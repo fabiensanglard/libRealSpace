@@ -23,29 +23,24 @@ void testJet(void){
     const char* trePath = "OBJECTS.TRE";
     const char* jetPath = "..\\..\\DATA\\OBJECTS\\A-10.IFF";
     
-    
+    // Let's open the TRE archive.
     TreArchive treArchive;
     treArchive.InitFromFile(trePath);
     
-    
-    for (size_t i=0 ; i < treArchive.GetNumEntries() ; i++){
-        TreEntry* entry = treArchive.GetEntryByID(i);
-        if (strcmp(entry->name, jetPath))
-            ;//fprintf(output,"    Entry [%3lu] '%s' size: %lu bytes.\n",i,entry->name,entry->size);
-        else
-            fprintf(stdout,"    FOUND !Entry [%3lu] '%s' size: %lu bytes.\n",i,entry->name,entry->size);
-    }
-    
+    // Let's open the jet IFF file in that archive
     TreEntry* iffJet = treArchive.GetEntryByName(jetPath);
     
+    // Oops !
     if (iffJet == NULL){
         printf("Unable to find jet '%s' in TRE archive '%s'.\n",jetPath,trePath);
         return;
     }
         
-    
+    // Parse it.
     IffLexer lexer ;
     lexer.InitFromRAM(iffJet->data,iffJet->size);
+    
+    //Render it !
     
 }
 
