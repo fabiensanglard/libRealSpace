@@ -72,6 +72,8 @@ public:
         return toLittleEndian;
     }
     
+    
+    
 private:
 	uint8_t* cursor;
 };

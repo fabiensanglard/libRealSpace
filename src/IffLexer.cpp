@@ -54,7 +54,7 @@ bool IffLexer::InitFromRAM(uint8_t* data, size_t size){
     
     stream.Set(this->data);
     
-    //Add the first 
+    Parse();
     
     return true;
 }
@@ -62,7 +62,7 @@ bool IffLexer::InitFromRAM(uint8_t* data, size_t size){
 size_t IffLexer::ParseChunk(){
     
     IffChunk chunk;
-    chunk.id = stream.ReadUInt32BE();
+    chunk.id = stream.ReadUInt32LE();
     
     if (!strncmp(chunk.textId,"FORM",4)){
         return ParseFORM();
@@ -84,28 +84,35 @@ size_t IffLexer::ParseChunk(){
         if (chunk.size % 2 != 0)
             chunk.size++;
         
-        //Check if we have something that can parse this chunk....
+        //Skip this content
+        chunk.data = stream.GetPosition();
+        
         stream.MoveForward(chunk.size);
         
         chunks[chunk.id] = chunk;
         
-        return chunk.size+CHUNK_HEADER_SIZE;
+        printf("%4s\n",chunk.textId);
+        
+        return chunk.size;
     }
 }
 
 size_t IffLexer::ParseFORM(){
     
-    uint32_t chunkSize = stream.ReadUInt32BE();
+    uint32_t chunkSize ;
+    chunkSize= stream.ReadUInt32BE();
 
-    uint32_t subId = stream.ReadUInt32BE();
+    //Sub ID
+    IffChunk chunk;
+    chunk.id = stream.ReadUInt32LE();
     
     
-    int bytesToParse = chunkSize - 4 ; //-4 beacuse of the subtype we just read
+    size_t bytesToParse = chunkSize  ; //-4 beacuse of the subtype and chunkSize we just read
     while (bytesToParse > 0){
         
         size_t lastChunkSize = ParseChunk();
         
-        bytesToParse -= lastChunkSize;
+        bytesToParse -= lastChunkSize + CHUNK_HEADER_SIZE+4;
     }
     
     if (chunkSize % 2 != 0)
@@ -124,6 +131,7 @@ size_t IffLexer::ParseCAT(){
     return chunkSize + CHUNK_HEADER_SIZE;
 }
 
+//Return how many bytes were moved forward
 size_t IffLexer::ParseLIST(){
     
     ByteStream stream(data);
@@ -141,10 +149,11 @@ void IffLexer::Parse(void){
     
     while(bytesToParse > 0){
         
-        size_t byteParsed ;
+        size_t byteParsed =0;
         
         IffChunk chunk;
-        chunk.id = stream.ReadUInt32BE();
+        chunk.id = stream.ReadUInt32LE();
+        bytesToParse-=4;
         
         //Check this is a FORM
         if (!strncmp(chunk.textId,"FORM",4)){
@@ -159,10 +168,9 @@ void IffLexer::Parse(void){
             byteParsed= ParseLIST();
         }
         else{
-            printf("This is not an IFF file !\n");
-            return;
+            //printf("This is not an IFF file !\n");
+            byteParsed = bytesToParse;
         }
-        
         bytesToParse -= byteParsed;
     }
 
