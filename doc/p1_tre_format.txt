@@ -1,0 +1,79 @@
+ ----------------------------------------------------------------------------
+|                        The Privateer 1 TRE Format                          |
+|                           By Mario "HCl" Brito                             |
+ ----------------------------------------------------------------------------
+
+
+
+                                 Introduction
+
+This is the simplest TRE format used by any Wing Commander game, as no
+compression routine is used. Due to the growth of the Wing Commander Editing
+community, i felt useful to document this TRE format. An interesting note is
+that Privateer 1 and Armada are *by far* the most dynamic games of all the
+WC games i've seen (when it comes to TRE management) since you can make the
+game load a new TRE (which can be a patch, i've done it before) only by adding
+it to the CFG file: the Righteous Fire add-on is little more than a TRE patch
+to Privateer 1!
+
+
+
+
+                                   The info
+
+First of all, i'll give some info on the data types i'll use, so there's no
+confusion:
+
+byte  = 1 byte 
+word  = 2 bytes
+dword = 4 bytes
+string = A space meant to hold a sequence of characters with a null (or \0)
+         at the end. It's size is constant (pretty much like an array).
+
+
+Like most TRE files, this one is divided in 2: the Header and the Data
+section. The Data section will not be covered since it'll be raw file data
+referenced by the header.
+
+
+-> The Header
+
+   data type    |     size      |       description
+------------------------------------------------------------------------------
+   dword        |       4       |  Number of files in this TRE. Notice
+                |               | that it takes 4 bytes, not 1. This is why
+                |               | TRESPLIT only extracts 5 files out of
+                |               | PRSO.TRE: it has 261 files = 0x105
+----------------|---------------|---------------------------------------------
+   dword        |       4       |  A pointer to the start offset of the data
+                |               | area (in short, the size of the header).
+----------------|---------------|---------------------------------------------
+
+The number of files in the TRE and the length of the header are defined.
+The below structure must be repeated for each file in the TRE:
+
+
+   data type    |     size      |       description
+------------------------------------------------------------------------------
+    byte        |       1       |  always 0x1, it's meaning is not fully
+                |               | understood.
+----------------|---------------|---------------------------------------------
+    string      |      65       |  The name of the file as the game reads it.
+                |               | Privateer's internal file structure demands
+                |               | that every file name starts with ..\..
+----------------|---------------|---------------------------------------------
+    dword       |       4       |  The offset on the TRE where the file starts.
+----------------|---------------|---------------------------------------------
+    dword       |       4       |  The size of the file.
+----------------|---------------|---------------------------------------------
+
+
+
+
+-> Thanks go to Origin Systems INC for creating Privateer, Righteous Fire 
+   and Armada
+
+Mario "HCl" Brito
+mbrito@student.dei.uc.pt
+
+

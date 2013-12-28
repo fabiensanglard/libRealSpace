@@ -1,0 +1,686 @@
++-----------------------------------------------------------------------------+
+|                     ORIGIN SYSTEMS' GRAPHICS FILE FORMATS                   |
+|                WING COMMANDER 1/2/ACADEMY, PRIVATEER 1 & ARMADA             |
+|            Original document (WC1B.TXT) by [MB] Mario "HCl" Brito           |
+|                 Updated by [MK] Maciek "Matrix" Korzeniowski                |
+|                            Revision 2 - 21-VII-1999                         |
++-----------------------------------------------------------------------------+
+
+------------
+Introduction
+------------
+[MK]
+My aim in updating this document is to record what I have learnt and
+implemented during the creation of my Wing Commander Bitmap Navigator (WCNAV)
+program.  For now it should fill the gap as a "loose" form of documentation
+for the inner workings of WCNAV.
+
+[MB]
+If a WC to BMP and a BMP to WC converter are to be achieved, this format must
+be completely understood. (I may even make my own when I finish writing this
+doc <WC1B.TXT>, but if I don't, this will contain enough info for other people
+that are interested to do their own).
+[MK]
+Like me.  =)
+
+[MB]
+Keep in mind that we're looking at the roots of the WC games. And since this
+format was used by several games, ship conversion between them is definitely
+possible.
+
+
+-------
+Ravings
+-------
+[MB]
+Ever since I began changing several aspects of WC1, I was amazed by the
+amount of work behind it.  Even though the WC1 engine may be uninteresting
+related to all those 3d engines that all games use nowadays, let's us not
+forget that it had no rival when it was made, back on 1991.  It's very
+interesting to work on, even if only for historical purposes.
+[MK]
+Origin's RLE technique is to this day very interesting.  The method of
+compression lends itself to quick blitting with transparency, with only minor
+modification.  If today's average PC had 33Mhz CPUs and had 1GB RAM, we'd most
+likely see more game engines with fine, pre-rendered objects.
+
+
+----------------
+Acknowledgements
+----------------
+[MB]
+I'd like to thank Origin Systems for making Wing Commander 1, a great game
+which I still play at this time (1998), and congratulate them for the rising
+quality of all Wing Commander games I've played (and bought, of course) 
+during all this time.
+[MK]
+Here, here!
+I'd also like to take the opportunity to thank Mario "HCl" Brito... because it
+wouldn't be appropriate for him to thank himself.  =)  Anyway, thanks for the
+work you've done in deciphering the format, without which neither this update,
+nor WCNAV would exist.
+
+
+------------------
+V?? file structure
+------------------
+[MK]
+These include files with extensions VGA and Vnn (where nn is a two digit
+number).  They are used in WC1/2/Academy.  VGA files also appear in Armada, 
+but although the structure looks similar, I haven't yet been able to extract
+any graphics yet.  However, It turns out that there really is no difference
+between the WC1 and WC2 graphics formats, only in the information that is
+stored in them.  All comments made about WC2 also apply to Academy, "since it's
+a direct variation of the same engine."  Thus we kill two...no, three birds
+with one stone.  Of course, same goes for Secret Missions 1/2 and Special
+Operations 1/2 since they're just add-ons to WC1 and WC2 respectively.
+
+There really is no header in the format, except maybe the first four bytes
+which are the file length in bytes.  This fact can be used to identify
+potential WC1/2 files by checking against the file length reported by the OS.
+Note that all values, unless otherwise stated, are in Intel format, big-endian,
+meaning the least significant byte comes first.
+
+After the first four bytes follows a table of absolute offsets (from the start
+of the file) containing any number of entries.  So if the number of entries is
+variable, how do we find out how many there are?  The trick is that the first
+offset will always point to the byte just after the last entry.  Thus we keep
+reading offsets until we reach the byte pointed to by the first offset.
+Each offset is in the format:
+   3 bytes - Absolute offset (from start of file)
+   1 byte  - Unknown
+
+I share Mario's view on the unknown byte in that, "I have no idea about the
+actual function of this. A marker maybe?"  I think it may be an offset type
+indicator.  It takes values of 0x01 in Armada, 0x02 in WC1, and 0xC1 or 0xE0
+in WC2.  In WC2, I think 0xC1 indicates an offset to a table of offsets, while
+0xE0 means the offset is directly to data.  As yet, I haven't been able to
+confirm this pattern, so I just ignore it.
+
+That's the level 1 table of offsets covered.  Now we move on to level 2.
+
+Each offset in the level 1 table, points to another (level 2) table of offsets,
+or to actual data.  In the case of graphics it is always the first case, even
+in the case of single images... At least I haven't found any graphics to
+support the contrary.
+
+The first four bytes at the offset indicated by the level 1 table entry, is the
+length of the block.  What follows are any number of offset entries similar to
+level 1:
+   3 bytes - Offset relative to block start (add value of level 1 offset)
+   1 byte  - Unknown
+
+The unknown is usually 0, so one would think that it's just a four byte offset.
+However this is not the case in Privateer, as described later.
+The trick with using the first offset as the end marker for the table applies
+here as well, only the level 2 offsets are relative to the level 1 offset.
+Thus to obtain the first byte of the RLE tract (see decoding algorithm in
+section below) you add the level 1 offset entry with the level 2 offset.
+
+In WC1B.TXT MB said that the first image offset "(could be a sum with the value
+at offset 4, but I seriously doubt it)"  He was on the right track... Sort of.
+
+I think an example is in order.  All values are hexadecimal.
+
+         00 01 02 03   04 05 06 07   08 09 0A 0B   0C 0D 0E 0F
+       +-----------------------------------------------------------------------
+000000 | E6 FF 00 00   10 00 00 02   04 02 00 02   EC 0F 00 02    Level 1 Table
+                                                               _
+000010 | F4 01 00 00   20 00 00 00   A0 00 00 00   20 01 00 00  \ Level 2 Table
+000020 | 50 01 00 00   3A 02 00 00   24 03 00 00   F5 03 00 00 _/ 
+
+000030 | 26 00 27 00   02 00 1A 00   .. .. .. ..   .. .. .. ..    Data (RLE)
+......
+0000B0 | 11 00 11 00   14 00 14 00   .. .. .. ..   .. .. .. ..    Data (RLE)
+......
+000130 | 11 00 11 00   14 00 14 00   .. .. .. ..   .. .. .. ..    Data (RLE)
+......
+000200 | .. .. .. ..   .. .. .. ..   EC 0D 00 00   08 00 00 00    Level 2 Table
+
+000210 | 1A 00 08 00   20 00 34 00   .. .. .. ..   .. .. .. ..    Data (RLE)
+......                                                         _
+000FE0 | .. .. .. ..   .. .. .. ..   .. .. .. ..   45 00 12 00  \ Data
+000FF0 | 44 00 5C 00   .. .. .. ..   .. .. .. ..   .. .. .. .. _/
+......
+00FFE0 | .. .. .. ..   .. ..
+
+Starting from the top, the file's length is 0xFFE6.  The level 1 table ends at
+0x000010, and that is also where the first level 2 table is.  Looking at file
+location 0x000010 we can see that the length of the first block containing this
+level 2 table is 0x1F4.  The second level 2 table is located at 0x000204 which
+you may notice, equals 0x000010 + 0x1F4.  Finally, the third offset is
+0x000FEC, not to a level 2 table, but directly to some non-graphic data.  Thus
+we come to the end of the level 1 table.
+
+Moving on, at 0x000010 comes the first of the level 2 tables.  The first offset
+is 0x20 telling us that the level 2 table ends at 0x000030, which is 0x20 + 0x10
+(from the level 1 offset).  You can also take 0x20 / 4 (bytes per table entry)
+ - 1 (the block length entry) to get 7, the number of offsets in this table.
+This tells us we can expect 7 images starting at 0x000030 (0x20 + 0x10),
+0x0000B0 (0xA0 + 0x10), 0x000130 (0x120 + 0x10), and so on.  These absolute
+offsets from the start of the file, are the starting point that we pass onto
+the RLE decoding routine as described in the section below.
+
+One last note.  You'll note that the second level 2 table starting at 0x000204
+has only one entry, 0x08, giving a single image starting at 0x000210 (0x204 +
+0x08).  This explains the strange '08 00 00 00' sequence that sometimes
+appears.  Also note that once again 0x204 (offset to level 2 table) + 0xDEC
+(the block length) equals 0xFEC, which is the third entry in the level 1 table.
+
+A few words on implementation.
+In WCNAV, after attempting auto detection of the type of file being read, the
+program scans the tree structure for all potential image offsets.  I use two
+nested loops to find them all.   Though I am no fan of recursion, it would
+probably have been a a better way of traversing this tree structure.  This way
+multiple levels could be achieved by marking offsets pointing to tables as type
+0x02, and offsets to actual data runs as type 0x00.  Either way there are a lot
+of pitfalls when trying to figure out if we've jumped to a level 2 table of
+offsets or directly to data.  I found that checking the offset + block length
+against the file length was a pretty good method.  This is mainly because pure
+data is usually stored in integers, 2 bytes each.  This causes a
+'nn 00 nn 00' pattern which when decoded as a block length (of type long,
+4 bytes), gives huge values, much past the end of the file.  Checks of this
+type are essential in OSs with strict memory memory protection.
+
+That's about it.  The only other thins I can remember are:
+
+In WC1 fighters, the first level 2 table points to to the (37) ship images.
+The second is to the (3) target VDU images.  The third offset in the level 1
+table could be the one that "keeps the coordinates and number of engines."
+
+In the case of WC2 fighters, the first offset is to the table of (37) ship
+image offsets.  The second is to the (3) target VDU images.  The fifth is to
+the (11) debris images.  The third and fourth offsets presumably point
+directly to information about ship stats and weapons' positions.
+
+
+------------------
+PAK file structure
+------------------
+Not much to say here.  Used in Privateer.  They have a PAK extension, and use
+the exact same format as WC1/2 (see section above).
+
+
+------------------
+SHP file structure
+------------------
+Files with a SHP extension.  Used in Privateer and Armada.  This structure is
+similar to V?? only there is a single level table of offsets, and they point
+directly to the start of RLE runs for the graphics.
+
+
+---------------------------------------
+Privateer 1 IFF graphics file structure
+---------------------------------------
+[MK]
+I won't go into the Interchange File Format (IFF) structure itself.  There are
+many resources available on the format.  If you've ever used an Amiga you'd
+know. =)  We are interested in are the GRID, GUNS, VSHP, and SHAP forms.  Note
+that SHAPs sometimes have a prefix, but we are only interested in searching for
+the last four letters indicating the start of a graphics block.
+
+[MB]
+Privateer is the second game (that I'm aware of, at least) that used TRE files
+(the first was Strike Commander).  It's also very interesting to observe the
+IFF format evolution from Strike Commander to Wing Commander Prophecy, but that
+won't be covered in this doc.
+
+[MK]
+Aw, shucks!  Oh please, do tell? =)
+
+Anyway, here goes.  Once you've identified the file as a valid IFF... No, not
+by filename extension but by the first four bytes which are 'F', 'O', 'R', 'M',
+or 0x46, 0x4F, 0x52, 0x4D respectively.  Then you have to find one of the forms
+you're interested in, say VSHP.  The four bytes immediately after this tag are
+the form length, only in little-endian format, what Motorola uses.  This means
+that the first byte is the most significant byte.  Thus the four consecutive
+byte entries '00 01 79 AB' means 0x000179AB and not 0xAB790100 like in Intel's
+big-endian format.  Back to business.  This form length is not terribly useful,
+but when added to the absolute offset of the byte just after the length, it
+gives the start of the next form.  More precisely, it points right to the next
+"FORM" tag.  For example, an extract from CLUNKER.IFF :
+
+         00 01 02 03   04 05 06 07   08 09 0A 0B   0C 0D 0E 0F
+       +-----------------------------------------------------------------------
+......                                              V  S  H  P
+000020 | .. .. .. ..   .. .. .. ..   .. .. .. ..   56 53 48 50
+000030 | 00 01 79 AB   FC 0D 00 00   08 00 00 C1   43 00 3A 00
+......
+000E30 | OF OC OO OO   08 00 00 C1   43 00 3A 00   31 00 36 00
+......
+001A30 | .. .. .. ..   .. .. .. ..   .. .. .. ..   .. .. .. D0
+001A40 | 0C 00 00 08   00 00 C1 43   00 3A 00 31   00 36 00 08
+......
+0179E0 | 46 4F 52 4D   .. .. .. ..   .. .. .. ..   .. .. .. ..
+	  F  O  R  M  
+
+The VSHP tag is found at 0x00002C.  Immediately after (+4), at 0x000030 we
+find the form length 0x179AB.  Now we're at 0x000034, so the next "FORM" tag
+should be at 0x179AB + 0x34 which equals 0x179DF...  That's not exactly right.
+I haven't read any IFF specifications yet, but "FORM"s seem to always be
+(16-bit) word aligned thus the next even byte would yield the correct value of
+0x00179E0.
+
+At 0x000034 we have the block (not form) length, back in Intel big-endian
+format ie. 0xDFC.  Next we have the now familiar:
+   3 bytes - Offset relative to block start (indicates start of RLE graphic)
+   1 byte  - Unknown
+
+The 0xC1 confirms that the offsets are indeed meant to be only 3 bytes.  These
+offsets are, like in WC1/2, from the beginning byte of the block length.  In
+this particular case the base value is 0x000034, plus 0x08 gives 0x00003C which
+is precisely where the graphic RLE run begins with two coordinate pairs, as
+described later in the RLE algorithm section.
+
+One last thing remains to be said... Well actually I've only touched on the
+subject	and heaps remains untold, but for our purposes one more piece of
+information is required.  In the Privateer IFF format, many blocks can be
+contained within a single form, each with only a single offset (0x08).  How's
+this done?  There's probably more than one way, but I'll explain the one I've
+used in WCNAV.
+
+Remember the form length?  This length should be the total length of all blocks
+contained within the form.  So here's what we do.  We record the form length
+(0x179AB) and maintain a running counter of bytes read, initially set to 0.
+When we're done decoding or saving the offset of the first image, we
+simply add the block length (0xDFC) to the running counter.  We then check if
+the running counter has passed out of the form ie. if counter < block_length
+then continue.  In WCNAV, I add the base offset (0x34) to the form lenght to
+get (near) the form end.  The running counter is set initially to 0x34 so that
+adding each block length gives the position of the next block.  From the
+example above,  0x34 + 0xDFC = 0x000E30, 0xE30 + 0xC0F = 0x001A3F, and so on.
+
+
+---------------------------------------
+Origin's proprietary compression method
+---------------------------------------
+[MK]
+This section is the most important.  It describes the technique used by Origin,
+to compress almost all WC1/WC2/Academy & Privateer graphics.  Further, it may
+apply to other Origin games of the time (early 90's) such as Strike Commander
+and Pacific Strike.  The compression method can be classified as a Run Length
+Encoding (RLE) algorithm.  I can't take any credit for this section since all
+the hard work in figuring it out was done by Mario.  I've merely edited it and
+added some comments here and there.
+
+[MB]
+First of all, the game defines some dimensions..
+
+(I'll say it's at a '+' (relative) position, since the actual position varies
+from file to file... For example: In the first image after the header file, in
+the Hornet, the +0 position is 168, the +1 position is 169, etc...)
+
+(Relative) Offset	Length (in bytes)	Comments
+
+   +0			2			X2
+   +2			2			X1
+   +4			2			Y1
+   +6			2			Y2
+
+
+  An example: The hornet seen from behind 
+  (hex values)
+
+  32 00 32 00 08 00 09
+
+Without being concerned with the actual values, we can see that the image
+is bigger horizontally than vertically.  This is consistent with the image
+we're looking at.
+
+  X1 is the number of pixels to the left of the center of the image.
+  X2 is the number of pixels to the right of the center of the image.
+  Y1 is the number of pixels to above the center of the image.
+  Y2 is the number of pixels below the center of the image.
+
+(in fact, this coordinates system isn't written in stone, since the game
+will rotate this images in every possible way, but let's consider that this
+is so, for our purposes.)
+
+--------------------
+
+Image Encoding:
+
+(Relative) Offset	Length (in bytes)	Comments
+
+  +0			2			Key Number
+					(not as simple as you may think)
+  +2			2			X
+  +4			2			Y
+  +8			-varies-                Data
+  ...
+  This will be repeated until the image is finished...
+  ...
+  ??			2			Contains 00 00
+
+[END]
+
+X,Y is to be treated like castesian coordinates, (0,0) being the center
+of the image.
+The X axis has -x1 as the maximum negative value, x2 as the maximum positive
+value.
+The Y axis has -y1 as the maximum negative value, y2 as the maximum positive
+value.
+
+Oprations:
+
+You have to shift to the right 1 bit (shr byte,1 ... the same as a division
+by 2).  This will decide a lot...
+
+[MK]
+The carry flag is bit 0 of the key value, and can be tested with a logical
+(boolean) AND (&).  Once the carry flag is tested, the actual value (number
+of pixels) can be obtained by right shifting (>>) by one bit.
+
+[MB]
+Case 1: If the carry flag is off (if the number is divisible by 2), then Data 
+contains the colors to put at X,Y.  The X is increased by 1 when a byte is
+stored (like si and di are in a rep stosb, if you're into assembler).
+
+   As an example: 04 00 E9 FF F9 FF C9 DF
+
+We have 0004 (the values are reversed, as you should know) for the Key
+Number. 4/2=2, no carry. It means we are putting 2 pixels on the screen.
+We must put them in (-23,-23), being C9 at (-23,-23) and DF at (-22,23).
+Nothing special about this.. The next method is a bit more complex...
+
+Case 2: If the carry flag is set (if the number is not divisible by 2), then
+Data will carry the bytes in an encoded form. The pixels will still be put
+on (x,y), but it's not as straight-forward as before.
+A byte of Data will be right-shifted also:
+
+  Case 2a: If the carry is not set, we have the number of pixels. Let's
+  copy the number of pixels to form the image. The color pixels will be 
+  after the shifted byte.
+
+  As an example: 02 00
+    2/2=1 no carry ... We have one pixel.. The color is 00
+
+  Case 2b: If the carry is set, we have the number of pixels too, but only
+  one color pixel will be after the shifted byte. This byte will be repeated
+  as many times as the number of pixels.
+
+  As an example: 07 EE
+    7/2=3 ... We have 3 pixels.. The colors are EE EE EE
+
+--
+
+Also, it's important to mention that the Key Number divided by 2, equals the
+number of pixels (this happens in both cases):
+
+- Case 1 is straight-forward.
+- Case 2:
+  Example: 11 00 15 00 E0 FF 06 0B 0A 0A 0B 00
+  - 11h=17
+  - 17/2=8, carry is on
+    [let's us skip the (x,y) part as it's irrelevant]
+  - 6/2=3, no carry, 3 pixels: 0B 0A 0A
+  - 0Bh=11
+  - 11/2=5, carry is on. 5 pixels: 00 00 00 00 00
+  - 17/2=8 and 5+3=8 
+  ------------------
+
+
+----------
+The C code
+----------
+[MK]
+This is it folks.  Time to put theory to practice.  I've taken the liberty to
+make a few "slight" improvements to the code.  I hope MB doesn't mind.  =)
+
+[MB]
+Here's the C code that demonstrates the operations above... Keep in mind that 
+it was programmed in a hurry, so don't complain if it's bugged, crashes your
+computer or doesn't run at all (well at least it should run :) )
+I posted it's compiled form in my page.  Search for WC1VIEW.ZIP.
+
+
+<<START WC1VIEW.C>>
+
+// [MK] Compiles fine under TC 3
+// This program should read (in theory, of course) all WC1 ships.
+
+#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h>
+
+#include "palwc1.h"	// Contains WC1 palette
+
+#define MAXX 320
+#define MAXY 200
+
+FILE *f;
+
+#define putpix(x,y,color) *(videobuffer+x+(y<<6)+(y<<8))=color
+#define clearscreen() memset(videobuffer,0,64000)
+unsigned char far *videobuffer=(unsigned char far *)0xA0000000L;
+
+
+// [MK] The all important RLE decoding routine
+void ship (char file[],long header)
+{
+int x1,x2,y1,y2,key,vx,vy,x,y,a,b,i,carry,color,counter=0;
+char buffer,buffer2;
+fseek (f, header, SEEK_SET);
+fread (&x2,2,1,f);
+fread (&x1,2,1,f);
+fread (&y1,2,1,f);
+fread (&y2,2,1,f); // Let's get the dimensions of the image...
+
+while (1) //Cycle will put image on screen...
+  {
+  fread (&key,2,1,f);
+  carry=key%2;
+  fread (&vx,2,1,f);
+  fread (&vy,2,1,f);
+  if (key==0) break;   // If we reached the end of image, lets end the routine
+  x=x1+1;     // Let's not forget that 0 is also a position
+  y=y1+1;
+  x+=vx;
+  y+=vy;
+  a=0;
+  ++counter;  //Increment our little counter (debugging feature)
+
+  if (carry==0)
+    {
+    for (a=0;a<key/2;++a)
+      {
+      buffer=fgetc(f);
+      putpix (x,y,buffer);
+      ++x;
+      }
+    }
+  else
+    {
+    b=0;
+    while (b<key/2)
+      {
+      buffer=fgetc(f);
+      if (buffer%2==0)
+        {
+        for (a=0;a<buffer/2;++a)
+          {
+          buffer2=fgetc(f);
+          putpix (x,y,buffer2);
+          ++b;
+          ++x;
+          }
+        }
+      else
+        {
+        buffer2=fgetc(f);
+        for (i=0;i<buffer/2;++i)
+          {
+          putpix(x,y,buffer2);
+          ++b;
+          ++x;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+void setpalette (char *palette)
+{
+int count,x,y;
+
+outportb(0x3C8,0);         //begin with colour 0
+for(count=0; count<768; count++)
+  outportb(0x3C9,palette[count]);;    //send the palette-data to port 3c9h
+}
+
+
+void graph_320_by_200(void)
+{
+asm mov ax,0x0013
+asm int 0x10
+}
+
+void text(void)
+{
+asm mov ax,0x0003
+asm int 0x10
+}
+
+void main (int argc, char **argv)
+{
+int i,n,flag;
+long start;
+long offset;
+char buff[4]={0,0,0,0};
+if (argc<2)
+  {
+  printf ("ERROR: Not enough parameters...\n");
+  printf ("You must supply a ship file as a parameter...\n\n");
+  exit(1);
+  }
+
+if ((f=fopen (argv[1],"rb"))==NULL)
+  {
+  text();
+  printf ("ERROR: Couldn't open file\n\n");
+  exit(1);
+  }
+fseek (f,4,SEEK_SET);
+buff[0]=fgetc(f);
+if (buff[0]!=0x10)
+  {
+  fseek (f,4,SEEK_SET);
+  flag=0;
+  }
+if (buff[0]==0x10)
+  {
+  fseek (f,20,SEEK_SET);
+  flag=1;
+  }
+
+//[MK] Original WC1 mode
+graph_320_by_200(); // No need for more...
+setpalette(wc1palette); // Load the wc1 pallete...
+
+for (n=0;n<37;++n)
+  {
+  for (i=0;i<3;++i) buff[i]=fgetc (f);
+    offset=(ftell(f))+1;
+  if (flag==0)
+    start=(*(long*)buff)+8;
+  if (flag==1)
+    start=(*(long*)buff)+16;
+  ship(argv[1],start); // Lets put the ship on screen...
+  getch();
+  clearscreen();
+  fseek (f,offset,SEEK_SET);
+  }
+
+text(); //back to text mode...
+}
+
+<<END WC1VIEW.C>>
+
+
+[MK]
+Below is the WC1 palette.  This way I've eliminated the need for external files
+when WC1VIEW is compiled.
+
+
+<<START PALWC1.H>>
+
+//Palette from wc1.pal.
+char wc1palette[768] = {
+  0,   0,   0,   4,   4,   4,   8,   8,   8,  13,  13,  13,  17,  17,  17,  21,
+ 21,  21,  25,  25,  25,  29,  29,  29,  33,  33,  33,  38,  38,  38,  42,  42,
+ 42,  46,  46,  46,  50,  50,  50,  54,  54,  54,  59,  59,  59,  63,  63,  63,
+ 63,  63,  63,  61,  59,  56,  59,  54,  50,  58,  50,  44,  56,  46,  39,  54,
+ 43,  33,  52,  39,  28,  50,  35,  24,  49,  32,  19,  43,  29,  17,  37,  25,
+ 15,  31,  21,  13,  25,  17,  10,  19,  13,   8,  13,   9,   5,   7,   5,   3,
+ 60,  60,  63,  51,  51,  62,  43,  44,  61,  35,  36,  60,  28,  29,  59,  21,
+ 22,  58,  13,  15,  57,   7,   9,  56,   0,   2,  55,   0,   2,  47,   0,   1,
+ 39,   0,   1,  31,   0,   1,  23,   0,   0,  16,   0,   0,   8,   0,   0,   0,
+ 60,  60,  63,  53,  52,  58,  46,  46,  53,  40,  40,  48,  34,  34,  43,  30,
+ 29,  38,  24,  24,  34,  20,  19,  29,  16,  15,  24,  12,  11,  21,   9,   8,
+ 18,   6,   5,  15,   4,   3,  13,   2,   2,  10,   0,   0,   7,   0,   0,   4,
+ 63,  63,  54,  63,  63,  46,  63,  63,  39,  63,  63,  31,  63,  62,  23,  63,
+ 61,  16,  63,  61,   8,  63,  61,   0,  63,  53,   0,  63,  46,   0,  63,  38,
+  0,  63,  30,   0,  63,  22,   0,  63,  15,   0,  63,   7,   0,  63,   0,   0,
+ 62,   0,   0,  57,   0,   0,  53,   0,   0,  49,   0,   0,  45,   0,   0,  41,
+  0,   0,  37,   0,   0,  33,   0,   0,  29,   0,   0,  25,   0,   0,  20,   0,
+  0,  16,   0,   0,  12,   0,   0,   8,   0,   0,   4,   0,   0,   0,   0,   0,
+ 63,  63,  63,  61,  54,  63,  58,  45,  63,  55,  36,  63,  53,  27,  63,  50,
+ 18,  63,  47,   9,  63,  45,   0,  63,  39,   0,  55,  33,   0,  47,  28,   0,
+ 39,  22,   0,  31,  17,   0,  24,  11,   0,  16,   5,   0,   8,   0,   0,   0,
+ 63,  63,  63,  61,  55,  52,  59,  48,  42,  56,  41,  32,  54,  34,  23,  52,
+ 28,  15,  50,  22,   7,  48,  18,   0,  42,  15,   0,  36,  13,   0,  30,  10,
+  0,  24,   8,   0,  18,   6,   0,  12,   4,   0,   6,   2,   0,   0,   0,   0,
+ 63,  63,  63,  63,  57,  54,  63,  51,  45,  63,  45,  36,  63,  38,  27,  63,
+ 32,  18,  63,  26,   9,  63,  19,   0,  55,  16,   0,  47,  14,   0,  39,  12,
+  0,  31,   9,   0,  24,   7,   0,  16,   5,   0,   8,   2,   0,   0,   0,   0,
+ 63,  63,  63,  54,  60,  63,  45,  56,  63,  36,  53,  63,  27,  50,  63,  18,
+ 46,  63,   9,  43,  63,   0,  39,  63,   0,  34,  55,   0,  29,  47,   0,  24,
+ 39,   0,  19,  31,   0,  15,  24,   0,  10,  16,   0,   5,   8,   0,   0,   0,
+ 63,  63,  63,  58,  63,  50,  52,  63,  38,  47,  63,  25,  42,  63,  13,  36,
+ 63,   0,  32,  56,   0,  29,  50,   0,  25,  44,   0,  21,  38,   0,  18,  31,
+  0,  14,  25,   0,  11,  19,   0,   7,  13,   0,   3,   6,   0,   0,   0,   0,
+ 63,  60,  56,  61,  53,  48,  59,  44,  41,  57,  35,  34,  56,  28,  32,  54,
+ 21,  32,  52,  15,  33,  50,  10,  36,  48,   5,  42,   0,   0,   0,   0,   0,
+  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   8,
+ 63,  61,   0,  56,  62,   0,  45,  61,   0,  36,  61,   0,  27,  60,   0,  18,
+ 59,   0,   9,  58,   0,   9,  51,   0,   8,  45,   0,   6,  38,   0,   5,  32,
+  0,   4,  26,   0,   3,  19,   0,   2,  13,   0,   1,   6,   0,   0,   0,   0,
+ 60,  63,  58,  55,  59,  51,  50,  54,  46,  45,  50,  40,  41,  46,  35,  37,
+ 42,  30,  33,  38,  26,  30,  34,  22,  25,  31,  17,  20,  27,  13,  16,  24,
+ 10,  11,  21,   7,   7,  17,   4,   4,  14,   2,   2,  11,   1,   0,   8,   0,
+ 12,  22,  11,  20,  28,  12,  20,  32,  16,  24,  36,  20,  32,  48,  24,  36,
+ 56,  28,  44,  60,  32,  56,  63,  52,  18,  13,   0,  24,  16,   0,  32,  23,
+  0,  40,  31,   2,  48,  40,   4,  52,  47,  12,  56,  53,  21,  60,  60,  32,
+ 63,  60,  56,  56,  52,  46,  49,  44,  37,  43,  37,  30,  36,  29,  21,  29,
+ 22,  14,  23,  15,   8,  16,  10,   4,  28,   4,   0,  32,   7,   0,  35,   9,
+  0,  39,  13,   1,  43,  17,   1,  46,  22,   1,  50,  27,   2,  58,  53, 63};
+
+<<END PALWC1.H>>
+
+
+-------
+The End
+-------
+[MB]
+Well, that's it. I'm amazed I found the time to write this.. I was planning
+to, a long time ago, but I kept delaying it more and more...
+
+[MK]
+Ditto.  =)
+
+
+-----
+To Do
+-----
+[MK]
+Privateer and Armada TRE and IFF files could be covered in greater detail.
+
+-------
+Credits
+-------
+
+-> Wing Commander is Copyright of Origin Systems
+-> Originally written by Mario "HCl" Brito <mbrito@student.dei.uc.pt>
+-> Updated by Maciek "Matrix" Korzeniowski <matrix3d@polbox.com>

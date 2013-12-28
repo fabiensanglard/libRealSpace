@@ -1,0 +1,4607 @@
+A Quick Introduction to IFF
+
+Jerry Morrison, Electronic Arts
+10-17-88
+
+
+IFF is the Amiga-standard "Interchange File Format", designed to work across 
+many machines.
+
+
+Why IFF?
+
+Did you ever have this happen to your picture file?
+
+   You can't load it into another paint program.
+   You need a converter to adopt to "ZooPaint" release 2.0 or a new 
+      hardware feature.
+   You must "export" and "import" to use it in a page layout program.
+   You can't move it to another brand of computer.
+
+What about interchanging musical scores, digitized audio, and other data?  It 
+seems the only thing that does interchange well is plain ASCII text files.
+
+It's inexcusable. And yet this is "normal" in MS-DOS.
+
+
+What is IFF?
+
+IFF, the "Interchange File Format" standard, encourages multimedia interchange 
+between different programs and different computers.  It supports long-lived, 
+extensible data.  It's great for composite files like a page layout file that 
+includes photos, an animation file that includes music, and a library of 
+sound effects.
+
+IFF is a 2-level standard.  The first layer is the "wrapper" or "envelope" 
+structure for all IFF files.  Technically, it's the syntax.  The second layer 
+defines particular IFF file types such as ILBM (standard raster pictures), 
+ANIM (animation), SMUS (simple musical score), and 8SVX (8-bit sampled audio 
+voice).
+
+IFF is also a design idea: programs should use interchange formats for their 
+everyday storage.
+
+This way, users rarely need converters and import/export commands to change 
+software releases, application programs, or hardware.
+
+
+What's the trick?
+
+File compatibility is easy to achieve if programmers let go of one notion--
+dumping internal data structures to disk.  A program's internal data structures 
+should really be suited to what the program does and how it works.  What's 
+"best" changes as the program evolves new functions and methods.  But a disk 
+format should be suited to storage and interchange.
+
+Once we design internal formats and disk formats for their own separate 
+purposes, the rest is easy.  Reading and writing become behind-the-scenes 
+conversions.  But two conversions hidden in each program is much better than 
+a pile of conversion programs.
+
+
+Does this seem strange?  It's what ASCII text programs do!  Text editors use 
+line tables, piece tables, gaps, and other structures for fast editing and 
+searching.  Text generators and consumers construct and parse files.  That's 
+why the ASCII standard works so well.
+
+Also, every file must be self-sufficient.  E.g., a picture file has to include 
+its size and number of bits/pixel.
+
+
+What's an IFF file look like?
+
+IFF is based on data blocks called "chunks". Here's an example color map
+chunk:
+
+                         +------------------+ in an ILBM file, CMAP means
+          char typeID[4] | 'CMAP'           | "color map"
+                         |------------------+ 
+  unsigned long dataSize |  48              | 48 data bytes
+                         |------------------+
+             char data[] |  0,0,0,255,      | 16 3-byte color values: black, 
+                         |  255,255,255...  | white, ....
+                         +------------------+
+
+                         +------------------+ in an ILBM file, CMAP means
+                         | 'CMAP'           | "color map"
+                         |------------------+ 
+                         |  48              | 48 data bytes
+                         |------------------+
+                         |  0,0,0,255,      | 16 3-byte color values: black, 
+                         |  255,255,255...  | white, ....
+                         +------------------+
+
+A chunk is made of a 4-character type identifier, a 32 bit data byte count, 
+and the data bytes. It's like a Macintosh "resource" with a 32-bit size.
+
+Fine points:
+
+oEvery 16- and 32-bit number is stored in 68000 byte order--highest 
+byte first.
+
+An Intel CPU must reverse the 2- or 4-byte sequence of each number. 
+This applies to chunk dataSize fields and to numbers inside chunk 
+data.  It does not affect character strings and byte data because you 
+can't reverse a 1-byte sequence.  But it does affect the 32-bit math 
+used in IFF's MakeID macro.  The standard does allow CPU specific byte 
+ordering hidden within a chunk itself, but the practice is discouraged.
+
+oEvery 16- and 32-bit number is stored on an even address.
+
+oEvery odd-length chunk must be followed by a 0 pad byte.  This pad 
+byte is not counted in dataSize.
+
+oAn ID is made of 4 ASCII characters in the range " " (space, hex 20) 
+through "~" (tilde, hex 7E).  Leading spaces are not permitted.
+
+oIDs are compared using a quick 32-bit equality test.  Case matters.
+
+
+A chunk typically holds a C structure, Pascal record, or an array.  For 
+example, an 'ILBM' picture has a 'BMHD' bitmap header chunk (a structure) and 
+a 'BODY' raster body chunk (an array).
+
+
+To construct an IFF file, just put a file type ID (like 'ILBM') into a wrapper 
+chunk called a 'FORM' (Think "FILE").  Inside that wrapper place chunks one 
+after another (with pad bytes as needed).  The chunk size always tells you 
+how many more bytes you need to skip over to get to the next chunk.
+
+
+          +------------------+
+          |                  |
+          |  'FORM'          |  FORM is a special chunk ID
+          |                  |
+          +------------------+
+          |   24070          |  24070 data bytes
+       -- +------------------+ 
+       |  |                  |
+       |  |  'ILBM'          |  FORM type is ILBM
+       |  |                  |
+       |  | +--------------+ |
+       |  | |  'BMHD'      | |  A BMHD bitmap header chunk 
+       |  | |--------------| |  (20 data bytes)
+       |  | |   20         | |
+       |  | |--------------| |
+       |  | |  320, 200,   | |
+       |  | |  0 ....      | |
+       |  | +--------------+ |
+       |  |                  |
+       |  | +--------------+ |
+       |  | |  'CMAP'      | |  A CMAP color map chunk
+24070 &lt;   | |--------------| |  (21 data bytes = 1 pad)
+bytes  |  | |   21         | |
+       |  | |--------------| |
+       |  | |  0, 0, 0,    | |
+       |  | |  255 ....    | |
+       |  | +--------------+ |
+       |  |   0              |  A pad byte
+       |  | +--------------+ |
+       |  | |  'BODY'      | |
+       |  | |--------------| |  A BODY raster body chunk
+       |  | |  24000       | |  (24000 data bytes)
+       |  | |--------------| |
+       |  | |  0, 0, 0.... | |
+       |  | +--------------+ |
+       -- +------------------+
+
+
+A FORM always contains one 4-character FORM type ID (a file type, in this 
+case 'ILBM') followed by any number of data chunks.  In this example, the FORM 
+type is 'ILBM', which stands for "InterLeaved BitMap".  (ILBM is an IFF 
+standard for bitplane raster pictures.)  This example has 3 chunks.  Note the 
+pad byte after the odd length chunk.
+
+Within FORMs ILBM, 'BMHD' identifies a bitmap header chunk, 'CMAP' a color 
+map, and 'BODY' a raster body.  In general, the chunk IDs in a FORM are 
+local to the FORM type ID.  The  exceptions are the 4 global chunk IDs 'FORM', 
+'LIST', 'CAT ', and 'PROP'.  (A FORM may contain other FORM chunks.  E.g., an 
+animation FORM might contain picture FORMs and sound FORMs.)
+
+
+
+How to read an IFF file?
+
+Given the C subroutine "GetChunkHeader()":
+
+/* Skip any remaining bytes of the current chunk, skip any pad byte, 
+and read the next chunk header. Returns the chunk ID or END_MARK. */
+
+ID GetChunkHeader();
+
+we read the chunks in a FORM ILBM with a loop like this:
+
+
+do
+  switch (id = GetChunkHeader())
+    {
+    case 'CMAP': ProcessCMAP(); break;
+    case 'BMHD': ProcessBMHD(); break;
+    case 'BODY': ProcessBODY(); break;
+    /* default: just ignore the chunk */
+    }
+  until (id == END_MARK);
+
+This loop processes each chunk by dispatching to a routine that reads the 
+specific type of chunk data.  We don't assume a particular order of chunks. 
+This is a simple parser.  Note that even if you have fully processed a chunk, 
+you should respect it's chunk size, even if the size is larger than you 
+expected.
+
+This sample ignores important details like I/O errors.  There are also higher-
+level errors to check, e.g., if we hit END_MARK without reading a BODY, we 
+didn't get a picture.
+
+Every IFF file is a 'FORM', 'LIST', or 'CAT ' chunk.  You can recognize an IFF 
+file by those first 4 bytes.  ('FORM' is far and away the most common.  We'll 
+get to LIST and CAT below.)  If the file contains a FORM, dispatch on the FORM 
+type ID to a chunk-reader loop like the one above.
+
+
+File extensibility
+
+IFF files are extensible and forward/backward compatible:
+
+oChunk contents should be designed for compatibility across 
+environments and for longevity.  Every chunk should have a path for 
+future expansion; at minimum this will be an unused bit or two.
+
+oThe standards team for a FORM type can extend one of the chunks that 
+contains a structure by appending new, optional structure fields.
+
+oAnyone can define new FORM types as well as new chunk types within a 
+FORM type.  Storing private chunks within a FORM is OK, but be sure 
+to register your activities with Commodore Applications and Technical 
+Support.
+
+oA chunk can be superseded by a new chunk type, e.g., to store more 
+bits per RGB color register. New programs can output the old chunk 
+(for backward compatibility) along with the new chunk.
+
+oIf you must change data in an incompatible way, change the chunk ID or 
+the FORM type ID.
+
+
+
+
+Advanced Topics: CAT, LIST, and PROP (not all that important)
+
+Sometimes you want to put several "files" into one, such as a picture library.
+This is what CAT is for.  It "concatenates" FORM and LIST chunks.
+
+          +--------------------+
+          |                    |
+          |   'CAT '           |  concatenation
+          |                    |
+          +--------------------+
+          |   48160            |  48160 data bytes
+          +--------------------+ 
+          |                    |
+          |   'ILBM'           |  This concatenation contains FORMs ILBM
+          |                    |
+          |  +--------------+  |
+          |  |  'FORM'      |  |  A FORM ILBM
+          |  |--------------|  |
+          |  |   24070      |  |
+          |  |--------------|  |
+          |  |  'ILBM'      |  |
+          |  |--------------|  |
+          |  |  ....        |  |
+          |  +--------------+  |
+          |                    |
+          |  +--------------+  |
+          |  |  'FORM'      |  |  Another FORM ILBM
+          |  |--------------|  |
+          |  |   24070      |  |
+          |  |--------------|  |
+          |  |  'ILBM'      |  |
+          |  |--------------|  |
+          |  |  ....        |  |
+          |  +--------------+  |
+          |                    |
+          +--------------------+
+
+
+This example CAT holds two ILBMs. It can be shown outline-style:
+
+CAT ILBM
+..FORM ILBM   \
+....BMHD      | a complete FORM ILBM picture
+....CMAP      |
+....BODY      /
+..FORM ILBM
+....BMHD
+....CMAP
+....BODY
+
+Sometimes you want to share the same color map across many pictures. LIST 
+and PROP do this:
+
+LIST ILBM
+..PROP ILBM   default properties for FORMs ILBM
+....CMAP      an ILBM CMAP chunk (there could be a BMHD chunk here, too)
+..FORM ILBM
+....BMHD      (there could be a CMAP here to override the default)
+....BODY
+..FORM ILBM
+....BMHD      (there could be a CMAP here to override the default)
+....BODY
+
+
+A LIST holds PROPs and FORMs (and occasionally LISTs and CATs).  A PROP ILBM 
+contains default data (in the above example, just one CMAP chunk) for all 
+FORMs ILBM in the LIST.  Any FORM may override the PROP-defined default with 
+its own CMAP.  All PROPs must appear at the beginning of a LIST.  Each FORM 
+type standardizes (among other things) which of its chunks are "property 
+chunks" (may appear in PROPs) and which are "data chunks" (may not appear 
+in PROPs).
+
+
+
+
+
+"EA IFF 85" Standard for Interchange Format Files
+
+
+Document Date:January 14, 1985  (Updated Oct, 1988 Commodore-Amiga, Inc.)
+From:Jerry Morrison, Electronic Arts
+Status:Released to the public domain, and in use
+
+
+1.  Introduction
+
+Standards are Good for Software Developers
+
+As home computer hardware evolves into better and better media machines, the 
+demand increases for higher quality, more detailed data.  Data development 
+gets more expensive, requires more expertise and better tools, and has to be 
+shared across projects.  Think about several ports of a product on one CD-ROM 
+with 500M Bytes of common data!
+
+Development tools need standard interchange file formats.  Imagine scanning 
+in images of "player" shapes, transferring them to an image enhancement 
+package, moving them to a paint program for touch up, then incorporating them 
+into a game.  Or writing a theme song with a Macintosh score editor and 
+incorporating it into an Amiga game.  The data must at times be transformed, 
+clipped, filled out, and moved across machine kinds.  Media projects will 
+depend on data transfer from graphic, music, sound effect, animation, and 
+script tools.
+
+
+Standards are Good for Software Users
+
+Customers should be able to move their own data between independently 
+developed software products.  And they should be able to buy data libraries 
+usable across many such products.  The types of data objects to exchange are 
+open-ended and include plain and formatted text, raster and structured 
+graphics, fonts, music, sound effects, musical instrument descriptions, 
+and animation.
+
+The problem with expedient file formats--typically memory dumps is that 
+they're too provincial.  By designing data for one particular use (such as a 
+screen snapshot), they preclude future expansion (would you like a full page 
+picture?  a multi-page document?).  In neglecting the possibility that other 
+programs might read their data, they fail to save contextual information
+(how many bit planes?  what resolution?).  Ignoring that other programs might 
+create such files, they're intolerant of extra data (a different picture 
+editor may want to save a texture palette with the image), missing data (such 
+as no color map), or minor variations (perhaps a smaller image).  In practice, 
+a filed representation should rarely mirror an in-memory representation.  The
+former should be designed for longevity; the latter to optimize the 
+manipulations of a particular program.  The same filed data will be read into 
+different memory formats by different programs.
+
+The IFF philosophy: "A little behind-the-scenes conversion when programs read 
+and write files is far better than NxM explicit conversion utilities for 
+highly specialized formats".
+
+So we need some standardization for data interchange among development tools 
+and products.  The more developers that adopt a standard, the better for all 
+of us and our customers.
+
+
+
+Here is "EA IFF 1985"
+
+Here is our offering: Electronic Arts' IFF standard for Interchange File 
+Format.  The full name is "EA IFF 1985".  Alternatives and justifications 
+are included for certain choices.  Public domain subroutine packages and 
+utility programs are available to make it easy to write and use IFF-compatible 
+programs.
+
+Part 1 introduces the standard.  Part 2 presents its requirements and 
+background.  Parts 3, 4, and 5 define the primitive data types, FORMs, and 
+LISTs, respectively, and how to define new high level types.  Part 6 
+specifies the top level file structure.  Section 7 lists names of the group
+responsible for this standard.  Appendix A is included for quick reference 
+and Appendix B.
+
+
+References
+
+American National Standard Additional Control Codes for Use with ASCII, ANSI 
+standard 3.64-1979 for an 8-bit character set.  See also ISO standard 2022 
+and ISO/DIS standard 6429.2.
+
+The C Programming Language, Brian W. Kernighan and Dennis M. Ritchie, Bell 
+Laboratories.  Prentice-Hall, Englewood Cliffs, NJ, 1978.
+
+C, A Reference Manual, Samuel P. Harbison and Guy L. Steele Jr., Tartan 
+Laboratories.  Prentice-Hall, Englewood Cliffs, NJ, 1984.
+
+Compiler Construction, An Advanced Course, edited by F. L. Bauer and J. Eickel
+(Springer-Verlag, 1976).  This book is one of many sources for information on 
+recursive descent parsing.
+
+DIF Technical Specification (c) 1981 by Software Arts, Inc.  DIF(tm) is the 
+format for spreadsheet data interchange developed by Software Arts, Inc.  
+DIF(tm) is a trademark of Software Arts, Inc.
+
+"FTXT" IFF Formatted Text, from Electronic Arts.  IFF supplement document for 
+a text format.
+
+"ILBM" IFF Interleaved Bitmap, from Electronic Arts.  IFF supplement document 
+for a raster image format.
+
+M68000 16/32-Bit Microprocessor Programmer's Reference Manual (c) 1984, 1982, 
+1980, 1979 by Motorola, Inc.
+
+PostScript Language Manual (c) 1984 Adobe Systems Incorporated.
+PostScript(tm) is a trademark of Adobe Systems, Inc.
+Times and Helvetica. are registered trademarks of Allied Corporation.
+
+Inside Macintosh (c) 1982, 1983, 1984, 1985 Apple Computer, Inc., a programmer's
+reference manual.
+Apple. is a trademark of Apple Computer, Inc.
+MacPaint(tm) is a trademark of Apple Computer, Inc.
+Macintosh(tm) is a trademark licensed to Apple Computer, Inc.
+
+InterScript: A Proposal for a Standard for the Interchange of Editable 
+Documents (c) 1984 Xerox Corporation.  Introduction to InterScript (c) 1985 
+Xerox Corporation.
+
+Amiga. is a registered trademark of Commodore-Amiga, Inc.
+
+Electronics Arts(tm) is a trademark of Electronic Arts.
+
+
+
+
+2.  Background for Designers
+
+Part 2 is about the background, requirements, and goals for the standard.  
+It's geared for people who want to design new types of IFF objects.  People 
+just interested in using the standard may wish to quickly scan this section.
+
+
+What Do We Need?
+
+A standard should be long on prescription and short on overhead.  It should 
+give lots of rules for designing programs and data files for synergy.  But 
+neither the programs nor the files should cost too much more than the 
+expedient variety.  Although we are looking to a future with CD-ROMs and
+perpendicular recording, the standard must work well on floppy disks.
+
+For program portability, simplicity, and efficiency, formats should be 
+designed with more than one implementation style in mind.  It ought to be 
+possible to read one of many objects in a file without scanning all the 
+preceding data.   (In practice, pure stream I/O is adequate although random 
+access makes it easier to write files.)  Some programs need to read and play 
+out their data in real time, so we need good compromises between generality 
+and efficiency.
+
+As much as we need standards, they can't hold up product schedules.  So we 
+also need a kind of decentralized extensibility where any software developer 
+can define and refine new object types without some "standards authority" in 
+the loop.  Developers must be able to extend existing formats in a forward- 
+and backward-compatible way.  A central repository for design information and 
+example programs can help us take full advantage of the standard.
+
+For convenience, data formats should heed the restrictions of various 
+processors and environments.  For example, word-alignment greatly helps 68000 
+access at insignificant cost to 8088 programs.
+
+Other goals include the ability to share common elements over a list of 
+objects and the ability to construct composite objects. 
+
+And finally, "Simple things should be simple and complex things should be 
+possible" - Alan Kay.
+
+
+Think Ahead
+
+Let's think ahead and build programs that read and write files for each other 
+and for programs yet to be designed.  Build data formats to last for future 
+computers so long as the overhead is acceptable.  This extends the usefulness 
+and life of today's programs and data.
+
+To maximize interconnectivity, the standard file structure and the specific 
+object formats must all be general and extensible.  Think ahead when designing 
+an object.  File formats should serve many purposes and allow many programs to 
+store and read back all the information they need; even squeeze in custom 
+data.  Then a programmer can store the available data and is encouraged to
+include fixed contextual details.  Recipient programs can read the needed 
+parts, skip unrecognized stuff, default missing data, and use the stored 
+context to help transform the data as needed.
+
+
+
+Scope
+
+IFF addresses these needs by defining a standard file structure, some initial 
+data object types, ways to define new types, and rules for accessing these 
+files.  We can accomplish a great deal by writing programs according to this 
+standard, but do not expect direct compatibility with existing software.  
+We'll need conversion programs to bridge the gap from the old world.
+
+IFF is geared for computers that readily process information in 8-bit bytes.  
+It assumes a "physical layer" of data storage and transmission that reliably 
+maintains "files" as sequences of 8-bit bytes.  The standard treats a "file" 
+as a container of data bytes and is independent of how to find a file and 
+whether it has a byte count.
+
+This standard does not by itself implement a clipboard for cutting and pasting 
+data between programs.  A clipboard needs software to mediate access, and 
+provide a notification mechanism so updates and requests for data can be 
+detected.
+
+
+Data Abstraction
+
+The basic problem is how to represent information  in a way that's program-
+independent, compiler- independent, machine-independent, and device-independent.
+
+The computer science approach is "data abstraction", also known as "objects", 
+"actors", and "abstract data types".  A data abstraction has a "concrete 
+representation" (its storage format), an "abstract representation" (its 
+capabilities and uses), and access procedures that isolate all the calling 
+software from the concrete representation.  Only the access procedures touch 
+the data storage.  Hiding mutable details behind an interface is called 
+"information hiding".  What is hidden are the non-portable details of 
+implementing the object, namely the selected storage representation and 
+algorithms for manipulating it.
+
+The power of this approach is modularity.  By adjusting the access procedures 
+we can extend and restructure the data without impacting the interface or its 
+callers.  Conversely, we can extend and restructure the interface and callers 
+without making existing data obsolete.  It's great for interchange!
+
+But we seem to need the opposite: fixed file formats for all programs to 
+access.  Actually, we could file data abstractions ("filed objects") by 
+storing the data and access procedures together.  We'd have to encode the 
+access procedures in a standard machine-independent programming language a la 
+PostScript.  Even with this, the interface can't evolve freely since we can't 
+update all copies of the access procedures.  So we'll have to design our 
+abstract representations for limited evolution and occasional revolution 
+(conversion).
+
+In any case, today's microcomputers can't practically store true data 
+abstractions.  They can do the next best thing: store arbitrary types of data 
+in "data chunks", each with a type identifier and a length count.  The type 
+identifier is a reference by name to the access procedures (any local 
+implementation).  The length count enables storage-level object operations 
+like "copy" and "skip to next" independent of object type or contents.
+
+Chunk writing is straightforward.  Chunk reading requires a trivial parser to 
+scan each chunk and dispatch to the proper access/conversion procedure.  
+Reading chunks nested inside other chunks may require recursion, but no look 
+ahead or backup.
+
+That's the main idea of IFF.  There are, of course, a few other details....
+
+
+
+Previous Work
+
+Where our needs are similar, we borrow from existing standards.
+
+Our basic need to move data between independently developed programs is 
+similar to that addressed by the Apple Macintosh desk scrap or "clipboard" 
+[Inside Macintosh chapter "Scrap Manager"].  The Scrap Manager works closely 
+with the Resource Manager, a handy filer and swapper for data objects (text 
+strings, dialog window templates, pictures, fonts?) including types yet to be 
+designed [Inside Macintosh chapter "Resource Manager"].  The Resource Manager
+is akin to Smalltalk's object swapper.
+
+We will probably write a Macintosh desk accessory that converts IFF files to 
+and from the Macintosh clipboard for quick and easy interchange with programs 
+like MacPaint and Resource Mover.
+
+Macintosh uses a simple and elegant scheme of four-character "identifiers" to 
+identify resource types, clipboard format types, file types, and file creator 
+programs.  Alternatives are unique ID numbers assigned by a central authority 
+or by hierarchical authorities, unique ID numbers generated by algorithm, 
+other fixed length character strings, and variable length strings.  Character 
+string identifiers double as readable signposts in data files and programs.  
+The choice of 4 characters is a good tradeoff between storage space, 
+fetch/compare/store time, and name space size.  We'll honor Apple's designers 
+by adopting this scheme.
+
+"PICT" is a good example of a standard structured graphics format (including 
+raster images) and its many uses [Inside Macintosh chapter "QuickDraw"].  
+Macintosh provides QuickDraw routines in ROM to create, manipulate, and 
+display PICTs.  Any application can create a PICT by simply asking QuickDraw 
+to record a sequence of drawing commands.  Since it's just as easy to ask 
+QuickDraw to render a PICT to a screen or a printer, it's very effective to 
+pass them betweenprograms, say from an illustrator to a word processor.  An 
+important feature is the ability to store "comments" in a PICT which QuickDraw 
+will ignore.  (Actually, it passes them to your optional custom "comment 
+handler".)
+
+PostScript, Adobe System's print file standard, is a more general way to 
+represent any print image (which is a specification for putting marks on 
+paper) [PostScript Language Manual].  In fact, PostScript is a full-fledged 
+programming language.  To interpret a PostScript program is to render a 
+document on a raster output device.  The language is defined in layers: a 
+lexical layer of identifiers, constants, and operators; a layer of reverse 
+polish semantics including scope rules and a way to define new subroutines; 
+and a printing-specific layer of built-in identifiers and operators for 
+rendering graphic images.  It is clearly a powerful (Turing equivalent) image
+definition language.  PICT and a subset of PostScript are candidates for 
+structured graphics standards.
+
+A PostScript document can be printed on any raster output device (including 
+a display) but cannot generally be edited.  That's because the original 
+flexibility and constraints have been discarded.  Besides, a PostScript 
+program may use arbitrary computation to supply parameters like placement and 
+size to each operator.  A QuickDraw PICT, in comparison, is a more restricted
+format of graphic primitives parameterized by constants.  So a PICT can be 
+edited at the level of the primitives, e.g., move or thicken a line.  It cannot 
+be edited at the higher level of, say, the bar chart data which generated the 
+picture.
+
+PostScript has another limitation: not all kinds of data amount to marks on 
+paper.  A musical instrument description is one example.  PostScript is just 
+not geared for such uses.
+
+
+"DIF" is another example of data being stored in a general format usable by 
+future programs [DIF Technical Specification].  DIF is a format for 
+spreadsheet data interchange.  DIF and PostScript are both expressed in plain 
+ASCII text files.  This is very handy for printing, debugging, experimenting, 
+and transmitting across modems.  It can have substantial cost in compaction 
+and read/write work, depending on use.  We won't store IFF files this way but 
+we could define an ASCII alternate representation with a converter program.
+
+InterScript is the Xerox standard for interchange of editable documents 
+[Introduction to InterScript].  It approaches a harder problem: How to 
+represent editable word processor documents that may contain formatted text, 
+pictures, cross-references like figure numbers, and even highly specialized 
+objects like mathematical equations?  InterScript aims to define one standard 
+representation for each kind of information.  Each InterScript-compatible 
+editor is supposed to preserve the objects it doesn't understand and even 
+maintain nested cross-references.  So a simple word processor would let you 
+edit the text of a fancy document without discarding the equations or 
+disrupting the equation numbers.
+
+Our task is similarly to store high level information and preserve as much 
+content as practical while moving it between programs.  But we need to span a 
+larger universe of data types and cannot expect to centrally define them all.  
+Fortunately, we don't need to make programs preserve information that they 
+don't understand.  And for better or worse, we don't have to tackle general-
+purpose cross-references yet.
+
+
+3.  Primitive Data Types
+
+Atomic components such as integers and characters that are interpretable 
+directly by the CPU are specified in one format for all processors.  We chose 
+a format that's the same as used by the Motorola MC68000 processor [M68000 
+16/32-Bit Microprocessor Programmer's Reference Manual].  The high byte and 
+high word of a number are stored first.
+
+N.B.: Part 3 dictates the format for "primitive" data types where--and only 
+where--used in the overall file structure.  The number of such occurrences of 
+dictated formats will be small enough that the costs of conversion, storage, 
+and management of processor-specific files would far exceed the costs of 
+conversion during I/O by "foreign" programs.  A particular data chunk may be
+specified with a different format for its internal primitive types or with 
+processor or environment specific variants if necessary to optimize local 
+usage.  Since that hurts data interchange, it's not recommended.  (Cf. 
+Designing New Data Sections, in Part 4.)
+
+
+Alignment
+
+All data objects larger than a byte are aligned on even byte addresses 
+relative to the start of the file.  This may require padding.  Pad bytes are 
+to be written as zeros, but don't count on that when reading.
+
+This means that every odd-length "chunk" must be padded so that the next one 
+will fall on an even boundary.  Also, designers of structures to be stored in 
+chunks should include pad fields where needed to align every field larger than 
+a byte.  For best efficiency, long word data should be arranged on long word 
+(4 byte) boundaries.  Zeros should be stored in all the pad bytes.
+
+
+Justification: Even-alignment causes a little extra work for files that are 
+used only on certain processors but allows 68000 programs to construct and 
+scan the data in memory and do block I/O.  Any 16-bit or greater CPU will have 
+faster access to aligned data.  You just add an occasional pad field to data 
+structures that you're going to block read/write or else stream read/write an
+extra byte.  And the same source code works on all processors.  Unspecified 
+alignment, on the other hand, would force 68000 programs to (dis)assemble 
+word and long word data one byte at a time.  Pretty cumbersome in a high level 
+language.  And if you don't conditionally compile that step out for other 
+processors, you won't gain anything.
+
+
+Numbers
+
+Numeric types supported are two's complement binary integers in the format 
+used by the MC68000 processor--high byte first, high word first--the reverse 
+of 8088 and 6502 format.
+
+UBYTE 8 bits unsigned
+WORD16 bits signed
+UWORD16 bits unsigned
+LONG32 bits signed
+
+The actual type definitions depend on the CPU and the compiler.  In this 
+document, we'll express data type definitions in the C programming language.  
+[See C, A Reference Manual.]  In 68000 Lattice C:
+
+typedef unsigned charUBYTE;/*  8 bits unsigned*/
+typedef shortWORD;/* 16 bits signed*/
+typedef unsigned shortUWORD;/* 16 bits unsigned*/
+typedef longLONG;/* 32 bits signed*/
+
+
+Characters
+
+The following character set is assumed wherever characters are used, e.g., in 
+text strings, IDs, and TEXT chunks (see below).  Characters are encoded in 
+8-bit ASCII.  Characters in the range NUL (hex 0) through DEL (hex 7F) are 
+well defined by the 7-bit ASCII standard.  IFF uses the graphic group " " 
+(SP, hex 20) through "~" (hex 7E).
+
+Most of the control character group hex 01 through hex 1F have no standard 
+meaning in IFF.  The control character LF (hex 0A) is defined as a "newline" 
+character.  It denotes an intentional line break, that is, a paragraph or line 
+terminator.  (There is no way to store an automatic line break.  That is 
+strictly a function of the margins in the environment the text is placed.) 
+The controlcharacter ESC (hex 1B) is a reserved escape character under the 
+rules of ANSI standard 3.64-1979 American National Standard Additional 
+Control Codes for Use with ASCII, ISO standard 2022, and ISO/DIS standard 
+6429.2.
+
+Characters in the range hex 7F through hex FF are not globally defined in IFF. 
+They are best left reserved for future standardization.  (Note that the FORM 
+type FTXT (formatted text) defines the meaning of these characters within FTXT 
+forms.)  In particular, character values hex 7F through hex 9F are control 
+codes while characters hex A0 through hex FF are extended graphic characters 
+like E, as per the ISO and ANSI standards cited above.  [See the supplementary
+document "FTXT" IFF Formatted Text.]
+
+
+Dates
+
+A "creation date" is defined as the date and time a stream of data bytes was 
+created.  (Some systems call this a "last modified date".)  Editing some data 
+changes its creation date.  Moving the data between volumes or machines does 
+not.
+
+The IFF standard date format will be one of those used in MS-DOS, Macintosh, 
+or AmigaDOS (probably a 32-bit unsigned number of seconds since a reference 
+point).  Issue: Investigate these three.
+
+
+Type IDs
+
+A "type ID", "property name", "FORM type", or any other IFF identifier is a 
+32-bit value: the concatenation of four ASCII characters in the range " " (SP, 
+hex 20) through "~" (hex 7E).  Spaces (hex 20) should not precede printing 
+characters; trailing spaces are OK.  Control characters are forbidden.
+
+typedef CHAR ID[4];
+
+IDs are compared using a simple 32-bit case-dependent equality test.  FORM 
+type IDs are restricted.  Since they may be stored in filename extensions 
+lower case letters and punctuation marks are forbidden.  Trailing spaces are OK.
+
+Carefully choose those four characters when you pick a new ID.  Make them 
+mnemonic so programmers can look at an interchange format file and figure 
+out what kind of data it contains.  The name space makes it possible for 
+developers scattered around the globe to generate ID values with minimal 
+collisions so long as they choose specific names like "MUS4" instead of 
+general ones like "TYPE" and "FILE".
+
+Commodore Applications and Technical Support has undertaken the task of 
+maintaining the registry of FORM type IDs and format descriptions.  See the 
+IFF registry document for more information.
+
+Sometimes it's necessary to make data format changes that aren't backward 
+compatible.  As much as we work for compatibility, unintended interactions 
+can develop.  Since IDs are used to denote data formats in IFF, new IDs are 
+chosen to denote revised formats.  Since programs won't read chunks whose IDs 
+they don't recognize (see Chunks, below), the new IDs keep old programs from
+stumbling over new data.  The conventional way to chose a "revision" ID is to 
+increment the last character if it's a digit or else change the last character 
+to a digit.  E.g., first and second revisions of the ID "XY" would be "XY1" 
+and "XY2".  Revisions of "CMAP" would be "CMA1" and "CMA2".
+
+
+Chunks
+
+Chunks are the building blocks in the IFF structure.  The form expressed as 
+a C typedef is:
+
+    typedef struct {
+IDckID;/* 4 character ID */
+LONGckSize;/* sizeof(ckData) */
+UBYTEckData[/* ckSize */];
+} Chunk;
+
+
+
+We can diagram an example chunk --a "CMAP" chunk containing 12 data bytes --
+like this:
+
+                        +------------------+   -
+        ckID:           | 'CMAP'           |   |
+                        |------------------+   |
+        ckSize:         |  12              |   |
+                    -   |------------------+   |
+        ckData:     |   |  0, 0, 0, 32     |  20 bytes
+                   12   |------------------+   |
+                  bytes |  0, 0, 64, 0     |   |
+                    |   |------------------+   |
+                    |   |  0, 0, 64, 0     |   |
+                    -   +------------------+   -
+
+
+That's 4 bytes of ckID, 4 bytes of ckSize and 12 data bytes.  The total space 
+used is 20 bytes.
+
+The ckID identifies the format and purpose of the chunk.  As a rule, a 
+program must recognize ckID to interpret ckData.  It should skip over all 
+unrecognized chunks.  The ckID also serves as a format version number as long 
+as we pick new IDs to identify new formats of ckData (see above).
+
+The following ckIDs are universally reserved to identify chunks with 
+particular IFF meanings: "LIST", "FORM", "PROP", "CAT ", and "    ".  The 
+special ID "    " (4 spaces) is a ckID for "filler" chunks, that is, chunks 
+that fill space but have no meaningful contents.  The IDs "LIS1" through 
+"LIS9", "FOR1" through "FOR9", and "CAT1" through "CAT9" are reserved for 
+future "version number" variations.  All IFF-compatible software must account 
+for these chunk IDs.
+
+The ckSize is a logical block size--how many data bytes are in ckData.  If 
+ckData is an odd number of bytes long, a 0 pad byte follows which is not 
+included in ckSize.  (Cf. Alignment.)  A chunk's total physical size is ckSize 
+rounded up to an even number plus the size of the header.  So the smallest 
+chunk is 8 bytes long with ckSize = 0.  For the sake of following chunks, 
+programs must respect every chunk's ckSize as a virtual end-of-file for 
+reading its ckData even if that data is malformed, e.g., if nested contents 
+are truncated.
+
+We can describe the syntax of a chunk as a regular expression with "#" 
+representing the ckSize, the length of the following {braced} bytes.  The 
+"[0]" represents a sometimes needed pad byte.  (The regular expressions in 
+this document are collected in Appendix A along with an explanation of 
+notation.)
+
+Chunk::= ID #{ UBYTE* } [0]
+
+One chunk output technique is to stream write a chunk header, stream write 
+the chunk contents, then random access back to the header to fill in the size. 
+Another technique is to make a preliminary pass over the data to compute the 
+size, then write it out all at once.
+
+
+Strings, String Chunks, and String Properties
+
+In a string of ASCII text, linefeed (0x0A) denotes a forced line break 
+(paragraph or line terminator).  Other control characters are not used.  (Cf. 
+Characters.)  For maximum compatibility with line editors, two linefeed 
+characters are often used to indicate a paragraph boundary.
+
+
+The ckID for a chunk that contains a string of plain, unformatted text is 
+"TEXT".  As a practical matter, a text string should probably not be longer 
+than 32767 bytes.  The standard allows up to 2^31 - 1 bytes.  The ckID "TEXT" 
+is globally reserved for this use.
+
+When used as a data property (see below), a text string chunk may be 0 to 255 
+characters long.  Such a string is readily converted to a C string or a Pascal 
+STRING[255].  The ckID of a property must have a unique property name, not  
+"TEXT".
+
+When used as a part of a chunk or data property, restricted C string format is 
+normally used.  That means 0 to 255 characters followed by a NULL byte (ASCII 
+value 0).
+
+
+Data Properties (advanced topic)
+
+Data properties specify attributes for following (non-property) chunks.  A 
+data property essentially says "identifier = value", for example "XY = (10, 
+200)", telling something about following chunks.  Properties may only appear 
+inside data sections ("FORM" chunks, cf. Data Sections) and property sections 
+("PROP" chunks, cf. Group PROP).
+
+The form of a data property is a type of Chunk.  The ckID is a property name 
+as well as a property type.  The ckSize should be small since data properties 
+are intended to be accumulated in RAM when reading a file.  (256 bytes is a 
+reasonable upper bound.)  Syntactically:
+
+Property::= Chunk
+
+When designing a data object, use properties to describe context information 
+like the size of an image, even if they don't vary in your program.  Other 
+programs will need this information.
+
+Think of property settings as assignments to variables in a programming 
+language.  Multiple assignments are redundant and local assignments 
+temporarily override global assignments.  The order of assignments doesn't 
+matter as long as they precede the affected chunks.  (Cf. LISTs, CATs, and 
+Shared Properties.)
+
+Each object type (FORM type) is a local name space for property IDs.  Think of 
+a "CMAP" property in a "FORM ILBM" as the qualified ID "ILBM.CMAP".  A "CMAP" 
+inside some other type of FORM may not have the same meaning.  Property IDs 
+specified when an object type is designed (and therefore known to all clients) 
+are called "standard" while specialized ones added later are "nonstandard".
+
+
+Links
+
+Issue: A standard mechanism for "links" or "cross references" is very 
+desirable for things like combining images and sounds into animations.  
+Perhaps we'll define "link" chunks within FORMs that refer to other FORMs or 
+to specific chunks within the same and other FORMs.  This needs further work.  
+EA IFF 1985 has no standard link mechanism.
+
+For now, it may suffice to read a list of, say, musical instruments, and then 
+just refer to them within a musical score by  sequence  number.
+
+
+
+File References
+
+Issue: We may need a standard form for references to other files.  A "file ref"
+could name a directory and a file in the same type of operating system as the 
+reference's originator.  Following the reference would expect the file to be 
+on some mounted volume, or perhaps the same directory as the file that made 
+the reference.  In a network environment, a file reference could name a server, 
+too.
+
+Issue: How can we express operating-system independent file references?
+
+Issue: What about a means to reference a portion of another file?  Would this 
+be a "file ref" plus a reference to a "link" within the target file?
+
+
+4.  Data Sections
+
+The first thing we need of a file is to check: Does it contain IFF data and, 
+if so, does it contain the kind of data we're looking for?  So we come to the 
+notion of a "data section".
+
+A "data section" or IFF "FORM" is one self-contained "data object" that might 
+be stored in a file by itself.  It is one high level data object such as a 
+picture or a sound effect, and generally contains a grouping of chunks.  The 
+IFF structure "FORM" makes it self-identifying.  It could be a composite
+object like a musical score with nested musical instrument descriptions.
+
+
+Group FORM
+
+A data section is a chunk with ckID "FORM" and this arrangement:
+
+FORM   ::= "FORM" #{ FormType (LocalChunk | FORM | LIST | CAT)* }
+FormType   ::= ID
+LocalChunk ::= Property | Chunk
+
+The ID "FORM" is a syntactic keyword like "struct" in C.  Think of a "struct 
+ILBM" containing a field "CMAP".  If you see "FORM" you will know to expect a 
+FORM type ID (the structure name, "ILBM" in this example) and a particular 
+contents arrangement or "syntax" (local chunks, FORMs, LISTs, and CATs).  A 
+"FORM ILBM", in particular, might contain a local chunk "CMAP", an "ILBM.CMAP" 
+(to use a qualified name).
+
+So the chunk ID "FORM" indicates a data section.  It implies that the chunk 
+contains an ID and some number of nested chunks.  In reading a FORM, like any 
+other chunk, programs must respect its ckSize as a virtual end-of-file for 
+reading its contents, even if they're truncated.
+
+The FORM type is a restricted ID that may not contain lower case letters or 
+punctuation characters.  (Cf. Type IDs.  Cf. Single Purpose Files.)
+
+The type-specific information in a FORM is composed of its "local chunks": 
+data properties and other chunks.  Each FORM type is a local name space for 
+local chunk IDs.  So "CMAP" local chunks in other FORM types may be unrelated 
+to "ILBM.CMAP".  More than that, each FORM type defines semantic scope.  If 
+you know what a FORM ILBM is, you will know what an ILBM.CMAP is.
+
+Local chunks defined when the FORM type is designed (and therefore known to 
+all clients of this type) are called "standard" while specialized ones added 
+later are "nonstandard".
+
+
+Among the local chunks, property chunks give settings for various details 
+like text font while the other chunks supply the essential information.  This 
+distinction is not clear cut.  A property setting can be cancelled by a later 
+setting of the same property.  E.g., in the sequence:
+
+prop1 = x  (Data A)  prop1 = z  prop1 = y (Data B)
+
+prop1 is = x for Data A, and y for Data B.  The setting prop1 = z has no effect.
+
+For clarity, the universally reserved chunk IDs "LIST", "FORM", "PROP", 
+"CAT ", "    ", "LIS1" through "LIS9", "FOR1" through "FOR9", and "CAT1" 
+through "CAT9" may not be FORM type IDs.
+
+Part 5, below, talks about grouping FORMs into LISTs and CATs.  They let you 
+group a bunch of FORMs but don't impose any particular meaning or constraints 
+on the grouping.  Read on.
+
+
+Composite FORMs
+
+A FORM chunk inside a FORM is a full-fledged data section.  This means you can 
+build a composite object such as a multi-frame animation sequence by nesting 
+available picture FORMs and sound effect FORMs.  You can insert additional 
+chunks with information like frame rate and frame count.
+
+Using composite FORMs, you leverage on existing programs that create and edit 
+the component FORMs.  Those editors may even look into your composite object 
+to copy out its type of component.  Such editors are not allowed to replace 
+their component objects within your composite object.  That's because the IFF 
+standard lets you specify consistency requirements for the composite FORM such 
+as maintaining a count or a directory of the components.  Only programs that 
+are written to uphold the rules of your FORM type may create or modify such 
+FORMs.
+
+Therefore, in designing a program that creates composite objects, you are 
+strongly requested to provide a facility for your users to import and export 
+the nested FORMs.  Import and export could move the data through a clipboard 
+or a file.
+
+Here are several existing FORM types and rules for defining new ones:
+
+FTXT
+
+An FTXT data section contains text with character formatting information 
+like fonts and faces.  It has no paragraph or document formatting information 
+like margins and page headers.  FORM FTXT is well matched to the text 
+representation in Amiga's Intuition environment.  See the supplemental 
+document "FTXT" IFF Formatted Text.
+
+ILBM
+
+"ILBM" is an InterLeaved BitMap image with color map; a machine-independent 
+format for raster images.  FORM ILBM is the standard image file format for 
+the Commodore-Amiga computer and is useful in other environments, too.  See 
+the supplemental document "ILBM" IFF Interleaved Bitmap.
+
+PICS
+
+The data chunk inside a "PICS" data section has ID "PICT" and holds a 
+QuickDraw picture.  Issue: Allow more than one PICT in a PICS?  See Inside 
+Macintosh chapter "QuickDraw" for details on PICTs and how to create and 
+display them on the Macintosh computer.
+
+
+The only standard property for PICS is "XY", an optional property that 
+indicates the position of the PICT relative to "the big picture".  The 
+contents of an XY is a QuickDraw Point.
+
+Note: PICT may be limited to Macintosh use, in which case there'll be another 
+format for structured graphics in other environments.
+
+
+Other Macintosh Resource Types
+
+Some other Macintosh resource types could be adopted for use within IFF files; 
+perhaps MWRT, ICN, ICN#, and STR#.
+
+Issue: Consider the candidates and reserve some more IDs.
+
+
+Designing New Data Sections
+
+Supplemental documents will define additional object types.  A supplement 
+needs to specify the object's purpose, its FORM type ID, the IDs and formats 
+of standard local chunks, and rules for generating and interpreting the data.  
+It's a good idea to supply typedefs and an example source program that 
+accesses the new object.  See "ILBM" IFF Interleaved Bitmap for such an example.
+
+Anyone can pick a new FORM type ID but should reserve it with Commodore
+Applications and Technical Support (CATS) at their earliest convenience.  
+While decentralized  format definitions and extensions are possible in IFF, 
+our preference is to get design consensus by committee, implement a program 
+to read and write it, perhaps tune the format before it becomes locked in 
+stone, and then publish the format with example code.  Some organization 
+should remain in charge of answering questions and coordinating extensions 
+to the format.
+
+If it becomes necessary to incompatibly revise the design of some data 
+section, its FORM type ID will serve as a version number (Cf. Type IDs).  E.g., 
+a revised "VDEO" data section could be called "VDE1".  But try to get by with 
+compatible revisions within the existing FORM type.
+
+In a new FORM type, the rules for primitive data types and word-alignment (Cf. 
+Primitive Data Types) may be overridden for the contents of its local chunks--
+but not for the chunk structure itself--if your documentation spells out the 
+deviations.  If machine-specific type variants are needed, e.g., to store vast 
+numbers of integers in reverse bit order, then outline the conversion 
+algorithm and indicate the variant inside each file, perhaps via different 
+FORM types.  Needless to say, variations should be minimized.
+
+In designing a FORM type, encapsulate all the data that other programs will 
+need to interpret your files.  E.g., a raster graphics image should specify the 
+image size even if your program always uses 320 x 200 pixels x 3 bitplanes.  
+Receiving programs are then empowered to append or clip the image rectangle, 
+to add or drop bitplanes, etc.  This enables a lot more compatibility.
+
+Separate the central data (like musical notes) from more specialized 
+information (like note beams) so simpler programs can extract the central 
+parts during read-in.  Leave room for expansion so other programs can squeeze 
+in new kinds of information (like lyrics).  And remember to keep the property 
+chunks manageably short--let's say &lt;= 256 bytes.
+
+
+When designing a data object, try to strike a good tradeoff between a super-
+general format and a highly-specialized one.  Fit the details to at least one 
+particular need, for example a raster image might as well store pixels in the 
+current machine's scan order.  But add the kind of generality that makes the 
+format usable with foreseeable hardware and software.  E.g., use a whole byte 
+for each red, green, and blue color value even if this year's computer has 
+only 4-bit video DACs.  Think ahead and help other programs so long as the 
+overhead is acceptable.  E.g., run compress a raster by scan line rather than 
+as a unit so future programs can swap images by scan line to and from 
+secondary storage.
+
+Try to design a general purpose "least common multiple" format that 
+encompasses the needs of many programs without getting too complicated.  Be 
+sure to leave provisions for future expansion.  Let's coalesce our uses around 
+a few such formats widely separated in the vast design space.  Two factors 
+make this flexibility and simplicity practical.  First, file storage space is 
+getting very plentiful, so compaction is not always a priority.  Second, 
+nearly any locally-performed data conversion work during file reading and 
+writing will be cheap compared to the I/O time.
+
+It must be OK to copy a LIST or FORM or CAT intact, e.g., to incorporate it 
+into a composite FORM.  So any kind of internal references within a FORM must 
+be relative references.  They could be relative to the start of the containing 
+FORM, relative from the referencing chunk, or a sequence number into a 
+collection.
+
+With composite FORMs, you leverage on existing programs that create and edit 
+the components.  If you write a program that creates composite objects, please 
+provide a facility for users to import and export the nested FORMs.
+
+Finally, don't forget to specify all implied rules in detail.
+
+
+5.  LISTs, CATs, and Shared Properties (Advanced topics)
+
+Data often needs to be grouped together, for example, consider a list of icons. 
+Sometimes a trick like arranging little images into a big raster works, but 
+generally they'll need to be structured as a first class group.  The objects 
+"LIST" and "CAT " are IFF-universal mechanisms for this purpose.  Note: LIST 
+and CAT are advanced topics the first time reader will want to skip.
+
+Property settings sometimes need to be shared over a list of similar objects.  
+E.g., a list of icons may share one color map.  LIST provides a means called 
+"PROP" to do this.  One purpose of a LIST is to define the scope of a PROP.  
+A "CAT ", on the other hand, is simply a concatenation of objects.
+
+Simpler programs may skip LISTs and PROPs altogether and just handle FORMs and 
+CATs.  All "fully-conforming" IFF programs also know about "CAT ", "LIST", and 
+"PROP".  Any program that reads a FORM inside a LIST must process shared PROPs 
+to correctly interpret that FORM.
+
+
+Group CAT
+
+A CAT is just an untyped group of data objects.
+
+Structurally, a CAT is a chunk with chunk ID "CAT " containing a "contents 
+type" ID followed by the nested objects.  The ckSize of each contained chunk 
+is essentially a relative pointer to the next one.
+
+CAT::= "CAT " #{ ContentsType (FORM | LIST | CAT)* }
+ContentsType    ::= ID-- a hint or an "abstract data type" ID
+
+
+In reading a CAT, like any other chunk, programs must respect its ckSize as a 
+virtual end-of-file for reading the nested objects even if they're malformed 
+or truncated.
+
+The "contents type" following the CAT's ckSize indicates what kind of FORMs 
+are inside.  So a CAT of ILBMs would store "ILBM" there.  It's just a hint.  
+It may be used to store an "abstract data type".  A CAT could just have blank 
+contents ID ("    ") if it contains more than one kind of FORM.
+
+CAT defines only the format of the group.  The group's meaning is open to 
+interpretation.  This is like a list in LISP: the structure of cells is 
+predefined but the meaning of the contents as, say, an association list 
+depends on use.  If you need a group with an enforced meaning (an "abstract 
+datatype" or Smalltalk "subclass"), some consistency constraints, or 
+additional data chunks, use a composite FORM instead (Cf. Composite FORMs).
+
+Since a CAT just means a concatenation of objects, CATs are rarely nested.  
+Programs should really merge CATs rather than nest them.
+
+
+Group LIST
+
+A LIST defines a group very much like CAT but it also gives a scope for PROPs 
+(see below).  And unlike CATs, LISTs should not be merged without 
+understanding their contents.
+
+Structurally, a LIST is a chunk with ckID "LIST" containing a "contents type" 
+ID, optional shared properties, and the nested contents (FORMs, LISTs, and 
+CATs), in that order.  The ckSize of each contained chunk is a relative 
+pointer to the next one.  A LIST is not an arbitrary linked list--the cells 
+are simply concatenated.
+
+LIST     ::= "LIST" #{ ContentsType PROP* (FORM | LIST | CAT)* }
+ContentsType ::= ID
+
+
+Group PROP
+
+PROP chunks may appear in LISTs (not in FORMs or CATs).  They supply shared 
+properties for the FORMs in that LIST.  This ability to elevate some property 
+settings to shared status for a list of forms is useful for both indirection 
+and compaction.  E.g., a list of images with the same size and colors can share 
+one "size" property and one "color map" property.  Individual FORMs can
+override the shared settings.
+
+The contents of a PROP is like a FORM with no data chunks:
+
+PROP::= "PROP" #{ FormType Property* }
+
+It means, "Here are the shared properties for FORM type &lt;FormType&gt;".
+
+A LIST may have at most one PROP of a FORM type, and all the PROPs must appear
+before any of the FORMs or nested LISTs and CATs.  You can have subsequences 
+of FORMs sharing properties by making each subsequence a LIST.
+
+
+Scoping: Think of property settings as variable bindings in nested blocks of a 
+programming language.  In C this would look like:
+
+#define Roman0
+#define Helvetica1
+
+void main()
+{
+int font=Roman;/* The global default */
+{
+printf("The font number is %d\n",font);
+}
+{
+int font=Helvetica;/* local setting */
+printf("The font number is %d\n",font);
+}
+{
+printf("The font number is %d\n",font);
+}
+}
+
+
+/*
+ * Sample output:The font number is 0
+ *The font number is 1
+ *The font number is 0
+ */
+
+
+
+
+An IFF file could contain:
+
+LIST {
+PROP TEXT {
+FONT {TimesRoman}/* shared setting*/
+}
+
+FORM TEXT {
+FONT {Helvetica}/* local setting*/
+CHRS {Hello }/* uses font Helvetica*/
+}
+
+FORM TEXT {
+CHRS {there.}/* uses font TimesRoman*/
+}
+}
+
+
+The shared property assignments selectively override the reader's global 
+defaults, but only for FORMs within the group.  A FORM's own property 
+assignments selectively override the global and group-supplied values.  So 
+when reading an IFF file, keep property settings on a stack.  They are 
+designed to be small enough to hold in main memory.
+
+Shared properties are semantically equivalent to copying those properties into 
+each of the nested FORMs right after their FORM type IDs.
+
+
+
+Properties for LIST
+
+Optional "properties for LIST" store the origin of the list's contents in a 
+PROP chunk for the pseudo FORM type "LIST".  They are the properties 
+originating program "OPGM", processor family "OCPU", computer type "OCMP", 
+computer serial number or network address "OSN ", and user name "UNAM".  In 
+our imperfect world, these could be called upon to distinguish between 
+unintended variations of a data format or to work around bugs in particular 
+originating/receiving program pairs.  Issue: Specify the format of these 
+properties.
+
+A creation date could also be stored in a property, but let's ask that file 
+creating, editing, and transporting programs maintain the correct date in the 
+local file system.  Programs that move files between machine types are 
+expected to copy across the creation dates.
+
+
+6.  Standard File Structure
+
+File Structure Overview
+
+An IFF file is just a single chunk of type FORM, LIST, or CAT.  Therefore an 
+IFF file can be recognized by its first 4 bytes: "FORM", "LIST", or "CAT ".  
+Any file contents after the chunk's end are to be ignored.  (Some file 
+transfer programs add garbage to the end of transferred files.  This 
+specification protects against such common damage).
+
+The simplest IFF file would be one that does no more than encapsulate some 
+binary data (perhaps even an old-fashioned single-purpose binary file).  Here 
+is a binary dump of such a minimal IFF example:
+
+0000: 464F524D 0000001A 534E4150 43524143    FORM....SNAPCRAC
+0010: 0000000D 68656C6C 6F2C776F 726C6421    ....hello,world!
+0020: 0A00                                   ..                    
+
+The first 4 bytes indicate this is a "FORM"; the most common IFF top level 
+structure.  The following 4 bytes indicate that the contents totals 26 bytes.  
+The form type is listed as "SNAP".
+
+Our form "SNAP" contains only one chunk at the moment; a chunk of type "CRAC". 
+&gt;From the size ($0000000D) the amount of data must be 13 bytes.  In this case, 
+the data happens to correspond to the ASCII string "hello, world!&lt;lf&gt;".   
+Since the number 13 is odd, a zero pad byte is added to the file.  At any time 
+new chunks could be added to form SNAP without affecting any other aspect of
+the file (other than the form size).  It's that simple.
+
+Since an IFF file can be a group of objects, programs that read/write single 
+objects can communicate to an extent with programs that read/write groups.  
+You're encouraged to write programs that handle all the objects in a LIST or 
+CAT.  A graphics editor, for example, could process a list of pictures as a 
+multiple page document, one page at a time.
+
+Programs should enforce IFF's syntactic rules when reading and writing files.  
+Users should be told when a file is corrupt.  This ensures robust data 
+transfer.  For minor damage, you may wish to give the user the option of using 
+the suspect data, or cancelling.  Presumably a user could read in a damaged 
+file, then save whatever was salvaged to a valid file.  The public domain IFF 
+reader/writer subroutine package does some syntatic checks for you.  A utility
+program"IFFCheck" is available that scans an IFF file and checks it for 
+conformance to IFF's syntactic rules.  IFFCheck also prints an outline of the 
+chunks in the file, showing the ckID and ckSize of each.  This is quite handy 
+when building IFF programs.  Example programs are also available to show 
+details of reading and writing IFF files.
+
+
+A merge program "IFFJoin" will be available that logically appends IFF files 
+into a single CAT group.  It "unwraps" each input file that is a CAT so that 
+the combined file isn't nested CATs.
+
+If we need to revise the IFF standard, the three anchoring IDs will be used as 
+"version numbers".  That's why IDs "FOR1" through "FOR9", "LIS1" through 
+"LIS9", and "CAT1" through "CAT9" are reserved.
+
+IFF formats are designed for reasonable performance with floppy disks.  We 
+achieve considerable simplicity in the formats and programs by relying on the 
+host file system rather than defining universal grouping structures like 
+directories for LIST contents.  On huge storage systems, IFF files could be 
+leaf nodes in a file structure like a B-tree.  Let's hope the host file system
+implements that for us!
+
+There are two kinds of IFF files: single purpose files and scrap files.  They 
+differ in the interpretation of multiple data objects and in the file's 
+external type.
+
+
+Single Purpose Files
+
+A single purpose IFF file is for normal "document" and "archive" storage.  
+This is in contrast with "scrap files" (see below) and temporary backing 
+storage (non-interchange files).
+
+The external file type (or filename extension, depending on the host file 
+system) indicates the file's contents.  It's generally the FORM type of the 
+data contained, hence the restrictions on FORM type IDs.
+
+Programmers and users may pick an "intended use" type as the filename 
+extension to make it easy to filter for the relevant files in a filename 
+requester.  This is actually a "subclass" or "subtype" that conveniently 
+separates files of the same FORM type that have different uses.  Programs 
+cannot demand conformity to its expected subtypes without overly restricting 
+data interchange since they cannot know about the subtypes to be used by 
+future programs that users will want to exchange data with.
+
+Issue: How to generate 3-letter MS-DOS extensions from 4-letter FORM type IDs?
+
+Most single purpose files will be a single FORM (perhaps a composite FORM like
+a musical score containing nested FORMs like musical instrument descriptions). 
+If it's a LIST or a CAT, programs should skip over unrecognized objects to 
+read the recognized ones or the first recognized one.  Then a program that 
+can read a single purpose file can read something out of a "scrap file", too.
+
+
+Scrap Files (not currently used)
+
+A "scrap file" is for maximum interconnectivity in getting data between 
+programs; the core of a clipboard function.  Scrap files may have type "IFF " 
+or filename extension ".IFF".
+
+A scrap file is typically a CAT containing alternate representations of the 
+same basic information.  Include as many alternatives as you can readily 
+generate.  This redundancy improves interconnectivity in situations where we 
+can't make all programs read and write super-general formats.  [Inside 
+Macintosh chapter "Scrap Manager".]  E.g., a graphically-annotated musical score
+might be supplemented by a stripped down 4-voice melody and by a text (the 
+lyrics).
+
+
+The originating program should write the alternate representations in order of 
+"preference": most preferred (most comprehensive) type to least preferred 
+(least comprehensive) type.  A receiving program should either use the first 
+appearing type that it understands or search for its own "preferred" type.
+
+A scrap file should have at most one alternative of any type.  (A LIST of same 
+type objects is OK as one of the alternatives.)  But don't count on this when 
+reading; ignore extra sections of a type.  Then a program that reads scrap 
+files can read something out of single purpose files.
+
+
+Rules for Reader Programs
+
+Here are some notes on building programs that read IFF files.  For LIST and 
+PROP work, you should also read up on recursive descent parsers.  [See, for 
+example, Compiler Construction, An Advanced Course.]
+
+oThe standard is very flexible so many programs can exchange data.  
+This implies a program has to scan the file and react to what's 
+actually there in whatever order it appears.  An IFF reader program 
+is a parser.
+
+oFor interchange to really work, programs must be willing to do some 
+conversion during read-in.  If the data isn't exactly what you expect, 
+say, the raster is smaller than those created by your program, then 
+adjust it.  Similarly, your program could crop a large picture, add 
+or drop bitplanes, or create/discard a mask plane.  The program 
+should give up gracefully on data that it can't convert.
+
+oIf it doesn't start with "FORM", "LIST", or "CAT ", it's not an IFF-85 
+file.
+
+oFor any chunk you encounter, you must recognize its type ID to 
+understand its contents.
+
+oFor any FORM chunk you encounter, you must recognize its FORM type ID 
+to understand the contained "local chunks".  Even if you don't 
+recognize the FORM type, you can still scan it for nested FORMs, 
+LISTs, and CATs of interest.
+
+oDon't forget to skip the implied pad byte after every odd-length chunk, 
+this is not  included in the chunk count!
+
+oChunk types LIST, FORM, PROP, and CAT are generic groups.  They always 
+contain a subtype ID followed by chunks.
+
+oReaders ought to handle a CAT of FORMs in a file.  You may treat the 
+FORMs like document pages to sequence through, or just use the first 
+FORM.
+
+oMany  IFF readers completely skip LISTs.  "Fully IFF-conforming" 
+readers are those that handle LISTs, even if just to read the first 
+FORM from a file.  If you do look into a LIST, you must process
+shared properties (in PROP chunks) properly.  The idea is to get the 
+correct data or none at all.
+
+oThe nicest readers are willing to look into unrecognized FORMs for 
+nested FORM types that they do recognize.  For example, a musical 
+score may contain nested instrument descriptions and animation or 
+desktop publishing files may contain still pictures.   This extra 
+step is highly recommended.
+
+
+Note to programmers: Processing PROP chunks is not simple! You'll need some 
+background in interpreters with stack frames.  If this is foreign to you, 
+build programs that read/write only one FORM per file.  For the more intrepid
+programmers, the next paragraph summarizes how to process LISTs and PROPs.  
+
+Allocate a stack frame for every LIST and FORM you encounter and initialize it 
+by copying the stack frame of the parent LIST or FORM.  At the top level, 
+you'll need a stack frame initialized to your program's global defaults.  
+While reading each LIST or FORM, store all encountered properties into the 
+current stack frame.  In the example ShowILBM, each stack frame has a place
+for a bitmap header property ILBM.BMHD and a color map property ILBM.CMAP.  
+When you finally get to the ILBM's BODY chunk, use the property settings 
+accumulated in the current stack frame.
+
+An alternate implementation would just remember PROPs encountered, forgetting 
+each on reaching the end of its scope (the end of the containing LIST).  When 
+a FORM XXXX is encountered, scan the chunks in all remembered PROPs XXXX, in 
+order, as if they appeared before the chunks actually in the FORM XXXX.  This 
+gets trickier if you read FORMs inside of FORMs.
+
+
+Rules for Writer Programs
+
+Here are some notes on building programs that write IFF files, which is much 
+easier than reading them.  
+
+oAn IFF file is a single FORM, LIST, or CAT chunk.
+
+oAny IFF-85 file must start with the 4 characters "FORM", "LIST", or 
+"CAT ", followed by a LONG ckSize.  There should be no data after 
+the chunk end.
+
+oChunk types LIST, FORM, PROP, and CAT are generic.  They always 
+contain a subtype ID followed by chunks.  These three IDs are 
+universally reserved, as are "LIS1" through "LIS9", "FOR1" through 
+"FOR9", "CAT1" through "CAT9", and "    ".
+
+oDon't forget to write a 0 pad byte after each odd-length chunk.
+
+oDo not try to edit a file that you don't know how to create.  Programs 
+may look into a file and copy out nested FORMs of types that they 
+recognize, but they should not edit and replace the nested FORMs and 
+not add or remove them.  Breaking these rules could make the 
+containing structure inconsistent.  You may write a new file 
+containing items you copied, or copied and modified, but don't copy 
+structural parts you don't understand.
+
+oYou must adhere to the syntax descriptions in Appendix A.  E.g., PROPs 
+may only appear inside LISTs.
+
+
+There are at least four common techniques for writing an IFF group:
+
+(1)  build the data in a file mapped into virtual memory.
+(2)  build the data in memory blocks and use block I/O.
+(3)  stream write the data piecemeal and (don't forget!) random 
+access back to set the group (or FORM) length count.
+(4)  make a preliminary pass to compute the length count then stream 
+write the data.
+
+
+Issue: The standard disallows "blind" chunk copying for consistency reasons.  
+Perhaps we can define a ckID convention for chunks that are OK to replicate 
+without knowledge of the contents.  Any such chunks would need to be 
+internally consistent, and not be bothered by changed external references.
+
+Issue: Stream-writing an IFF FORM can be inconvenient.  With random access 
+files one can write all the chunks then go back to fix up the FORM size.  With 
+stream access, the FORM size must be calculated before the file is written.  
+When compression is involved, this can be slow or inconvenient.  Perhaps we 
+can define an "END " chunk.  The stream writer would use -1 ($FFFFFFFF) as 
+the FORM size.  The reader would follow each chunk, when the reader reaches 
+an "END ", it would terminate the last -1 sized chunk.  Certain new IFF FORMs 
+could require that readers understand "END ".
+
+
+
+
+
+Appendix A.  Reference
+
+
+Type Definitions
+
+The following C typedefs describe standard IFF structures.  Declarations to 
+use in practice will vary with the CPU and compiler.  For example, 68000 
+Lattice C produces efficient comparison code if we define ID as a "LONG".  A 
+macro "MakeID" builds these IDs at compile time.
+
+
+
+/* Standard IFF types, expressed in 68000 Lattice C.*/
+
+typedef unsigned char UBYTE;/*  8 bits unsigned*/
+typedef short WORD;/* 16 bits signed*/
+typedef unsigned short UWORD;/* 16 bits unsigned*/
+typedef long LONG;/* 32 bits signed*/
+
+typedef char ID[4];/* 4 chars in ' ' through '~' */
+
+typedef struct {
+  IDckID;
+  LONGckSize;/* sizeof(ckData)*/
+  UBYTEckData[/* ckSize */];
+  } Chunk;
+
+
+/* ID typedef and builder for 68000 Lattice C. */
+typedef LONG ID; /* 4 chars in ' ' through '~'*/
+
+#define MakeID(a,b,c,d) ( (a)&lt;&lt;24 | (b)&lt;&lt;16 | (c)&lt;&lt;8 | (d) )
+
+/* Globally reserved IDs. */
+#define ID_FORM   MakeID('F','O','R','M')
+#define ID_LIST   MakeID('L','I','S','T')
+#define ID_PROP   MakeID('P','R','O','P')
+#define ID_CAT    MakeID('C','A','T',' ')
+#define ID_FILLER MakeID(' ',' ',' ',' ')
+
+
+Syntax Definitions
+
+
+Here's a collection of the syntax definitions in this document.
+
+
+Chunk     ::= ID #{ UBYTE* } [0]
+
+Property     ::= Chunk
+
+FORM     ::= "FORM" #{ FormType (LocalChunk | FORM | LIST | CAT)* }
+FormType     ::= ID
+LocalChunk   ::= Property | Chunk
+
+CAT     ::= "CAT " #{ ContentsType (FORM | LIST | CAT)* }
+ContentsType ::= ID-- a hint or an "abstract data type" ID
+
+LIST     ::= "LIST" #{ ContentsType PROP* (FORM | LIST | CAT)* }
+PROP     ::= "PROP" #{ FormType Property* }
+
+
+
+
+In this extended regular expression notation, the token "#" represents a count 
+of the following {braced} data bytes.  Literal items are shown in "quotes", 
+[square bracketed items] are optional, and "*" means 0 or more instances.  A 
+sometimes-needed pad byte is shown as "[0]".
+
+
+Example Diagrams
+
+Here's a box diagram for an example IFF file, a raster image FORM ILBM.  This 
+FORM contains a bitmap header property chunk BMHD, a color map property chunk 
+CMAP, and a raster data chunk BODY.  This particular raster is 320 x 200 
+pixels x 3 bit planes uncompressed.  The "0" after the CMAP chunk represents 
+a zero pad byte; included since the CMAP chunk has an odd length.  The text 
+to the right of the diagram shows the outline that would be printed by the 
+IFFCheck utility program for this particular file.
+
+
+          +----------------------------+
+          |                            |
+          |  'FORM'            24070   |  FORM 24070 ILBM
+          |                            |
+       -  +----------------------------+
+       |  |                            |
+       |  |    'ILBM'                  |  
+       |  |                            |
+       |  |  +----------------------+  |
+       |  |  |  'BMHD'         20   |  |  .BMHD 20
+       |  |  |----------------------|  |  
+       |  |  |  320, 200, 0, 0, 3,  |  |
+       |  |  |  0, 0, 0, ....       |  |
+       |  |  +----------------------+  |
+       |  |                            |
+24070 &lt;   |  +----------------------+  |
+ bytes |  |  |  'CMAP'         21   |  |  .CMAP 21
+       |  |  |----------------------|  |  
+       |  |  |  0, 0, 0; 32, 0, 0;  |  |
+       |  |  |  64, 0, 0 ...        |  |
+       |  |  +----------------------+  |
+       |  |     0                      |  
+       |  |  +----------------------+  |
+       |  |  |  'BODY'      24000   |  |
+       |  |  |----------------------|  |  .BODY 24000
+       |  |  |  0, 0, 0....         |  |
+       |  |  +----------------------+  |
+       |  |                            |
+       -- +----------------------------+
+
+
+
+This second diagram shows a LIST of two FORMs ILBM sharing a common BMHD 
+property and a common CMAP property.  Again, the text on the right is an 
+outline a la IFFCheck.
+
+
+        +------------------------------+
+        | 'LIST'              48114    |
+        +------------------------------+
+        |                              |
+        |   'ILBM'                     |
+        |                              |
+        |  +------------------------+  |
+        |  |  'PROP'        62      |  | .PROP 62 ILBM
+        |  +------------------------+  |
+        |  |                        |  |
+        |  |  'ILBM'                |  |
+        |  | +--------------------+ |  |
+        |  | |  'BMHD'       20   | |  | ..BMHD 20
+        |  | |--------------------| |  |
+        |  | |  320, 200, 0, 0, 3,| |  |
+        |  | |  0, 0, 0, ....     | |  |
+        |  | +--------------------+ |  |
+        |  |                        |  |
+        |  | +--------------------+ |  |
+        |  | |  'CMAP'       21   | |  | ..CMAP 21
+        |  | |--------------------| |  |
+        |  | |  0, 0, 0; 32, 0, 0;| |  |
+        |  | |  64, 0, 0 ....     | |  |
+        |  | +--------------------+ |  |
+        |  |   0                    |  |
+        |  +------------------------+  |
+        |                              |
+        |                              |
+        |  +------------------------+  |
+        |  |  'FORM'        24012   |  | .FORM 24012 ILBM
+        |  +------------------------+  |
+        |  |                        |  |
+        |  |  'ILBM'                |  |
+        |  | +--------------------+ |  |
+        |  | |  'BODY'    24000   | |  | ..BODY 24000
+        |  | |--------------------| |  |
+        |  | |  0, 0, 0....       | |  |
+        |  | +--------------------+ |  |
+        |  +------------------------+  |
+        |                              |
+        |                              |
+        |  +------------------------+  |
+        |  |  'FORM'        24012   |  | .FORM 24012 ILBM
+        |  +------------------------+  |
+        |  |                        |  |
+        |  |  'ILBM'                |  |
+        |  | +--------------------+ |  |
+        |  | |  'BODY'    24000   | |  | ..BODY 24000
+        |  | |--------------------| |  |
+        |  | |  0, 0, 0....       | |  |
+        |  | +--------------------+ |  |
+        |  +------------------------+  |
+        |                              |
+        |                              |
+        +------------------------------+
+
+
+
+"ILBM" IFF Interleaved Bitmap
+
+Date:January 17, 1986 (CRNG data updated Oct, 1988 by Jerry Morrison)
+(Appendix E added and CAMG updated Oct, 1988 by Commodore-Amiga, Inc.)
+
+From:Jerry Morrison, Electronic Arts
+
+Status:Released and in use
+
+
+
+1. Introduction
+
+"EA IFF 85" is Electronic Arts' standard for interchange format files.  "ILBM" 
+is a format for a 2 dimensional raster graphics image, specifically an 
+InterLeaved bitplane BitMap image with color map.  An ILBM is an IFF "data 
+section" or "FORM type", which can be an IFF file or a part of one.  ILBM 
+allows simple, highly portable raster graphic storage.
+
+An ILBM is an archival representation designed for three uses.  First, a stand-
+alone image that specifies exactly how to display itself (resolution, size, 
+color map, etc.).  Second, an image intended to be merged into a bigger 
+picture which has its own depth, color map, and so on.  And third, an empty 
+image with a color map selection or "palette" for a paint program.  ILBM is 
+also intended as a building block for composite IFF FORMs like "animation 
+sequences" and "structured graphics".  Some uses of ILBM will be to preserve as 
+much information as possible across disparate environments.  Other uses will be 
+to store data for a single program or highly cooperative programs while 
+maintaining subtle details.  So we're trying to accomplish a lot with this one 
+format.
+
+This memo is the IFF supplement for FORM ILBM.  Section 2 defines the purpose 
+and format of property chunks bitmap header "BMHD", color map "CMAP", hotspot 
+"GRAB", destination merge data "DEST", sprite information "SPRT", and 
+Commodore Amiga viewport mode "CAMG".  Section 3 defines the standard data 
+chunk "BODY".  These are the "standard" chunks.  Section 4 defines the non-
+standard data chunks.  Additional specialized chunks like texture pattern can 
+be added later.  The ILBM syntax is summarized in Appendix A as a regular 
+expression and in Appendix B as a box diagram.  Appendix C explains the 
+optional run encoding scheme.  Appendix D names the committee responsible for 
+this FORM ILBM standard.
+
+Details of the raster layout are given in part 3, "Standard Data Chunk".  Some 
+elements are based on the Commodore Amiga hardware but generalized for use on 
+other computers.  An alternative to ILBM would be appropriate for computers 
+with true color data in each pixel, though the wealth of available ILBM images 
+makes import and export important.
+
+Reference:
+
+"EA IFF 85" Standard for Interchange Format Files describes the underlying 
+conventions for all IFF files.
+Amiga. is a registered trademark of Commodore-Amiga, Inc.
+Electronic Arts(tm) is a trademark of Electronic Arts.
+Macintosh(tm) is a trademark licensed to Apple Computer, Inc.
+MacPaint(tm) is a trademark of Apple Computer, Inc.
+
+
+
+2. Standard Properties
+
+ILBM has several defined property chunks that act on the main data chunks.  
+The required property "BMHD" and any optional properties must appear before 
+any "BODY" chunk.  (Since an ILBM has only one BODY chunk, any following 
+properties would be superfluous.)  Any of these properties may be shared over 
+a LIST of several IBLMs by putting them in a PROP ILBM (See the EA IFF 85 
+document).
+
+BMHD
+
+The required property "BMHD" holds a BitMapHeader as defined in the following 
+documentation.  It describes the dimensions of the image, the encoding used, 
+and other data necessary to understand the BODY chunk to follow.
+
+    typedef UBYTE Masking;     /* Choice of masking technique. */
+
+    #define mskNone                0
+    #define mskHasMask             1
+    #define mskHasTransparentColor 2
+    #define mskLasso               3
+
+    typedef UBYTE Compression;    /* Choice of compression algorithm 
+       applied to the rows of all source and mask planes.  "cmpByteRun1"
+       is the byte run encoding described in Appendix C.  Do not compress 
+       across rows! */
+    #define cmpNone        0
+    #define cmpByteRun1    1
+
+    typedef struct {
+      UWORD       w, h;             /* raster width &amp; height in pixels      */
+      WORD        x, y;             /* pixel position for this image        */
+      UBYTE       nPlanes;          /* # source bitplanes                   */
+      Masking     masking;
+      Compression compression;
+      UBYTE       Flags;            /* CMAP flags (formerly pad1, unused)   */
+      UWORD       transparentColor; /* transparent "color number" (sort of) */
+      UBYTE       xAspect, yAspect; /* pixel aspect, a ratio width : height */
+      WORD        pageWidth, pageHeight; /* source "page" size in pixels    */
+    } BitMapHeader;
+
+
+Fields are filed in the order shown.  The UBYTE fields are byte-packed (the C 
+compiler must not add pad bytes to the structure).
+
+The fields w and h indicate the size of the image rectangle in pixels.  Each 
+row of the image is stored in an integral number of 16 bit words.  The number 
+of words per row is words=((w+15)/16) or Ceiling(w/16).  The fields x and y 
+indicate the desired position of this image within the destination picture. 
+Some reader programs may ignore x and y.  A safe default for writing an ILBM 
+is (x, y) = (0, 0).
+
+The number of source bitplanes in the BODY chunk is stored in nPlanes.  An ILBM 
+with a CMAP but no BODY and nPlanes = 0 is the recommended way to store a 
+color map.
+
+Note: Color numbers are color map index values formed by pixels in the 
+destination bitmap, which may be deeper than nPlanes if a DEST chunk calls 
+for merging the image into a deeper image.
+
+
+The field masking indicates what kind of masking is to be used for this image. 
+The value mskNone designates an opaque rectangular image.  The value mskHasMask 
+means that a mask plane is interleaved with the bitplanes in the BODY chunk 
+(see below).  The value mskHasTransparentColor indicates that pixels in the 
+source planes matching transparentColor are to be considered "transparent". 
+(Actually, transparentColor isn't a "color number" since it's matched with 
+numbers formed by the source bitmap rather than the possibly deeper destination
+bitmap.  Note that having a transparent color implies ignoring one of the color 
+registers.  The value mskLasso indicates the reader may construct a mask by 
+lassoing the image as in MacPaint(tm).  To do this, put a 1 pixel border of 
+transparentColor around the image rectangle.  Then do a seed fill from this 
+border.  Filled pixels are to be transparent.
+
+Issue: Include in an appendix an algorithm for converting a transparent color 
+to a mask plane, and maybe a lasso algorithm.
+
+A code indicating the kind of data compression used is stored in compression. 
+Beware that using data compression makes your data unreadable by programs that 
+don't implement the matching decompression algorithm.  So we'll employ as few 
+compression encodings as possible.  The run encoding byteRun1 is documented in 
+Appendix C.
+
+The field pad1 is a pad byte reserved for future use.  It must be set to 0 for 
+consistency.
+
+The transparentColor specifies which bit pattern means "transparent".  This 
+only applies if masking is mskHasTransparentColor or mskLasso.  Otherwise, 
+transparentColor should be 0 (see above).
+
+The pixel aspect ratio is stored as a ratio in the two fields xAspect and 
+yAspect.  This may be used by programs to compensate for different aspects 
+or to help interpret the fields w, h, x, y, pageWidth, and pageHeight, which 
+are in units of pixels.  The fraction xAspect/yAspect represents a pixel's 
+width/height.  It's recommended that your programs store proper fractions in 
+the BitMapHeader, but aspect ratios can always be correctly compared with the 
+test:
+
+xAspect * yDesiredAspect = yAspect * xDesiredAspect
+
+Typical values for aspect ratio are width : height = 10 : 11  for an Amiga 320 
+x 200 display and 1 : 1 for a Macintosh(tm) display.
+
+The size in pixels of the source "page" (any raster device) is stored in 
+pageWidth and pageHeight, e.g., (320, 200) for a low resolution Amiga display. 
+This information might be used to scale an image or to automatically set the 
+display format to suit the image.  Note that the image can be larger than the 
+page.
+
+
+
+CMAP
+
+The optional (but encouraged) property "CMAP" stores color map data as 
+triplets of red, green, and blue intensity values.  The n color map entries 
+("color registers") are stored in the order 0 through n-1, totaling 3n bytes. 
+Thus n is the ckSize/3.  Normally, n would equal 2^(nPlanes).
+
+A CMAP chunk contains a ColorMap array as defined below.  Note that these 
+typedefs assume a C compiler that implements packed arrays of 3-byte elements.
+
+    typedef struct {
+        UBYTE red, green, blue;           /* color intensities 0..255 */
+        } ColorRegister;                  /* size = 3 bytes           */
+
+    typedef ColorRegister ColorMap[n];    /* size = 3n bytes          */
+
+The color components red, green, and blue represent fractional intensity 
+values in the range 0 through 255 256ths.  White is (255, 255, 255) and black 
+is (0, 0, 0).  If your machine has less color resolution, use the high order 
+bits.  Shift each field right on reading (or left on writing) and assign it 
+to (from) a field in a local packed format like Color4, below.  This achieves 
+automatic conversion of images across environments with different color 
+resolutions.  On reading an ILBM, use defaults if the color map is absent or 
+has fewer color registers than you need.  Ignore any extra color registers.  
+(See Appendix E for a better way to write colors)
+
+The example type Color4 represents the format of a color register in the 
+memory of an Amiga with the original graphics chip set, i.e., 4 bit video 
+DACs.  (The ":4" tells smarter C compilers to pack the field into 4 bits.)
+
+    typedef struct {
+        unsigned pad1 :4, red :4, green :4, blue :4;
+        } Color4;                      /*   Amiga RAM format.  Not filed.  */
+
+With the latest generation of Amigas, there is a new complication.  Amigas 
+with the AA chip set support a full 8 bits of color resolution.  In order 
+to distinguish older CMAPs with 4-bit values from newer CMAP chunks with full 
+8-bit values, use the high order bit of BMHD.Flags (1 &lt;&lt; 7).  If this bit is 
+set, it means this CMAP is a full 8-bit value.  If this bit is clear, it is 
+probably an older 4-bit CMAP with values either left justified or scaled.
+
+Remember that every chunk must be padded to an even length, so a color map 
+with an odd number of entries would be followed by a 0 byte, not included 
+in the ckSize.
+
+
+GRAB
+
+The optional property "GRAB" locates a "handle" or "hotspot" of the image 
+relative to its upper left corner, e.g., when used as a mouse cursor or a 
+"paint brush".  A GRAB chunk contains a Point2D.
+
+    typedef struct {
+        WORD x, y;         /* relative coordinates (pixels) */
+        } Point2D;
+
+
+DEST
+
+The optional property "DEST" is a way to say how to scatter zero or more 
+source bitplanes into a deeper destination image.  Some readers may ignore DEST.
+
+The contents of a DEST chunk is DestMerge structure:
+
+   typedef struct {
+       UBYTE depth;      /* # bitplanes in the original source               */
+       UBYTE pad1;       /* unused; for consistency put 0 here               */
+       UWORD planePick;  /* how to scatter source bitplanes into destination */
+       UWORD planeOnOff; /* default bitplane data for planePick              */
+       UWORD planeMask;  /* selects which bitplanes to store into            */
+       } DestMerge;
+
+
+The low order depth number of bits in planePick, planeOnOff, and planeMask 
+correspond one-to-one with destination bitplanes.  Bit 0 with bitplane 0, etc. 
+(Any higher order bits should be ignored.)  "1" bits in planePick mean "put 
+the next source bitplane into this bitplane", so the number of "1" bits should 
+equal nPlanes.  "0" bits mean "put the corresponding bit from planeOnOff into 
+this bitplane".  Bits in planeMask gate writing to the destination bitplane: 
+"1" bits mean "write to this bitplane" while "0" bits mean "leave this 
+bitplane alone".  The normal case (with no DEST property) is equivalent to 
+planePick = planeMask = 2^(nPlanes) - 1.
+
+Remember that color numbers are formed by pixels in the destination bitmap 
+(depth planes deep) not in the source bitmap (nPlanes planes deep).
+
+
+SPRT
+
+The presence of an "SPRT" chunk indicates that this image is intended as a 
+sprite.  It's up to the reader program to actually make it a sprite, if even 
+possible, and to use or overrule the sprite precedence data inside the SPRT 
+chunk:
+
+    typedef UWORD SpritePrecedence; /* relative precedence, 0 is the highest */
+
+Precedence 0 is the highest, denoting a sprite that is foremost.
+
+Creating a sprite may imply other setup.  E.g., a 2 plane Amiga sprite would 
+have transparentColor = 0.  Color registers 1, 2, and 3 in the CMAP would be 
+stored into the correct hardware color registers for the hardware sprite 
+number used, while CMAP color register 0 would be ignored.
+
+
+CAMG
+
+A "CAMG" chunk is specifically for Commodore Amiga ILBM's.  All Amiga-based 
+reader and writer software should deal with CAMG.  The Amiga supports many 
+different video display modes including interlace, Extra Halfbrite, hold and 
+modify (HAM), plus a variety of new modes under the 2.0 operating system.
+A CAMG chunk contains a single long word (length=4) which specifies the Amiga 
+display mode of the picture.
+
+Prior to 2.0, it was possible to express all available Amiga ViewModes in 16 
+bits of flags (Viewport-&gt;Modes or NewScreen-&gt;ViewModes).  Old-style writers and 
+readers place a 16-bit Amiga ViewModes value in the low word of the CAMG, and 
+zeros in the high word.  The following Viewmode flags should always be 
+removed from old-style 16-bit ViewModes values when writing or reading them:
+
+EXTENDED_MODE | SPRITES | VP_HIDE | 
+          GENLOCK_AUDIO | GENLOCK_VIDEO (=0x7102, mask=0x8EFD)
+
+New ILBM readers and writers, should treat the full CAMG longword as a 32-bit 
+ModeID to support new and future display modes.
+
+New ILBM writers, when running under the 2.0 Amiga operating system, should 
+directly store the full 32-bit return value of the graphics function 
+GetVPModeID(vp) in the CAMG longword.  When running under 1.3, store a 16-bit 
+Viewmodes value masked as described above.
+
+
+ILBM readers should only mask bits out of a CAMG if the CAMG has a zero upper 
+word (see exception below).  New ILBM readers, when running under 2.0, should 
+then treat the 32-bit CAMG value as a ModeID, and should use the graphics 
+ModeNotAvailable() function to determine if the mode is available.  If the 
+mode is not available, fall back to another suitable display mode.  When 
+running under 1.3, the low word of the CAMG may generally be used to open a 
+compatible display.
+
+Note that one popular graphics package stores junk in the upper word of the 
+CAMG of brushes, and incorrect values (generally zero) in the low word.  You 
+can screen for such junk values by testing for non-zero in the upper word of 
+a ModeID in conjunction with the 0x00001000 bit NOT set in the low word.
+
+The following code fragment demonstrates ILBM reader filtering of
+inappropriate bits in 16-bit CAMG values.
+
+#include &lt;graphics/view.h&gt;
+#include &lt;graphics/displayinfo.h&gt;
+
+/* Knock bad bits out of old-style CAMG modes before checking availability.
+ * (some ILBM CAMG's have these bits set in old 1.3 modes, and should not)
+ * If not an extended monitor ID, or if marked as extended but missing
+ * upper 16 bits, screen out inappropriate bits now.
+ */
+if((!(modeid &amp; MONITOR_ID_MASK)) ||
+    ((modeid &amp; EXTENDED_MODE)&amp;&amp;(!(modeid &amp; 0xFFFF0000))))
+   modeid &amp;= 
+      (~(EXTENDED_MODE|SPRITES|GENLOCK_AUDIO|GENLOCK_VIDEO|VP_HIDE));
+
+/* Check for bogus CAMG like some brushes have, with junk in
+ * upper word and extended bit NOT set not set in lower word.
+ */
+if((modeid &amp; 0xFFFF0000)&amp;&amp;(!(modeid &amp; EXTENDED_MODE)))
+    {
+    /* Bad CAMG, so ignore CAMG and determine a mode based on 
+     * based on pagesize or aspect
+     */
+     modeid = NULL;
+     if(wide &gt;= 640) modeid |= HIRES;
+     if(high &gt;= 400) modeid |= LACE;
+     }
+
+/* Now, ModeNotAvailable() may be used to determine if the mode is available.
+ *
+ * If the mode is not available, you may prompt the user for a mode
+ * choice, or search the 2.0 display database for an appropriate
+ * replacement mode, or you may be able to get a relatively compatible
+ * old display mode by masking out all bits except
+ * HIRES | LACE | HAM | EXTRA_HALFBRITE
+ */
+
+   if((modeid &amp; 0xFFFF0000)&amp;&amp;(!(modeid &amp; 0x00001000)))
+{
+/* Then probably invalid ModeID */
+}
+
+
+3. Standard "BODY" Data Chunk
+
+Raster Layout
+
+Raster scan proceeds left-to-right (increasing X) across scan lines, then 
+top-to-bottom (increasing Y) down columns of scan lines.  The coordinate 
+system is in units of pixels, where (0,0) is the upper left corner.
+
+The raster is typically organized as bitplanes in memory.  The corresponding 
+bits from each plane, taken together, make up an index into the color map 
+which gives a color value for that pixel.  The first bitplane, plane 0, is 
+the low order bit of these color indexes.
+
+A scan line is made of one "row" from each bitplane.  A row is one plane's bits 
+for one scan line, but padded out to a word (2 byte) boundary (not necessarily 
+the first word boundary).  Within each row, successive bytes are displayed in 
+order and the most significant bit of each byte is displayed first.
+
+A "mask" is an optional "plane" of data the same size (w, h) as a bitplane.  
+It tells how to "cut out" part of the image when painting it onto another 
+image.  "One" bits in the mask mean "copy the corresponding pixel to the 
+destination".  "Zero" mask bits mean "leave this destination pixel alone".  In 
+other words, "zero" bits designate transparent pixels.
+
+The rows of the different bitplanes and mask are interleaved in the file (see 
+below).  This localizes all the information pertinent to each scan line.  It 
+makes it much easier to transform the data while reading it to adjust the 
+image size or depth.  It also makes it possible to scroll a big image by 
+swapping rows directly from the file without the need for random-access to 
+all the bitplanes.
+
+
+
+BODY
+
+The source raster  is stored in a "BODY" chunk.  This one chunk holds all 
+bitplanes and the optional mask, interleaved by row.
+
+The BitMapHeader, in a BMHD property chunk, specifies the raster's dimensions 
+w, h, and nPlanes.  It also holds the masking field which indicates if there 
+is a mask plane and the compression field which indicates the compression 
+algorithm used.  This information is needed to interpret the BODY chunk, so 
+the BMHD chunk must appear first.  While reading an ILBM's BODY, a program 
+may convert the image to another size by filling (with transparentColor) or 
+clipping.
+
+The BODY's content is a concatenation of scan lines.  Each scan line is a 
+concatenation of one row of data from each plane in order 0 through nPlanes-1 
+followed by one row from the mask (if masking = hasMask ).  If the BitMapHeader 
+field compression is cmpNone, all h rows are exactly (w+15)/16 words wide. 
+Otherwise, every row is compressed according to the specified algorithm and 
+the stored widths depend on the data compression.
+
+Reader programs that require fewer bitplanes than appear in a particular ILBM 
+file can combine planes or drop the high-order (later) planes.  Similarly, 
+they may add bitplanes and/or discard the mask plane.
+
+Do not compress across rows, and don't forget to compress the mask just like 
+the bitplanes.  Remember to pad any BODY chunk that contains an odd number of 
+bytes and skip the pad when reading.
+
+
+4. Nonstandard Data Chunks
+
+The following data chunks were defined after various programs began using FORM 
+ILBM so they are "nonstandard" chunks.  See the registry document for the 
+latest information on additional non-standard chunks.
+
+
+CRNG
+
+A "CRNG" chunk contains "color register range" information.  It's used by 
+Electronic Arts' Deluxe Paint program to identify a contiguous range of 
+color registers for a "shade range" and color cycling.  There can be zero or 
+more CRNG chunks in an ILBM, but all should appear before the BODY chunk. 
+Deluxe Paint normally writes 4 CRNG chunks in an ILBM when the user asks it 
+to "Save Picture".
+
+    typedef struct {
+        WORD  pad1;      /* reserved for future use; store 0 here    */
+        WORD  rate;      /* color cycle rate                         */
+        WORD  flags;     /* see below                                */
+        UBYTE low, high; /* lower and upper color registers selected */
+        } CRange;
+
+
+The bits of the flags word are interpreted as follows: if the low bit is set 
+then the cycle is "active", and if this bit is clear it is not active.  
+Normally, color cycling is done so that colors move to the next higher 
+position in the cycle, with the color in the high slot moving around to the
+low slot.  If the second bit of the flags word is set, the cycle moves in the 
+opposite direction.  As usual, the other bits of the flags word are reserved 
+for future expansion.  Here are the masks to test these bits:
+
+#define RNG_ACTIVE  1
+#define RNG_REVERSE 2
+
+The fields low and high indicate the range of color registers (color numbers) 
+selected by this CRange.
+
+The field active indicates whether color cycling is on or off.  Zero means off.
+
+The field rate determines the speed at which the colors will step when color 
+cycling is on.  The units are such that a rate of 60 steps per second is 
+represented as 2^14 = 16384.  Slower rates can be obtained by linear scaling: 
+for 30 steps/second, rate = 8192; for 1 step/second, rate = 16384/60 * 273.
+
+
+CCRT
+
+Commodore's Graphicraft program uses a similar chunk "CCRT" (for Color 
+Cycling Range and Timing).  This chunk contains a CycleInfo structure.
+
+    typedef struct {
+        WORD  direction;    /* 0 = don't cycle.  1 = cycle forwards      */
+                            /* (1, 2, 3). -1 = cycle backwards (3, 2, 1) */
+        UBYTE start, end;   /* lower and upper color registers selected  */
+        LONG  seconds;      /* # seconds between changing colors plus... */
+        LONG  microseconds; /* # microseconds between changing colors    */
+        WORD  pad;          /* reserved for future use; store 0 here     */
+        } CycleInfo;
+
+This is very similar to a CRNG chunk.  A program would probably only use one 
+of these two methods of expressing color cycle data, new programs should use 
+CRNG.  You could write out both if you want to communicate this information 
+to both Deluxe Paint and Graphicraft.
+
+
+Appendix A. ILBM Regular Expression
+
+Here's a regular expression summary of the FORM ILBM syntax.  This could be an 
+IFF file or a part of one.
+
+ILBM ::= "FORM" #{    "ILBM" BMHD [CMAP] [GRAB] [DEST] [SPRT] [CAMG]
+    CRNG* CCRT* [BODY]    }
+
+BMHD ::= "BMHD" #{    BitMapHeader    }
+CMAP ::= "CMAP" #{    (red green blue)*    } [0]
+GRAB ::= "GRAB" #{    Point2D    }
+DEST ::= "DEST" #{    DestMerge    }
+SPRT ::= "SPRT" #{    SpritePrecedence    }
+CAMG ::= "CAMG" #{    LONG    }
+
+CRNG ::= "CRNG" #{    CRange    }
+CCRT ::= "CCRT" #{    CycleInfo    }
+BODY ::= "BODY" #{    UBYTE*    } [0]
+
+
+
+The token "#" represents a ckSize LONG count of the following {braced} data 
+bytes.  E.g., a BMHD's "#" should equal sizeof(BitMapHeader).  Literal strings 
+are shown in "quotes", [square bracket items] are optional, and "*" means 0 
+or more repetitions.  A sometimes-needed pad byte is shown as "[0]".
+
+The property chunks BMHD, CMAP, GRAB, DEST, SPRT, CAMG and any CRNG and CCRT 
+data chunks may actually be in any order but all must appear before the BODY 
+chunk since ILBM readers usually stop as soon as they read the BODY.  If any 
+of the 6 property chunks are missing, default values are inherited from any 
+shared properties (if the ILBM appears inside an IFF LIST with PROPs) or from 
+the reader program's defaults.  If any property appears more than once, the 
+last occurrence before the BODY is the one that counts since that's the one 
+that modifies the BODY.
+
+
+Appendix B. ILBM Box Diagram
+
+Here's a box diagram for a simple example: an uncompressed image 320 x 200 
+pixels x 3 bitplanes.  The text to the right of the diagram shows the outline 
+that would be printed by the Sift utility program for this particular file.
+
+
+          +--------------------+
+          |                    |
+          |  'FORM'     24070  |  FORM 24070 ILBM
+          |                    |
+       -- +--------------------+ 
+       |  |                    |
+       |  |  'ILBM'            |
+       |  |                    |
+       |  | +----------------+ |
+       |  | |  'BMHD'    20  | |  .BMHD 20
+       |  | |----------------| |  
+       |  | |  320, 200,     | |
+       |  | |  0 ....        | |
+       |  | +----------------+ |
+       |  |                    |
+       |  | +----------------+ |
+24070 &lt;   | |  'CMAP'    21  | |  .CMAP 21
+ bytes |  | |----------------| |  
+       |  | |  0, 0, 0,      | |
+       |  | |  255 ....      | |
+       |  | +----------------+ |
+       |  |   0                |  
+       |  | +----------------+ |
+       |  | |  'BODY'  24000 | |  .BODY 24000
+       |  | |----------------| |  
+       |  | |  0, 0, 0....   | |
+       |  | +----------------+ |
+       |  |                    |
+       -- +--------------------+
+
+The "0" after the CMAP chunk is a pad byte.
+
+
+
+Appendix C. IFF Hints
+
+Hints on ILBM files from Jerry Morrison, Oct 1988.  How to avoid some 
+pitfalls when reading ILBM files:
+
+oDon't ignore the BitMapHeader.masking field.  A bitmap with a mask 
+(such as a partially-transparent DPaint brush or a DPaint picture with 
+a stencil) will read as garbage if you don't de-interleave the mask.
+
+oDon't assume all images are compressed.  Narrow images aren't usually 
+run-compressed since that would actually make them longer.
+
+oDon't assume a particular image size.  You may encounter overscan 
+pictures and PAL pictures.
+
+There's a better way to read a BODY than the example IFF code.  The GetBODY 
+routine should call a GetScanline routine once per scan line, which calls a 
+GetRow routine for each bitplane in the file.  This in turn calls a 
+GetUnpackedBytes routine, which calls a GetBytes routine as needed and unpacks 
+the result.  (If the picture is uncompressed, GetRow calls GetBytes directly.) 
+Since theunpacker knows how many packed bytes to read, this avoids juggling 
+buffers for a memory-to-memory UnPackBytes routine.
+
+Caution: If you make many AmigaDOS calls to read or write a few bytes at a 
+time, performance will be mud! AmigaDOS has a high overhead per call, even 
+with RAM disk.  So use buffered read/write routines.
+
+Different hardware display devices have different color resolutions:
+
+    Device        R:G:B bits    maxColor
+    -------       ----------    --------
+    Mac SE            1              1
+    IBM EGA       2:2:2              3
+    Atari ST      3:3:3              7
+    Amiga         4:4:4             15 
+    CD-I          5:5:5             31
+    IBM VGA       6:6:6             63
+    Mac II        8:8:8            255
+
+An ILBM CMAP defines 8 bits of Red, Green and Blue (i.e., 8:8:8 bits of R:G:B). 
+When displaying on hardware which has less color resolution, just take the 
+high order bits.  For example, to convert ILBM's 8-bit Red to the Amiga's 
+4-bit Red, right shift the data by 4 bits  (R4 := R8 &gt;&gt; 4).
+
+To convert hardware colors to ILBM colors, the ILBM specification says just 
+set the high bits (R8 := R4 &lt;&lt; 4).  But you can transmit higher contrast to 
+foreign display devices by scaling the data [0..maxColor] to the full range 
+[0..255].  In other words, R8 := (Rn x 255) w maxColor.  (Example #1:  EGA 
+color 1:2:3 scales to 85:170:255.  Example #2:  Amiga 15:7:0 scales to
+255:119:0).  This makes a big difference where maxColor is less than 15.  In 
+the extreme case, Mac SE white (1) should be converted to ILBM white (255), 
+not to ILBM gray (128).
+
+
+
+CGA and EGA subtleties
+
+IBM EGA colors in 350 scan line mode are 2:2:2 bits of R:G:B, stored in memory 
+as xxR'G'B'RBG.  That's 3 low-order bits followed by 3 high-order bits.
+
+IBM CGA colors are 4 bits stored in a byte as xxxxIRGB.  (EGA colors in 200 
+scan line modes are the same as CGA colors, but stored in memory as xxxIxRGB.) 
+That's 3 high-order bits (one for each of R, G, and B) plus one low-order "
+Intensity" bit for all 3 components R, G, and B.  Exception: IBM monitors show 
+IRGB = 0110 as brown, which is really the EGA color R:G:B = 2:1:0, not dark 
+yellow 2:2:0.
+
+
+24-bit ILBMS
+
+When storing deep images as ILBMs (such as images with 8 bits each of R,G, 
+and B), the bits for each pixel represent an absolute RGB value for that 
+pixel rather than an index into a limited color map.  The order for saving 
+the bits is critical since a deep ILBM would not contain the usual CMAP of 
+RGB values (such a CMAP would be too large and redundant).
+
+To interpret these "deep" ILBMs, it is necessary to have a standard order in 
+which the bits of the R, G, and B values will be stored.  A number of 
+different orderings have already been used in deep ILBMs, so it was necessary 
+to us chose one of these orderings as a standard.
+
+The following bit ordering has been chosen as the default bit ordering for 
+deep ILBMs.
+
+Default standard deep ILBM bit ordering:
+saved first -------------------------------------------------&gt; saved last
+R0 R1 R2 R3 R4 R5 R6 R7  G0 G1 G2 G3 G4 G5 G6 G7  B0 B1 B2 B3 B4 B5 B6 B7
+
+One other existing deep bit ordering that you may encounter is the 21-bit 
+NewTek format.
+
+NewTek deep ILBM bit ordering:
+saved first ------------------------------------------------------&gt; saved last
+R7 G7 B7  R6 G6 B6  R5 G5 B5  R4 G4 B4  R3 G3 B3  R2 G2 B2  R1 G1 B1  R0 G0 B0
+
+
+Note that you may encounter CLUT chunks in deep ILBM's.  See the Third Party 
+Specs appendix for more information on CLUT chunks.
+
+
+
+Appendix D. ByteRun1 Run Encoding
+
+The run encoding scheme byteRun1 is best described by pseudo code for the 
+decoder Unpacker (called UnPackBits in the Macintosh(tm) toolbox):
+
+  UnPacker:
+    LOOP until produced the desired number of bytes
+        Read the next source byte into n
+        SELECT n FROM
+            [0..127]   =&gt; copy the next n+1 bytes literally
+            [-1..-127] =&gt; replicate the next byte -n+1 times
+            -128       =&gt; no operation
+            ENDCASE;
+        ENDLOOP;
+
+In the inverse routine Packer, it's best to encode a 2 byte repeat run as a 
+replicate run except when preceded and followed by a literal run, in which 
+case it's best to merge the three into one literal run.  Always encode 3 byte 
+repeats as replicate runs.
+
+Remember that each row of each scan line of a raster is separately packed.
+
+
+
+
+
+           Intro to IFF Amiga ILBM Files and Amiga Viewmodes
+           =================================================
+
+The IFF (Interchange File Format) for graphic images on the Amiga is called 
+FORM ILBM (InterLeaved BitMap).  It follows a standard parsable IFF format.
+
+Sample hex dump of beginning of an ILBM:
+========================================
+
+Important note!  You can NOT ever depend on any particular ILBM chunk being 
+at any particular offset into the file!  IFF files are composed, in their 
+simplest form, of chunks within a FORM.  Each chunk starts starts with a 
+4-letter chunkID, followed by a 32-bit length of the rest of the chunk.  You 
+PARSE IFF files, skipping past unneeded or unknown chunks by seeking their 
+length (+1 if odd length) to the next 4-letter chunkID.
+
+0000: 464F524D 00016418 494C424D 424D4844    FORM..d.ILBMBMHD
+0010: 00000014 01400190 00000000 06000100    .....@..........
+0020: 00000A0B 01400190 43414D47 00000004    .....@..CAMG....
+0030: 00000804 434D4150 00000030 001100EE    ....CMAP...0....
+0040: EEEE0000 22000055 33333355 55550033    .... ..P000PPP.0
+0050: 99885544 77777711 66EE2266 EE6688DD    ..P@ppp.`. `.`..
+0060: AAAAAAAA 99EECCCC CCDDAAEE 424F4459    ............BODY
+0070: 000163AC F8000F80 148A5544 2ABDEFFF    ..c.......UD*...  etc.
+
+Interpretation:
+
+      'F O R M' length  'I L B M''B M H D'&lt;-start of BitMapHeader chunk
+0000: 464F524D 00016418 494C424D 424D4844    FORM..d.ILBMBMHD
+
+       length  WideHigh XorgYorg PlMkCoPd &lt;- Planes Mask Compression Pad
+0010: 00000014 01400190 00000000 06000100    .....@..........
+
+      TranAspt PagwPagh 'C A M G' length  &lt;- start of C-AMiGa View modes chunk
+0020: 00000A0B 01400190 43414D47 00000004    .....@..CAMG....
+
+      Viewmode 'C M A P' length  R g b R  &lt;- Viewmode 800=HAM | 4=LACE 
+0030: 00000804 434D4150 00000030 001100EE    ....CMAP...0....
+
+      g b R g  b R g b  R g b R  g b R g  &lt;- Rgb's are for reg0 thru regN
+0040: EEEE0000 22000055 33333355 55550033    .... ..P000PPP.0
+
+      b R g b  R g b R  g b R g  b R g b
+0050: 99885544 77777711 66EE2266 EE6688DD    ..P@ppp.`. `.`..
+
+      R g b R  g b R g  b R g b 'B O D Y' 
+0060: AAAAAAAA 99EECCCC CCDDAAEE 424F4459    ............BODY
+
+       length   start of body data        &lt;- Compacted (Compression=1 above)
+0070: 000163AC F8000F80 148A5544 2ABDEFFF    ..c.......UD*...
+0080: FFBFF800 0F7FF7FC FF04F85A 77AD5DFE    ...........Zw.].  etc.
+
+Notes on CAMG Viewmodes:  HIRES=0x8000  LACE=0x4  HAM=0x800  HALFBRITE=0x80
+
+
+
+
+Interpreting ILBMs
+==================
+      
+ILBM is a fairly simple IFF FORM.  All you really need to deal with to 
+extract the image are the following chunks:
+
+(Note - Also watch for AUTH Author chunks and (c) Copyright chunks
+ and preserve any copyright information if you rewrite the ILBM)
+
+   BMHD - info about the size, depth, compaction method
+          (See interpreted hex dump above)
+
+   CAMG - optional Amiga viewmodes chunk
+          Most HAM and HALFBRITE ILBMs should have this chunk.  If no
+          CAMG chunk is present, and image is 6 planes deep, assume
+          HAM and you'll probably be right.  Some Amiga viewmodes
+          flags are HIRES=0x8000, LACE=0x4, HAM=0x800, HALFBRITE=0x80.
+  Note that new Amiga 2.0 ILBMs may have more complex 32-bit
+  numbers (modeid) stored in the CAMG.  However, the bits
+  described above should get you a compatible old viewmode.
+  
+   CMAP - RGB values for color registers 0 to n
+          (each component left justified in a byte)
+  If a deep ILBM (like 12 or 24 planes), there should be no CMAP
+  and instead the BODY planes are interpreted as the bits of RGB
+  in the order R0...Rn G0...Gn B0...Bn
+
+   BODY - The pixel data, stored in an interleaved fashion as follows:
+          (each line individually compacted if BMHD Compression = 1)
+             plane 0 scan line 0
+             plane 1 scan line 0
+             plane 2 scan line 0
+             ...
+             plane n scan line 0
+             plane 0 scan line 1
+             plane 1 scan line 1
+             etc.
+
+ 
+Body Compression
+================
+
+The BODY contains pixel data for the image.  Width, Height, and depth 
+(Planes) is specified in the BMHD.
+
+If the BMHD Compression byte is 0, then the scan line data is not compressed.
+If Compression=1, then each scan line is individually compressed as follows:
+
+   More than 2 bytes the same stored as BYTE code value n from  -1 to -127 
+     followed by byte to be repeated (-n) + 1 times.
+   Varied bytes stored as BYTE code n from 0 to 127 followed by n+1 bytes 
+     of data.
+   The byte code -128 is a NOP.
+
+
+
+
+Interpreting the Scan Line Data:
+================================
+
+If the ILBM is not HAM or HALFBRITE, then after parsing and uncompacting if 
+necessary, you will have N planes of pixel data.  Color register used for 
+each pixel is specified by looking at each pixel thru the planes.  I.e., 
+if you have 5 planes, and the bit for a particular pixel is set in planes 
+0 and 3:
+
+       PLANE     4 3 2 1 0
+       PIXEL     0 1 0 0 1
+
+then that pixel uses color register binary 01001 = 9
+
+The RGB value for each color register is stored in the CMAP chunk of the 
+ILBM, starting with register 0, with each register's RGB value stored as
+one byte of R, one byte G, and one byte of B, with each component scaled
+to 8-bits.  (ie. 4-bit Amiga R, G, and B components are each stored in the
+high nibble of a byte.  The low nibble may also contain valid data if the 
+color was stored with 8-bit-per-gun color resolution).
+
+
+BUT - if the picture is HAM or HALFBRITE, it is interpreted differently.
+                        ===    =========
+
+Hopefully, if the picture is HAM or HALFBRITE, the package that saved it 
+properly saved a CAMG chunk (look at a hex dump of your file with ACSII 
+interpretation - you will see the chunks - they all start with a 4-ASCII-
+character chunk ID).  If the picture is 6 planes deep and has no CAMG chunk, 
+it is probably HAM.   If you see a CAMG chunk, the "CAMG" is followed by the 
+32-bit chunk length, and then the 32-bit Amiga Viewmode flags.  
+
+HAM pics with a 16-bit CAMG will have the 0x800 bit set in CAMG ViewModes.
+HALBRITE pics will have the 0x80 bit set.
+
+To transport a HAM or HALFBRITE picture to another machine, you must 
+understand how HAM and HALFBRITE work on the Amiga.
+
+
+How Amiga HAM mode works:
+=========================
+
+Amiga HAM (Hold and Modify) mode lets the Amiga display all 4096 RGB values.  
+In HAM mode, the bits in the two last planes describe an R G or B 
+modification to the color of the previous pixel on the line to create the 
+color of the current pixel.  So a 6-plane HAM picture has 4 planes for 
+specifying absolute color pixels giving up to 16 absolute colors which would 
+be specified in the ILBM CMAP chunk.  The bits in the last two planes are 
+color modification bits which cause the Amiga, in HAM mode, to take the RGB 
+value of the previous pixel (Hold and), substitute the 4 bits in planes 0-3 
+for the previous color's R G or B component (Modify) and display the result 
+for the current pixel.  If the first pixel of a scan line is a modification 
+pixel, it modifies the RGB value of the border color (register 0).  The color 
+modification bits in the last two planes (planes 4 and 5) are interpreted as 
+follows:
+
+   00 - no modification.  Use planes 0-3 as normal color register index
+   10 - hold previous, replacing Blue component with bits from planes 0-3 
+   01 - hold previous, replacing Red component with bits from planes 0-3
+   11 - hold previous. replacing Green component with bits from planes 0-3
+
+
+
+How Amiga HALFBRITE mode works:
+===============================
+
+This one is simpler.  In HALFBRITE mode, the Amiga interprets the bit in the 
+last plane as HALFBRITE modification.  The bits in the other planes are 
+treated as normal color register numbers (RGB values for each color register 
+is specified in the CMAP chunk).  If the bit in the last plane is set (1), 
+then that pixel is displayed at half brightness.  This can provide up to 64 
+absolute colors.
+
+
+Other Notes:
+============
+
+Amiga ILBMs images must be a even number of bytes wide.  Smaller images (such 
+as brushes) are padded to an even byte width.
+
+ILBMs created with Electronic Arts IBM and Amiga "DPaintII" packages are 
+compatible (though you may have to use a '.lbm' filename extension on an 
+IBM).  The ILBM graphic files may be transferred between the machines (or 
+between the Amiga and IBM sides your Amiga if you have a CBM Bridgeboard 
+card installed) and loaded into either package.
+
+
+Color Lookup Table chunk
+
+
+TITLE: CLUT IFF chunk proposal
+
+"CLUT" IFF 8-Bit Color Look Up Table
+
+Date:July 2, 1989
+From:Justin V. McCormick
+Status:Public Proposal
+Supporting Software:  FG 2.0 by Justin V. McCormick for PP&amp;S
+
+
+Introduction:
+
+  This memo describes the IFF supplement for the new chunk "CLUT".
+
+Description:
+
+  A CLUT (Color Look Up Table) is a special purpose data module
+containing table with 256 8-bit entries.  Entries in this table
+can be used directly as a translation for one 8-bit value to
+another.
+
+Purpose:
+
+  To store 8-bit data look up tables in a simple format for
+later retrieval.  These tables are used to translate or bias
+8-bit intensity, contrast, saturation, hue, color registers, or
+other similar data in a reproducable manner.
+
+Specifications:
+
+/* Here is the IFF chunk ID macro for a CLUT chunk */
+#define ID_CLUT MakeID('C','L','U','T')
+
+/*
+ * Defines for different flavors of 8-bit CLUTs.
+ */
+#define CLUT_MONO0L/* A Monochrome, contrast or intensity LUT */
+#define CLUT_RED1L/* A LUT for reds */
+#define CLUT_GREEN2L/* A LUT for greens */
+#define CLUT_BLUE3L/* A LUT for blues */
+#define CLUT_HUE4L/* A LUT for hues */
+#define CLUT_SAT5L/* A LUT for saturations */
+#define CLUT_UNUSED66L/* How about a Signed Data flag */
+#define CLUT_UNUSED77L/* Or an Assumed Negative flag*/
+
+/* All types &gt; 7 are reserved until formally claimed */
+#define CLUT_RESERVED_BITS 0xfffffff8L
+
+/* The struct for Color Look-Up-Tables of all types */
+typedef struct
+{
+  ULONG type;/* See above type defines */
+  ULONG res0;/* RESERVED FOR FUTURE EXPANSION */
+  UBYTE lut[256];/* The 256 byte look up table */
+} ColorLUT;
+
+
+CLUT Example:
+
+  Normally, the CLUT chunk will appear after the BMHD of an FORM
+ILBM before the BODY chunk, in the same "section" as CMAPs are
+normally found.  However, a FORM may contain only CLUTs with no
+other supporting information.
+
+  As a general guideline, it is desirable to group all CLUTs
+together in a form without other chunk types between them.
+If you were using CLUTs to store RGB intensity corrections, you
+would write three CLUTs in a row, R, G, then B.
+
+  Here is a box diagram for a 320x200x8 image stored as an IFF ILBM
+with a single CLUT chunk for intensity mapping:
+
+      +-----------------------------------+   
+      |'FORM'64284    |     FORM 64284 ILBM
+      +-----------------------------------+   
+      |'ILBM'    |     
+      +-----------------------------------+   
+      | +-------------------------------+ |   
+      | | 'BMHD'20  | |     .BMHD 20
+      | | 320, 200, 0, 0, 8, 0, 0, ...  | |   
+      | | ------------------------------+ |   
+      | | 'CLUT'264          | |     .CLUT 264
+      | | 0, 0, 0; 32, 0, 0; 64,0,0; .. | |   
+      | +-------------------------------+ |   
+      | +-------------------------------+ |   
+      | |'BODY'64000     | |     .BODY 64000
+      | |0, 0, 0, ...  | |   
+      | +-------------------------------+ |   
+      +-----------------------------------+   
+
+
+Design Notes:
+-------------
+
+  I have deliberately kept this chunk simple (KISS) to
+facilitate implementation.  In particular, no provision is made
+for expansion to 16-bit or 32-bit tables.  My reasoning is that
+a 16-bit table can have 64K entries, and thus would benefit from
+data compression.  My suggestion would be to propose another
+chunk or FORM type better suited for large tables rather than
+small ones like CLUT.
+
+
+
+Newtek Dynamic Ham color chunks
+
+Newtek for Digiview IV (dynamic Ham)
+
+ILBM.DYCP - dynamic color palette
+3 longwords (file setup stuff)
+
+ILBM.CTBL - array of words, one for each color (0rgb)
+Dots per inch chunk
+
+
+
+ILBM DPI chunk (1-16-90)
+==============
+
+ILBM.DPI   Dots Per Inch   to allow output of an image at the
+same resolution it was scanned at
+
+typedef struct {
+UWORD dpi_x;
+UWORD dpi_y;
+} DPIHeader ;
+
+For example, an image scanned at horizontal resolution of
+240dpi and vertical resolution of 300dpi would be saved as:
+
+44504920 00000004 00F0 012C
+D P I    size     dpi_x dpi_y
+
+
+DPaint perspective chunk (EA)
+
+IFF FORM / CHUNK DESCRIPTION
+============================
+
+Form/Chunk ID:   Chunk DPPV  (DPaint II ILBM perspective chunk)
+Date Submitted:  12/86
+Submitted by:    Dan Silva 
+
+Chunk Description:
+
+   The DPPV chunk describes the perspective state in a DPaintII ILBM.
+
+Chunk Spec:
+
+/* The chunk identifier DPPV */
+#define ID_DPPV    MakeID('D','P','P','V')
+
+typedef LONG LongFrac;
+typedef struct ( LongFrac x,y,z; )  LFPoint;
+typedef LongFrac  APoint[3];
+
+typedef union {
+   LFPoint l;
+   APoint  a;
+   } UPoint;
+
+/* values taken by variable rotType */
+#define ROT_EULER  0
+#define ROT_INCR   1
+
+/* Disk record describing Perspective state */
+
+typedef struct {
+   WORD     rotType;           /* rotation type */
+   WORD     iA, iB, iC;        /* rotation angles (in degrees) */
+   LongFrac Depth;             /* perspective depth */
+   WORD     uCenter, vCenter;  /* coords of center perspective,
+                                * relative to backing bitmap,
+                                * in Virtual coords
+                                */
+   WORD     fixCoord;          /* which coordinate is fixed */
+   WORD     angleStep;         /* large angle stepping amount */
+   UPoint   grid;              /* gridding spacing in X,Y,Z */
+   UPoint   gridReset;         /* where the grid goes on Reset */
+   UPoint   gridBrCenter;      /* Brush center when grid was last on,
+                                * as reference point
+                                */
+   UPoint   permBrCenter;      /* Brush center the last time the mouse
+                                * button was clicked, a rotation performed,
+                                * or motion along "fixed" axis
+                                */
+   LongFrac rot[3][3];         /* rotation matrix */
+   } PerspState;
+
+SUPPORTING SOFTWARE
+===================
+DPaint II   by Dan Silva for Electronic Arts
+
+
+
+DPaint IV enhanced color cycle chunk (EA)
+
+DRNG Chunk for FORM ILBM
+========================
+
+Submitted by Lee Taran
+
+Purpose:
+
+Enhanced Color Cycling Capabilities
+-------------------------------------
+   * DPaintIV supports a new color cycling model which does NOT
+     require that color cycles contain a contiguous range of color
+     registers.
+
+     For example:
+       If your range looks like:  [1][3][8][2]
+       then at each cycle tick
+          temp = [2], 
+          [2] = [8],
+          [8] = [3],
+          [3] = [1], 
+          [1] = temp
+
+   * You can now cycle a single register thru a series of rgb values.
+     For example:
+        If your range looks like: [1] [orange] [blue] [purple]
+        then at each cycle tick color register 1 will take on the
+        next color in the cycle.
+         
+        ie:  t=0:  [1] = curpal[1]
+             t=1:  [1] = purple
+             t=2:  [1] = blue
+             t=3:  [1] = orange
+             t=4:  goto t=0
+
+   * You can combine rgb cycling with traditional color cycling.
+     For example:
+         Your range can look like:
+             [1] [orange] [blue] [2] [green] [yellow]
+
+         t=0: [1] = curpal[1], [2] = curpal[2]
+         t=1: [1] = yellow,    [2] = blue
+         t=2: [1] = green,     [2] = orange
+         t=3: [1] = curpal[2], [2] = curpal[1]
+         t=4: [1] = blue,      [2] = yellow
+         t=5: [1] = orange,    [2] = green
+         t=6: goto t=0
+
+Note:
+   * DPaint will save out an old style range CRNG if the range fits
+     the CRNG model otherwise it will save out a DRNG chunk. 
+   * no thought has been given (yet) to interlocking cycles
+
+
+
+/* --------------------------------------------------------------------- 
+
+ IFF Information:  DPaintIV DRNG chunk
+
+          DRNG ::= "DRNG" # { DRange DColor* DIndex* }
+                                                                      
+ a &lt;cell&gt; is where the color or register appears within the range     
+
+ The RNG_ACTIVE flags is set when the range is cyclable. A range 
+ should only have the RNG_ACTIVE if it:
+      1&gt; contains at least one color register
+      2&gt; has a defined rate 
+      3&gt; has more than one color and/or color register
+ If the above conditions are met then RNG_ACTIVE is a user/program 
+ preference.  If the bit is NOT set the program should NOT cycle the
+ range.
+
+ The RNG_DP_RESERVED flags should always be 0!!!
+ --------------------------------------------------------------------- */
+typedef struct {
+   UBYTE min;           /* min cell value */
+   UBYTE max;           /* max cell value */
+   SHORT rate;          /* color cycling rate, 16384 = 60 steps/second */
+   SHORT flags;         /* 1=RNG_ACTIVE,4=RNG_DP_RESERVED */
+   UBYTE ntrue;         /* number of DColor structs to follow */
+   UBYTE nregs;         /* number of DIndex structs to follow */
+   } DRange;           
+
+typedef struct { UBYTE cell; UBYTE r,g,b; } DColor; /* true color cell */
+typedef struct { UBYTE cell; UBYTE index; } DIndex; /* color register cell */
+
+
+
+Encapsulated Postscript chunk
+
+ILBM EPSF Chunk
+===============
+
+Pixelations   Kevin Saltzman   617-277-5414
+
+Chunk to hold encapsulated postscript
+
+Used by PixelScript in their clip art.  Holds a postscript
+representation of the ILBM's graphic image.
+
+EPSF length
+   ; Bounding box
+   WORD lowerleftx;
+   WORD lowerlefty;
+   WORD upperrightx;
+   WORD upperrighty;
+   CHAR []    ; ascii postscript file
+
+
+
+RGB image forms, Turbo Silver (Impulse)
+
+                    FORM RGBN and FORM RGB8
+    -----------------------
+
+RGBN and RGB8 files are used in Impulse's Turbo Silver and Imagine.
+They are almost identical to FORM ILBM's except for the BODY chunk
+and slight differences in the BMHD chunk.
+
+A CAMG chunk IS REQUIRED.
+
+The BMHD chunk specfies the number of bitplanes as 13 for type RGBN
+and 25 for type RGB8, and the compression type as 4.
+
+The FORM RGBN uses 12 bit RGB values, and the FORM RGB8 uses
+24 bit RGB values.
+
+The BODY chunk contains RGB values, a "genlock" bit, and repeat
+counts.  In Silver, when "genlock" bit is set, a "zero color" is
+written into the bitplanes for genlock video to show through.
+In Diamond and Light24 (Impulse 12 &amp; 24 bit paint programs),
+the genlock bit is ignored if the file is loaded as a picture
+(and the RGB color is used instead), and if the file is loaded
+as a brush the genlock bit marks pixels that are not part of
+the brush.
+
+For both RGBN and RGB8 body chunks, each RGB value always has a
+repeat count.  The values are written in different formats depending
+on the magnitude of the repeat count.
+
+For the RGBN BODY chunk:
+
+For each RGB value, a WORD (16-bits) is written: with the
+12 RGB bits in the MSB (most significant bit) positions;
+the "genlock" bit next; and then a 3 bit repeat count.  
+If the repeat count is greater than 7, the 3-bit count is
+zero, and a BYTE repeat count follows.  If the repeat count
+is greater than 255, the BYTE count is zero, and a WORD
+repeat count follows.  Repeat counts greater than 65536 are
+not supported.
+
+For the RGB8 body chunk:
+
+For each RGB value, a LONG-word (32 bits) is written:
+with the 24 RGB bits in the MSB positions; the "genlock"
+bit next, and then a 7 bit repeat count.
+
+In a previous version of this document, there appeared the
+following line:
+
+"If the repeat count is greater than 127, the same rules apply
+as in the RGBN BODY."
+
+But Impulse has never written more than a 7 bit repeat count,
+and when Imagine and Light24 were written, they didn't support
+reading anything but 7 bit counts.
+
+Sample BODY code:
+
+if(!count) {
+if (Rgb8) {
+fread (&amp;w, 4, 1, RGBFile);
+lock = w &amp; 0x00000080;
+rgb = w &gt;&gt; 8;
+count = w &amp; 0x0000007f;
+} else {
+w = (UWORD) getw (RGBFile);
+lock = w &amp; 8;
+rgb = w &gt;&gt; 4;
+count = w &amp; 7;
+}
+if (!count)
+if (!(count = (UBYTE) getc (RGBFile)))
+count = (UWORD) getw (RGBFile);
+}
+
+The pixels are scanned from left to right across horizontal
+lines, processing from top to bottom.  The (12 or 24 bit) RGB
+values are stored with the red bits as the MSB's, the green
+bits next, and the blue bits as the LSB's.
+
+Special note:  As of this writing (Sep 88), Silver does NOT
+support anything but black for color zero.
+
+
+
+Cel animation form
+
+                              A N I M
+                  An IFF Format For CEL Animations
+
+                    Revision date:  4 May 1988
+
+                     prepared by:
+                          SPARTA Inc.
+                          23041 de la Carlota
+                          Laguna Hills, Calif 92653
+                          (714) 768-8161
+                          contact: Gary Bonham
+
+                     also by:
+                          Aegis Development Co.
+                          2115 Pico Blvd.
+                          Santa Monica, Calif 90405
+                          213) 392-9972
+
+
+1.0 Introduction
+   
+   The ANIM IFF format was developed at Sparta originally for the
+   production of animated video sequences on the Amiga computer.  The
+   intent was to be able to store, and play back, sequences of frames
+   and to minimize both the storage space on disk (through compression)
+   and playback time (through efficient de-compression algorithms).
+   It was desired to maintain maximum compatibility with existing
+   IFF formats and to be able to display the initial frame as a normal
+   still IFF picture.
+   
+   Several compression schemes have been introduced in the ANIM format.
+   Most of these are strictly of historical interest as the only one
+   currently being placed in new code is the vertical run length encoded
+   byte encoding developed by Jim Kent.
+   
+   1.1 ANIM Format Overview
+      
+      The general philosophy of ANIMs is to present the initial frame
+      as a normal, run-length-encoded, IFF picture.  Subsequent
+      frames are then described by listing only their differences
+      from a previous frame.  Normally, the "previous" frame is two
+      frames back as that is the frame remaining in the hidden 
+      screen buffer when double-buffering is used.  To better
+      understand this, suppose one has two screens, called A and B,
+      and the ability to instantly switch the display from one to
+      the other.  The normal playback mode is to load the initial
+      frame into A and duplicate it into B.  Then frame A is displayed
+      on the screen.  Then the differences for frame 2 are used to
+      alter screen B and it is displayed.  Then the differences for
+      frame 3 are used to alter screen A and it is displayed, and so
+      on.  Note that frame 2 is stored as differences from frame 1,
+      but all other frames are stored as differences from two frames
+      back.
+      
+      ANIM is an IFF FORM and its basic format is as follows (this
+      assumes the reader has a basic understanding of IFF format
+      files):
+                      FORM ANIM
+                      . FORM ILBM         first frame
+                      . . BMHD                normal type IFF data
+                      . . ANHD                optional animation header
+                                              chunk for timing of 1st frame.
+                      . . CMAP
+                      . . BODY
+                      . FORM ILBM         frame 2
+                      . . ANHD                animation header chunk
+                      . . DLTA                delta mode data
+                      . FORM ILBM         frame 3
+                      . . ANHD
+                      . . DLTA
+                           ...
+      
+      The initial FORM ILBM can contain all the normal ILBM chunks,
+      such as CRNG, etc.  The BODY will normally be a standard
+      run-length-encoded data chunk (but may be any other legal
+      compression mode as indicated by the BMHD).  If desired, an ANHD
+      chunk can appear here to provide timing data for the first
+      frame.  If it is here, the operation field should be =0.
+      
+      The subsequent FORMs ILBM contain an ANHD, instead of a BMHD,
+      which duplicates some of BMHD and has additional parameters
+      pertaining to the animation frame.  The DLTA chunk contains
+      the data for the delta compression modes.  If the older XOR 
+      compression mode is used, then a BODY chunk will be here.  In 
+      addition, other chunks may be placed in each of these as deemed 
+      necessary (and as code is placed in player programs to utilize 
+      them).  A good example would be CMAP chunks to alter the color 
+      palette.  A basic assumption in ANIMs is that the size of the 
+      bitmap, and the display mode (e.g. HAM) will not change through 
+      the animation.  Take care when playing an ANIM that if a CMAP 
+      occurs with a frame, then the change must be applied to both buffers.
+      
+      Note that the DLTA chunks are not interleaved bitmap representations,
+      thus the use of the ILBM form is inappropriate for these frames.  
+      However, this inconsistency was not noted until there were a number
+      of commercial products either released or close to release which
+      generated/played this format.  Therefore, this is probably an
+      inconsistency which will have to stay with us.
+
+   1.2 Recording ANIMs
+
+      To record an ANIM will require three bitmaps - one for creation of 
+      the next frame, and two more for a "history" of the previous two 
+      frames for performing the compression calculations (e.g. the delta 
+      mode calculations).
+      
+      There are five frame-to-frame compression methods currently defined.  
+      The first three are mainly for historical interest.  The product Aegis 
+      VideoScape 3D utilizes the third method in version 1.0, but switched 
+      to method 5 on 2.0.  This is the only instance known of a commercial 
+      product generating ANIMs of any of the first three methods.  The 
+      fourth method is a general short or long word compression scheme which 
+      has several options including whether the compression is horizontal
+      or vertical, and whether or not it is XOR format.  This offers a 
+      choice to the user for the optimization of file size and/or playback 
+      speed.  The fifth method is the byte vertical run length encoding as 
+      designed by Jim Kent.  Do not confuse this with Jim's RIFF file format 
+      which is different than ANIM.  Here we utilized his compression/
+      decompression routines within the ANIM file structure.
+      
+      The following paragraphs give a general outline of each of the
+      methods of compression currently included in this spec.
+
+      1.2.1 XOR mode
+         
+         This mode is the original and is included here for historical
+         interest.  In general, the delta modes are far superior.
+         The creation of XOR mode is quite simple.  One simply
+         performs an exclusive-or (XOR) between all corresponding
+         bytes of the new frame and two frames back.  This results
+         in a new bitmap with 0 bits wherever the two frames were
+         identical, and 1 bits where they are different.  Then this
+         new bitmap is saved using run-length-encoding.  A major
+         obstacle of this mode is in the time consumed in performing
+         the XOR upon reconstructing the image.
+         
+      1.2.2 Long Delta mode
+         
+         This mode stores the actual new frame long-words which are
+         different, along with the offset in the bitmap.  The
+         exact format is shown and discussed in section 2 below.
+         Each plane is handled separately, with no data being saved
+         if no changes take place in a given plane.  Strings of
+         2 or more long-words in a row which change can be run
+         together so offsets do not have to be saved for each one.
+         
+         Constructing this data chunk usually consists of having a buffer 
+         to hold the data, and calculating the data as one compares the 
+         new frame, long-word by long-word, with two frames back.
+         
+      1.2.3 Short Delta mode
+         
+         This mode is identical to the Long Delta mode except that
+         short-words are saved instead of long-words.  In most
+         instances, this mode results in a smaller DLTA chunk.
+         The Long Delta mode is mainly of interest in improving
+         the playback speed when used on a 32-bit 68020 Turbo Amiga.
+         
+      1.2.4 General Delta mode
+
+         The above two delta compression modes were hastily put together.
+         This mode was an attempt to provide a well-thought-out delta
+         compression scheme.  Options provide for both short and long
+         word compression, either vertical or horizontal compression,
+         XOR mode (which permits reverse playback), etc.  About the time
+         this was being finalized, the fifth mode, below, was developed
+         by Jim Kent.  In practice the short-vertical-run-length-encoded
+         deltas in this mode play back faster than the fifth mode (which
+         is in essence a byte-vertical-run-length-encoded delta mode) but
+         does not compress as well - especially for very noisy data such
+         as digitized images.  In most cases, playback speed not being
+         terrifically slower, the better compression (sometimes 2x) is
+         preferable due to limited storage media in most machines.
+
+         Details on this method are contained in section 2.2.2 below.
+
+      1.2.5 Byte Vertical Compression
+
+         This method does not offer the many options that method 4 offers,
+         but is very successful at producing decent compression even for
+         very noisy data such as digitized images.  The method was devised
+         by Jim Kent and is utilized in his RIFF file format which is 
+         different than the ANIM format.  The description of this method
+         in this document is taken from Jim's writings.  Further, he has
+         released both compression and decompression code to public domain.
+         
+         Details on this method are contained in section 2.2.3 below.
+
+   1.3 Playing ANIMs
+      
+      Playback of ANIMs will usually require two buffers, as mentioned
+      above, and double-buffering between them.  The frame data from
+      the ANIM file is used to modify the hidden frame to the next
+      frame to be shown.  When using the XOR mode, the usual run-
+      length-decoding routine can be easily modified to do the 
+      exclusive-or operation required.  Note that runs of zero bytes,
+      which will be very common, can be ignored, as an exclusive or
+      of any byte value to a byte of zero will not alter the original
+      byte value.
+      
+      The general procedure, for all compression techniques, is to first
+      decode the initial ILBM picture into the hidden buffer and double-
+      buffer it into view.  Then this picture is copied to the other (now
+      hidden) buffer.  At this point each frame is displayed with the
+      same procedure.  The next frame is formed in the hidden buffer by
+      applying the DLTA data (or the XOR data from the BODY chunk in the
+      case of the first XOR method) and the new frame is double-buffered
+      into view.  This process continues to the end of the file.
+
+      A master colormap should be kept for the entire ANIM which would
+      be initially set from the CMAP chunk in the initial ILBM.  This
+      colormap should be used for each frame.  If a CMAP chunk appears
+      in one of the frames, then this master colormap is updated and the
+      new colormap applies to all frames until the occurrance of another
+      CMAP chunk.
+
+      Looping ANIMs may be constructed by simply making the last two frames
+      identical to the first two.  Since the first two frames are special
+      cases (the first being a normal ILBM and the second being a delta from
+      the first) one can continually loop the anim by repeating from frame
+      three.  In this case the delta for creating frame three will modify
+      the next to the last frame which is in the hidden buffer (which is
+      identical to the first frame), and the delta for creating frame four
+      will modify the last frame which is identical to the second frame.
+
+      Multi-File ANIMs are also supported so long as the first two frames
+      of a subsequent file are identical to the last two frames of the
+      preceeding file.  Upon reading subsequent files, the ILBMs for the
+      first two frames are simply ignored, and the remaining frames are
+      simply appended to the preceeding frames.  This permits splitting
+      ANIMs across multiple floppies and also permits playing each section
+      independently and/or editing it independent of the rest of the ANIM.
+      
+      Timing of ANIM playback is easily achieved using the vertical blank
+      interrupt of the Amiga.  There is an example of setting up such
+      a timer in the ROM Kernel Manual.  Be sure to remember the timer
+      value when a frame is flipped up, so the next frame can be flipped
+      up relative to that time.  This will make the playback independent
+      of how long it takes to decompress a frame (so long as there is enough
+      time between frames to accomplish this decompression).
+
+2.0 Chunk Formats
+   2.1 ANHD Chunk
+      The ANHD chunk consists of the following data structure:
+      
+           UBYTE operation  The compression method:
+                            =0 set directly (normal ILBM BODY),
+                            =1 XOR ILBM mode,
+                            =2 Long Delta mode,
+                            =3 Short Delta mode,
+                            =4 Generalized short/long Delta mode,
+                            =5 Byte Vertical Delta mode
+                            =6 Stereo op 5 (third party)
+                            =74 (ascii 'J') reserved for Eric Graham's
+                               compression technique (details to be
+                               released later).
+
+           UBYTE mask      (XOR mode only - plane mask where each
+                            bit is set =1 if there is data and =0
+                            if not.)
+           UWORD w,h       (XOR mode only - width and height of the
+                            area represented by the BODY to eliminate
+                            unnecessary un-changed data)
+           WORD  x,y       (XOR mode only - position of rectangular
+                            area representd by the BODY)
+           ULONG abstime   (currently unused - timing for a frame
+                            relative to the time the first frame
+                            was displayed - in jiffies (1/60 sec))
+           ULONG reltime   (timing for frame relative to time
+                            previous frame was displayed - in
+                            jiffies (1/60 sec))
+           UBYTE interleave (unused so far - indicates how may frames
+                             back this data is to modify.  =0 defaults
+                             to indicate two frames back (for double
+                             buffering). =n indicates n frames back.
+                             The main intent here is to allow values
+                             of =1 for special applications where
+                             frame data would modify the immediately
+                             previous frame)
+           UBYTE pad0        Pad byte, not used at present.
+           ULONG bits        32 option bits used by options=4 and 5.
+                             At present only 6 are identified, but the
+                             rest are set =0 so they can be used to
+                             implement future ideas.  These are defined
+                             for option 4 only at this point.  It is
+                             recommended that all bits be set =0 for
+                             option 5 and that any bit settings used in
+                             the future (such as for XOR mode) be compatible 
+                             with the option 4 bit settings.   Player code 
+                             should check undefined bits in options 4 and 5
+                             to assure they are zero.
+
+                             The six bits for current use are:
+
+                             bit #              set =0               set =1
+                             ===============================================
+                             0              short data           long data
+                             1                 set                  XOR
+                             2             separate info        one info list
+                                           for each plane       for all planes
+                             3               not RLC        RLC (run length coded)
+                             4              horizontal           vertical
+                             5           short info offsets   long info offsets
+
+           UBYTE pad[16]     This is a pad for future use for future
+                             compression modes.
+      
+   2.2 DLTA Chunk
+      
+      This chunk is the basic data chunk used to hold delta compression
+      data.  The format of the data will be dependent upon the exact
+      compression format selected.  At present there are two basic
+      formats for the overall structure of this chunk.
+
+      2.2.1 Format for methods 2 &amp; 3
+
+         This chunk is a basic data chunk used to hold the delta
+         compression data.  The minimum size of this chunk is 32 bytes
+         as the first 8 long-words are byte pointers into the chunk for
+         the data for each of up to 8 bitplanes.  The pointer for the
+         plane data starting immediately following these 8 pointers will
+         have a value of 32 as the data starts in the 33-rd byte of the
+         chunk (index value of 32 due to zero-base indexing).
+      
+         The data for a given plane consists of groups of data words.  In
+         Long Delta mode, these groups consist of both short and long
+         words - short words for offsets and numbers, and long words for
+         the actual data.  In Short Delta mode, the groups are identical
+         except data words are also shorts so all data is short words.
+         Each group consists of a starting word which is an offset.  If
+         the offset is positive then it indicates the increment in long
+         or short words (whichever is appropriate) through the bitplane.
+         In other words, if you were reconstructing the plane, you would
+         start a pointer (to shorts or longs depending on the mode) to
+         point to the first word of the bitplane.  Then the offset would
+         be added to it and the following data word would be placed at
+         that position.  Then the next offset would be added to the
+         pointer and the following data word would be placed at that
+         position.  And so on...  The data terminates with an offset
+         equal to 0xFFFF.
+      
+         A second interpretation is given if the offset is negative.  In
+         that case, the absolute value is the offset+2.  Then the 
+         following short-word indicates the number of data words that
+         follow.  Following that is the indicated number of contiguous
+         data words (longs or shorts depending on mode) which are to
+         be placed in contiguous locations of the bitplane.
+      
+         If there are no changed words in a given plane, then the pointer
+         in the first 32 bytes of the chunk is =0.
+      
+      2.2.2 Format for method 4
+         
+         The DLTA chunk is modified slightly to have 16 long pointers at
+         the start.  The first 8 are as before - pointers to the start of
+         the data for each of the bitplanes (up to a theoretical max of 8
+         planes).  The next 8 are pointers to the start of the offset/numbers
+         data list.  If there is only one list of offset/numbers for all
+         planes, then the pointer to that list is repeated in all positions
+         so the playback code need not even be aware of it.  In fact, one
+         could get fancy and have some bitplanes share lists while others
+         have different lists, or no lists (the problems in these schemes
+         lie in the generation, not in the playback).
+
+         The best way to show the use of this format is in a sample playback
+         routine.
+
+            SetDLTAshort(bm,deltaword)
+            struct BitMap *bm;
+            WORD *deltaword;
+            {
+               int i;
+               LONG *deltadata;
+               WORD *ptr,*planeptr;
+               register int s,size,nw;
+               register WORD *data,*dest;
+
+               deltadata = (LONG *)deltaword;
+               nw = bm-&gt;BytesPerRow &gt;&gt;1;
+
+               for (i=0;i&lt;bm-&gt;Depth;i++) {
+                  planeptr = (WORD *)(bm-&gt;Planes[i]);
+                  data = deltaword + deltadata[i];
+                  ptr  = deltaword + deltadata[i+8];
+                  while (*ptr != 0xFFFF) {
+                     dest = planeptr + *ptr++;
+                     size = *ptr++;
+                     if (size &lt; 0) {
+                        for (s=size;s&lt;0;s++) {
+                           *dest = *data;
+                           dest += nw;
+                        }
+                        data++;
+                     }
+                     else {
+                        for (s=0;s&lt;size;s++) {
+                           *dest = *data++;
+                           dest += nw;
+                        }
+                     }
+                  }
+               }
+               return(0);
+            }
+
+         The above routine is for short word vertical compression with
+         run length compression.  The most efficient way to support 
+         the various options is to replicate this routine and make 
+         alterations for, say, long word or XOR.  The variable nw
+         indicates the number of words to skip to go down the vertical
+         column.  This one routine could easily handle horizontal
+         compression by simply setting nw=1.  For ultimate playback
+         speed, the core, at least, of this routine should be coded in
+         assembly language.
+
+      2.2.2 Format for method 5
+
+         In this method the same 16 pointers are used as in option 4.
+         The first 8 are pointers to the data for up to 8 planes.
+         The second set of 8 are not used but were retained for several
+         reasons.  First to be somewhat compatible with code for option
+         4 (although this has not proven to be of any benefit) and 
+         second, to allow extending the format for more bitplanes (code
+         has been written for up to 12 planes).  
+
+         Compression/decompression is performed on a plane-by-plane basis.
+         For each plane, compression can be handled by the skip.c code
+         (provided Public Domain by Jim Kent) and decompression can be
+         handled by unvscomp.asm (also provided Public Domain by Jim Kent).
+         
+         Compression/decompression is performed on a plane-by-plane basis.
+         The following description of the method is taken directly from
+         Jim Kent's code with minor re-wording.  Please refer to Jim's
+         code (skip.c and unvscomp.asm) for more details:
+
+            Each column of the bitplane is compressed separately.
+            A 320x200 bitplane would have 40 columns of 200 bytes each.
+            Each column starts with an op-count followed by a number
+            of ops.  If the op-count is zero, that's ok, it just means
+            there's no change in this column from the last frame.
+            The ops are of three classes, and followed by a varying
+            amount of data depending on which class:
+              1. Skip ops - this is a byte with the hi bit clear that
+                 says how many rows to move the "dest" pointer forward,
+                 ie to skip. It is non-zero.
+              2. Uniq ops - this is a byte with the hi bit set.  The hi
+                 bit is masked down and the remainder is a count of the
+                 number of bytes of data to copy literally.  It's of
+                 course followed by the data to copy.
+              3. Same ops - this is a 0 byte followed by a count byte,
+                 followed by a byte value to repeat count times.
+            Do bear in mind that the data is compressed vertically rather
+            than horizontally, so to get to the next byte in the destination
+            we add the number of bytes per row instead of one!
+
+
+ANIM brush format
+
+                    Dpaint Anim Brush IFF Format
+
+             From a description by the author of DPaint,
+                      Dan Silva, Electronic Arts
+
+
+The "Anim Brushes" of DPaint III are saved on disk in the IFF "ANIM" format.  
+Basically, an ANIM Form consists of an initial ILBM which is the first frame 
+of the animation, and any number of subsequent "ILBM"S (which aren't really 
+ILBM's) each of which contains an ANHD animation header chunk and a DLTA chunk  
+comprised of the encoded difference between a frame and a previous one.
+
+To use ANIM terminology (for a description of the ANIM format, see the IFF 
+Anim Spec, by Gary Bonham). Anim Brushes use a "type 5" encoding, which is 
+a vertical, byte-oriented delta encoding (based on Jim Kent's RIFF).  The 
+deltas have an interleave of 1, meaning deltas are computed between adjacent 
+frames, rather than between frames 2 apart, which is the usual ANIM custom 
+for the purpose of fast hardware page-flipping.  Also, the deltas use 
+Exclusive Or to allow reversable play.
+
+However, to my knowledge, all the existing Anim players in the Amiga world 
+will only play type 5 "Anim"s which have an interleave of 0 (i.e. 2) and 
+which use a Store operation rather than Exclusive Or, so no existing programs 
+will read Anim Brushes anyway.  The job of modifying existing Anim readers 
+to read Anim Brushes should be simplified, however.
+
+
+Here is an outline of the structure of the IFF Form output by DPaint III as 
+an "Anim Brush".  The IFF Reader should of course be flexible enough to 
+tolerate variation in what chunks actually appear in the initial ILBM.
+
+                  FORM ANIM
+                      . FORM ILBM         first frame
+                      . . BMHD        
+                      . . CMAP
+                      . . DPPS
+                      . . GRAB
+                      . . CRNG
+                      . . CRNG
+                      . . CRNG
+                      . . CRNG
+                      . . CRNG
+                      . . CRNG
+                      . . DPAN     my own little chunk.
+                      . . CAMG
+                      . . BODY
+
+                      . FORM ILBM         frame 2
+                      . . ANHD                animation header chunk
+                      . . DLTA                delta mode data
+
+                      . FORM ILBM         frame 3
+                      . . ANHD                animation header chunk
+                      . . DLTA                delta mode data
+
+                      . FORM ILBM         frame 4
+                      . . ANHD                animation header chunk
+                      . . DLTA                delta mode data
+       ...
+                   . FORM ILBM         frame N
+                      . . ANHD                animation header chunk
+                      . . DLTA                delta mode data
+
+
+--- Here is the format of the DPAN chunk:
+
+typedef struct {
+ UWORD version;   /* current version=4 */
+ UWORD nframes;   /* number of frames in the animation.*/
+ ULONG flags;   /* Not used */
+ } DPAnimChunk;
+
+The version number was necessary during development. At present all I look 
+at is "nframes".
+
+
+--- Here is the ANHD chunk format:
+
+typedef struct {
+ UBYTE operation;  /* =0  set directly
+       =1  XOR ILBM mode,
+       =2 Long Delta mode,
+       =3 Short Delta mode
+       =4 Generalize short/long Delta mode,
+       =5 Byte Vertical Delta (riff)
+       =74 (Eric Grahams compression mode)
+   */
+ UBYTE mask;      /* XOR ILBM only: plane mask where data is*/
+ UWORD w,h;  
+ WORD x,y;
+ ULONG abstime;
+ ULONG reltime;
+ UBYTE interleave; /* 0 defaults to 2 */
+ UBYTE pad0;   /* not used */
+ ULONG bits;   /* meaning of bits:
+    bit# =0                 =1
+    0    short data         long data
+    1    store              XOR
+    2    separate info      one info for
+         for each plane     for all planes
+    3    not RLC            RLC (run length encoded)
+    4    horizontal         vertical
+    5    short info offsets long info offsets
+   -------------------------*/
+ UBYTE pad[16];
+ } AnimHdr;
+
+
+for Anim Brushes, I set:
+
+ animHdr.operation = 5;  /* RIFF encoding */
+ animHdr.interleave = 1;
+ animHdr.w = curAnimBr.bmob.pict.box.w; 
+ animHdr.h = curAnimBr.bmob.pict.box.h; 
+ animHdr.reltime = 1;
+ animHdr.abstime = 0;
+ animHdr.bits = 4; /* indicating XOR */
+
+-- everything else is set to 0.
+
+NOTE: the "bits" field was actually intended ( by the original creator of 
+the ANIM format, Gary Bonham of SPARTA, Inc.) for use with only with 
+compression method 4. I am using bit 2 of the bits field to indicate the 
+Exclusive OR operation in the context of method 5, which seems like a 
+reasonable generalization. 
+
+
+For an Anim Brush with 10 frames, there will be an initial frame followed 
+by 10 Delta's (i.e ILBMS containing ANHD and DLTA chunks).  Applying the 
+first Delta to the initial frame generates the second frame, applying the 
+second Delta to the second frame generates the third frame, etc.  Applying 
+the last Delta thus brings back the first frame.  
+
+The DLTA chunk begins with 16 LONG plane offets, of which DPaint only uses 
+the first 6 (at most).  These plane offsets are either the offset (in bytes) 
+from the beginning of the DLTA chunk to the data for the corresponding plane, 
+or Zero, if there was no change in that plane.  Thus the first plane offset 
+is either 0 or 64.
+
+
+(The following description of the method is based on Gary Bonham's rewording 
+of Jim Kent's RIFF documentation.)
+
+  Compression/decompression is performed on a plane-by-plane 
+  basis.  
+
+  Each byte-column of the bitplane is compressed separately.  A 
+  320x200 bitplane would have 40 columns of 200 bytes each.  In 
+  general, the bitplanes are always an even number of bytes wide, 
+  so for instance a 17x20 bitplane would have 4 columns of 20 
+  bytes each.
+
+  Each column starts with an op-count followed by a number of 
+  ops.  If the op-count is zero, that's ok, it just means there's 
+  no change in this column from the last frame.  The ops are of 
+  three kinds, and followed by a varying amount of data depending 
+  on which kind:
+
+     1. SKIP - this is a byte with the hi bit clear that   says 
+        how many rows to move the "dest" pointer forward, ie to 
+        skip. It is non-zero.
+
+     2. DUMP - this is a byte with the hi bit set.  The hi bit is 
+        masked off and the remainder is a count of the number of 
+        bytes of data to XOR directly.  It is followed by the 
+        bytes to copy.
+
+     3. RUN - this is a 0 byte followed by a count byte, followed 
+        by a byte value to repeat "count" times, XOR'ing it into 
+        the destination.
+
+  Bear in mind that the data is compressed vertically rather than 
+  horizontally, so to get to the next byte in the destination  you 
+  add the number of bytes per row instead of one.
+
+The Format of DLTA chunks is as described in section 2.2.2 of the Anim Spec. 
+The encoding for type 5 is described in section 2.2.3 of the Anim Spec.  
+
+
+
+
+
+2-D Object standard format
+
+FORM DR2D
+
+Description by Ross Cunniff and John Orr
+
+
+A standard IFF FORM to describe 2D drawings has been sorely needed for
+a long time.  Several commercial drawing packages have been available
+for some time but none has established its file format as the Amiga
+standard.  The absence of a 2D drawing standard hinders the
+development of applications that use 2D drawings as it forces each
+application to understand several private standards instead of a
+single one.  Without a standard, data exchange for both the developer
+and the user is difficult, if not impossible.
+
+The DR2D FORM fills this void.  This FORM was developed by Taliesin,
+Inc. for use as the native file format for their two-dimensional
+structured drawing package, ProVector.  Saxon Industries and Soft
+Logik Publishing Corporation are planning to support this new FORM in
+the near future.
+
+Many of the values stored in the DR2D FORM are stored as IEEE single
+precision floating point numbers.  These numbers consist of 32 bits,
+arranged as follows:
+
+ _______________________________________________________________________
+| s e e e e e e e | e m m m m m m m | m m m m m m m m | m m m m m m m m |
+ -----------------------------------------------------------------------
+  31            24  23            16  15            8   7             0
+
+
+where: 
+
+sis the sign of the number where 1 is negative and 0 is
+  positive. 
+eis the 8 bit exponent in excess 127 form.  This number
+  is the power of two to which the mantissa is raised
+  (Excess 127 form means that 127 is added to the
+  exponent before packing it into the IEEE number.) 
+mis the 23 bit mantissa.  It ranges from 1.0000000 to
+  1.999999..., where the leading base-ten one is
+  assumed. 
+
+An IEEE single precision with the value of 0.0000000 has all its bits
+cleared. 
+
+
+
+
+
+
+The DR2D Chunks
+
+
+FORM (0x464F524D)  /* All drawings are a FORM */
+
+struct FORMstruct {
+    ULONGID;    /* DR2D */
+    ULONGSize;
+};
+
+
+DR2D (0x44523244)  /* ID of 2D drawing */
+
+
+The DR2D chunks are broken up into three groups: the global drawing
+attribute chunks, the object attribute chunks, and the object chunks.
+The global drawing attribute chunks describe elements of a 2D drawing
+that are common to many objects in the drawing.  Document preferences,
+palette information, and custom fill patterns are typical
+document-wide settings defined in global drawing attribute chunks.
+The object attribute chunks are used to set certain properties of the
+object chunk(s) that follows the object attribute chunk.  The current
+fill pattern, dash pattern, and line color are all set using an object
+attribute chunk.  Object chunks describe the actual DR2D drawing.
+Polygons, text, and bitmaps are found in these chunks.
+
+
+
+The Global Drawing Attribute Chunks
+
+The following chunks describe global attributes of a DR2D document.
+
+DRHD (0x44524844) /* Drawing header */
+
+The DRHD chunk contains the upper left and lower right extremes of the
+document in (X, Y) coordinates.  This chunk is required and should
+only appear once in a document in the outermost layer of the DR2D file
+(DR2Ds can be nested).
+
+struct DRHDstruct {
+    ULONGID;
+    ULONGSize;    /* Always 16 */
+    IEEEXLeft, YTop,
+XRight, YBot;
+};
+
+
+The point (XLeft,YTop) is the upper left corner of the project and the
+point (XRight,YBot) is its lower right corner.  These coordinates not
+only supply the size and position of the document in a coordinate
+system, they also supply the project's orientation.  If XLeft &lt;
+XRight, the X-axis increases toward the right.  If YTop &lt; YBot, the
+Y-axis increases toward the bottom.  Other combinations are possible;
+for example in Cartesian coordinates, XLeft would be less than XRight
+but YTop would be greater than YBot.
+
+
+
+
+
+PPRF (0x50505249)   /* Page preferences */
+
+The PPRF chunk contains preference settings for ProVector.  Although
+this chunk is not required, its use is encouraged because it contains
+some important environment information.
+
+struct PPRFstruct {
+    ULONGID;
+    ULONGSize;
+    charPrefs[Size];
+};
+
+DR2D stores preferences as a concatenation of several null-terminated
+strings, in the Prefs[] array.  The strings can appear in any order.
+The currently supported strings are:
+
+Units=&lt;unit-type&gt;
+Portrait=&lt;boolean&gt;
+PageType=&lt;page-type&gt;
+GridSize=&lt;number&gt;
+
+where:
+&lt;unit-type&gt; is either Inch, Cm, or Pica
+&lt;boolean&gt;   is either True or False
+&lt;page-type&gt; is either Standard, Legal, B4, B5, A3,
+  A4, A5, or Custom 
+&lt;number&gt;    is a floating-point number
+
+The DR2D FORM does not require this chunk to explicitly state all the
+possible preferences.  In the absence of any particular preference
+string, a DR2D reader should fall back on the default value.  The
+defaults are:
+
+Units=Inch
+Portrait=True
+PageType=Standard
+GridSize=1.0
+
+
+CMAP (0x434D4150)   /* Color map (Same as ILBM CMAP) */
+
+This chunk is identical to the ILBM CMAP chunk as described in the IFF
+ILBM documentation.
+
+struct CMAPstruct {
+    ULONGID;
+    ULONGSize;
+    UBYTEColorMap[Size];
+};
+
+ColorMap is an array of 24-bit RGB color values.  The 24-bit value is
+spread across three bytes, the first of which contains the red
+intensity, the next contains the green intensity, and the third
+contains the blue intensity.  Because DR2D stores its colors with
+24-bit accuracy, DR2D readers must not make the mistake that some ILBM
+readers do in assuming the CMAP chunk colors correspond directly to
+Amiga color registers.
+
+
+
+FONS (0x464F4E53)   /* Font chunk (Same as FTXT FONS chunk) */
+
+The FONS chunk contains information about a font used in the DR2D
+FORM.  ProVector does not include support for Amiga fonts.  Instead,
+ProVector uses fonts defined in the OFNT FORM which is documented
+later in this article.
+
+struct FONSstruct {
+    ULONGID;
+    ULONGSize;
+    UBYTEFontID;/* ID the font is referenced by */
+    UBYTEPad1;          /* Always 0 */
+    UBYTEProportional;/* Is it proportional? */
+    UBYTESerif;/* does it have serifs? */
+    CHARName[Size-4];/* The name of the font */
+};
+
+The UBYTE FontID field is the number DR2D assigns to this font.
+References to this font by other DR2D chunks are made using this
+number.    
+
+The Proportional and Serif fields indicate properties of this font.
+Specifically, Proportional indicates if this font is proportional, and
+Serif indicates if this font has serifs.  These two options were
+created to allow for font substitution in case the specified font is
+not available.  They are set according to these values:
+
+0The DR2D writer didn't know if this font is
+  proportional/has serifs. 
+1No, this font is not proportional/does not have
+  serifs. 
+2Yes, this font is proportional/does have serifs.
+
+The last field, Name[], is a NULL terminated string containing the
+name of the font. 
+
+
+DASH (0x44415348)   /* Line dash pattern for edges */
+
+This chunk describes the on-off dash pattern associated with a line.
+
+struct DASHstruct {
+    ULONGID;
+    ULONGSize;
+    USHORTDashID;/* ID of the dash pattern */
+    USHORTNumDashes; /* Should always be even */
+    IEEEDashes[NumDashes];  /* On-off pattern */
+};
+
+DashID is the number assigned to this specific dash pattern.
+References to this dash pattern by other DR2D chunks are made using
+this number.
+
+The Dashes[] array contains the actual dash pattern.  The first number
+in the array (element 0) is the length of the ``on'' portion of the
+pattern.  The second number (element 1) specifies the ``off'' portion
+of the pattern.  If there are more entries in the Dashes array, the
+pattern will continue.  Even-index elements specify the length of an
+``on'' span, while odd-index elements specify the length of an ``off''
+span.  There must be an even number of entries.  These lengths are not
+in the same units as specified in the PPRF chunk, but are multiples of
+the line width, so a line of width 2.5 and a dash pattern of 1.0, 2.0
+would have an ``on'' span of length 1.0 x 2.5 = 2.5 followed by an
+``off'' span of length 2.0 x 2.5 = 5.  The following figure shows
+several dash pattern examples.  Notice that for lines longer than the
+dash pattern, the pattern repeats.
+
+
+[figure 1 - dash patterns]
+
+By convention, DashID 0 is reserved to mean `No line pattern at all',
+i.e. the edges are invisible.  This DASH pattern should not be defined
+by a DR2D DASH chunk.  Again by convention, a NumDashes of 0 means
+that the line is solid.
+
+
+AROW (0x41524F57)   /* An arrow-head pattern */
+
+The AROW chunk describes an arrowhead pattern.  DR2D open polygons
+(OPLY) can have arrowheads attached to their endpoints.  See the
+description of the OPLY chunk later in this article for more
+information on the OPLY chunk.
+
+
+#define ARROW_FIRST  0x01 /* Draw an arrow on the OPLY's first point */
+#define ARROW_LAST   0x02 /* Draw an arrow on the OPLY's last point */
+
+struct AROWstruct {
+    ULONGID;
+    ULONGSize;
+    UBYTEFlags;    /* Flags, from ARROW_*, above */
+    UBYTEPad0;/* Should always 0 */
+    USHORTArrowID;/* Name of the arrow head */
+    USHORTNumPoints;
+    IEEEArrowPoints[NumPoints*2];
+};
+
+
+The Flags field specifies which end(s) of an OPLY to place an
+arrowhead based on the #defines above.  ArrowID is the number by which
+an OPLY will reference this arrowhead pattern.
+
+The coordinates in the array ArrowPoints[] define the arrowhead's
+shape.  These points form a closed polygon.  See the section on the
+OPLY/CPLY object chunks for a descriptionof how DR2D defines shapes.
+The arrowhead is drawn in the same coordinate system relative to the
+endpoint of the OPLY the arrowhead is attached to.  The arrowhead's
+origin (0,0) coincides with the OPLY's endpoint.  DR2D assumes that
+the arrowhead represented in the AROW chunk is pointing to the right
+so the proper rotation can be applied to the arrowhead.  The arrow is
+filled according to the current fill pattern set in the ATTR object
+attribute chunk.
+
+
+
+FILL (0x46494C4C)   /* Object-oriented fill pattern */
+
+The FILL chunk defines a fill pattern.  This chunk is only valid
+inside nested DR2D FORMs.  The GRUP object chunk section of this
+article contans an example of the FILL chunk.
+
+struct FILLstruct {
+    ULONGID;
+    ULONGSize;
+    USHORTFillID;  /* ID of the fill */
+};
+
+FillID is the number by which the ATTR object attribute chunk
+references fill patterns.  The FILL chunk must be the first chunk
+inside a nested DR2D FORM.  A FILL is followed by one DR2D object plus
+any of the object attribute chunks (ATTR, BBOX) associated with the
+object.
+
+[Figure 2 - fill patterns]
+
+
+DR2D makes a ``tile'' out of the fill pattern, giving it a virtual
+bounding box based on the extreme X and Y values of the FILL's object
+(Fig. A).  The bounding box shown in Fig. A surrounding the pattern
+(the two ellipses) is invisible to the user.  In concept, this
+rectangle is pasted on the page left to right, top to bottom like
+floor tiles (Fig. B).  Again, the bounding boxes are not visible.  The
+only portion of this tiled pattern that is visible is the part that
+overlaps the object (Fig. C) being filled.  The object's path is
+called a clipping path, as it ``clips'' its shape from the tiled
+pattern (Fig. D).  Note that the fill is only masked on top of
+underlying objects, so any ``holes'' in the pattern will act as a
+window, leaving visible underlying objects.
+
+
+LAYR (0x4C415952)   /* Define a layer */
+
+A DR2D project is broken up into one or more layers.  Each DR2D object
+is in one of these layers.  Layers provide several useful features.
+Any particular layer can be ``turned off'', so that the objects in the
+layer are not displayed.  This eliminates the unnecessary display of
+objects not currently needed on the screen.  Also, the user can lock a
+layer to protect the layer's objects from accidental changes.
+
+struct LAYRstruct {
+    ULONG    ID;
+    ULONG    Size;
+    USHORT   LayerID;   /* ID of the layer */
+    char     LayerName[16];   /* Null terminated and padded */
+    UBYTE    Flags;   /* Flags, from LF_*, below */
+    UBYTE    Pad0;   /* Always 0 */
+};    
+
+LayerID is the number assigned to this layer.  As the field's name
+indicates, LayerName[] is the NULL terminated name of the layer.
+Flags is a bit field who's bits are set according to the #defines
+below:
+
+#define LF_ACTIVE     0x01  /* Active for editing */
+#define LF_DISPLAYED  0x02  /* Displayed on the screen */
+
+If the LF_ACTIVE bit is set, this layer is unlocked.  A set
+LF_DISPLAYED bit indicates that this layer is currently visible on the
+screen.  A cleared LF_DISPLAYED bit implies that LF_ACTIVE is not set.
+The reason for this is to keep the user from accidentally editing
+layers that are invisible.
+
+
+The Object Attribute Chunks
+
+
+ATTR (0x41545452)   /* Object attributes */
+
+The ATTR chunk sets various attributes for the objects that follow it.
+The attributes stay in effect until the next ATTR changes the
+attributes, or the enclosing FORM ends, whichever comes first.
+
+
+/* Various fill types */
+#define FT_NONE0    /* No fill*/
+#define FT_COLOR    1    /* Fill with color from palette */
+#define FT_OBJECTS2    /* Fill with tiled objects*/
+
+
+struct ATTRstruct {
+    ULONGID;
+    ULONGSize;
+    UBYTEFillType;    /* One of FT_*, above*/
+    UBYTEJoinType;    /* One of JT_*, below*/
+    UBYTEDashPattern; /* ID of edge dash pattern */
+    UBYTEArrowHead;   /* ID of arrowhead to use  */
+    USHORTFillValue;   /* Color or object with which to fill */
+    USHORTEdgeValue;   /* Edge color index*/
+    USHORTWhichLayer;  /* ID of layer it's in*/
+    IEEEEdgeThick;   /* Line width*/
+};
+
+
+
+FillType specifies what kind of fill to use on this ATTR chunk's
+objects.  A value of FT_NONE means that this ATTR chunk's objects are
+not filled.  FT_COLOR indicates that the objects should be filled in
+with a color.  That color's ID (from the CMAP chunk) is stored in the
+FillValue field.  If FillType is equal to FT_OBJECTS, FillValue
+contains the ID of a fill pattern defined in a FILL chunk.
+
+JoinType determines which style of line join to use when connecting
+the edges of line segments.  The field contains one of these four
+values:
+
+/* Join types */
+#define JT_NONE   0    /* Don't do line joins */
+#define JT_MITER  1    /* Mitered join */
+#define JT_BEVEL  2    /* Beveled join */
+#define JT_ROUND  3    /* Round join */
+
+DashPattern and ArrowHead contain the ID of the dash pattern and arrow
+head for this ATTR's objects.  A DashPattern of zero means that there
+is no dash pattern so lines will be invisible.  If ArrowHead is 0,
+OPLYs have no arrow head.  EdgeValue is the color of the line
+segments.  WhichLayer contains the ID of the layer this ATTR's objects
+are in.  EdgeThick is the width of this ATTR's line segments.
+
+
+
+BBOX (0x42424F48)   /* Bounding box of next object in FORM */
+
+
+The BBOX chunk supplies the dimensions and position of a bounding box
+surrounding the DR2D object that follows this chunk in the FORM.  A
+BBOX chunk can apply to a FILL or AROW as well as a DR2D object.  The
+BBOX chunk appears just before its DR2D object, FILL, or AROW chunk.
+
+struct BBOXstruct {
+    ULONGID;
+    ULONGSize;
+    IEEEXMin, YMin,  /* Bounding box of obj. */
+XMax, YMax;  /* including line width*/
+};
+
+In a Cartesian coordinate system, the point (XMin, YMin) is the
+coordinate of the lower left hand corner of the bounding box and
+(XMax, YMax) is the upper right.  These coordinates take into
+consideration the width of the lines making up the bounding box.
+
+
+XTRN (0x5854524E)   /* Externally controlled object */
+
+
+The XTRN chunk was created primarily to allow ProVector to link DR2D
+objects to ARexx functions. 
+
+struct XTRNstruct {
+    ULONG   ID;
+    ULONG   Size;
+    short   ApplCallBacks;             /* From #defines, below */
+    short   ApplNameLength;
+    char    ApplName[ApplNameLength];  /* Name of ARexx func to call */
+};
+
+ApplName[] contains the name of the ARexx script ProVector calls when
+the user manipulates the object in some way.  The ApplCallBacks field
+specifies the particular action that triggers calling the ARexx script
+according to the #defines listed below.
+
+/* Flags for ARexx script callbacks */
+#define    X_CLONE     0x0001    /* The object has been cloned */
+#define    X_MOVE      0x0002    /* The object has been moved */
+#define    X_ROTATE    0x0004    /* The object has been rotated */
+#define    X_RESIZE    0x0008    /* The object has been resized */
+#define    X_CHANGE    0x0010    /* An attribute (see ATTR) of the 
+                                    object has changed */
+#define    X_DELETE    0x0020    /* The object has been deleted */
+#define    X_CUT       0x0040    /* The object has been deleted, but
+                                    stored in the clipboard */
+#define    X_COPY      0x0080    /* The object has been copied to the
+                                    clipboard */
+#define    X_UNGROUP   0x0100    /* The object has been ungrouped */
+
+
+For example, given the XTRN object:
+
+FORM xxxx DR2D {
+XTRN xxxx { X_RESIZE | X_MOVE, 10, "Dimension" }
+ATTR xxxx { 0, 0, 1, 0, 0, 0, 0.0 }
+FORM xxxx DR2D {
+GRUP xxxx { 2 }
+STXT xxxx { 0, 0.5, 1.0, 6.0, 5.0, 0.0, 4, "3.0" }
+OPLY xxxx { 2, { 5.5, 5.5, 8.5, 5.5 } }
+}
+}
+
+ProVector would call the ARexx script named Dimension if the user
+resized or moved this object.  What exactly ProVector sends depends
+upon what the user does to the object.  The following list shows what
+string(s) ProVector sends according to which flag(s) are set.  The
+parameters are described below.
+
+X_CLONE     ``appl CLONE objID dx dy''
+X_MOVE      ``appl MOVE objID dx dy''
+X_ROTATE    ``appl ROTATE objID cx cy angle''
+X_RESIZE    ``appl RESIZE objID cx cy sx sy''
+X_CHANGE    ``appl CHANGE objID et ev ft fv ew jt fn''
+X_DELETE    ``appl DELETE objID''
+X_CUT       ``appl CUT objID''
+X_COPY      ``appl COPY objID''
+X_UNGROUP   ``appl UNGROUP objID''
+
+where:
+appl is the name of the ARexx script
+CLONE, MOVE, ROTATE, RESIZE, etc. are literal strings
+objID is the object ID that ProVector assigns to this object
+(dx, dy) is the position offset of the CLONE or MOVE
+(cx, cy) is the point around which the object is rotated or resized
+angle is the angle (in degrees) the object is rotated
+sx and sy are the scaling factors in the horizontal and
+  vertical directions, respectively. 
+et is the edge type (the dash pattern index)
+ev is the edge value (the edge color index)
+ft is the fill type
+fv is the fill index
+ew is the edge weight
+jt is the join type
+fn is the font name
+
+The X_CHANGE message reflects changes to the attributes found in the
+ATTR chunk. 
+
+If the user resized the XTRN object shown above by factor of 2,
+ProVector would call the ARexx script Dimension like this: 
+
+Dimension RESIZE 1985427 7.0 4.75 2.0 2.0
+
+
+
+The Object Chunks
+
+
+The following chunks define the objects available in the DR2D FORM.
+
+
+VBM  (0x56424D20)   /* Virtual BitMap */
+
+The VBM chunk contains the position, dimensions, and file name of an
+ILBM image. 
+
+
+struct VBMstruct {
+    IEEEXPos, YPos,   /* Virtual coords */
+XSize, YSize, /* Virtual size */
+Rotation;       /* in degrees */
+    USHORTPathLen;        /* Length of dir path */
+    charPath[PathLen];  /* Null-terminated path of file */
+};
+
+
+The coordinate (XPos, YPos) is the position of the upper left hand
+corner of the bitmap and the XSize and YSize fields supply the x and y
+dimensions to which the image should be scaled.  Rotation tells how
+many degrees to rotate the ILBM around its upper left hand corner.
+ProVector does not currently support rotation of bitmaps and will
+ignore this value.  Path contains the name of the ILBM file and may
+also contain a partial or full path to the file.  DR2D readers should
+not assume the path is correct.  The full path to an ILBM on one
+system may not match the path to the same ILBM on another system.  If
+a DR2D reader cannot locate an ILBM file based on the full path name
+or the file name itself (looking in the current directory), it should
+ask the user where to find the image.
+ 
+
+
+CPLY (0x43504C59)   /* Closed polygon */
+OPLY (0x4F504C59)   /* Open polygon */
+
+Polygons are the basic components of almost all 2D objects in the DR2D
+FORM.  Lines, squares, circles, and arcs are all examples of DR2D
+polygons.  There are two types of DR2D polygons, the open polygon
+(OPLY) and the closed polygon (CPLY).  The difference between a closed
+and open polygon is that the computer adds a line segment connecting
+the endpoints of a closed polygon so that it is a continuous path.  An
+open polygon's endpoints do not have to meet, like the endpoints of a
+line segment.
+
+struct POLYstruct {
+    ULONGID;
+    ULONGSize;
+    USHORTNumPoints;
+    IEEEPolyPoints[2*NumPoints];
+};
+
+The NumPoints field contains the number of points in the polygon and
+the PolyPoints array contains the (X, Y) coordinates of the points of
+the non-curved parts of polygons.  The even index elements are X
+coordinates and the odd index elements are Y coordinates.
+
+[Figure 3 - Bezier curves]
+
+DR2D uses Bezier cubic sections, or cubic splines, to describe curves
+in polygons.  A set of four coordinates (P1 through P4) defines the
+shape of a cubic spline.  The first coordinate (P1) is the point where
+the curve begins.  The line from the first to the second coordinate
+(P1 to P2) is tangent to the curve at the first point.  The line from
+P3 to P4 is tangent to the cubic section, where it ends at P4.
+
+The coordinates describing the cubic section are stored in the
+PolyPoints[] array with the coordinates of the normal points.  DR2D
+inserts an indicator point before a set of cubic section points to
+differentiate a normal point from the points that describe a curve.
+An indicator point has an X value of 0xFFFFFFFF.  The indicator
+point's Y value is a bit field.  If this bit field's low-order bit is
+set, the points that follow the indicator point make up a cubic
+section.
+
+The second lowest order bit in the indicator point's bit field is the
+MOVETO flag.  If this bit is set, the point (or set of cubic section
+points) starts a new polygon, or subpolygon.  This subpolygon will
+appear to be completely separate from other polygons but there is an
+important connection between a polygon and its subpolygon.
+Subpolygons make it possible to create holes in polygons.  An example
+of a polygon with a hole is the letter ``O''.  The ``O'' is a filled
+circular polygon with a smaller circular polygon within it.  The
+reason the inner polygon isn't covered up when the outer polygon is
+filled is that DR2D fills are done using the even-odd rule.
+
+The even-odd rule determines if a point is ``inside'' a polygon by
+drawing a ray outward from that point and counting the number of path
+segments the ray crosses.  If the number is even, the point is outside
+the object and shouldn't be filled.  Conversely, an odd number of
+crossings means the point is inside and should be filled.  DR2D only
+applies the even-odd rule to a polygon and its subpolygons, so no
+other objects are considered in the calculations.
+
+Taliesin, Inc. supplied the following algorithm to illustrate the
+format of DR2D polygons.  OPLYs, CPLYs, AROWs, and ProVector's outline
+fonts all use the same format:
+
+
+        typedef union {
+            IEEE num;
+            LONG bits;
+        } Coord;
+
+        #define INDICATOR       0xFFFFFFFF
+        #define IND_SPLINE      0x00000001
+        #define IND_MOVETO      0x00000002
+
+        /* A common pitfall in attempts to support DR2D has
+                been to fail to recognize the case when an
+                INDICATOR point indicates the following
+                coordinate to be the first point of BOTH a
+                Bezier cubic and a sub-polygon, ie. the
+                value of the flag = (IND_CURVE | IND_MOVETO) */
+
+        Coord   Temp0, Temp1;
+        int     FirstPoint, i, Increment;
+
+        /* Initialize the path */
+        NewPath();
+        FirstPoint = 1;
+
+        /* Draw the path */
+        i = 0;
+        while( i &lt; NumPoints ) {
+            Temp0.num = PolyPoints[2*i];    Temp1.num = PolyPoints[2*i + 1];
+            if( Temp0.bits == INDICATOR ) {
+                /* Increment past the indicator */
+                Increment = 1;
+                if( Temp1.bits &amp; IND_MOVETO ) {
+                    /* Close and fill, if appropriate */
+                    if( ID == CPLY ) {
+                        FillPath();
+                    }
+                    else {
+                        StrokePath();
+                    }
+
+                    /* Set up the new path */
+                    NewPath();
+                    FirstPoint = 1;
+                }
+                if( Temp1.bits &amp; IND_CURVE ) {
+                    /* The next 4 points are Bezier cubic control points */
+                    if( FirstPoint )
+                        MoveTo( PolyPoints[2*i + 2], PolyPoints[2*i + 3] );
+                    else
+                        LineTo( PolyPoints[2*i + 2], PolyPoints[2*i + 3] );
+                    CurveTo(    PolyPoints[2*i + 4], PolyPoints[2*i + 5],
+                                PolyPoints[2*i + 6], PolyPoints[2*i + 7],
+                                PolyPoints[2*i + 8], PolyPoints[2*i + 9] );
+                    FirstPoint = 0;
+                    /* Increment past the control points */
+                    Increment += 4;
+                }
+            }
+            else {
+                if( FirstPoint )
+                    MoveTo(     PolyPoints[2*i], PolyPoints[2*i + 1] );
+                else
+                    LineTo(     PolyPoints[2*i], PolyPoints[2*i + 1] );
+                FirstPoint = 0;
+
+                /* Increment past the last endpoint */
+                Increment = 1;
+            }
+
+            /* Add the increment */
+            i += Increment;
+        }
+
+        /* Close the last path */
+        if( ID == CPLY ) {
+            FillPath();
+        }
+        else {
+            StrokePath();
+        }
+
+GRUP (0x47525550)   /* Group */
+
+The GRUP chunk combines several DR2D objects into one.  This chunk is
+only valid inside nested DR2D FORMs, and must be the first chunk in
+the FORM.
+
+struct GROUPstruct {
+    ULONGID;
+    ULONGSize;
+    USHORTNumObjs;
+};
+
+The NumObjs field contains the number of objects contained in this
+group.  Note that the layer of the GRUP FORM overrides the layer of
+objects within the GRUP.  The following example illustrates the layout
+of the GRUP (and FILL) chunk.
+
+       FORM { DR2D              /* Top-level drawing... */
+                DRHD { ... }    /* Confirmed by presence of DRHD chunk */
+                CMAP { ... }    /* Various other things... */
+                FONS { ... }
+                FORM { DR2D             /* A nested form... */
+                        FILL { 1 }      /* Ah!  The fill-pattern table */
+                        CPLY { ... }    /* with only 1 object */
+                }
+                FORM { DR2D             /* Yet another nested form */
+                        GRUP { ..., 3 } /* Ah! A group of 3 objects */
+                        TEXT { ... }
+                        CPLY { ... }
+                        OPLY { ... }
+                }
+                FORM { DR2D             /* Still another nested form */
+                        GRUP { ..., 2 } /* A GRUP with 2 objects */
+                        OPLY { ... }
+                        TEXT { ... }
+                }
+        }
+
+
+STXT (0x53545854)   /* Simple text */
+
+The STXT chunk contains a text string along with some information on
+how and where to render the text. 
+
+struct STXTstruct {
+    ULONGID;
+    ULONGSize;
+    UBYTEPad0;/* Always 0 (for future expansion) */
+    UBYTEWhichFont;      /* Which font to use */
+    IEEECharW, CharH,  /* W/H of an individual char */
+BaseX, BaseY,  /* Start of baseline */
+Rotation;      /* Angle of text (in degrees) */
+    USHORTNumChars;
+    charTextChars[NumChars];
+};
+
+The text string is in the character array, TextChars[].  The ID of the
+font used to render the text is WhichFont.  The font's ID is set in a
+FONS chunk.  The starting point of the baseline of the text is (BaseX,
+BaseY).  This is the point around which the text is rotated.  If the
+Rotation field is zero (degrees), the text's baseline will originate
+at (BaseX, BaseY) and move to the right.  CharW and CharH are used to
+scale the text after rotation.  CharW is the average character width
+and CharH is the average character height.  The CharW/H fields are
+comparable to an X and Y font size.  
+
+
+
+TPTH (0x54505448) /* A text string along a path */
+
+This chunk defines a path (polygon) and supplies a string to render
+along the edge of the path.
+
+struct TPTHstruct {
+    ULONG   ID;
+    ULONG   Size;
+    UBYTE   Justification;/* see defines, below */
+    UBYTE   WhichFont;/* Which font to use */
+    IEEE    CharW, CharH;/* W/H of an individual char*/
+    USHORT  NumChars;   /* Number of chars in the string */
+    USHORT  NumPoints;  /* Number of points in the path */
+    char    TextChars[NumChars];/* PAD TO EVEN #! */
+    IEEE    Path[2*NumPoints];  /* The path on which the text lies */
+};
+
+WhichFont contains the ID of the font used to render the text.
+Justification controls how the text is justified on the line.
+Justification can be one of the following values:
+
+#define J_LEFT 0x00    /* Left justified */
+#define J_RIGHT0x01   /* Right justified */
+#define J_CENTER  0x02/* Center text */
+#define J_SPREAD  0x03    /* Spread text across path */
+
+CharW and CharH are the average width and height of the font
+characters and are akin to X and Y font sizes, respectively.  A
+negative FontH implies that the font is upsidedown.  Note that CharW
+must not be negative.  NumChars is the number of characters in the
+TextChars[] string, the string containing the text to be rendered.
+NumPoints is the number of points in the Path[] array.  Path[] is the
+path along which the text is rendered.  The path itself is not
+rendered.  The points of Path[] are in the same format as the points
+of a DR2D polygon.
+ 
+
+
+A Simple DR2D Example
+
+Here is a (symbolic) DR2D FORM:
+
+    FORM { DR2D
+            DRHD 16 { 0.0, 0.0, 10.0, 8.0 }
+            CMAP  6 { 0,0,0, 255,255,255 }
+            FONS  9 { 1, 0, 1, 0, "Roman" } 0
+            DASH 12 { 1, 2, {1.0, 1.0} }
+            ATTR 14 { 0, 0, 1, 0, 0, 0, 0, 0.0 }
+            BBOX 16 { 2.0, 2.0, 8.0, 6.0 }
+            FORM { DR2D
+                  GRUP  2 { 2 }
+                  BBOX 16 { 3.0, 4.0, 7.0, 5.0 }
+                  STXT 36 { 0,1, 0.5, 1.0, 3.0, 5.0, 0.0, 12, "Hello, World" }
+                  BBOX 16 { 2.0, 2.0, 8.0, 6.0 }
+                  OPLY 42 { 5, {2.0,2.0, 8.0,2.0, 8.0,6.0, 2.0,6.0, 2.0,2.0 }
+            }
+    }
+
+
+[Figure 4 - Simple DR2D drawing]
+
+
+The OFNT FORM
+
+OFNT(0x4F464E54)   /* ID of outline font file */
+
+ProVector's outline fonts are stored in an IFF FORM called OFNT.  This
+IFF is a separate file from a DR2D.  DR2D's FONS chunk refers only to
+fonts defined in the OFNT form.
+
+
+OFHD(0x4F464844)   /* ID of OutlineFontHeaDer */
+
+This chunk contains some basic information on the font.
+
+struct OFHDstruct {
+    char   FontName[32];   /* Font name, null padded */
+    short  FontAttrs;   /* See FA_*, below */
+    IEEE   FontTop,   /* Typical height above baseline */
+   FontBot,        /* Typical descent below baseline */
+   FontWidth;      /* Typical width, i.e. of the letter O */
+};
+
+#define FA_BOLD      0x0001
+#define FA_OBLIQUE   0x0002
+#define FA_SERIF0x0004
+
+The FontName field is a NULL terminated string containing the name of
+this font.  FontAttrs is a bit field with flags for several font attributes.  
+The flags, as defined above, are bold, oblique, and serif.  The unused 
+higher order bits are reserved for later use.  The other fields describe the 
+average dimensions of the characters in this font.  FontTop is the average 
+height above the baseline, FontBot is the average descent below the baseline, 
+and FontWidth is the average character width.
+
+
+KERN(0x4B45524C)   /* Kerning pair */
+
+The KERN chunk describes a kerning pair.  A kerning pair sets the
+distance between a specific pair of characters.  
+
+struct KERNstruct {
+    short   Ch1, Ch2; /* The pair to kern (allows for 16 bits...) */
+    IEEE    XDisplace,  /* Amount to displace -left +right */
+    YDisplace;  /* Amount to displace -down +up */
+};
+
+The Ch1 and Ch2 fields contain the pair of characters to kern.  These 
+characters are typically stored as ASCII codes.  Notice that OFNT stores 
+the characters as a 16-bit value.  Normally, characters are stored as 8-bit 
+values.  The wary programmer will be sure to cast assigns properly to avoid 
+problems with assigning an 8-bit value to a 16-bit variable.  The remaining 
+fields, XDisplace and YDisplace, supply the baseline shift from Ch1 to Ch2.
+
+
+CHDF(0x43484446)  /* Character definition */
+
+This chunk defines the shape of ProVector's outline fonts.  
+
+struct CHDFstruct {
+    short   Ch;/* The character we're defining (ASCII) */
+    short   NumPoints;  /* The number of points in the definition */
+    IEEE    XWidth,     /* Position for next char on baseline - X */
+            YWidth;/* Position for next char on baseline - Y */
+ /* IEEE    Points[2*NumPoints]*/    /* The actual points */
+};
+
+
+#defineINDICATOR   0xFFFFFFFF   /* If X == INDICATOR, Y is an action */
+#defineIND_SPLINE  0x00000001   /* Next 4 pts are spline control pts */
+#defineIND_MOVETO  0x00000002   /* Start new subpoly */
+#define IND_STROKE  0x00000004   /* Stroke previous path */
+#define IND_FILL    0x00000008   /* Fill previous path */
+
+Ch is the value (normally ASCII) of the character outline this chunk
+defines.  Like Ch1 and Ch2 in the KERN chunk, Ch is stored as a 16-bit
+value.  (XWidth,YWidth) is the offset to the baseline for the
+following character.  OFNT outlines are defined using the same method
+used to define DR2D's polygons (see the description of OPLY/CPLY for
+details).
+
+Because the OFNT FORM does not have an ATTR chunk, it needed an
+alternative to make fills and strokes possible.  There are two extra
+bits used in font indicator points not found in polygon indicator
+points, the IND_STROKE and IND_FILL bits (see defines above).  These
+two defines describe how to render the current path when rendering
+fonts.
+
+The current path remains invisible until the path is either filled
+and/or stroked.  When the IND_FILL bit is set, the currently defined
+path is filled in with the current fill pattern (as specified in the
+current ATTR chunk).  A set IND_STROKE bit indicates that the
+currently defined path itself should be rendered.  The current ATTR's
+chunk dictates the width of the line, as well as several other
+attributes of the line.  These two bits apply only to the OFNT FORM
+and should not be used in describing DR2D polygons.
+
+
