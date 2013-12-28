@@ -22,6 +22,11 @@ Tools to parse and render Origin Systems RealSpace engine assets.
 
 Support MacOS X, Windows and Linux 
 
+Goal :
+======
+
+The long term goal is to be able to play Strike Commander with a Virtual Reality Headset
+(Oculus Rift).
 
 Dependencies :
 ==============
