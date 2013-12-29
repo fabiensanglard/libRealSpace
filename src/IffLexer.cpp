@@ -8,10 +8,28 @@
 
 #include "IffLexer.h"
 
+char textIDs[5];
+char* GetChunkTextID(uint32_t id){
+    char* cursor = (char*)&id;
+    for (int i=3 ; i >=0 ; i--)
+        textIDs[i] = cursor[3-i];
+    
+    
+    return textIDs;
+}
 
 IffChunk::IffChunk() :
     subId(0){
     
+}
+
+
+IffChunk::~IffChunk(){
+    while (!childs.empty()){
+        IffChunk* chunk = childs.back();
+        childs.pop_back();
+        delete chunk;
+    }
 }
 
 //A CHUNK_HEADER_SIZE features a 4 bytes ID and a 4 bytes size;
@@ -22,6 +40,30 @@ IffLexer::IffLexer(){
 }
 
 IffLexer::~IffLexer(){
+    
+    /*
+    for(std::vector<IffChunk*>::iterator i = topChunk.childs.begin();
+        i != topChunk.childs.end();
+        ++i)
+        delete *i;
+    */
+    
+    
+    while (!topChunk.childs.empty()){
+        IffChunk* chunk = topChunk.childs.back();
+        topChunk.childs.pop_back();
+        delete chunk;
+    }
+    
+    
+    /*
+    for(int i=0 ; i < this->topChunk.childs.size() ; i++){
+        printf("~IffLexer Feeing topChunk childs  %d. (size=%lu)\n",i,this->topChunk.childs.size());
+        IffChunk* chunk = topChunk.childs[i];
+
+        delete chunk;
+    }
+     */
     
 }
 
@@ -82,7 +124,7 @@ size_t IffLexer::ParseFORM(IffChunk* chunk){
     
     //Form subtype
     chunk->subId = stream.ReadUInt32BE();
-    
+    chunksHashTable[chunk->subId] = chunk;
     
     bytesToParse-=4;
     
@@ -90,8 +132,9 @@ size_t IffLexer::ParseFORM(IffChunk* chunk){
         
         IffChunk* child = new IffChunk();
         size_t byteParsed = ParseChunk(child);
-        chunk->childs.push_back(child);
         
+        chunk->childs.push_back(child);
+        chunksHashTable[child->id] = child;
         
         bytesToParse -= byteParsed;
     }
@@ -132,7 +175,7 @@ size_t IffLexer::ParseChunk(IffChunk* chunk){
             chunk->data = stream.GetPosition();
             stream.MoveForward(chunk->size);
             
-            chunks[chunk->id] = chunk;
+            chunksHashTable[chunk->id] = chunk;
             
             
             
@@ -182,8 +225,8 @@ void IffLexer::Parse(void){
     
         size_t byteParsed =ParseChunk(child);
         
-        masterChunk.childs.push_back(child);
-        
+        topChunk.childs.push_back(child);
+        chunksHashTable[child->id] = child;
         
         bytesToParse -= byteParsed;
         
@@ -192,7 +235,7 @@ void IffLexer::Parse(void){
 }
 
 IffChunk* IffLexer::GetChunkByID(uint32_t id){
-    return this->chunks[id];
+    return this->chunksHashTable[id];
 }
 
 void Tab(int tab){
@@ -200,15 +243,7 @@ void Tab(int tab){
         putchar(' ');
 }
 
-char textIDs[5];
-char* GetChunkTextID(uint32_t id){
-    char* cursor = (char*)&id;
-    for (int i=3 ; i >=0 ; i--)
-        textIDs[i] = cursor[3-i];
-    
-    
-    return textIDs;
-}
+
 
 void ListChunkContent(uint32_t level,IffChunk* chunk){
     
@@ -235,8 +270,8 @@ void IffLexer::List(FILE* output){
     
     uint32_t level = 0;
     
-    for(size_t i = 0 ; i < masterChunk.childs.size() ; i++){
-        IffChunk* child =  masterChunk.childs[i];
+    for(size_t i = 0 ; i < topChunk.childs.size() ; i++){
+        IffChunk* child =  topChunk.childs[i];
         ListChunkContent(level,child);
     }
 }

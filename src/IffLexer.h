@@ -16,6 +16,7 @@ class IffChunk{
 public:
     
     IffChunk();
+    ~IffChunk();
     
     uint32_t id;
     uint8_t* data;
@@ -48,13 +49,13 @@ private:
     size_t ParseLIST(IffChunk* child);
     
     void Parse(void);
-    std::map<uint32_t,IffChunk*> chunks;
+    std::map<uint32_t,IffChunk*> chunksHashTable;
     
     ByteStream stream;
     uint8_t* data;
     size_t size;
     
-    IffChunk masterChunk;
+    IffChunk topChunk;
 };
 
 #endif /* defined(__libRealSpace__IffLexer__) */

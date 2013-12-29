@@ -41,6 +41,14 @@ void testJet(void){
     lexer.InitFromRAM(iffJet->data,iffJet->size);
     
     lexer.List(stdout);
+    
+    //Verify the object has an appearance
+    if (lexer.GetChunkByID('APPR') != NULL){
+        printf("This object does have an apperance.\n");
+    }
+    else
+        printf("This object does NOT have an apperance !!\n");
+    
     //Render it !
     
 }
