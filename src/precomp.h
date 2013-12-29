@@ -20,12 +20,12 @@ extern "C" {
 #endif
 
 #ifdef __cplusplus
-    #include <string>
+    #include <string.h>
     #include <vector>
     #include <map>
 
     #include <stdint.h>
-    #include <unistd.h>
+
 
     #include "Base.h"
     #include "ByteStream.h"

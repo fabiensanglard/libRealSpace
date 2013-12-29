@@ -153,7 +153,46 @@ size_t TreArchive::GetNumEntries(void){
 
 
 bool TreArchive::Decompress(const char* dstDirectory){
-    return false;
+    
+    for(size_t i=0 ; i < entries.size() ; i++){
+        TreEntry* entry = orderedEntries[i];
+        
+        //Build the path without . or ..
+        char fullPath[512];
+        fullPath[0] = '\0';
+        strcat(fullPath,dstDirectory);
+        
+        size_t dstSize = strlen(fullPath);
+        if (fullPath[dstSize-1] != '/')
+            strcat(fullPath,"/");
+        
+        
+        char* cursor = entry->name;
+        while(*cursor == '.' ||
+              *cursor == '/' ||
+              *cursor == '\\')
+            cursor++;
+            
+        
+        strcat(fullPath, cursor);
+        
+        //Convert '\\' to '/'
+        size_t sizeFullPath = strlen(fullPath);
+        for (int i =0 ; i < sizeFullPath ; i++){
+            if (fullPath[i] =='\\')
+                fullPath[i] = '/';
+        }
+        
+        
+        CreateDirectories(fullPath);
+        
+        FILE* file = fopen(fullPath,"w");
+        fwrite(entry->data, 1, entry->size, file);
+        fclose(file);
+        
+    }
+
+    return true;
 }
 
 

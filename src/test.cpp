@@ -44,10 +44,10 @@ void testJet(void){
     
     //Verify the object has an appearance
     if (lexer.GetChunkByID('APPR') != NULL){
-        printf("This object does have an apperance.\n");
+        printf("This object does have an appearance.\n");
     }
     else
-        printf("This object does NOT have an apperance !!\n");
+        printf("This object does NOT have an appearance !!\n");
     
     //Render it !
     
@@ -57,18 +57,23 @@ void testPalette(void){
     
     IffLexer lexer ;
     lexer.InitFromFile("PALETTE.IFF");
-    
     lexer.List(stdout);
     
     RSPalette palette;
     palette.InitFromIFF(&lexer);
 }
 
-
+void testTREDecompress(void){
+    
+    const char* trePath = "OBJECTS.TRE";
+    TreArchive treArchive;
+    treArchive.InitFromFile(trePath);
+    treArchive.Decompress(".");
+}
 
 
 int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
-    testPalette();
+    testTREDecompress();
 }
