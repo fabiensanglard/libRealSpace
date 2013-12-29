@@ -34,6 +34,8 @@ extern "C" {
     #include "IffLexer.h"
 
     #include "RSPalette.h"
+
+    #include "PakArchive.h"
 /*
  
     #include "Texture.h"

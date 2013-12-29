@@ -157,23 +157,22 @@ bool TreArchive::Decompress(const char* dstDirectory){
     for(size_t i=0 ; i < entries.size() ; i++){
         TreEntry* entry = orderedEntries[i];
         
-        //Build the path without . or ..
+        
         char fullPath[512];
         fullPath[0] = '\0';
         strcat(fullPath,dstDirectory);
         
+        //Make sure the dstDirectory end with a /
         size_t dstSize = strlen(fullPath);
         if (fullPath[dstSize-1] != '/')
             strcat(fullPath,"/");
         
-        
+        //Remove the leading . and .. and /
         char* cursor = entry->name;
         while(*cursor == '.' ||
               *cursor == '/' ||
               *cursor == '\\')
             cursor++;
-            
-        
         strcat(fullPath, cursor);
         
         //Convert '\\' to '/'
@@ -183,9 +182,10 @@ bool TreArchive::Decompress(const char* dstDirectory){
                 fullPath[i] = '/';
         }
         
-        
+        //Recursively create the directories
         CreateDirectories(fullPath);
         
+        //Write file !
         FILE* file = fopen(fullPath,"w");
         fwrite(entry->data, 1, entry->size, file);
         fclose(file);

@@ -141,7 +141,7 @@ size_t IffLexer::ParseFORM(IffChunk* chunk){
     
     
     
-    return chunk->size+8;
+    return chunk->size+CHUNK_HEADER_SIZE;
 }
 
 size_t IffLexer::ParseChunk(IffChunk* chunk){
@@ -179,7 +179,7 @@ size_t IffLexer::ParseChunk(IffChunk* chunk){
             
             
             
-            return chunk->size+8;
+            return chunk->size+CHUNK_HEADER_SIZE;
         }
             break;
     }

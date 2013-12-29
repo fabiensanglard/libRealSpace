@@ -9,8 +9,6 @@
 #ifndef __pak__Stream__
 #define __pak__Stream__
 
-#include <stdint.h>
-
 /*
  
  This is the class used to parse all byte streams.
