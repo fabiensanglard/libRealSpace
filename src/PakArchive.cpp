@@ -18,9 +18,11 @@ PakArchive::~PakArchive(){
         delete[] this->data;
 }
 
+
+
 void PakArchive::Parse(void){
     
-    uint32_t advertisedSize = stream.ReadUInt32BE();
+    uint32_t advertisedSize = stream.ReadUInt32LE();
     
     if (advertisedSize != this->size){
         printf("'%s' is not a PAK archive !.\n",this->path);
@@ -28,7 +30,36 @@ void PakArchive::Parse(void){
     }
     
     //Parse rest
+    ByteStream peek(this->stream);
+    uint32_t offset = peek.ReadUInt32LE();
+    offset &= 0x00FFFFFF ; //Remove the leading 0xE0
+    
+    uint32_t numEntries = (offset-4)/4;
+    
+    for(int i =0 ; i < numEntries ; i ++){
         
+        PakEntry* entry = new PakEntry();
+        
+        offset = stream.ReadUInt32LE();
+        offset &= 0x00FFFFFF ; //Remove the leading 0xE0
+        
+        entry->data = this->data + offset;
+        
+        entries.push_back(entry);
+    }
+    
+    //Second pass to calculate the sizes.
+    int i =0;
+    for( ; i < numEntries-1 ; i ++){
+        
+        PakEntry* entry = entries[i];
+        
+        entry->size = entries[i+1]->data - entry->data;
+    }
+    
+    PakEntry* entry = entries[i];
+    entry->size = this->data+this->size - entries[i-1]->data;
+    
 }
 
 bool PakArchive::InitFromFile(const char* filepath){
@@ -95,9 +126,9 @@ void PakArchive::List(FILE* output){
     for(size_t i =0; i < GetNumEntries() ; i++){
         PakEntry* entry = entries[i];
         if (entry->size != 0)
-            fprintf(output,"Entry [%3lu] size: %6lu bytes.\n",i, entry->size);
+            fprintf(output,"    Entry [%3lu] size: %7lu bytes.\n",i, entry->size);
         else
-            fprintf(output,"Entry [%3lu] size: %6lu bytes (DUPLICATE).\n",i, entry->size);
+            fprintf(output,"    Entry [%3lu] size: %7lu bytes (DUPLICATE).\n",i, entry->size);
     }
 }
 

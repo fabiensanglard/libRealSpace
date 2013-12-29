@@ -71,9 +71,16 @@ void testTREDecompress(void){
     treArchive.Decompress(".");
 }
 
+void testParsePAK(){
+    PakArchive archive;
+    archive.InitFromFile("MAURITAN.PAK");
+    
+    archive.List(stdout);
+}
+
 
 int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
-    testTREDecompress();
+    testParsePAK();
 }
