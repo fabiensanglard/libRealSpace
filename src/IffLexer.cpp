@@ -20,6 +20,7 @@ char* GetChunkTextID(uint32_t id){
 
 IffChunk::IffChunk() :
     subId(0){
+        
     
 }
 
@@ -36,7 +37,7 @@ IffChunk::~IffChunk(){
 #define CHUNK_HEADER_SIZE 8
 
 IffLexer::IffLexer(){
-    
+    this->path[0] = '\0';
 }
 
 IffLexer::~IffLexer(){
@@ -89,7 +90,7 @@ bool IffLexer::InitFromFile(const char* filepath){
     uint8_t* fileData = new uint8_t[fileSize];
     fread(fileData, 1, fileSize, file);
     
-   
+    strcpy(this->path, filepath);
     
     return InitFromRAM(fileData,fileSize);
     
@@ -101,6 +102,9 @@ bool IffLexer::InitFromRAM(uint8_t* data, size_t size){
     this->size = size;
     
     stream.Set(this->data);
+    
+    if (this->path[0] == '\0')
+        strcpy(this->path, "PALETTE FROM RAM");
     
     Parse();
     

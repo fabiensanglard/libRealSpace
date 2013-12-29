@@ -17,11 +17,11 @@ RSPalette::~RSPalette(){
     
 }
 
-Palette* RSPalette::GetColorPalette(void){
+VGAPalette* RSPalette::GetColorPalette(void){
     return &this->colors;
 }
 
-Palette* RSPalette::GetBWPalette(void){
+VGAPalette* RSPalette::GetBWPalette(void){
     return &this->bwColors;
 }
 

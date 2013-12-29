@@ -41,6 +41,8 @@ public:
     
     IffChunk* GetChunkByID(uint32_t id);
     
+    inline const char* GetName(void){ return this->path;}
+    
 private:
     
     size_t ParseChunk(IffChunk* child);
@@ -56,6 +58,8 @@ private:
     size_t size;
     
     IffChunk topChunk;
+    
+    char path[512];
 };
 
 #endif /* defined(__libRealSpace__IffLexer__) */

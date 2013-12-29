@@ -29,13 +29,14 @@ void PakArchive::Parse(void){
         return;
     }
     
-    //Parse rest
+    
     ByteStream peek(this->stream);
     uint32_t offset = peek.ReadUInt32LE();
     offset &= 0x00FFFFFF ; //Remove the leading 0xE0
     
     uint32_t numEntries = (offset-4)/4;
     
+    //First pass to read all the offsets
     for(int i =0 ; i < numEntries ; i ++){
         
         PakEntry* entry = new PakEntry();
@@ -56,7 +57,6 @@ void PakArchive::Parse(void){
         
         entry->size = entries[i+1]->data - entry->data;
     }
-    
     PakEntry* entry = entries[i];
     entry->size = this->data+this->size - entries[i-1]->data;
     

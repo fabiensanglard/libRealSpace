@@ -9,6 +9,33 @@
 #ifndef __iff__Texture__
 #define __iff__Texture__
 
+typedef struct {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
+} Texel;
+
+typedef struct VGAPalette{
+    
+    Texel palette[256];
+    
+    void SetColor(uint8_t value,Texel* texel){
+        
+        Texel* paletteColor ;
+        
+        paletteColor = &palette[value] ;
+        
+        *paletteColor = *texel;
+    }
+    
+    const Texel* GetRGBColor(uint8_t value){
+        return &palette[value];
+    }
+    
+} VGAPalette ;
+
+
 class Texture{
     
 public:
@@ -23,7 +50,6 @@ public:
     int32_t height;
     char name[8];
     uint8_t* data;
-    bool privateData;
     
     
     void SetRLECenterCoo(int16_t left,int16_t right,int16_t top,int16_t bottom);

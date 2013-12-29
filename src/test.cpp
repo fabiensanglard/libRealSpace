@@ -78,9 +78,27 @@ void testParsePAK(){
     archive.List(stdout);
 }
 
+int testShowPalette(void)
+{
+    
+    IffLexer lexer ;
+    lexer.InitFromFile("PALETTE.IFF");
+    lexer.List(stdout);
+    
+    RSPalette palette;
+    palette.InitFromIFF(&lexer);
+    
+    
+    renderer.Init(1024,768);
+    renderer.SetTitle(lexer.GetName());
+    
+    renderer.ShowPalette(palette.GetColorPalette());
+    
+    return 0;
+}
 
 int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
-    testParsePAK();
+    testShowPalette();
 }

@@ -31,14 +31,20 @@ extern "C" {
     #include "ByteStream.h"
     #include "TreArchive.h"
 
+    #include "Texture.h"
+    #include "Renderer.h"
+
     #include "IffLexer.h"
 
     #include "RSPalette.h"
+    #include "RSEntity.h"
 
     #include "PakArchive.h"
-/*
+
  
-    #include "Texture.h"
+
+
+/*
     #include "rle.h"
 
     #include "IFFChunkReader.h"

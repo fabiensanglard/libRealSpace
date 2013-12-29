@@ -11,33 +11,30 @@
 
 
 Texture::Texture()
- : data(0),
-    privateData(false)
+ : data(0)
+
 {
     
 }
 
 Texture::~Texture(){
-    
-    if (privateData)
-        free(data);
+    free(data);
 }
 
 void Texture::Set(const char name[8],uint32_t width,uint32_t height,uint8_t* data ){
-    this->width = width;
-    this->height = height;
-    this->data = data;
     
-    strncpy(this->name,name,8);
+    CreateEmpty(name,width,height);
+    memcpy(this->data,data, width * height);
     
-    privateData = false;
 }
 
 void Texture::CreateEmpty(const char name[8],uint32_t width,uint32_t height){
+    
+    strncpy(this->name,name,8);
     this->width = width;
     this->height = height;
     this->data = (uint8_t*)malloc(width*height);
-    privateData = true;
+    
 }
 
 

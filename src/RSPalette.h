@@ -11,31 +11,7 @@
 
 
 
-typedef struct {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t a;
-} Texel;
 
-typedef struct Palette{
-    
-    Texel palette[256];
-    
-    void SetColor(uint8_t value,Texel* texel){
-        
-        Texel* paletteColor ;
-        
-        paletteColor = &palette[value] ;
-        
-        *paletteColor = *texel;
-    }
-    
-    const Texel* GetRGBColor(uint8_t value){
-        return &palette[value];
-    }
-    
-} Palette ;
 
 class RSPalette{
     
@@ -50,10 +26,10 @@ public:
     
     
     
-    Palette* GetColorPalette(void);
+    VGAPalette* GetColorPalette(void);
     void SetColorFlag(uint32_t flag);
     
-    Palette* GetBWPalette(void);
+    VGAPalette* GetBWPalette(void);
     void SetBWFlag(uint32_t flag);
     
     
@@ -64,10 +40,10 @@ private:
     void ParseCMAP(IffChunk* chunk);
     
     uint32_t colorFlag;
-    Palette colors;
+    VGAPalette colors;
     
     uint32_t bwFlag;
-    Palette bwColors;
+    VGAPalette bwColors;
 };
 
 #endif /* defined(__iff__RealSpacePaletteObject__) */
