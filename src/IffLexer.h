@@ -9,13 +9,22 @@
 #ifndef __libRealSpace__IffLexer__
 #define __libRealSpace__IffLexer__
 
-typedef struct{
+
+
+class IffChunk{
+    
+public:
+    
+    IffChunk();
     
     uint32_t id;
     uint8_t* data;
     size_t size;
     
-} IffChunk;
+    //In the case of FORM,CAT  and LIST
+    uint32_t subId;
+    std::vector<IffChunk*> childs;
+} ;
 
 class IffLexer{
     
@@ -27,23 +36,25 @@ public:
     bool InitFromFile(const char* filepath);
     bool InitFromRAM(uint8_t* data, size_t size);
 
-    bool HasMoreChunks(void);
-    IffChunk* GetNextChunk(void);
+    void List(FILE* output);
+    
+    IffChunk* GetChunkByID(uint32_t id);
     
 private:
     
-    size_t ParseChunk(int tabs);
-    size_t ParseFORM(int tabs);
-    size_t ParseCAT(int tabs);
-    size_t ParseLIST(int tabs);
+    size_t ParseChunk(IffChunk* child);
+    size_t ParseFORM(IffChunk* child);
+    size_t ParseCAT(IffChunk* child);
+    size_t ParseLIST(IffChunk* child);
     
     void Parse(void);
-    std::map<uint32_t,IffChunk> chunks;
+    std::map<uint32_t,IffChunk*> chunks;
     
     ByteStream stream;
     uint8_t* data;
     size_t size;
     
+    IffChunk masterChunk;
 };
 
 #endif /* defined(__libRealSpace__IffLexer__) */

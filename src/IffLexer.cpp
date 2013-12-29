@@ -8,6 +8,12 @@
 
 #include "IffLexer.h"
 
+
+IffChunk::IffChunk() :
+    subId(0){
+    
+}
+
 //A CHUNK_HEADER_SIZE features a 4 bytes ID and a 4 bytes size;
 #define CHUNK_HEADER_SIZE 8
 
@@ -59,120 +65,91 @@ bool IffLexer::InitFromRAM(uint8_t* data, size_t size){
     return true;
 }
 
-void Tab(int tab){
-    for(int i=0 ; i <tab ;i++)
-        putchar('   ');
-}
-
-void PrintGetChunkIdText(uint32_t id,int tab){
-    char*idTetx = (char*)&id;
-    
-    Tab(tab);
-    
-    for(int i=3 ; i >=0 ;i--)
-        putchar(idTetx[i]);
-    
-    putchar('\n');
-}
 
 
 
-size_t IffLexer::ParseFORM(int tabs){
-    
-    
-    
-    IffChunk chunk;
+size_t IffLexer::ParseFORM(IffChunk* chunk){
+ 
     
     //FORM id
-    stream.ReadUInt32BE();
+    chunk->id = stream.ReadUInt32BE();
     
-    chunk.size = stream.ReadUInt32BE();
-    if (chunk.size % 2 != 0)
-        chunk.size++;
-    size_t bytesToParse = chunk.size;
+    chunk->size = stream.ReadUInt32BE();
+    
+    if (chunk->size % 2 != 0)
+        chunk->size++;
+    size_t bytesToParse = chunk->size;
     
     //Form subtype
-    chunk.id = stream.ReadUInt32BE();
+    chunk->subId = stream.ReadUInt32BE();
     
     
     bytesToParse-=4;
     
-    //PrintGetChunkIdText(chunk.id,tabs);
-    
-    Tab(tabs);
-    printf("FORM.");
-    
-    PrintGetChunkIdText(chunk.id,0);
-    
     while (bytesToParse > 0){
         
-        Tab(tabs);
-        size_t byteParsed = ParseChunk(tabs+1);
-    
-        Tab(tabs);
+        IffChunk* child = new IffChunk();
+        size_t byteParsed = ParseChunk(child);
+        chunk->childs.push_back(child);
+        
         
         bytesToParse -= byteParsed;
     }
     
     
     
-    return chunk.size+8;
+    return chunk->size+8;
 }
 
-size_t IffLexer::ParseChunk(int tabs){
+size_t IffLexer::ParseChunk(IffChunk* chunk){
     
     ByteStream peek(stream);
     
-    IffChunk chunk;
-    chunk.id = peek.ReadUInt32BE();
     
-    switch (chunk.id) {
+    chunk->id = peek.ReadUInt32BE();
+    
+    switch (chunk->id) {
         case 'FORM':
-            return ParseFORM(tabs+1);
+            return ParseFORM(chunk);
             break;
         case 'CAT ':
-            return ParseFORM(tabs+1);
+            return ParseFORM(chunk);
             break;
         case 'LIST':
-            return ParseFORM(tabs+1);
+            return ParseFORM(chunk);
             break;
-        case 'UVXY':
-            printf("UVXY");
         default:
         {
             
-            chunk.id = stream.ReadUInt32BE();
+            chunk->id = stream.ReadUInt32BE();
             
-            PrintGetChunkIdText(chunk.id,tabs+1);
-            //Unknow chunk :( !
-            //Check if we have a hander.
-            chunk.size = stream.ReadUInt32BE();
+            chunk->size = stream.ReadUInt32BE();
             
-            if (chunk.size % 2 != 0)
-                chunk.size++;
+            if (chunk->size % 2 != 0)
+                chunk->size++;
             
             //That this chunk
-            chunk.data = stream.GetPosition();
-            stream.MoveForward(chunk.size);
+            chunk->data = stream.GetPosition();
+            stream.MoveForward(chunk->size);
             
-            chunks[chunk.id] = chunk;
+            chunks[chunk->id] = chunk;
             
             
             
-            return chunk.size+8;
+            return chunk->size+8;
         }
             break;
     }
     
 }
 
-size_t IffLexer::ParseCAT(int tabs){
-    return ParseFORM(tabs);
+size_t IffLexer::ParseCAT(IffChunk* chunk){
+    return ParseFORM(chunk);
 }
 
 //Return how many bytes were moved forward
-size_t IffLexer::ParseLIST(int tabs){
-    return ParseFORM(tabs);
+size_t IffLexer::ParseLIST(IffChunk* chunk){
+    return ParseFORM(chunk);
 }
 
 void IffLexer::Parse(void){
@@ -196,21 +173,70 @@ void IffLexer::Parse(void){
         }
     }
     
+    
    
     while(bytesToParse > 0){
         
-        printf("bytesToParse %lu\n",bytesToParse);
-        size_t byteParsed =ParseChunk(0);
-        printf("byteParsed = %lu",byteParsed);
+
+        IffChunk* child = new IffChunk();
+    
+        size_t byteParsed =ParseChunk(child);
+        
+        masterChunk.childs.push_back(child);
+        
+        
         bytesToParse -= byteParsed;
+        
     }
 
 }
 
-bool IffLexer::HasMoreChunks(void){
-    return false;
+IffChunk* IffLexer::GetChunkByID(uint32_t id){
+    return this->chunks[id];
 }
 
-IffChunk* IffLexer::GetNextChunk(void){
-    return NULL;
+void Tab(int tab){
+    for(int i=0 ; i <tab*2 ;i++)
+        putchar(' ');
+}
+
+char textIDs[5];
+char* GetChunkTextID(uint32_t id){
+    char* cursor = (char*)&id;
+    for (int i=3 ; i >=0 ; i--)
+        textIDs[i] = cursor[3-i];
+    
+    
+    return textIDs;
+}
+
+void ListChunkContent(uint32_t level,IffChunk* chunk){
+    
+    Tab(level);
+    printf("%s\n",GetChunkTextID(chunk->id));
+    
+    Tab(level);
+    printf("%lu\n",chunk->size);
+    
+    if (chunk->subId != 0){
+        Tab(level);
+        printf("%s\n",GetChunkTextID(chunk->subId));
+        
+    }
+    
+    for(size_t i = 0 ; i < chunk->childs.size() ; i++){
+        IffChunk* child =  chunk->childs[i];
+        ListChunkContent(level+1,child);
+    }
+    
+}
+
+void IffLexer::List(FILE* output){
+    
+    uint32_t level = 0;
+    
+    for(size_t i = 0 ; i < masterChunk.childs.size() ; i++){
+        IffChunk* child =  masterChunk.childs[i];
+        ListChunkContent(level,child);
+    }
 }

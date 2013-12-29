@@ -40,6 +40,7 @@ void testJet(void){
     IffLexer lexer ;
     lexer.InitFromRAM(iffJet->data,iffJet->size);
     
+    lexer.List(stdout);
     //Render it !
     
 }
