@@ -23,8 +23,9 @@ public:
     void Clear(void);
 
     void ShowPalette(VGAPalette* palette);
-    void ShowImage(uint8_t* image, uint16_t width, uint16_t height,VGAPalette* palette,int zoom,bool wait);
-    void ShowModel(RSEntity* object,VGAPalette* palette , size_t lodLevel);
+    void DrawImage(uint8_t* image, uint16_t width, uint16_t height,VGAPalette* palette,int zoom);
+    void DrawModel(RSEntity* object,VGAPalette* palette , size_t lodLevel);
+    void DisplayModel(RSEntity* object,size_t lodLevel);
     
     void SetTitle(const char* title);
     
@@ -44,6 +45,7 @@ private:
     uint8_t* backBuffer;
     
     VGAPalette defaultPalette;
+    bool running;
 };
 
 

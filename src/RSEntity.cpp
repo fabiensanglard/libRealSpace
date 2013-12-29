@@ -44,6 +44,9 @@ void RSEntity::ParseTXMP(IffChunk* chunk){
 
 void RSEntity::ParseTXMS(IffChunk* chunk){
     
+    if (chunk==NULL)
+        return;
+    
     if (chunk->childs.size() <1 ){
         //That is not expected, at minimun we should have an INFO chunk.
         printf("Error: This TXMS doesn't even have an INFO chunk.");
@@ -65,7 +68,8 @@ void RSEntity::ParseTXMS(IffChunk* chunk){
 
 void RSEntity::ParseVERT(IffChunk* chunk){
     
-
+    if (chunk==NULL)
+        return;
     
     ByteStream stream(chunk->data);
     
@@ -93,6 +97,9 @@ void RSEntity::ParseVERT(IffChunk* chunk){
 
 void RSEntity::ParseLVL(IffChunk* chunk){
     
+    if (chunk==NULL)
+        return;
+    
     ByteStream stream(chunk->data);
     
     Lod lod ;
@@ -110,6 +117,9 @@ void RSEntity::ParseLVL(IffChunk* chunk){
 
 
 void RSEntity::ParseVTRI(IffChunk* chunk){
+    
+    if (chunk==NULL)
+        return;
     
     size_t numTriangle= chunk->size/8;
     ByteStream stream(chunk->data);
@@ -138,6 +148,9 @@ void RSEntity::ParseVTRI(IffChunk* chunk){
 }
 
 void RSEntity::ParseUVXY(IffChunk* chunk){
+    
+    if (chunk==NULL)
+        return;
     
     ByteStream stream(chunk->data);
     

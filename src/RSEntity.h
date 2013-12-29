@@ -9,6 +9,10 @@
 #ifndef __libRealSpace__RSEntity__
 #define __libRealSpace__RSEntity__
 
+#define LOD_LEVEL_MAX 0
+#define LOD_LEVEL_MED 1
+#define LOD_LEVEL_MIN 2
+
 typedef struct Vertex{
     float x;
     float y;

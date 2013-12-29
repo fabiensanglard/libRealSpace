@@ -36,7 +36,7 @@ void Renderer::Init(int32_t width , int32_t height){
     //Load the default palette
     IffLexer lexer ;
     lexer.InitFromFile("PALETTE.IFF");
-    lexer.List(stdout);
+    //lexer.List(stdout);
     
     RSPalette palette;
     palette.InitFromIFF(&lexer);
@@ -63,6 +63,30 @@ void Renderer::Init(int32_t width , int32_t height){
     
     // Create an OpenGL context associated with the window.
     SDL_GL_CreateContext(sdlWindow);
+    
+    
+    glViewport(0,0,this->width,this->height);			// Reset The Current Viewport
+	glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
+	glLoadIdentity();									// Reset The Projection Matrix
+    
+    
+	// Calculate The Aspect Ratio Of The Window
+    int zoom= 30;
+	glOrtho(-this->width/zoom,
+            this->width/zoom,
+            -this->height/zoom,
+            this->height/zoom,-300,300);
+    
+	glMatrixMode(GL_MODELVIEW);							// Select The Modelview Matrix
+	glLoadIdentity();									// Reset The Modelview Matrix
+    
+	glClearColor(0.8f, 0.8f, 8.5f, 1.0f);				// Black Background
+	//glClearDepth(1.0f);								// Depth Buffer Setup
+	glDisable(GL_DEPTH_TEST);							// Disable Depth Testing
+    
+    
+    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+
     
     SDL_HideWindow(sdlWindow);
 
@@ -135,7 +159,7 @@ void Renderer::PumpEvents(void){
     if (!initialized)
         return;
     
-    while(1){
+   
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch(event.type) {
@@ -143,6 +167,7 @@ void Renderer::PumpEvents(void){
                     
                     if (SDLK_ESCAPE == event.key.keysym.sym){
                         SDL_HideWindow(sdlWindow);
+                        running = false;
                         return;
                     }
                     printf("%d\n",event.key.keysym.sym);
@@ -155,7 +180,8 @@ void Renderer::PumpEvents(void){
                     
             }
         }
-    }
+        
+    
 
 }
 
@@ -163,7 +189,7 @@ void Renderer::PumpEvents(void){
 
 
 
-void Renderer::ShowImage(uint8_t* image, uint16_t imageWidth, uint16_t imageHeight,VGAPalette* palette,int zoom,bool wait){
+void Renderer::DrawImage(uint8_t* image, uint16_t imageWidth, uint16_t imageHeight,VGAPalette* palette,int zoom){
     
     //Need to copy all images in the offscreen buffer
     if (imageWidth*zoom > this->width ||
@@ -172,6 +198,8 @@ void Renderer::ShowImage(uint8_t* image, uint16_t imageWidth, uint16_t imageHeig
         printf("Image is too big for this windows.\n");
         return;
     }
+    
+    running = true;
     
     Clear();
     
@@ -207,7 +235,7 @@ void Renderer::ShowImage(uint8_t* image, uint16_t imageWidth, uint16_t imageHeig
     SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
     SDL_RenderPresent(sdlRenderer);
     
-    if (wait)
+    if (running)
         PumpEvents();
 }
 
@@ -245,8 +273,8 @@ void Renderer::UploadTextureToVRAM(Texture* texture, VGAPalette* palette){
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     
     
     glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
@@ -259,7 +287,7 @@ void Renderer::UnloadTextureToVRAM(Texture* texture){
 }
 
 
-void Renderer::ShowModel(RSEntity* object,VGAPalette* palette, size_t lodLevel ){
+void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel ){
     
     if (palette== USE_DEFAULT_PALETTE)
         palette=&defaultPalette;
@@ -268,32 +296,6 @@ void Renderer::ShowModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         printf("Unable to render this Level Of Details (out of range): Max level is  %d\n",object->numLods-1);
         return;
     }
-        
-    
-    
-    
-    glViewport(0,0,this->width,this->height);			// Reset The Current Viewport
-	glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
-	glLoadIdentity();									// Reset The Projection Matrix
-    
-    
-	// Calculate The Aspect Ratio Of The Window
-    int zoom= 30;
-	glOrtho(-this->width/zoom,
-            this->width/zoom,
-            -this->height/zoom,
-            this->height/zoom,-300,300);
-    
-	glMatrixMode(GL_MODELVIEW);							// Select The Modelview Matrix
-	glLoadIdentity();									// Reset The Modelview Matrix
-    
-	glClearColor(0.8f, 0.8f, 8.5f, 1.0f);				// Black Background
-	//glClearDepth(1.0f);								// Depth Buffer Setup
-	glDisable(GL_DEPTH_TEST);							// Disable Depth Testing
-    
-
-    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-    
     
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -331,12 +333,7 @@ void Renderer::ShowModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
     glEnd();
     
     
-    //We cannot load the texture within glBegin: Preload them here
-    for (int i=0 ; i < object->numUVs; i++){
-        uvxyEntry* textInfo = &object->uvs[i];
-        Texture* texture = &object->textures[textInfo->textureID];
-        texture->GetTextureID();
-    }
+    
     
     //Pass two for the textures:
     if (lodLevel == 0){
@@ -378,9 +375,149 @@ void Renderer::ShowModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
        - Make the camera rotate like the Object Viewer in Strike Commander
     */
     
-    SDL_GL_SwapWindow(sdlWindow);
     
-    PumpEvents();
+    
+    
+}
+
+typedef float matrix_t[16];
+#define DEG_TO_RAD (2.0f*M_PI/360.0f)
+void gluPerspective(float fovy, float aspect, float zNear, float zFar,matrix_t projectionMatrix)
+{
+    float f  = (float)(1 / tan(fovy*DEG_TO_RAD/2));
+    
+    
+    projectionMatrix[0]= f/aspect;        projectionMatrix[4]= 0;        projectionMatrix[ 8]= 0;                                                                projectionMatrix[12]= 0;
+    projectionMatrix[1]= 0;                 projectionMatrix[5]= f;        projectionMatrix[ 9]= 0;                                                                projectionMatrix[13]= 0;
+    projectionMatrix[2]= 0;                        projectionMatrix[6]= 0;        projectionMatrix[10]=(zFar+zNear)/(zNear-zFar) ;                projectionMatrix[14]= 2*(zFar*zNear)/(zNear-zFar);
+    projectionMatrix[3]= 0;                        projectionMatrix[7]=0;        projectionMatrix[11]=-1;                                                                projectionMatrix[15]= 0;
+}
+
+typedef float vec3_t[3];
+#define vectorClear( a )                ( (a)[ 0 ] = (a)[ 1 ] = (a)[ 2 ] = 0 )
+#define vectorNegate( a, b )        ( (b)[ 0 ] = -(a)[ 0 ], (b)[ 1 ] = -(a)[ 1 ], (b)[ 2 ] = -(a)[ 2 ] )
+#define vectorSet( v, x, y, z )        ( (v)[ 0 ] = ( x ), (v)[ 1 ] = ( y ), (v)[ 2 ] = ( z ) )
+#define vectorInverse( a )                ( (a)[ 0 ] = (-a)[ 0 ], (a)[ 1 ] = (-a)[ 1 ], (a)[ 2 ] = (-a)[ 2 ] )
+#define DotProduct( x, y )                        ( (x)[ 0 ] * (y)[ 0 ] + (x)[ 1 ] * (y)[ 1 ] + (x)[ 2 ] * (y)[ 2 ] )
+#define vectorSubtract( a, b, c )        ( (c)[ 0 ] = (a)[ 0 ] - (b)[ 0 ], (c)[ 1 ] = (a)[ 1 ] - (b)[ 1 ], (c)[ 2 ] = (a)[ 2 ] - (b)[ 2 ] )
+#define vectorAdd( a, b, c )                ( (c)[ 0 ] = (a)[ 0 ] + (b)[ 0 ], (c)[ 1 ] = (a)[ 1 ] + (b)[ 1 ], (c)[ 2 ] = (a)[ 2 ] + (b)[ 2 ] )
+#define vectorCopy( a, b )                        ( (b)[ 0 ] = (a)[ 0 ], (b)[ 1 ] = (a)[ 1 ], (b)[ 2 ] = (a)[ 2 ] )
+#define        vectorScale( v, s, o )                ( (o)[ 0 ] = (v)[ 0 ] * (s),(o)[ 1 ] = (v)[ 1 ] * (s), (o)[ 2 ] = (v)[ 2 ] * (s) )
+#define        vectorMA( v, s, b, o )                ( (o)[ 0 ] = (v)[ 0 ] + (b)[ 0 ]*(s),(o)[ 1 ] = (v)[ 1 ] + (b)[ 1 ] * (s),(o)[ 2 ] = (v)[ 2 ] + (b)[ 2 ] * (s) )
+#define vector_Interpolate( vtarget, v1, value, v2 ) ( (vtarget)[0] = (v1)[0] * (1 - (value)) + (v2)[0] * (value),   (vtarget)[1] = (v1)[1] * (1 - (value)) + (v2)[1] * (value)  , (vtarget)[2] = (v1)[2] * (1 - (value)) + (v2)[2] * (value)  )
+
+
+void vectorCrossProduct( const vec3_t v1, const vec3_t v2, vec3_t cross )
+{
+    cross[ 0 ] = v1[ 1 ] * v2[ 2 ] - v1[ 2 ] * v2[ 1 ];                // X
+    cross[ 1 ] = v1[ 2 ] * v2[ 0 ] - v1[ 0 ] * v2[ 2 ];                // Y
+    cross[ 2 ] = v1[ 0 ] * v2[ 1 ] - v1[ 1 ] * v2[ 0 ];                // Z
+}
+
+// Long life to however came up with this. You rule man.
+float InvSqrt(float x)
+{
+    float xhalf = 0.5f*x;
+    int i = *(int*)&x;        // get bits for floating value
+    i = 0x5f3759df - (i>>1); // gives initial guess y0
+    x = *(float*)&i;        // convert bits back to float
+    x = x*(1.5f-xhalf*x*x); // Newton step, repeating increases accuracy
+    return x;
+}
+
+void normalize(vec3_t v)
+{
+    float ilength;
+    //float length;
+    //length = (float)sqrt( v[ 0 ] * v[ 0 ] + v[ 1 ] * v[ 1 ] + v[ 2 ] * v[ 2 ] );
+    
+    ilength = InvSqrt(v[ 0 ] * v[ 0 ] + v[ 1 ] * v[ 1 ] + v[ 2 ] * v[ 2 ]);
+    //        printf("Length = %.3f\n",length);
+    
+    //if( length )
+    //{
+    //ilength = 1 / length;
+    v[ 0 ] *= ilength;
+    v[ 1 ] *= ilength;
+    v[ 2 ] *= ilength;
+    //}
 }
 
 
+
+
+void gluLookAt(  vec3_t vEye,  vec3_t vLookat, vec3_t vUp ,matrix_t fModelView)
+{
+    vec3_t vN,vU,vV;
+    
+    // determine the new n
+    vectorSubtract(vEye,vLookat,vN);
+    
+    // determine the new u by crossing with the up vector
+    vectorCrossProduct(vUp, vN, vU) ;
+    
+    // normalize both the u and n vectors
+    normalize(vU) ;
+    normalize(vN);
+    
+    // determine v by crossing n and u
+    vectorCrossProduct(vN,vU,vV);
+    
+    // create a model view matrix
+    fModelView[0] = vU[0];                                        fModelView[4] = vU[1];                                        fModelView[8] = vU[2];                                        fModelView[12] = - DotProduct(vEye,vU);
+    fModelView[1] = vV[0];                                        fModelView[5] = vV[1];                                        fModelView[9] = vV[2];                                        fModelView[13] = - DotProduct(vEye,vV);
+    fModelView[2] = vN[0];                                        fModelView[6] = vN[1];                                        fModelView[10]= vN[2];                                        fModelView[14]=  - DotProduct(vEye,vN);
+    fModelView[3]=        0.0f;                                        fModelView[7]= 0.0f;                                        fModelView[11]= 0.0f;                                        fModelView[15]= 1.0f;
+    
+}
+
+void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
+    
+    //Make sure all textures are within the GPU
+    //We cannot load the texture within glBegin: Preload them here
+    for (int i=0 ; i < object->numUVs; i++){
+        uvxyEntry* textInfo = &object->uvs[i];
+        Texture* texture = &object->textures[textInfo->textureID];
+        texture->GetTextureID();
+    }
+    
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    matrix_t projectionMatrix;
+    gluPerspective(50.0f,this->width/(float)this->height,0.1f,10000.0f,projectionMatrix);
+    glLoadMatrixf(projectionMatrix);
+    
+    running = true;
+    float counter=0;
+    while (running) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        matrix_t modelViewMatrix;
+        
+        vec3_t position;
+        position[0]= 28*cos(counter);
+        position[1]= 10;
+        position[2]= 28*sin(counter);
+        counter += 0.005;
+        
+        vec3_t vLookat;
+        vLookat[0]= 0;
+        vLookat[1]= 0;
+        vLookat[2]= 0;
+        
+        vec3_t up;
+        up[0]= 0;
+        up[1]= 1;
+        up[2]= 0;
+        
+        gluLookAt(position, vLookat, up, modelViewMatrix);
+        glLoadMatrixf(modelViewMatrix);
+        
+        DrawModel(object,USE_DEFAULT_PALETTE, lodLevel );
+        SDL_GL_SwapWindow(sdlWindow);
+        PumpEvents();
+    }
+    
+}

@@ -23,11 +23,15 @@ void testJet(void){
     const char* trePath = "OBJECTS.TRE";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\A-10.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\EJECSEAT.IFF";
-    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIRAGE.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-22.IFF";
+    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15AB.IFF";
     
     // Let's open the TRE archive.
     TreArchive treArchive;
     treArchive.InitFromFile(trePath);
+    treArchive.List(stdout);
     
     // Let's open the jet IFF file in that archive
     TreEntry* iffJet = treArchive.GetEntryByName(jetPath);
@@ -48,12 +52,13 @@ void testJet(void){
     if (lexer.GetChunkByID('APPR') != NULL){
         ;//printf("This object does have an appearance.\n");
     }
-    else
+    else{
         printf("This object does NOT have an appearance !!\n");
-    
+        return;
+    }
     
     //Render it !
-    \
+    
     renderer.Init(1024,768);
     renderer.SetTitle(jetPath);
     
@@ -63,7 +68,7 @@ void testJet(void){
     
     RSEntity jet;
     jet.InitFromIFF(&jetIffLexer);
-    renderer.ShowModel(&jet, Renderer::USE_DEFAULT_PALETTE,0);
+    renderer.DisplayModel(&jet,LOD_LEVEL_MAX);
      
 }
 
