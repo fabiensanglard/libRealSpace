@@ -17,6 +17,9 @@ RSEntity::~RSEntity(){
     
 }
 
+void RSEntity::SetPalette(VGAPalette* palette){
+    this->palette = palette;
+}
 
 void RSEntity::ParseTXMP(IffChunk* chunk){
 

@@ -51,7 +51,13 @@ public:
     char name[8];
     uint8_t* data;
     
+    //GPU stuff
+    enum Location {DISK = 1, RAM = 2, VRAM = 4};
+    uint32_t locFlag;
+    uint32_t id;
+    uint32_t GetTextureID(void);
     
+    //Run Length Encoding stuff
     void SetRLECenterCoo(int16_t left,int16_t right,int16_t top,int16_t bottom);
     uint8_t* rleCenter;
     int16_t left;

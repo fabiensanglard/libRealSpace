@@ -79,7 +79,7 @@ bool IffLexer::InitFromFile(const char* filepath){
     FILE* file = fopen(fullPath, "r");
     
     if (!file){
-        printf("Unable to open TRE archive: '%s'.\n",filepath);
+        printf("Unable to open IFF archive: '%s'.\n",filepath);
         return false;
     }
     

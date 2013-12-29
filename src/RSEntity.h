@@ -61,6 +61,9 @@ public:
     void AddLod(Lod* lod);
     void AddTriangle(Triangle* triangle);
     
+    void SetPalette(VGAPalette* palette);
+    
+    
     
     uint32_t numTextures;
     Texture textures[256];
@@ -78,6 +81,9 @@ public:
     uint32_t numTriangles;
     
 private:
+    
+    VGAPalette* palette;
+    
     
     void ParseVERT(IffChunk* chunk);
     void ParseLVL(IffChunk* chunk);

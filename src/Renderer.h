@@ -24,9 +24,14 @@ public:
 
     void ShowPalette(VGAPalette* palette);
     void ShowImage(uint8_t* image, uint16_t width, uint16_t height,VGAPalette* palette,int zoom,bool wait);
-    void ShowModel(RSEntity* object,VGAPalette* palette );
+    void ShowModel(RSEntity* object,VGAPalette* palette , size_t lodLevel);
     
     void SetTitle(const char* title);
+    
+    void UploadTextureToVRAM(Texture* texture, VGAPalette* palette);
+    void UnloadTextureToVRAM(Texture* texture);
+    
+    static  VGAPalette* const USE_DEFAULT_PALETTE;
     
 private:
     
@@ -37,6 +42,8 @@ private:
     int32_t height;
     
     uint8_t* backBuffer;
+    
+    VGAPalette defaultPalette;
 };
 
 

@@ -11,21 +11,33 @@
 
 
 Texture::Texture()
- : data(0)
+ : data(0),
+  locFlag(DISK)
 
 {
     
 }
 
 Texture::~Texture(){
-    free(data);
+    
+    
+    
+    if ((locFlag & VRAM)){
+        renderer.UnloadTextureToVRAM(this);
+        locFlag &= ~VRAM;
+    }
+    
+    if ((locFlag & RAM)){
+        free(data);
+        locFlag &= RAM;
+    }
 }
 
 void Texture::Set(const char name[8],uint32_t width,uint32_t height,uint8_t* data ){
     
     CreateEmpty(name,width,height);
     memcpy(this->data,data, width * height);
-    
+    locFlag = RAM;
 }
 
 void Texture::CreateEmpty(const char name[8],uint32_t width,uint32_t height){
@@ -34,9 +46,20 @@ void Texture::CreateEmpty(const char name[8],uint32_t width,uint32_t height){
     this->width = width;
     this->height = height;
     this->data = (uint8_t*)malloc(width*height);
-    
+    locFlag = RAM;
 }
 
+uint32_t Texture::GetTextureID(void){
+    
+    if ((locFlag & VRAM) == 0){
+        
+        renderer.UploadTextureToVRAM(this,Renderer::USE_DEFAULT_PALETTE);
+        
+        locFlag |= VRAM;
+    }
+    
+    return this->id;
+}
 
 void Texture::SetRLECenterCoo(int16_t left,int16_t right,int16_t top,int16_t bottom){
 

@@ -21,9 +21,9 @@ void testTRE(void){
 void testJet(void){
     
     const char* trePath = "OBJECTS.TRE";
-    const char* jetPath = "..\\..\\DATA\\OBJECTS\\A-10.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\A-10.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\EJECSEAT.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
+    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
     
     // Let's open the TRE archive.
     TreArchive treArchive;
@@ -53,16 +53,7 @@ void testJet(void){
     
     
     //Render it !
-    //Get the game palette
-     IffLexer paletteLexer ;
-     paletteLexer.InitFromFile("PALETTE.IFF");
-     //paletteLexer.List(stdout);
-     
-     RSPalette palette;
-     palette.InitFromIFF(&paletteLexer);
-     VGAPalette* vgaPalette = palette.GetColorPalette();
-    
-    
+    \
     renderer.Init(1024,768);
     renderer.SetTitle(jetPath);
     
@@ -72,7 +63,7 @@ void testJet(void){
     
     RSEntity jet;
     jet.InitFromIFF(&jetIffLexer);
-    renderer.ShowModel(&jet, vgaPalette);
+    renderer.ShowModel(&jet, Renderer::USE_DEFAULT_PALETTE,0);
      
 }
 

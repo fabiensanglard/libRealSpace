@@ -11,20 +11,36 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_opengl.h"
 
+
+
+
 Renderer renderer;
 
 static SDL_Window *sdlWindow;
 static SDL_Renderer *sdlRenderer;
 static SDL_Texture * sdlTexture;
 
+VGAPalette* const Renderer::USE_DEFAULT_PALETTE = NULL;
+
 Renderer::Renderer() :
    initialized(false){
+       
+    
 }
 
 Renderer::~Renderer(){
 }
 
 void Renderer::Init(int32_t width , int32_t height){
+    
+    //Load the default palette
+    IffLexer lexer ;
+    lexer.InitFromFile("PALETTE.IFF");
+    lexer.List(stdout);
+    
+    RSPalette palette;
+    palette.InitFromIFF(&lexer);
+    this->defaultPalette = *palette.GetColorPalette();
     
     this->width = width;
     this->height = height;
@@ -38,6 +54,15 @@ void Renderer::Init(int32_t width , int32_t height){
     
     backBuffer = (uint8_t*)calloc(width*height*4,1);
     
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        printf("Unable to initialize SDL:  %s\n",SDL_GetError());
+        return ;
+    }
+    
+    sdlWindow = SDL_CreateWindow("RealSpace OBJ Viewer",0,0,this->width,this->height,SDL_WINDOW_OPENGL);
+    
+    // Create an OpenGL context associated with the window.
+    SDL_GL_CreateContext(sdlWindow);
     
     SDL_HideWindow(sdlWindow);
 
@@ -193,23 +218,59 @@ void Renderer::ShowImage(uint8_t* image, uint16_t imageWidth, uint16_t imageHeig
 
 
 
-
-
-
-void Renderer::ShowModel(RSEntity* object,VGAPalette* palette ){
+void Renderer::UploadTextureToVRAM(Texture* texture, VGAPalette* palette){
     
-    //Create a window with OpenGL
-    SDL_Window* window = NULL;
+    if (!initialized)
+        return;
     
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        printf("Unable to initialize SDL:  %s\n",SDL_GetError());
-        return ;
+    if (palette == USE_DEFAULT_PALETTE)
+        palette = &this->defaultPalette;
+    
+    //Convert texture from VGA to RGBA using the palette
+    uint8_t* rgbaData = (uint8_t*)malloc(4 * this->width * this->height);
+    
+    uint8_t* rgbaDst = rgbaData;
+    for(int i=0 ; i < this->height * this->width ; i++){
+        
+        const Texel* texel;
+        texel = palette->GetRGBColor(texture->data[i]);
+        *rgbaDst++ = texel->r;
+        *rgbaDst++ = texel->g;
+        *rgbaDst++ = texel->b;
+        *rgbaDst++ = texel->a;
     }
     
-    window = SDL_CreateWindow("RealSpace OBJ Viewer",0,0,this->width,this->height,SDL_WINDOW_OPENGL);
+    glGenTextures(1, &texture->id);
+    glBindTexture(GL_TEXTURE_2D, texture->id);
     
-    // Create an OpenGL context associated with the window.
-    SDL_GL_CreateContext(window);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    
+    
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
+    
+    free(rgbaData);
+}
+
+void Renderer::UnloadTextureToVRAM(Texture* texture){
+    glDeleteTextures(1, &texture->id);
+}
+
+
+void Renderer::ShowModel(RSEntity* object,VGAPalette* palette, size_t lodLevel ){
+    
+    if (palette== USE_DEFAULT_PALETTE)
+        palette=&defaultPalette;
+    
+    if (lodLevel >= object->numLods){
+        printf("Unable to render this Level Of Details (out of range): Max level is  %d\n",object->numLods-1);
+        return;
+    }
+        
+    
+    
     
     glViewport(0,0,this->width,this->height);			// Reset The Current Viewport
 	glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
@@ -231,26 +292,28 @@ void Renderer::ShowModel(RSEntity* object,VGAPalette* palette ){
 	glDisable(GL_DEPTH_TEST);							// Disable Depth Testing
     
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     
     
-    
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     glDisable(GL_CULL_FACE);
     
-    SDL_ShowWindow(window);
+    SDL_ShowWindow(sdlWindow);
 
     //Draw
     glBegin(GL_TRIANGLES);
     //glPointSize(3.2);
     //glBegin(GL_POINTS);
-    for(int i = 1 ; i < object->lods[0].numTriangles ; i++){
+    for(int i = 1 ; i < object->lods[lodLevel].numTriangles ; i++){
         
-        uint16_t triangleID = object->lods[0].triangleIDs[i];
+        uint16_t triangleID = object->lods[lodLevel].triangleIDs[i];
         
         Triangle* triangle = &object->triangles[triangleID];
         
         const Texel* texel = palette->GetRGBColor(triangle->color);
         glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,texel->a/255.0f);
+        
         
         glVertex3f(object->vertices[triangle->ids[0]].y,
                    object->vertices[triangle->ids[0]].z,
@@ -267,13 +330,55 @@ void Renderer::ShowModel(RSEntity* object,VGAPalette* palette ){
     }
     glEnd();
     
+    
+    //We cannot load the texture within glBegin: Preload them here
+    for (int i=0 ; i < object->numUVs; i++){
+        uvxyEntry* textInfo = &object->uvs[i];
+        Texture* texture = &object->textures[textInfo->textureID];
+        texture->GetTextureID();
+    }
+    
+    //Pass two for the textures:
+    if (lodLevel == 0){
+        glEnable(GL_TEXTURE_2D);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+        
+        glDepthFunc(GL_EQUAL);
+        
+        for (int i=0 ; i < object->numUVs; i++) {
+            
+            uvxyEntry* textInfo = &object->uvs[i];
+            
+            Texture* texture = &object->textures[textInfo->textureID];
+            
+            glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
+            
+            Triangle* triangle = &object->triangles[textInfo->triangleID];
+            
+            glBegin(GL_TRIANGLES);
+            for(int j=0 ; j < 3 ; j++){
+            glTexCoord2f(textInfo->uvs[j].u/(float)texture->width, textInfo->uvs[j].v/(float)texture->height);
+            glVertex3f(object->vertices[triangle->ids[j]].y,
+                       object->vertices[triangle->ids[j]].z,
+                       object->vertices[triangle->ids[j]].x);
+            }
+            glEnd();
+            
+        }
+        
+        
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+    }
+    
     /*TODO !!!!
-       - Figure out texture (likely a second pass).
+       - The pilot texture doesn't draw ?!?!?
        - Figure out transluctancy (for cockpit glass).
        - Make the camera rotate like the Object Viewer in Strike Commander
     */
     
-    SDL_GL_SwapWindow(window);
+    SDL_GL_SwapWindow(sdlWindow);
     
     PumpEvents();
 }
