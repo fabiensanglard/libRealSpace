@@ -24,6 +24,7 @@ public:
 
     
     ByteStream(uint8_t* cursor);
+    ByteStream(ByteStream& stream);
     ByteStream();
     ~ByteStream();
     

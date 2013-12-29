@@ -59,118 +59,149 @@ bool IffLexer::InitFromRAM(uint8_t* data, size_t size){
     return true;
 }
 
-size_t IffLexer::ParseChunk(){
-    
-    IffChunk chunk;
-    chunk.id = stream.ReadUInt32LE();
-    
-    if (!strncmp(chunk.textId,"FORM",4)){
-        return ParseFORM();
-    }
-    
-    else if (!strncmp(chunk.textId,"CAT ",4)){
-        return ParseCAT();
-    }
-    
-    else if (!strncmp(chunk.textId,"LIST",4)){
-        return ParseLIST();
-    }
-    else{
-        
-        //Unknow chunk :( !
-        //Check if we have a hander.
-        chunk.size = stream.ReadUInt32BE();
-
-        if (chunk.size % 2 != 0)
-            chunk.size++;
-        
-        //Skip this content
-        chunk.data = stream.GetPosition();
-        
-        stream.MoveForward(chunk.size);
-        
-        chunks[chunk.id] = chunk;
-        
-        printf("%4s\n",chunk.textId);
-        
-        return chunk.size;
-    }
+void Tab(int tab){
+    for(int i=0 ; i <tab ;i++)
+        putchar('   ');
 }
 
-size_t IffLexer::ParseFORM(){
+void PrintGetChunkIdText(uint32_t id,int tab){
+    char*idTetx = (char*)&id;
     
-    uint32_t chunkSize ;
-    chunkSize= stream.ReadUInt32BE();
+    Tab(tab);
+    
+    for(int i=3 ; i >=0 ;i--)
+        putchar(idTetx[i]);
+    
+    putchar('\n');
+}
 
-    //Sub ID
+
+
+size_t IffLexer::ParseFORM(int tabs){
+    
+    
+    
     IffChunk chunk;
-    chunk.id = stream.ReadUInt32LE();
+    
+    //FORM id
+    stream.ReadUInt32BE();
+    
+    chunk.size = stream.ReadUInt32BE();
+    if (chunk.size % 2 != 0)
+        chunk.size++;
+    size_t bytesToParse = chunk.size;
+    
+    //Form subtype
+    chunk.id = stream.ReadUInt32BE();
     
     
-    size_t bytesToParse = chunkSize  ; //-4 beacuse of the subtype and chunkSize we just read
+    bytesToParse-=4;
+    
+    //PrintGetChunkIdText(chunk.id,tabs);
+    
+    Tab(tabs);
+    printf("FORM.");
+    
+    PrintGetChunkIdText(chunk.id,0);
+    
     while (bytesToParse > 0){
         
-        size_t lastChunkSize = ParseChunk();
+        Tab(tabs);
+        size_t byteParsed = ParseChunk(tabs+1);
+    
+        Tab(tabs);
         
-        bytesToParse -= lastChunkSize + CHUNK_HEADER_SIZE+4;
+        bytesToParse -= byteParsed;
     }
     
-    if (chunkSize % 2 != 0)
-        chunkSize++;
     
-    return chunkSize+CHUNK_HEADER_SIZE+4;
+    
+    return chunk.size+8;
 }
 
-size_t IffLexer::ParseCAT(){
+size_t IffLexer::ParseChunk(int tabs){
     
-    stream.ReadUInt32BE();
-    size_t chunkSize = stream.ReadUInt32BE();
-    stream.MoveForward(chunkSize);
+    ByteStream peek(stream);
     
-    printf("***Warning**** CAT not implemented.\n");
-    return chunkSize + CHUNK_HEADER_SIZE;
+    IffChunk chunk;
+    chunk.id = peek.ReadUInt32BE();
+    
+    switch (chunk.id) {
+        case 'FORM':
+            return ParseFORM(tabs+1);
+            break;
+        case 'CAT ':
+            return ParseFORM(tabs+1);
+            break;
+        case 'LIST':
+            return ParseFORM(tabs+1);
+            break;
+        case 'UVXY':
+            printf("UVXY");
+        default:
+        {
+            
+            chunk.id = stream.ReadUInt32BE();
+            
+            PrintGetChunkIdText(chunk.id,tabs+1);
+            //Unknow chunk :( !
+            //Check if we have a hander.
+            chunk.size = stream.ReadUInt32BE();
+            
+            if (chunk.size % 2 != 0)
+                chunk.size++;
+            
+            //That this chunk
+            chunk.data = stream.GetPosition();
+            stream.MoveForward(chunk.size);
+            
+            chunks[chunk.id] = chunk;
+            
+            
+            
+            return chunk.size+8;
+        }
+            break;
+    }
+    
+}
+
+size_t IffLexer::ParseCAT(int tabs){
+    return ParseFORM(tabs);
 }
 
 //Return how many bytes were moved forward
-size_t IffLexer::ParseLIST(){
-    
-    ByteStream stream(data);
-    
-    stream.ReadUInt32BE();
-    size_t chunkSize = stream.ReadUInt32BE();
-    
-    printf("***Warning**** LIST not implemented.\n");
-    return chunkSize + CHUNK_HEADER_SIZE;
+size_t IffLexer::ParseLIST(int tabs){
+    return ParseFORM(tabs);
 }
 
 void IffLexer::Parse(void){
     
     size_t bytesToParse = this->size;
     
+    
+    ByteStream peek(stream);
+    uint32_t header = peek.ReadUInt32BE();
+    
+    switch (header) {
+        case 'FORM':
+        case 'CAR ':
+        case 'LIST':
+            break;
+        default:
+        {
+            printf("ERROR, this is not an IFF file.\n");
+            return;
+            break;
+        }
+    }
+    
+   
     while(bytesToParse > 0){
         
-        size_t byteParsed =0;
-        
-        IffChunk chunk;
-        chunk.id = stream.ReadUInt32LE();
-        bytesToParse-=4;
-        
-        //Check this is a FORM
-        if (!strncmp(chunk.textId,"FORM",4)){
-            byteParsed= ParseFORM();
-        }
-        
-        else if (!strncmp(chunk.textId,"CAT ",4)){
-            byteParsed= ParseCAT();
-        }
-        
-        else if (!strncmp(chunk.textId,"LIST",4)){
-            byteParsed= ParseLIST();
-        }
-        else{
-            //printf("This is not an IFF file !\n");
-            byteParsed = bytesToParse;
-        }
+        printf("bytesToParse %lu\n",bytesToParse);
+        size_t byteParsed =ParseChunk(0);
+        printf("byteParsed = %lu",byteParsed);
         bytesToParse -= byteParsed;
     }
 

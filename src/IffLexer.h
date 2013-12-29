@@ -11,13 +11,7 @@
 
 typedef struct{
     
-    // The ID can be access as text for printout or int for
-    // fast comparaison.
-    union{
-        char textId[4];
-        uint32_t id;
-    };
-    
+    uint32_t id;
     uint8_t* data;
     size_t size;
     
@@ -38,10 +32,10 @@ public:
     
 private:
     
-    size_t ParseChunk();
-    size_t ParseFORM();
-    size_t ParseCAT();
-    size_t ParseLIST();
+    size_t ParseChunk(int tabs);
+    size_t ParseFORM(int tabs);
+    size_t ParseCAT(int tabs);
+    size_t ParseLIST(int tabs);
     
     void Parse(void);
     std::map<uint32_t,IffChunk> chunks;

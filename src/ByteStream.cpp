@@ -13,6 +13,9 @@ ByteStream::ByteStream(uint8_t* cursor){
     this->cursor = cursor;
 }
 
+ByteStream::ByteStream(ByteStream& stream){
+    this->cursor = stream.cursor;
+}
 
 ByteStream::ByteStream(){
     
