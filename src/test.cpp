@@ -22,6 +22,8 @@ void testJet(void){
     
     const char* trePath = "OBJECTS.TRE";
     const char* jetPath = "..\\..\\DATA\\OBJECTS\\A-10.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\EJECSEAT.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
     
     // Let's open the TRE archive.
     TreArchive treArchive;
@@ -40,17 +42,38 @@ void testJet(void){
     IffLexer lexer ;
     lexer.InitFromRAM(iffJet->data,iffJet->size);
     
-    lexer.List(stdout);
+    //lexer.List(stdout);
     
     //Verify the object has an appearance
     if (lexer.GetChunkByID('APPR') != NULL){
-        printf("This object does have an appearance.\n");
+        ;//printf("This object does have an appearance.\n");
     }
     else
         printf("This object does NOT have an appearance !!\n");
     
-    //Render it !
     
+    //Render it !
+    //Get the game palette
+     IffLexer paletteLexer ;
+     paletteLexer.InitFromFile("PALETTE.IFF");
+     //paletteLexer.List(stdout);
+     
+     RSPalette palette;
+     palette.InitFromIFF(&paletteLexer);
+     VGAPalette* vgaPalette = palette.GetColorPalette();
+    
+    
+    renderer.Init(1024,768);
+    renderer.SetTitle(jetPath);
+    
+
+    IffLexer jetIffLexer;
+    jetIffLexer.InitFromRAM(iffJet->data,iffJet->size);
+    
+    RSEntity jet;
+    jet.InitFromIFF(&jetIffLexer);
+    renderer.ShowModel(&jet, vgaPalette);
+     
 }
 
 void testPalette(void){
@@ -87,18 +110,19 @@ int testShowPalette(void)
     
     RSPalette palette;
     palette.InitFromIFF(&lexer);
-    
+    VGAPalette* vgaPalette = palette.GetColorPalette();
     
     renderer.Init(1024,768);
     renderer.SetTitle(lexer.GetName());
     
-    renderer.ShowPalette(palette.GetColorPalette());
+    renderer.ShowPalette(vgaPalette);
     
     return 0;
 }
 
+
 int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
-    testShowPalette();
+    testJet();
 }

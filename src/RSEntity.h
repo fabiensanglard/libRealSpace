@@ -53,7 +53,7 @@ public:
     RSEntity();
     ~RSEntity();
     
-    void Parse(IffLexer* lexer);
+    void InitFromIFF(IffLexer* lexer);
     
     void AddTexture(Texture* texture);
     void AddVertex(Vertex* vertex);
@@ -76,6 +76,15 @@ public:
     
     Triangle triangles[65536];
     uint32_t numTriangles;
+    
+private:
+    
+    void ParseVERT(IffChunk* chunk);
+    void ParseLVL(IffChunk* chunk);
+    void ParseVTRI(IffChunk* chunk);
+    void ParseTXMS(IffChunk* chunk);
+    void ParseUVXY(IffChunk* chunk);
+    void ParseTXMP(IffChunk* chunk);
 };
 
 #endif /* defined(__libRealSpace__RSEntity__) */

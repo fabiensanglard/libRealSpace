@@ -60,6 +60,12 @@ public:
         return *i;
     }
     
+    inline int32_t ReadInt32LE(void){
+        int32_t* i = (int32_t*)cursor;
+        cursor+=4;
+        return *i;
+    }
+    
     inline uint32_t ReadUInt32BE(void){
         
         uint32_t toLittleEndian = 0;

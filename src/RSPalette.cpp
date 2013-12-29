@@ -107,22 +107,29 @@ void RSPalette::ParseCMAP(IffChunk* chunk){
 
 void RSPalette::InitFromIFF(IffLexer* lexer){
     
+    bool foundPalette = false;
     IffChunk* chunk = NULL;
     
     chunk = lexer->GetChunkByID('PALT');
     if (chunk != NULL){
+        foundPalette = true;
         this->ParsePALT(chunk);
     }
     
     chunk = lexer->GetChunkByID('BLWH');
     if (chunk != NULL){
+        foundPalette = true;
         this->ParseBLWH(chunk);
-        
     }
     
     chunk = lexer->GetChunkByID('CMAP');
     if (chunk != NULL){
+        foundPalette = true;
         this->ParseCMAP(chunk);
+    }
+    
+    if (!foundPalette){
+        printf("Error: Unable to find palette with lexer '%s'\n",lexer->GetName());
     }
     
 }
