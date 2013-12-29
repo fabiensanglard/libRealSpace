@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2D310906186FEAEA00D3443F /* RSPalette.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D310904186FEAEA00D3443F /* RSPalette.cpp */; };
 		2DFEFBAE186F5C84002305A9 /* TreArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */; };
 		2DFEFBB7186F655A002305A9 /* ByteStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBB5186F655A002305A9 /* ByteStream.cpp */; };
 		2DFEFBBA186F65FE002305A9 /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBB8186F65FE002305A9 /* Base.cpp */; };
@@ -27,6 +28,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2D310904186FEAEA00D3443F /* RSPalette.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSPalette.cpp; path = ../src/RSPalette.cpp; sourceTree = SOURCE_ROOT; };
+		2D310905186FEAEA00D3443F /* RSPalette.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSPalette.h; path = ../src/RSPalette.h; sourceTree = SOURCE_ROOT; };
 		2DFEFB7D186F5BEE002305A9 /* libRealSpace */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = libRealSpace; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DFEFB98186F5C84002305A9 /* precomp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = precomp.h; path = ../src/precomp.h; sourceTree = SOURCE_ROOT; };
 		2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TreArchive.cpp; path = ../src/TreArchive.cpp; sourceTree = SOURCE_ROOT; };
@@ -51,6 +54,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2D310903186FEAA900D3443F /* objects */ = {
+			isa = PBXGroup;
+			children = (
+				2D310905186FEAEA00D3443F /* RSPalette.h */,
+				2D310904186FEAEA00D3443F /* RSPalette.cpp */,
+			);
+			name = objects;
+			sourceTree = "<group>";
+		};
 		2DFEFB74186F5BED002305A9 = {
 			isa = PBXGroup;
 			children = (
@@ -70,6 +82,7 @@
 		2DFEFB7F186F5BEE002305A9 /* libRealSpace */ = {
 			isa = PBXGroup;
 			children = (
+				2D310903186FEAA900D3443F /* objects */,
 				2DFEFBC1186F7618002305A9 /* iff */,
 				2DFEFBB4186F654A002305A9 /* utils */,
 				2DFEFBB0186F5D36002305A9 /* archives */,
@@ -165,6 +178,7 @@
 				2DFEFBC0186F676A002305A9 /* test.cpp in Sources */,
 				2DFEFBAE186F5C84002305A9 /* TreArchive.cpp in Sources */,
 				2DFEFBB7186F655A002305A9 /* ByteStream.cpp in Sources */,
+				2D310906186FEAEA00D3443F /* RSPalette.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

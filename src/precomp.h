@@ -32,6 +32,8 @@ extern "C" {
     #include "TreArchive.h"
 
     #include "IffLexer.h"
+
+    #include "RSPalette.h"
 /*
  
     #include "Texture.h"
@@ -46,8 +48,6 @@ extern "C" {
     #include "gfx.h"
     #include "pak.h"
 
-    #include "RealSpacePaletteObject.h"
-    #include "IFFChunkReaderPalette.h"
 
 
     #include "IFFReader.h"

@@ -53,7 +53,16 @@ void testJet(void){
     
 }
 
-
+void testPalette(void){
+    
+    IffLexer lexer ;
+    lexer.InitFromFile("PALETTE.IFF");
+    
+    lexer.List(stdout);
+    
+    RSPalette palette;
+    palette.InitFromIFF(&lexer);
+}
 
 
 
@@ -61,5 +70,5 @@ void testJet(void){
 int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
-    testJet();
+    testPalette();
 }
