@@ -80,7 +80,7 @@ void Renderer::Init(int32_t width , int32_t height){
 	glMatrixMode(GL_MODELVIEW);							// Select The Modelview Matrix
 	glLoadIdentity();									// Reset The Modelview Matrix
     
-	glClearColor(0.8f, 0.8f, 8.5f, 1.0f);				// Black Background
+	glClearColor(0.4f, 0.4f, 1.0f, 1.0f);				// Black Background
 	//glClearDepth(1.0f);								// Depth Buffer Setup
 	glDisable(GL_DEPTH_TEST);							// Disable Depth Testing
     
@@ -90,6 +90,21 @@ void Renderer::Init(int32_t width , int32_t height){
     
     SDL_HideWindow(sdlWindow);
 
+    camera.Init(50.0f,this->width/(float)this->height,0.1f,10000.0f);
+    
+    vec3_t lookAt = {0,0,0};
+    camera.SetLookAt(lookAt);
+    
+    vec3_t up = {0,1,0};
+    camera.SetUp(up);
+    
+    vec3_t position = {28,20,-28};
+    camera.SetPosition(position);
+    
+    
+    light[0] = 300;
+    light[1] = 300;
+    light[2] = 300;
     
     initialized = true;
 }
@@ -298,16 +313,17 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
     }
     
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    
     glDisable(GL_CULL_FACE);
     
     SDL_ShowWindow(sdlWindow);
 
-    //Draw
+    //Pass 1, draw color
+    if (1)
+    {
+    glDepthFunc(GL_LESS);
     glBegin(GL_TRIANGLES);
-    //glPointSize(3.2);
-    //glBegin(GL_POINTS);
-    for(int i = 1 ; i < object->lods[lodLevel].numTriangles ; i++){
+    for(int i = 0 ; i < object->lods[lodLevel].numTriangles ; i++){
         
         uint16_t triangleID = object->lods[lodLevel].triangleIDs[i];
         
@@ -316,11 +332,12 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         const Texel* texel = palette->GetRGBColor(triangle->color);
         glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,texel->a/255.0f);
         
-        
-        glVertex3f(object->vertices[triangle->ids[0]].y,
-                   object->vertices[triangle->ids[0]].z,
-                   object->vertices[triangle->ids[0]].x);
-        
+        for(int j=0 ; j < 3 ; j++)
+        glVertex4f(object->vertices[triangle->ids[j]].y,
+                   object->vertices[triangle->ids[j]].z,
+                   object->vertices[triangle->ids[j]].x,
+                   1.0f);
+        /*
         glVertex3f(object->vertices[triangle->ids[1]].y,
                    object->vertices[triangle->ids[1]].z,
                    object->vertices[triangle->ids[1]].x);
@@ -328,14 +345,16 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         glVertex3f(object->vertices[triangle->ids[2]].y,
                    object->vertices[triangle->ids[2]].z,
                    object->vertices[triangle->ids[2]].x);
-        
+        */
     }
     glEnd();
-    
+    }
     
     
     
     //Pass two for the textures:
+    if (1)
+    {
     if (lodLevel == 0){
         glEnable(GL_TEXTURE_2D);
         glEnable(GL_BLEND);
@@ -368,10 +387,113 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
     }
+    }
+    
+    
+    
+    if (1){
+    //Pass 3: Let's makde a gouraud pass.
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA,GL_SRC_ALPHA);
+    
+    //We only write a pixel if the depth is EQUAL to what is in the depth buffer.
+    glDepthFunc(GL_EQUAL);
+        
+    //glDepthFunc(GL_LESS);
+        
+        Lod* lod = &object->lods[lodLevel] ;
+    for(int i = 0 ; i < lod->numTriangles ; i++){
+        
+        uint16_t triangleID = lod->triangleIDs[i];
+        
+        Triangle* triangle = &object->triangles[triangleID];
+        
+        //Calculate the normal for this triangle
+        vec3_t edge1 ;
+        edge1[0] = object->vertices[triangle->ids[0]].y - object->vertices[triangle->ids[1]].y;
+        edge1[1] = object->vertices[triangle->ids[0]].z - object->vertices[triangle->ids[1]].z;
+        edge1[2] = object->vertices[triangle->ids[0]].x - object->vertices[triangle->ids[1]].x;
+        
+        vec3_t edge2 ;
+        edge2[0] = object->vertices[triangle->ids[2]].y - object->vertices[triangle->ids[1]].y;
+        edge2[1] = object->vertices[triangle->ids[2]].z - object->vertices[triangle->ids[1]].z;
+        edge2[2] = object->vertices[triangle->ids[2]].x - object->vertices[triangle->ids[1]].x;
+        
+        
+        
+        vec3_t normal ;
+        vectorCrossProduct(edge1, edge2, normal);
+        
+        // All normals are supposed to point outward in modern GPU but SC triangles
+        // don't have consistent winding. They can be CW or CCW (the back governal of a jet  is
+        // typically one triangle that must be visible from both sides !
+        // As a result, gouraud shading was probably performed in screen space.
+        // How can we replicate this ?
+        //        - Take the normal and compare it to the sign of the direction to the camera.
+        //        - If the signs don't match: reverse the normal.
+        normalize(normal);
+        
+        vec3_t cameraPosition;
+        camera.GetPosition(cameraPosition);
+        
+        vec3_t cameraDirection;
+        vec3_t vertexPositon;
+        vertexPositon[0] = object->vertices[triangle->ids[0]].y;
+        vertexPositon[1] = object->vertices[triangle->ids[0]].z;
+        vertexPositon[2] = object->vertices[triangle->ids[0]].x;
+        
+        vectorSubtract(cameraPosition, vertexPositon, cameraDirection);
+        normalize(cameraDirection);
+        
+        if (DotProduct(cameraDirection, normal) < 0){
+            vectorNegate(normal,normal);
+        }
+        
+        
+        glBegin(GL_TRIANGLES);
+        for(int j=0 ; j < 3 ; j++){
+            
+            
+            
+            vec3_t vertice;
+            vertice[0] = object->vertices[triangle->ids[j]].y;
+            vertice[1] = object->vertices[triangle->ids[j]].z;
+            vertice[2] = object->vertices[triangle->ids[j]].x;
+            
+            
+            
+            vec3_t sunDirection;
+            vectorSubtract(light, vertice, sunDirection);
+            normalize(sunDirection);
+            
+            float lambertianFactor = DotProduct(sunDirection,normal);
+            if (lambertianFactor < 0  )
+                lambertianFactor = 0;
+            
+            //lambertianFactor+=0.1f;
+            
+             int8_t gouraud = 255 * lambertianFactor;
+            
+            
+            //gouraud = 255;
+            
+            glColor4f(gouraud/255.0f, gouraud/255.0f, gouraud/255.0f,0.5f);
+            glVertex3f(object->vertices[triangle->ids[j]].y,
+                       object->vertices[triangle->ids[j]].z,
+                       object->vertices[triangle->ids[j]].x);
+        }
+        glEnd();
+        
+    }
+    
+    
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+    }
     
     /*TODO !!!!
-       - The pilot texture doesn't draw ?!?!?
-       - Figure out transluctancy (for cockpit glass).
+       - Figure out transluctancy (for cockpit glass): Pilot if not visible !.
        - Make the camera rotate like the Object Viewer in Strike Commander
     */
     
@@ -380,96 +502,9 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
     
 }
 
-typedef float matrix_t[16];
-#define DEG_TO_RAD (2.0f*M_PI/360.0f)
-void gluPerspective(float fovy, float aspect, float zNear, float zFar,matrix_t projectionMatrix)
-{
-    float f  = (float)(1 / tan(fovy*DEG_TO_RAD/2));
-    
-    
-    projectionMatrix[0]= f/aspect;        projectionMatrix[4]= 0;        projectionMatrix[ 8]= 0;                                                                projectionMatrix[12]= 0;
-    projectionMatrix[1]= 0;                 projectionMatrix[5]= f;        projectionMatrix[ 9]= 0;                                                                projectionMatrix[13]= 0;
-    projectionMatrix[2]= 0;                        projectionMatrix[6]= 0;        projectionMatrix[10]=(zFar+zNear)/(zNear-zFar) ;                projectionMatrix[14]= 2*(zFar*zNear)/(zNear-zFar);
-    projectionMatrix[3]= 0;                        projectionMatrix[7]=0;        projectionMatrix[11]=-1;                                                                projectionMatrix[15]= 0;
-}
-
-typedef float vec3_t[3];
-#define vectorClear( a )                ( (a)[ 0 ] = (a)[ 1 ] = (a)[ 2 ] = 0 )
-#define vectorNegate( a, b )        ( (b)[ 0 ] = -(a)[ 0 ], (b)[ 1 ] = -(a)[ 1 ], (b)[ 2 ] = -(a)[ 2 ] )
-#define vectorSet( v, x, y, z )        ( (v)[ 0 ] = ( x ), (v)[ 1 ] = ( y ), (v)[ 2 ] = ( z ) )
-#define vectorInverse( a )                ( (a)[ 0 ] = (-a)[ 0 ], (a)[ 1 ] = (-a)[ 1 ], (a)[ 2 ] = (-a)[ 2 ] )
-#define DotProduct( x, y )                        ( (x)[ 0 ] * (y)[ 0 ] + (x)[ 1 ] * (y)[ 1 ] + (x)[ 2 ] * (y)[ 2 ] )
-#define vectorSubtract( a, b, c )        ( (c)[ 0 ] = (a)[ 0 ] - (b)[ 0 ], (c)[ 1 ] = (a)[ 1 ] - (b)[ 1 ], (c)[ 2 ] = (a)[ 2 ] - (b)[ 2 ] )
-#define vectorAdd( a, b, c )                ( (c)[ 0 ] = (a)[ 0 ] + (b)[ 0 ], (c)[ 1 ] = (a)[ 1 ] + (b)[ 1 ], (c)[ 2 ] = (a)[ 2 ] + (b)[ 2 ] )
-#define vectorCopy( a, b )                        ( (b)[ 0 ] = (a)[ 0 ], (b)[ 1 ] = (a)[ 1 ], (b)[ 2 ] = (a)[ 2 ] )
-#define        vectorScale( v, s, o )                ( (o)[ 0 ] = (v)[ 0 ] * (s),(o)[ 1 ] = (v)[ 1 ] * (s), (o)[ 2 ] = (v)[ 2 ] * (s) )
-#define        vectorMA( v, s, b, o )                ( (o)[ 0 ] = (v)[ 0 ] + (b)[ 0 ]*(s),(o)[ 1 ] = (v)[ 1 ] + (b)[ 1 ] * (s),(o)[ 2 ] = (v)[ 2 ] + (b)[ 2 ] * (s) )
-#define vector_Interpolate( vtarget, v1, value, v2 ) ( (vtarget)[0] = (v1)[0] * (1 - (value)) + (v2)[0] * (value),   (vtarget)[1] = (v1)[1] * (1 - (value)) + (v2)[1] * (value)  , (vtarget)[2] = (v1)[2] * (1 - (value)) + (v2)[2] * (value)  )
-
-
-void vectorCrossProduct( const vec3_t v1, const vec3_t v2, vec3_t cross )
-{
-    cross[ 0 ] = v1[ 1 ] * v2[ 2 ] - v1[ 2 ] * v2[ 1 ];                // X
-    cross[ 1 ] = v1[ 2 ] * v2[ 0 ] - v1[ 0 ] * v2[ 2 ];                // Y
-    cross[ 2 ] = v1[ 0 ] * v2[ 1 ] - v1[ 1 ] * v2[ 0 ];                // Z
-}
-
-// Long life to however came up with this. You rule man.
-float InvSqrt(float x)
-{
-    float xhalf = 0.5f*x;
-    int i = *(int*)&x;        // get bits for floating value
-    i = 0x5f3759df - (i>>1); // gives initial guess y0
-    x = *(float*)&i;        // convert bits back to float
-    x = x*(1.5f-xhalf*x*x); // Newton step, repeating increases accuracy
-    return x;
-}
-
-void normalize(vec3_t v)
-{
-    float ilength;
-    //float length;
-    //length = (float)sqrt( v[ 0 ] * v[ 0 ] + v[ 1 ] * v[ 1 ] + v[ 2 ] * v[ 2 ] );
-    
-    ilength = InvSqrt(v[ 0 ] * v[ 0 ] + v[ 1 ] * v[ 1 ] + v[ 2 ] * v[ 2 ]);
-    //        printf("Length = %.3f\n",length);
-    
-    //if( length )
-    //{
-    //ilength = 1 / length;
-    v[ 0 ] *= ilength;
-    v[ 1 ] *= ilength;
-    v[ 2 ] *= ilength;
-    //}
-}
 
 
 
-
-void gluLookAt(  vec3_t vEye,  vec3_t vLookat, vec3_t vUp ,matrix_t fModelView)
-{
-    vec3_t vN,vU,vV;
-    
-    // determine the new n
-    vectorSubtract(vEye,vLookat,vN);
-    
-    // determine the new u by crossing with the up vector
-    vectorCrossProduct(vUp, vN, vU) ;
-    
-    // normalize both the u and n vectors
-    normalize(vU) ;
-    normalize(vN);
-    
-    // determine v by crossing n and u
-    vectorCrossProduct(vN,vU,vV);
-    
-    // create a model view matrix
-    fModelView[0] = vU[0];                                        fModelView[4] = vU[1];                                        fModelView[8] = vU[2];                                        fModelView[12] = - DotProduct(vEye,vU);
-    fModelView[1] = vV[0];                                        fModelView[5] = vV[1];                                        fModelView[9] = vV[2];                                        fModelView[13] = - DotProduct(vEye,vV);
-    fModelView[2] = vN[0];                                        fModelView[6] = vN[1];                                        fModelView[10]= vN[2];                                        fModelView[14]=  - DotProduct(vEye,vN);
-    fModelView[3]=        0.0f;                                        fModelView[7]= 0.0f;                                        fModelView[11]= 0.0f;                                        fModelView[15]= 1.0f;
-    
-}
 
 void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
     
@@ -484,7 +519,7 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     matrix_t projectionMatrix;
-    gluPerspective(50.0f,this->width/(float)this->height,0.1f,10000.0f,projectionMatrix);
+    camera.gluPerspective(projectionMatrix);
     glLoadMatrixf(projectionMatrix);
     
     running = true;
@@ -496,26 +531,31 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
         glLoadIdentity();
         matrix_t modelViewMatrix;
         
-        vec3_t position;
-        position[0]= 28*cos(counter);
-        position[1]= 10;
-        position[2]= 28*sin(counter);
-        counter += 0.005;
         
-        vec3_t vLookat;
-        vLookat[0]= 0;
-        vLookat[1]= 0;
-        vLookat[2]= 0;
         
-        vec3_t up;
-        up[0]= 0;
-        up[1]= 1;
-        up[2]= 0;
+        light[0]= 20*cos(counter);
+        light[1]= 10;
+        light[2]= 20*sin(counter);
+        counter += 0.02;
         
-        gluLookAt(position, vLookat, up, modelViewMatrix);
+        //camera.SetPosition(position);
+        
+        
+        camera.gluLookAt(modelViewMatrix);
         glLoadMatrixf(modelViewMatrix);
         
         DrawModel(object,USE_DEFAULT_PALETTE, lodLevel );
+        
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
+        glPointSize(6);
+        
+        glBegin(GL_POINTS);
+            glColor4f(1, 1,0 , 1);
+            glVertex3f(light[0],light[1], light[2]);
+        glEnd();
+        
         SDL_GL_SwapWindow(sdlWindow);
         PumpEvents();
     }

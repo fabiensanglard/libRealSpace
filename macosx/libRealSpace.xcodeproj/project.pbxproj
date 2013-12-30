@@ -13,6 +13,8 @@
 		2D310910187081F000D3443F /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D31090E187081F000D3443F /* Renderer.cpp */; };
 		2D3109131870830200D3443F /* RSEntity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D3109111870830200D3443F /* RSEntity.cpp */; };
 		2D31091518708A1200D3443F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D31091418708A1200D3443F /* OpenGL.framework */; };
+		2D9B61761871EDEA0071ACDA /* Matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B61741871EDEA0071ACDA /* Matrix.cpp */; };
+		2D9B61791871F8470071ACDA /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B61771871F8470071ACDA /* Camera.cpp */; };
 		2DFEFBAE186F5C84002305A9 /* TreArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */; };
 		2DFEFBB7186F655A002305A9 /* ByteStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBB5186F655A002305A9 /* ByteStream.cpp */; };
 		2DFEFBBA186F65FE002305A9 /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBB8186F65FE002305A9 /* Base.cpp */; };
@@ -44,6 +46,10 @@
 		2D3109111870830200D3443F /* RSEntity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSEntity.cpp; path = ../src/RSEntity.cpp; sourceTree = SOURCE_ROOT; };
 		2D3109121870830200D3443F /* RSEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSEntity.h; path = ../src/RSEntity.h; sourceTree = SOURCE_ROOT; };
 		2D31091418708A1200D3443F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		2D9B61741871EDEA0071ACDA /* Matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix.cpp; path = ../src/Matrix.cpp; sourceTree = SOURCE_ROOT; };
+		2D9B61751871EDEA0071ACDA /* Matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix.h; path = ../src/Matrix.h; sourceTree = SOURCE_ROOT; };
+		2D9B61771871F8470071ACDA /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Camera.cpp; sourceTree = SOURCE_ROOT; };
+		2D9B61781871F8470071ACDA /* Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = SOURCE_ROOT; };
 		2DFEFB7D186F5BEE002305A9 /* libRealSpace */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = libRealSpace; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DFEFB98186F5C84002305A9 /* precomp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = precomp.h; path = ../src/precomp.h; sourceTree = SOURCE_ROOT; };
 		2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TreArchive.cpp; path = ../src/TreArchive.cpp; sourceTree = SOURCE_ROOT; };
@@ -87,6 +93,10 @@
 				2D31090E187081F000D3443F /* Renderer.cpp */,
 				2D31090C18707F1500D3443F /* Texture.h */,
 				2D31090B18707F1500D3443F /* Texture.cpp */,
+				2D9B61751871EDEA0071ACDA /* Matrix.h */,
+				2D9B61741871EDEA0071ACDA /* Matrix.cpp */,
+				2D9B61781871F8470071ACDA /* Camera.h */,
+				2D9B61771871F8470071ACDA /* Camera.cpp */,
 			);
 			name = renderers;
 			sourceTree = "<group>";
@@ -207,7 +217,9 @@
 			files = (
 				2D310910187081F000D3443F /* Renderer.cpp in Sources */,
 				2D3109131870830200D3443F /* RSEntity.cpp in Sources */,
+				2D9B61761871EDEA0071ACDA /* Matrix.cpp in Sources */,
 				2DFEFBC4186F764E002305A9 /* IffLexer.cpp in Sources */,
+				2D9B61791871F8470071ACDA /* Camera.cpp in Sources */,
 				2DFEFBBA186F65FE002305A9 /* Base.cpp in Sources */,
 				2DFEFBC0186F676A002305A9 /* test.cpp in Sources */,
 				2D310909186FFD7800D3443F /* PakArchive.cpp in Sources */,

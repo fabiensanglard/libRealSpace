@@ -21,12 +21,12 @@ void testTRE(void){
 void testJet(void){
     
     const char* trePath = "OBJECTS.TRE";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\A-10.IFF";
+    const char* jetPath = "..\\..\\DATA\\OBJECTS\\A-10.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\EJECSEAT.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIRAGE.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-22.IFF";
-    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15AB.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15.IFF";
     
     // Let's open the TRE archive.
     TreArchive treArchive;

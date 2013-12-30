@@ -31,6 +31,9 @@ extern "C" {
     #include "ByteStream.h"
     #include "TreArchive.h"
 
+    #include <math.h>
+    #include "Matrix.h"
+    #include "Camera.h"
     #include "Texture.h"
     #include "Renderer.h"
 

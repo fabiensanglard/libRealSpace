@@ -46,6 +46,9 @@ private:
     
     VGAPalette defaultPalette;
     bool running;
+    
+    Camera camera;
+    vec3_t light;
 };
 
 
