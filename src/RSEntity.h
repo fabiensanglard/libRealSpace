@@ -33,7 +33,7 @@ typedef struct uvxyEntry{
 
 typedef struct Triangle{
     
-    uint8_t flag0;
+    uint8_t property;
     uint8_t ids[3];
     
     uint8_t color;
@@ -83,6 +83,8 @@ public:
     
     Triangle triangles[65536];
     uint32_t numTriangles;
+    
+    enum Property { TRANSPARENT = 0x02};
     
 private:
     

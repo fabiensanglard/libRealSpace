@@ -98,7 +98,7 @@ void Renderer::Init(int32_t width , int32_t height){
     vec3_t up = {0,1,0};
     camera.SetUp(up);
     
-    vec3_t position = {28,20,-28};
+    vec3_t position = {18,10,-18};
     camera.SetPosition(position);
     
     
@@ -185,6 +185,12 @@ void Renderer::PumpEvents(void){
                         running = false;
                         return;
                     }
+                    if (SDLK_p == event.key.keysym.sym){
+                        paused = !paused;
+                        return;
+                    }
+                    
+                    
                     printf("%d\n",event.key.keysym.sym);
                     
                     
@@ -319,48 +325,57 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
     SDL_ShowWindow(sdlWindow);
 
     //Pass 1, draw color
-    if (1)
-    {
+   
+    //Pass two for the textures:
+    
     glDepthFunc(GL_LESS);
-    glBegin(GL_TRIANGLES);
+    
     for(int i = 0 ; i < object->lods[lodLevel].numTriangles ; i++){
         
         uint16_t triangleID = object->lods[lodLevel].triangleIDs[i];
         
         Triangle* triangle = &object->triangles[triangleID];
         
+        if (triangle->property == RSEntity::TRANSPARENT)
+            continue;
+        
         const Texel* texel = palette->GetRGBColor(triangle->color);
         glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,texel->a/255.0f);
         
+        glBegin(GL_TRIANGLES);
         for(int j=0 ; j < 3 ; j++)
-        glVertex4f(object->vertices[triangle->ids[j]].y,
+        glVertex4f(object->vertices[triangle->ids[j]].x,
+                   object->vertices[triangle->ids[j]].y,
                    object->vertices[triangle->ids[j]].z,
-                   object->vertices[triangle->ids[j]].x,
                    1.0f);
-        /*
-        glVertex3f(object->vertices[triangle->ids[1]].y,
-                   object->vertices[triangle->ids[1]].z,
-                   object->vertices[triangle->ids[1]].x);
+        glEnd();
         
-        glVertex3f(object->vertices[triangle->ids[2]].y,
-                   object->vertices[triangle->ids[2]].z,
-                   object->vertices[triangle->ids[2]].x);
+        /*
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        SDL_GL_SwapWindow(sdlWindow);
+        SDL_GL_SwapWindow(sdlWindow);
+        SDL_GL_SwapWindow(sdlWindow);
+        paused=true;
+        while(paused){
+            //SDL_GL_SwapWindow(sdlWindow);
+            PumpEvents();
+        }
         */
     }
-    glEnd();
-    }
     
     
     
-    //Pass two for the textures:
-    if (1)
-    {
+    
+    
     if (lodLevel == 0){
         glEnable(GL_TEXTURE_2D);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         
         glDepthFunc(GL_EQUAL);
+        
+        glAlphaFunc ( GL_GREATER, 0.0 ) ;
+        glEnable ( GL_ALPHA_TEST ) ;
         
         for (int i=0 ; i < object->numUVs; i++) {
             
@@ -374,12 +389,13 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
             
             glBegin(GL_TRIANGLES);
             for(int j=0 ; j < 3 ; j++){
-            glTexCoord2f(textInfo->uvs[j].u/(float)texture->width, textInfo->uvs[j].v/(float)texture->height);
-            glVertex3f(object->vertices[triangle->ids[j]].y,
-                       object->vertices[triangle->ids[j]].z,
-                       object->vertices[triangle->ids[j]].x);
+                glTexCoord2f(textInfo->uvs[j].u/(float)texture->width, textInfo->uvs[j].v/(float)texture->height);
+                glVertex3f(object->vertices[triangle->ids[j]].x,
+                           object->vertices[triangle->ids[j]].y,
+                           object->vertices[triangle->ids[j]].z);
             }
             glEnd();
+            
             
         }
         
@@ -387,7 +403,7 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
     }
-    }
+
     
     
     
@@ -411,14 +427,14 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         
         //Calculate the normal for this triangle
         vec3_t edge1 ;
-        edge1[0] = object->vertices[triangle->ids[0]].y - object->vertices[triangle->ids[1]].y;
-        edge1[1] = object->vertices[triangle->ids[0]].z - object->vertices[triangle->ids[1]].z;
-        edge1[2] = object->vertices[triangle->ids[0]].x - object->vertices[triangle->ids[1]].x;
+        edge1[0] = object->vertices[triangle->ids[0]].x - object->vertices[triangle->ids[1]].x;
+        edge1[1] = object->vertices[triangle->ids[0]].y - object->vertices[triangle->ids[1]].y;
+        edge1[2] = object->vertices[triangle->ids[0]].z - object->vertices[triangle->ids[1]].z;
         
         vec3_t edge2 ;
-        edge2[0] = object->vertices[triangle->ids[2]].y - object->vertices[triangle->ids[1]].y;
-        edge2[1] = object->vertices[triangle->ids[2]].z - object->vertices[triangle->ids[1]].z;
-        edge2[2] = object->vertices[triangle->ids[2]].x - object->vertices[triangle->ids[1]].x;
+        edge2[0] = object->vertices[triangle->ids[2]].x - object->vertices[triangle->ids[1]].x;
+        edge2[1] = object->vertices[triangle->ids[2]].y - object->vertices[triangle->ids[1]].y;
+        edge2[2] = object->vertices[triangle->ids[2]].z - object->vertices[triangle->ids[1]].z;
         
         
         
@@ -439,9 +455,9 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         
         vec3_t cameraDirection;
         vec3_t vertexPositon;
-        vertexPositon[0] = object->vertices[triangle->ids[0]].y;
-        vertexPositon[1] = object->vertices[triangle->ids[0]].z;
-        vertexPositon[2] = object->vertices[triangle->ids[0]].x;
+        vertexPositon[0] = object->vertices[triangle->ids[0]].x;
+        vertexPositon[1] = object->vertices[triangle->ids[0]].y;
+        vertexPositon[2] = object->vertices[triangle->ids[0]].z;
         
         vectorSubtract(cameraPosition, vertexPositon, cameraDirection);
         normalize(cameraDirection);
@@ -457,9 +473,9 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
             
             
             vec3_t vertice;
-            vertice[0] = object->vertices[triangle->ids[j]].y;
-            vertice[1] = object->vertices[triangle->ids[j]].z;
-            vertice[2] = object->vertices[triangle->ids[j]].x;
+            vertice[0] = object->vertices[triangle->ids[j]].x;
+            vertice[1] = object->vertices[triangle->ids[j]].y;
+            vertice[2] = object->vertices[triangle->ids[j]].z;
             
             
             
@@ -471,21 +487,22 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
             if (lambertianFactor < 0  )
                 lambertianFactor = 0;
             
-            //lambertianFactor+=0.1f;
+            lambertianFactor*=0.8f;
             
-             int8_t gouraud = 255 * lambertianFactor;
+            // int8_t gouraud = 255 * lambertianFactor;
             
             
             //gouraud = 255;
             
-            glColor4f(gouraud/255.0f, gouraud/255.0f, gouraud/255.0f,0.5f);
-            glVertex3f(object->vertices[triangle->ids[j]].y,
-                       object->vertices[triangle->ids[j]].z,
-                       object->vertices[triangle->ids[j]].x);
+            glColor4f(lambertianFactor, lambertianFactor, lambertianFactor,0.5f);
+            
+            glVertex3f(object->vertices[triangle->ids[j]].x,
+                       object->vertices[triangle->ids[j]].y,
+                       object->vertices[triangle->ids[j]].z);
         }
         glEnd();
-        
     }
+    
     
     
     glDisable(GL_TEXTURE_2D);
@@ -546,6 +563,8 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
         
         DrawModel(object,USE_DEFAULT_PALETTE, lodLevel );
         
+        //Render light
+        /*
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
@@ -555,6 +574,7 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
             glColor4f(1, 1,0 , 1);
             glVertex3f(light[0],light[1], light[2]);
         glEnd();
+        */
         
         SDL_GL_SwapWindow(sdlWindow);
         PumpEvents();

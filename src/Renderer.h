@@ -46,6 +46,7 @@ private:
     
     VGAPalette defaultPalette;
     bool running;
+    bool paused;
     
     Camera camera;
     vec3_t light;

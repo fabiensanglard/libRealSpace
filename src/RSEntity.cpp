@@ -83,13 +83,13 @@ void RSEntity::ParseVERT(IffChunk* chunk){
         Vertex vertex ;
         
         coo = stream.ReadInt32LE();
-        vertex.x = (coo>>8) + (coo&0x000000FF)/256.0;
+        vertex.z = (coo>>8) + (coo&0x000000FF)/255.0;
         
         coo = stream.ReadInt32LE();
-        vertex.y = (coo>>8) + (coo&0x000000FF)/256.0;
+        vertex.x = (coo>>8) + (coo&0x000000FF)/255.0;
         
         coo = stream.ReadInt32LE();
-        vertex.z = (coo>>8) + (coo&0x000000FF)/256.0;
+        vertex.y = (coo>>8) + (coo&0x000000FF)/255.0;
         AddVertex(&vertex);
     }
     
@@ -127,7 +127,7 @@ void RSEntity::ParseVTRI(IffChunk* chunk){
     Triangle triangle ;
     for (int i = 0; i < numTriangle ; i++) {
         
-        triangle.flag0 = stream.ReadByte();
+        triangle.property = stream.ReadByte();
         
         
         
@@ -138,7 +138,7 @@ void RSEntity::ParseVTRI(IffChunk* chunk){
         
         triangle.color = stream.ReadByte();
         
-        triangle.flags[1] = stream.ReadByte();
+        triangle.flags[0] = stream.ReadByte();
         triangle.flags[1] = stream.ReadByte();
         triangle.flags[2] = stream.ReadByte();
         

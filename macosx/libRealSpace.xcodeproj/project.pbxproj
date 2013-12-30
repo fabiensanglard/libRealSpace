@@ -48,8 +48,8 @@
 		2D31091418708A1200D3443F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		2D9B61741871EDEA0071ACDA /* Matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix.cpp; path = ../src/Matrix.cpp; sourceTree = SOURCE_ROOT; };
 		2D9B61751871EDEA0071ACDA /* Matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix.h; path = ../src/Matrix.h; sourceTree = SOURCE_ROOT; };
-		2D9B61771871F8470071ACDA /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Camera.cpp; sourceTree = SOURCE_ROOT; };
-		2D9B61781871F8470071ACDA /* Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = SOURCE_ROOT; };
+		2D9B61771871F8470071ACDA /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Camera.cpp; path = ../src/Camera.cpp; sourceTree = SOURCE_ROOT; };
+		2D9B61781871F8470071ACDA /* Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Camera.h; path = ../src/Camera.h; sourceTree = SOURCE_ROOT; };
 		2DFEFB7D186F5BEE002305A9 /* libRealSpace */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = libRealSpace; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DFEFB98186F5C84002305A9 /* precomp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = precomp.h; path = ../src/precomp.h; sourceTree = SOURCE_ROOT; };
 		2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TreArchive.cpp; path = ../src/TreArchive.cpp; sourceTree = SOURCE_ROOT; };
