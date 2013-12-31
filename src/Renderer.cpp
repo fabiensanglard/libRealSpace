@@ -180,12 +180,16 @@ void Renderer::PumpEvents(void){
             switch(event.type) {
                 case SDL_KEYDOWN :{
                     
-                    if (SDLK_ESCAPE == event.key.keysym.sym){
+                    SDL_Keycode keyCode = event.key.keysym.sym;
+                    
+                    if (SDLK_ESCAPE == keyCode){
                         SDL_HideWindow(sdlWindow);
                         running = false;
+                        exit(0);
                         return;
                     }
-                    if (SDLK_p == event.key.keysym.sym){
+                    if (SDLK_p == keyCode ||
+                        SDLK_SPACE == keyCode){
                         paused = !paused;
                         return;
                     }
@@ -212,6 +216,10 @@ void Renderer::PumpEvents(void){
 
 void Renderer::DrawImage(uint8_t* image, uint16_t imageWidth, uint16_t imageHeight,VGAPalette* palette,int zoom){
     
+    
+    if (palette== USE_DEFAULT_PALETTE)
+        palette=&defaultPalette;
+    
     //Need to copy all images in the offscreen buffer
     if (imageWidth*zoom > this->width ||
         imageHeight*zoom > this->height)
@@ -232,12 +240,17 @@ void Renderer::DrawImage(uint8_t* image, uint16_t imageWidth, uint16_t imageHeig
             float widthCoef =  j/((float)imageWidth *zoom) ;
             float heightCoef = i/((float)imageHeight*zoom) ;
             
-            const Texel* src = palette->GetRGBColor( *(image +
-                                                       (int)( widthCoef  *imageWidth ) +
-                                                       (int)( heightCoef *imageHeight) * this->width
-                                                       
-                                                       )
-                                                    );
+            uint8_t* srcIndex = image +
+            (int)( widthCoef  *imageWidth ) +
+            (int)( heightCoef *imageHeight) * imageWidth;
+            
+            if (srcIndex <image || srcIndex>= image+imageWidth*imageHeight ){
+                printf("Trying to access outside the image.\n");
+                
+            }
+            
+            const Texel* src = palette->GetRGBColor( *srcIndex);
+            
             if (src->a != 0){
                 dst[0] = src->a;
                 dst[1] = src->b;
@@ -256,7 +269,9 @@ void Renderer::DrawImage(uint8_t* image, uint16_t imageWidth, uint16_t imageHeig
     SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
     SDL_RenderPresent(sdlRenderer);
     
-    if (running)
+    paused = true;
+    
+    while (paused)
         PumpEvents();
 }
 
@@ -279,7 +294,7 @@ void Renderer::UploadTextureToVRAM(Texture* texture, VGAPalette* palette){
     uint8_t* rgbaData = (uint8_t*)malloc(4 * this->width * this->height);
     
     uint8_t* rgbaDst = rgbaData;
-    for(int i=0 ; i < this->height * this->width ; i++){
+    for(int i=0 ; i < texture->height * texture->width ; i++){
         
         const Texel* texel;
         texel = palette->GetRGBColor(texture->data[i]);

@@ -9,7 +9,8 @@
 #include "precomp.h"
 
 
-PakArchive::PakArchive(){
+PakArchive::PakArchive() :
+    initalizedFromFile(false){
     
 }
 
@@ -84,9 +85,9 @@ bool PakArchive::InitFromFile(const char* filepath){
     uint8_t* fileData = new uint8_t[fileSize];
     fread(fileData, 1, fileSize, file);
     
-    strcpy(this->path, filepath);
+    initalizedFromFile = true;
     
-    InitFromRAM(fileData,fileSize);
+    InitFromRAM(filepath,fileData,fileSize);
     
     
     fclose(file);
@@ -95,10 +96,9 @@ bool PakArchive::InitFromFile(const char* filepath){
 
 }
 
-void PakArchive::InitFromRAM(uint8_t* data, size_t size){
+void PakArchive::InitFromRAM(const char* name,uint8_t* data, size_t size){
     
-    if (this->path[0] == '\0')
-        strcpy(this->path, "From RAM");
+    strcpy(this->path,name);
     
     this->data = data;
     this->size = size;
@@ -109,10 +109,10 @@ void PakArchive::InitFromRAM(uint8_t* data, size_t size){
 
 }
 
-bool PakArchive::Decompress(const char* dstDirectory){
+bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
     
     const char* suffix = ".CONTENT/";
-    const char* filePattern = "FILE%d.UNKNOWN";
+    const char* filePattern = "FILE%d.%s";
     char fullDstPath[512];
     
     for( size_t i = 0 ; i < this->entries.size() ; i++){
@@ -133,7 +133,7 @@ bool PakArchive::Decompress(const char* dstDirectory){
         strcat(fullDstPath, suffix);
         
         
-        sprintf(fullDstPath+strlen(fullDstPath),filePattern,i);
+        sprintf(fullDstPath+strlen(fullDstPath),filePattern,i,extension);
         
         //Make sure we have all the directories
         CreateDirectories(fullDstPath);
@@ -172,4 +172,9 @@ void PakArchive::List(FILE* output){
 
 void PakArchive::GuessContent(FILE* output){
     
+}
+
+
+char* PakArchive::GetName(void){
+    return this->path;
 }

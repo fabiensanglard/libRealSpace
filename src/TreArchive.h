@@ -33,7 +33,7 @@ public:
     ~TreArchive();
  
     bool InitFromFile(const char* filepath);
-    void InitFromRAM(uint8_t* data, size_t size);
+    void InitFromRAM(const char* name, uint8_t* data, size_t size);
     
     char* GetPath(void);
     

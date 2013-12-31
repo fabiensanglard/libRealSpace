@@ -17,6 +17,7 @@ TreArchive::TreArchive():
 }
 
 TreArchive::~TreArchive(){
+    
     if (initalizedFromFile)
         delete[] this->data;
     
@@ -48,9 +49,8 @@ bool TreArchive::InitFromFile(const char* filepath){
     uint8_t* fileData = new uint8_t[fileSize];
     fread(fileData, 1, fileSize, file);
     
-    strcpy(this->path, filepath);
     
-    InitFromRAM(fileData,fileSize);
+    InitFromRAM(filepath,fileData,fileSize);
     
     
     fclose(file);
@@ -58,10 +58,9 @@ bool TreArchive::InitFromFile(const char* filepath){
     return true;
 }
 
-void TreArchive::InitFromRAM(uint8_t* data, size_t size){
+void TreArchive::InitFromRAM(const char* name,uint8_t* data, size_t size){
     
-    if (this->path[0] == '\0')
-        strcpy(this->path, "From RAM");
+    strcpy(this->path, name);
     
     this->data = data;
     this->size = size;

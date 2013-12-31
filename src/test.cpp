@@ -43,14 +43,15 @@ void testJet(void){
         return;
     }
         
-    // Parse it.
-    IffLexer lexer ;
-    lexer.InitFromRAM(iffJet->data,iffJet->size);
     
-    //lexer.List(stdout);
+    
+    
+
+    IffLexer jetIffLexer;
+    jetIffLexer.InitFromRAM(iffJet->data,iffJet->size);
     
     //Verify the object has an appearance
-    if (lexer.GetChunkByID('APPR') != NULL){
+    if (jetIffLexer.GetChunkByID('APPR') != NULL){
         ;//printf("This object does have an appearance.\n");
     }
     else{
@@ -59,13 +60,8 @@ void testJet(void){
     }
     
     //Render it !
-    
-    renderer.Init(1024,768);
     renderer.SetTitle(jetPath);
     
-
-    IffLexer jetIffLexer;
-    jetIffLexer.InitFromRAM(iffJet->data,iffJet->size);
     
     RSEntity jet;
     jet.InitFromIFF(&jetIffLexer);
@@ -100,16 +96,61 @@ void testPAKDecompress(void){
     treArchive.List(stdout);
     
     //Find the sounds PAKS.
-    TreEntry* treEntry = treArchive.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1VOC.PAK");
+    const char* pakName = "..\\..\\DATA\\MIDGAMES\\MID1VOC.PAK";
+    TreEntry* treEntry = treArchive.GetEntryByName(pakName);
     
     
     PakArchive pakArchive;
-    pakArchive.InitFromRAM(treEntry->data, treEntry->size);
+    pakArchive.InitFromRAM(pakName,treEntry->data, treEntry->size);
     
     //Decompress it
-    pakArchive.Decompress(".");
+    pakArchive.Decompress(".","VOC");
 }
 
+void testShowAllTexturesPAK(void){
+    
+    
+    const char* trePath = "TEXTURES.TRE";
+    TreArchive treArchive;
+    treArchive.InitFromFile(trePath);
+    
+    //Find the texture PAKS.
+    TreEntry* treEntry = NULL;
+    const char* pakName = "..\\..\\DATA\\TXM\\TXMPACK.PAK";
+    treEntry = treArchive.GetEntryByName(pakName);
+    
+    PakArchive txmPakArchive;
+    txmPakArchive.InitFromRAM(pakName,treEntry->data, treEntry->size);
+    
+    RSMapTextureSet txmTextureSet ;
+    txmTextureSet.InitFromPAK(&txmPakArchive);
+    //txmTextureSet.List(stdout);
+    
+    //Show all textures
+    for(size_t i=0 ; i < txmTextureSet.GetNumTextures() ; i++ ){
+        printf("Drawing %lu.\n",i);
+        Texture* texture = txmTextureSet.GetTextureById(i);
+        renderer.DrawImage(texture->data,texture->width, texture->height,Renderer::USE_DEFAULT_PALETTE,2);
+    }
+    
+    
+    const char* accPakName = "..\\..\\DATA\\TXM\\ACCPACK.PAK";
+    treArchive.GetEntryByName(accPakName);
+    
+    PakArchive accPakArchive;
+    accPakArchive.InitFromRAM(accPakName,treEntry->data, treEntry->size);
+    //accPakArchive.List(stdout);
+    
+    //Show all textures
+    RSMapTextureSet accTextureSet ;
+    accTextureSet.InitFromPAK(&txmPakArchive);
+    //Show all textures
+    for(size_t i=0 ; i < accTextureSet.GetNumTextures() ; i++ ){
+        printf("Drawing %lu.\n",i);
+        Texture* texture = accTextureSet.GetTextureById(i);
+        renderer.DrawImage(texture->data,texture->width, texture->height,Renderer::USE_DEFAULT_PALETTE,2);
+    }
+}
 
 void testParsePAK(){
     PakArchive archive;
@@ -129,7 +170,7 @@ int testShowPalette(void)
     palette.InitFromIFF(&lexer);
     VGAPalette* vgaPalette = palette.GetColorPalette();
     
-    renderer.Init(1024,768);
+    
     renderer.SetTitle(lexer.GetName());
     
     renderer.ShowPalette(vgaPalette);
@@ -141,5 +182,10 @@ int testShowPalette(void)
 int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
-    testPAKDecompress();
+    
+    renderer.Init(1280,800);
+    testJet();
+    
+    //renderer.Init(320,200);
+    //testShowAllTexturesPAK();
 }

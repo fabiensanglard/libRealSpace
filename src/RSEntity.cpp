@@ -9,7 +9,13 @@
 #include "RSEntity.h"
 
 
-RSEntity::RSEntity(){
+RSEntity::RSEntity() :
+
+numTextures(0),
+numVertices(0),
+numUVs(0),
+numLods(0),
+numTriangles(0){
     
 }
 

@@ -25,10 +25,10 @@ public:
     ~PakArchive();
     
     bool InitFromFile(const char* filepath);
-    void InitFromRAM(uint8_t* data, size_t size);
+    void InitFromRAM(const char* name,uint8_t* data, size_t size);
     
 
-    bool Decompress(const char* dstDirectory);
+    bool Decompress(const char* dstDirectory, const char* extension);
     
     size_t GetNumEntries(void);
     PakEntry* GetEntry(size_t index);
@@ -37,6 +37,7 @@ public:
     
     void GuessContent(FILE* output);
     
+    char* GetName(void);
 private:
 
     ByteStream stream;
