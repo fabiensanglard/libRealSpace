@@ -46,7 +46,7 @@ extern "C" {
     #include "RSMusic.h"
     #include "RSSound.h"
     #include "RSMap.h"
-
+    #include "RSImageSet.h"
 
 
 
