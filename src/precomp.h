@@ -39,12 +39,16 @@ extern "C" {
 
     #include "IffLexer.h"
 
-    #include "RSPalette.h"
-    #include "RSEntity.h"
-
     #include "PakArchive.h"
 
- 
+    #include "RSPalette.h"
+    #include "RSEntity.h"
+    #include "RSMusic.h"
+    #include "RSSound.h"
+    #include "RSMap.h"
+
+
+
 
 
 /*
