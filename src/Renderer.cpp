@@ -98,7 +98,7 @@ void Renderer::Init(int32_t width , int32_t height){
     vec3_t up = {0,1,0};
     camera.SetUp(up);
     
-    vec3_t position = {18,10,-18};
+    vec3_t position = {28,20,-38};
     camera.SetPosition(position);
     
     
@@ -294,8 +294,8 @@ void Renderer::UploadTextureToVRAM(Texture* texture, VGAPalette* palette){
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     
     
     glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
@@ -414,7 +414,7 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
     glBlendFunc(GL_ONE_MINUS_SRC_ALPHA,GL_SRC_ALPHA);
     
     //We only write a pixel if the depth is EQUAL to what is in the depth buffer.
-    glDepthFunc(GL_EQUAL);
+    glDepthFunc(GL_LEQUAL);
         
     //glDepthFunc(GL_LESS);
         
