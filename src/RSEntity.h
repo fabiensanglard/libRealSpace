@@ -59,7 +59,7 @@ public:
     
     void InitFromIFF(IffLexer* lexer);
     
-    void AddTexture(Texture* texture);
+    void AddImage(RSImage* image);
     void AddVertex(Vertex* vertex);
     void AddUV(uvxyEntry* uv);
     void AddLod(Lod* lod);
@@ -69,8 +69,8 @@ public:
     
     
     
-    uint32_t numTextures;
-    Texture textures[256];
+    uint32_t numImages;
+    RSImage* images[256];
     
     Vertex vertices[65536];
     uint32_t numVertices;

@@ -13,10 +13,10 @@ RSMapTextureSet::RSMapTextureSet(){
 }
 
 RSMapTextureSet::~RSMapTextureSet(){
-    while (!textures.empty()){
-        Texture* texture = textures.back();
-        textures.pop_back();
-        delete texture;
+    while (!images.empty()){
+        RSImage* image = images.back();
+        images.pop_back();
+        delete image;
     }
 }
 
@@ -28,12 +28,12 @@ void RSMapTextureSet::InitFromPAK(PakArchive* archive){
     Parse(archive);
 }
 
-size_t RSMapTextureSet::GetNumTextures(void){
-    return textures.size();
+size_t RSMapTextureSet::GetNumImages(void){
+    return images.size();
 }
 
-Texture* RSMapTextureSet::GetTextureById(size_t index){
-    return textures[index];
+RSImage* RSMapTextureSet::GetImageById(size_t index){
+    return images[index];
 }
 
 
@@ -52,9 +52,11 @@ void RSMapTextureSet::Parse(PakArchive* archive){
         
         if (entry->size-4 == size){
             //That does look like a map texture !
-            Texture* texture = new Texture();
-            texture->Set("MAP_TEXTURE",width,height,stream.GetPosition());
-            textures.push_back(texture);
+            RSImage* image = new RSImage();
+            
+            image->Create("MAP_TEXTURE",width,height);
+            image->UpdateContent(stream.GetPosition());
+            images.push_back(image);
         }
     }
 }
@@ -63,9 +65,9 @@ void RSMapTextureSet::List(FILE* output){
     
     printf("Listing all textures from '%s'.\n",name);
     
-    for(size_t i = 0 ; i < textures.size() ; i++){
-        Texture* texture = textures[i];
-        printf("Texture [%3lu] width: %d height: %d size: %d bytes.\n",i,texture->width,texture->height,texture->width*texture->height);
+    for(size_t i = 0 ; i < images.size() ; i++){
+        RSImage* image = images[i];
+        printf("Image [%3lu] width: %zu height: %zu size: %lu bytes.\n",i,image->width,image->height,image->width*image->height);
     }
     
 }

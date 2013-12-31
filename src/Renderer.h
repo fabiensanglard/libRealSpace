@@ -23,16 +23,17 @@ public:
     void Clear(void);
 
     void ShowPalette(VGAPalette* palette);
-    void DrawImage(uint8_t* image, uint16_t width, uint16_t height,VGAPalette* palette,int zoom);
+    void DrawImage(RSImage* image,int zoom);
     void DrawModel(RSEntity* object,VGAPalette* palette , size_t lodLevel);
     void DisplayModel(RSEntity* object,size_t lodLevel);
     
     void SetTitle(const char* title);
     
-    void UploadTextureToVRAM(Texture* texture, VGAPalette* palette);
-    void UnloadTextureToVRAM(Texture* texture);
+    void CreateTextureInGPU(Texture* texture);
+    void UploadTextureContentToGPU(Texture* texture);
+    void DeleteTextureInGPU(Texture* texture);
     
-    static  VGAPalette* const USE_DEFAULT_PALETTE;
+    VGAPalette* GetDefaultPalette(void);
     
 private:
     

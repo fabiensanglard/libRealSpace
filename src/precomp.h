@@ -35,6 +35,8 @@ extern "C" {
     #include "Matrix.h"
     #include "Camera.h"
     #include "Texture.h"
+
+    #include "RSImage.h"
     #include "Renderer.h"
 
     #include "IffLexer.h"

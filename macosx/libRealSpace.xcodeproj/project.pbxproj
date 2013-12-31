@@ -20,6 +20,7 @@
 		2D9B618218725CEC0071ACDA /* RSMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B618018725CEC0071ACDA /* RSMap.cpp */; };
 		2D9B618518725E3C0071ACDA /* RSImageSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B618318725E3C0071ACDA /* RSImageSet.cpp */; };
 		2DB3FB63187281850081B676 /* RSMapTextureSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DB3FB61187281850081B676 /* RSMapTextureSet.cpp */; };
+		2DB3FB661872BAAA0081B676 /* RSImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DB3FB641872BAAA0081B676 /* RSImage.cpp */; };
 		2DFEFBAE186F5C84002305A9 /* TreArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */; };
 		2DFEFBB7186F655A002305A9 /* ByteStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBB5186F655A002305A9 /* ByteStream.cpp */; };
 		2DFEFBBA186F65FE002305A9 /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBB8186F65FE002305A9 /* Base.cpp */; };
@@ -65,6 +66,8 @@
 		2D9B618418725E3C0071ACDA /* RSImageSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSImageSet.h; path = ../src/RSImageSet.h; sourceTree = SOURCE_ROOT; };
 		2DB3FB61187281850081B676 /* RSMapTextureSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSMapTextureSet.cpp; path = ../src/RSMapTextureSet.cpp; sourceTree = SOURCE_ROOT; };
 		2DB3FB62187281850081B676 /* RSMapTextureSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSMapTextureSet.h; path = ../src/RSMapTextureSet.h; sourceTree = SOURCE_ROOT; };
+		2DB3FB641872BAAA0081B676 /* RSImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSImage.cpp; path = ../src/RSImage.cpp; sourceTree = SOURCE_ROOT; };
+		2DB3FB651872BAAA0081B676 /* RSImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSImage.h; path = ../src/RSImage.h; sourceTree = SOURCE_ROOT; };
 		2DFEFB7D186F5BEE002305A9 /* libRealSpace */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = libRealSpace; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DFEFB98186F5C84002305A9 /* precomp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = precomp.h; path = ../src/precomp.h; sourceTree = SOURCE_ROOT; };
 		2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TreArchive.cpp; path = ../src/TreArchive.cpp; sourceTree = SOURCE_ROOT; };
@@ -107,6 +110,8 @@
 				2D9B618318725E3C0071ACDA /* RSImageSet.cpp */,
 				2DB3FB62187281850081B676 /* RSMapTextureSet.h */,
 				2DB3FB61187281850081B676 /* RSMapTextureSet.cpp */,
+				2DB3FB651872BAAA0081B676 /* RSImage.h */,
+				2DB3FB641872BAAA0081B676 /* RSImage.cpp */,
 			);
 			name = objects;
 			sourceTree = "<group>";
@@ -246,6 +251,7 @@
 				2D3109131870830200D3443F /* RSEntity.cpp in Sources */,
 				2D9B61761871EDEA0071ACDA /* Matrix.cpp in Sources */,
 				2DFEFBC4186F764E002305A9 /* IffLexer.cpp in Sources */,
+				2DB3FB661872BAAA0081B676 /* RSImage.cpp in Sources */,
 				2D9B61791871F8470071ACDA /* Camera.cpp in Sources */,
 				2D9B617F18725C8B0071ACDA /* RSSound.cpp in Sources */,
 				2DFEFBBA186F65FE002305A9 /* Base.cpp in Sources */,

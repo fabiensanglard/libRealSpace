@@ -20,8 +20,6 @@ static SDL_Window *sdlWindow;
 static SDL_Renderer *sdlRenderer;
 static SDL_Texture * sdlTexture;
 
-VGAPalette* const Renderer::USE_DEFAULT_PALETTE = NULL;
-
 Renderer::Renderer() :
    initialized(false){
        
@@ -120,8 +118,8 @@ void Renderer::SetTitle(const char* title){
 void Renderer::Clear(void){
     
     Texel color ;
-    color.r = 220;
-    color.g = 220;
+    color.r = 0;
+    color.g = 0;
     color.b = 255;
     color.a = 255;
     
@@ -214,95 +212,60 @@ void Renderer::PumpEvents(void){
 
 
 
-void Renderer::DrawImage(uint8_t* image, uint16_t imageWidth, uint16_t imageHeight,VGAPalette* palette,int zoom){
-    
-    
-    if (palette== USE_DEFAULT_PALETTE)
-        palette=&defaultPalette;
-    
-    //Need to copy all images in the offscreen buffer
-    if (imageWidth*zoom > this->width ||
-        imageHeight*zoom > this->height)
-    {
-        printf("Image is too big for this windows.\n");
-        return;
-    }
+void Renderer::DrawImage(RSImage* image,int zoom){
     
     running = true;
     
-    Clear();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    uint8_t* dst = this->backBuffer;
+    glDisable(GL_DEPTH_TEST);
     
-    for(int i = 0 ; i < imageHeight *zoom ; i++){
-        for (int j=0; j < imageWidth *zoom; j++) {
-            
-            float widthCoef =  j/((float)imageWidth *zoom) ;
-            float heightCoef = i/((float)imageHeight*zoom) ;
-            
-            uint8_t* srcIndex = image +
-            (int)( widthCoef  *imageWidth ) +
-            (int)( heightCoef *imageHeight) * imageWidth;
-            
-            if (srcIndex <image || srcIndex>= image+imageWidth*imageHeight ){
-                printf("Trying to access outside the image.\n");
-                
-            }
-            
-            const Texel* src = palette->GetRGBColor( *srcIndex);
-            
-            if (src->a != 0){
-                dst[0] = src->a;
-                dst[1] = src->b;
-                dst[2] = src->g;
-                dst[3] = src->r;
-            }
-            dst+=4;
-        }
-        dst += (this->width - imageWidth*zoom)*4;
-    }
+    glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
+	glLoadIdentity();									// Reset The Projection Matrix
+    
+    
+	// Calculate The Aspect Ratio Of The Window
+    glOrtho(0, this->width, 0, this->height, -10, 10) ;
+    
+	glMatrixMode(GL_MODELVIEW);							// Select The Modelview Matrix
+	glLoadIdentity();
+    
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
+    
+    image->SyncTexture();
+    
+    glBindTexture(GL_TEXTURE_2D, image->GetTexture()->id);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0);
+        glVertex2d(0, 0);
+    
+        glTexCoord2f(0, 1);
+        glVertex2d(image->width*zoom, 0);
+    
+        glTexCoord2f(1, 1);
+        glVertex2d(image->width*zoom, image->height*zoom);
+    
+        glTexCoord2f(1, 0);
+        glVertex2d(0, image->width*zoom);
+    glEnd();
+    
+    SDL_GL_SwapWindow(sdlWindow);
     
     SDL_ShowWindow(sdlWindow);
-    
-    //draw texture
-    SDL_UpdateTexture(sdlTexture, NULL, backBuffer, this->width*4);
-    SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
-    SDL_RenderPresent(sdlRenderer);
     
     paused = true;
     
     while (paused)
         PumpEvents();
+    
 }
 
-
-
-
-
-
-
-
-void Renderer::UploadTextureToVRAM(Texture* texture, VGAPalette* palette){
+void Renderer::CreateTextureInGPU(Texture* texture){
     
     if (!initialized)
         return;
-    
-    if (palette == USE_DEFAULT_PALETTE)
-        palette = &this->defaultPalette;
-    
-    //Convert texture from VGA to RGBA using the palette
-    uint8_t* rgbaData = (uint8_t*)malloc(4 * this->width * this->height);
-    
-    uint8_t* rgbaDst = rgbaData;
-    for(int i=0 ; i < texture->height * texture->width ; i++){
-        
-        const Texel* texel;
-        texel = palette->GetRGBColor(texture->data[i]);
-        *rgbaDst++ = texel->r;
-        *rgbaDst++ = texel->g;
-        *rgbaDst++ = texel->b;
-        *rgbaDst++ = texel->a;
-    }
     
     glGenTextures(1, &texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
@@ -312,20 +275,27 @@ void Renderer::UploadTextureToVRAM(Texture* texture, VGAPalette* palette){
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     
-    
-    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
-    
-    free(rgbaData);
 }
 
-void Renderer::UnloadTextureToVRAM(Texture* texture){
+
+void Renderer::UploadTextureContentToGPU(Texture* texture){
+    
+
+    if (!initialized)
+        return;
+    
+    glBindTexture(GL_TEXTURE_2D, texture->id);
+    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
+}
+
+void Renderer::DeleteTextureInGPU(Texture* texture){
     glDeleteTextures(1, &texture->id);
 }
 
 
 void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel ){
     
-    if (palette== USE_DEFAULT_PALETTE)
+    if (palette== NULL)
         palette=&defaultPalette;
     
     if (lodLevel >= object->numLods){
@@ -396,14 +366,17 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
             
             uvxyEntry* textInfo = &object->uvs[i];
             
-            Texture* texture = &object->textures[textInfo->textureID];
+            RSImage* image = object->images[textInfo->textureID];
             
-            glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
+            Texture* texture = image->GetTexture();
+            
+            glBindTexture(GL_TEXTURE_2D, texture->id);
             
             Triangle* triangle = &object->triangles[textInfo->triangleID];
             
             glBegin(GL_TRIANGLES);
             for(int j=0 ; j < 3 ; j++){
+                
                 glTexCoord2f(textInfo->uvs[j].u/(float)texture->width, textInfo->uvs[j].v/(float)texture->height);
                 glVertex3f(object->vertices[triangle->ids[j]].x,
                            object->vertices[triangle->ids[j]].y,
@@ -542,10 +515,9 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
     
     //Make sure all textures are within the GPU
     //We cannot load the texture within glBegin: Preload them here
-    for (int i=0 ; i < object->numUVs; i++){
-        uvxyEntry* textInfo = &object->uvs[i];
-        Texture* texture = &object->textures[textInfo->textureID];
-        texture->GetTextureID();
+    for (int i=0 ; i < object->numImages; i++){
+        RSImage* image = object->images[i];
+        image->SyncTexture();
     }
     
     glMatrixMode(GL_PROJECTION);
@@ -576,7 +548,7 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
         camera.gluLookAt(modelViewMatrix);
         glLoadMatrixf(modelViewMatrix);
         
-        DrawModel(object,USE_DEFAULT_PALETTE, lodLevel );
+        DrawModel(object,NULL, lodLevel );
         
         //Render light
         /*
@@ -594,5 +566,10 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
         SDL_GL_SwapWindow(sdlWindow);
         PumpEvents();
     }
-    
+
+}
+
+
+VGAPalette* Renderer::GetDefaultPalette(void){
+    return &this->defaultPalette;
 }

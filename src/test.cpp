@@ -18,6 +18,55 @@ void testTRE(void){
     
 }
 
+void testShowAllJetTextures(void)
+{
+    const char* trePath = "OBJECTS.TRE";
+    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15.IFF";
+    
+    // Let's open the TRE archive.
+    TreArchive treArchive;
+    treArchive.InitFromFile(trePath);
+    treArchive.List(stdout);
+    
+    // Let's open the jet IFF file in that archive
+    TreEntry* iffJet = treArchive.GetEntryByName(jetPath);
+    
+    // Oops !
+    if (iffJet == NULL){
+        printf("Unable to find jet '%s' in TRE archive '%s'.\n",jetPath,trePath);
+        return;
+    }
+    
+    
+    
+    
+    
+    IffLexer jetIffLexer;
+    jetIffLexer.InitFromRAM(iffJet->data,iffJet->size);
+    
+    //Verify the object has an appearance
+    if (jetIffLexer.GetChunkByID('APPR') != NULL){
+        ;//printf("This object does have an appearance.\n");
+    }
+    else{
+        printf("This object does NOT have an appearance !!\n");
+        return;
+    }
+    
+    //Render it !
+    renderer.SetTitle(jetPath);
+    
+    
+    RSEntity jet;
+    jet.InitFromIFF(&jetIffLexer);
+    
+    for(size_t i = 0 ; i < jet.numImages; i++){
+        RSImage* image = jet.images[i];
+        renderer.DrawImage(image,1);
+    }
+        
+}
+
 void testJet(void){
     
     const char* trePath = "OBJECTS.TRE";
@@ -25,8 +74,8 @@ void testJet(void){
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\EJECSEAT.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIRAGE.IFF";
-    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-22.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-22.IFF";
+    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\YF23.IFF";
     
     // Let's open the TRE archive.
@@ -124,13 +173,13 @@ void testShowAllTexturesPAK(void){
     
     RSMapTextureSet txmTextureSet ;
     txmTextureSet.InitFromPAK(&txmPakArchive);
-    //txmTextureSet.List(stdout);
+    txmTextureSet.List(stdout);
     
     //Show all textures
-    for(size_t i=0 ; i < txmTextureSet.GetNumTextures() ; i++ ){
+    for(size_t i=0 ; i < txmTextureSet.GetNumImages() ; i++ ){
         printf("Drawing %lu.\n",i);
-        Texture* texture = txmTextureSet.GetTextureById(i);
-        renderer.DrawImage(texture->data,texture->width, texture->height,Renderer::USE_DEFAULT_PALETTE,2);
+        RSImage* image = txmTextureSet.GetImageById(i);
+        renderer.DrawImage(image,2);
     }
     
     
@@ -145,10 +194,10 @@ void testShowAllTexturesPAK(void){
     RSMapTextureSet accTextureSet ;
     accTextureSet.InitFromPAK(&txmPakArchive);
     //Show all textures
-    for(size_t i=0 ; i < accTextureSet.GetNumTextures() ; i++ ){
+    for(size_t i=0 ; i < accTextureSet.GetNumImages() ; i++ ){
         printf("Drawing %lu.\n",i);
-        Texture* texture = accTextureSet.GetTextureById(i);
-        renderer.DrawImage(texture->data,texture->width, texture->height,Renderer::USE_DEFAULT_PALETTE,2);
+        RSImage* image = accTextureSet.GetImageById(i);
+        renderer.DrawImage(image,1);
     }
 }
 
@@ -185,6 +234,9 @@ int main( int argc,char** argv){
     
     renderer.Init(1280,800);
     testJet();
+    
+    //renderer.Init(320,200);
+    //testShowAllJetTextures();
     
     //renderer.Init(320,200);
     //testShowAllTexturesPAK();

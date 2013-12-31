@@ -9,6 +9,8 @@
 #ifndef __libRealSpace__RSMapTextureSet__
 #define __libRealSpace__RSMapTextureSet__
 
+
+
 class RSMapTextureSet{
   
 public:
@@ -18,8 +20,8 @@ public:
     
     void InitFromPAK(PakArchive* archive);
     
-    size_t GetNumTextures(void);
-    Texture* GetTextureById(size_t index);
+    size_t GetNumImages(void);
+    RSImage* GetImageById(size_t index);
     
     void List(FILE* output);
     
@@ -28,7 +30,7 @@ private:
     char name[512];
     
     void Parse(PakArchive* archive);
-    std::vector<Texture*> textures;
+    std::vector<RSImage*> images;
   
 };
 

@@ -11,7 +11,7 @@
 
 RSEntity::RSEntity() :
 
-numTextures(0),
+numImages(0),
 numVertices(0),
 numUVs(0),
 numLods(0),
@@ -32,7 +32,7 @@ void RSEntity::ParseTXMP(IffChunk* chunk){
 
     ByteStream stream(chunk->data);
     
-    Texture* texture = new Texture();
+    RSImage* image = new RSImage();
     
     char name[8];
     
@@ -42,9 +42,10 @@ void RSEntity::ParseTXMP(IffChunk* chunk){
     uint32_t width = stream.ReadShort();
     uint32_t height= stream.ReadShort();
     
-    texture->Set(name, width, height, stream.GetPosition());
+    image->Create(name, width, height);
+    image->UpdateContent(stream.GetPosition());
     
-    AddTexture(texture);
+    AddImage(image);
 
 }
 
@@ -215,9 +216,9 @@ void RSEntity::InitFromIFF(IffLexer* lexer){
 }
 
 
-void RSEntity::AddTexture(Texture* texture){
-    this->textures[numTextures] = *texture;
-    numTextures++;
+void RSEntity::AddImage(RSImage* image){
+    this->images[numImages] = image;
+    numImages++;
 }
 
 void RSEntity::AddVertex(Vertex* vertex){

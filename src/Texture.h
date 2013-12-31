@@ -36,35 +36,35 @@ typedef struct VGAPalette{
 } VGAPalette ;
 
 
+class RSImage;
+
 class Texture{
     
 public:
     Texture();
     ~Texture();
     
-    void Set(const char name[8],uint32_t width,uint32_t height,uint8_t* data );
-    void CreateEmpty(const char name[8],uint32_t width,uint32_t height);
-
-    void Clear(void);
-    int32_t width;
-    int32_t height;
+    void Set(RSImage* image );
+    size_t width;
+    size_t height;
     char name[8];
     uint8_t* data;
+
+
+    
+    enum Location{ DISK=0x1,RAM=0x2,VRAM=0x4};
+    uint8_t locFlag;
     
     //GPU stuff
-    enum Location {DISK = 1, RAM = 2, VRAM = 4};
-    uint32_t locFlag;
     uint32_t id;
     uint32_t GetTextureID(void);
     
-    //Run Length Encoding stuff
-    void SetRLECenterCoo(int16_t left,int16_t right,int16_t top,int16_t bottom);
-    uint8_t* rleCenter;
-    int16_t left;
-    int16_t right;
-    int16_t top;
-    int16_t bottom;
-    bool WriteRLETexel(int16_t dx,int16_t dy, uint8_t color);
+
+    
+    void UpdateContent(RSImage* image);
+
+private:
+    
 };
 
 #endif /* defined(__iff__Texture__) */

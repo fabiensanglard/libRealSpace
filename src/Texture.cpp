@@ -20,77 +20,49 @@ Texture::Texture()
 
 Texture::~Texture(){
     
+    if (id)
+        renderer.DeleteTextureInGPU(this);
     
-    
-    if ((locFlag & VRAM)){
-        renderer.UnloadTextureToVRAM(this);
-        locFlag &= ~VRAM;
-    }
-    
-    if ((locFlag & RAM)){
-        free(data);
-        locFlag &= RAM;
-    }
 }
 
-void Texture::Set(const char name[8],uint32_t width,uint32_t height,uint8_t* data ){
+void Texture::Set(RSImage* image){
     
-    CreateEmpty(name,width,height);
-    memcpy(this->data,data, width * height);
+    strncpy(this->name,image->name,8);
+    this->width = image->width;
+    this->height = image->height;
+    this->data = (uint8_t*)malloc(width*height*4);
     locFlag = RAM;
-}
-
-void Texture::CreateEmpty(const char name[8],uint32_t width,uint32_t height){
     
-    strncpy(this->name,name,8);
-    this->width = width;
-    this->height = height;
-    this->data = (uint8_t*)malloc(width*height);
-    locFlag = RAM;
+    UpdateContent(image);
 }
 
 uint32_t Texture::GetTextureID(void){
     
-    if ((locFlag & VRAM) == 0){
+    
+    return id;
+    
+}
+
+
+void Texture::UpdateContent(RSImage* image){
+    
+    uint8_t* src = image->data;
+    uint8_t* dst = this->data;
+    VGAPalette* palette = image->palette;
+    
+    for(int i=0 ; i < image->height ; i++){
+    for(int j=0 ; j < image->width  ; j++){
         
-        renderer.UploadTextureToVRAM(this,Renderer::USE_DEFAULT_PALETTE);
+        uint8_t* srcIndex = src + j + i* image->width;
         
-        locFlag |= VRAM;
+        const Texel* src = palette->GetRGBColor( (*srcIndex) );
+        
+        dst[0] = src->r;
+        dst[1] = src->g;
+        dst[2] = src->b;
+        dst[3] = src->a;
+        
+        dst+=4;
     }
-    
-    return this->id;
-}
-
-void Texture::SetRLECenterCoo(int16_t left,int16_t right,int16_t top,int16_t bottom){
-
-    //
-    rleCenter= this->data + abs(left) + abs(top) * this->width;
-    this->left=left;
-    this->right=right;
-    this->top=top;
-    this->bottom=bottom;
-}
-
-
-bool Texture::WriteRLETexel(int16_t dx,int16_t dy, uint8_t color){
-    
-    
-    uint8_t* dst = rleCenter;
-    dst+=dx;
-    dst+=dy*this->width;
-    
-
-    
-    if (dst < (this->data+this->width*this->height) && dst >= this->data)
-        *dst = color;
-    else{
-        //printf("Error, trying to write outside texture.\n");
-        return true;
     }
-    
-    return false;
-}
-
-void Texture::Clear(void){
-    memset(this->data,0,this->width*this->height);
 }
