@@ -11,6 +11,7 @@
 
 class RSImageSet{
     
+    void InitFromPAK(PakArchive* archive, uint32_t index);
 };
 
 #endif /* defined(__libRealSpace__ImageSet__) */

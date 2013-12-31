@@ -91,6 +91,26 @@ void testTREDecompress(void){
     treArchive.Decompress(".");
 }
 
+void testPAKDecompress(void){
+    
+    const char* trePath = "GAMEFLOW.TRE";
+    TreArchive treArchive;
+    treArchive.InitFromFile(trePath);
+    
+    treArchive.List(stdout);
+    
+    //Find the sounds PAKS.
+    TreEntry* treEntry = treArchive.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1VOC.PAK");
+    
+    
+    PakArchive pakArchive;
+    pakArchive.InitFromRAM(treEntry->data, treEntry->size);
+    
+    //Decompress it
+    pakArchive.Decompress(".");
+}
+
+
 void testParsePAK(){
     PakArchive archive;
     archive.InitFromFile("MAURITAN.PAK");
@@ -121,5 +141,5 @@ int testShowPalette(void)
 int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
-    testJet();
+    testPAKDecompress();
 }

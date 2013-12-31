@@ -12,9 +12,7 @@
 class RSMusic{
     
 public:
-    void InitFromPAK(PakArchive* archive, uint32_t index);
-    void InitFromRAM(uint8_t* data, size_t size);
-    
+    void InitFromPAK(PakArchive* archive, uint32_t index);    
 };
 
 #endif /* defined(__libRealSpace__RSMusic__) */

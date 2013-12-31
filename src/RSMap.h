@@ -12,7 +12,6 @@
 class RSMap{
 public:
     void InitFromPAK(PakArchive* archive, uint32_t index);
-    void InitFromRAM(uint8_t* data, size_t size);
 };
 
 #endif /* defined(__libRealSpace__RSMap__) */

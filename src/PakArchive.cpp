@@ -110,6 +110,44 @@ void PakArchive::InitFromRAM(uint8_t* data, size_t size){
 }
 
 bool PakArchive::Decompress(const char* dstDirectory){
+    
+    const char* suffix = ".CONTENT/";
+    const char* filePattern = "FILE%d.UNKNOWN";
+    char fullDstPath[512];
+    
+    for( size_t i = 0 ; i < this->entries.size() ; i++){
+        
+        //Build dst path
+        fullDstPath[0] = '\0';
+        strcat(fullDstPath, dstDirectory);
+        
+        //Make sure we have a slash at the end of the dst.
+        size_t pathLength = strlen(fullDstPath);
+        if (fullDstPath[pathLength-1] != '/')
+            strcat(fullDstPath,"/");
+        
+        //Append the PAK archive name
+        strcat(fullDstPath, this->path);
+        
+        //Append the subdirectory name.
+        strcat(fullDstPath, suffix);
+        
+        
+        sprintf(fullDstPath+strlen(fullDstPath),filePattern,i);
+        
+        //Make sure we have all the directories
+        CreateDirectories(fullDstPath);
+        
+        
+        //Write content.
+        FILE* dstFile = fopen(fullDstPath,"w");
+        PakEntry* entry = entries[i];
+        fwrite(entry->data,1, entry->size, dstFile);
+        fclose(dstFile);
+        
+        printf("Extracting file: '%s. (size: %lu).'\n",fullDstPath,entry->size);
+    }
+
     return true;
 }
 
