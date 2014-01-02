@@ -10,6 +10,7 @@
 #define __iff__gfx__
 
 class RSEntity;
+struct Vertex;
 
 class Renderer{
     
@@ -34,6 +35,10 @@ public:
     void DeleteTextureInGPU(Texture* texture);
     
     VGAPalette* GetDefaultPalette(void);
+    
+    
+    //For research methods: Those should be deleted soon:
+    void RenderVerticeField(Vertex* vertices, int numVertices);
     
 private:
     

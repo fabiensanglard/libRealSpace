@@ -117,6 +117,11 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
     
     for( size_t i = 0 ; i < this->entries.size() ; i++){
         
+        PakEntry* entry = entries[i];
+        
+        if(entry->size == 0)
+            continue;
+        
         //Build dst path
         fullDstPath[0] = '\0';
         strcat(fullDstPath, dstDirectory);
@@ -141,7 +146,12 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
         
         //Write content.
         FILE* dstFile = fopen(fullDstPath,"w");
-        PakEntry* entry = entries[i];
+        
+        if (dstFile == NULL){
+            printf("Unable to create destination file: '%s'.\n",fullDstPath);
+            continue;
+        }
+        
         fwrite(entry->data,1, entry->size, dstFile);
         fclose(dstFile);
         
@@ -170,8 +180,15 @@ void PakArchive::List(FILE* output){
     }
 }
 
-void PakArchive::GuessContent(FILE* output){
+
+void PakArchive::GuessPakEntryContent(PakEntry* entry){
     
+}
+
+void PakArchive::GuessContent(FILE* output){
+    for(size_t i=0 ; i < entries.size() ; i++){
+        GuessPakEntryContent(entries[i]);
+    }
 }
 
 

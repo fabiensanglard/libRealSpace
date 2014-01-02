@@ -9,9 +9,18 @@
 #ifndef __libRealSpace__RSMap__
 #define __libRealSpace__RSMap__
 
-class RSMap{
+class RSArea{
 public:
-    void InitFromPAK(PakArchive* archive, uint32_t index);
+    
+    RSArea();
+    ~RSArea();
+    
+    void InitFromPAKFileName(const char* pakFilename);
+    
+private:
+    
+    std::vector<RSMapTextureSet*> textures;
+    PakArchive* archive;
 };
 
 #endif /* defined(__libRealSpace__RSMap__) */

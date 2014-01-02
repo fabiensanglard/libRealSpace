@@ -1,4 +1,4 @@
-//
+ //
 //  test.cpp
 //  libRealSpace
 //
@@ -18,15 +18,21 @@ void testTRE(void){
     
 }
 
-void testShowAllJetTextures(void)
+
+
+
+
+//const char* trePath = "OBJECTS.TRE";
+//const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
+void testShowAllJetTextures(const char* trePath,const char* jetPath)
 {
-    const char* trePath = "OBJECTS.TRE";
-    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15.IFF";
+    
+    renderer.Init(640,400);
     
     // Let's open the TRE archive.
     TreArchive treArchive;
     treArchive.InitFromFile(trePath);
-    treArchive.List(stdout);
+    //treArchive.List(stdout);
     
     // Let's open the jet IFF file in that archive
     TreEntry* iffJet = treArchive.GetEntryByName(jetPath);
@@ -60,11 +66,57 @@ void testShowAllJetTextures(void)
     RSEntity jet;
     jet.InitFromIFF(&jetIffLexer);
     
-    for(size_t i = 0 ; i < jet.numImages; i++){
+    printf("Model '%s' features %lu textures.\n",jetPath,jet.NumImages());
+    for(size_t i = 0 ; i < jet.NumImages(); i++){
         RSImage* image = jet.images[i];
-        renderer.DrawImage(image,1);
+        renderer.DrawImage(image,2);
     }
         
+}
+
+void ShowAllJets(void){
+    
+    renderer.Init(1280,800);
+    
+    const char* trePath = "OBJECTS.TRE";
+    
+    // Let's open the TRE archive.
+    TreArchive treArchive;
+    treArchive.InitFromFile(trePath);
+    
+    for (size_t i = 0 ; i < treArchive.GetNumEntries(); i++) {
+        
+
+        
+        TreEntry* e = treArchive.GetEntryByID(i);
+
+        printf("Rendering jet [%lu] '%s'.\n",i,e->name);
+        
+        IffLexer lexer;
+        lexer.InitFromRAM(e->data,e->size);
+        
+        if (lexer.GetChunkByID('APPR') == NULL){
+            continue;
+            printf("Skipping '%s' (No APPR).\n",e->name);
+        }
+        
+        //Render it !
+        renderer.SetTitle(e->name);
+        
+        
+        RSEntity jet;
+        jet.InitFromIFF(&lexer);
+        
+        //Oops we don't have that number of level
+        if (jet.NumLods() <= LOD_LEVEL_MAX ){
+            printf("Skipping '%s' (No LOD_LEVEL_MAX).\n",e->name);
+            continue;
+        }
+
+        
+        
+        renderer.DisplayModel(&jet,LOD_LEVEL_MAX);
+    }
 }
 
 void testJet(void){
@@ -72,11 +124,15 @@ void testJet(void){
     const char* trePath = "OBJECTS.TRE";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\A-10.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\EJECSEAT.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
+    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIRAGE.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-22.IFF";
-    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15.IFF";
     //const char* jetPath = "..\\..\\DATA\\OBJECTS\\YF23.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIG21.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIG29.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\SU27.IFF";
+    
     
     // Let's open the TRE archive.
     TreArchive treArchive;
@@ -158,6 +214,7 @@ void testPAKDecompress(void){
 
 void testShowAllTexturesPAK(void){
     
+    renderer.Init(640,400);
     
     const char* trePath = "TEXTURES.TRE";
     TreArchive treArchive;
@@ -184,7 +241,7 @@ void testShowAllTexturesPAK(void){
     
     
     const char* accPakName = "..\\..\\DATA\\TXM\\ACCPACK.PAK";
-    treArchive.GetEntryByName(accPakName);
+    treEntry = treArchive.GetEntryByName(accPakName);
     
     PakArchive accPakArchive;
     accPakArchive.InitFromRAM(accPakName,treEntry->data, treEntry->size);
@@ -192,7 +249,7 @@ void testShowAllTexturesPAK(void){
     
     //Show all textures
     RSMapTextureSet accTextureSet ;
-    accTextureSet.InitFromPAK(&txmPakArchive);
+    accTextureSet.InitFromPAK(&accPakArchive);
     //Show all textures
     for(size_t i=0 ; i < accTextureSet.GetNumImages() ; i++ ){
         printf("Drawing %lu.\n",i);
@@ -228,15 +285,61 @@ int testShowPalette(void)
 }
 
 
+void ParseAndRenderVertices(PakEntry* entry){
+    
+    renderer.Init(1280,800);
+    
+    Vertex* vertices = new Vertex[512];
+    
+    ByteStream stream(entry->data);
+    
+    stream.ReadInt32LE();
+    stream.ReadInt32LE();
+    
+    for (int i=0 ; i < 208; i++) {
+        Vertex* v = &vertices[i];
+        int32_t coo ;
+        
+        coo = stream.ReadInt32LE();
+        v->x = (coo>>16) + (coo&0x000000FF)/65550.0;
+        coo = stream.ReadInt32LE();
+        v->z = (coo>>16) + (coo&0x000000FF)/65550.0;
+        coo = stream.ReadInt32LE();
+        v->y = (coo>>16) + (coo&0x000000FF)/65550.0;
+    }
+    
+    //Render them
+    renderer.RenderVerticeField(vertices,208);
+}
+
+void reverseEngineeMapTri(void){
+    
+    PakArchive archive ;
+    archive.InitFromFile("MAURITAN.TRI");
+    archive.List(stdout);
+    //archive.Decompress("/Users/fabiensanglard/Desktop/","TXT");
+    
+    for (size_t i =0 ; i < archive.GetNumEntries();  i++){
+        PakEntry* entry = archive.GetEntry(i);
+        if (entry->size != 0){
+            ParseAndRenderVertices(entry);
+        }
+    }
+    
+}
+
 int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
     
-    renderer.Init(1280,800);
-    testJet();
+    
+   // reverseEngineeMapTri();
+    
+    //
+    ShowAllJets();
     
     //renderer.Init(320,200);
-    //testShowAllJetTextures();
+    //testShowAllJetTextures("OBJECTS.TRE","..\\..\\DATA\\OBJECTS\\40MMAA.IFF");
     
     //renderer.Init(320,200);
     //testShowAllTexturesPAK();

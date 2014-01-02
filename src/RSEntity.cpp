@@ -9,18 +9,17 @@
 #include "RSEntity.h"
 
 
-RSEntity::RSEntity() :
-
-numImages(0),
-numVertices(0),
-numUVs(0),
-numLods(0),
-numTriangles(0){
+RSEntity::RSEntity()
+{
     
 }
 
 RSEntity::~RSEntity(){
-    
+    while(!images.empty()){
+        RSImage* image = images.back();
+        images.pop_back();
+        delete image;
+    }
 }
 
 void RSEntity::SetPalette(VGAPalette* palette){
@@ -215,28 +214,42 @@ void RSEntity::InitFromIFF(IffLexer* lexer){
         ParseLVL(chunk);
 }
 
+size_t RSEntity::NumImages(void){
+    return this->images.size();
+}
+
+size_t RSEntity::NumVertice(void){
+    return this->vertices.size();
+}
+
+size_t RSEntity::NumUVs(void){
+    return this->uvs.size();
+}
+
+size_t RSEntity::NumLods(void){
+    return this->lods.size();
+}
+
+size_t RSEntity::NumTriangles(void){
+    return this->triangles.size();
+}
 
 void RSEntity::AddImage(RSImage* image){
-    this->images[numImages] = image;
-    numImages++;
+    this->images.push_back(image);
 }
 
 void RSEntity::AddVertex(Vertex* vertex){
-    this->vertices[numVertices] = *vertex;
-    numVertices++;
+    this->vertices.push_back(*vertex);
 }
 
 void RSEntity::AddUV(uvxyEntry* uv){
-    this->uvs[numUVs] = *uv;
-    numUVs++;
+    this->uvs.push_back(*uv);
 }
 
 void RSEntity::AddLod(Lod* lod){
-    this->lods[numLods] = *lod;
-    numLods++;
+    this->lods.push_back(*lod);
 }
 
 void RSEntity::AddTriangle(Triangle* triangle){
-    this->triangles[numTriangles] = * triangle;
-    numTriangles++;
+    this->triangles.push_back(*triangle);
 }

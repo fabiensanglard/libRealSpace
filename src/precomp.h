@@ -47,9 +47,12 @@ extern "C" {
     #include "RSEntity.h"
     #include "RSMusic.h"
     #include "RSSound.h"
-    #include "RSMap.h"
+
     #include "RSImageSet.h"
     #include "RSMapTextureSet.h"
+    #include "RSArea.h"
+
+
 
 
 

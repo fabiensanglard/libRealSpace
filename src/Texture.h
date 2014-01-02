@@ -26,6 +26,7 @@ typedef struct VGAPalette{
         
         paletteColor = &palette[value] ;
         
+        
         *paletteColor = *texel;
     }
     

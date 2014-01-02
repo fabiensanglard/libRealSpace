@@ -23,6 +23,7 @@ public:
     void gluPerspective(matrix_t projectionMatrix);
     void gluLookAt(matrix_t fModelView);
     
+   
 private:
     
     float fovy;
@@ -33,6 +34,8 @@ private:
     vec3_t lookAt;
     vec3_t position;
     vec3_t up;
+    
+    
 };
 
 #endif /* defined(__libRealSpace__Camera__) */

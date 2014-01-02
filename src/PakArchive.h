@@ -36,6 +36,7 @@ public:
     void List(FILE* output);
     
     void GuessContent(FILE* output);
+    void GuessPakEntryContent(PakEntry* entry);
     
     char* GetName(void);
 private:

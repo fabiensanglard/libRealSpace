@@ -60,29 +60,29 @@ public:
     void InitFromIFF(IffLexer* lexer);
     
     void AddImage(RSImage* image);
+    size_t NumImages(void);
+    
     void AddVertex(Vertex* vertex);
+    size_t NumVertice(void);
+    
     void AddUV(uvxyEntry* uv);
+    size_t NumUVs(void);
+    
     void AddLod(Lod* lod);
+    size_t NumLods(void);
+    
     void AddTriangle(Triangle* triangle);
+    size_t NumTriangles(void);
     
     void SetPalette(VGAPalette* palette);
     
     
-    
-    uint32_t numImages;
-    RSImage* images[256];
-    
-    Vertex vertices[65536];
-    uint32_t numVertices;
-    
-    uvxyEntry uvs[256];
-    uint32_t numUVs;
-    
-    Lod lods[5];
-    uint32_t numLods;
-    
-    Triangle triangles[65536];
-    uint32_t numTriangles;
+    std::vector<RSImage*> images;
+    std::vector<Vertex> vertices;
+    std::vector<uvxyEntry> uvs;
+    std::vector<Lod> lods;
+    std::vector<Triangle> triangles;
+
     
     enum Property { TRANSPARENT = 0x02};
     

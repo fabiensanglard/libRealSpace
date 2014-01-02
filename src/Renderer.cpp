@@ -88,7 +88,7 @@ void Renderer::Init(int32_t width , int32_t height){
     
     SDL_HideWindow(sdlWindow);
 
-    camera.Init(50.0f,this->width/(float)this->height,0.1f,10000.0f);
+    camera.Init(50.0f,this->width/(float)this->height,0.1f,10000000.0f);
     
     vec3_t lookAt = {0,0,0};
     camera.SetLookAt(lookAt);
@@ -96,7 +96,10 @@ void Renderer::Init(int32_t width , int32_t height){
     vec3_t up = {0,1,0};
     camera.SetUp(up);
     
+    //This is better for jets.
     vec3_t position = {28,20,-38};
+    
+    //vec3_t position = {300,300,-300};
     camera.SetPosition(position);
     
     
@@ -189,9 +192,9 @@ void Renderer::PumpEvents(void){
                     if (SDLK_p == keyCode ||
                         SDLK_SPACE == keyCode){
                         paused = !paused;
+                        running = false;
                         return;
                     }
-                    
                     
                     printf("%d\n",event.key.keysym.sym);
                     
@@ -214,6 +217,9 @@ void Renderer::PumpEvents(void){
 
 void Renderer::DrawImage(RSImage* image,int zoom){
     
+    if (!initialized)
+        return;
+    
     running = true;
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -231,13 +237,15 @@ void Renderer::DrawImage(RSImage* image,int zoom){
 	glLoadIdentity();
     
     glEnable(GL_TEXTURE_2D);
-    glDisable(GL_BLEND);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_CULL_FACE);
     
     image->SyncTexture();
     
     glBindTexture(GL_TEXTURE_2D, image->GetTexture()->id);
     glBegin(GL_QUADS);
+    
         glTexCoord2f(0, 0);
         glVertex2d(0, 0);
     
@@ -248,7 +256,7 @@ void Renderer::DrawImage(RSImage* image,int zoom){
         glVertex2d(image->width*zoom, image->height*zoom);
     
         glTexCoord2f(1, 0);
-        glVertex2d(0, image->width*zoom);
+        glVertex2d(0, image->height*zoom);
     glEnd();
     
     SDL_GL_SwapWindow(sdlWindow);
@@ -289,17 +297,25 @@ void Renderer::UploadTextureContentToGPU(Texture* texture){
 }
 
 void Renderer::DeleteTextureInGPU(Texture* texture){
+    
+    if (!initialized)
+        return;
+    
     glDeleteTextures(1, &texture->id);
 }
 
 
 void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel ){
+
+    if (!initialized)
+        return;
     
     if (palette== NULL)
         palette=&defaultPalette;
     
-    if (lodLevel >= object->numLods){
-        printf("Unable to render this Level Of Details (out of range): Max level is  %d\n",object->numLods-1);
+    if (lodLevel >= object->NumLods()){
+        printf("Unable to render this Level Of Details (out of range): Max level is  %lu\n",
+               std::min(0UL,object->NumLods()-1));
         return;
     }
     
@@ -315,6 +331,8 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
     
     glDepthFunc(GL_LESS);
     
+    
+    
     for(int i = 0 ; i < object->lods[lodLevel].numTriangles ; i++){
         
         uint16_t triangleID = object->lods[lodLevel].triangleIDs[i];
@@ -325,7 +343,7 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
             continue;
         
         const Texel* texel = palette->GetRGBColor(triangle->color);
-        glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,texel->a/255.0f);
+        glColor4f(texel->r/512.0f, texel->g/512.0f, texel->b/512.0f,texel->a/255.0f);
         
         glBegin(GL_TRIANGLES);
         for(int j=0 ; j < 3 ; j++)
@@ -349,12 +367,13 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
     }
     
     
-    
+    glColor3f(0.3f, 0.3f, 0.3f);
     
     
     if (lodLevel == 0){
         glEnable(GL_TEXTURE_2D);
         glEnable(GL_BLEND);
+        
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         
         glDepthFunc(GL_EQUAL);
@@ -362,9 +381,14 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         glAlphaFunc ( GL_GREATER, 0.0 ) ;
         glEnable ( GL_ALPHA_TEST ) ;
         
-        for (int i=0 ; i < object->numUVs; i++) {
+
+        for (int i=0 ; i < object->NumUVs(); i++) {
             
             uvxyEntry* textInfo = &object->uvs[i];
+            
+            //Seems we have a textureID that we don't have :( !
+            if (textInfo->textureID >= object->images.size())
+                continue;
             
             RSImage* image = object->images[textInfo->textureID];
             
@@ -395,18 +419,20 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
     
     
     
-    if (1){
+
     //Pass 3: Let's makde a gouraud pass.
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE_MINUS_SRC_ALPHA,GL_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE);
+    glBlendEquation(GL_ADD);
+
     
     //We only write a pixel if the depth is EQUAL to what is in the depth buffer.
     glDepthFunc(GL_LEQUAL);
         
     //glDepthFunc(GL_LESS);
         
-        Lod* lod = &object->lods[lodLevel] ;
+    Lod* lod = &object->lods[lodLevel] ;
     for(int i = 0 ; i < lod->numTriangles ; i++){
         
         uint16_t triangleID = lod->triangleIDs[i];
@@ -475,7 +501,7 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
             if (lambertianFactor < 0  )
                 lambertianFactor = 0;
             
-            lambertianFactor*=0.8f;
+            lambertianFactor*=0.2f;
             
             // int8_t gouraud = 255 * lambertianFactor;
             
@@ -490,20 +516,11 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         }
         glEnd();
     }
-    
+
     
     
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
-    }
-    
-    /*TODO !!!!
-       - Figure out transluctancy (for cockpit glass): Pilot if not visible !.
-       - Make the camera rotate like the Object Viewer in Strike Commander
-    */
-    
-    
-    
     
 }
 
@@ -513,9 +530,12 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
 
 void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
     
+    if (!initialized)
+        return;
+    
     //Make sure all textures are within the GPU
     //We cannot load the texture within glBegin: Preload them here
-    for (int i=0 ; i < object->numImages; i++){
+    for (int i=0 ; i < object->NumImages(); i++){
         RSImage* image = object->images[i];
         image->SyncTexture();
     }
@@ -551,7 +571,7 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
         DrawModel(object,NULL, lodLevel );
         
         //Render light
-        /*
+        
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
@@ -561,7 +581,7 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
             glColor4f(1, 1,0 , 1);
             glVertex3f(light[0],light[1], light[2]);
         glEnd();
-        */
+        
         
         SDL_GL_SwapWindow(sdlWindow);
         PumpEvents();
@@ -572,4 +592,64 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
 
 VGAPalette* Renderer::GetDefaultPalette(void){
     return &this->defaultPalette;
+}
+
+
+
+void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    matrix_t projectionMatrix;
+    camera.gluPerspective(projectionMatrix);
+    glLoadMatrixf(projectionMatrix);
+    
+    SDL_ShowWindow(sdlWindow);
+    
+    running = true;
+    float counter=0;
+    while (running) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        matrix_t modelViewMatrix;
+        
+        vec3_t newPosition;
+        newPosition[0]= 30000*cos(counter);
+        newPosition[1]= 10000;
+        newPosition[2]= 30000*sin(counter);
+        counter += 0.02;
+        
+        camera.SetPosition(newPosition);
+        
+        
+        camera.gluLookAt(modelViewMatrix);
+        glLoadMatrixf(modelViewMatrix);
+        
+        glClear(GL_COLOR_BUFFER_BIT);
+        glPointSize(5);
+        glBegin(GL_POINTS);
+        for(int i=0; i < numVertices ; i ++)
+            glVertex3f(vertices[i].x,
+                       vertices[i].y,
+                       vertices[i].z     );
+        glEnd();
+        
+        //Render light
+        
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
+        glPointSize(6);
+        
+        glBegin(GL_POINTS);
+        glColor4f(1, 1,0 , 1);
+        glVertex3f(light[0],light[1], light[2]);
+        glEnd();
+        
+        
+        SDL_GL_SwapWindow(sdlWindow);
+        PumpEvents();
+    }
+
 }

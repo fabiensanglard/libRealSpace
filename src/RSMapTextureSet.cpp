@@ -58,6 +58,8 @@ void RSMapTextureSet::Parse(PakArchive* archive){
             image->UpdateContent(stream.GetPosition());
             images.push_back(image);
         }
+        else
+            printf("Cannot make sense of entry %lu.\n",i);
     }
 }
 
