@@ -9,7 +9,7 @@
 #ifndef __libRealSpace__RSMapTextureSet__
 #define __libRealSpace__RSMapTextureSet__
 
-
+//TODO: CHANGE CONSTRUCTORE TO USE IFF !!!
 
 class RSMapTextureSet{
   

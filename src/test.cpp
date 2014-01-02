@@ -236,7 +236,7 @@ void testShowAllTexturesPAK(void){
     for(size_t i=0 ; i < txmTextureSet.GetNumImages() ; i++ ){
         printf("Drawing %lu.\n",i);
         RSImage* image = txmTextureSet.GetImageById(i);
-        renderer.DrawImage(image,2);
+        //renderer.DrawImage(image,2);
     }
     
     
@@ -336,11 +336,11 @@ int main( int argc,char** argv){
    // reverseEngineeMapTri();
     
     //
-    ShowAllJets();
+    //ShowAllJets();
     
     //renderer.Init(320,200);
     //testShowAllJetTextures("OBJECTS.TRE","..\\..\\DATA\\OBJECTS\\40MMAA.IFF");
     
     //renderer.Init(320,200);
-    //testShowAllTexturesPAK();
+    testShowAllTexturesPAK();
 }
