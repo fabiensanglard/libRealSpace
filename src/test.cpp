@@ -337,11 +337,20 @@ void reverseEngineeMapTri(void){
 
 int main( int argc,char** argv){
     
-    SetBase("");
+  
     
+
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
 
+   // PakArchive archive ;
+   // archive.InitFromFile("CANYON.PAK");
+   // archive.Decompress("/Users/fabiensanglard/Desktop/", "TXT");
+    
     RSArea area;
     area.InitFromPAKFileName("MAURITAN.PAK");
+    area.InitFromPAKFileName("CANYON.PAK");
+    area.InitFromPAKFileName("SANFRAN.PAK");
+    area.InitFromPAKFileName("RHODEI.PAK");
+    
 }

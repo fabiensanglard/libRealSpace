@@ -29,6 +29,8 @@ void RSArea::ParseMetadata(){
     
     //Meta are in the first PAK file.
     
+    printf("Parsing file[0] (Metadatas)\n");
+    
     PakEntry* entry = archive->GetEntry(0);
     
     IffLexer lexer;
@@ -49,7 +51,61 @@ void RSArea::ParseMetadata(){
         return;
     }
     
+    
+    
+    /*
+     The content of the ELEV chunk is the same across ALL MAPS
+     Only RHODEI.ELV    RHODEI.AVG
+          RHODEI.MED    RHODEI.AVG 
+          RHODEI.LOW    RHODEI.AVG
+     
+     At the end change. RHODEI / CANYON / QUEBEC / MAURITAN etc.....
+     */
+    
+    //Elevation format entry is 46 bytes long:
+    
+    // 2 bytes 0F 00
+    // 2 bytes
+    // 4 bytes 08 00 00 00
+    // 2 bytes
+    // 4 bytes 00 00 12 00
+    // 1 byte
+    // 4 bytes 00 20 4e 00 00
+    
+    //13 bytes: A filename
+    //13 bytes: An other filename
+    
     IffChunk* elev = lexer.GetChunkByID('ELEV');
+    printf("Content of elevation chunk:\n");
+    size_t numEleRecords = elev->size / 46;
+    ByteStream elevStream(elev->data);
+    for(size_t e=0 ; e < numEleRecords ; e++)
+    {
+        
+        printf("elev record [%zu] ",e);
+        uint8_t unknownsElev[20];
+        for(int i=0; i < 20 ; i++)
+            unknownsElev[i] = elevStream.ReadByte();
+    
+        char elevName[14];
+        for(int i=0; i < 13 ; i++)
+            elevName[i] = elevStream.ReadByte();
+        elevName[13]  = 0;
+    
+        char elevOtherName[14];
+        for(int i=0; i < 13 ; i++)
+            elevOtherName[i] = elevStream.ReadByte();
+        elevOtherName[13]  = 0;
+        
+        for (int i=0; i<20 ; i++){
+            printf("%2X ",unknownsElev[i]);
+        }
+        
+        printf("%-13s %-13s \n",elevName,elevOtherName);
+    }
+    
+   
+    
     
     IffChunk* atri = lexer.GetChunkByID('ATRI');
     
@@ -71,6 +127,36 @@ void RSArea::ParseMetadata(){
         return;
     }
     
+    IffChunk* txmsInfo = txms->childs[0];
+    if (txmsInfo->id != 'INFO'){
+        printf("Error: First child in TXMS is not an INFO chunk ?!\n");
+        return;
+    }
+    
+    IffChunk* txmsMaps = txms->childs[1];
+    if (txmsMaps->id != 'MAPS'){
+        printf("Error: Second child in TXMS is not an MAP chunk ?!\n");
+        return;
+    }
+    
+    //Num texture sets
+    size_t numTexturesSets = txmsMaps->size/12;
+    printf("This area features %lu textureSets references.\n",numTexturesSets);
+    
+    ByteStream textureRefStrean(txmsMaps->data);
+        
+    for (size_t i=0; i < numTexturesSets ; i++) {
+        uint16_t fastID = textureRefStrean.ReadUShort();
+        char setName[8];
+        for(int n=0; n < 8 ; n++){
+            setName[n] = textureRefStrean.ReadByte();
+        }
+        uint8_t unknown = textureRefStrean.ReadByte();
+        uint8_t numImages = textureRefStrean.ReadByte();
+        
+        printf("Texture Set Ref [%3lu] 0x%2X[%-8s] %X (%2u files).\n",i,fastID,setName,unknown,numImages);
+    }
+    
     /*
         TXMS format:
             One INFO chunk
@@ -88,6 +174,8 @@ void RSArea::ParseMetadata(){
 }
 
 void RSArea::ParseObjects(){
+    
+    printf("Parsing file[5] (Objects)\n");
     /*
          The OBJ file seems to have a pattern: 
      
@@ -111,7 +199,7 @@ void RSArea::ParseObjects(){
     PakArchive objectFiles;
     objectFiles.InitFromRAM("PAK Objects from RAM",objectsFilesLocation->data, objectsFilesLocation->size);
     
-    printf("This PAK features %lu OBJ files.\n",objectFiles.GetNumEntries());
+    size_t numObjects=0;
     for(size_t i = 0 ; i < objectFiles.GetNumEntries() ; i++){
         PakEntry* entry = objectFiles.GetEntry(i);
         
@@ -119,8 +207,52 @@ void RSArea::ParseObjects(){
             ByteStream reader(entry->data);
             uint16_t numObjs = reader.ReadUShort();
             printf("OBJ files %lu features %d objects.\n",i,numObjs);
+            
+            for(int j=0 ; j < numObjs ; j++){
+                
+                
+                char setName[9];
+                for(int k=0 ; k <8 ; k++)
+                    setName[k] = reader.ReadByte();
+                setName[8] = 0;
+                
+                uint8_t unknown09 = reader.ReadByte();
+                uint8_t unknown10 = reader.ReadByte();
+                uint8_t unknown11 = reader.ReadByte();
+                uint8_t unknown12 = reader.ReadByte();
+                uint8_t unknown13 = reader.ReadByte();
+                
+                
+                
+                char accessoryName[9];
+                for(int k=0 ; k <8 ; k++)
+                    accessoryName[k] = reader.ReadByte();
+                accessoryName[8] = 0;
+                
+                
+                uint8_t unknowns[0x31];
+
+                for(int k=0 ; k <0x31 ; k++)
+                    unknowns[k] = reader.ReadByte();
+                
+                printf("object set [%3lu] obj [%2d] - '%-8s' %2X %2X %2X %2X %2X '%-8s'",i,j,setName,
+                       unknown09,
+                       unknown10,
+                       unknown11,
+                       unknown12,
+                       unknown13,accessoryName);
+                
+                for(int k=0 ; k <0x31 ; k++)
+                    printf("%2X ",unknowns[k]);
+            
+                printf("\n");
+                
+            }
+            
+            numObjects+=numObjs;
         }
     }
+    printf("This Area features %lu Objects.\n",numObjects);
     
 }
 
@@ -143,8 +275,8 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
         printf("        - 1 file containing records of size 600 (mipmaps of the 2400 records ?)\n");
         printf("        - 1  file containing records of size 150 (mipmaps of the 600  records ?)\n");
         printf("        - 1 file containing the map 3D data (MAURITAN.TRI).\n");
-        printf("        - 1 file containing the objects locations on the map (MAURITAN.OBJ).\n");
-        printf("        - 1 file containing MAURITAN.AVG (I assume Average of something ?)\n");
+        printf("        - 1 file containing the objects locations on the map (MAURITAN.OBJ).\n");      //COMPLETELY REVERSE ENGINEERED !!!!
+        printf("        - 1 file containing MAURITAN.AVG (I assume Average of something ?)\n");        
         return;
     }
     
