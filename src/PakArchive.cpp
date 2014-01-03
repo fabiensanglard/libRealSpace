@@ -70,7 +70,7 @@ void PakArchive::Parse(void){
     }
     
     PakEntry* entry = entries[i];
-    entry->size = (this->data + this->size) - entries[i-1]->data;
+    entry->size = (this->data + this->size) - entries[i]->data;
     
 }
 
@@ -193,6 +193,9 @@ void PakArchive::List(FILE* output){
     fprintf(output,"Listing content of PAK archives '%s'\n",this->path);
     for(size_t i =0; i < GetNumEntries() ; i++){
         PakEntry* entry = entries[i];
+        
+        
+        
         if (entry->size != 0)
             fprintf(output,"    Entry [%3lu] size: %7lu bytes.\n",i, entry->size);
         else

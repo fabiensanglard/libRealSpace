@@ -184,6 +184,13 @@ void RSEntity::ParseUVXY(IffChunk* chunk){
 }
 
 
+void RSEntity::InitFromRAM(uint8_t* data, size_t size){
+    
+    IffLexer lexer;
+    lexer.InitFromRAM(data,size);
+    InitFromIFF(&lexer);
+}
+
 void RSEntity::InitFromIFF(IffLexer* lexer){
     
     

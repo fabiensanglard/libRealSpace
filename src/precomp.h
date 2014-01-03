@@ -23,41 +23,36 @@ extern "C" {
     #include <string.h>
     #include <vector>
     #include <map>
-
+    #include <math.h>
     #include <stdint.h>
 
-
+// Reusable Realspace Classes
     #include "Base.h"
     #include "ByteStream.h"
     #include "TreArchive.h"
-
-    #include <math.h>
     #include "Matrix.h"
     #include "Camera.h"
     #include "Texture.h"
-
     #include "RSImage.h"
     #include "Renderer.h"
-
     #include "IffLexer.h"
-
     #include "PakArchive.h"
-
     #include "RSPalette.h"
     #include "RSEntity.h"
     #include "RSMusic.h"
     #include "RSSound.h"
-
-    #include "RSImageSet.h"
     #include "RSMapTextureSet.h"
     #include "RSArea.h"
+    #include "RLECodex.h"
 
-
+// Strike commander specific.
+    #include "SCObjectViewer.h"
+    #include "SCDogFightMenu.h"
 
 
 
 /*
-    #include "rle.h"
+    
 
     #include "IFFChunkReader.h"
     #include "IFFReader.h"

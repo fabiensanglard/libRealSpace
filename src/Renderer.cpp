@@ -1,4 +1,4 @@
-//
+ //
 //  gfx.cpp
 //  iff
 //
@@ -120,20 +120,11 @@ void Renderer::SetTitle(const char* title){
 
 void Renderer::Clear(void){
     
-    Texel color ;
-    color.r = 0;
-    color.g = 0;
-    color.b = 255;
-    color.a = 255;
     
-    for(int i=0 ; i < height * width; i++){
-        *(backBuffer+i*4+0) = color.a ;
-        *(backBuffer+i*4+1) = color.b ;
-        *(backBuffer+i*4+2) = color.g ;
-        *(backBuffer+i*4+3) = color.r ;
-    }
+    if (!initialized)
+        return;
     
-    SDL_UpdateTexture(sdlTexture, NULL, backBuffer, width*4);
+    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 }
 
 #define CELLSIZE 16
@@ -220,6 +211,10 @@ void Renderer::DrawImage(RSImage* image,int zoom){
     if (!initialized)
         return;
     
+    
+    
+
+    
     running = true;
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -240,22 +235,23 @@ void Renderer::DrawImage(RSImage* image,int zoom){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_CULL_FACE);
-    
-    image->SyncTexture();
-    
+     
     glBindTexture(GL_TEXTURE_2D, image->GetTexture()->id);
     glBegin(GL_QUADS);
     
-        glTexCoord2f(0, 0);
+
+            glTexCoord2f(0, 1);
         glVertex2d(0, 0);
     
-        glTexCoord2f(0, 1);
+
+            glTexCoord2f(1, 1);
         glVertex2d(image->width*zoom, 0);
     
-        glTexCoord2f(1, 1);
+
+    glTexCoord2f(1, 0);
         glVertex2d(image->width*zoom, image->height*zoom);
     
-        glTexCoord2f(1, 0);
+            glTexCoord2f(0, 0);
         glVertex2d(0, image->height*zoom);
     glEnd();
     

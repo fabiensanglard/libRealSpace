@@ -23,6 +23,8 @@ public:
     
     void SetPalette(VGAPalette* palette);
     
+    void ClearContent(void);
+    
     Texture* GetTexture(void);
     void SyncTexture(void);
     

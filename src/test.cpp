@@ -335,14 +335,54 @@ void reverseEngineeMapTri(void){
     
 }
 
-int main( int argc,char** argv){
+void DecompressAllTRE(void){
     
-  
+    TreArchive gameflow ;
+    gameflow.InitFromFile("GAMEFLOW.TRE");
+    gameflow.List(stdout);
+    gameflow.Decompress("/Users/fabiensanglard/Desktop/");
     
+    TreArchive misc ;
+    misc.InitFromFile("MISC.TRE");
+    misc.List(stdout);
+    misc.Decompress("/Users/fabiensanglard/Desktop/");
+    
+    
+    TreArchive missions ;
+    missions.InitFromFile("MISSIONS.TRE");
+    missions.List(stdout);
+    missions.Decompress("/Users/fabiensanglard/Desktop/");
+    
+    
+    TreArchive objects ;
+    objects.InitFromFile("OBJECTS.TRE");
+    objects.List(stdout);
+    objects.Decompress("/Users/fabiensanglard/Desktop/");
+    
+    
+    TreArchive sound ;
+    sound.InitFromFile("SOUND.TRE");
+    sound.List(stdout);
+    sound.Decompress("/Users/fabiensanglard/Desktop/");
 
+    TreArchive textures ;
+    textures.InitFromFile("TEXTURES.TRE");
+    textures.List(stdout);
+    textures.Decompress("/Users/fabiensanglard/Desktop/");
+}
+
+int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
 
+    //testShowAllTexturesPAK();
+    //return 0;
+    
+    
+    SCObjectViewer viewer;
+    viewer.Init();
+    return 0;
+    
     PakArchive archiveCanyon ;
     archiveCanyon.InitFromFile("CANYON.PAK");
     archiveCanyon.Decompress("/Users/fabiensanglard/Desktop/", "TXT");

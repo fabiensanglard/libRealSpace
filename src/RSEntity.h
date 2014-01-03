@@ -57,6 +57,7 @@ public:
     RSEntity();
     ~RSEntity();
     
+    void InitFromRAM(uint8_t* data, size_t size);
     void InitFromIFF(IffLexer* lexer);
     
     void AddImage(RSImage* image);

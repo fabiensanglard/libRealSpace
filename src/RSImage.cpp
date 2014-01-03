@@ -30,6 +30,7 @@ void RSImage::Create(const char name[8],uint32_t width,uint32_t height){
     this->palette = renderer.GetDefaultPalette();
     
     this->texture.Set(this);
+    dirty = true;
 }
 
 void RSImage::UpdateContent(uint8_t* src){
@@ -57,41 +58,18 @@ void RSImage::SyncTexture(void){
     
 }
 
+void RSImage::ClearContent(void){
+    memset(this->data,0,this->width*this->height);
+    dirty = true;
+}
+
 void RSImage::SetPalette(VGAPalette* palette){
     this->palette = palette;
 }
 
 Texture* RSImage::GetTexture(void){
+    
+    SyncTexture();
+    
     return &this->texture;
-}
-
-
-void RSImage::SetRLECenterCoo(int16_t left,int16_t right,int16_t top,int16_t bottom){
-    
-    //
-    rleCenter= this->data + abs(left) + abs(top) * this->width;
-    this->left=left;
-    this->right=right;
-    this->top=top;
-    this->bottom=bottom;
-}
-
-
-bool RSImage::WriteRLETexel(int16_t dx,int16_t dy, uint8_t color){
-    
-    
-    uint8_t* dst = rleCenter;
-    dst+=dx;
-    dst+=dy*this->width;
-    
-    
-    
-    if (dst < (this->data+this->width*this->height) && dst >= this->data)
-        *dst = color;
-    else{
-        //printf("Error, trying to write outside texture.\n");
-        return true;
-    }
-    
-    return false;
 }

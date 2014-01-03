@@ -6,17 +6,23 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "rle.h"
+#include "precomp.h"
 
 
 #include "ByteStream.h"
 #include <stdio.h>
 
+RLECodex::RLECodex(){
+    
+}
 
 
+RLECodex::~RLECodex(){
+    
+}
 
 
-void ReadFragment(ByteStream* stream,RLEFragment* frag){
+void RLECodex::ReadFragment(ByteStream* stream,RLEFragment* frag){
     
 	uint16_t code = stream->ReadUShort();
 
@@ -43,7 +49,7 @@ void ReadFragment(ByteStream* stream,RLEFragment* frag){
 	
 }
 
-bool ExpandFragment(ByteStream* stream,RLEFragment* frag, Texture* dst ){
+bool RLECodex::ExpandFragment(ByteStream* stream,RLEFragment* frag, RSImage* dst ){
     
     bool error;
     
@@ -53,7 +59,7 @@ bool ExpandFragment(ByteStream* stream,RLEFragment* frag, Texture* dst ){
 		{
 			for(int i=0 ; i < frag->numTexels ; i++){
 				uint8_t color = stream->ReadByte();
-				error = dst->WriteRLETexel(frag->dx+i,frag->dy,color);
+				error = WriteRLETexel(dst,frag->dx+i,frag->dy,color);
                 if (error)
                     return true;
 			}
@@ -74,7 +80,7 @@ bool ExpandFragment(ByteStream* stream,RLEFragment* frag, Texture* dst ){
                 if (subCodeType == SUB_FRAG_RAW){
                     for(int i=0 ; i < fragNumTexels ; i++){
                         uint8_t color = stream->ReadByte();
-                        error = dst->WriteRLETexel(frag->dx+numOfTexelsWritten,frag->dy,color);
+                        error = WriteRLETexel(dst,frag->dx+numOfTexelsWritten,frag->dy,color);
                         if (error)
                             return true;
                         numOfTexelsWritten++;
@@ -84,7 +90,7 @@ bool ExpandFragment(ByteStream* stream,RLEFragment* frag, Texture* dst ){
                 else{
                     uint8_t color = stream->ReadByte();
                     for(int i=0 ; i < fragNumTexels ; i++){
-                        error = dst->WriteRLETexel(frag->dx+numOfTexelsWritten,frag->dy,color);
+                        error = WriteRLETexel(dst,frag->dx+numOfTexelsWritten,frag->dy,color);
                         if (error)
                             return true;
 
@@ -108,28 +114,47 @@ bool ExpandFragment(ByteStream* stream,RLEFragment* frag, Texture* dst ){
 }
 
 
+bool RLECodex::WriteRLETexel(RSImage* dstImage,int16_t dx,int16_t dy, uint8_t color){
+    
+    uint8_t* dst = rleCenter;
+    dst+=dx;
+    dst+=dy*dstImage->width;
+    
+    
+    
+    if (dst < (dstImage->data+dstImage->width*dstImage->height) && dst >= dstImage->data)
+        *dst = color;
+    else{
+        //printf("Error, trying to write outside texture.\n");
+        return true;
+    }
+    
+    return false;
 
-bool ReadImage(uint8_t* src, Texture* dst, size_t* byteRead){
+}
+
+bool RLECodex::ReadImage(uint8_t* src, RSImage* dst, size_t* byteRead){
 	
 	ByteStream stream(src);
 	
 	RLEFragment frag ;
     
-    int16_t rightDist = stream.ReadShort();
-    int16_t leftDist  = stream.ReadShort();
-    int16_t topDist   = stream.ReadShort();
-    int16_t botDist   = stream.ReadShort();
-
-    dst->SetRLECenterCoo(leftDist, rightDist, topDist, botDist);
+    this->rightDist = stream.ReadShort();
+    this->leftDist  = stream.ReadShort();
+    this->topDist   = stream.ReadShort();
+    this->botDist   = stream.ReadShort();
+    rleCenter= dst->data + abs(leftDist) + abs(topDist) * dst->width;
+    
     
 	ReadFragment(&stream,&frag);
     
 	while( frag.type != FRAG_END){
         
 		bool error = ExpandFragment(&stream,&frag,dst);
-        if (error)
+        if (error){
+            printf("Error:\n");
             return true;
-        
+        }
 		ReadFragment(&stream,&frag);	
 	}
     
