@@ -343,9 +343,15 @@ int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
 
-   // PakArchive archive ;
-   // archive.InitFromFile("CANYON.PAK");
-   // archive.Decompress("/Users/fabiensanglard/Desktop/", "TXT");
+    PakArchive archiveCanyon ;
+    archiveCanyon.InitFromFile("CANYON.PAK");
+    archiveCanyon.Decompress("/Users/fabiensanglard/Desktop/", "TXT");
+
+    PakArchive archiveMauritan ;
+    archiveMauritan.InitFromFile("MAURITAN.PAK");
+    archiveMauritan.Decompress("/Users/fabiensanglard/Desktop/", "TXT");
+
+    return 0;
     
     RSArea area;
     area.InitFromPAKFileName("MAURITAN.PAK");

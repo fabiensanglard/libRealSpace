@@ -37,6 +37,10 @@ int Sys_CreateDirectory(const char* path){
 }
 
 void printErrorMessage(int error,const char* subPath){
+    
+    if (error ==EEXIST || error == ENOENT)
+        return;
+    
     printf("Error while creating '%s': Reason:\n",subPath);
     switch (error) {
         case EACCES: printf("EACCES: Search permission is denied for a component of the path prefix.| Write permission is denied for the parent directory."); break;

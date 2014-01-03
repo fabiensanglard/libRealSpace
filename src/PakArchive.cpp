@@ -7,7 +7,7 @@
 //
 
 #include "precomp.h"
-
+#include <errno.h>
 
 PakArchive::PakArchive() :
     initalizedFromFile(false){
@@ -35,9 +35,13 @@ void PakArchive::Parse(void){
     uint32_t offset = peek.ReadUInt32LE();
     offset &= 0x00FFFFFF ; //Remove the leading 0xE0
     
-    uint32_t numEntries = (offset-4)/4;
+    size_t numEntries = (offset-4)/4;
     
-    //First pass to read all the offsets
+    //Hashmap to keep track of duplicates
+    std::map<uint32_t,void*> uniqueOffsets;
+    
+    
+    //First to read all the offsets
     for(int i =0 ; i < numEntries ; i ++){
         
         PakEntry* entry = new PakEntry();
@@ -47,19 +51,26 @@ void PakArchive::Parse(void){
         
         entry->data = this->data + offset;
         
-        entries.push_back(entry);
+        if (uniqueOffsets[offset] == NULL){
+            entries.push_back(entry);
+            uniqueOffsets[offset] = entry;
+        }
+        
     }
+    
+    //printf("Total entries: %lu.\n",numEntries);
+    numEntries = uniqueOffsets.size();
+    //printf("Uniqu entries: %lu.\n",numEntries);
     
     //Second pass to calculate the sizes.
     int i =0;
     for( ; i < numEntries-1 ; i ++){
-        
         PakEntry* entry = entries[i];
-        
         entry->size = entries[i+1]->data - entry->data;
     }
+    
     PakEntry* entry = entries[i];
-    entry->size = this->data+this->size - entries[i-1]->data;
+    entry->size = (this->data + this->size) - entries[i-1]->data;
     
 }
 
@@ -115,6 +126,8 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
     const char* filePattern = "FILE%d.%s";
     char fullDstPath[512];
     
+    printf("Decompressing PAK %s (size: %lu bytes)\n.",this->path,this->size);
+    
     for( size_t i = 0 ; i < this->entries.size() ; i++){
         
         PakEntry* entry = entries[i];
@@ -152,10 +165,17 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
             continue;
         }
         
-        fwrite(entry->data,1, entry->size, dstFile);
+        size_t byteWritten = fwrite(entry->data,1, entry->size, dstFile);
+        
+        if (byteWritten != entry->size){
+
+            printf("*Error while writing entry (errono: %s) size(size: %lu).\n",strerror(errno),entry->size);
+        }
+        else
+            printf("Extracted file: '%s. (size: %lu).'\n",fullDstPath,entry->size);
         fclose(dstFile);
         
-        printf("Extracting file: '%s. (size: %lu).'\n",fullDstPath,entry->size);
+        
     }
 
     return true;
