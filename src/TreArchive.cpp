@@ -185,6 +185,7 @@ bool TreArchive::Decompress(const char* dstDirectory){
         CreateDirectories(fullPath);
         
         //Write file !
+        printf("Decompressing TRE file: %lu '%s' %lu (bytes).\n",i,fullPath,entry->size);
         FILE* file = fopen(fullPath,"w");
         fwrite(entry->data, 1, entry->size, file);
         fclose(file);

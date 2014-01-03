@@ -9,7 +9,20 @@
 #ifndef __libRealSpace__RSMapTextureSet__
 #define __libRealSpace__RSMapTextureSet__
 
-//TODO: CHANGE CONSTRUCTORE TO USE IFF !!!
+//TODO: CHANGE CONSTRUCTORE TO USE IFF and MapImageEntry!!!
+
+typedef struct{
+    
+    uint16_t startingIDs;
+    char name[8];
+    
+    uint8_t unknown0;
+    uint8_t numImages;
+    uint8_t unknown1;
+    uint8_t unknown2;
+    uint8_t unknown3;
+    
+} MapImageEntry;
 
 class RSMapTextureSet{
   

@@ -184,12 +184,19 @@ void testPalette(void){
     palette.InitFromIFF(&lexer);
 }
 
-void testTREDecompress(void){
+void testTREDecompress(const char* dst){
     
-    const char* trePath = "OBJECTS.TRE";
+   // const char* trePath = "GAMEFLOW.TRE";
+   // const char* trePath = "MISC.TRE";
+   // const char* trePath = "MISSIONS.TRE";
+   // const char* trePath = "OBJECTS.TRE";
+   // const char* trePath = "SOUND.TRE";
+    const char* trePath = "TEXTURES.TRE";
+   
+    
     TreArchive treArchive;
     treArchive.InitFromFile(trePath);
-    treArchive.Decompress(".");
+    treArchive.Decompress(dst);
 }
 
 void testPAKDecompress(void){
@@ -236,7 +243,7 @@ void testShowAllTexturesPAK(void){
     for(size_t i=0 ; i < txmTextureSet.GetNumImages() ; i++ ){
         printf("Drawing %lu.\n",i);
         RSImage* image = txmTextureSet.GetImageById(i);
-        //renderer.DrawImage(image,2);
+        renderer.DrawImage(image,2);
     }
     
     
@@ -330,17 +337,11 @@ void reverseEngineeMapTri(void){
 
 int main( int argc,char** argv){
     
+    SetBase("");
+    
+    
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
-    
-    
-   // reverseEngineeMapTri();
-    
-    //
-    //ShowAllJets();
-    
-    //renderer.Init(320,200);
-    //testShowAllJetTextures("OBJECTS.TRE","..\\..\\DATA\\OBJECTS\\40MMAA.IFF");
-    
-    //renderer.Init(320,200);
-    testShowAllTexturesPAK();
+
+    RSArea area;
+    area.InitFromPAKFileName("MAURITAN.PAK");
 }

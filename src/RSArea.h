@@ -19,6 +19,10 @@ public:
     
 private:
     
+    void ParseMetadata(void );
+    void ParseObjects(void );
+    void ParseTrigo(void );
+    
     std::vector<RSMapTextureSet*> textures;
     PakArchive* archive;
 };
