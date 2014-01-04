@@ -51,7 +51,7 @@ extern "C" {
 // Strike commander specific.
     #include "SCObjectViewer.h"
     #include "SCDogFightMenu.h"
-
+    #include "SCMainMenu.h"
 
 
 /*

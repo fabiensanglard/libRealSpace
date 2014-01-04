@@ -374,6 +374,43 @@ void DecompressAllTRE(void){
     textures.Decompress("/Users/fabiensanglard/Desktop/");
 }
 
+
+//DELETE ME
+static void showAllImageInArchive(PakArchive* archive){
+    
+    
+    for(size_t i = 0 ; i < archive->GetNumEntries() ; i ++){
+        
+        printf("Show all images %lu.\n",i);
+        PakEntry* entry = archive->GetEntry(i);
+        
+        
+        
+        RLECodex codex ;
+        size_t byteRead;
+        
+        RSImage screen;
+        screen.Create("SCREEN", 320, 200);
+        bool errorFound = codex.ReadImage(entry->data, &screen, &byteRead);
+        
+        
+        renderer.Clear();
+        if (!errorFound){
+            renderer.Pause();
+            while(renderer.IsPaused()){
+                
+                renderer.DrawImage(&screen, 2);
+                renderer.Swap();
+                renderer.ShowWindow();
+                renderer.PumpEvents();
+            }
+        }
+        screen.ClearContent();
+    }
+    
+    
+}
+
 int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
@@ -381,6 +418,34 @@ int main( int argc,char** argv){
     //testShowAllTexturesPAK();
     //return 0;
     
+    //WIP
+    /*
+    renderer.Init(640, 400);
+    TreArchive tre;
+    tre.InitFromFile("GAMEFLOW.TRE");
+    
+    TreEntry* pakToExplore = tre.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK");
+    
+    PakArchive arch;
+    arch.InitFromRAM("MID1.PAK",pakToExplore->data,pakToExplore->size);
+    
+    for(size_t i =0 ;i < arch.GetNumEntries() ; i++){
+    
+        PakEntry* entry = arch.GetEntry(i);
+        PakArchive a;
+        a.InitFromRAM("", entry->data, entry->size);
+        showAllImageInArchive(&a);
+    }
+    return 0;
+    */
+    
+    
+    /*
+    SCMainMenu mainMenu;
+    mainMenu.Init();
+    mainMenu.Run();
+    return 0;
+    */
     
     SCObjectViewer viewer;
     viewer.Init();

@@ -97,7 +97,8 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
     
 }
 
-void showAllImage(PakArchive* archive){
+//DELETE ME
+static void showAllImage(PakArchive* archive){
     
     
     
@@ -314,7 +315,7 @@ void SCObjectViewer::Run(void){
         uint32_t currentTime = SDL_GetTicks();
         uint32_t totalTime = currentTime - startTime;
         
-        modelIndex = (totalTime /2000) % showCases.size();
+        modelIndex = (totalTime /4000) % showCases.size();
         
         renderer.Clear();
         renderer.DrawImage(&backgroundImage, 2);

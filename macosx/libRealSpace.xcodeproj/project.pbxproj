@@ -23,6 +23,7 @@
 		2D9B618218725CEC0071ACDA /* RSArea.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B618018725CEC0071ACDA /* RSArea.cpp */; };
 		2DB3FB63187281850081B676 /* RSMapTextureSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DB3FB61187281850081B676 /* RSMapTextureSet.cpp */; };
 		2DB3FB661872BAAA0081B676 /* RSImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DB3FB641872BAAA0081B676 /* RSImage.cpp */; };
+		2DB6D4A51877B3C3008E6631 /* SCMainMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DB6D4A31877B3C3008E6631 /* SCMainMenu.cpp */; };
 		2DFEFBAE186F5C84002305A9 /* TreArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */; };
 		2DFEFBB7186F655A002305A9 /* ByteStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBB5186F655A002305A9 /* ByteStream.cpp */; };
 		2DFEFBBA186F65FE002305A9 /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBB8186F65FE002305A9 /* Base.cpp */; };
@@ -74,6 +75,8 @@
 		2DB3FB62187281850081B676 /* RSMapTextureSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSMapTextureSet.h; path = ../src/RSMapTextureSet.h; sourceTree = SOURCE_ROOT; };
 		2DB3FB641872BAAA0081B676 /* RSImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSImage.cpp; path = ../src/RSImage.cpp; sourceTree = SOURCE_ROOT; };
 		2DB3FB651872BAAA0081B676 /* RSImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSImage.h; path = ../src/RSImage.h; sourceTree = SOURCE_ROOT; };
+		2DB6D4A31877B3C3008E6631 /* SCMainMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCMainMenu.cpp; path = ../src/SCMainMenu.cpp; sourceTree = SOURCE_ROOT; };
+		2DB6D4A41877B3C3008E6631 /* SCMainMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCMainMenu.h; path = ../src/SCMainMenu.h; sourceTree = SOURCE_ROOT; };
 		2DFEFB7D186F5BEE002305A9 /* libRealSpace */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = libRealSpace; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DFEFB98186F5C84002305A9 /* precomp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = precomp.h; path = ../src/precomp.h; sourceTree = SOURCE_ROOT; };
 		2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TreArchive.cpp; path = ../src/TreArchive.cpp; sourceTree = SOURCE_ROOT; };
@@ -142,6 +145,8 @@
 				2D58A414187716A7003EF449 /* SCObjectViewer.cpp */,
 				2D3DE2B71877529A0080E744 /* SCDogFightMenu.h */,
 				2D3DE2B61877529A0080E744 /* SCDogFightMenu.cpp */,
+				2DB6D4A41877B3C3008E6631 /* SCMainMenu.h */,
+				2DB6D4A31877B3C3008E6631 /* SCMainMenu.cpp */,
 			);
 			name = sc;
 			sourceTree = "<group>";
@@ -263,6 +268,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2DB6D4A51877B3C3008E6631 /* SCMainMenu.cpp in Sources */,
 				2D58A416187716A7003EF449 /* SCObjectViewer.cpp in Sources */,
 				2D9B617C18725C660071ACDA /* RSMusic.cpp in Sources */,
 				2D310910187081F000D3443F /* Renderer.cpp in Sources */,

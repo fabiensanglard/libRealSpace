@@ -49,6 +49,15 @@ public:
     
     Camera* GetCamera(void);
     void SetLight(vec3_t);
+    
+    inline bool IsPaused(void){
+        return this->paused;
+    }
+    
+    inline void Pause(void){
+        this->paused = true;
+    }
+    
 private:
     
     

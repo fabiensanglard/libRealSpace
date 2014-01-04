@@ -405,7 +405,6 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
     
     
     //Texture pass
-    glColor3f(0.5f, 0.5f, 0.5f);
     if (lodLevel == 0){
         glEnable(GL_TEXTURE_2D);
         
@@ -454,6 +453,8 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
                 lambertianFactor+= ambientLamber;
                 if (lambertianFactor > 1)
                     lambertianFactor = 1;
+                
+                
                 
                 glColor4f(lambertianFactor, lambertianFactor, lambertianFactor,1);
                 glTexCoord2f(textInfo->uvs[j].u/(float)texture->width, textInfo->uvs[j].v/(float)texture->height);
