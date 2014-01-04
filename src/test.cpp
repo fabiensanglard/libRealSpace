@@ -449,12 +449,12 @@ int main( int argc,char** argv){
     return 0;
     */
 
-    
+    /* 
     SCDogFightMenu dogFightMenu;
     dogFightMenu.Init();
     dogFightMenu.Run();
     return 0;
-    
+    */
     
     SCObjectViewer viewer;
     viewer.Init();
