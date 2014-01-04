@@ -11,6 +11,7 @@
 
 class RSEntity;
 struct Vertex;
+class Triangle;
 
 class Renderer{
     
@@ -40,9 +41,19 @@ public:
     //For research methods: Those should be deleted soon:
     void RenderVerticeField(Vertex* vertices, int numVertices);
     
+    VGAPalette* GetPalette(void);
+    
+    void Swap(void);
+    void ShowWindow(void);
+    void PumpEvents(void);
+    
+    Camera* GetCamera(void);
+    void SetLight(vec3_t);
 private:
     
-    void PumpEvents(void);
+    
+    void GetNormal(RSEntity* object,Triangle* triangle,vec3_t normal);
+    
     bool initialized;
     
     int32_t width;

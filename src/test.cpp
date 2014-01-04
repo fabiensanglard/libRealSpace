@@ -70,6 +70,7 @@ void testShowAllJetTextures(const char* trePath,const char* jetPath)
     for(size_t i = 0 ; i < jet.NumImages(); i++){
         RSImage* image = jet.images[i];
         renderer.DrawImage(image,2);
+        renderer.Swap();
     }
         
 }
@@ -244,6 +245,7 @@ void testShowAllTexturesPAK(void){
         printf("Drawing %lu.\n",i);
         RSImage* image = txmTextureSet.GetImageById(i);
         renderer.DrawImage(image,2);
+        renderer.Swap();
     }
     
     
@@ -262,6 +264,7 @@ void testShowAllTexturesPAK(void){
         printf("Drawing %lu.\n",i);
         RSImage* image = accTextureSet.GetImageById(i);
         renderer.DrawImage(image,1);
+        renderer.Swap();
     }
 }
 
@@ -381,6 +384,7 @@ int main( int argc,char** argv){
     
     SCObjectViewer viewer;
     viewer.Init();
+    viewer.Run();
     return 0;
     
     PakArchive archiveCanyon ;

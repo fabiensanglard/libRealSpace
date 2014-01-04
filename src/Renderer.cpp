@@ -8,12 +8,6 @@
 
 #include "precomp.h"
 
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_opengl.h"
-
-
-
-
 Renderer renderer;
 
 static SDL_Window *sdlWindow;
@@ -27,6 +21,14 @@ Renderer::Renderer() :
 }
 
 Renderer::~Renderer(){
+}
+
+Camera* Renderer::GetCamera(void){
+    return &this->camera;
+}
+
+VGAPalette* Renderer::GetPalette(void){
+    return &this->defaultPalette;
 }
 
 void Renderer::Init(int32_t width , int32_t height){
@@ -45,11 +47,13 @@ void Renderer::Init(int32_t width , int32_t height){
     
     SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_HIDDEN, &sdlWindow, &sdlRenderer);
     
+    /*
     sdlTexture = SDL_CreateTexture(sdlRenderer,
                                    SDL_PIXELFORMAT_RGBA8888,
                                    SDL_TEXTUREACCESS_STREAMING,
                                    width, height);
-    
+    */
+
     backBuffer = (uint8_t*)calloc(width*height*4,1);
     
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -57,7 +61,7 @@ void Renderer::Init(int32_t width , int32_t height){
         return ;
     }
     
-    sdlWindow = SDL_CreateWindow("RealSpace OBJ Viewer",0,0,this->width,this->height,SDL_WINDOW_OPENGL);
+    sdlWindow = SDL_CreateWindow("RealSpace OBJ Viewer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,this->width,this->height,SDL_WINDOW_OPENGL);
     
     // Create an OpenGL context associated with the window.
     SDL_GL_CreateContext(sdlWindow);
@@ -125,11 +129,14 @@ void Renderer::Clear(void){
         return;
     
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+    glColor4f(1, 1, 1, 1);
 }
 
 #define CELLSIZE 16
 void Renderer::ShowPalette(VGAPalette* palette){
     
+    return ;
+    /*
     for(int i = 0 ; i < 256 ; i++){
         
         const Texel* color = palette->GetRGBColor(i);
@@ -155,7 +162,7 @@ void Renderer::ShowPalette(VGAPalette* palette){
     SDL_RenderPresent(sdlRenderer);
     
     PumpEvents();
-    
+    */
     
 
 }
@@ -211,59 +218,53 @@ void Renderer::DrawImage(RSImage* image,int zoom){
     if (!initialized)
         return;
     
-    
-    
-
-    
-    running = true;
-    
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        running = true;
     
     glDisable(GL_DEPTH_TEST);
     
     glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
 	glLoadIdentity();									// Reset The Projection Matrix
-    
-    
-	// Calculate The Aspect Ratio Of The Window
     glOrtho(0, this->width, 0, this->height, -10, 10) ;
-    
 	glMatrixMode(GL_MODELVIEW);							// Select The Modelview Matrix
 	glLoadIdentity();
+    
+    
     
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    
     glDisable(GL_CULL_FACE);
      
     glBindTexture(GL_TEXTURE_2D, image->GetTexture()->id);
     glBegin(GL_QUADS);
-    
-
             glTexCoord2f(0, 1);
-        glVertex2d(0, 0);
+            glVertex2d(0, 0);
     
-
             glTexCoord2f(1, 1);
-        glVertex2d(image->width*zoom, 0);
+            glVertex2d(image->width*zoom, 0);
     
-
-    glTexCoord2f(1, 0);
-        glVertex2d(image->width*zoom, image->height*zoom);
+            glTexCoord2f(1, 0);
+            glVertex2d(image->width*zoom, image->height*zoom);
     
             glTexCoord2f(0, 0);
-        glVertex2d(0, image->height*zoom);
+            glVertex2d(0, image->height*zoom);
     glEnd();
     
-    SDL_GL_SwapWindow(sdlWindow);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
     
-    SDL_ShowWindow(sdlWindow);
     
     paused = true;
-    
-    while (paused)
-        PumpEvents();
-    
+}
+
+void Renderer::ShowWindow(void){
+    SDL_ShowWindow(sdlWindow);
+}
+
+void Renderer::Swap(void){
+    SDL_GL_SwapWindow(sdlWindow);
 }
 
 void Renderer::CreateTextureInGPU(Texture* texture){
@@ -301,6 +302,51 @@ void Renderer::DeleteTextureInGPU(Texture* texture){
 }
 
 
+void Renderer::GetNormal(RSEntity* object,Triangle* triangle,vec3_t normal){
+    //Calculate the normal for this triangle
+    vec3_t edge1 ;
+    edge1[0] = object->vertices[triangle->ids[0]].x - object->vertices[triangle->ids[1]].x;
+    edge1[1] = object->vertices[triangle->ids[0]].y - object->vertices[triangle->ids[1]].y;
+    edge1[2] = object->vertices[triangle->ids[0]].z - object->vertices[triangle->ids[1]].z;
+    
+    vec3_t edge2 ;
+    edge2[0] = object->vertices[triangle->ids[2]].x - object->vertices[triangle->ids[1]].x;
+    edge2[1] = object->vertices[triangle->ids[2]].y - object->vertices[triangle->ids[1]].y;
+    edge2[2] = object->vertices[triangle->ids[2]].z - object->vertices[triangle->ids[1]].z;
+    
+    vectorCrossProduct(edge1, edge2, normal);
+    normalize(normal);
+    
+    
+    
+    
+    // All normals are supposed to point outward in modern GPU but SC triangles
+    // don't have consistent winding. They can be CW or CCW (the back governal of a jet  is
+    // typically one triangle that must be visible from both sides !
+    // As a result, gouraud shading was probably performed in screen space.
+    // How can we replicate this ?
+    //        - Take the normal and compare it to the sign of the direction to the camera.
+    //        - If the signs don't match: reverse the normal.
+    vec3_t cameraPosition;
+    camera.GetPosition(cameraPosition);
+    
+    
+    vec3_t vertexPositon;
+    vertexPositon[0] = object->vertices[triangle->ids[0]].x;
+    vertexPositon[1] = object->vertices[triangle->ids[0]].y;
+    vertexPositon[2] = object->vertices[triangle->ids[0]].z;
+    
+    vec3_t cameraDirection;
+    vectorSubtract(cameraPosition, vertexPositon, cameraDirection);
+    normalize(cameraDirection);
+    
+    if (DotProduct(cameraDirection, normal) < 0){
+        vectorNegate(normal,normal);
+    }
+
+    
+}
+
 void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel ){
 
     if (!initialized)
@@ -315,69 +361,60 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         return;
     }
     
-    glEnable(GL_DEPTH_TEST);
     
+    float ambientLamber = 0.4f;
+    
+    Lod* lod = &object->lods[lodLevel] ;
+    
+    
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    matrix_t projectionMatrix;
+    camera.gluPerspective(projectionMatrix);
+    glLoadMatrixf(projectionMatrix);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    matrix_t modelViewMatrix;
+    camera.gluLookAt(modelViewMatrix);
+    glLoadMatrixf(modelViewMatrix);
+        
+        
+        
     glDisable(GL_CULL_FACE);
     
-    SDL_ShowWindow(sdlWindow);
-
-    //Pass 1, draw color
-   
-    //Pass two for the textures:
+    glEnable(GL_BLEND);
     
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        
+    glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     
     
-    
-    for(int i = 0 ; i < object->lods[lodLevel].numTriangles ; i++){
-        
-        uint16_t triangleID = object->lods[lodLevel].triangleIDs[i];
-        
-        Triangle* triangle = &object->triangles[triangleID];
-        
-        if (triangle->property == RSEntity::TRANSPARENT)
-            continue;
-        
-        const Texel* texel = palette->GetRGBColor(triangle->color);
-        glColor4f(texel->r/512.0f, texel->g/512.0f, texel->b/512.0f,texel->a/255.0f);
-        
-        glBegin(GL_TRIANGLES);
-        for(int j=0 ; j < 3 ; j++)
-        glVertex4f(object->vertices[triangle->ids[j]].x,
-                   object->vertices[triangle->ids[j]].y,
-                   object->vertices[triangle->ids[j]].z,
-                   1.0f);
-        glEnd();
-        
-        /*
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        SDL_GL_SwapWindow(sdlWindow);
-        SDL_GL_SwapWindow(sdlWindow);
-        SDL_GL_SwapWindow(sdlWindow);
-        paused=true;
-        while(paused){
-            //SDL_GL_SwapWindow(sdlWindow);
-            PumpEvents();
-        }
-        */
-    }
-    
-    
-    glColor3f(0.3f, 0.3f, 0.3f);
-    
-    
+    //Texture pass
+    glColor3f(0.5f, 0.5f, 0.5f);
     if (lodLevel == 0){
         glEnable(GL_TEXTURE_2D);
-        glEnable(GL_BLEND);
         
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-        
-        glDepthFunc(GL_EQUAL);
+        //glDepthFunc(GL_EQUAL);
         
         glAlphaFunc ( GL_GREATER, 0.0 ) ;
         glEnable ( GL_ALPHA_TEST ) ;
         
-
+        
         for (int i=0 ; i < object->NumUVs(); i++) {
             
             uvxyEntry* textInfo = &object->uvs[i];
@@ -394,9 +431,31 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
             
             Triangle* triangle = &object->triangles[textInfo->triangleID];
             
+            vec3_t normal;
+            GetNormal(object, triangle, normal);
+            
+            
             glBegin(GL_TRIANGLES);
             for(int j=0 ; j < 3 ; j++){
                 
+                vec3_t vertice;
+                vertice[0] = object->vertices[triangle->ids[j]].x;
+                vertice[1] = object->vertices[triangle->ids[j]].y;
+                vertice[2] = object->vertices[triangle->ids[j]].z;
+                
+                vec3_t lighDirection;
+                vectorSubtract(light, vertice, lighDirection);
+                normalize(lighDirection);
+                
+                float lambertianFactor = DotProduct(lighDirection,normal);
+                if (lambertianFactor < 0  )
+                    lambertianFactor = 0;
+                
+                lambertianFactor+= ambientLamber;
+                if (lambertianFactor > 1)
+                    lambertianFactor = 1;
+                
+                glColor4f(lambertianFactor, lambertianFactor, lambertianFactor,1);
                 glTexCoord2f(textInfo->uvs[j].u/(float)texture->width, textInfo->uvs[j].v/(float)texture->height);
                 glVertex3f(object->vertices[triangle->ids[j]].x,
                            object->vertices[triangle->ids[j]].y,
@@ -412,70 +471,32 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         glDisable(GL_BLEND);
     }
 
-    
+
     
     
 
-    //Pass 3: Let's makde a gouraud pass.
+   
+    //Pass 3: Let's draw the transparent stuff render RSEntity::TRANSPARENT)
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
     glBlendEquation(GL_ADD);
 
-    
-    //We only write a pixel if the depth is EQUAL to what is in the depth buffer.
-    glDepthFunc(GL_LEQUAL);
-        
     //glDepthFunc(GL_LESS);
         
-    Lod* lod = &object->lods[lodLevel] ;
+        
     for(int i = 0 ; i < lod->numTriangles ; i++){
         
         uint16_t triangleID = lod->triangleIDs[i];
         
         Triangle* triangle = &object->triangles[triangleID];
         
-        //Calculate the normal for this triangle
-        vec3_t edge1 ;
-        edge1[0] = object->vertices[triangle->ids[0]].x - object->vertices[triangle->ids[1]].x;
-        edge1[1] = object->vertices[triangle->ids[0]].y - object->vertices[triangle->ids[1]].y;
-        edge1[2] = object->vertices[triangle->ids[0]].z - object->vertices[triangle->ids[1]].z;
-        
-        vec3_t edge2 ;
-        edge2[0] = object->vertices[triangle->ids[2]].x - object->vertices[triangle->ids[1]].x;
-        edge2[1] = object->vertices[triangle->ids[2]].y - object->vertices[triangle->ids[1]].y;
-        edge2[2] = object->vertices[triangle->ids[2]].z - object->vertices[triangle->ids[1]].z;
+        if (triangle->property != RSEntity::TRANSPARENT)
+            continue;
         
         
-        
-        vec3_t normal ;
-        vectorCrossProduct(edge1, edge2, normal);
-        
-        // All normals are supposed to point outward in modern GPU but SC triangles
-        // don't have consistent winding. They can be CW or CCW (the back governal of a jet  is
-        // typically one triangle that must be visible from both sides !
-        // As a result, gouraud shading was probably performed in screen space.
-        // How can we replicate this ?
-        //        - Take the normal and compare it to the sign of the direction to the camera.
-        //        - If the signs don't match: reverse the normal.
-        normalize(normal);
-        
-        vec3_t cameraPosition;
-        camera.GetPosition(cameraPosition);
-        
-        vec3_t cameraDirection;
-        vec3_t vertexPositon;
-        vertexPositon[0] = object->vertices[triangle->ids[0]].x;
-        vertexPositon[1] = object->vertices[triangle->ids[0]].y;
-        vertexPositon[2] = object->vertices[triangle->ids[0]].z;
-        
-        vectorSubtract(cameraPosition, vertexPositon, cameraDirection);
-        normalize(cameraDirection);
-        
-        if (DotProduct(cameraDirection, normal) < 0){
-            vectorNegate(normal,normal);
-        }
-        
+        vec3_t normal;
+        GetNormal(object,triangle,normal);
         
         glBegin(GL_TRIANGLES);
         for(int j=0 ; j < 3 ; j++){
@@ -497,14 +518,14 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
             if (lambertianFactor < 0  )
                 lambertianFactor = 0;
             
-            lambertianFactor*=0.2f;
+            lambertianFactor=0.2f;
             
             // int8_t gouraud = 255 * lambertianFactor;
             
             
             //gouraud = 255;
             
-            glColor4f(lambertianFactor, lambertianFactor, lambertianFactor,0.5f);
+            glColor4f(lambertianFactor, lambertianFactor, lambertianFactor,1);
             
             glVertex3f(object->vertices[triangle->ids[j]].x,
                        object->vertices[triangle->ids[j]].y,
@@ -513,28 +534,73 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
         glEnd();
     }
 
-    
-    
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
     
+    
+    
+    
+    
+    
+    //Pass 1, draw color
+    for(int i = 0 ; i < lod->numTriangles ; i++){
+        //for(int i = 60 ; i < 62 ; i++){  //Debug purpose only back governal of F-16 is 60-62
+        
+        uint16_t triangleID = lod->triangleIDs[i];
+        
+        Triangle* triangle = &object->triangles[triangleID];
+        
+        if (triangle->property == RSEntity::TRANSPARENT)
+            continue;
+        
+        vec3_t normal;
+        GetNormal(object, triangle, normal);
+        
+        glBegin(GL_TRIANGLES);
+        for(int j=0 ; j < 3 ; j++){
+            
+            vec3_t vertice;
+            vertice[0] = object->vertices[triangle->ids[j]].x;
+            vertice[1] = object->vertices[triangle->ids[j]].y;
+            vertice[2] = object->vertices[triangle->ids[j]].z;
+            
+            vec3_t lighDirection;
+            vectorSubtract(light, vertice, lighDirection);
+            normalize(lighDirection);
+            
+            float lambertianFactor = DotProduct(lighDirection,normal);
+            if (lambertianFactor < 0  )
+                lambertianFactor = 0;
+            
+            lambertianFactor+= ambientLamber;
+            if (lambertianFactor > 1)
+                lambertianFactor = 1;
+            
+            const Texel* texel = palette->GetRGBColor(triangle->color);
+            
+            glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,1);
+            //glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
+            
+            glVertex3f(object->vertices[triangle->ids[j]].x,
+                       object->vertices[triangle->ids[j]].y,
+                       object->vertices[triangle->ids[j]].z);
+        }
+        glEnd();
+    }
+    
+
 }
 
 
 
-
+void Renderer::SetLight(vec3_t l){
+     vectorCopy(this->light,l);
+}
 
 void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
     
     if (!initialized)
         return;
-    
-    //Make sure all textures are within the GPU
-    //We cannot load the texture within glBegin: Preload them here
-    for (int i=0 ; i < object->NumImages(); i++){
-        RSImage* image = object->images[i];
-        image->SyncTexture();
-    }
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();

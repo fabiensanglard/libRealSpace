@@ -26,6 +26,9 @@ extern "C" {
     #include <math.h>
     #include <stdint.h>
 
+    #include "SDL2/SDL.h"
+    #include "SDL2/SDL_opengl.h"
+
 // Reusable Realspace Classes
     #include "Base.h"
     #include "ByteStream.h"

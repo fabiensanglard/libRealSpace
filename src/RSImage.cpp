@@ -46,6 +46,7 @@ void RSImage::SyncTexture(void){
     if ((texture.locFlag & Texture::VRAM) != Texture::VRAM){
         //Create texture in the GPU
         renderer.CreateTextureInGPU(&texture);
+        texture.locFlag |= Texture::VRAM;
     }
     
     //Check if we are synchornized with GPU

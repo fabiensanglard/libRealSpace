@@ -9,6 +9,7 @@
 #include "precomp.h"
 
 
+
 SCObjectViewer::SCObjectViewer(){
     
 }
@@ -116,9 +117,10 @@ void showAllImage(PakArchive* archive){
         
         
         renderer.Clear();
-        if (!errorFound)
+        if (!errorFound){
             renderer.DrawImage(&screen, 2);
-        
+            renderer.Swap();
+        }
         screen.ClearContent();
     }
     
@@ -127,14 +129,15 @@ void showAllImage(PakArchive* archive){
 
 void SCObjectViewer::ParseAssets(PakArchive* archive){
     
-    renderer.Init(640, 400);
     
+    
+    /*
     PakEntry* entry0 = archive->GetEntry(PAK_ID_MENU_DYNAMC);
     PakArchive file0;
     file0.InitFromRAM("OBJVIEW.PAK: file PAK_ID_MENU_DYNAMC",entry0->data, entry0->size);
     file0.List(stdout);
     showAllImage(&file0);
-    
+    */
     
     //Identified as OBJECT VIEWER STATIC TITLE
     /*
@@ -237,11 +240,13 @@ void SCObjectViewer::Init(void){
     TreEntry* objViewIFF = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
     TreEntry* objViewPAK = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
     
+    
     IffLexer objToDisplay;
     objToDisplay.InitFromRAM(objViewIFF->data, objViewIFF->size);
     objToDisplay.List(stdout);
     ParseObjList(&objToDisplay);
     ListObjects();
+    
     
     PakArchive assets;
     assets.InitFromRAM("OBJVIEW.PAK",objViewPAK->data, objViewPAK->size);
@@ -249,8 +254,96 @@ void SCObjectViewer::Init(void){
     //assets.Decompress("/Users/fabiensanglard/Desktop/ObjViewer.PAK", "MEH");
     ParseAssets(&assets);
     
+
 }
 
 void SCObjectViewer::Run(void){
+    
+    
+    renderer.Init(640, 400);
+    
+    
+    TreArchive tre ;
+    tre.InitFromFile("GAMEFLOW.TRE");
+    TreEntry* objViewPAK = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
+    
+    PakArchive assets;
+    assets.InitFromRAM("OBJVIEW.PAK",objViewPAK->data, objViewPAK->size);
+    
+    RLECodex codex ;
+    size_t byteRead;
+    bool errorFound;
+    
+    //Get blue background
+    PakEntry* backgroundPAKEntry = assets.GetEntry(PAK_ID_BACKGROUND);
+    PakArchive backgroundPAK;
+    backgroundPAK.InitFromRAM("PAK_ID_BACKGROUND",backgroundPAKEntry->data, backgroundPAKEntry->size);
+    RSImage backgroundImage;
+    backgroundImage.Create("backgroundImage", 320, 200);
+    errorFound = codex.ReadImage(backgroundPAK.GetEntry(0)->data, &backgroundImage, &byteRead);
+        
+    //Get static manu
+    PakEntry* staticMenuPAKEntry = assets.GetEntry(PAK_ID_MENU_STATIC);
+    PakArchive staticMenuPAK;
+    staticMenuPAK.InitFromRAM("PAK_ID_MENU_STATIC",staticMenuPAKEntry->data, staticMenuPAKEntry->size);
+    RSImage staticMenuImage;
+    staticMenuImage.Create("staticMenuImage", 320, 200);
+    errorFound = codex.ReadImage(staticMenuPAK.GetEntry(0)->data, &staticMenuImage, &byteRead);
+    
+    
+    
+    
+    
+    /*
+    PakEntry* menuBGData = assets.GetEntry(PAK_ID_MENU_DYNAMC);
+    */
+    
+    VGAPalette* palette = renderer.GetDefaultPalette();
+    Texel* texel = palette->GetRGBColor(0);
+    texel->a = 0;
+    
+    float counter=0;
+    
+    uint32_t startTime = SDL_GetTicks();
+    
+    uint32_t modelIndex=0;
+    
+    while(1){
+        
+        
+        uint32_t currentTime = SDL_GetTicks();
+        uint32_t totalTime = currentTime - startTime;
+        
+        modelIndex = (totalTime /2000) % showCases.size();
+        
+        renderer.Clear();
+        renderer.DrawImage(&backgroundImage, 2);
+        renderer.DrawImage(&staticMenuImage, 2);
+    
+        RSShowCase showCase = showCases[modelIndex];
+        
+        vec3_t newPosition;
+        newPosition[0]= showCase.cameraDist/200 *cos(counter/4);
+        newPosition[1]= 10;
+        newPosition[2]= showCase.cameraDist/200*sin(counter/4);
+        counter += 0.02;
+        
+        renderer.GetCamera()->SetPosition(newPosition);
+        
+        vec3_t light;
+        light[0]= 20*cos(-counter/2.0f);
+        light[1]= 10;
+        light[2]= 20*sin(-counter/2.0f);
+        renderer.SetLight(light);
+        
+        
+        RSEntity* modelToDraw = showCase.entity;
+        renderer.DrawModel(modelToDraw, NULL, LOD_LEVEL_MAX);
+    
+        renderer.Swap();
+        renderer.ShowWindow();
+        renderer.PumpEvents();
+    }
+
     
 }

@@ -30,7 +30,7 @@ typedef struct VGAPalette{
         *paletteColor = *texel;
     }
     
-    const Texel* GetRGBColor(uint8_t value){
+    Texel* GetRGBColor(uint8_t value){
         return &palette[value];
     }
     
