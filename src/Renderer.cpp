@@ -31,6 +31,15 @@ VGAPalette* Renderer::GetPalette(void){
     return &this->defaultPalette;
 }
 
+
+void Renderer::SetPalette(VGAPalette* palette){
+    this->currentPalette = palette;
+}
+
+void Renderer::ResetPalette(void){
+    this->currentPalette = &defaultPalette;
+}
+
 void Renderer::Init(int32_t width , int32_t height){
     
     //Load the default palette
@@ -41,6 +50,8 @@ void Renderer::Init(int32_t width , int32_t height){
     RSPalette palette;
     palette.InitFromIFF(&lexer);
     this->defaultPalette = *palette.GetColorPalette();
+    
+    this->currentPalette = &defaultPalette;
     
     this->width = width;
     this->height = height;
@@ -218,7 +229,9 @@ void Renderer::DrawImage(RSImage* image,int zoom){
     if (!initialized)
         return;
     
-        running = true;
+    running = true;
+    
+    image->SetPalette(this->currentPalette);
     
     glDisable(GL_DEPTH_TEST);
     
@@ -347,13 +360,10 @@ void Renderer::GetNormal(RSEntity* object,Triangle* triangle,vec3_t normal){
     
 }
 
-void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel ){
+void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
 
     if (!initialized)
         return;
-    
-    if (palette== NULL)
-        palette=&defaultPalette;
     
     if (lodLevel >= object->NumLods()){
         printf("Unable to render this Level Of Details (out of range): Max level is  %lu\n",
@@ -577,7 +587,7 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
             if (lambertianFactor > 1)
                 lambertianFactor = 1;
             
-            const Texel* texel = palette->GetRGBColor(triangle->color);
+            const Texel* texel = currentPalette->GetRGBColor(triangle->color);
             
             glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,1);
             //glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
@@ -596,6 +606,10 @@ void Renderer::DrawModel(RSEntity* object,VGAPalette* palette, size_t lodLevel )
 
 void Renderer::SetLight(vec3_t l){
      vectorCopy(this->light,l);
+}
+
+VGAPalette* Renderer::GetCurrentPalette(void){
+    return this->currentPalette;
 }
 
 void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
@@ -631,7 +645,7 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
         camera.gluLookAt(modelViewMatrix);
         glLoadMatrixf(modelViewMatrix);
         
-        DrawModel(object,NULL, lodLevel );
+        DrawModel(object, lodLevel );
         
         //Render light
         

@@ -18,20 +18,32 @@ typedef struct {
 
 typedef struct VGAPalette{
     
-    Texel palette[256];
+    Texel colors[256];
     
     void SetColor(uint8_t value,Texel* texel){
         
         Texel* paletteColor ;
         
-        paletteColor = &palette[value] ;
+        paletteColor = &colors[value] ;
         
         
         *paletteColor = *texel;
     }
     
     Texel* GetRGBColor(uint8_t value){
-        return &palette[value];
+        return &colors[value];
+    }
+    
+    void Diff(VGAPalette* other){
+        for (int i=0  ;i <256 ; i++){
+            if(colors[i].r != other->colors[i].r ||
+               colors[i].g != other->colors[i].g ||
+               colors[i].b != other->colors[i].b ||
+               colors[i].a != other->colors[i].a
+               )
+                printf("diff: %d.\n",i);
+        }
+            
     }
     
 } VGAPalette ;

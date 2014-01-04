@@ -26,7 +26,7 @@ public:
 
     void ShowPalette(VGAPalette* palette);
     void DrawImage(RSImage* image,int zoom);
-    void DrawModel(RSEntity* object,VGAPalette* palette , size_t lodLevel);
+    void DrawModel(RSEntity* object, size_t lodLevel);
     void DisplayModel(RSEntity* object,size_t lodLevel);
     
     void SetTitle(const char* title);
@@ -58,6 +58,10 @@ public:
         this->paused = true;
     }
     
+    void SetPalette(VGAPalette* palette);
+    void ResetPalette(void);
+    VGAPalette* GetCurrentPalette(void);
+    
 private:
     
     
@@ -71,6 +75,7 @@ private:
     uint8_t* backBuffer;
     
     VGAPalette defaultPalette;
+    VGAPalette* currentPalette;
     bool running;
     bool paused;
     

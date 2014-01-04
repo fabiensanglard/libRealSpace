@@ -158,7 +158,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     showAllImage(&file1);
     */
     
-    //Identified as DOGGIHT SETUP
+    //Identified as DOGFIGHT SETUP
     /*
     PakEntry* entry2 = archive->GetEntry(2);
     PakArchive file2;
@@ -339,7 +339,7 @@ void SCObjectViewer::Run(void){
         
         
         RSEntity* modelToDraw = showCase.entity;
-        renderer.DrawModel(modelToDraw, NULL, LOD_LEVEL_MAX);
+        renderer.DrawModel(modelToDraw, LOD_LEVEL_MAX);
     
         renderer.Swap();
         renderer.ShowWindow();

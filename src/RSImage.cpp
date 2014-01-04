@@ -66,6 +66,7 @@ void RSImage::ClearContent(void){
 
 void RSImage::SetPalette(VGAPalette* palette){
     this->palette = palette;
+    dirty = true;
 }
 
 Texture* RSImage::GetTexture(void){

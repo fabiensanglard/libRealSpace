@@ -429,8 +429,10 @@ int main( int argc,char** argv){
     PakArchive arch;
     arch.InitFromRAM("MID1.PAK",pakToExplore->data,pakToExplore->size);
     
-    for(size_t i =0 ;i < arch.GetNumEntries() ; i++){
+    printf("MID1.PAK" " contains %lu entries\n.",arch.GetNumEntries());
     
+    for(size_t i =0 ;i < arch.GetNumEntries() ; i++){
+        
         PakEntry* entry = arch.GetEntry(i);
         PakArchive a;
         a.InitFromRAM("", entry->data, entry->size);
@@ -446,6 +448,13 @@ int main( int argc,char** argv){
     mainMenu.Run();
     return 0;
     */
+
+    
+    SCDogFightMenu dogFightMenu;
+    dogFightMenu.Init();
+    dogFightMenu.Run();
+    return 0;
+    
     
     SCObjectViewer viewer;
     viewer.Init();

@@ -11,6 +11,23 @@
 
 class SCDogFightMenu{
     
+public:
+    
+    SCDogFightMenu();
+    ~SCDogFightMenu();
+    
+    void Init( );
+    
+    void Run(void);
+
+    static const uint8_t PAK_ID_PALETTE          = 7;
+    static const uint8_t PAK_ID_BACKGROUND       = 6;
+    static const uint8_t PAK_ID_TITLE            = 1 ;
+    static const uint8_t PAK_ID_BUTTONS          = 3 ;
+private:
+    
+    void ParsePalette(PakEntry* entry);
+    VGAPalette palette;
 };
 
 #endif /* defined(__libRealSpace__SCDogFightMenu__) */
