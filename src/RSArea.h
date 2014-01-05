@@ -21,7 +21,12 @@ private:
     
     void ParseMetadata(void );
     void ParseObjects(void );
+    
     void ParseTrigo(void );
+    void ParseTriFile(PakEntry* entry);
+    
+    //Temporary name: I don't know yet what is in there.
+    void ParseMystery(void);
     
     std::vector<RSMapTextureSet*> textures;
     PakArchive* archive;

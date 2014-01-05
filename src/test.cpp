@@ -295,49 +295,6 @@ int testShowPalette(void)
 }
 
 
-void ParseAndRenderVertices(PakEntry* entry){
-    
-    renderer.Init(1280,800);
-    
-    Vertex* vertices = new Vertex[512];
-    
-    ByteStream stream(entry->data);
-    
-    stream.ReadInt32LE();
-    stream.ReadInt32LE();
-    
-    for (int i=0 ; i < 208; i++) {
-        Vertex* v = &vertices[i];
-        int32_t coo ;
-        
-        coo = stream.ReadInt32LE();
-        v->x = (coo>>16) + (coo&0x000000FF)/65550.0;
-        coo = stream.ReadInt32LE();
-        v->z = (coo>>16) + (coo&0x000000FF)/65550.0;
-        coo = stream.ReadInt32LE();
-        v->y = (coo>>16) + (coo&0x000000FF)/65550.0;
-    }
-    
-    //Render them
-    renderer.RenderVerticeField(vertices,208);
-}
-
-void reverseEngineeMapTri(void){
-    
-    PakArchive archive ;
-    archive.InitFromFile("MAURITAN.TRI");
-    archive.List(stdout);
-    //archive.Decompress("/Users/fabiensanglard/Desktop/","TXT");
-    
-    for (size_t i =0 ; i < archive.GetNumEntries();  i++){
-        PakEntry* entry = archive.GetEntry(i);
-        if (entry->size != 0){
-            ParseAndRenderVertices(entry);
-        }
-    }
-    
-}
-
 void DecompressAllTRE(void){
     
     TreArchive gameflow ;
@@ -456,11 +413,13 @@ int main( int argc,char** argv){
     return 0;
     */
     
+    
     SCObjectViewer viewer;
     viewer.Init();
     viewer.Run();
     return 0;
     
+    /*
     PakArchive archiveCanyon ;
     archiveCanyon.InitFromFile("CANYON.PAK");
     archiveCanyon.Decompress("/Users/fabiensanglard/Desktop/", "TXT");
@@ -470,11 +429,16 @@ int main( int argc,char** argv){
     archiveMauritan.Decompress("/Users/fabiensanglard/Desktop/", "TXT");
 
     return 0;
+    */
+    
+    
     
     RSArea area;
-    area.InitFromPAKFileName("MAURITAN.PAK");
-    area.InitFromPAKFileName("CANYON.PAK");
-    area.InitFromPAKFileName("SANFRAN.PAK");
-    area.InitFromPAKFileName("RHODEI.PAK");
+    area.InitFromPAKFileName("ARENA.PAK");
+    
+    //area.InitFromPAKFileName("MAURITAN.PAK");
+    //area.InitFromPAKFileName("CANYON.PAK");
+    //area.InitFromPAKFileName("SANFRAN.PAK");
+    //area.InitFromPAKFileName("RHODEI.PAK");
     
 }

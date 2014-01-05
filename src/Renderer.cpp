@@ -712,19 +712,8 @@ void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
                        vertices[i].z     );
         glEnd();
         
-        //Render light
         
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
-        glPointSize(6);
-        
-        glBegin(GL_POINTS);
-        glColor4f(1, 1,0 , 1);
-        glVertex3f(light[0],light[1], light[2]);
-        glEnd();
-        
-        
+
         SDL_GL_SwapWindow(sdlWindow);
         PumpEvents();
     }

@@ -35,7 +35,7 @@ void RSArea::ParseMetadata(){
     
     IffLexer lexer;
     lexer.InitFromRAM(entry->data, entry->size);
-    lexer.List(stdout);
+    //lexer.List(stdout);
     
     IffChunk* tera = lexer.GetChunkByID('TERA');
     if (tera == NULL) {
@@ -108,6 +108,21 @@ void RSArea::ParseMetadata(){
     
     
     IffChunk* atri = lexer.GetChunkByID('ATRI');
+    printf("Content of trigo chunk:\n");
+    
+    ByteStream triStream(atri->data);
+    for (int i=0; i < 40; i++) {
+        printf(" %2X",triStream.ReadByte());
+    }
+    char triFileName[13];
+    for (int i=0; i < 13; i++)
+        triFileName[i] = triStream.ReadByte();
+    printf(" '%-13s' \n",triFileName);
+    
+    
+    
+    
+    
     
     IffChunk* objs = lexer.GetChunkByID('OBJS');
     /*
@@ -141,7 +156,7 @@ void RSArea::ParseMetadata(){
     
     //Num texture sets
     size_t numTexturesSets = txmsMaps->size/12;
-    printf("This area features %lu textureSets references.\n",numTexturesSets);
+    //printf("This area features %lu textureSets references.\n",numTexturesSets);
     
     ByteStream textureRefStrean(txmsMaps->data);
         
@@ -154,7 +169,7 @@ void RSArea::ParseMetadata(){
         uint8_t unknown = textureRefStrean.ReadByte();
         uint8_t numImages = textureRefStrean.ReadByte();
         
-        printf("Texture Set Ref [%3lu] 0x%2X[%-8s] %X (%2u files).\n",i,fastID,setName,unknown,numImages);
+       // printf("Texture Set Ref [%3lu] 0x%2X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
     }
     
     /*
@@ -256,7 +271,83 @@ void RSArea::ParseObjects(){
     
 }
 
+
+void RSArea::ParseTriFile(PakEntry* entry){
+    
+    Vertex* vertices = new Vertex[832];
+    
+    ByteStream stream(entry->data);
+    
+    stream.ReadInt32LE();
+    stream.ReadInt32LE();
+    
+    for (int i=0 ; i < 832; i++) {
+        Vertex* v = &vertices[i];
+        int32_t coo ;
+        
+        coo = stream.ReadInt32LE();
+        v->x = (coo>>8) + (coo&0x000000FF)/255.0;
+        v->x /= 2000;
+        coo = stream.ReadInt32LE();
+        v->z = (coo>>8) + (coo&0x000000FF)/255.0;
+        v->z /= 2000;
+        
+        coo = stream.ReadInt32LE();
+        v->y =   (coo>>8) + (coo&0x000000FF)/255.0;
+        v->y /= 2000;
+    }
+    
+    //Render them
+    renderer.RenderVerticeField(vertices,832);
+}
+
+
 void RSArea::ParseTrigo(){
+    
+    PakEntry* entry ;
+    
+    renderer.Init(640, 400);
+    
+    entry = archive->GetEntry(4);
+    
+    printf(".TRI file is %lu bytes.\n",entry->size);
+    // .TRI is a PAK
+    PakArchive triFiles;
+    triFiles.InitFromRAM(".TRI",entry->data, entry->size);
+    triFiles.List(stdout);
+    //triFiles.Decompress("/Users/fabiensanglard/Desktop/MAURITAN.TRIS/","TRI");
+    
+    printf("Found %d .TRI files.\n",triFiles.GetNumEntries());
+    
+    for(size_t i=0 ; i < triFiles.GetNumEntries() ; i++){
+        
+        PakEntry* entry  = triFiles.GetEntry(i);
+        if (entry->size != 0)
+            ParseTriFile(entry);
+    }
+}
+
+
+void RSArea::ParseMystery(void){
+    
+    PakEntry* entry ;
+    
+    entry = archive->GetEntry(1);
+    PakArchive fullPak;
+    fullPak.InitFromRAM("FULLSIZE",entry->data,entry->size);
+    fullPak.List(stdout);
+    
+    entry = archive->GetEntry(2);
+    PakArchive medPak;
+    medPak.InitFromRAM("MED SIZE",entry->data,entry->size);
+    medPak.List(stdout);
+
+    
+    entry = archive->GetEntry(3);
+    PakArchive smallPak;
+    smallPak.InitFromRAM("SMALSIZE",entry->data,entry->size);
+    smallPak.List(stdout);
+
     
 }
 
@@ -281,9 +372,10 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     }
     
     //Parse the meta datas.
-    ParseMetadata();
-    ParseObjects();
+    //ParseMetadata();
+    //ParseObjects();
     ParseTrigo();
+    //ParseMystery();
     
     
     //Load the textures from the PAKs (TXMPACK.PAK and ACCPACK.PAK) within TEXTURES.TRE.

@@ -51,16 +51,16 @@ void PakArchive::Parse(void){
         
         entry->data = this->data + offset;
         
-        if (uniqueOffsets[offset] == NULL){
+        //if (uniqueOffsets[offset] == NULL){
             entries.push_back(entry);
             uniqueOffsets[offset] = entry;
-        }
+        //}
         
     }
     
-    //printf("Total entries: %lu.\n",numEntries);
-    numEntries = uniqueOffsets.size();
-    //printf("Uniqu entries: %lu.\n",numEntries);
+   
+    //numEntries = uniqueOffsets.size();
+    
     
     //Second pass to calculate the sizes.
     int i =0;
@@ -193,9 +193,7 @@ void PakArchive::List(FILE* output){
     fprintf(output,"Listing content of PAK archives '%s'\n",this->path);
     for(size_t i =0; i < GetNumEntries() ; i++){
         PakEntry* entry = entries[i];
-        
-        
-        
+       
         if (entry->size != 0)
             fprintf(output,"    Entry [%3lu] size: %7lu bytes.\n",i, entry->size);
         else
