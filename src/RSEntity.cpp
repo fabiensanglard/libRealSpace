@@ -219,7 +219,50 @@ void RSEntity::InitFromIFF(IffLexer* lexer){
     chunk = lexer->GetChunkByID('LVL2');
     if (chunk!= NULL)
         ParseLVL(chunk);
+    
+    
+    CalcBoundingBox();
 }
+
+
+BoudingBox* RSEntity::GetBoudingBpx(void){
+    return &this->bb;
+}
+
+
+void RSEntity::CalcBoundingBox(void){
+    
+    this->bb.min.x = FLT_MAX;
+    this->bb.min.y = FLT_MAX;
+    this->bb.min.z = FLT_MAX;
+    
+    this->bb.max.x = FLT_MIN;
+    this->bb.max.y = FLT_MIN;
+    this->bb.max.z = FLT_MIN;
+    
+    
+    for(size_t i =0; i < this->vertices.size() ; i++){
+        
+        Vertex vertex = vertices[i];
+        
+        if (bb.min.x > vertex.x)
+            bb.min.x = vertex.x;
+        if (bb.min.y > vertex.y)
+            bb.min.y = vertex.y;
+        if (bb.min.z > vertex.z)
+            bb.min.z = vertex.z;
+        
+        if (bb.max.x < vertex.x)
+            bb.max.x = vertex.x;
+        if (bb.max.y < vertex.y)
+            bb.max.y = vertex.y;
+        if (bb.max.z < vertex.z)
+            bb.max.z = vertex.z;
+        
+    }
+
+}
+
 
 size_t RSEntity::NumImages(void){
     return this->images.size();

@@ -67,6 +67,8 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
         for(int k = 0 ; k < 9 ; k++)
             objName[k] = stream.ReadByte();
         ConvertToUpperCase(objName);
+
+        
         
         for(int k = 0 ; k < 20 ; k++)
             showCase.displayName[k] = stream.ReadByte();
@@ -88,6 +90,7 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
         
         uint32_t fixedPointDist = stream.ReadInt32LE();
         showCase.cameraDist = (fixedPointDist >> 8) + (fixedPointDist & 0xFF)/255.0f ;
+        //showCase.cameraDist = 200000;
         
         showCases.push_back(showCase);
         
@@ -308,6 +311,14 @@ void SCObjectViewer::Run(void){
     uint32_t startTime = SDL_GetTicks();
     
     uint32_t modelIndex=0;
+    
+    RSShowCase showCase = showCases[0];
+    printf("F-16 dimensions: x: %.2f y: %.2f z: %.2f\n",
+           showCase.entity->GetBoudingBpx()->max.x-showCase.entity->GetBoudingBpx()->min.x,
+           showCase.entity->GetBoudingBpx()->max.y-showCase.entity->GetBoudingBpx()->min.y,
+           showCase.entity->GetBoudingBpx()->max.z-showCase.entity->GetBoudingBpx()->min.z
+           );
+    
     
     while(1){
         

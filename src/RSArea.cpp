@@ -214,74 +214,78 @@ void RSArea::ParseObjects(){
     PakArchive objectFiles;
     objectFiles.InitFromRAM("PAK Objects from RAM",objectsFilesLocation->data, objectsFilesLocation->size);
     
-    size_t numObjects=0;
+    printf("This .OBJ features %lu entries.\n",objectFiles.GetNumEntries());
+    
+    
     for(size_t i = 0 ; i < objectFiles.GetNumEntries() ; i++){
         PakEntry* entry = objectFiles.GetEntry(i);
+  
+        if (entry->size == 0)
+            continue;
         
-        if (entry->size != 0){
-            ByteStream reader(entry->data);
-            uint16_t numObjs = reader.ReadUShort();
-            printf("OBJ files %lu features %d objects.\n",i,numObjs);
+        ByteStream reader(entry->data);
+        uint16_t numObjs = reader.ReadUShort();
+        printf("OBJ files %lu features %d objects.\n",i,numObjs);
             
-            for(int j=0 ; j < numObjs ; j++){
+        for(int j=0 ; j < numObjs ; j++){
+            
+            char setName[9];
+            for(int k=0 ; k <8 ; k++)
+                setName[k] = reader.ReadByte();
+            setName[8] = 0;
+                
+            uint8_t unknown09 = reader.ReadByte();
+            uint8_t unknown10 = reader.ReadByte();
+            uint8_t unknown11 = reader.ReadByte();
+            uint8_t unknown12 = reader.ReadByte();
+            uint8_t unknown13 = reader.ReadByte();
                 
                 
-                char setName[9];
-                for(int k=0 ; k <8 ; k++)
-                    setName[k] = reader.ReadByte();
-                setName[8] = 0;
                 
-                uint8_t unknown09 = reader.ReadByte();
-                uint8_t unknown10 = reader.ReadByte();
-                uint8_t unknown11 = reader.ReadByte();
-                uint8_t unknown12 = reader.ReadByte();
-                uint8_t unknown13 = reader.ReadByte();
+            char accessoryName[9];
+            for(int k=0 ; k <8 ; k++)
+                accessoryName[k] = reader.ReadByte();
+            accessoryName[8] = 0;
                 
                 
-                
-                char accessoryName[9];
-                for(int k=0 ; k <8 ; k++)
-                    accessoryName[k] = reader.ReadByte();
-                accessoryName[8] = 0;
-                
-                
-                uint8_t unknowns[0x31];
+            uint8_t unknowns[0x31];
 
-                for(int k=0 ; k <0x31 ; k++)
-                    unknowns[k] = reader.ReadByte();
+            for(int k=0 ; k <0x31 ; k++)
+                unknowns[k] = reader.ReadByte();
                 
-                printf("object set [%3lu] obj [%2d] - '%-8s' %2X %2X %2X %2X %2X '%-8s'",i,j,setName,
+            printf("object set [%3lu] obj [%2d] - '%-8s' %2X %2X %2X %2X %2X '%-8s'",i,j,setName,
                        unknown09,
                        unknown10,
                        unknown11,
                        unknown12,
                        unknown13,accessoryName);
                 
-                for(int k=0 ; k <0x31 ; k++)
-                    printf("%2X ",unknowns[k]);
+            for(int k=0 ; k <0x31 ; k++)
+                printf("%2X ",unknowns[k]);
             
-                printf("\n");
+            printf("\n");
                 
-            }
             
-            numObjects+=numObjs;
+            
+            
         }
+        
     }
-    printf("This Area features %lu Objects.\n",numObjects);
+    
     
 }
 
 
 void RSArea::ParseTriFile(PakEntry* entry){
     
-    Vertex* vertices = new Vertex[832];
+    Vertex* vertices = new Vertex[300];
     
     ByteStream stream(entry->data);
     
     stream.ReadInt32LE();
     stream.ReadInt32LE();
     
-    for (int i=0 ; i < 832; i++) {
+    for (int i=0 ; i < 300; i++) {
         Vertex* v = &vertices[i];
         int32_t coo ;
         
@@ -298,7 +302,7 @@ void RSArea::ParseTriFile(PakEntry* entry){
     }
     
     //Render them
-    renderer.RenderVerticeField(vertices,832);
+    renderer.RenderVerticeField(vertices,300);
 }
 
 
@@ -373,8 +377,8 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     
     //Parse the meta datas.
     //ParseMetadata();
-    //ParseObjects();
-    ParseTrigo();
+    ParseObjects();
+    //ParseTrigo();
     //ParseMystery();
     
     

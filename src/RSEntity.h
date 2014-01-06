@@ -19,6 +19,11 @@ typedef struct Vertex{
     float z;
 } Vertex ;
 
+typedef struct BoudingBox{
+    Vertex min;
+    Vertex max;
+} BoudingBox;
+
 typedef struct UV{
     uint8_t u;
     uint8_t v;
@@ -87,7 +92,13 @@ public:
     
     enum Property { TRANSPARENT = 0x02};
     
+    BoudingBox* GetBoudingBpx(void);
+    
+    
 private:
+    
+    BoudingBox bb;
+    void CalcBoundingBox(void);
     
     VGAPalette* palette;
     

@@ -419,6 +419,7 @@ int main( int argc,char** argv){
     viewer.Run();
     return 0;
     
+    
     /*
     PakArchive archiveCanyon ;
     archiveCanyon.InitFromFile("CANYON.PAK");
@@ -440,5 +441,6 @@ int main( int argc,char** argv){
     //area.InitFromPAKFileName("CANYON.PAK");
     //area.InitFromPAKFileName("SANFRAN.PAK");
     //area.InitFromPAKFileName("RHODEI.PAK");
+    //area.InitFromPAKFileName("EGYPT.PAK");
     
 }

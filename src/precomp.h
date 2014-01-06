@@ -25,6 +25,7 @@ extern "C" {
     #include <map>
     #include <math.h>
     #include <stdint.h>
+    #include <float.h>
 
     #include "SDL2/SDL.h"
     #include "SDL2/SDL_opengl.h"

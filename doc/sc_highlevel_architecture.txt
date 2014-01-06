@@ -1,0 +1,61 @@
+Strike Commander Executable System :
+====================================
+
+Strike Commande is not a monolitic DOS executable. Instead various 
+aspects of the game are distributed over:
+
+INSTALL.EXE	
+MKTERR.EXE	
+SC.EXE
+MKGAME.EXE	
+OPTTEST.EXE	
+STRIKE.EXE
+
+Each are discussed next, the size of each executable is given as a reverse
+engineering time estimate (RETE). Based on prior experience, working evenings and
+weekend on an EXE allows 10KB/month.
+
+Installing the game from floppy disk to Hard-Drive is done via INSTALL.EXE
+(7,793 bytes : RETE 2 weeks).
+
+After installation, Strike commander is started from
+calling C:\SC\SC.EXE
+
+But SC.EXE is just a dispatch of 20KB (RETE: 1 month).
+
+Upon calling it, it will load OPTTEST.EXE
+which: 
+   
+    Play the intro.
+    Display the various menu.
+    Take care of the gameplay between missions.
+
+OPTTEST.EXE is a much more significant EXE (870,528 bytes: RETE: 7 years)    
+
+Upon starting a mission, OPTTEST.EXE verifiy
+that the PAK file is ready. If not, it starts
+MKTERR.EXE to generate it.
+MKTERR.EXE is 203,744 bytes (RETE : 1.5 years).
+
+Then it loads STRIKE.EXE: The actual 3D engine.
+STRIKE.EXE 746,304 bytes (RETE: 6 years)
+
+All those EXE are loaded with DOs 21h standard
+system calls.
+
+Note: I haven't figured out what MKGAME.EXE	 is used for
+but it is (131,696 bytes : 1 year)
+
+Total effort estimate for Strike Commander Reverse Engineering :
+
+
+INSTALL.EXE	    7,793 bytes : RETE  2 weeks
+MKTERR.EXE	  203,744 bytes : RETE  1.5 years
+SC.EXE         20,000 bytes : RETE  1 month
+MKGAME.EXE	  131,696 bytes : RETE  1 year
+OPTTEST.EXE	  870,528 bytes : RETE  7 years
+STRIKE.EXE    746,304 bytes : RETE  6 years
+=============================================
+15 years, 7 months and 2 weeks.
+
+Depressing.
