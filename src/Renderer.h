@@ -12,6 +12,7 @@
 class RSEntity;
 struct Vertex;
 class Triangle;
+class RSArea;
 
 class Renderer{
     
@@ -40,6 +41,8 @@ public:
     
     //For research methods: Those should be deleted soon:
     void RenderVerticeField(Vertex* vertices, int numVertices);
+    
+    void RenderWorld(RSArea* area, int LOD, int verticesPerBlock);
     
     VGAPalette* GetPalette(void);
     

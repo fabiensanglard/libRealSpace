@@ -372,6 +372,28 @@ int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
 
+    /*
+    SetBase("/Users/fabiensanglard/Desktop/ARENA.PAK.CONTENT/");
+    PakArchive archiveMauritan ;
+    archiveMauritan.InitFromFile("FILE1.TXT");
+    archiveMauritan.Decompress("/Users/fabiensanglard/Desktop/ARENA.PAK.CONTENT/MIP_MAX/", "MIP_MAX");
+    
+    PakArchive f ;
+    f.InitFromFile("FILE2.TXT");
+    f.Decompress("/Users/fabiensanglard/Desktop/ARENA.PAK.CONTENT/MIP_MED/", "MIP_MED");
+    
+    PakArchive g ;
+    g.InitFromFile("FILE3.TXT");
+    g.Decompress("/Users/fabiensanglard/Desktop/ARENA.PAK.CONTENT/MIP_MIN/", "MIP_MIN");
+    */
+    
+    /*
+    PakArchive archiveMauritan ;
+    archiveMauritan.InitFromFile("ARENA.PAK");
+    archiveMauritan.Decompress("/Users/fabiensanglard/Desktop/", "TXT");
+    */
+    
+    
     //testShowAllTexturesPAK();
     //return 0;
     
@@ -413,12 +435,12 @@ int main( int argc,char** argv){
     return 0;
     */
     
-    
+    /*
     SCObjectViewer viewer;
     viewer.Init();
     viewer.Run();
     return 0;
-    
+    */
     
     /*
     PakArchive archiveCanyon ;

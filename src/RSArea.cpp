@@ -331,8 +331,76 @@ void RSArea::ParseTrigo(){
     }
 }
 
+//A lod features 
+//A block features either 25, 100 or 400 vertex
+void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
+    
+    PakArchive blocksPAL;
+    blocksPAL.InitFromRAM("BLOCKS",entry->data, entry->size);
+    
+    
+    
+    for (size_t i=0; i < blocksPAL.GetNumEntries(); i++) { // Iterate over the BLOCKS_PER_MAP block entries.
+        
+        //SRC Asset Block
+        PakEntry* blockEntry = blocksPAL.GetEntry(i);
+        
+        //DST custom block
+        AreaBlock* block = &blocks[lod][i];
+        
+        ByteStream vertStream(blockEntry->data);
+        for(size_t vertexID=0 ; vertexID < blockDim*blockDim ; vertexID++){
+            
+            Vertex* vertex = &block->vertice[vertexID];
+            
+
+            //vertex->rawData[z] =
+            
+          
+            //vertStream.ReadByte();
+           
+            int16_t height = vertStream.ReadShort();
+            //int32_t height =
+            vertStream.ReadShort();
+            vertStream.ReadShort();
+            //vertStream.ReadShort();
+            
+           // vertStream.ReadShort();
+           // height = vertStream.ReadShort();
+            
+           // height =  height>8 + ((height & 0xFF) / 255.0f);
+           // height*=300;
+            
+            
+            vertex->y = height/5 ;//elevation[i]/40 + height/5;
+            
+#define BLOCK_WIDTH 512
+            vertex->x = i % 18 * BLOCK_WIDTH + vertexID % blockDim / (float)(blockDim) * BLOCK_WIDTH ;
+            vertex->z = i / 18 * BLOCK_WIDTH + vertexID / blockDim / (float)(blockDim) *BLOCK_WIDTH ;
+           
+        }
+        
+    }
+}
+
+
+void RSArea::ParseElevations(void){
+    
+    PakEntry* entry ;
+    
+    entry = archive->GetEntry(6);
+    
+    ByteStream stream(entry->data);
+    
+    for (size_t i = 0 ; i < BLOCKS_PER_MAP; i++) {
+        elevation[i]=stream.ReadUShort();
+    }
+}
 
 void RSArea::ParseMystery(void){
+    
+    
+    renderer.Init(640, 400);
     
     PakEntry* entry ;
     
@@ -340,18 +408,25 @@ void RSArea::ParseMystery(void){
     PakArchive fullPak;
     fullPak.InitFromRAM("FULLSIZE",entry->data,entry->size);
     fullPak.List(stdout);
+    ParseBlocks(BLOCK_LOD_MAX,entry,20);
+    renderer.SetTitle("Strike Commander Map Viewer");
+    renderer.RenderWorld(this,BLOCK_LOD_MAX,400);
+    
     
     entry = archive->GetEntry(2);
     PakArchive medPak;
     medPak.InitFromRAM("MED SIZE",entry->data,entry->size);
     medPak.List(stdout);
-
+    ParseBlocks(BLOCK_LOD_MED,entry,10);
+    renderer.RenderWorld(this,BLOCK_LOD_MED,100);
+    
     
     entry = archive->GetEntry(3);
     PakArchive smallPak;
     smallPak.InitFromRAM("SMALSIZE",entry->data,entry->size);
     smallPak.List(stdout);
-
+    ParseBlocks(BLOCK_LOD_MIN,entry,5);
+    renderer.RenderWorld(this,BLOCK_LOD_MIN,25);
     
 }
 
@@ -377,9 +452,11 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     
     //Parse the meta datas.
     //ParseMetadata();
-    ParseObjects();
+    //ParseObjects();
     //ParseTrigo();
-    //ParseMystery();
+    
+    ParseElevations();
+    ParseMystery();
     
     
     //Load the textures from the PAKs (TXMPACK.PAK and ACCPACK.PAK) within TEXTURES.TRE.
@@ -395,18 +472,9 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     TreArchive treArchive;
     treArchive.InitFromFile(trePath);
     
-   
-    
-    
-    
-    
     //Find the texture PAKS.
     TreEntry* treEntry = NULL;
     RSMapTextureSet* set;
-    
-    
-    
-    
     
     const char* txmPakName = "..\\..\\DATA\\TXM\\TXMPACK.PAK";
     treEntry = treArchive.GetEntryByName(txmPakName);
@@ -415,8 +483,6 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     set = new RSMapTextureSet();
     set->InitFromPAK(&txmPakArchive);
     textures.push_back(set);
-    
-    
     
     //ACCPACK.PAK seems to contain runway textures
     const char* accPakName = "..\\..\\DATA\\TXM\\ACCPACK.PAK";

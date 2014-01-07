@@ -692,9 +692,9 @@ void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
         matrix_t modelViewMatrix;
         
         vec3_t newPosition;
-        newPosition[0]= 30000*cos(counter);
-        newPosition[1]= 10000;
-        newPosition[2]= 30000*sin(counter);
+        newPosition[0]= 256*cos(counter);
+        newPosition[1]= 0;
+        newPosition[2]= 256*sin(counter);
         counter += 0.02;
         
         camera.SetPosition(newPosition);
@@ -714,6 +714,65 @@ void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
         
         
 
+        SDL_GL_SwapWindow(sdlWindow);
+        PumpEvents();
+    }
+
+}
+
+
+void Renderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock){
+    
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    matrix_t projectionMatrix;
+    camera.gluPerspective(projectionMatrix);
+    glLoadMatrixf(projectionMatrix);
+    
+    SDL_ShowWindow(sdlWindow);
+    
+    running = true;
+    
+    float counter=0;
+    
+    vec3_t lookAt = {256*11,100,256*8};
+    
+    renderer.GetCamera()->SetLookAt(lookAt);
+    glPointSize(2);
+    while (running) {
+        
+        glClear(GL_COLOR_BUFFER_BIT );
+        
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        matrix_t modelViewMatrix;
+        vec3_t newPosition;
+        newPosition[0]=  lookAt[0] - 2256*cos(counter/2);
+        newPosition[1]= 700;
+        newPosition[2]=  lookAt[2] - 2256*sin(counter/2);
+        counter += 0.02;
+
+        camera.SetPosition(newPosition);
+        camera.gluLookAt(modelViewMatrix);
+        glLoadMatrixf(modelViewMatrix);
+        
+        
+        
+        glBegin(GL_POINTS);
+        
+        for(int i=0 ; i < 324 ; i++){
+            AreaBlock* block = area->GetAreaBlock(LOD, i);
+            for (size_t i=0 ; i < verticesPerBlock ; i ++){
+                Vertex* v = &block->vertice[i];
+                glVertex3f(v->x,
+                           v->y,
+                           v->z         );
+            }
+        }
+            glEnd();
+        
+        
+        
         SDL_GL_SwapWindow(sdlWindow);
         PumpEvents();
     }

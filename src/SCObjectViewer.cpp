@@ -312,13 +312,14 @@ void SCObjectViewer::Run(void){
     
     uint32_t modelIndex=0;
     
+    /*
     RSShowCase showCase = showCases[0];
     printf("F-16 dimensions: x: %.2f y: %.2f z: %.2f\n",
            showCase.entity->GetBoudingBpx()->max.x-showCase.entity->GetBoudingBpx()->min.x,
            showCase.entity->GetBoudingBpx()->max.y-showCase.entity->GetBoudingBpx()->min.y,
            showCase.entity->GetBoudingBpx()->max.z-showCase.entity->GetBoudingBpx()->min.z
            );
-    
+    */
     
     while(1){
         

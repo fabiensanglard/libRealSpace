@@ -105,19 +105,12 @@
 		2D310903186FEAA900D3443F /* objects */ = {
 			isa = PBXGroup;
 			children = (
-				2D310905186FEAEA00D3443F /* RSPalette.h */,
 				2D310904186FEAEA00D3443F /* RSPalette.cpp */,
-				2D3109121870830200D3443F /* RSEntity.h */,
 				2D3109111870830200D3443F /* RSEntity.cpp */,
-				2D9B617B18725C660071ACDA /* RSMusic.h */,
 				2D9B617A18725C660071ACDA /* RSMusic.cpp */,
-				2D9B617E18725C8B0071ACDA /* RSSound.h */,
 				2D9B617D18725C8B0071ACDA /* RSSound.cpp */,
-				2D9B618118725CEC0071ACDA /* RSArea.h */,
 				2D9B618018725CEC0071ACDA /* RSArea.cpp */,
-				2DB3FB62187281850081B676 /* RSMapTextureSet.h */,
 				2DB3FB61187281850081B676 /* RSMapTextureSet.cpp */,
-				2DB3FB651872BAAA0081B676 /* RSImage.h */,
 				2DB3FB641872BAAA0081B676 /* RSImage.cpp */,
 			);
 			name = objects;
@@ -126,13 +119,9 @@
 		2D31090A18707EF300D3443F /* renderers */ = {
 			isa = PBXGroup;
 			children = (
-				2D31090F187081F000D3443F /* Renderer.h */,
 				2D31090E187081F000D3443F /* Renderer.cpp */,
-				2D31090C18707F1500D3443F /* Texture.h */,
 				2D31090B18707F1500D3443F /* Texture.cpp */,
-				2D9B61751871EDEA0071ACDA /* Matrix.h */,
 				2D9B61741871EDEA0071ACDA /* Matrix.cpp */,
-				2D9B61781871F8470071ACDA /* Camera.h */,
 				2D9B61771871F8470071ACDA /* Camera.cpp */,
 			);
 			name = renderers;
@@ -141,14 +130,39 @@
 		2D3DE2B5187752820080E744 /* sc */ = {
 			isa = PBXGroup;
 			children = (
-				2D58A415187716A7003EF449 /* SCObjectViewer.h */,
 				2D58A414187716A7003EF449 /* SCObjectViewer.cpp */,
-				2D3DE2B71877529A0080E744 /* SCDogFightMenu.h */,
 				2D3DE2B61877529A0080E744 /* SCDogFightMenu.cpp */,
-				2DB6D4A41877B3C3008E6631 /* SCMainMenu.h */,
 				2DB6D4A31877B3C3008E6631 /* SCMainMenu.cpp */,
 			);
 			name = sc;
+			sourceTree = "<group>";
+		};
+		2DA526C6187B7D1500BE1A11 /* headers */ = {
+			isa = PBXGroup;
+			children = (
+				2DFEFB98186F5C84002305A9 /* precomp.h */,
+				2DFEFBB3186F5E21002305A9 /* TreArchive.h */,
+				2D310908186FFD7800D3443F /* PakArchive.h */,
+				2DFEFBC3186F764E002305A9 /* IffLexer.h */,
+				2D58A41818773255003EF449 /* RLECodex.h */,
+				2DFEFBB6186F655A002305A9 /* ByteStream.h */,
+				2DFEFBB9186F65FE002305A9 /* Base.h */,
+				2D58A415187716A7003EF449 /* SCObjectViewer.h */,
+				2D310905186FEAEA00D3443F /* RSPalette.h */,
+				2D3109121870830200D3443F /* RSEntity.h */,
+				2D9B617B18725C660071ACDA /* RSMusic.h */,
+				2D9B617E18725C8B0071ACDA /* RSSound.h */,
+				2D9B618118725CEC0071ACDA /* RSArea.h */,
+				2DB3FB62187281850081B676 /* RSMapTextureSet.h */,
+				2DB3FB651872BAAA0081B676 /* RSImage.h */,
+				2D3DE2B71877529A0080E744 /* SCDogFightMenu.h */,
+				2DB6D4A41877B3C3008E6631 /* SCMainMenu.h */,
+				2D31090F187081F000D3443F /* Renderer.h */,
+				2D31090C18707F1500D3443F /* Texture.h */,
+				2D9B61751871EDEA0071ACDA /* Matrix.h */,
+				2D9B61781871F8470071ACDA /* Camera.h */,
+			);
+			name = headers;
 			sourceTree = "<group>";
 		};
 		2DFEFB74186F5BED002305A9 = {
@@ -171,13 +185,13 @@
 		2DFEFB7F186F5BEE002305A9 /* libRealSpace */ = {
 			isa = PBXGroup;
 			children = (
+				2DA526C6187B7D1500BE1A11 /* headers */,
 				2D3DE2B5187752820080E744 /* sc */,
 				2D31090A18707EF300D3443F /* renderers */,
 				2D310903186FEAA900D3443F /* objects */,
 				2DFEFBC1186F7618002305A9 /* iff */,
 				2DFEFBB4186F654A002305A9 /* utils */,
 				2DFEFBB0186F5D36002305A9 /* archives */,
-				2DFEFB98186F5C84002305A9 /* precomp.h */,
 				2DFEFBBF186F676A002305A9 /* test.cpp */,
 			);
 			path = libRealSpace;
@@ -186,9 +200,7 @@
 		2DFEFBB0186F5D36002305A9 /* archives */ = {
 			isa = PBXGroup;
 			children = (
-				2DFEFBB3186F5E21002305A9 /* TreArchive.h */,
 				2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */,
-				2D310908186FFD7800D3443F /* PakArchive.h */,
 				2D310907186FFD7800D3443F /* PakArchive.cpp */,
 			);
 			name = archives;
@@ -197,11 +209,8 @@
 		2DFEFBB4186F654A002305A9 /* utils */ = {
 			isa = PBXGroup;
 			children = (
-				2D58A41818773255003EF449 /* RLECodex.h */,
 				2D58A41718773255003EF449 /* RLECodex.cpp */,
-				2DFEFBB6186F655A002305A9 /* ByteStream.h */,
 				2DFEFBB5186F655A002305A9 /* ByteStream.cpp */,
-				2DFEFBB9186F65FE002305A9 /* Base.h */,
 				2DFEFBB8186F65FE002305A9 /* Base.cpp */,
 			);
 			name = utils;
@@ -210,7 +219,6 @@
 		2DFEFBC1186F7618002305A9 /* iff */ = {
 			isa = PBXGroup;
 			children = (
-				2DFEFBC3186F764E002305A9 /* IffLexer.h */,
 				2DFEFBC2186F764E002305A9 /* IffLexer.cpp */,
 			);
 			name = iff;
