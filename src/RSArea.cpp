@@ -321,7 +321,7 @@ void RSArea::ParseTrigo(){
     triFiles.List(stdout);
     //triFiles.Decompress("/Users/fabiensanglard/Desktop/MAURITAN.TRIS/","TRI");
     
-    printf("Found %d .TRI files.\n",triFiles.GetNumEntries());
+    printf("Found %zu .TRI files.\n",triFiles.GetNumEntries());
     
     for(size_t i=0 ; i < triFiles.GetNumEntries() ; i++){
         
@@ -331,6 +331,18 @@ void RSArea::ParseTrigo(){
     }
 }
 
+
+#define LAND_TYPE_SEA    0
+#define LAND_TYPE_DESERT 1
+#define LAND_TYPE_GROUND 2
+#define LAND_TYPE_PRAIRI 3
+#define LAND_TYPE_SEA    4
+#define LAND_TYPE_SEA    5
+#define LAND_TYPE_SNOW   6
+#define LAND_TYPE_SEA    7
+
+static int mapColors[256];
+
 //A lod features 
 //A block features either 25, 100 or 400 vertex
 void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
@@ -338,7 +350,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
     PakArchive blocksPAL;
     blocksPAL.InitFromRAM("BLOCKS",entry->data, entry->size);
     
-    
+    memset(mapColors, 0, 256);
     
     for (size_t i=0; i < blocksPAL.GetNumEntries(); i++) { // Iterate over the BLOCKS_PER_MAP block entries.
         
@@ -351,37 +363,38 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
         ByteStream vertStream(blockEntry->data);
         for(size_t vertexID=0 ; vertexID < blockDim*blockDim ; vertexID++){
             
-            Vertex* vertex = &block->vertice[vertexID];
+            MapVertex* vertex = &block->vertice[vertexID];
             
+            
+            
+            
+            int32_t height ;
+            
+            
+            height =vertStream.ReadShort();
+            vertStream.ReadByte();
+
+            
+            
+            uint8_t color = vertStream.ReadByte();
+            mapColors[color]++;
+            
+           
+            //height = height > 1;
+//            height =vertStream.ReadByte();
+ //           vertStream.ReadByte();
+
+            
+            vertStream.ReadByte();
+            vertStream.ReadByte();
             
             
             /*
-            int32_t height ;
-              vertStream.ReadShort();
-//            height =vertStream.ReadByte();
-//            ;
-            //height = vertStream.ReadByte();
-            height =vertStream.ReadByte();
-            height =vertStream.ReadByte();
-//            height = height > 16;
-           // height /= 120000;
-             vertStream.ReadShort();
-            //height *= 10;
-            //height = vertStream.ReadShort();
-            //vertStream.ReadInt32LE();
-            
-            //height += elevation[i]/10;
-            
-             //vertStream.ReadByte();
-            */
-            
-            
-            
              int16_t height = vertStream.ReadShort();
              height /= 4;
              vertStream.ReadShort();
              vertStream.ReadShort();
-            
+            */
             
             vertex->y = height ;
 #define BLOCK_WIDTH 512
@@ -391,6 +404,12 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
         }
         
     }
+    
+    printf("Color stats:\n");
+    for (int i = 0 ; i < 256 ; i++){
+        printf("color %3d : num = %4d\n",i,mapColors[i]);
+    }
+    
 }
 
 

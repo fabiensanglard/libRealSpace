@@ -20,7 +20,7 @@ typedef struct AreaBlock{
     size_t height;
     
     //To be delete later when we can parse it properly
-    Vertex vertice[400];
+    MapVertex vertice[400];
     
     
 } AreaBlock;

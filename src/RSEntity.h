@@ -13,6 +13,15 @@
 #define LOD_LEVEL_MED 1
 #define LOD_LEVEL_MIN 2
 
+
+typedef struct MapVertex{
+    float x;
+    float y;
+    float z;
+    float color[3];
+} MapVertex ;
+
+
 typedef struct Vertex{
     float x;
     float y;

@@ -465,10 +465,10 @@ int main( int argc,char** argv){
     
     
     
-    RSArea area;
+    RSArea* area = new RSArea();
     
-    //area.InitFromPAKFileName("ALASKA.PAK");
-    area.InitFromPAKFileName("ARENA.PAK");
+    area->InitFromPAKFileName("ALASKA.PAK");
+    //area->InitFromPAKFileName("ARENA.PAK");
     //area.InitFromPAKFileName("EUROPE.PAK");
     // // NOT A MAP !area.InitFromPAKFileName("MSFILES.PAK");
     //area.InitFromPAKFileName("SANFRAN.PAK");
@@ -478,7 +478,7 @@ int main( int argc,char** argv){
     //area.InitFromPAKFileName("QUEBEC.PAK");
     //area.InitFromPAKFileName("TURKEY.PAK");
     //area.InitFromPAKFileName("ANDMAL2.PAK");
-    //area.InitFromPAKFileName("EGYPT.PAK");
+    //area->InitFromPAKFileName("EGYPT.PAK");
     //area.InitFromPAKFileName("MAURITAN.PAK");
     //area.InitFromPAKFileName("RHODEI.PAK");
     

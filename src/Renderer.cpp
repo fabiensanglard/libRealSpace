@@ -767,7 +767,7 @@ void Renderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock){
         for(int i=0 ; i < 324 ; i++){
             AreaBlock* block = area->GetAreaBlock(LOD, i);
             for (size_t i=0 ; i < verticesPerBlock ; i ++){
-                Vertex* v = &block->vertice[i];
+                MapVertex* v = &block->vertice[i];
                 glVertex3f(v->x,
                            v->y,
                            v->z         );

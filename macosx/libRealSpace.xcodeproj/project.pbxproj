@@ -345,6 +345,7 @@
 				OTHER_LDFLAGS = (
 					"-l",
 					sdl2,
+					"-stack_size,0x80000000",
 				);
 				SDKROOT = macosx;
 			};
@@ -386,6 +387,7 @@
 				OTHER_LDFLAGS = (
 					"-l",
 					sdl2,
+					"-stack_size,0x80000000",
 				);
 				SDKROOT = macosx;
 			};
