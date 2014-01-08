@@ -262,5 +262,102 @@ It seems that all .TRI features 3 files of 4632 bytes organized as follow :
 238/2   = 119 references to triangles ?
 
 
- 
 
+Dec 7th, 2014 :
+===============
+
+One more major advancement !!! I have identified the terrain type flag. For now
+I have hardcoded the colors. I need to find where they are defined:
+
+#define LAND_TYPE_SEA    0
+#define LAND_TYPE_DESERT 1
+#define LAND_TYPE_GROUND 2
+#define LAND_TYPE_PRAIRI 3
+#define LAND_TYPE_TAIGA  4
+#define LAND_TYPE_TUNDRA 5
+#define LAND_TYPE_SNOW   6
+
+I also think I know how the textures are applied. Two flags:
+ - Texture SET.
+ - Texture ID in the set.
+
+If I am correct they I would be left with one more byte in the heightmap entries that I
+cannot identify. Could it be a recalculated shade ? The increase in values does look progressive when I use that value instead of the height.
+
+So if I am done with the 3D data….and I also have the objects. Then what the HECK is in 
+this .TRI file that I cannot decrypt ?????!??! Probably the texture that are
+not induced by a type change (like the city in ARENA ?) 
+
+How is the TXM pack organized: 
+
+6 textures: SEA to PRAIRI (WITH BEACH)
+6 textures: SEA to TAIGA  (escarpment and ROCK)
+6 textures: TUNDRA  to SNOW
+6 textures: TAIGA to TUNDRA 
+6 textures: TAIGA to GROUND 
+6 textures: PRAIRY to TUNDRA
+6 textures: TUDNRA TO TRANSPARENT
+6 textures: PRAIRI to TAIGA
+6 textures: GROUND to TAIGA
+6 textures: DESERT to PRAIRY
+6 textures: GROUND to PRAIRI
+6 textures: DESERT to GROUND
+
+SHORTER TRANSITIONS of the previous
+6 textures: SEA to PRAIRI (WITH BEACH)
+6 textures: SEA to TAIGA  (escarpment and ROCK)
+6 textures: TUNDRA  to SNOW
+6 textures: TAIGA to TUNDRA 
+6 textures: TAIGA to GROUND 
+6 textures: PRAIRY to TUNDRA
+6 textures: TUDNRA TO TRANSPARENT
+6 textures: PRAIRI to TAIGA
+6 textures: GROUND to TAIGA
+6 textures: DESERT to PRAIRY
+6 textures: GROUND to PRAIRI
+6 textures: DESERT to GROUND
++++++++++++++
+6 textures: Sea-Beach-ground
+6 textures: Sea-Escarpment-ground
+
+
+Ilot textures (rocks, land, etc….)
+
+
+6 textures: SEA TO CITY.
+1 BROKEN TEXTURE: City
+1 BROKEN TEXTURE: City
+1 City texture
+3 textures farming
+12 textures river
+
+1 BROKEN TEXTURE country side
+1 texture country side
+1 BROKEN TEXTURE desert
+1 BROKEN TEXTURE desert
+3 crop circles textures
+
+1 textures road
+1 textures road BROKEN
+
+12 textures airstrip
+1 textures  09
+1 textures  18
+1 textures  27
+1 textures  36
+
+1 impact texture BROKEN
+1 impact texture BROKEN
+1 impact texture BROKEN
+1 impact texture
+1 impact texture SNOW/TRANSPARENT
+1 impact texture TUNDRA/GROUND
+1 impact texture TAIGA/PRAIRIE
+1 impact texture ?????/DESERT
+1 impact texture BROKEN
+
+
+
+4PM: YEA ! I have found where the SHADE is. The map did have precomputed gouraud
+shading…but it looks like it was is 8 levels of shades instead of the 16 I was expecting.
+I guess it was to give room for close up dithering shading ???

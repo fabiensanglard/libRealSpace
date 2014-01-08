@@ -336,12 +336,10 @@ void RSArea::ParseTrigo(){
 #define LAND_TYPE_DESERT 1
 #define LAND_TYPE_GROUND 2
 #define LAND_TYPE_PRAIRI 3
-#define LAND_TYPE_SEA    4
-#define LAND_TYPE_SEA    5
+#define LAND_TYPE_TAIGA  4
+#define LAND_TYPE_TUNDRA 5
 #define LAND_TYPE_SNOW   6
-#define LAND_TYPE_SEA    7
 
-static int mapColors[256];
 
 //A lod features 
 //A block features either 25, 100 or 400 vertex
@@ -349,8 +347,6 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
     
     PakArchive blocksPAL;
     blocksPAL.InitFromRAM("BLOCKS",entry->data, entry->size);
-    
-    memset(mapColors, 0, 256);
     
     for (size_t i=0; i < blocksPAL.GetNumEntries(); i++) { // Iterate over the BLOCKS_PER_MAP block entries.
         
@@ -368,35 +364,61 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             
             
-            int32_t height ;
+            int16_t height ;
+            height = vertStream.ReadShort();
+            height /= 4;
+          
+            vertex->flag = vertStream.ReadByte();
+            vertex->type = vertStream.ReadByte();
+            
+            uint8_t paletteColor =0;
             
             
-            height =vertStream.ReadShort();
-            vertStream.ReadByte();
+            // Hardcoding the values since I have no idea where those
+            // are coming from. Maybe it was hard-coded in STRIKE.EXE ?
+            switch (vertex->type) {
+                case LAND_TYPE_SEA:
+                    paletteColor = 0xA;
+                break;
+                case LAND_TYPE_DESERT:
+                    paletteColor = 0x3;
+                break;
+                case LAND_TYPE_GROUND:
+                   paletteColor = 0x6;
+                    break;
+                case LAND_TYPE_PRAIRI:
+                   paletteColor = 0x5;
+                    break;
+                case LAND_TYPE_TAIGA:
+                    paletteColor = 0x8;
+                    break;
+                case LAND_TYPE_TUNDRA:
+                     paletteColor = 0xB;
+                    break;
+                case LAND_TYPE_SNOW:
+                    paletteColor = 0xC;
+                    break;
+                default:
+                    printf("No color for type %d\n",vertex->type);
+            }
 
+            uint8_t shade1 =  (vertex->flag & 0x0F)  ;
+            uint8_t shade2 = (vertex->flag & 0xF0)  ;
             
-            
-            uint8_t color = vertStream.ReadByte();
-            mapColors[color]++;
-            
-           
-            //height = height > 1;
-//            height =vertStream.ReadByte();
- //           vertStream.ReadByte();
 
-            
-            vertStream.ReadByte();
-            vertStream.ReadByte();
+            Texel* t = renderer.GetDefaultPalette()->GetRGBColor(paletteColor*16+shade1/2);
             
             
-            /*
-             int16_t height = vertStream.ReadShort();
-             height /= 4;
-             vertStream.ReadShort();
-             vertStream.ReadShort();
-            */
+            vertex->color[0] = t->r/255.0f;
+            vertex->color[1] = t->g/255.0f;
+            vertex->color[2] = t->b/255.0f;
             
+            
+            vertex->textSet = vertStream.ReadByte();
+            vertex->text    = vertStream.ReadByte();
+     
             vertex->y = height ;
+            
 #define BLOCK_WIDTH 512
             vertex->x = i % 18 * BLOCK_WIDTH + vertexID % blockDim / (float)(blockDim) * BLOCK_WIDTH ;
             vertex->z = i / 18 * BLOCK_WIDTH + vertexID / blockDim / (float)(blockDim) *BLOCK_WIDTH ;
@@ -404,11 +426,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
         }
         
     }
-    
-    printf("Color stats:\n");
-    for (int i = 0 ; i < 256 ; i++){
-        printf("color %3d : num = %4d\n",i,mapColors[i]);
-    }
+
     
 }
 
@@ -428,6 +446,7 @@ void RSArea::ParseElevations(void){
 
 void RSArea::ParseHeightMap(void){
     
+    char title[512];
     
     renderer.Init(1280, 800);
     
@@ -438,8 +457,9 @@ void RSArea::ParseHeightMap(void){
     fullPak.InitFromRAM("FULLSIZE",entry->data,entry->size);
    // fullPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MAX,entry,20);
-    renderer.SetTitle("Strike Commander Map Viewer");
-    renderer.RenderWorld(this,BLOCK_LOD_MAX,400);
+    sprintf(title, "SC Map Viewer : %s level : MAX",name);
+    renderer.SetTitle(title);
+    renderer.RenderWorldPoints(this,BLOCK_LOD_MAX,400);
     
     
     entry = archive->GetEntry(2);
@@ -447,20 +467,29 @@ void RSArea::ParseHeightMap(void){
     medPak.InitFromRAM("MED SIZE",entry->data,entry->size);
   //  medPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MED,entry,10);
+    /*
+    sprintf(title, "SC Map Viewer : %s level : MED",name);
+    renderer.SetTitle(title);
     renderer.RenderWorld(this,BLOCK_LOD_MED,100);
-    
+    */
     
     entry = archive->GetEntry(3);
     PakArchive smallPak;
     smallPak.InitFromRAM("SMALSIZE",entry->data,entry->size);
  //   smallPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MIN,entry,5);
-    renderer.RenderWorld(this,BLOCK_LOD_MIN,25);
     
+    /*
+    sprintf(title, "SC Map Viewer : %s level : MIN",name);
+    renderer.SetTitle(title);
+    renderer.RenderWorld(this,BLOCK_LOD_MIN,25);
+    */
 }
 
 void RSArea::InitFromPAKFileName(const char* pakFilename){
     
+    
+    strcpy(name,pakFilename);
     
     //Check the PAK has 5 entries
     this->archive = new PakArchive();
@@ -480,11 +509,11 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     }
     
     //Parse the meta datas.
-   // ParseMetadata();
-   // ParseObjects();
+    ParseMetadata();
+    ParseObjects();
    // ParseTrigo();
     
-   // ParseElevations();
+    ParseElevations();
     ParseHeightMap();
     
     

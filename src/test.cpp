@@ -240,13 +240,24 @@ void testShowAllTexturesPAK(void){
     txmTextureSet.InitFromPAK(&txmPakArchive);
     txmTextureSet.List(stdout);
     
+    
+    renderer.ShowWindow();
+    renderer.SetTitle("TXMPACK.PAK");
+    
     //Show all textures
     for(size_t i=0 ; i < txmTextureSet.GetNumImages() ; i++ ){
         printf("Drawing %lu.\n",i);
         RSImage* image = txmTextureSet.GetImageById(i);
+        renderer.Clear();
         renderer.DrawImage(image,2);
         renderer.Swap();
+        renderer.Pause();
+        while (renderer.IsPaused()) {
+            renderer.PumpEvents();
+        }
     }
+    
+    
     
     
     const char* accPakName = "..\\..\\DATA\\TXM\\ACCPACK.PAK";
@@ -256,6 +267,8 @@ void testShowAllTexturesPAK(void){
     accPakArchive.InitFromRAM(accPakName,treEntry->data, treEntry->size);
     //accPakArchive.List(stdout);
     
+        renderer.SetTitle("ACCPACK.PAK");
+    
     //Show all textures
     RSMapTextureSet accTextureSet ;
     accTextureSet.InitFromPAK(&accPakArchive);
@@ -263,8 +276,13 @@ void testShowAllTexturesPAK(void){
     for(size_t i=0 ; i < accTextureSet.GetNumImages() ; i++ ){
         printf("Drawing %lu.\n",i);
         RSImage* image = accTextureSet.GetImageById(i);
+        renderer.Clear();
         renderer.DrawImage(image,1);
         renderer.Swap();
+        renderer.Pause();
+        while (renderer.IsPaused()) {
+            renderer.PumpEvents();
+        }
     }
 }
 
@@ -465,21 +483,24 @@ int main( int argc,char** argv){
     
     
     
-    RSArea* area = new RSArea();
     
+    //testShowAllTexturesPAK();
+    
+    
+    RSArea* area = new RSArea();
     area->InitFromPAKFileName("ALASKA.PAK");
-    //area->InitFromPAKFileName("ARENA.PAK");
-    //area.InitFromPAKFileName("EUROPE.PAK");
+    area->InitFromPAKFileName("ARENA.PAK");
+    area->InitFromPAKFileName("EUROPE.PAK");
     // // NOT A MAP !area.InitFromPAKFileName("MSFILES.PAK");
-    //area.InitFromPAKFileName("SANFRAN.PAK");
-    //area.InitFromPAKFileName("ANDMAL1.PAK");
-    //area.InitFromPAKFileName("CANYON.PAK");
+    area->InitFromPAKFileName("SANFRAN.PAK");
+    area->InitFromPAKFileName("ANDMAL1.PAK");
+    area->InitFromPAKFileName("CANYON.PAK");
     // // NOT A MAP !area.InitFromPAKFileName("MAPDATA.PAK");
-    //area.InitFromPAKFileName("QUEBEC.PAK");
-    //area.InitFromPAKFileName("TURKEY.PAK");
-    //area.InitFromPAKFileName("ANDMAL2.PAK");
-    //area->InitFromPAKFileName("EGYPT.PAK");
-    //area.InitFromPAKFileName("MAURITAN.PAK");
-    //area.InitFromPAKFileName("RHODEI.PAK");
+    area->InitFromPAKFileName("QUEBEC.PAK");
+    area->InitFromPAKFileName("TURKEY.PAK");
+    area->InitFromPAKFileName("ANDMAL2.PAK");
+    area->InitFromPAKFileName("EGYPT.PAK");
+    area->InitFromPAKFileName("MAURITAN.PAK");
+    area->InitFromPAKFileName("RHODEI.PAK");
     
 }

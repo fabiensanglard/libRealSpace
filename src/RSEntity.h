@@ -18,7 +18,14 @@ typedef struct MapVertex{
     float x;
     float y;
     float z;
+
+    uint8_t flag;
+    uint8_t type;
+    uint8_t textSet;
+    uint8_t text;
+    
     float color[3];
+    
 } MapVertex ;
 
 

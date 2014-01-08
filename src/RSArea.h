@@ -69,6 +69,8 @@ private:
     AreaBlock blocks[NUM_LODS][BLOCKS_PER_MAP];
     
     float elevation[BLOCKS_PER_MAP];
+    
+    char name[16];
 };
 
 #endif /* defined(__libRealSpace__RSMap__) */

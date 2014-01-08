@@ -724,8 +724,7 @@ void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
 
 }
 
-
-void Renderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock){
+void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -737,15 +736,95 @@ void Renderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock){
     
     running = true;
     
-    float counter=0;
+    static float counter=0;
     
     vec3_t lookAt = {256*16,100,256*16};
     
     renderer.GetCamera()->SetLookAt(lookAt);
-    glPointSize(2);
+    
+    
+    glPointSize(4);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    
+    
+    
     while (running) {
         
-        glClear(GL_COLOR_BUFFER_BIT );
+        glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+        
+        
+        
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        matrix_t modelViewMatrix;
+        vec3_t newPosition;
+        newPosition[0]=  lookAt[0] + 5256*cos(counter/2);
+        newPosition[1]= 3700;
+        newPosition[2]=  lookAt[2] + 5256*sin(counter/2);
+        counter += 0.02;
+        
+        camera.SetPosition(newPosition);
+        camera.gluLookAt(modelViewMatrix);
+        glLoadMatrixf(modelViewMatrix);
+        
+        
+        
+        glBegin(GL_QUADS);
+        
+        for(int i=0 ; i < 324 ; i++){
+            //for(int i=96 ; i < 99 ; i++){
+            AreaBlock* block = area->GetAreaBlock(LOD, i);
+            for (size_t i=0 ; i < verticesPerBlock ; i ++){
+                
+                MapVertex* v = &block->vertice[i];
+                glColor3fv(v->color);
+                glVertex3f(v->x,
+                           v->y,
+                           v->z         );
+            }
+        }
+        glEnd();
+        
+        
+        
+        SDL_GL_SwapWindow(sdlWindow);
+        PumpEvents();
+    }
+
+}
+
+void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
+{
+    
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    matrix_t projectionMatrix;
+    camera.gluPerspective(projectionMatrix);
+    glLoadMatrixf(projectionMatrix);
+    
+    SDL_ShowWindow(sdlWindow);
+    
+    running = true;
+    
+    static float counter=0;
+    
+    vec3_t lookAt = {256*16,100,256*16};
+    
+    renderer.GetCamera()->SetLookAt(lookAt);
+    
+    
+    glPointSize(4);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    
+    
+    while (running) {
+        
+        glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+        
+    
         
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
@@ -765,9 +844,14 @@ void Renderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock){
         glBegin(GL_POINTS);
         
         for(int i=0 ; i < 324 ; i++){
+        //for(int i=96 ; i < 99 ; i++){
             AreaBlock* block = area->GetAreaBlock(LOD, i);
             for (size_t i=0 ; i < verticesPerBlock ; i ++){
                 MapVertex* v = &block->vertice[i];
+                
+                
+                glColor3fv(v->color);
+                
                 glVertex3f(v->x,
                            v->y,
                            v->z         );

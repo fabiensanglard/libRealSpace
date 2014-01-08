@@ -42,7 +42,8 @@ public:
     //For research methods: Those should be deleted soon:
     void RenderVerticeField(Vertex* vertices, int numVertices);
     
-    void RenderWorld(RSArea* area, int LOD, int verticesPerBlock);
+    void RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock);
+    void RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock);
     
     VGAPalette* GetPalette(void);
     

@@ -41,7 +41,13 @@ void RSMapTextureSet::Parse(PakArchive* archive){
     
     
     for(size_t i = 0 ; i < archive->GetNumEntries() ; i++){
+        
+        
+        
         PakEntry* entry = archive->GetEntry(i);
+        
+        if (entry->size == 0)
+            continue;
         
         ByteStream stream(entry->data);
         
@@ -59,7 +65,7 @@ void RSMapTextureSet::Parse(PakArchive* archive){
             images.push_back(image);
         }
         else
-            printf("Cannot make sense of entry %lu.\n",i);
+            printf("Cannot make sense of entry %lu:\n REASON: (entry size is %lu but advertised is %d).\n",i,entry->size,size);
     }
 }
 
