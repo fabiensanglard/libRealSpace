@@ -353,27 +353,37 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             Vertex* vertex = &block->vertice[vertexID];
             
-
-            //vertex->rawData[z] =
-            
-          
-            //vertStream.ReadByte();
-           
-            int16_t height = vertStream.ReadShort();
-            //int32_t height =
-            vertStream.ReadShort();
-            vertStream.ReadShort();
-            //vertStream.ReadShort();
-            
-           // vertStream.ReadShort();
-           // height = vertStream.ReadShort();
-            
-           // height =  height>8 + ((height & 0xFF) / 255.0f);
-           // height*=300;
             
             
-            vertex->y = height/5 ;//elevation[i]/40 + height/5;
+            /*
+            int32_t height ;
+              vertStream.ReadShort();
+//            height =vertStream.ReadByte();
+//            ;
+            //height = vertStream.ReadByte();
+            height =vertStream.ReadByte();
+            height =vertStream.ReadByte();
+//            height = height > 16;
+           // height /= 120000;
+             vertStream.ReadShort();
+            //height *= 10;
+            //height = vertStream.ReadShort();
+            //vertStream.ReadInt32LE();
             
+            //height += elevation[i]/10;
+            
+             //vertStream.ReadByte();
+            */
+            
+            
+            
+             int16_t height = vertStream.ReadShort();
+             height /= 4;
+             vertStream.ReadShort();
+             vertStream.ReadShort();
+            
+            
+            vertex->y = height ;
 #define BLOCK_WIDTH 512
             vertex->x = i % 18 * BLOCK_WIDTH + vertexID % blockDim / (float)(blockDim) * BLOCK_WIDTH ;
             vertex->z = i / 18 * BLOCK_WIDTH + vertexID / blockDim / (float)(blockDim) *BLOCK_WIDTH ;
@@ -397,17 +407,17 @@ void RSArea::ParseElevations(void){
     }
 }
 
-void RSArea::ParseMystery(void){
+void RSArea::ParseHeightMap(void){
     
     
-    renderer.Init(640, 400);
+    renderer.Init(1280, 800);
     
     PakEntry* entry ;
     
     entry = archive->GetEntry(1);
     PakArchive fullPak;
     fullPak.InitFromRAM("FULLSIZE",entry->data,entry->size);
-    fullPak.List(stdout);
+   // fullPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MAX,entry,20);
     renderer.SetTitle("Strike Commander Map Viewer");
     renderer.RenderWorld(this,BLOCK_LOD_MAX,400);
@@ -416,7 +426,7 @@ void RSArea::ParseMystery(void){
     entry = archive->GetEntry(2);
     PakArchive medPak;
     medPak.InitFromRAM("MED SIZE",entry->data,entry->size);
-    medPak.List(stdout);
+  //  medPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MED,entry,10);
     renderer.RenderWorld(this,BLOCK_LOD_MED,100);
     
@@ -424,7 +434,7 @@ void RSArea::ParseMystery(void){
     entry = archive->GetEntry(3);
     PakArchive smallPak;
     smallPak.InitFromRAM("SMALSIZE",entry->data,entry->size);
-    smallPak.List(stdout);
+ //   smallPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MIN,entry,5);
     renderer.RenderWorld(this,BLOCK_LOD_MIN,25);
     
@@ -451,12 +461,12 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     }
     
     //Parse the meta datas.
-    //ParseMetadata();
-    //ParseObjects();
-    //ParseTrigo();
+   // ParseMetadata();
+   // ParseObjects();
+   // ParseTrigo();
     
-    ParseElevations();
-    ParseMystery();
+   // ParseElevations();
+    ParseHeightMap();
     
     
     //Load the textures from the PAKs (TXMPACK.PAK and ACCPACK.PAK) within TEXTURES.TRE.

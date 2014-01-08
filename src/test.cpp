@@ -372,6 +372,15 @@ int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
 
+    //Render palette
+    /*
+    renderer.Init(512, 512);
+    renderer.SetClearColor(255,0,255);
+    renderer.Clear();
+    renderer.ShowPalette(renderer.GetDefaultPalette());
+    */
+    
+    
     /*
     SetBase("/Users/fabiensanglard/Desktop/ARENA.PAK.CONTENT/");
     PakArchive archiveMauritan ;
@@ -457,12 +466,20 @@ int main( int argc,char** argv){
     
     
     RSArea area;
-    area.InitFromPAKFileName("ARENA.PAK");
     
-    //area.InitFromPAKFileName("MAURITAN.PAK");
-    //area.InitFromPAKFileName("CANYON.PAK");
+    //area.InitFromPAKFileName("ALASKA.PAK");
+    area.InitFromPAKFileName("ARENA.PAK");
+    //area.InitFromPAKFileName("EUROPE.PAK");
+    // // NOT A MAP !area.InitFromPAKFileName("MSFILES.PAK");
     //area.InitFromPAKFileName("SANFRAN.PAK");
-    //area.InitFromPAKFileName("RHODEI.PAK");
+    //area.InitFromPAKFileName("ANDMAL1.PAK");
+    //area.InitFromPAKFileName("CANYON.PAK");
+    // // NOT A MAP !area.InitFromPAKFileName("MAPDATA.PAK");
+    //area.InitFromPAKFileName("QUEBEC.PAK");
+    //area.InitFromPAKFileName("TURKEY.PAK");
+    //area.InitFromPAKFileName("ANDMAL2.PAK");
     //area.InitFromPAKFileName("EGYPT.PAK");
+    //area.InitFromPAKFileName("MAURITAN.PAK");
+    //area.InitFromPAKFileName("RHODEI.PAK");
     
 }

@@ -28,6 +28,8 @@ public:
     Texture* GetTexture(void);
     void SyncTexture(void);
     
+    uint8_t* GetData(void);
+    
     size_t width;
     size_t height;
     char name[512];

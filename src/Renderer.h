@@ -65,6 +65,8 @@ public:
     void ResetPalette(void);
     VGAPalette* GetCurrentPalette(void);
     
+    void SetClearColor(uint8_t red, uint8_t green, uint8_t blue);
+    
 private:
     
     
@@ -74,8 +76,7 @@ private:
     
     int32_t width;
     int32_t height;
-    
-    uint8_t* backBuffer;
+
     
     VGAPalette defaultPalette;
     VGAPalette* currentPalette;

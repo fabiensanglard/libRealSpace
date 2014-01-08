@@ -59,6 +59,12 @@ void RSImage::SyncTexture(void){
     
 }
 
+
+uint8_t* RSImage::GetData(void){
+    dirty = true;
+    return data;
+}
+
 void RSImage::ClearContent(void){
     memset(this->data,0,this->width*this->height);
     dirty = true;

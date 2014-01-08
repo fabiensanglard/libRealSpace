@@ -65,19 +65,19 @@ All PAKS have the same structural content:
        - .AVG file : 
 
 Note: All maps have the same AVG and index[1-3] file size. I think it is because all maps have the same dimensions.
-That means data are not compressed ( a flat land would not the same vertex resolution as a land with crevasses).
+That means data are not compressed ( a flat land would not have the same vertex resolution as a land with crevasses).
 If vertex are evenly spaces on the map, that would mean only elevation are stored and 3D data is reconstructed at runtime.
 Since RAM was so sparce in the 90s that would actually make a lot of sense to have a full 3 component vertex exist
 only when it is about to be rendered to the screen.
 
-Now, how spaces are the vertex infomations ?
+Now, how spaced are the vertex informations ?
       .AVG could contains the average elevation for a block ?
 
 
 
 Guild guesses :
 
-According the game palette, they are 16 shades of each colors. That would mean a precalculated
+According to the game palette, they are 16 shades of each colors. That would mean a precalculated
 shade for a terran vertex would take 1/2 byte. 2400 bytes would give 4800 vertice shades.
 
 Divisors of 4800 :
@@ -218,4 +218,49 @@ Low level:
 
 90*90 = 8100 vertices for a map.
 
+
+Dec 7th, 2014 :
+===============
+
+I am so happy, I managed to get the vertices around 4AM: The mystery files were indeed the 3D data. Each entry is
+a heigh in a height map. Entries are 6 bytes long:
+
+2 bytes: Elevation
+2 bytes unknown.
+2 bytes unknown.
+
+Using that I was able to see AREA.PAK with the gorgeous mountain, canyons, see. I think the last 2 byte have
+to do with texturing: I notice a lot of vertices are set where the Arena city is. Now is the color in there or is it 
+determined at runtime ?
+
+I have also reverse engineered the AVG file. The size was 648 which was obviously 324*2 (once you have the key 324 value so MANY things become clear). So there are 2 byte per block and it gives the AVERAGE elevation for the block.
+I have no idea what it is used for.
+
+
+I need two things to finally render the map beautifully:
+ - Color: Vertex color: Is this in the file or generated on the fly ?
+ - Texture: Where are the texture ID and texture coordinate ?
+
+In order to improve rendering speed, I would be tempted to assume everything is in the file and ready to be used. 
+4 byte is enough for a color palette index. And it is also enough for texture:
+1 byte for textureSet ID
+1 byte for textureID in the set.
+1 byte for U coordinate
+1 byte for V coordinate
+
+I think i should go back to TMX.PAK and study how texture set are working, what it the texture size and if one byte could contains both U and V.
+
+An other vector of attack would be to try to see if the gouraud shading was recalculated and stored there.
+
+I have a MAP viewer now but I need to work on something that will let me move and look everywhere. That would help a lot.
+
+Tired to work on the MAP, I did not improve much today. Let’s focus on the .TRI instead.
+It seems that all .TRI features 3 files of 4632 bytes organized as follow :
+
+2496/12 = 208 vertices
+1890/6  = 315 triangles
+238/2   = 119 references to triangles ?
+
+
+ 
 

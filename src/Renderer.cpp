@@ -58,14 +58,6 @@ void Renderer::Init(int32_t width , int32_t height){
     
     SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_HIDDEN, &sdlWindow, &sdlRenderer);
     
-    /*
-    sdlTexture = SDL_CreateTexture(sdlRenderer,
-                                   SDL_PIXELFORMAT_RGBA8888,
-                                   SDL_TEXTUREACCESS_STREAMING,
-                                   width, height);
-    */
-
-    backBuffer = (uint8_t*)calloc(width*height*4,1);
     
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("Unable to initialize SDL:  %s\n",SDL_GetError());
@@ -122,7 +114,16 @@ void Renderer::Init(int32_t width , int32_t height){
     light[1] = 300;
     light[2] = 300;
     
+    
+    
     initialized = true;
+}
+
+void Renderer::SetClearColor(uint8_t red, uint8_t green, uint8_t blue){
+    if (!initialized)
+        return;
+    
+    glClearColor(red/255.0f, green/255.0f, blue/255.0f, 1.0f);
 }
 
 void Renderer::SetTitle(const char* title){
@@ -143,38 +144,41 @@ void Renderer::Clear(void){
     glColor4f(1, 1, 1, 1);
 }
 
-#define CELLSIZE 16
+
 void Renderer::ShowPalette(VGAPalette* palette){
     
-    return ;
-    /*
+    
+    int CELLSIZE=16 ;
+    RSImage image ;
+    image.Create("PALETTE_TEXTURE", CELLSIZE*16, CELLSIZE*16);
+    
+    uint8_t* dst = image.GetData();
     for(int i = 0 ; i < 256 ; i++){
         
-        const Texel* color = palette->GetRGBColor(i);
         
-        int offsetY = (i / CELLSIZE)*CELLSIZE*              4;
-        int offsetX = (i % CELLSIZE)*CELLSIZE* width*4;
+        int offsetY = (i / CELLSIZE)*CELLSIZE;
+        int offsetX = (i % CELLSIZE)*CELLSIZE* (int)image.width;
         
         for(int h = 0 ; h < CELLSIZE ; h++){
             for(int w = 0 ; w < CELLSIZE; w++){
-                *(backBuffer +offsetX +offsetY + h*4 +w*4*width+0) = color->a;
-                *(backBuffer +offsetX +offsetY + h*4 +w*4*width+1) = color->b;
-                *(backBuffer +offsetX +offsetY + h*4 +w*4*width+2) = color->g;
-                *(backBuffer +offsetX +offsetY + h*4 +w*4*width+3) = color->r;
+                *(dst +offsetX +offsetY + w +h*image.width) = i;
             }
         }
     }
+   
+
+    DrawImage(&image, 2);
     
+    SetTitle("PALETTE");
+    renderer.Swap();
+    ShowWindow();
+
+    Pause();
+    while (IsPaused()) {
+        PumpEvents();
+    }
     
-    SDL_ShowWindow(sdlWindow);
-    
-    SDL_UpdateTexture(sdlTexture, NULL, backBuffer, width*4);
-    SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
-    SDL_RenderPresent(sdlRenderer);
-    
-    PumpEvents();
-    */
-    
+    exit(0);
 
 }
 

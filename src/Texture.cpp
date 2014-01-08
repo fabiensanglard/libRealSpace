@@ -22,7 +22,8 @@ Texture::~Texture(){
     
     if (id)
         renderer.DeleteTextureInGPU(this);
-    
+    if (data)
+        free(data);
 }
 
 void Texture::Set(RSImage* image){

@@ -54,7 +54,7 @@ private:
     void ParseTriFile(PakEntry* entry);
     
     //Temporary name: I don't know yet what is in there.
-    void ParseMystery(void);
+    void ParseHeightMap(void);
     void ParseBlocks(size_t lod,PakEntry* entry,size_t verticePerBlock);
     
     void ParseElevations(void);
