@@ -488,8 +488,9 @@ int main( int argc,char** argv){
     
     
     RSArea* area = new RSArea();
-    area->InitFromPAKFileName("ALASKA.PAK");
+
     area->InitFromPAKFileName("ARENA.PAK");
+    area->InitFromPAKFileName("ALASKA.PAK");
     area->InitFromPAKFileName("EUROPE.PAK");
     // // NOT A MAP !area.InitFromPAKFileName("MSFILES.PAK");
     area->InitFromPAKFileName("SANFRAN.PAK");

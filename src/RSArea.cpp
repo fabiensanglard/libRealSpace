@@ -420,8 +420,8 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             vertex->y = height ;
             
 #define BLOCK_WIDTH 512
-            vertex->x = i % 18 * BLOCK_WIDTH + vertexID % blockDim / (float)(blockDim) * BLOCK_WIDTH ;
-            vertex->z = i / 18 * BLOCK_WIDTH + vertexID / blockDim / (float)(blockDim) *BLOCK_WIDTH ;
+            vertex->x = i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH ;
+            vertex->z = i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH ;
            
         }
         
@@ -459,7 +459,8 @@ void RSArea::ParseHeightMap(void){
     ParseBlocks(BLOCK_LOD_MAX,entry,20);
     sprintf(title, "SC Map Viewer : %s level : MAX",name);
     renderer.SetTitle(title);
-    renderer.RenderWorldPoints(this,BLOCK_LOD_MAX,400);
+    //renderer.RenderWorldPoints(this,BLOCK_LOD_MAX,400);
+    renderer.RenderWorldSolid(this,BLOCK_LOD_MAX,400);
     
     
     entry = archive->GetEntry(2);

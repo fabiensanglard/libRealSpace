@@ -743,7 +743,7 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     renderer.GetCamera()->SetLookAt(lookAt);
     
     
-    glPointSize(4);
+   
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     
@@ -768,20 +768,61 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         camera.gluLookAt(modelViewMatrix);
         glLoadMatrixf(modelViewMatrix);
         
-        
+        uint32_t sideSize = sqrt(verticesPerBlock);
         
         glBegin(GL_QUADS);
         
         for(int i=0 ; i < 324 ; i++){
             //for(int i=96 ; i < 99 ; i++){
             AreaBlock* block = area->GetAreaBlock(LOD, i);
-            for (size_t i=0 ; i < verticesPerBlock ; i ++){
+            for (size_t x=0 ; x < sideSize-1 ; x ++){
+                for (size_t y=0 ; y < sideSize-1 ; y ++){
+                    
+                    
+                    MapVertex* v;
+                    
+                    v = &block->vertice[x+y*sideSize];
+                    glColor3fv(v->color);
+                    glVertex3f(v->x,
+                               v->y,
+                               v->z         );
+                    
+                    v = &block->vertice[x+1+y*sideSize];
+                    glColor3fv(v->color);
+                    glVertex3f(v->x,
+                               v->y,
+                               v->z         );
+                    
+                    v = &block->vertice[x+1+(y+1)*sideSize];
+                    glColor3fv(v->color);
+                    glVertex3f(v->x,
+                               v->y,
+                               v->z         );
+                    
+                    v = &block->vertice[x+(y+1)*sideSize];
+                    glColor3fv(v->color);
+                    glVertex3f(v->x,
+                               v->y,
+                               v->z         );
+                    
+                }
                 
-                MapVertex* v = &block->vertice[i];
-                glColor3fv(v->color);
-                glVertex3f(v->x,
-                           v->y,
-                           v->z         );
+              
+            }
+            
+            
+            //Inter-block right side
+            if ( i % 18 != 17){
+                AreaBlock* rightblock = area->GetAreaBlock(LOD, i);
+                for (size_t x=0 ; x < sideSize-1 ; x ++){
+                    
+                }
+            }
+            
+            //Inter-block right side
+            if ( i / 18 != 17){
+                for (size_t y=0 ; y < sideSize-1 ; y++){
+                }
             }
         }
         glEnd();
