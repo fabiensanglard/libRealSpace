@@ -739,7 +739,7 @@ void Renderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock){
     
     float counter=0;
     
-    vec3_t lookAt = {256*11,100,256*8};
+    vec3_t lookAt = {256*16,100,256*16};
     
     renderer.GetCamera()->SetLookAt(lookAt);
     glPointSize(2);
@@ -751,9 +751,9 @@ void Renderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock){
         glLoadIdentity();
         matrix_t modelViewMatrix;
         vec3_t newPosition;
-        newPosition[0]=  lookAt[0] - 2256*cos(counter/2);
-        newPosition[1]= 700;
-        newPosition[2]=  lookAt[2] - 2256*sin(counter/2);
+        newPosition[0]=  lookAt[0] + 5256*cos(counter/2);
+        newPosition[1]= 3700;
+        newPosition[2]=  lookAt[2] + 5256*sin(counter/2);
         counter += 0.02;
 
         camera.SetPosition(newPosition);
