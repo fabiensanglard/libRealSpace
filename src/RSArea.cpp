@@ -470,7 +470,7 @@ void RSArea::ParseHeightMap(void){
     medPak.InitFromRAM("MED SIZE",entry->data,entry->size);
   //  medPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MED,entry,10);
-    /*
+    
     sprintf(title, "SC Map Viewer : %s level : MED",name);
     renderer.SetTitle(title);
     renderer.RenderWorldSolid(this,BLOCK_LOD_MED,100);
@@ -482,11 +482,11 @@ void RSArea::ParseHeightMap(void){
  //   smallPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MIN,entry,5);
     
-    /*
+    
     sprintf(title, "SC Map Viewer : %s level : MIN",name);
     renderer.SetTitle(title);
     renderer.RenderWorldSolid(this,BLOCK_LOD_MIN,25);
-    */
+     
 }
 
 void RSArea::InitFromPAKFileName(const char* pakFilename){
