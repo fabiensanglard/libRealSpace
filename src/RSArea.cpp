@@ -417,9 +417,10 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             uint8_t shade =  (vertex->flag & 0x0F)  ;
             shade = shade >> 1;
             
-            uint8_t unknow = (vertex->flag & 0xF0)  ;
+            int16_t unknown = (vertex->flag & 0xF0)  ;
+            unknown = unknown >> 8;
             
-            Texel* t = renderer.GetDefaultPalette()->GetRGBColor(paletteColor*16+shade);
+            Texel* t = renderer.GetDefaultPalette()->GetRGBColor(paletteColor*16+shade);//+unknown);
             
             
             vertex->color[0] = t->r/255.0f;
