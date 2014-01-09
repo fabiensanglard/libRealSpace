@@ -417,6 +417,11 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             uint8_t shade =  (vertex->flag & 0x0F)  ;
             shade = shade >> 1;
             
+            /*
+            if (shade & 1)
+                shade = 0;
+            */
+            
             int16_t unknown = (vertex->flag & 0xF0)  ;
             unknown = unknown >> 8;
             
@@ -439,16 +444,16 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     - text
             */
             
-            vertex->y = height ;
+            vertex->y = height;//-vertex->text * 10;//height ;
             
 #define BLOCK_WIDTH (512)
             vertex->x = i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH ;
             vertex->z = i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH ;
            
             
-            vertex->color[0] = t->r/255.0f*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
-            vertex->color[1] = t->g/255.0f*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
-            vertex->color[2] = t->b/255.0f*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
+            vertex->color[0] = t->r/255.0f;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
+            vertex->color[1] = t->g/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
+            vertex->color[2] = t->b/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
         }
         
     }

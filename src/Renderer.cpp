@@ -714,6 +714,215 @@ void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
 
 }
 
+void Renderer::RenderBlock(RSArea* area, int LOD, int i){
+    
+    
+    AreaBlock* block = area->GetAreaBlockByID(LOD, i);
+    
+    uint32_t sideSize = block->sideSize;
+    
+    for (size_t x=0 ; x < sideSize-1 ; x ++){
+        for (size_t y=0 ; y < sideSize-1 ; y ++){
+            
+            
+            MapVertex* v;
+            
+            //Render lower triangle
+            v = &block->vertice[x+y*sideSize];
+            glColor3fv(v->color);
+            glVertex3f(v->x,
+                       v->y,
+                       v->z         );
+            
+            v = &block->vertice[x+1+(y+1)*sideSize];
+            glColor3fv(v->color);
+            glVertex3f(v->x,
+                       v->y,
+                       v->z         );
+            
+            v = &block->vertice[x+(y+1)*sideSize];
+            glColor3fv(v->color);
+            glVertex3f(v->x,
+                       v->y,
+                       v->z         );
+            
+            
+            
+           
+            
+            
+            //Render Upper triangles
+            v = &block->vertice[x+y*sideSize];
+            glColor3fv(v->color);
+            glVertex3f(v->x,
+                       v->y,
+                       v->z         );
+            
+            v = &block->vertice[x+1+y*sideSize];
+            glColor3fv(v->color);
+            glVertex3f(v->x,
+                       v->y,
+                       v->z         );
+            
+            v = &block->vertice[x+1+(y+1)*sideSize];
+            glColor3fv(v->color);
+            glVertex3f(v->x,
+                       v->y,
+                       v->z         );
+            
+        }
+        
+        
+    }
+    
+    
+    //Inter-block right side
+    if ( i % 18 != 17){
+        AreaBlock* currentBlock = area->GetAreaBlockByID(LOD, i);
+        AreaBlock* rightBlock = area->GetAreaBlockByID(LOD, i+1);
+        
+        for (int y=0 ; y < sideSize-1 ; y ++){
+            MapVertex* currentVertex     =   currentBlock->GetVertice(currentBlock->sideSize-1, y);
+            MapVertex* rightVertex       =   rightBlock->GetVertice(0, y);
+            MapVertex* bottomRightVertex =   rightBlock->GetVertice(0, y+1);
+            MapVertex* bottomVertex      =   currentBlock->GetVertice(currentBlock->sideSize-1, y+1);
+            
+            //Render lower triangle
+            glColor3fv(currentVertex->color);
+            glVertex3f(currentVertex->x,
+                       currentVertex->y,
+                       currentVertex->z         );
+            
+            glColor3fv(bottomRightVertex->color);
+            glVertex3f(bottomRightVertex->x,
+                       bottomRightVertex->y,
+                       bottomRightVertex->z         );
+            
+            glColor3fv(bottomVertex->color);
+            glVertex3f(bottomVertex->x,
+                       bottomVertex->y,
+                       bottomVertex->z         );
+            
+            
+            //Render Upper triangles
+            glColor3fv(currentVertex->color);
+            glVertex3f(currentVertex->x,
+                       currentVertex->y,
+                       currentVertex->z         );
+            
+            glColor3fv(rightVertex->color);
+            glVertex3f(rightVertex->x,
+                       rightVertex->y,
+                       rightVertex->z         );
+            
+            glColor3fv(bottomRightVertex->color);
+            glVertex3f(bottomRightVertex->x,
+                       bottomRightVertex->y,
+                       bottomRightVertex->z         );
+        }
+    }
+    
+    //Inter-block bottom side
+    if ( i / 18 != 17){
+        
+        AreaBlock* currentBlock = area->GetAreaBlockByID(LOD, i);
+        AreaBlock* bottomBlock = area->GetAreaBlockByID(LOD, i+BLOCK_PER_MAP_SIDE);
+        
+        for (int x=0 ; x < sideSize-1 ; x++){
+            MapVertex* currentVertex     =   currentBlock->GetVertice(x,currentBlock->sideSize-1);
+            MapVertex* rightVertex       =   currentBlock->GetVertice(x+1,currentBlock->sideSize-1);
+            MapVertex* bottomRightVertex =   bottomBlock->GetVertice(x+1,0);
+            MapVertex* bottomVertex      =   bottomBlock->GetVertice(x,0);
+            
+            //Render lower triangle
+            glColor3fv(currentVertex->color);
+            glVertex3f(currentVertex->x,
+                       currentVertex->y,
+                       currentVertex->z         );
+            
+            glColor3fv(bottomRightVertex->color);
+            glVertex3f(bottomRightVertex->x,
+                       bottomRightVertex->y,
+                       bottomRightVertex->z         );
+            
+            glColor3fv(bottomVertex->color);
+            glVertex3f(bottomVertex->x,
+                       bottomVertex->y,
+                       bottomVertex->z         );
+            
+            
+            //Render Upper triangles
+            glColor3fv(currentVertex->color);
+            glVertex3f(currentVertex->x,
+                       currentVertex->y,
+                       currentVertex->z         );
+            
+            glColor3fv(rightVertex->color);
+            glVertex3f(rightVertex->x,
+                       rightVertex->y,
+                       rightVertex->z         );
+            
+            glColor3fv(bottomRightVertex->color);
+            glVertex3f(bottomRightVertex->x,
+                       bottomRightVertex->y,
+                       bottomRightVertex->z         );
+        }
+    }
+    
+    
+    
+    //Inter bottom-right quad
+    if ( i % 18 != 17 && i / 18 != 17){
+        
+        AreaBlock* currentBlock = area->GetAreaBlockByID(LOD, i);
+        AreaBlock* rightBlock = area->GetAreaBlockByID(LOD, i+1);
+        AreaBlock* rightBottonBlock = area->GetAreaBlockByID(LOD, i+1+BLOCK_PER_MAP_SIDE);
+        AreaBlock* bottomBlock = area->GetAreaBlockByID(LOD, i+BLOCK_PER_MAP_SIDE);
+        
+        MapVertex* currentVertex     =   currentBlock->GetVertice(currentBlock->sideSize-1,currentBlock->sideSize-1);
+        MapVertex* rightVertex       =   rightBlock->GetVertice(0,currentBlock->sideSize-1);
+        MapVertex* bottomRightVertex =   rightBottonBlock->GetVertice(0,0);
+        MapVertex* bottomVertex      =   bottomBlock->GetVertice(currentBlock->sideSize-1,0);
+        
+        //Render lower triangle
+        glColor3fv(currentVertex->color);
+        glVertex3f(currentVertex->x,
+                   currentVertex->y,
+                   currentVertex->z         );
+        
+        glColor3fv(bottomRightVertex->color);
+        glVertex3f(bottomRightVertex->x,
+                   bottomRightVertex->y,
+                   bottomRightVertex->z         );
+        
+        glColor3fv(bottomVertex->color);
+        glVertex3f(bottomVertex->x,
+                   bottomVertex->y,
+                   bottomVertex->z         );
+        
+        
+        //Render Upper triangles
+        glColor3fv(currentVertex->color);
+        glVertex3f(currentVertex->x,
+                   currentVertex->y,
+                   currentVertex->z         );
+        
+        glColor3fv(rightVertex->color);
+        glVertex3f(rightVertex->x,
+                   rightVertex->y,
+                   rightVertex->z         );
+        
+        glColor3fv(bottomRightVertex->color);
+        glVertex3f(bottomRightVertex->x,
+                   bottomRightVertex->y,
+                   bottomRightVertex->z         );
+        
+        
+    }
+
+    
+}
+
 void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     glMatrixMode(GL_PROJECTION);
@@ -726,7 +935,7 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     running = true;
     
-    static float counter=0;
+    static float counter=15;
     
     vec3_t lookAt = {256*16,100,256*16};
     
@@ -758,162 +967,11 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         camera.gluLookAt(modelViewMatrix);
         glLoadMatrixf(modelViewMatrix);
         
-        uint32_t sideSize = sqrt(verticesPerBlock);
-        
-        glBegin(GL_QUADS);
-        
-        for(int i=0 ; i < 324 ; i++){
-            //for(int i=96 ; i < 99 ; i++){
-            AreaBlock* block = area->GetAreaBlockByID(LOD, i);
-            
-            for (size_t x=0 ; x < sideSize-1 ; x ++){
-                for (size_t y=0 ; y < sideSize-1 ; y ++){
-                    
-                    
-                    MapVertex* v;
-                    
-                    v = &block->vertice[x+y*sideSize];
-                    glColor3fv(v->color);
-                    glVertex3f(v->x,
-                               v->y,
-                               v->z         );
-                    
-                    v = &block->vertice[x+1+y*sideSize];
-                    glColor3fv(v->color);
-                    glVertex3f(v->x,
-                               v->y,
-                               v->z         );
-                    
-                    v = &block->vertice[x+1+(y+1)*sideSize];
-                    glColor3fv(v->color);
-                    glVertex3f(v->x,
-                               v->y,
-                               v->z         );
-                    
-                    v = &block->vertice[x+(y+1)*sideSize];
-                    glColor3fv(v->color);
-                    glVertex3f(v->x,
-                               v->y,
-                               v->z         );
-                    
-                }
-                
-              
-            }
-            
-            
-            //Inter-block right side
-            if ( i % 18 != 17){
-                AreaBlock* currentBlock = area->GetAreaBlockByID(LOD, i);
-                AreaBlock* rightBlock = area->GetAreaBlockByID(LOD, i+1);
-                
-                for (int y=0 ; y < sideSize-1 ; y ++){
-                    MapVertex* currentVertex     =   currentBlock->GetVertice(currentBlock->sideSize-1, y);
-                    MapVertex* rightVertex       =   rightBlock->GetVertice(0, y);
-                    MapVertex* bottomRightVertex =   rightBlock->GetVertice(0, y+1);
-                    MapVertex* bottomVertex      =   currentBlock->GetVertice(currentBlock->sideSize-1, y+1);
-
-                    glColor3fv(currentVertex->color);
-                    glVertex3f(currentVertex->x,
-                               currentVertex->y,
-                               currentVertex->z         );
-                    
-                    glColor3fv(rightVertex->color);
-                    glVertex3f(rightVertex->x,
-                               rightVertex->y,
-                               rightVertex->z         );
-                    
-                    glColor3fv(bottomRightVertex->color);
-                    glVertex3f(bottomRightVertex->x,
-                               bottomRightVertex->y,
-                               bottomRightVertex->z         );
-                    
-                    glColor3fv(bottomVertex->color);
-                    glVertex3f(bottomVertex->x,
-                               bottomVertex->y,
-                               bottomVertex->z         );
-                }
-            }
-            
-            //Inter-block bottom side
-            if ( i / 18 != 17){
-                
-                AreaBlock* currentBlock = area->GetAreaBlockByID(LOD, i);
-                AreaBlock* bottomBlock = area->GetAreaBlockByID(LOD, i+BLOCK_PER_MAP_SIDE);
-                
-                for (int x=0 ; x < sideSize-1 ; x++){
-                    MapVertex* currentVertex     =   currentBlock->GetVertice(x,currentBlock->sideSize-1);
-                    MapVertex* rightVertex       =   currentBlock->GetVertice(x+1,currentBlock->sideSize-1);
-                    MapVertex* bottomRightVertex =   bottomBlock->GetVertice(x+1,0);
-                    MapVertex* bottomVertex      =   bottomBlock->GetVertice(x,0);
-                    
-                    glColor3fv(currentVertex->color);
-                    glVertex3f(currentVertex->x,
-                               currentVertex->y,
-                               currentVertex->z         );
-                    
-                    glColor3fv(rightVertex->color);
-                    glVertex3f(rightVertex->x,
-                               rightVertex->y,
-                               rightVertex->z         );
-                    
-                    glColor3fv(bottomRightVertex->color);
-                    glVertex3f(bottomRightVertex->x,
-                               bottomRightVertex->y,
-                               bottomRightVertex->z         );
-                    
-                    glColor3fv(bottomVertex->color);
-                    glVertex3f(bottomVertex->x,
-                               bottomVertex->y,
-                               bottomVertex->z         );
-                }
-            }
-            
-            
-            
-            //Inter bottom-right quad
-            if ( i % 18 != 17 && i / 18 != 17){
-                
-                AreaBlock* currentBlock = area->GetAreaBlockByID(LOD, i);
-                AreaBlock* rightBlock = area->GetAreaBlockByID(LOD, i+1);
-                AreaBlock* rightBottonBlock = area->GetAreaBlockByID(LOD, i+1+BLOCK_PER_MAP_SIDE);
-                AreaBlock* bottomBlock = area->GetAreaBlockByID(LOD, i+BLOCK_PER_MAP_SIDE);
-                
-                MapVertex* currentVertex     =   currentBlock->GetVertice(currentBlock->sideSize-1,currentBlock->sideSize-1);
-                MapVertex* rightVertex       =   rightBlock->GetVertice(0,currentBlock->sideSize-1);
-                MapVertex* bottomRightVertex =   rightBottonBlock->GetVertice(0,0);
-                MapVertex* bottomVertex      =   bottomBlock->GetVertice(currentBlock->sideSize-1,0);
-                
-                glColor3fv(currentVertex->color);
-                glVertex3f(currentVertex->x,
-                           currentVertex->y,
-                           currentVertex->z         );
-                
-                glColor3fv(rightVertex->color);
-                glVertex3f(rightVertex->x,
-                           rightVertex->y,
-                           rightVertex->z         );
-                
-                glColor3fv(bottomRightVertex->color);
-                glVertex3f(bottomRightVertex->x,
-                           bottomRightVertex->y,
-                           bottomRightVertex->z         );
-                
-                glColor3fv(bottomVertex->color);
-                glVertex3f(bottomVertex->x,
-                           bottomVertex->y,
-                           bottomVertex->z         );
-                
-                
-            }
-
-            
-            
-        }
         
         
-        
-        
+        glBegin(GL_TRIANGLES);
+        for(int i=0 ; i < 324 ; i++)
+            RenderBlock(area, LOD, i);
         glEnd();
         
         

@@ -43,6 +43,8 @@ public:
     void RenderVerticeField(Vertex* vertices, int numVertices);
     
     void RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock);
+    
+    void RenderBlock(RSArea* area,int LOD, int blockID);
     void RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock);
     
     VGAPalette* GetPalette(void);

@@ -421,8 +421,10 @@ int main( int argc,char** argv){
     */
     
     
-    //testShowAllTexturesPAK();
-    //return 0;
+    /*
+    testShowAllTexturesPAK();
+    return 0;
+    */
     
     //WIP
     /*

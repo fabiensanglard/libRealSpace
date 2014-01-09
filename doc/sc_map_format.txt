@@ -293,8 +293,8 @@ How is the TXM pack organized:
 6 textures: SEA to PRAIRI (WITH BEACH)
 6 textures: SEA to TAIGA  (escarpment and ROCK)
 6 textures: TUNDRA  to SNOW
+6 textures: TAIGA to SNOW 
 6 textures: TAIGA to TUNDRA 
-6 textures: TAIGA to GROUND 
 6 textures: PRAIRY to TUNDRA
 6 textures: TUDNRA TO TRANSPARENT
 6 textures: PRAIRI to TAIGA
@@ -361,3 +361,67 @@ Ilot textures (rocks, land, etc….)
 4PM: YEA ! I have found where the SHADE is. The map did have precomputed gouraud
 shading…but it looks like it was is 8 levels of shades instead of the 16 I was expecting.
 I guess it was to give room for close up dithering shading ???
+
+
+
+Dec 8th, 2014 :
+===============
+
+Studying the texture set, I can see a pattern. And more importantly I can see how triangles are
+supposed to be formed in the quads: It is NOT from top right to lower left but top left to lower
+right: Textures are SUPER very clear about that. Also, when it comes to textures, it seems RED
+is the transparent color. Not 255. One more hack in Strike Commander I guess.
+
+Texture patter:
+
+Texture 0: 1 side.
+Texture 1: 1 side.
+Texture 2: 2 sides.
+Texture 3: 1 side.
+Texture 4: 2 side.
+Texture 5: 2 side.
+
+For any combinations of points type difference, there is a texture associated. 
+
+The texture can be selected as follow:
+
+Lower triangle:
+0
+
+2  1
+
+Upper triangle :
+
+0  1
+
+2
+
+If the vertex is textured, value is 1 otherwise it is 0.
+
+The three vertex taken in order with value 0 or 1 gives a 3 bits value that is the offset in the texture set.
+
+Now how can we select the right texture set ????
+
+
+How to render a triangle:
+
+Check the 3 vertex types:
+  If all the same -> No texture: Use type palette color + shader
+
+  If one or more vertex are of different types, a transition textures
+  has to be drawn. Use the binary code to see what textureID to select
+  depending on the vertex types and whether you are rendering an upper
+  or lower triangle.
+
+Question remaining, how do we select the texture set ?
+This has to be coming from the 2 last byte in the map entries that I have yet
+to reverse engineer :
+
+2 bytes height
+1 byte type
+1 byte unknown
+
+2 byte texture Things to REVERSE ENGINEER !!!!
+  
+
+
