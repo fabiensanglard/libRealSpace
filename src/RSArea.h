@@ -19,9 +19,14 @@ typedef struct AreaBlock{
     size_t width;
     size_t height;
     
+    int sideSize;
+    
     //To be delete later when we can parse it properly
     MapVertex vertice[400];
     
+    inline MapVertex* GetVertice(int x, int y){
+        return &vertice[x + y * this->sideSize];
+    }
     
 } AreaBlock;
 
@@ -30,8 +35,9 @@ typedef struct AreaBlock{
 #define BLOCK_LOD_MIN 2
 
 #define NUM_LODS 3
-#define BLOCKS_PER_MAP 324
 
+#define BLOCK_PER_MAP_SIDE 18
+#define BLOCKS_PER_MAP (BLOCK_PER_MAP_SIDE*BLOCK_PER_MAP_SIDE)
 
 class RSArea{
 public:
@@ -41,8 +47,12 @@ public:
     
     void InitFromPAKFileName(const char* pakFilename);
     
-    inline AreaBlock* GetAreaBlock(int lod, int blockID){
+    inline AreaBlock* GetAreaBlockByID(int lod,int blockID){
         return &this->blocks[lod][blockID];
+    }
+    
+    inline AreaBlock* GetAreaBlockByCoo(int lod, int x, int y){
+        return &this->blocks[lod][x + y * BLOCK_PER_MAP_SIDE];
     }
     
 private:

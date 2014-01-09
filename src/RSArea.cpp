@@ -356,6 +356,8 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
         //DST custom block
         AreaBlock* block = &blocks[lod][i];
         
+        block->sideSize = blockDim;
+        
         ByteStream vertStream(blockEntry->data);
         for(size_t vertexID=0 ; vertexID < blockDim*blockDim ; vertexID++){
             
@@ -471,8 +473,8 @@ void RSArea::ParseHeightMap(void){
     /*
     sprintf(title, "SC Map Viewer : %s level : MED",name);
     renderer.SetTitle(title);
-    renderer.RenderWorld(this,BLOCK_LOD_MED,100);
-    */
+    renderer.RenderWorldSolid(this,BLOCK_LOD_MED,100);
+    
     
     entry = archive->GetEntry(3);
     PakArchive smallPak;
@@ -483,7 +485,7 @@ void RSArea::ParseHeightMap(void){
     /*
     sprintf(title, "SC Map Viewer : %s level : MIN",name);
     renderer.SetTitle(title);
-    renderer.RenderWorld(this,BLOCK_LOD_MIN,25);
+    renderer.RenderWorldSolid(this,BLOCK_LOD_MIN,25);
     */
 }
 
