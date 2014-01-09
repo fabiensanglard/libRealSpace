@@ -396,16 +396,16 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     paletteColor = 0x3;
                 break;
                 case LAND_TYPE_GROUND:
-                   paletteColor = 0x6;
+                   paletteColor = 0x2;
                     break;
                 case LAND_TYPE_PRAIRI:
                    paletteColor = 0x5;
                     break;
                 case LAND_TYPE_TAIGA:
-                    paletteColor = 0x8;
+                    paletteColor = 0x4;
                     break;
                 case LAND_TYPE_TUNDRA:
-                     paletteColor = 0xB;
+                     paletteColor = 0x1;
                     break;
                 case LAND_TYPE_SNOW:
                     paletteColor = 0xC;
