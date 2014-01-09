@@ -340,8 +340,18 @@ void RSArea::ParseTrigo(){
 #define LAND_TYPE_TUNDRA 5
 #define LAND_TYPE_SNOW   6
 
+#define BYTETOBINARYPATTERN "%d%d%d%d%d%d%d%d"
+#define BYTETOBINARY(byte)  \
+(byte & 0x80 ? 1 : 0), \
+(byte & 0x40 ? 1 : 0), \
+(byte & 0x20 ? 1 : 0), \
+(byte & 0x10 ? 1 : 0), \
+(byte & 0x08 ? 1 : 0), \
+(byte & 0x04 ? 1 : 0), \
+(byte & 0x02 ? 1 : 0), \
+(byte & 0x01 ? 1 : 0)
 
-//A lod features 
+//A lod features
 //A block features either 25, 100 or 400 vertex
 void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
     
@@ -404,11 +414,12 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     printf("No color for type %d\n",vertex->type);
             }
 
-            uint8_t shade1 =  (vertex->flag & 0x0F)  ;
-            uint8_t shade2 = (vertex->flag & 0xF0)  ;
+            uint8_t shade =  (vertex->flag & 0x0F)  ;
+            shade = shade >> 1;
             
-
-            Texel* t = renderer.GetDefaultPalette()->GetRGBColor(paletteColor*16+shade1/2);
+            uint8_t unknow = (vertex->flag & 0xF0)  ;
+            
+            Texel* t = renderer.GetDefaultPalette()->GetRGBColor(paletteColor*16+shade);
             
             
             vertex->color[0] = t->r/255.0f;
@@ -419,9 +430,19 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             vertex->textSet = vertStream.ReadByte();
             vertex->text    = vertStream.ReadByte();
      
+            
+            
+            /*
+              TODO: Figure out what are:
+                    - flag high 4 bits.
+                    - flag low  1 bits.
+                    - textSet
+                    - text
+            */
+            
             vertex->y = height ;
             
-#define BLOCK_WIDTH 512
+#define BLOCK_WIDTH (512)
             vertex->x = i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH ;
             vertex->z = i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH ;
            
@@ -486,7 +507,7 @@ void RSArea::ParseHeightMap(void){
     sprintf(title, "SC Map Viewer : %s level : MIN",name);
     renderer.SetTitle(title);
     renderer.RenderWorldSolid(this,BLOCK_LOD_MIN,25);
-     
+    
 }
 
 void RSArea::InitFromPAKFileName(const char* pakFilename){
