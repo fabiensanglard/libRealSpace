@@ -97,7 +97,7 @@ void Renderer::Init(int32_t width , int32_t height){
     
     SDL_HideWindow(sdlWindow);
 
-    camera.Init(50.0f,this->width/(float)this->height,100.0f,12000.0f);
+    camera.Init(50.0f,this->width/(float)this->height,10.0f,12000.0f);
     
     vec3_t lookAt = {0,0,0};
     camera.SetLookAt(lookAt);
@@ -717,11 +717,24 @@ void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
 
 }
 
+#define TEX_ZERO (0/64.0f)
+#define TEX_ONE (64/64.0f)
+#define OFFSET (1/64.0f)
+float textTrianCoo64[2][3][2] = {
+    
+    {{TEX_ZERO,TEX_ZERO+OFFSET},    {TEX_ONE-2*OFFSET,TEX_ONE-OFFSET},    {TEX_ZERO,TEX_ONE-OFFSET} }, // LOWER_TRIANGE
+    
+    {{TEX_ZERO+2*OFFSET,TEX_ZERO+OFFSET},    {TEX_ONE,TEX_ZERO+OFFSET},    {TEX_ONE,TEX_ONE-OFFSET} }  //UPPER_TRIANGE
+};
+
 float textTrianCoo[2][3][2] = {
     
-    {{0,0},    {1,1},    {0,1} },
-    {{0,0},    {1,0},    {1,1} }
+    {{TEX_ZERO,TEX_ZERO},    {TEX_ONE,TEX_ONE},    {TEX_ZERO,TEX_ONE} }, // LOWER_TRIANGE
+    
+    {{TEX_ZERO,TEX_ZERO},    {TEX_ONE,TEX_ZERO},    {TEX_ONE,TEX_ONE} }  //UPPER_TRIANGE
 };
+
+
 #define LOWER_TRIANGE 0
 #define UPPER_TRIANGE 1
 
@@ -758,23 +771,30 @@ void Renderer::RenderTexturedTriangle(MapVertex* tri0,
     
     glBegin(GL_TRIANGLES);
     
-   
-    glTexCoord2fv(textTrianCoo[triangleType][0]);
-    glVertex3f(tri0->v.x,
-               tri0->v.y,
-               tri0->v.z         );
+    if (image->width == 64){
+        glTexCoord2fv(textTrianCoo64[triangleType][0]);
+        glVertex3f(tri0->v.x,tri0->v.y,tri0->v.z         );
     
   
-    glTexCoord2fv(textTrianCoo[triangleType][1]);
-    glVertex3f(tri1->v.x,
-               tri1->v.y,
-               tri1->v.z         );
+        glTexCoord2fv(textTrianCoo64[triangleType][1]);
+        glVertex3f(tri1->v.x,tri1->v.y,tri1->v.z         );
     
     
-    glTexCoord2fv(textTrianCoo[triangleType][2]);
-    glVertex3f(tri2->v.x,
-               tri2->v.y,
-               tri2->v.z         );
+        glTexCoord2fv(textTrianCoo64[triangleType][2]);
+        glVertex3f(tri2->v.x,tri2->v.y,tri2->v.z         );
+    }
+        else{
+        glTexCoord2fv(textTrianCoo[triangleType][0]);
+        glVertex3f(tri0->v.x,tri0->v.y,tri0->v.z         );
+        
+        
+        glTexCoord2fv(textTrianCoo[triangleType][1]);
+        glVertex3f(tri1->v.x,tri1->v.y,tri1->v.z         );
+        
+        
+        glTexCoord2fv(textTrianCoo[triangleType][2]);
+        glVertex3f(tri2->v.x,tri2->v.y,tri2->v.z         );
+        }
     glEnd();
     
 }
@@ -870,7 +890,7 @@ void Renderer::RenderQuad(MapVertex* currentVertex,
     }
     else{
         if (currentVertex->upperImageID != 0xFF )
-            RenderTexturedTriangle(currentVertex,rightVertex,bottomRightVertex,area,UPPER_TRIANGE);
+             RenderTexturedTriangle(currentVertex,rightVertex,bottomRightVertex,area,UPPER_TRIANGE);
     }
     
     
@@ -966,7 +986,7 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     running = true;
     
-    static float counter=15;
+    float counter=15;
     
     
     
@@ -996,20 +1016,36 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         vec3_t lookAt = {2456,0,256};
         */
 
-        //City
+        //City Top
         
          newPosition[0]=  3700;//lookAt[0] + 5256*cos(counter/2);
          newPosition[1]= 300;
          newPosition[2]=  2900;//lookAt[2];// + 5256*sin(counter/2);
          vec3_t lookAt = {3856,0,2856};
         
-
+        
+        //City view on mountains
+        /*
+        counter = 23;
+        vec3_t lookAt = {3856,30,2856};
+        newPosition[0]=  lookAt[0] + 256*cos(counter/2);
+        newPosition[1]= 60;
+        newPosition[2]=  lookAt[2] + 256*sin(counter/2);
+        //counter += 0.02;
+        */
+        
         renderer.GetCamera()->SetLookAt(lookAt);
         camera.SetPosition(newPosition);
         camera.gluLookAt(modelViewMatrix);
         glLoadMatrixf(modelViewMatrix);
         
+        static bool displayList = false;
         
+        if (!displayList){
+            glNewList(1, GL_COMPILE);
+        }
+        
+        if (!displayList){
         glDepthFunc(GL_LESS);
         glBegin(GL_TRIANGLES);
         for(int i=0 ; i < 324 ; i++)
@@ -1028,6 +1064,13 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
             RenderBlock(area, LOD, i,true);
         glDisable(GL_BLEND);
         glDisable(GL_TEXTURE_2D);
+        
+        
+            glEndList();
+            displayList = true;
+        }
+        else
+            glCallList(1);
         
         
         SDL_GL_SwapWindow(sdlWindow);

@@ -235,6 +235,7 @@ void testShowAllTexturesPAK(void){
     
     PakArchive txmPakArchive;
     txmPakArchive.InitFromRAM(pakName,treEntry->data, treEntry->size);
+   // txmPakArchive.Decompress("/Users/fabiensanglard/Desktop/DATA/", ".TXT");
     
     RSMapTextureSet txmTextureSet ;
     txmTextureSet.InitFromPAK(&txmPakArchive);
@@ -249,7 +250,7 @@ void testShowAllTexturesPAK(void){
         printf("Drawing %lu.\n",i);
         RSImage* image = txmTextureSet.GetImageById(i);
         renderer.Clear();
-        renderer.DrawImage(image,2);
+        renderer.DrawImage(image,4);
         renderer.Swap();
         renderer.Pause();
         while (renderer.IsPaused()) {
@@ -277,7 +278,7 @@ void testShowAllTexturesPAK(void){
         printf("Drawing %lu.\n",i);
         RSImage* image = accTextureSet.GetImageById(i);
         renderer.Clear();
-        renderer.DrawImage(image,1);
+        renderer.DrawImage(image,4);
         renderer.Swap();
         renderer.Pause();
         while (renderer.IsPaused()) {
@@ -388,7 +389,7 @@ static void showAllImageInArchive(PakArchive* archive){
 
 int main( int argc,char** argv){
     
-    SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
+    SetBase("/Users/fabiensanglard/SC/SC");
 
     //Render palette
     /*

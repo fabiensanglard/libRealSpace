@@ -42,7 +42,8 @@ void RSMapTextureSet::Parse(PakArchive* archive){
     
     for(size_t i = 0 ; i < archive->GetNumEntries() ; i++){
         
-        
+        if (i == 229 || i ==  230)
+            printf("Intersest !\n");
         
         PakEntry* entry = archive->GetEntry(i);
         

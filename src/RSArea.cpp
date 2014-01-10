@@ -378,7 +378,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             int16_t height ;
             height = vertStream.ReadShort();
-            height /= 26;
+            height /= 17;
           
             vertex->flag = vertStream.ReadByte();
             vertex->type = vertStream.ReadByte();

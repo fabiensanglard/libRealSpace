@@ -34,7 +34,7 @@ void Texture::Set(RSImage* image){
     this->data = (uint8_t*)malloc(width*height*4);
     locFlag = RAM;
     
-    UpdateContent(image);
+    //UpdateContent(image);
 }
 
 uint32_t Texture::GetTextureID(void){
@@ -55,6 +55,9 @@ void Texture::UpdateContent(RSImage* image){
     for(int j=0 ; j < image->width  ; j++){
         
         uint8_t* srcIndex = src + j + i* image->width;
+        
+        if (image->height == 128 && image->width == 128 &&  *srcIndex == 0)
+            printf("Interest !\n");
         
         const Texel* src = palette->GetRGBColor( (*srcIndex) );
         

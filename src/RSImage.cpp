@@ -35,7 +35,7 @@ void RSImage::Create(const char name[8],uint32_t width,uint32_t height){
 
 void RSImage::UpdateContent(uint8_t* src){
     
-    memccpy(this->data,src, 1, width * height);
+    memcpy(this->data,src, width * height);
     this->dirty = true;
     
 }
