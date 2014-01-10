@@ -351,45 +351,9 @@ void DecompressAllTRE(void){
 }
 
 
-//DELETE ME
-static void showAllImageInArchive(PakArchive* archive){
-    
-    
-    for(size_t i = 0 ; i < archive->GetNumEntries() ; i ++){
-        
-        printf("Show all images %lu.\n",i);
-        PakEntry* entry = archive->GetEntry(i);
-        
-        
-        
-        RLECodex codex ;
-        size_t byteRead;
-        
-        RSImage screen;
-        screen.Create("SCREEN", 320, 200);
-        bool errorFound = codex.ReadImage(entry->data, &screen, &byteRead);
-        
-        
-        renderer.Clear();
-        if (!errorFound){
-            renderer.Pause();
-            while(renderer.IsPaused()){
-                
-                renderer.DrawImage(&screen, 2);
-                renderer.Swap();
-                renderer.ShowWindow();
-                renderer.PumpEvents();
-            }
-        }
-        screen.ClearContent();
-    }
-    
-    
-}
-
 int main( int argc,char** argv){
     
-    SetBase("/Users/fabiensanglard/SC/SC");
+    SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC");
 
     //Render palette
     /*

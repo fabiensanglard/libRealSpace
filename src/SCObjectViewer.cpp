@@ -100,37 +100,6 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
     
 }
 
-//DELETE ME
-static void showAllImage(PakArchive* archive){
-    
-    
-    
-    
-    
-    
-    
-    for(size_t i = 0 ; i < archive->GetNumEntries() ; i ++){
-        PakEntry* entry = archive->GetEntry(i);
-        
-        RLECodex codex ;
-        size_t byteRead;
-        
-        RSImage screen;
-        screen.Create("SCREEN", 320, 200);
-        bool errorFound = codex.ReadImage(entry->data, &screen, &byteRead);
-        
-        
-        renderer.Clear();
-        if (!errorFound){
-            renderer.DrawImage(&screen, 2);
-            renderer.Swap();
-        }
-        screen.ClearContent();
-    }
-    
-    
-}
-
 void SCObjectViewer::ParseAssets(PakArchive* archive){
     
     

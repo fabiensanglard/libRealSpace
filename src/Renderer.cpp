@@ -12,7 +12,6 @@ Renderer renderer;
 
 static SDL_Window *sdlWindow;
 static SDL_Renderer *sdlRenderer;
-static SDL_Texture * sdlTexture;
 
 Renderer::Renderer() :
    initialized(false){

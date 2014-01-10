@@ -366,7 +366,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
         //DST custom block
         AreaBlock* block = &blocks[lod][i];
         
-        block->sideSize = blockDim;
+        block->sideSize = static_cast<int32_t>(blockDim);
         
         ByteStream vertStream(blockEntry->data);
         for(size_t vertexID=0 ; vertexID < blockDim*blockDim ; vertexID++){
