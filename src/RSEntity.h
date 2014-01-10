@@ -14,26 +14,26 @@
 #define LOD_LEVEL_MIN 2
 
 
-typedef struct MapVertex{
-    float x;
-    float y;
-    float z;
-
-    uint8_t flag;
-    uint8_t type;
-    uint8_t textSet;
-    uint8_t text;
-    
-    float color[3];
-    
-} MapVertex ;
-
-
 typedef struct Vertex{
     float x;
     float y;
     float z;
 } Vertex ;
+
+typedef struct MapVertex{
+    Vertex v;
+
+    uint8_t flag;
+    uint8_t type;
+    uint8_t lowerImageID;
+    uint8_t upperImageID;
+    
+    float color[4];
+    
+} MapVertex ;
+
+
+
 
 typedef struct BoudingBox{
     Vertex min;

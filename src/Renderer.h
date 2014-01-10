@@ -13,6 +13,7 @@ class RSEntity;
 struct Vertex;
 class Triangle;
 class RSArea;
+class MapVertex;
 
 class Renderer{
     
@@ -39,13 +40,29 @@ public:
     VGAPalette* GetDefaultPalette(void);
     
     
+    //Map Rendering
     //For research methods: Those should be deleted soon:
     void RenderVerticeField(Vertex* vertices, int numVertices);
     
     void RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock);
+
+    void RenderTexturedTriangle(MapVertex* tri0,MapVertex* tri1,MapVertex* tri2,RSArea* area,int triangleType);
+    void RenderColoredTriangle (MapVertex* tri0,MapVertex* tri1,MapVertex* tri2);
+    bool IsTextured(MapVertex* tri0,MapVertex* tri1,MapVertex* tri2);
+    void RenderQuad(MapVertex* currentVertex,
+                           MapVertex* rightVertex,
+                           MapVertex* bottomRightVertex,
+                           MapVertex* bottomVertex,
+                           RSArea* area,bool renderTexture);
     
-    void RenderBlock(RSArea* area,int LOD, int blockID);
+    void RenderBlock(RSArea* area,int LOD, int blockID,bool renderTexture);
     void RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock);
+    
+    
+    
+    
+    
+    
     
     VGAPalette* GetPalette(void);
     

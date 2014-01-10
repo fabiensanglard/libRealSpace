@@ -303,7 +303,7 @@ How is the TXM pack organized:
 6 textures: GROUND to PRAIRI
 6 textures: DESERT to GROUND
 
-SHORTER TRANSITIONS of the previous
+Lower RESOLUTION Med and then LOW TRANSITIONS of the previous
 6 textures: SEA to PRAIRI (WITH BEACH)
 6 textures: SEA to TAIGA  (escarpment and ROCK)
 6 textures: TUNDRA  to SNOW
@@ -336,7 +336,10 @@ Ilot textures (rocks, land, etc….)
 1 BROKEN TEXTURE desert
 1 BROKEN TEXTURE desert
 3 crop circles textures
+END
 
+ACC PAK:
+========
 1 textures road
 1 textures road BROKEN
 

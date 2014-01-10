@@ -55,6 +55,8 @@ public:
         return &this->blocks[lod][x + y * BLOCK_PER_MAP_SIDE];
     }
     
+    RSImage* GetImageByID(size_t ID);
+    
 private:
     
     void ParseMetadata(void );

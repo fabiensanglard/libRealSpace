@@ -332,13 +332,13 @@ void RSArea::ParseTrigo(){
 }
 
 
-#define LAND_TYPE_SEA    0
-#define LAND_TYPE_DESERT 1
-#define LAND_TYPE_GROUND 2
-#define LAND_TYPE_PRAIRI 3
-#define LAND_TYPE_TAIGA  4
-#define LAND_TYPE_TUNDRA 5
-#define LAND_TYPE_SNOW   6
+#define LAND_TYPE_SEA      0
+#define LAND_TYPE_DESERT   1
+#define LAND_TYPE_GROUND   2
+#define LAND_TYPE_SAVANNAH 3
+#define LAND_TYPE_TAIGA    4
+#define LAND_TYPE_TUNDRA   5
+#define LAND_TYPE_SNOW     6
 
 #define BYTETOBINARYPATTERN "%d%d%d%d%d%d%d%d"
 #define BYTETOBINARY(byte)  \
@@ -378,7 +378,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             int16_t height ;
             height = vertStream.ReadShort();
-            height /= 4;
+            height /= 26;
           
             vertex->flag = vertStream.ReadByte();
             vertex->type = vertStream.ReadByte();
@@ -398,7 +398,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                 case LAND_TYPE_GROUND:
                    paletteColor = 0x2;
                     break;
-                case LAND_TYPE_PRAIRI:
+                case LAND_TYPE_SAVANNAH:
                    paletteColor = 0x5;
                     break;
                 case LAND_TYPE_TAIGA:
@@ -425,17 +425,30 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             int16_t unknown = (vertex->flag & 0xF0)  ;
             unknown = unknown >> 8;
             
-            Texel* t = renderer.GetDefaultPalette()->GetRGBColor(paletteColor*16+shade);//+unknown);
+            
             
             
            
             
             
-            vertex->textSet = vertStream.ReadByte();
-            vertex->text    = vertStream.ReadByte();
+            
+            vertex->upperImageID    = vertStream.ReadByte();
+            vertex->lowerImageID = vertStream.ReadByte();
+            
+            /*
+            //City block
+            if (blockDim == 20 && i==97){
+                printf("%2X (%2X) ",vertex->lowerImageID,vertex->upperImageID );
+                
+                if (vertexID % 20 == 19)
+                    printf("\n");
+            }
+            */
+            
      
+            Texel* t = renderer.GetDefaultPalette()->GetRGBColor(paletteColor*16+shade);
             
-            
+            //Texel* t = renderer.GetDefaultPalette()->GetRGBColor(vertex->text);
             /*
               TODO: Figure out what are:
                     - flag high 4 bits.
@@ -444,16 +457,17 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     - text
             */
             
-            vertex->y = height;//-vertex->text * 10;//height ;
+            vertex->v.y = height;//-vertex->text * 10;//height ;
             
 #define BLOCK_WIDTH (512)
-            vertex->x = i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH ;
-            vertex->z = i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH ;
+            vertex->v.x = i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH ;
+            vertex->v.z = i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH ;
            
             
             vertex->color[0] = t->r/255.0f;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
             vertex->color[1] = t->g/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
             vertex->color[2] = t->b/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
+            vertex->color[3] = 255;
         }
         
     }
@@ -518,6 +532,12 @@ void RSArea::ParseHeightMap(void){
     
 }
 
+
+RSImage* RSArea::GetImageByID(size_t ID){
+    
+    return textures[0]->GetImageById(ID);
+}
+
 void RSArea::InitFromPAKFileName(const char* pakFilename){
     
     
@@ -540,14 +560,7 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
         return;
     }
     
-    //Parse the meta datas.
-    ParseMetadata();
-    ParseObjects();
-   // ParseTrigo();
-    
-    ParseElevations();
-    ParseHeightMap();
-    
+   
     
     //Load the textures from the PAKs (TXMPACK.PAK and ACCPACK.PAK) within TEXTURES.TRE.
     /*
@@ -583,5 +596,12 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     set->InitFromPAK(&accPakArchive);
     textures.push_back(set);
 
-
+    //Parse the meta datas.
+    ParseMetadata();
+    ParseObjects();
+   // ParseTrigo();
+    
+    ParseElevations();
+    ParseHeightMap();
+    
 }

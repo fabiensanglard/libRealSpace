@@ -97,7 +97,7 @@ void Renderer::Init(int32_t width , int32_t height){
     
     SDL_HideWindow(sdlWindow);
 
-    camera.Init(50.0f,this->width/(float)this->height,50.0f,30000.0f);
+    camera.Init(50.0f,this->width/(float)this->height,100.0f,12000.0f);
     
     vec3_t lookAt = {0,0,0};
     camera.SetLookAt(lookAt);
@@ -294,11 +294,14 @@ void Renderer::CreateTextureInGPU(Texture* texture){
     glGenTextures(1, &texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
     
+    glEnable(GL_TEXTURE_2D);
+    //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    
+    //glDisable(GL_TEXTURE_2D);
 }
 
 
@@ -714,7 +717,166 @@ void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
 
 }
 
-void Renderer::RenderBlock(RSArea* area, int LOD, int i){
+float textTrianCoo[2][3][2] = {
+    
+    {{0,0},    {1,1},    {0,1} },
+    {{0,0},    {1,0},    {1,1} }
+};
+#define LOWER_TRIANGE 0
+#define UPPER_TRIANGE 1
+
+void Renderer::RenderTexturedTriangle(MapVertex* tri0,
+                                     MapVertex* tri1,
+                                     MapVertex* tri2,
+                                     RSArea* area,
+                                      int triangleType){
+    
+    
+    float white[4];
+    white[0] = 1;
+    white[1] = 1;
+    white[2] = 1;
+    white[3] = 1;
+    glColor4fv(white);
+    
+    RSImage* image = NULL;
+    if (triangleType == LOWER_TRIANGE)
+        image = area->GetImageByID(tri0->lowerImageID);
+    if (triangleType == UPPER_TRIANGE)
+        image = area->GetImageByID(tri0->upperImageID);
+    
+    
+    if (image == NULL){
+        printf("This should never happen: Put a break point here.\n");
+        return;
+    }
+        
+    
+
+    
+    glBindTexture(GL_TEXTURE_2D,image->GetTexture()->GetTextureID());
+    
+    glBegin(GL_TRIANGLES);
+    
+   
+    glTexCoord2fv(textTrianCoo[triangleType][0]);
+    glVertex3f(tri0->v.x,
+               tri0->v.y,
+               tri0->v.z         );
+    
+  
+    glTexCoord2fv(textTrianCoo[triangleType][1]);
+    glVertex3f(tri1->v.x,
+               tri1->v.y,
+               tri1->v.z         );
+    
+    
+    glTexCoord2fv(textTrianCoo[triangleType][2]);
+    glVertex3f(tri2->v.x,
+               tri2->v.y,
+               tri2->v.z         );
+    glEnd();
+    
+}
+
+
+bool Renderer::IsTextured(MapVertex* tri0,MapVertex* tri1,MapVertex* tri2){
+    return
+            // tri0->type != tri1->type ||
+           //tri0->type != tri2->type ||
+    tri0->upperImageID == 0xFF || tri0->lowerImageID == 0xFF ;
+    
+}
+void Renderer::RenderColoredTriangle(MapVertex* tri0,
+                                     MapVertex* tri1,
+                                     MapVertex* tri2){
+    
+
+    if (tri0->type != tri1->type || tri0->type != tri2->type
+        
+        ){
+        
+        if (tri1->type > tri0->type)
+            if (tri1->type > tri2->type)
+                glColor4fv(tri1->color);
+            else
+                glColor4fv(tri2->color);
+        else
+            if (tri0->type > tri2->type)
+                glColor4fv(tri0->color);
+            else
+                glColor4fv(tri2->color);
+        
+        
+        
+        glVertex3f(tri0->v.x,
+                   tri0->v.y,
+                   tri0->v.z         );
+        
+        
+        glVertex3f(tri1->v.x,
+                   tri1->v.y,
+                   tri1->v.z         );
+        
+        
+        glVertex3f(tri2->v.x,
+                   tri2->v.y,
+                   tri2->v.z         );
+    }
+    else{
+        glColor4fv(tri0->color);
+        glVertex3f(tri0->v.x,
+                   tri0->v.y,
+                   tri0->v.z         );
+        
+        glColor4fv(tri1->color);
+        glVertex3f(tri1->v.x,
+                   tri1->v.y,
+                   tri1->v.z         );
+        
+        glColor4fv(tri2->color);
+        glVertex3f(tri2->v.x,
+                   tri2->v.y,
+                   tri2->v.z         );
+    }
+    
+   
+}
+
+
+
+void Renderer::RenderQuad(MapVertex* currentVertex,
+                MapVertex* rightVertex,
+                MapVertex* bottomRightVertex,
+                          MapVertex* bottomVertex,RSArea* area,bool renderTexture){
+    
+    //Render lower triangle
+    if (!renderTexture){
+        //if (currentVertex->lowerImageID == 0xFF ){
+            RenderColoredTriangle(currentVertex,bottomRightVertex,bottomVertex);
+        //}
+    }
+    else{
+        if (currentVertex->lowerImageID != 0xFF )
+            RenderTexturedTriangle(currentVertex,bottomRightVertex,bottomVertex,area,LOWER_TRIANGE);
+    }
+    
+      //Render Upper triangles
+    
+    if (!renderTexture){
+       // if (currentVertex->upperImageID == 0xFF ){
+            RenderColoredTriangle(currentVertex,rightVertex,bottomRightVertex);
+       // }
+    }
+    else{
+        if (currentVertex->upperImageID != 0xFF )
+            RenderTexturedTriangle(currentVertex,rightVertex,bottomRightVertex,area,UPPER_TRIANGE);
+    }
+    
+    
+}
+
+void Renderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
     
     
     AreaBlock* block = area->GetAreaBlockByID(LOD, i);
@@ -725,51 +887,13 @@ void Renderer::RenderBlock(RSArea* area, int LOD, int i){
         for (size_t y=0 ; y < sideSize-1 ; y ++){
             
             
-            MapVertex* v;
-            
-            //Render lower triangle
-            v = &block->vertice[x+y*sideSize];
-            glColor3fv(v->color);
-            glVertex3f(v->x,
-                       v->y,
-                       v->z         );
-            
-            v = &block->vertice[x+1+(y+1)*sideSize];
-            glColor3fv(v->color);
-            glVertex3f(v->x,
-                       v->y,
-                       v->z         );
-            
-            v = &block->vertice[x+(y+1)*sideSize];
-            glColor3fv(v->color);
-            glVertex3f(v->x,
-                       v->y,
-                       v->z         );
+            MapVertex* currentVertex     =   &block->vertice[x+y*sideSize];
+            MapVertex* rightVertex       =   &block->vertice[(x+1)+y*sideSize];
+            MapVertex* bottomRightVertex =   &block->vertice[(x+1)+(y+1)*sideSize];
+            MapVertex* bottomVertex      =   &block->vertice[x+(y+1)*sideSize];
             
             
-            
-           
-            
-            
-            //Render Upper triangles
-            v = &block->vertice[x+y*sideSize];
-            glColor3fv(v->color);
-            glVertex3f(v->x,
-                       v->y,
-                       v->z         );
-            
-            v = &block->vertice[x+1+y*sideSize];
-            glColor3fv(v->color);
-            glVertex3f(v->x,
-                       v->y,
-                       v->z         );
-            
-            v = &block->vertice[x+1+(y+1)*sideSize];
-            glColor3fv(v->color);
-            glVertex3f(v->x,
-                       v->y,
-                       v->z         );
-            
+            RenderQuad(currentVertex,rightVertex, bottomRightVertex, bottomVertex,area,renderTexture);
         }
         
         
@@ -787,38 +911,7 @@ void Renderer::RenderBlock(RSArea* area, int LOD, int i){
             MapVertex* bottomRightVertex =   rightBlock->GetVertice(0, y+1);
             MapVertex* bottomVertex      =   currentBlock->GetVertice(currentBlock->sideSize-1, y+1);
             
-            //Render lower triangle
-            glColor3fv(currentVertex->color);
-            glVertex3f(currentVertex->x,
-                       currentVertex->y,
-                       currentVertex->z         );
-            
-            glColor3fv(bottomRightVertex->color);
-            glVertex3f(bottomRightVertex->x,
-                       bottomRightVertex->y,
-                       bottomRightVertex->z         );
-            
-            glColor3fv(bottomVertex->color);
-            glVertex3f(bottomVertex->x,
-                       bottomVertex->y,
-                       bottomVertex->z         );
-            
-            
-            //Render Upper triangles
-            glColor3fv(currentVertex->color);
-            glVertex3f(currentVertex->x,
-                       currentVertex->y,
-                       currentVertex->z         );
-            
-            glColor3fv(rightVertex->color);
-            glVertex3f(rightVertex->x,
-                       rightVertex->y,
-                       rightVertex->z         );
-            
-            glColor3fv(bottomRightVertex->color);
-            glVertex3f(bottomRightVertex->x,
-                       bottomRightVertex->y,
-                       bottomRightVertex->z         );
+            RenderQuad(currentVertex,rightVertex, bottomRightVertex, bottomVertex,area,renderTexture);
         }
     }
     
@@ -834,38 +927,7 @@ void Renderer::RenderBlock(RSArea* area, int LOD, int i){
             MapVertex* bottomRightVertex =   bottomBlock->GetVertice(x+1,0);
             MapVertex* bottomVertex      =   bottomBlock->GetVertice(x,0);
             
-            //Render lower triangle
-            glColor3fv(currentVertex->color);
-            glVertex3f(currentVertex->x,
-                       currentVertex->y,
-                       currentVertex->z         );
-            
-            glColor3fv(bottomRightVertex->color);
-            glVertex3f(bottomRightVertex->x,
-                       bottomRightVertex->y,
-                       bottomRightVertex->z         );
-            
-            glColor3fv(bottomVertex->color);
-            glVertex3f(bottomVertex->x,
-                       bottomVertex->y,
-                       bottomVertex->z         );
-            
-            
-            //Render Upper triangles
-            glColor3fv(currentVertex->color);
-            glVertex3f(currentVertex->x,
-                       currentVertex->y,
-                       currentVertex->z         );
-            
-            glColor3fv(rightVertex->color);
-            glVertex3f(rightVertex->x,
-                       rightVertex->y,
-                       rightVertex->z         );
-            
-            glColor3fv(bottomRightVertex->color);
-            glVertex3f(bottomRightVertex->x,
-                       bottomRightVertex->y,
-                       bottomRightVertex->z         );
+            RenderQuad(currentVertex,rightVertex, bottomRightVertex, bottomVertex,area,renderTexture);
         }
     }
     
@@ -884,38 +946,7 @@ void Renderer::RenderBlock(RSArea* area, int LOD, int i){
         MapVertex* bottomRightVertex =   rightBottonBlock->GetVertice(0,0);
         MapVertex* bottomVertex      =   bottomBlock->GetVertice(currentBlock->sideSize-1,0);
         
-        //Render lower triangle
-        glColor3fv(currentVertex->color);
-        glVertex3f(currentVertex->x,
-                   currentVertex->y,
-                   currentVertex->z         );
-        
-        glColor3fv(bottomRightVertex->color);
-        glVertex3f(bottomRightVertex->x,
-                   bottomRightVertex->y,
-                   bottomRightVertex->z         );
-        
-        glColor3fv(bottomVertex->color);
-        glVertex3f(bottomVertex->x,
-                   bottomVertex->y,
-                   bottomVertex->z         );
-        
-        
-        //Render Upper triangles
-        glColor3fv(currentVertex->color);
-        glVertex3f(currentVertex->x,
-                   currentVertex->y,
-                   currentVertex->z         );
-        
-        glColor3fv(rightVertex->color);
-        glVertex3f(rightVertex->x,
-                   rightVertex->y,
-                   rightVertex->z         );
-        
-        glColor3fv(bottomRightVertex->color);
-        glVertex3f(bottomRightVertex->x,
-                   bottomRightVertex->y,
-                   bottomRightVertex->z         );
+        RenderQuad(currentVertex,rightVertex, bottomRightVertex, bottomVertex,area,renderTexture);
         
         
     }
@@ -937,9 +968,7 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     static float counter=15;
     
-    vec3_t lookAt = {256*16,100,256*16};
     
-    renderer.GetCamera()->SetLookAt(lookAt);
     
     
     glDisable(GL_CULL_FACE);
@@ -958,22 +987,47 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         glLoadIdentity();
         matrix_t modelViewMatrix;
         vec3_t newPosition;
-        newPosition[0]=  lookAt[0] + 5256*cos(counter/2);
-        newPosition[1]= 3700;
-        newPosition[2]=  lookAt[2] + 5256*sin(counter/2);
-        counter += 0.02;
         
+        //Island
+        /*
+        newPosition[0]=  2500;//lookAt[0] + 5256*cos(counter/2);
+        newPosition[1]= 350;
+        newPosition[2]=  600;//lookAt[2];// + 5256*sin(counter/2);
+        vec3_t lookAt = {2456,0,256};
+        */
+
+        //City
+        
+         newPosition[0]=  3700;//lookAt[0] + 5256*cos(counter/2);
+         newPosition[1]= 300;
+         newPosition[2]=  2900;//lookAt[2];// + 5256*sin(counter/2);
+         vec3_t lookAt = {3856,0,2856};
+        
+
+        renderer.GetCamera()->SetLookAt(lookAt);
         camera.SetPosition(newPosition);
         camera.gluLookAt(modelViewMatrix);
         glLoadMatrixf(modelViewMatrix);
         
         
-        
+        glDepthFunc(GL_LESS);
         glBegin(GL_TRIANGLES);
         for(int i=0 ; i < 324 ; i++)
-            RenderBlock(area, LOD, i);
+            RenderBlock(area, LOD, i,false);
         glEnd();
         
+        
+        glEnable(GL_TEXTURE_2D);
+        
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+        
+        glDepthFunc(GL_EQUAL);
+       
+        for(int i=0 ; i < 324 ; i++)
+            RenderBlock(area, LOD, i,true);
+        glDisable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
         
         
         SDL_GL_SwapWindow(sdlWindow);
@@ -1040,9 +1094,9 @@ void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
                 
                 glColor3fv(v->color);
                 
-                glVertex3f(v->x,
-                           v->y,
-                           v->z         );
+                glVertex3f(v->v.x,
+                           v->v.y,
+                           v->v.z         );
             }
         }
             glEnd();
