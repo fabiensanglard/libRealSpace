@@ -391,6 +391,10 @@ int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC/");
 
+    
+    Matrix matrix;
+    matrix.Identity();
+    matrix.Print();
     //Render palette
     /*
     renderer.Init(512, 512);

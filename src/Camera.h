@@ -32,8 +32,12 @@ private:
     float zFar;
     
     Point3D lookAt;
-    Point3D position;
     Point3D up;
+    
+    
+    Point3D position;
+    Quaternion orientation;
+    
     
     
 };

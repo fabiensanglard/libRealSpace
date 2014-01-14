@@ -32,12 +32,14 @@ extern "C" {
 
 
     #include "Math.h"
+    #include "Matrix.h"
+    #include "Quaternion.h"
 
 // Reusable Realspace Classes
     #include "Base.h"
     #include "ByteStream.h"
     #include "TreArchive.h"
-    #include "Matrix.h"
+
     #include "Camera.h"
     #include "Texture.h"
     #include "RSImage.h"

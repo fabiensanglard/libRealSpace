@@ -8,50 +8,6 @@
 
 #include "precomp.h"
 
-void gluLookAt(  Vector3D* vEye,  Vector3D* vLookat, Vector3D* vUp ,Matrix* viewMatrix)
-{
-    
-    // determine the new n
-    //vectorSubtract(vEye,vLookat,vN);
-    Vector3D vN(*vEye);
-    vN.Substract(vLookat);
-    
-    // determine the new u by crossing with the up vector
-    //vectorCrossProduct(vUp, vN, vU) ;
-    Vector3D vU = vUp->CrossProduct(&vN);
-    
-    // normalize both the u and n vectors
-    //normalize(vU) ;
-    //normalize(vN);
-    vU.Normalize();
-    vN.Normalize();
-    
-    
-    // determine v by crossing n and u
-    //vectorCrossProduct(vN,vU,vV);
-    Vector3D vV = vN.CrossProduct(&vU);
-    
-    // create a model view matrix
-    viewMatrix->m[0] = vU.x;     viewMatrix->m[4] = vU.y;  viewMatrix->m[8] = vU.z;  viewMatrix->m[12] = - vEye->DotProduct(&vU);
-    viewMatrix->m[1] = vV.x;     viewMatrix->m[5] = vV.y;  viewMatrix->m[9] = vV.z;  viewMatrix->m[13] = - vEye->DotProduct(&vV);
-    viewMatrix->m[2] = vN.x;     viewMatrix->m[6] = vN.y;  viewMatrix->m[10]= vN.z;  viewMatrix->m[14] = - vEye->DotProduct(&vN);
-    viewMatrix->m[3]=   0.0f;     viewMatrix->m[7]= 0.0f;    viewMatrix->m[11]= 0.0f;   viewMatrix->m[15] = 1.0f;
-    
-}
-
-
-void gluPerspective(float fovy, float aspect, float zNear, float zFar,Matrix* projectionMatrix)
-{
-    float f  = (float)(1 / tan(fovy*DEG_TO_RAD/2));
-    
-    
-    projectionMatrix->m[0]= f/aspect;    projectionMatrix->m[4]= 0;  projectionMatrix->m[ 8]= 0;                         projectionMatrix->m[12]= 0;
-    projectionMatrix->m[1]= 0;           projectionMatrix->m[5]= f;  projectionMatrix->m[ 9]= 0;                         projectionMatrix->m[13]= 0;
-    projectionMatrix->m[2]= 0;           projectionMatrix->m[6]= 0;  projectionMatrix->m[10]=(zFar+zNear)/(zNear-zFar) ; projectionMatrix->m[14]= 2*(zFar*zNear)/(zNear-zFar);
-    projectionMatrix->m[3]= 0;           projectionMatrix->m[7]= 0;   projectionMatrix->m[11]=-1;                        projectionMatrix->m[15]= 0;
-}
-
-
 
 
 void Camera::Init(float fovy, float aspect, float zNear, float zFar){
@@ -74,11 +30,43 @@ void Camera::SetUp(Vector3D* up){
 }
 
 void Camera::gluPerspective(Matrix* projectionMatrix){
-    ::gluPerspective(fovy,aspect,zNear,zFar,projectionMatrix);
+    float f  = (float)(1 / tan(fovy*DEG_TO_RAD/2));
+    
+    
+    projectionMatrix->v[0][0]= f/aspect; projectionMatrix->v[1][0]= 0;  projectionMatrix->v[2][0]= 0;  projectionMatrix->v[3][0]= 0;
+    projectionMatrix->v[0][1]= 0;        projectionMatrix->v[1][1]= f;  projectionMatrix->v[2][1]= 0;  projectionMatrix->v[3][1]= 0;
+    projectionMatrix->v[0][2]= 0;        projectionMatrix->v[1][2]= 0;  projectionMatrix->v[2][2]=(zFar+zNear)/(zNear-zFar) ; projectionMatrix->v[3][2]= 2*(zFar*zNear)/(zNear-zFar);
+    projectionMatrix->v[0][3]= 0;        projectionMatrix->v[1][3]= 0;   projectionMatrix->v[2][3]=-1;   projectionMatrix->v[3][3]= 0;
 }
 
 void Camera::gluLookAt(Matrix* viewMatrix){
-    ::gluLookAt(&this->position,&this->lookAt, &this->up , viewMatrix);
+    // determine the new n
+    //vectorSubtract(vEye,vLookat,vN);
+    Vector3D vN(this->position);
+    vN.Substract(&this->lookAt);
+    
+    // determine the new u by crossing with the up vector
+    //vectorCrossProduct(vUp, vN, vU) ;
+    Vector3D vU = this->up.CrossProduct(&vN);
+    
+    // normalize both the u and n vectors
+    //normalize(vU) ;
+    //normalize(vN);
+    vU.Normalize();
+    vN.Normalize();
+    
+    
+    // determine v by crossing n and u
+    //vectorCrossProduct(vN,vU,vV);
+    Vector3D vV = vN.CrossProduct(&vU);
+    
+    // create a model view matrix
+    viewMatrix->v[0][0] = vU.x;  viewMatrix->v[1][0] = vU.y;  viewMatrix->v[2][0] = vU.z;  viewMatrix->v[3][0] = - position.DotProduct(&vU);
+    viewMatrix->v[0][1] = vV.x;  viewMatrix->v[1][1] = vV.y;  viewMatrix->v[2][1] = vV.z;  viewMatrix->v[3][1] = - position.DotProduct(&vV);
+    viewMatrix->v[0][2] = vN.x;  viewMatrix->v[1][2] = vN.y;  viewMatrix->v[2][2]= vN.z;   viewMatrix->v[3][2] = - position.DotProduct(&vN);
+    viewMatrix->v[0][3]=   0.0f; viewMatrix->v[1][3]= 0.0f;   viewMatrix->v[2][3]= 0.0f;   viewMatrix->v[3][3] = 1.0f;
+    
+
 }
 
 void Camera::GetPosition(Point3D* position){

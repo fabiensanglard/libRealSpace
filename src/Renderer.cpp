@@ -381,13 +381,13 @@ void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
     glLoadIdentity();
     Matrix projectionMatrix;
     camera.gluPerspective(&projectionMatrix);
-    glLoadMatrixf(projectionMatrix.m);
+    glLoadMatrixf(projectionMatrix.ToGL());
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     Matrix modelViewMatrix;
     camera.gluLookAt(&modelViewMatrix);
-    glLoadMatrixf(modelViewMatrix.m);
+    glLoadMatrixf(modelViewMatrix.ToGL());
         
         
         
@@ -603,7 +603,7 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
     glLoadIdentity();
     Matrix projectionMatrix;
     camera.gluPerspective(&projectionMatrix);
-    glLoadMatrixf(projectionMatrix.m);
+    glLoadMatrixf(projectionMatrix.ToGL());
     
     running = true;
     float counter=0;
@@ -625,7 +625,7 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
         
         
         camera.gluLookAt(&modelViewMatrix);
-        glLoadMatrixf(modelViewMatrix.m);
+        glLoadMatrixf(modelViewMatrix.ToGL());
         
         DrawModel(object, lodLevel );
         
@@ -660,7 +660,7 @@ void Renderer::RenderVerticeField(Point3D* vertices, int numVertices){
     glLoadIdentity();
     Matrix projectionMatrix;
     camera.gluPerspective(&projectionMatrix);
-    glLoadMatrixf(projectionMatrix.m);
+    glLoadMatrixf(projectionMatrix.ToGL());
     
     SDL_ShowWindow(sdlWindow);
     
@@ -683,7 +683,7 @@ void Renderer::RenderVerticeField(Point3D* vertices, int numVertices){
         
         
         camera.gluLookAt(&modelViewMatrix);
-        glLoadMatrixf(modelViewMatrix.m);
+        glLoadMatrixf(modelViewMatrix.ToGL());
         
         glClear(GL_COLOR_BUFFER_BIT);
         glPointSize(5);
@@ -969,7 +969,7 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glLoadIdentity();
     Matrix projectionMatrix;
     camera.gluPerspective(&projectionMatrix);
-    glLoadMatrixf(projectionMatrix.m);
+    glLoadMatrixf(projectionMatrix.ToGL());
     
     
     
@@ -1044,7 +1044,7 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
          
         
         camera.gluLookAt(&modelViewMatrix);
-        glLoadMatrixf(modelViewMatrix.m);
+        glLoadMatrixf(modelViewMatrix.ToGL());
         
         
         
@@ -1084,7 +1084,7 @@ void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
     
     Matrix projectionMatrix;
     camera.gluPerspective(&projectionMatrix);
-    glLoadMatrixf(projectionMatrix.m);
+    glLoadMatrixf(projectionMatrix.ToGL());
     
     
     
@@ -1132,7 +1132,7 @@ void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
         
         Matrix modelViewMatrix;
         camera.gluLookAt(&modelViewMatrix);
-        glLoadMatrixf(modelViewMatrix.m);
+        glLoadMatrixf(modelViewMatrix.ToGL());
         
         
         glBegin(GL_POINTS);
