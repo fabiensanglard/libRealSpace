@@ -278,7 +278,7 @@ void RSArea::ParseObjects(){
 
 void RSArea::ParseTriFile(PakEntry* entry){
     
-    Vertex* vertices = new Vertex[300];
+    Point3D* vertices = new Point3D[300];
     
     ByteStream stream(entry->data);
     
@@ -286,7 +286,7 @@ void RSArea::ParseTriFile(PakEntry* entry){
     stream.ReadInt32LE();
     
     for (int i=0 ; i < 300; i++) {
-        Vertex* v = &vertices[i];
+        Point3D* v = &vertices[i];
         int32_t coo ;
         
         coo = stream.ReadInt32LE();
@@ -303,6 +303,8 @@ void RSArea::ParseTriFile(PakEntry* entry){
     
     //Render them
     renderer.RenderVerticeField(vertices,300);
+    
+    delete[] vertices;
 }
 
 
@@ -396,13 +398,13 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     paletteColor = 0x3;
                 break;
                 case LAND_TYPE_GROUND:
-                   paletteColor = 0x2;
+                   paletteColor = 0x7;
                     break;
                 case LAND_TYPE_SAVANNAH:
                    paletteColor = 0x5;
                     break;
                 case LAND_TYPE_TAIGA:
-                    paletteColor = 0x4;
+                    paletteColor = 0x9;
                     break;
                 case LAND_TYPE_TUNDRA:
                      paletteColor = 0x1;

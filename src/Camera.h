@@ -14,14 +14,14 @@ class Camera{
 public:
     void Init(float fovy, float aspect, float zNear, float zFar);
     
-    void SetLookAt(vec3_t lookAt);
-    void SetPosition(vec3_t position);
-    void SetUp(vec3_t up);
+    void SetLookAt(Point3D* lookAt);
+    void SetPosition(Point3D* position);
+    void SetUp(Point3D* up);
     
-    void GetPosition(vec3_t position);
+    void GetPosition(Point3D* position);
     
-    void gluPerspective(matrix_t projectionMatrix);
-    void gluLookAt(matrix_t fModelView);
+    void gluPerspective(Matrix* projectionMatrix);
+    void gluLookAt(Matrix* fModelView);
     
    
 private:
@@ -31,9 +31,9 @@ private:
     float zNear;
     float zFar;
     
-    vec3_t lookAt;
-    vec3_t position;
-    vec3_t up;
+    Point3D lookAt;
+    Point3D position;
+    Point3D up;
     
     
 };

@@ -389,7 +389,7 @@ static void showAllImageInArchive(PakArchive* archive){
 
 int main( int argc,char** argv){
     
-    SetBase("/Users/fabiensanglard/SC/SC");
+    SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC/");
 
     //Render palette
     /*

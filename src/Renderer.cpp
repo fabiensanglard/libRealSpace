@@ -12,7 +12,6 @@ Renderer renderer;
 
 static SDL_Window *sdlWindow;
 static SDL_Renderer *sdlRenderer;
-static SDL_Texture * sdlTexture;
 
 Renderer::Renderer() :
    initialized(false){
@@ -99,24 +98,19 @@ void Renderer::Init(int32_t width , int32_t height){
 
     camera.Init(50.0f,this->width/(float)this->height,10.0f,12000.0f);
     
-    vec3_t lookAt = {0,0,0};
-    camera.SetLookAt(lookAt);
+    Vector3D lookAt = {0,0,0};
+    camera.SetLookAt(&lookAt);
     
-    vec3_t up = {0,1,0};
-    camera.SetUp(up);
+    Vector3D up = {0,1,0};
+    camera.SetUp(&up);
     
     //This is better for jets.
-    vec3_t position = {28,20,-38};
+    Point3D position = {28,20,-38};
     
     //vec3_t position = {300,300,-300};
-    camera.SetPosition(position);
+    camera.SetPosition(&position);
     
-    
-    light[0] = 300;
-    light[1] = 300;
-    light[2] = 300;
-    
-    
+    light.SetWithCoo(300, 300, 300);
     
     initialized = true;
 }
@@ -324,22 +318,21 @@ void Renderer::DeleteTextureInGPU(Texture* texture){
 }
 
 
-void Renderer::GetNormal(RSEntity* object,Triangle* triangle,vec3_t normal){
+void Renderer::GetNormal(RSEntity* object,Triangle* triangle,Vector3D* normal){
+    
     //Calculate the normal for this triangle
-    vec3_t edge1 ;
-    edge1[0] = object->vertices[triangle->ids[0]].x - object->vertices[triangle->ids[1]].x;
-    edge1[1] = object->vertices[triangle->ids[0]].y - object->vertices[triangle->ids[1]].y;
-    edge1[2] = object->vertices[triangle->ids[0]].z - object->vertices[triangle->ids[1]].z;
-    
-    vec3_t edge2 ;
-    edge2[0] = object->vertices[triangle->ids[2]].x - object->vertices[triangle->ids[1]].x;
-    edge2[1] = object->vertices[triangle->ids[2]].y - object->vertices[triangle->ids[1]].y;
-    edge2[2] = object->vertices[triangle->ids[2]].z - object->vertices[triangle->ids[1]].z;
-    
-    vectorCrossProduct(edge1, edge2, normal);
-    normalize(normal);
+    Vector3D edge1 ;
+    edge1 = object->vertices[triangle->ids[0]];
+    edge1.Substract(& object->vertices[triangle->ids[1]]);
     
     
+    Vector3D edge2 ;
+    edge2 = object->vertices[triangle->ids[2]];
+    edge2.Substract(& object->vertices[triangle->ids[1]]);
+    
+    *normal = edge1;
+    *normal = normal->CrossProduct(&edge2);
+    normal->Normalize();
     
     
     // All normals are supposed to point outward in modern GPU but SC triangles
@@ -349,21 +342,19 @@ void Renderer::GetNormal(RSEntity* object,Triangle* triangle,vec3_t normal){
     // How can we replicate this ?
     //        - Take the normal and compare it to the sign of the direction to the camera.
     //        - If the signs don't match: reverse the normal.
-    vec3_t cameraPosition;
-    camera.GetPosition(cameraPosition);
+    Point3D cameraPosition;
+    camera.GetPosition(&cameraPosition);
     
     
-    vec3_t vertexPositon;
-    vertexPositon[0] = object->vertices[triangle->ids[0]].x;
-    vertexPositon[1] = object->vertices[triangle->ids[0]].y;
-    vertexPositon[2] = object->vertices[triangle->ids[0]].z;
+    Point3D *vertexOnTriangle = &object->vertices[triangle->ids[0]];
+
+    Point3D cameraDirection;
+    cameraDirection = cameraPosition;
+    cameraDirection.Substract(vertexOnTriangle);
+    cameraDirection.Normalize();
     
-    vec3_t cameraDirection;
-    vectorSubtract(cameraPosition, vertexPositon, cameraDirection);
-    normalize(cameraDirection);
-    
-    if (DotProduct(cameraDirection, normal) < 0){
-        vectorNegate(normal,normal);
+    if (cameraDirection.DotProduct(normal) < 0){
+        normal->Negate();
     }
 
     
@@ -388,15 +379,15 @@ void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    matrix_t projectionMatrix;
-    camera.gluPerspective(projectionMatrix);
-    glLoadMatrixf(projectionMatrix);
+    Matrix projectionMatrix;
+    camera.gluPerspective(&projectionMatrix);
+    glLoadMatrixf(projectionMatrix.m);
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    matrix_t modelViewMatrix;
-    camera.gluLookAt(modelViewMatrix);
-    glLoadMatrixf(modelViewMatrix);
+    Matrix modelViewMatrix;
+    camera.gluLookAt(&modelViewMatrix);
+    glLoadMatrixf(modelViewMatrix.m);
         
         
         
@@ -437,23 +428,21 @@ void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
             
             Triangle* triangle = &object->triangles[textInfo->triangleID];
             
-            vec3_t normal;
-            GetNormal(object, triangle, normal);
+            Vector3D normal;
+            GetNormal(object, triangle, &normal);
             
             
             glBegin(GL_TRIANGLES);
             for(int j=0 ; j < 3 ; j++){
                 
-                vec3_t vertice;
-                vertice[0] = object->vertices[triangle->ids[j]].x;
-                vertice[1] = object->vertices[triangle->ids[j]].y;
-                vertice[2] = object->vertices[triangle->ids[j]].z;
+                Point3D vertice = object->vertices[triangle->ids[j]];
                 
-                vec3_t lighDirection;
-                vectorSubtract(light, vertice, lighDirection);
-                normalize(lighDirection);
+                Vector3D lighDirection;
+                lighDirection = light;
+                lighDirection.Substract(&vertice);
+                lighDirection.Normalize();
                 
-                float lambertianFactor = DotProduct(lighDirection,normal);
+                float lambertianFactor = lighDirection.DotProduct(&normal);
                 if (lambertianFactor < 0  )
                     lambertianFactor = 0;
                 
@@ -503,26 +492,24 @@ void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
             continue;
         
         
-        vec3_t normal;
-        GetNormal(object,triangle,normal);
+        Vector3D normal;
+        GetNormal(object,triangle,&normal);
         
         glBegin(GL_TRIANGLES);
         for(int j=0 ; j < 3 ; j++){
             
             
             
-            vec3_t vertice;
-            vertice[0] = object->vertices[triangle->ids[j]].x;
-            vertice[1] = object->vertices[triangle->ids[j]].y;
-            vertice[2] = object->vertices[triangle->ids[j]].z;
+            Point3D vertice = object->vertices[triangle->ids[j]];
             
             
+            Vector3D sunDirection;
+            sunDirection = light;
+            sunDirection.Substract(&vertice);
+            sunDirection.Normalize();
+
             
-            vec3_t sunDirection;
-            vectorSubtract(light, vertice, sunDirection);
-            normalize(sunDirection);
-            
-            float lambertianFactor = DotProduct(sunDirection,normal);
+            float lambertianFactor = sunDirection.DotProduct(&normal);
             if (lambertianFactor < 0  )
                 lambertianFactor = 0;
             
@@ -535,9 +522,9 @@ void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
             
             glColor4f(lambertianFactor, lambertianFactor, lambertianFactor,1);
             
-            glVertex3f(object->vertices[triangle->ids[j]].x,
-                       object->vertices[triangle->ids[j]].y,
-                       object->vertices[triangle->ids[j]].z);
+            glVertex3f(vertice.x,
+                       vertice.y,
+                       vertice.z);
         }
         glEnd();
     }
@@ -561,22 +548,20 @@ void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
         if (triangle->property == RSEntity::TRANSPARENT)
             continue;
         
-        vec3_t normal;
-        GetNormal(object, triangle, normal);
+        Vector3D normal;
+        GetNormal(object, triangle, &normal);
         
         glBegin(GL_TRIANGLES);
         for(int j=0 ; j < 3 ; j++){
             
-            vec3_t vertice;
-            vertice[0] = object->vertices[triangle->ids[j]].x;
-            vertice[1] = object->vertices[triangle->ids[j]].y;
-            vertice[2] = object->vertices[triangle->ids[j]].z;
+            Point3D vertice = object->vertices[triangle->ids[j]];
             
-            vec3_t lighDirection;
-            vectorSubtract(light, vertice, lighDirection);
-            normalize(lighDirection);
+            Vector3D lighDirection;
+            lighDirection = light;
+            lighDirection.Substract(&vertice);
+            lighDirection.Normalize();
             
-            float lambertianFactor = DotProduct(lighDirection,normal);
+            float lambertianFactor = lighDirection.DotProduct(&normal);
             if (lambertianFactor < 0  )
                 lambertianFactor = 0;
             
@@ -601,8 +586,8 @@ void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
 
 
 
-void Renderer::SetLight(vec3_t l){
-     vectorCopy(this->light,l);
+void Renderer::SetLight(Point3D* l){
+    this->light = *l;
 }
 
 VGAPalette* Renderer::GetCurrentPalette(void){
@@ -616,9 +601,9 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    matrix_t projectionMatrix;
-    camera.gluPerspective(projectionMatrix);
-    glLoadMatrixf(projectionMatrix);
+    Matrix projectionMatrix;
+    camera.gluPerspective(&projectionMatrix);
+    glLoadMatrixf(projectionMatrix.m);
     
     running = true;
     float counter=0;
@@ -627,20 +612,20 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
         
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        matrix_t modelViewMatrix;
+        Matrix modelViewMatrix;
         
         
         
-        light[0]= 20*cos(counter);
-        light[1]= 10;
-        light[2]= 20*sin(counter);
+        light.x= 20*cos(counter);
+        light.y= 10;
+        light.z= 20*sin(counter);
         counter += 0.02;
         
         //camera.SetPosition(position);
         
         
-        camera.gluLookAt(modelViewMatrix);
-        glLoadMatrixf(modelViewMatrix);
+        camera.gluLookAt(&modelViewMatrix);
+        glLoadMatrixf(modelViewMatrix.m);
         
         DrawModel(object, lodLevel );
         
@@ -653,7 +638,7 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
         
         glBegin(GL_POINTS);
             glColor4f(1, 1,0 , 1);
-            glVertex3f(light[0],light[1], light[2]);
+            glVertex3f(light.x,light.y, light.z);
         glEnd();
         
         
@@ -670,12 +655,12 @@ VGAPalette* Renderer::GetDefaultPalette(void){
 
 
 
-void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
+void Renderer::RenderVerticeField(Point3D* vertices, int numVertices){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    matrix_t projectionMatrix;
-    camera.gluPerspective(projectionMatrix);
-    glLoadMatrixf(projectionMatrix);
+    Matrix projectionMatrix;
+    camera.gluPerspective(&projectionMatrix);
+    glLoadMatrixf(projectionMatrix.m);
     
     SDL_ShowWindow(sdlWindow);
     
@@ -686,19 +671,19 @@ void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
         
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        matrix_t modelViewMatrix;
+        Matrix modelViewMatrix;
         
-        vec3_t newPosition;
-        newPosition[0]= 256*cos(counter);
-        newPosition[1]= 0;
-        newPosition[2]= 256*sin(counter);
+        Point3D newPosition;
+        newPosition.x= 256*cos(counter);
+        newPosition.y= 0;
+        newPosition.z= 256*sin(counter);
         counter += 0.02;
         
-        camera.SetPosition(newPosition);
+        camera.SetPosition(&newPosition);
         
         
-        camera.gluLookAt(modelViewMatrix);
-        glLoadMatrixf(modelViewMatrix);
+        camera.gluLookAt(&modelViewMatrix);
+        glLoadMatrixf(modelViewMatrix.m);
         
         glClear(GL_COLOR_BUFFER_BIT);
         glPointSize(5);
@@ -719,6 +704,9 @@ void Renderer::RenderVerticeField(Vertex* vertices, int numVertices){
 
 #define TEX_ZERO (0/64.0f)
 #define TEX_ONE (64/64.0f)
+
+// What is this offset ? It is used to get rid of the red delimitations
+// in the 64x64 textures.
 #define OFFSET (1/64.0f)
 float textTrianCoo64[2][3][2] = {
     
@@ -976,11 +964,14 @@ void Renderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
 
 void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
+    
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    matrix_t projectionMatrix;
-    camera.gluPerspective(projectionMatrix);
-    glLoadMatrixf(projectionMatrix);
+    Matrix projectionMatrix;
+    camera.gluPerspective(&projectionMatrix);
+    glLoadMatrixf(projectionMatrix.m);
+    
+    
     
     SDL_ShowWindow(sdlWindow);
     
@@ -997,16 +988,25 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glDepthFunc(GL_LESS);
     
     
+    Matrix modelViewMatrix;
+    Point3D newPosition;
+    counter = 23;
+    Point3D lookAt = {3856,600,2856};
+    newPosition.x=  lookAt.x + 256*cos(counter/2);
+    newPosition.y=  600;
+    newPosition.z=  lookAt.z + 256*sin(counter/2);
+    
+    renderer.GetCamera()->SetLookAt(&lookAt);
+    camera.SetPosition(&newPosition);
+
+    
     while (running) {
         
         glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
         
         
-        
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        matrix_t modelViewMatrix;
-        vec3_t newPosition;
         
         //Island
         /*
@@ -1017,12 +1017,12 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         */
 
         //City Top
-        
+        /*
          newPosition[0]=  3700;//lookAt[0] + 5256*cos(counter/2);
          newPosition[1]= 300;
          newPosition[2]=  2900;//lookAt[2];// + 5256*sin(counter/2);
          vec3_t lookAt = {3856,0,2856};
-        
+        */
         
         //City view on mountains
         /*
@@ -1031,21 +1031,24 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         newPosition[0]=  lookAt[0] + 256*cos(counter/2);
         newPosition[1]= 60;
         newPosition[2]=  lookAt[2] + 256*sin(counter/2);
-        //counter += 0.02;
         */
         
-        renderer.GetCamera()->SetLookAt(lookAt);
-        camera.SetPosition(newPosition);
-        camera.gluLookAt(modelViewMatrix);
-        glLoadMatrixf(modelViewMatrix);
+        //Canyon
+        ///*
         
-        static bool displayList = false;
         
-        if (!displayList){
-            glNewList(1, GL_COMPILE);
-        }
+        //*/
         
-        if (!displayList){
+        //counter += 0.02;
+        
+         
+        
+        camera.gluLookAt(&modelViewMatrix);
+        glLoadMatrixf(modelViewMatrix.m);
+        
+        
+        
+       
         glDepthFunc(GL_LESS);
         glBegin(GL_TRIANGLES);
         for(int i=0 ; i < 324 ; i++)
@@ -1054,23 +1057,16 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         
         
         glEnable(GL_TEXTURE_2D);
-        
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-        
         glDepthFunc(GL_EQUAL);
-       
         for(int i=0 ; i < 324 ; i++)
             RenderBlock(area, LOD, i,true);
         glDisable(GL_BLEND);
         glDisable(GL_TEXTURE_2D);
         
         
-            glEndList();
-            displayList = true;
-        }
-        else
-            glCallList(1);
+        
         
         
         SDL_GL_SwapWindow(sdlWindow);
@@ -1082,27 +1078,30 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
 void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
 {
     
+    
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    matrix_t projectionMatrix;
-    camera.gluPerspective(projectionMatrix);
-    glLoadMatrixf(projectionMatrix);
     
-    SDL_ShowWindow(sdlWindow);
+    Matrix projectionMatrix;
+    camera.gluPerspective(&projectionMatrix);
+    glLoadMatrixf(projectionMatrix.m);
     
-    running = true;
     
-    static float counter=0;
-    
-    vec3_t lookAt = {256*16,100,256*16};
-    
-    renderer.GetCamera()->SetLookAt(lookAt);
     
     
     glPointSize(4);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+   
 
+    
+    SDL_ShowWindow(sdlWindow);
+    
+    running = true;
+    
+    
+    
+    static float counter = 0;
     
     
     while (running) {
@@ -1113,17 +1112,27 @@ void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
         
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        matrix_t modelViewMatrix;
-        vec3_t newPosition;
-        newPosition[0]=  lookAt[0] + 5256*cos(counter/2);
-        newPosition[1]= 3700;
-        newPosition[2]=  lookAt[2] + 5256*sin(counter/2);
-        counter += 0.02;
-
-        camera.SetPosition(newPosition);
-        camera.gluLookAt(modelViewMatrix);
-        glLoadMatrixf(modelViewMatrix);
         
+        
+        Point3D lookAt = { 256*16,100,256*16 };
+        
+        renderer.GetCamera()->SetLookAt(&lookAt);
+        
+        Point3D newPosition;
+        camera.GetPosition(&newPosition);
+        
+        newPosition.x= lookAt.x + 5256*cos(counter/2);
+        newPosition.y= 3700;
+        newPosition.z= lookAt.z + 5256*sin(counter/2);
+
+        camera.SetPosition(&newPosition);
+        
+        Vector3D up = {0,1,0};
+        camera.SetUp(&up);
+        
+        Matrix modelViewMatrix;
+        camera.gluLookAt(&modelViewMatrix);
+        glLoadMatrixf(modelViewMatrix.m);
         
         
         glBegin(GL_POINTS);

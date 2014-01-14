@@ -8,41 +8,47 @@
 
 #include "precomp.h"
 
-void gluLookAt(  vec3_t vEye,  vec3_t vLookat, vec3_t vUp ,matrix_t fModelView)
+void gluLookAt(  Vector3D* vEye,  Vector3D* vLookat, Vector3D* vUp ,Matrix* viewMatrix)
 {
-    vec3_t vN,vU,vV;
     
     // determine the new n
-    vectorSubtract(vEye,vLookat,vN);
+    //vectorSubtract(vEye,vLookat,vN);
+    Vector3D vN(*vEye);
+    vN.Substract(vLookat);
     
     // determine the new u by crossing with the up vector
-    vectorCrossProduct(vUp, vN, vU) ;
+    //vectorCrossProduct(vUp, vN, vU) ;
+    Vector3D vU = vUp->CrossProduct(&vN);
     
     // normalize both the u and n vectors
-    normalize(vU) ;
-    normalize(vN);
+    //normalize(vU) ;
+    //normalize(vN);
+    vU.Normalize();
+    vN.Normalize();
+    
     
     // determine v by crossing n and u
-    vectorCrossProduct(vN,vU,vV);
+    //vectorCrossProduct(vN,vU,vV);
+    Vector3D vV = vN.CrossProduct(&vU);
     
     // create a model view matrix
-    fModelView[0] = vU[0];                                        fModelView[4] = vU[1];                                        fModelView[8] = vU[2];                                        fModelView[12] = - DotProduct(vEye,vU);
-    fModelView[1] = vV[0];                                        fModelView[5] = vV[1];                                        fModelView[9] = vV[2];                                        fModelView[13] = - DotProduct(vEye,vV);
-    fModelView[2] = vN[0];                                        fModelView[6] = vN[1];                                        fModelView[10]= vN[2];                                        fModelView[14]=  - DotProduct(vEye,vN);
-    fModelView[3]=        0.0f;                                        fModelView[7]= 0.0f;                                        fModelView[11]= 0.0f;                                        fModelView[15]= 1.0f;
+    viewMatrix->m[0] = vU.x;     viewMatrix->m[4] = vU.y;  viewMatrix->m[8] = vU.z;  viewMatrix->m[12] = - vEye->DotProduct(&vU);
+    viewMatrix->m[1] = vV.x;     viewMatrix->m[5] = vV.y;  viewMatrix->m[9] = vV.z;  viewMatrix->m[13] = - vEye->DotProduct(&vV);
+    viewMatrix->m[2] = vN.x;     viewMatrix->m[6] = vN.y;  viewMatrix->m[10]= vN.z;  viewMatrix->m[14] = - vEye->DotProduct(&vN);
+    viewMatrix->m[3]=   0.0f;     viewMatrix->m[7]= 0.0f;    viewMatrix->m[11]= 0.0f;   viewMatrix->m[15] = 1.0f;
     
 }
 
 
-void gluPerspective(float fovy, float aspect, float zNear, float zFar,matrix_t projectionMatrix)
+void gluPerspective(float fovy, float aspect, float zNear, float zFar,Matrix* projectionMatrix)
 {
     float f  = (float)(1 / tan(fovy*DEG_TO_RAD/2));
     
     
-    projectionMatrix[0]= f/aspect;        projectionMatrix[4]= 0;        projectionMatrix[ 8]= 0;                                                                projectionMatrix[12]= 0;
-    projectionMatrix[1]= 0;                 projectionMatrix[5]= f;        projectionMatrix[ 9]= 0;                                                                projectionMatrix[13]= 0;
-    projectionMatrix[2]= 0;                        projectionMatrix[6]= 0;        projectionMatrix[10]=(zFar+zNear)/(zNear-zFar) ;                projectionMatrix[14]= 2*(zFar*zNear)/(zNear-zFar);
-    projectionMatrix[3]= 0;                        projectionMatrix[7]=0;        projectionMatrix[11]=-1;                                                                projectionMatrix[15]= 0;
+    projectionMatrix->m[0]= f/aspect;    projectionMatrix->m[4]= 0;  projectionMatrix->m[ 8]= 0;                         projectionMatrix->m[12]= 0;
+    projectionMatrix->m[1]= 0;           projectionMatrix->m[5]= f;  projectionMatrix->m[ 9]= 0;                         projectionMatrix->m[13]= 0;
+    projectionMatrix->m[2]= 0;           projectionMatrix->m[6]= 0;  projectionMatrix->m[10]=(zFar+zNear)/(zNear-zFar) ; projectionMatrix->m[14]= 2*(zFar*zNear)/(zNear-zFar);
+    projectionMatrix->m[3]= 0;           projectionMatrix->m[7]= 0;   projectionMatrix->m[11]=-1;                        projectionMatrix->m[15]= 0;
 }
 
 
@@ -55,28 +61,28 @@ void Camera::Init(float fovy, float aspect, float zNear, float zFar){
     this->zFar =zFar;
 }
 
-void Camera::SetLookAt(vec3_t lookAt){
-    vectorCopy(this->lookAt, lookAt);
+void Camera::SetLookAt(Point3D *lookAt){
+    this->lookAt = *lookAt;
 }
 
-void Camera::SetPosition(vec3_t position){
-    vectorCopy(this->position, position);
+void Camera::SetPosition(Point3D* position){
+    this->position = *position;
 }
 
-void Camera::SetUp(vec3_t up){
-    vectorCopy(this->up, up);
+void Camera::SetUp(Vector3D* up){
+    this->up = *up;
 }
 
-void Camera::gluPerspective(matrix_t projectionMatrix){
+void Camera::gluPerspective(Matrix* projectionMatrix){
     ::gluPerspective(fovy,aspect,zNear,zFar,projectionMatrix);
 }
 
-void Camera::gluLookAt(matrix_t fModelView){
-    ::gluLookAt(position,lookAt, up , fModelView);
+void Camera::gluLookAt(Matrix* viewMatrix){
+    ::gluLookAt(&this->position,&this->lookAt, &this->up , viewMatrix);
 }
 
-void Camera::GetPosition(vec3_t position){
-    vectorCopy(position, this->position);
+void Camera::GetPosition(Point3D* position){
+    this->position = *position;
 }
 
 

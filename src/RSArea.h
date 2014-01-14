@@ -9,10 +9,7 @@
 #ifndef __libRealSpace__RSMap__
 #define __libRealSpace__RSMap__
 
-typedef struct  BlockVertex{
-    uint8_t rawData[6];
-    Vertex v;
-} BlockVertex;
+
 
 typedef struct AreaBlock{
     

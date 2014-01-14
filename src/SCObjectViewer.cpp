@@ -335,19 +335,19 @@ void SCObjectViewer::Run(void){
     
         RSShowCase showCase = showCases[modelIndex];
         
-        vec3_t newPosition;
-        newPosition[0]= showCase.cameraDist/200 *cos(counter/4);
-        newPosition[1]= 10;
-        newPosition[2]= showCase.cameraDist/200*sin(counter/4);
+        Point3D newPosition;
+        newPosition.x= showCase.cameraDist/200 *cos(counter/4);
+        newPosition.y= 10;
+        newPosition.z= showCase.cameraDist/200*sin(counter/4);
         counter += 0.02;
         
-        renderer.GetCamera()->SetPosition(newPosition);
+        renderer.GetCamera()->SetPosition(&newPosition);
         
-        vec3_t light;
-        light[0]= 20*cos(-counter/2.0f);
-        light[1]= 10;
-        light[2]= 20*sin(-counter/2.0f);
-        renderer.SetLight(light);
+        Point3D light;
+        light.x= 20*cos(-counter/2.0f);
+        light.y= 10;
+        light.z= 20*sin(-counter/2.0f);
+        renderer.SetLight(&light);
         
         
         RSEntity* modelToDraw = showCase.entity;

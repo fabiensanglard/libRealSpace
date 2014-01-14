@@ -9,10 +9,108 @@
 #ifndef __libRealSpace__Matrix__
 #define __libRealSpace__Matrix__
 
-typedef float matrix_t[16];
+
 #define DEG_TO_RAD (2.0f*M_PI/360.0f)
 
+class Vector3D{
+    
+public:
+    
+    inline void SetWithCoo(float x, float y, float z){
+        this->x = x;
+        this->y = y;
+        this->z = z;
+    }
+    
+    inline void Clear(void){
+        SetWithCoo(0, 0,0);
+    }
 
+    inline void Negate(void){
+        Scale(-1);
+    }
+    
+    inline void Add(Vector3D* other){
+        this->x += other->x;
+        this->y += other->y;
+        this->z += other->z;
+    }
+
+    inline void Substract(Vector3D* other){
+        this->x -= other->x;
+        this->y -= other->y;
+        this->z -= other->z;
+    }
+    
+
+    inline void Scale(float factor){
+        this->x *= factor;
+        this->y *= factor;
+        this->z *= factor;
+    }
+
+    
+    inline Vector3D CrossProduct(const Vector3D* other){
+        Vector3D result;
+
+        result.x = this->y * other->z - this->z * other->y;                // X
+        result.y = this->z * other->x - this->x * other->z;                // Y
+        result.z = this->x * other->y - this->y * other->x;                // Z
+        
+        return result;
+    }
+
+    
+    inline void Normalize(void){
+        float ilength;
+        
+        ilength = DotProduct(this);
+        
+        float invSqrtLength = InvSqrt(ilength);
+        
+        Scale(invSqrtLength);
+    }
+    
+    
+    inline float DotProduct(Vector3D* other){
+        
+        float acc = 0;
+        acc += this->x * other->x;
+        acc += this->y * other->y;
+        acc += this->z * other->z;
+        
+        return acc;
+    }
+
+    
+    float x;
+    float y;
+    float z;
+    
+private:
+};
+
+#define Point3D Vector3D
+
+
+class Matrix{
+    public:
+    
+        void Clear(void);
+        void Identity(void);
+    
+        void PreMultiply(Matrix* other);
+    
+        float m[16];
+    
+    private:
+};
+
+
+
+
+
+/*
 typedef float vec3_t[3];
 #define vectorClear( a )                ( (a)[ 0 ] = (a)[ 1 ] = (a)[ 2 ] = 0 )
 #define vectorNegate( a, b )        ( (b)[ 0 ] = -(a)[ 0 ], (b)[ 1 ] = -(a)[ 1 ], (b)[ 2 ] = -(a)[ 2 ] )
@@ -30,5 +128,6 @@ typedef float vec3_t[3];
 void vectorCrossProduct( const vec3_t v1, const vec3_t v2, vec3_t cross );
 float InvSqrt(float x);
 void normalize(vec3_t v);
+*/
 
 #endif /* defined(__libRealSpace__Matrix__) */

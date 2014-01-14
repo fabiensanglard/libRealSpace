@@ -10,7 +10,7 @@
 #define __iff__gfx__
 
 class RSEntity;
-struct Vertex;
+
 class Triangle;
 class RSArea;
 class MapVertex;
@@ -42,7 +42,7 @@ public:
     
     //Map Rendering
     //For research methods: Those should be deleted soon:
-    void RenderVerticeField(Vertex* vertices, int numVertices);
+    void RenderVerticeField(Point3D* vertices, int numVertices);
     
     void RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock);
 
@@ -71,7 +71,7 @@ public:
     void PumpEvents(void);
     
     Camera* GetCamera(void);
-    void SetLight(vec3_t);
+    void SetLight(Point3D* position);
     
     inline bool IsPaused(void){
         return this->paused;
@@ -90,7 +90,7 @@ public:
 private:
     
     
-    void GetNormal(RSEntity* object,Triangle* triangle,vec3_t normal);
+    void GetNormal(RSEntity* object,Triangle* triangle,Point3D* normal);
     
     bool initialized;
     
@@ -104,7 +104,7 @@ private:
     bool paused;
     
     Camera camera;
-    vec3_t light;
+    Point3D light;
 };
 
 
