@@ -105,3 +105,32 @@ void Matrix::Transpose(void){
 float* Matrix::ToGL(void){
     return (float*)this->v;
 }
+
+
+
+void Matrix::SetTranslation(float x, float y, float z){
+    v[3][0] = x;
+    v[3][1] = y;
+    v[3][2] = z;
+}
+
+void Matrix::SetRotationX(float angle){
+    v[1][1] = cos(angle);
+    v[1][2] = sin(angle);
+    v[2][1] = -sin(angle);
+    v[2][2] = cos(angle);
+}
+
+void Matrix::SetRotationY(float angle){
+    v[0][0] = cos(angle);
+    v[0][2] = -sin(angle);
+    v[2][0] = sin(angle);
+    v[2][2] = cos(angle);
+}
+
+void Matrix::SetRotationZ(float angle){
+    v[0][0] = cos(angle);
+    v[0][1] = sin(angle);
+    v[1][0] = -sin(angle);
+    v[1][1] = cos(angle);
+}

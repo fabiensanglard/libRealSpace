@@ -389,16 +389,7 @@ void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
     Lod* lod = &object->lods[lodLevel] ;
     
     
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    Matrix* projectionMatrix = camera.GetProjectionMatrix();
-    glLoadMatrixf(projectionMatrix->ToGL());
     
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    Matrix* modelViewMatrix = camera.GetViewMatrix();
-    glLoadMatrixf(modelViewMatrix->ToGL());
-        
         
         
     glDisable(GL_CULL_FACE);
@@ -714,7 +705,7 @@ void Renderer::RenderVerticeField(Point3D* vertices, int numVertices){
 
 // What is this offset ? It is used to get rid of the red delimitations
 // in the 64x64 textures.
-#define OFFSET (0/64.0f)
+#define OFFSET (1/64.0f)
 float textTrianCoo64[2][3][2] = {
     
     {{TEX_ZERO,TEX_ZERO+OFFSET},    {TEX_ONE-2*OFFSET,TEX_ONE-OFFSET},    {TEX_ZERO,TEX_ONE-OFFSET} }, // LOWER_TRIANGE
@@ -969,6 +960,32 @@ void Renderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
     
 }
 
+void Renderer::RenderJets(RSArea* area){
+    
+    glMatrixMode(GL_MODELVIEW);
+    
+    
+    
+    for(size_t i=0 ; i < area->GetNumJets(); i++){
+        RSEntity* entity = area->GetJet(i);
+    
+        glPushMatrix();
+        
+        Matrix objMatrix = entity->orientation.ToMatrix();
+        Point3D pos = entity->position;
+        objMatrix.v[3][0] = pos.x;
+        objMatrix.v[3][1] = pos.y;
+        objMatrix.v[3][2] = pos.z;
+        
+        glMultMatrixf(objMatrix.ToGL());
+        
+        DrawModel(entity, LOD_LEVEL_MAX);
+        
+        glPopMatrix();
+    }
+    
+}
+
 void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     
@@ -1000,6 +1017,17 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     Point3D lookAt = {3856,0,2856};
     camera.LookAt(&lookAt);
     
+    
+    GLuint fogMode[]= { GL_EXP, GL_EXP2, GL_LINEAR };   // Storage For Three Types Of Fog
+    GLuint fogfilter= 0;                    // Which Fog To Use
+    GLfloat fogColor[4]= {1.0f, 1.0f, 1.0f, 1.0f};
+    glFogi(GL_FOG_MODE, fogMode[fogfilter]);        // Fog Mode
+    glFogfv(GL_FOG_COLOR, fogColor);            // Set Fog Color
+    glFogf(GL_FOG_DENSITY, 0.0002f);              // How Dense Will The Fog Be
+    glHint(GL_FOG_HINT, GL_DONT_CARE);          // Fog Hint Value
+    glFogf(GL_FOG_START, 600.0f);             // Fog Start Depth
+    glFogf(GL_FOG_END, 8000.0f);               // Fog End Depth
+    glEnable(GL_FOG);
     
     while (running) {
         
@@ -1066,6 +1094,7 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         //for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
         //   RenderObjects(area,i);
         
+        RenderJets(area);
         
         SDL_GL_SwapWindow(sdlWindow);
         PumpEvents();

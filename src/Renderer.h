@@ -62,7 +62,7 @@ public:
     void RenderObjects(RSArea* area,size_t blockID);
     
     
-    
+    void RenderJets(RSArea* area);
     
     VGAPalette* GetPalette(void);
     

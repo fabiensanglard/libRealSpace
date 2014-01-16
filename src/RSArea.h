@@ -71,6 +71,8 @@ public:
     std::vector<MapObject> objects[BLOCKS_PER_MAP];
     float elevation[BLOCKS_PER_MAP];
 
+    size_t GetNumJets(void);
+    RSEntity* GetJet(size_t jetID);
     
 private:
     
@@ -98,7 +100,9 @@ private:
     
     char name[16];
     
-    
+    void AddJet(TreArchive* tre, const char* name, Quaternion* orientation, Point3D* position);
+    void AddJets(void);
+    std::vector<RSEntity*> jets;
 };
 
 #endif /* defined(__libRealSpace__RSMap__) */

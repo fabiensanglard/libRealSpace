@@ -18,4 +18,10 @@ Tuesday, January 14, 2014 :
 
 Fin.
 
+Wednesday, January 15, 2014 :
+=============================
+Added moving Camera. I could not find the crop circles anywhere on ARENA.PAK
+Maybe they are on an other map ? I could probably search for the ImageID but
+that would be less fun :P !
 
+ 

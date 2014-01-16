@@ -106,6 +106,10 @@ public:
     BoudingBox* GetBoudingBpx(void);
     
     
+    //For rendering
+    Point3D position;
+    Quaternion orientation;
+    
 private:
     
     BoudingBox bb;
@@ -122,9 +126,7 @@ private:
     void ParseTXMP(IffChunk* chunk);
     
     
-    //This is used for drawing an object
-    Point3D position;
-    Quaternion orientation;
+    
 };
 
 #endif /* defined(__libRealSpace__RSEntity__) */

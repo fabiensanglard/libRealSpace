@@ -110,6 +110,10 @@ public:
     
     float v[4][4];
     
+    void SetTranslation(float x, float y, float z);
+    void SetRotationX(float angle);
+    void SetRotationY(float angle);
+    void SetRotationZ(float angle);
     
 private:
 };

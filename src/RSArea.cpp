@@ -532,7 +532,7 @@ void RSArea::ParseHeightMap(void){
     
     char title[512];
     
-    renderer.Init(640, 400);
+    
     
     PakEntry* entry ;
     
@@ -544,7 +544,7 @@ void RSArea::ParseHeightMap(void){
     sprintf(title, "SC Map Viewer : %s level : MAX",name);
     renderer.SetTitle(title);
     //renderer.RenderWorldPoints(this,BLOCK_LOD_MAX,400);
-    renderer.RenderWorldSolid(this,BLOCK_LOD_MAX,400);
+
     
     
     entry = archive->GetEntry(2);
@@ -555,7 +555,7 @@ void RSArea::ParseHeightMap(void){
     
     sprintf(title, "SC Map Viewer : %s level : MED",name);
     renderer.SetTitle(title);
-    renderer.RenderWorldSolid(this,BLOCK_LOD_MED,100);
+    //renderer.RenderWorldSolid(this,BLOCK_LOD_MED,100);
     
     
     entry = archive->GetEntry(3);
@@ -567,7 +567,7 @@ void RSArea::ParseHeightMap(void){
     
     sprintf(title, "SC Map Viewer : %s level : MIN",name);
     renderer.SetTitle(title);
-    renderer.RenderWorldSolid(this,BLOCK_LOD_MIN,25);
+    //renderer.RenderWorldSolid(this,BLOCK_LOD_MIN,25);
     
 }
 
@@ -577,8 +577,55 @@ RSImage* RSArea::GetImageByID(size_t ID){
     return textures[0]->GetImageById(ID);
 }
 
+void RSArea::AddJet(TreArchive* tre, const char* name, Quaternion* orientation, Point3D* position){
+    
+    TreEntry* jetEntry = tre->GetEntryByName(name);
+    RSEntity* entity = new RSEntity();
+    IffLexer lexer;
+    lexer.InitFromRAM(jetEntry->data, jetEntry->size);
+    entity->InitFromIFF(&lexer);
+    
+    entity->orientation = *orientation;
+    entity->position = *position;
+    
+    jets.push_back(entity);
+}
+
+void RSArea::AddJets(void){
+    
+    TreArchive tre;
+    tre.InitFromFile("OBJECTS.TRE");
+    
+    Quaternion rot;
+    Matrix f16m;
+    f16m.Identity();
+    f16m.SetRotationX(0.5f);
+    
+    rot.FromMatrix(&f16m);
+    Point3D pos ;
+    pos = {4066,95,2980};
+    AddJet(&tre,"..\\..\\DATA\\OBJECTS\\F-16DES.IFF",&rot,&pos);
+    
+    
+    f16m.SetRotationX(-0.5f);
+    rot.FromMatrix(&f16m);
+    pos = {4010,100,2990};
+    AddJet(&tre,"..\\..\\DATA\\OBJECTS\\F-22.IFF",&rot,&pos);
+    
+    //pos = {3886,300,2886};
+    //AddJet(&tre,"..\\..\\DATA\\OBJECTS\\MIG29.IFF",&rot,&pos);
+    
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-22.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\YF23.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIG21.IFF";
+    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIG29.IFF";
+
+}
+
 void RSArea::InitFromPAKFileName(const char* pakFilename){
     
+    renderer.Init(640*2, 400*2);
     
     strcpy(name,pakFilename);
     
@@ -644,4 +691,16 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     
     ParseHeightMap();
     
+    
+    AddJets();
+    
+    renderer.RenderWorldSolid(this,BLOCK_LOD_MAX,400);
+}
+
+size_t RSArea::GetNumJets(void){
+    return jets.size();
+}
+
+RSEntity* RSArea::GetJet(size_t jetID){
+    return jets[jetID];
 }

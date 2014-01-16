@@ -74,6 +74,19 @@ void Camera::SetPosition(Point3D* position){
 
 void Camera::Rotate(float pitch, float yaw, float roll){
     
+    /*
+    Matrix rollRot;
+    rollRot.Identity();
+    rollRot.v[0][0] = cos(yaw);
+    rollRot.v[0][1] = sin(yaw);
+    rollRot.v[1][0] = -sin(yaw);
+    rollRot.v[1][1] = cos(yaw);
+    Quaternion qRollRot;
+    qRollRot.FromMatrix(&rollRot);
+    orientation.Multiply(&qRollRot);
+    */
+    
+    
     //Generate all rotation quaternions.
     Matrix pitchRot;
     pitchRot.Identity();
@@ -179,17 +192,17 @@ Matrix* Camera::GetViewMatrix(void){
 
 void Camera::MoveForward(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x -= m.v[0][2]*10;
-    this->position.y -= m.v[1][2]*10;
-    this->position.z -= m.v[2][2]*10;
+    this->position.x -= m.v[0][2]*100;
+    this->position.y -= m.v[1][2]*100;
+    this->position.z -= m.v[2][2]*100;
     CalcViewMatrix();
 }
 
 void Camera::MoveBackward(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x += m.v[0][2]*10;
-    this->position.y += m.v[1][2]*10;
-    this->position.z += m.v[2][2]*10;
+    this->position.x += m.v[0][2]*100;
+    this->position.y += m.v[1][2]*100;
+    this->position.z += m.v[2][2]*100;
     CalcViewMatrix();
 }
 
