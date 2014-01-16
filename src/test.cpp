@@ -389,7 +389,7 @@ static void showAllImageInArchive(PakArchive* archive){
 
 int main( int argc,char** argv){
     
-    SetBase("/Users/fabiensanglard/Desktop/SC/strikecommander/SC/");
+    SetBase("/Users/fabiensanglard/SC/SC/");
 
     
     Matrix matrix;

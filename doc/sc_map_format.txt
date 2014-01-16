@@ -1,4 +1,4 @@
-Dec 4th, 2014 :
+Jan 4th, 2014 :
 ===============
 
 So close yet so far. 
@@ -147,7 +147,7 @@ I would expect a texture set indice and then a texture index for the texture in 
 
 
 
-Dec 5th, 2014 :
+Jan 5th, 2014 :
 ===============
 
 Crap, it did not work. i get an horrible mess. Let’s go do something else and come back to it later.
@@ -219,7 +219,7 @@ Low level:
 90*90 = 8100 vertices for a map.
 
 
-Dec 7th, 2014 :
+Jan 7th, 2014 :
 ===============
 
 I am so happy, I managed to get the vertices around 4AM: The mystery files were indeed the 3D data. Each entry is
@@ -263,7 +263,7 @@ It seems that all .TRI features 3 files of 4632 bytes organized as follow :
 
 
 
-Dec 7th, 2014 :
+Jan 7th, 2014 :
 ===============
 
 One more major advancement !!! I have identified the terrain type flag. For now
@@ -367,7 +367,7 @@ I guess it was to give room for close up dithering shading ???
 
 
 
-Dec 8th, 2014 :
+January 8th, 2014 :
 ===============
 
 Studying the texture set, I can see a pattern. And more importantly I can see how triangles are
@@ -427,4 +427,23 @@ to reverse engineer :
 2 byte texture Things to REVERSE ENGINEER !!!!
   
 
+Jan 14th, 2014 :
+================
 
+I cannot figure out the coordinate system of the .OBJ. Therefore I cannot draw them :( !!
+I was quite sure the coordinate would be in block space. But it is not.
+
+Editing ARENA.PAK, I was able to figure out that
+
+0x4A leaves the block to the left
+0xCA leaves the block to the right
+
+Which means those are the coordinate of one block to the left or right since all objects from
+adjacents block are also drawn.
+
+Just spent two hours trying to figure this thing out. This is so hard.
+
+Jan 14th, 2014 :
+================
+
+Switching to Camera and the joy of Quaternions.

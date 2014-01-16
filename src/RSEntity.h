@@ -120,6 +120,11 @@ private:
     void ParseTXMS(IffChunk* chunk);
     void ParseUVXY(IffChunk* chunk);
     void ParseTXMP(IffChunk* chunk);
+    
+    
+    //This is used for drawing an object
+    Point3D position;
+    Quaternion orientation;
 };
 
 #endif /* defined(__libRealSpace__RSEntity__) */

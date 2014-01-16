@@ -100,11 +100,13 @@ public:
     void Clear(void);
     void Identity(void);
     
-    void PreMultiply(Matrix* other);
+    void Multiply(Matrix* other);
     
     void Print(void);
     
     float* ToGL(void);
+    
+    void Transpose(void);
     
     float v[4][4];
     

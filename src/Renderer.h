@@ -59,7 +59,7 @@ public:
     void RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock);
     
     
-    
+    void RenderObjects(RSArea* area,size_t blockID);
     
     
     

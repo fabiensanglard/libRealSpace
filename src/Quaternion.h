@@ -22,11 +22,21 @@ class Quaternion{
     
     void FromMatrix(Matrix* matrix);
     
+    void Conjugate(void);
+    
+    float DotProduct(Quaternion* other);
+    
+    Quaternion Slerp(Quaternion* other, float alpha);
+    
+    void Normalize(void);
+                     
     private:
+    
+        float w;
         float x;
         float y;
         float z;
-        float w;
+    
 };
 
 #endif /* defined(__libRealSpace__Quaternion__) */

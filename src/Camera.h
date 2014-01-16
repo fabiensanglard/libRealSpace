@@ -12,34 +12,52 @@
 class Camera{
 
 public:
-    void Init(float fovy, float aspect, float zNear, float zFar);
     
-    void SetLookAt(Point3D* lookAt);
+    //Update parameters and recalculate perspective
+    void SetPersective(float fovy, float aspect, float zNear, float zFar);
+    
+    //Update orientation and Matrix view
+    void LookAt(Point3D* lookAt);
+    
+    //Update position and Matrix view
     void SetPosition(Point3D* position);
-    void SetUp(Point3D* up);
     
-    void GetPosition(Point3D* position);
-    
+    //Update orientation and Matrix view
+    void Rotate(float pitch, float yaw, float roll);
+    /*
     void gluPerspective(Matrix* projectionMatrix);
     void gluLookAt(Matrix* fModelView);
+    */
     
-   
+    //Various Getters
+    Point3D GetPosition(void);
+    Quaternion GetOrientation(void);
+    Matrix* GetProjectionMatrix(void);
+    Matrix* GetViewMatrix(void);
+    
+    
+    
+    //Moves
+    void MoveForward(void);
+    void MoveBackward(void);
+    void MoveStrafLeft(void);
+    void MoveStrafRight(void);
+    
 private:
+    
+    void CalcViewMatrix(void);
     
     float fovy;
     float aspect;
     float zNear;
     float zFar;
     
-    Point3D lookAt;
-    Point3D up;
-    
-    
     Point3D position;
     Quaternion orientation;
     
     
-    
+    Matrix mproj;
+    Matrix mview;
 };
 
 #endif /* defined(__libRealSpace__Camera__) */

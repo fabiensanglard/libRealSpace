@@ -1,0 +1,21 @@
+TODO List to consider the project over :
+========================================
+
+Tuesday, January 14, 2014 :
+===========================
+- Add objects on the map. The format is known but not used for now.
+- Add music and sound effects playback. The format is known but not used.
+- Fixed transparent bug in jets: There is a color that should be transparent.
+- Have full SC intro play: Individual animations are known but not the compositor.
+- Have SC main menu, object viewer and practice menu functional. Use a SCMenu class and a FIFO stack.
+- Replace gouraud shading with Phong for terran and jets.
+- Add gorgeous athmosphere scatted sky.
+- Add gorgeous clouds.
+- Add volumetric/altitude related fog.
+- Add scenery feature: F-16 patrol.
+- Add Virtual Cockpit.
+- Add Oculus VR support.
+
+Fin.
+
+

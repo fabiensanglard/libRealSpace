@@ -188,6 +188,8 @@ void RSArea::ParseMetadata(){
     
 }
 
+#define OBJ_ENTRY_SIZE 0x46
+#define OBJ_ENTRY_NUM_OBJECTS_FIELD 0x2
 void RSArea::ParseObjects(){
     
     printf("Parsing file[5] (Objects)\n");
@@ -223,16 +225,25 @@ void RSArea::ParseObjects(){
         if (entry->size == 0)
             continue;
         
-        ByteStream reader(entry->data);
-        uint16_t numObjs = reader.ReadUShort();
+        ByteStream sizeGetter(entry->data);
+        uint16_t numObjs = sizeGetter.ReadUShort();
         printf("OBJ files %lu features %d objects.\n",i,numObjs);
-            
+        
+        //if (i != 97)
+        //    continue;
+        
         for(int j=0 ; j < numObjs ; j++){
             
-            char setName[9];
+            
+            
+            ByteStream reader(entry->data+OBJ_ENTRY_NUM_OBJECTS_FIELD+OBJ_ENTRY_SIZE*j);
+            
+            MapObject mapObject;
+            
+            
             for(int k=0 ; k <8 ; k++)
-                setName[k] = reader.ReadByte();
-            setName[8] = 0;
+                mapObject.name[k] = reader.ReadByte();
+            mapObject.name[8] = 0;
                 
             uint8_t unknown09 = reader.ReadByte();
             uint8_t unknown10 = reader.ReadByte();
@@ -242,31 +253,55 @@ void RSArea::ParseObjects(){
                 
                 
                 
-            char accessoryName[9];
+            
             for(int k=0 ; k <8 ; k++)
-                accessoryName[k] = reader.ReadByte();
-            accessoryName[8] = 0;
-                
-                
-            uint8_t unknowns[0x31];
+                mapObject.destroyedName[k] = reader.ReadByte();
+            mapObject.destroyedName[8] = 0;
+            
+            int32_t coo[12];
+            coo[0] = reader.ReadByte();
+            coo[1] = reader.ReadByte();
+            coo[2] = reader.ReadByte();
+            coo[3] = reader.ReadByte();
+            mapObject.position[0] =  (coo[3] << 8) | coo[2];
+            //coo[3] = (uint32_t)reader.ReadByte();
 
-            for(int k=0 ; k <0x31 ; k++)
+            coo[4] = reader.ReadByte();
+            coo[5] = reader.ReadByte();
+            coo[6] = reader.ReadByte();
+            coo[7] = reader.ReadByte();
+            mapObject.position[2] = (coo[7] << 8) | coo[6];
+
+            
+            coo[8] = reader.ReadByte();
+            coo[9] = reader.ReadByte();
+            coo[10] = reader.ReadByte();
+            coo[11] = reader.ReadByte();
+            mapObject.position[1] = (coo[11] << 8) | coo[10];
+           
+
+            uint8_t unknowns[0x31-12];
+
+            for(int k=0 ; k <0x31-12; k++)
                 unknowns[k] = reader.ReadByte();
                 
-            printf("object set [%3lu] obj [%2d] - '%-8s' %2X %2X %2X %2X %2X '%-8s'",i,j,setName,
+            printf("object set [%3lu] obj [%2d] - '%-8s' %2X %2X %2X %2X %2X '%-8s'",i,j,mapObject.name,
                        unknown09,
                        unknown10,
                        unknown11,
                        unknown12,
-                       unknown13,accessoryName);
-                
-            for(int k=0 ; k <0x31 ; k++)
+                       unknown13,mapObject.destroyedName);
+            
+            for(int k=0 ; k < 12 ; k++)
+                printf("%2X ",coo[k]);
+            
+            for(int k=0 ; k <0x31-12 ; k++)
                 printf("%2X ",unknowns[k]);
             
             printf("\n");
                 
             
-            
+            objects[i].push_back(mapObject);
             
         }
         
@@ -353,6 +388,8 @@ void RSArea::ParseTrigo(){
 (byte & 0x02 ? 1 : 0), \
 (byte & 0x01 ? 1 : 0)
 
+
+
 //A lod features
 //A block features either 25, 100 or 400 vertex
 void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
@@ -380,7 +417,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             int16_t height ;
             height = vertStream.ReadShort();
-            height /= 17;
+            height /= HEIGHT_DIVIDER;
           
             vertex->flag = vertStream.ReadByte();
             vertex->type = vertStream.ReadByte();
@@ -487,7 +524,7 @@ void RSArea::ParseElevations(void){
     ByteStream stream(entry->data);
     
     for (size_t i = 0 ; i < BLOCKS_PER_MAP; i++) {
-        elevation[i]=stream.ReadUShort();
+        elevation[i]=stream.ReadUShort() ;
     }
 }
 
@@ -495,7 +532,7 @@ void RSArea::ParseHeightMap(void){
     
     char title[512];
     
-    renderer.Init(1280, 800);
+    renderer.Init(640, 400);
     
     PakEntry* entry ;
     
@@ -599,11 +636,12 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     textures.push_back(set);
 
     //Parse the meta datas.
+    ParseElevations();
     ParseMetadata();
     ParseObjects();
    // ParseTrigo();
     
-    ParseElevations();
+    
     ParseHeightMap();
     
 }

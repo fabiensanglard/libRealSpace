@@ -9,7 +9,20 @@
 #ifndef __libRealSpace__RSMap__
 #define __libRealSpace__RSMap__
 
+//DIRTY HACK !!! DELETE ME ASAP
+#define  HEIGHT_DIVIDER 17
 
+
+typedef struct MapObject{
+    
+    char name[9];
+    char destroyedName[9];
+    
+    uint32_t position[3];
+    
+    RSEntity* entity;
+    
+} MapObject;
 
 typedef struct AreaBlock{
     
@@ -54,6 +67,11 @@ public:
     
     RSImage* GetImageByID(size_t ID);
     
+    //Per block objects list
+    std::vector<MapObject> objects[BLOCKS_PER_MAP];
+    float elevation[BLOCKS_PER_MAP];
+
+    
 private:
     
     void ParseMetadata(void );
@@ -77,9 +95,10 @@ private:
     // Level 0 blocks are  5* 5;
     AreaBlock blocks[NUM_LODS][BLOCKS_PER_MAP];
     
-    float elevation[BLOCKS_PER_MAP];
     
     char name[16];
+    
+    
 };
 
 #endif /* defined(__libRealSpace__RSMap__) */
