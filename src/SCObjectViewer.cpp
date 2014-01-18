@@ -323,6 +323,7 @@ void SCObjectViewer::Run(void){
     
     while(1){
         
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         
         uint32_t currentTime = SDL_GetTicks();
         uint32_t totalTime = currentTime - startTime;
@@ -342,12 +343,24 @@ void SCObjectViewer::Run(void){
         counter += 0.02;
         
         renderer.GetCamera()->SetPosition(&newPosition);
+        Point3D lookAt = {0,0,0};
+        renderer.GetCamera()->LookAt(&lookAt);
         
         Point3D light;
         light.x= 20*cos(-counter/2.0f);
         light.y= 10;
         light.z= 20*sin(-counter/2.0f);
         renderer.SetLight(&light);
+
+        glMatrixMode(GL_PROJECTION);
+        Matrix* projection = renderer.GetCamera()->GetProjectionMatrix();
+        glLoadMatrixf(projection->ToGL());
+        
+        glMatrixMode(GL_MODELVIEW);
+        Matrix* view = renderer.GetCamera()->GetViewMatrix();
+        glLoadMatrixf(view->ToGL());
+        
+        
         
         
         RSEntity* modelToDraw = showCase.entity;
