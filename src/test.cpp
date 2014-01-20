@@ -391,10 +391,33 @@ int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
 
+    /*
+    TreArchive archiveSound ;
+    archiveSound.InitFromFile("SOUND.TRE");
+    archiveSound.List(stdout);
     
-    Matrix matrix;
-    matrix.Identity();
-    matrix.Print();
+    
+    TreArchive archive ;
+    archive.InitFromFile("GAMEFLOW.TRE");
+    archive.List(stdout);
+    
+    RSImage screen;
+    screen.Create("Screen",320, 200);
+    
+    RLECodex codex;
+    size_t byteRead;
+    codex.ReadImage(archive.GetData()+5824512, &screen, &byteRead);
+    
+    renderer.Init(320, 200);
+    
+    renderer.ShowWindow();
+    renderer.Pause();
+    while(renderer.IsPaused()){
+        renderer.DrawImage(&screen, 1);
+        renderer.Swap();
+    }
+    */
+    
     //Render palette
     /*
     renderer.Init(512, 512);

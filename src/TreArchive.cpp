@@ -21,8 +21,8 @@ TreArchive::~TreArchive(){
     if (initalizedFromFile)
         delete[] this->data;
     
-    for(size_t i=0 ; i < orderedEntries.size() ; i++){
-        delete orderedEntries[i];
+    for(size_t i=0 ; i < entries.size() ; i++){
+        delete entries[i];
     }
 }
 
@@ -100,6 +100,10 @@ void TreArchive::ReadEntry(ByteStream* stream, TreEntry* entry){
     entry->size = stream->ReadUInt32LE();
 }
 
+
+
+
+
 void TreArchive::Parse(void){
 
     ByteStream stream(this->data);
@@ -115,46 +119,47 @@ void TreArchive::Parse(void){
         TreEntry* entry = new TreEntry();
         ReadEntry(&stream,entry);
         
-        entries[entry->name] = entry;
+        mappedEntries[entry->name] = entry;
         
         // We use a vector so we can return the list of files in the order
         // they were listed in the TRE index.
-        orderedEntries.push_back(entry);
+        entries.push_back(entry);
     }
     
+    std::sort(entries.begin(), entries.end(),TreArchive::Compare);
 }
 
 void TreArchive::List(FILE* output){
     
     fprintf(output,"Listing content of TRE archive '%s'.\n",this->path);
-    fprintf(output,"    %lu entrie(s) found.\n",this->orderedEntries.size());
+    fprintf(output,"    %lu entrie(s) found.\n",entries.size());
 
-    for (size_t i=0 ; i < orderedEntries.size() ; i++){
-        TreEntry* entry = orderedEntries[i];
-        fprintf(output,"    Entry [%3lu] '%s' size: %lu bytes.\n",i,entry->name,entry->size);
+    for (size_t i=0 ; i < entries.size() ; i++){
+        TreEntry* entry = entries[i];
+        fprintf(output,"    Entry [%3lu] offset[%8lu]'%s' size: %lu bytes.\n",i,entry->data-this->data,entry->name,entry->size);
     }
 }
 
 
 //Direct access to a TRE entry.
 TreEntry* TreArchive::GetEntryByName(const char* entryName){
-    return entries[entryName];
+    return mappedEntries[entryName];
 }
 
 TreEntry* TreArchive::GetEntryByID(size_t entryID){
-    return orderedEntries[entryID];
+    return entries[entryID];
 }
 
 size_t TreArchive::GetNumEntries(void){
-    return orderedEntries.size();
+    return entries.size();
 }
 
 
 
 bool TreArchive::Decompress(const char* dstDirectory){
     
-    for(size_t i=0 ; i < entries.size() ; i++){
-        TreEntry* entry = orderedEntries[i];
+    for(size_t i=0 ; i < mappedEntries.size() ; i++){
+        TreEntry* entry = entries[i];
         
         
         char fullPath[512];

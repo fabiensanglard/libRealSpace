@@ -26,6 +26,7 @@ extern "C" {
     #include <math.h>
     #include <stdint.h>
     #include <float.h>
+    #include <algorithm> 
 
     #include "SDL2/SDL.h"
     #include "SDL2/SDL_opengl.h"

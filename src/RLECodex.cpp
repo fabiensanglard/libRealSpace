@@ -152,7 +152,7 @@ bool RLECodex::ReadImage(uint8_t* src, RSImage* dst, size_t* byteRead){
         
 		bool error = ExpandFragment(&stream,&frag,dst);
         if (error){
-            printf("Error:\n");
+            printf("Error in RLE\n");
             return true;
         }
 		ReadFragment(&stream,&frag);	
