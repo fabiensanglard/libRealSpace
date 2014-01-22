@@ -1,0 +1,12 @@
+Strike Commander Jet Format :
+=============================
+
+By Fabien Sanglard
+January 21st, 2014
+
+
+Jets are selfcontained in IFF files: Everything is there:
+
+Aerodynamic properties.
+Damange area and HP.
+Apperance.

@@ -383,7 +383,120 @@ static void showAllImageInArchive(PakArchive* archive){
         }
         screen.ClearContent();
     }
+}
+
+void ExploreRootIFFS(void){
     
+    //IffLexer instant;
+    //instant.InitFromFile("INSTANT.IFF");
+    //instant.List(stdout);
+    
+    IffLexer misn2op;
+    misn2op.InitFromFile("MISN2OP.IFF");
+    misn2op.List(stdout);
+    
+    
+    IffLexer opt2misn;
+    opt2misn.InitFromFile("OP2MISN.IFF");
+    opt2misn.List(stdout);
+    
+    
+    IffLexer palette;
+    palette.InitFromFile("PALETTE.IFF");
+    palette.List(stdout);
+    
+    
+    IffLexer palFade;
+    palFade.InitFromFile("PALFADE.IFF");
+    palFade.List(stdout);
+    
+    IffLexer txmList;
+    txmList.InitFromFile("TXM_LIST.IFF");
+    txmList.List(stdout);
+    
+    
+    
+    PakArchive eject;
+    eject.InitFromFile("EJECT.PAK");
+    eject.List(stdout);
+    eject.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/", "TXT");
+    
+    SetBase("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT");
+    
+    PakArchive file0;
+    file0.InitFromFile("FILE0.TXT");
+    file0.List(stdout);
+    file0.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE0", "TXT");
+
+
+    PakArchive file1;
+    file1.InitFromFile("FILE1.TXT");
+    file1.List(stdout);
+    file1.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE1", "TXT");
+
+
+    PakArchive file2;
+    file2.InitFromFile("FILE2.TXT");
+    file2.List(stdout);
+    file2.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE2", "TXT");
+    
+    PakArchive file3;
+    file3.InitFromFile("FILE3.TXT");
+    file3.List(stdout);
+    file3.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE3", "TXT");
+    
+    PakArchive file4;
+    file4.InitFromFile("FILE4.TXT");
+    file4.List(stdout);
+    file4.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE4", "TXT");
+    
+    PakArchive file5;
+    file5.InitFromFile("FILE5.TXT");
+    file5.List(stdout);
+    file5.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE5", "TXT");
+    
+    PakArchive file6;
+    file6.InitFromFile("FILE6.TXT");
+    file6.List(stdout);
+    file6.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE6", "TXT");
+    
+    PakArchive file7;
+    file7.InitFromFile("FILE7.TXT");
+    file7.List(stdout);
+    file7.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE7", "TXT");
+    
+    PakArchive file8;
+    file8.InitFromFile("FILE8.TXT");
+    file8.List(stdout);
+    file8.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE8", "TXT");
+}
+
+void listTRE(void){
+
+    
+    TreArchive gameFlow ;
+    gameFlow.InitFromFile("GAMEFLOW.TRE");
+    gameFlow.List(stdout);
+
+    TreArchive misc ;
+    misc.InitFromFile("MISC.TRE");
+    misc.List(stdout);
+
+    TreArchive mission ;
+    mission.InitFromFile("MISSIONS.TRE");
+    mission.List(stdout);
+    
+    TreArchive objects ;
+    objects.InitFromFile("OBJECTS");
+    objects.List(stdout);
+    
+    TreArchive sound ;
+    sound.InitFromFile("SOUND.TRE");
+    sound.List(stdout);
+
+    TreArchive textures ;
+    textures.InitFromFile("TEXTURES.TRE");
+    textures.List(stdout);
     
 }
 
@@ -391,6 +504,12 @@ int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
 
+//    listTRE();
+//    return 0;
+    
+//    ExploreRootIFFS();
+//    return 0;
+    
     /*
     TreArchive archiveSound ;
     archiveSound.InitFromFile("SOUND.TRE");

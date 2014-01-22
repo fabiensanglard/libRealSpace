@@ -1,0 +1,207 @@
+Strike Commander Map Format :
+=============================
+
+By Fabien Sanglard
+January 21st, 2014
+
+Here is the reverse engineered Strike Commander map format specification. libRealSpace is able to parse and render it.
+
+Strike Commander map are stored in PAK archives. The origina game shipped with 13 of them:
+
+ALASKA.PAK
+ANDMAL1.PAK
+ANDMAL2.PAK
+ARENA.PAK
+CANYON.PAK
+EGYPT.PAK
+EUROPE.PAK
+MAPDATA.PAK
+MAURITAN.PAK
+QUEBEC.PAK
+RHODEI.PAK
+SANFRAN.PAK
+TURKEY.PAK
+
+A PAK archive features 7 entries:
+
+Entry 0 is an IFF formated file providing metadata about the map.
+Entry 1 is a PAK containing the high level detail heightmap and textures.
+Entry 2 is a PAK containing the  med level detail heightmap and textures.
+Entry 3 is a PAK containing the  low level detail heightmap and textures.
+Entry 4 is the triangle file.
+Entry 5 is a PAK contains the objects and planes on the map.
+Entry 6 is the elevation file. It always contains 648 bytes.
+
+
+High Level Description :
+========================
+
+Strike Commander maps are square and made of 18*18 blocks. That gives 324 blocks.
+The are ordered from left to right and too to bottom.
+
+0. IFF Descriptor
+=================
+
+The IFF format is:
+
+FORM
+676
+TERA
+  VERS
+  2
+  INFO
+  6
+  FORM
+  248
+  BLOX
+    ELEV
+    138     Features the names of MED, LOW and AVG files. elements are 46 bytes long:
+                20 bytes unknown
+                13 bytes filename X.ELV | X.MED | X.LOW
+                14 bytes file name always X.AVG
+    ATRI
+    54      54 bytes long. 
+    OBJS
+    28      18 bytes long. Last 8 bytes is the name of the .OBJ file for obj locations and desc.
+  FORM
+  384
+  TXMS
+    INFO
+    4       Version
+    MAPS
+    360     Textures Set used from TXMPACK.PAK.
+            Record length 36 bytes:
+
+            2 bytes HIGHT LOD indexOffset in TXMPACK.PAK
+            8 bytes TEXTURE SET NAME 
+            1 byte  0x00
+            1 byte num textures in the set
+
+            2 bytes MEDIUM LOD indexOffset in TXMPACK.PAK
+            8 bytes TEXTURE SET NAME 
+            1 byte  0x00
+            1 byte num textures in the set
+
+            2 bytes LOW LOD indexOffset in TXMPACK.PAK
+            8 bytes TEXTURE SET NAME 
+            1 byte  0x00
+            1 byte num textures in the set
+
+
+The TERA chunk is a marker to show this is a map descriptor :
+
+
+
+1.2.3 3D Data
+=============
+
+Map elevation and texture are provided at three levels of details: HIGH, MEDIUM and LOW.
+Those are used at runtime to lower the amount of data processed.
+
+Entry 0 is the HIGH LEVEL. It features 324 files (one for each block). 
+An entry is 2400 bytes which is divided in 400 entries. At this level, a block
+has 20x20 vertices.
+
+A vertex desriptor is 6 bytes long:
+
+2 bytes (unsigned little endian): Vertex height.
+1 byte  shade
+1 byte  type
+2 bytes upperTriangleTextureID
+2 bytes lowerTriangleTextureID
+
+Type:
+#define LAND_TYPE_SEA      0
+#define LAND_TYPE_DESERT   1
+#define LAND_TYPE_GROUND   2
+#define LAND_TYPE_SAVANNAH 3
+#define LAND_TYPE_TAIGA    4
+#define LAND_TYPE_TUNDRA   5
+#define LAND_TYPE_SNOW     6
+
+The shade level is only coded on 7 byte. To get the value, perform a right shift.
+
+The textureID are indexes to entries in TEXTURES.TRE/../../DATA/TXM/TXMPACK.PAK
+
+In order to draw a quad, two triangles must be drawn, in the high level it is :
+
+Vertex 0 ..........Vertex 1
+  .                    .
+  .    .        HT     . 
+  .       .            .
+  .           .        .
+  .  LT           .    . 
+  .                    .
+Vertex 20 ..........Vertex 21
+
+
+The lowerTriangle and HigherTriangle are marked at LT and HT.
+A value of 0xFF indicates no triangle, use a color instead and shift the value by the shade value.
+I was unable to find the vertex type to color anywhere: For now it is hard-coded:
+
+LAND_TYPE_SEA      0xA;
+LAND_TYPE_DESERT   0x3;
+LAND_TYPE_GROUND   0x7;
+LAND_TYPE_SAVANNAH 0x5;
+LAND_TYPE_TAIGA:   0x9;
+LAND_TYPE_TUNDRA:  0x1;
+LAND_TYPE_SNOW:    0xC;
+
+For a vertex that is not textured, palette index is typeColor << 8 + ((shade & 0xf) > 1)
+
+
+4 .TRI file
+===========
+
+.TRI is also a PAK with 324 entries (one for each block).
+
+The content of each entries is mostly unknown even though I managed to see a pattern:
+The content purpose is also unknown.
+
+
+4 bytes unknown
+4 bytes unknown
+Vertices on 12 bytes (format 24:8)
+
+them
+
+Indices for triangles (6 indices, 2 per triangle ID)
+
+then
+
+Triangles: 
+two byte triangles indices. Often 00 00 01 00 02 00 03 00
+that trigger full drawing.
+
+
+
+5 .OBJ file
+===========
+
+The OBJ file is a PAK that features 324 entries, one for each block on the map. 
+Each entry start with the number of objects in the block on an unsigned 2 byte integer.
+After that is the list of objects. Each object entry is 0x46 long.
+
+8 byte for the OBJ normal representation name (reference to OBJECTS.TRE/../../DATA/XXX.IFF)
+5 bytes unknown
+8 byte for the OBJ destroyed representation name (reference to OBJECTS.TRE/../../DATA/XXX.IFF)
+12 byte containing the object coordinates. Not funny understood but
+    Offset 2-3 make the object move east-west.
+    Offset 6-7-8 makes the object move north south.
+
+    Note that increasing those value too much will make and object vanish: Only object in current block
+    and neighbooring blocks are drawn by the engine. Obj coordinates are in block space and If you move an object more than 1 block from the block were it is described, it will never be drawn. A good example is 
+    ARENA.PAK, city is in block 97: If you move building too much they end up dissapearing because objects 
+    in block 97 are only drawn if you are in blocks:
+                                                                78   79  80
+                                                                96   97  98
+                                                               114  116 117
+37 bytes with unknown flags.   
+
+
+6 .ELV file
+===========
+
+This file contains 648 bytes and gives the elevation average of each block.
+Elevation is encoded as a little endian 16bits unsigned integer.
+

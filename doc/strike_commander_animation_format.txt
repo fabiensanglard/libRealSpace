@@ -1,0 +1,16 @@
+Strike Commander Animation Format :
+=====================================
+
+By Fabien Sanglard
+January 21st, 2014
+
+Strike Commander animation are stored in layers. I am fairly sure they are organized like the SKF
+from Ultima 8. The player (http://www.usecode.org/pentagram/doxygen/SKFPlayer_8cpp-source.html)
+features evens to play sound, music, frame, subtitles and everything.
+
+Animation layers format have been described by Matio in wc1g.txt.
+
+Note that IFF palette colors are coded on 7 bits for JET
+Note that IFF palette colors are coded on 8 bits for ANIMATIONS
+
+Little is known about the rest so far.

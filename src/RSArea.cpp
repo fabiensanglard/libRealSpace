@@ -35,7 +35,7 @@ void RSArea::ParseMetadata(){
     
     IffLexer lexer;
     lexer.InitFromRAM(entry->data, entry->size);
-    //lexer.List(stdout);
+    lexer.List(stdout);
     
     IffChunk* tera = lexer.GetChunkByID('TERA');
     if (tera == NULL) {
