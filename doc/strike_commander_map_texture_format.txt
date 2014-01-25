@@ -1,0 +1,8 @@
+Strike Commander Map Texture Set Format :
+=====================================
+
+By Fabien Sanglard
+January 21st, 2014
+
+
+Textures for the map are stored in TEXTURES.TRE

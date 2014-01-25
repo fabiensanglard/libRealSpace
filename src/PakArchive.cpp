@@ -10,7 +10,8 @@
 #include <errno.h>
 
 PakArchive::PakArchive() :
-    initalizedFromFile(false){
+    initalizedFromFile(false),
+   ready(false){
     
 }
 
@@ -30,6 +31,7 @@ void PakArchive::Parse(void){
         return;
     }
     
+    ready = true;
     
     ByteStream peek(this->stream);
     uint32_t offset = peek.ReadUInt32LE();
@@ -115,6 +117,8 @@ void PakArchive::InitFromRAM(const char* name,uint8_t* data, size_t size){
     this->size = size;
     
     stream.Set(this->data);
+    
+    ready = false;
     
     Parse();
 

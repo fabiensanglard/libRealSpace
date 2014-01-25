@@ -56,9 +56,6 @@ void Texture::UpdateContent(RSImage* image){
         
         uint8_t* srcIndex = src + j + i* image->width;
         
-        if (image->height == 128 && image->width == 128 &&  *srcIndex == 0)
-            printf("Interest !\n");
-        
         const Texel* src = palette->GetRGBColor( (*srcIndex) );
         
         dst[0] = src->r;

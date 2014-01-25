@@ -36,6 +36,7 @@ SDL 2
 Eye Candies :
 =============
 
+![Alt text](pics/nice_sc_scene.png)
 ![Alt text](/pics/F-22.png)
 ![Alt text](/pics/face.png)
 

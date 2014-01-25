@@ -8,40 +8,129 @@
 
 #include "precomp.h"
 
+/*
+ 0  4  8 12
+ 1  5  9 13
+ 2  6 10 14
+ 3  7 11 15
+ */
 
-
-void vectorCrossProduct( const vec3_t v1, const vec3_t v2, vec3_t cross )
-{
-    cross[ 0 ] = v1[ 1 ] * v2[ 2 ] - v1[ 2 ] * v2[ 1 ];                // X
-    cross[ 1 ] = v1[ 2 ] * v2[ 0 ] - v1[ 0 ] * v2[ 2 ];                // Y
-    cross[ 2 ] = v1[ 0 ] * v2[ 1 ] - v1[ 1 ] * v2[ 0 ];                // Z
+void Matrix::Print(void){
+    
+    for (size_t y=0; y < 4 ; y++) {
+        for (size_t x=0; x < 4 ; x++) {
+            printf("% 4.2f ",v[y][x]);
+        }
+        printf("\n");
+    }
 }
 
-// Long life to however came up with this. You rule man.
-float InvSqrt(float x)
-{
-    float xhalf = 0.5f*x;
-    int i = *(int*)&x;        // get bits for floating value
-    i = 0x5f3759df - (i>>1); // gives initial guess y0
-    x = *(float*)&i;        // convert bits back to float
-    x = x*(1.5f-xhalf*x*x); // Newton step, repeating increases accuracy
-    return x;
+
+void Matrix::Clear(void){
+    for (size_t y=0; y < 4 ; y++) {
+        for (size_t x=0; x < 4 ; x++) {
+            v[y][x] = 0;
+        }
+    }
 }
 
-void normalize(vec3_t v)
-{
-    float ilength;
-    //float length;
-    //length = (float)sqrt( v[ 0 ] * v[ 0 ] + v[ 1 ] * v[ 1 ] + v[ 2 ] * v[ 2 ] );
+void Matrix::Identity(void){
+    Clear();
+    v[0][0] = 1;
+    v[1][1] = 1;
+    v[2][2] = 1;
+    v[3][3] = 1;
+}
+
+void Matrix::Multiply(Matrix* other){
     
-    ilength = InvSqrt(v[ 0 ] * v[ 0 ] + v[ 1 ] * v[ 1 ] + v[ 2 ] * v[ 2 ]);
-    //        printf("Length = %.3f\n",length);
+    /*                                         other
+     
+                                    [0][0] [1][0] [2][0] [3][0]
+                                    [0][1] [1][1] [2][1] [3][1]
+                                    [0][2] [1][2] [2][2] [3][2]
+                                    [0][3] [1][3] [2][3] [3][3]
+                this
+     
+     [0][0] [1][0] [2][0] [3][0]
+     [0][1] [1][1] [2][1] [3][1]
+     [0][2] [1][2] [2][2] [3][2]
+     [0][3] [1][3] [2][3] [3][3]                   i  j
+     */
     
-    //if( length )
-    //{
-    //ilength = 1 / length;
-    v[ 0 ] *= ilength;
-    v[ 1 ] *= ilength;
-    v[ 2 ] *= ilength;
-    //}
+    Matrix result;
+    
+    for(size_t i=0 ; i < 4 ; i ++){
+        for(size_t j=0 ; j < 4 ; j ++){
+            result.v[j][i] =
+            v[0][i]  * other->v[j][0] +
+            v[1][i]  * other->v[j][1] +
+            v[2][i]  * other->v[j][2] +
+            v[3][i]  * other->v[j][3] ;
+        }
+    }
+                        
+    *this = result;
+}
+
+void Matrix::Transpose(void){
+    
+    Matrix tmp;
+    
+    tmp.v[0][0] = v[0][0];
+    tmp.v[1][1] = v[1][1];
+    tmp.v[2][2] = v[2][2];
+    tmp.v[3][3] = v[3][3];
+    
+    tmp.v[0][1] = v[1][0];
+    tmp.v[0][2] = v[2][0];
+    tmp.v[0][3] = v[3][0];
+    
+    tmp.v[1][0] = v[0][1];
+    tmp.v[1][2] = v[2][1];
+    tmp.v[1][3] = v[3][1];
+
+    tmp.v[2][0] = v[0][2];
+    tmp.v[2][1] = v[1][2];
+    tmp.v[2][3] = v[3][2];
+
+    tmp.v[3][0] = v[0][3];
+    tmp.v[3][1] = v[1][3];
+    tmp.v[3][2] = v[2][3];
+    
+    *this = tmp;
+}
+
+
+float* Matrix::ToGL(void){
+    return (float*)this->v;
+}
+
+
+
+void Matrix::SetTranslation(float x, float y, float z){
+    v[3][0] = x;
+    v[3][1] = y;
+    v[3][2] = z;
+}
+
+void Matrix::SetRotationX(float angle){
+    v[1][1] = cos(angle);
+    v[1][2] = sin(angle);
+    v[2][1] = -sin(angle);
+    v[2][2] = cos(angle);
+}
+
+void Matrix::SetRotationY(float angle){
+    v[0][0] = cos(angle);
+    v[0][2] = -sin(angle);
+    v[2][0] = sin(angle);
+    v[2][2] = cos(angle);
+}
+
+void Matrix::SetRotationZ(float angle){
+    v[0][0] = cos(angle);
+    v[0][1] = sin(angle);
+    v[1][0] = -sin(angle);
+    v[1][1] = cos(angle);
 }

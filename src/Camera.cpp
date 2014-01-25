@@ -8,76 +8,221 @@
 
 #include "precomp.h"
 
-void gluLookAt(  vec3_t vEye,  vec3_t vLookat, vec3_t vUp ,matrix_t fModelView)
-{
-    vec3_t vN,vU,vV;
-    
-    // determine the new n
-    vectorSubtract(vEye,vLookat,vN);
-    
-    // determine the new u by crossing with the up vector
-    vectorCrossProduct(vUp, vN, vU) ;
-    
-    // normalize both the u and n vectors
-    normalize(vU) ;
-    normalize(vN);
-    
-    // determine v by crossing n and u
-    vectorCrossProduct(vN,vU,vV);
-    
-    // create a model view matrix
-    fModelView[0] = vU[0];                                        fModelView[4] = vU[1];                                        fModelView[8] = vU[2];                                        fModelView[12] = - DotProduct(vEye,vU);
-    fModelView[1] = vV[0];                                        fModelView[5] = vV[1];                                        fModelView[9] = vV[2];                                        fModelView[13] = - DotProduct(vEye,vV);
-    fModelView[2] = vN[0];                                        fModelView[6] = vN[1];                                        fModelView[10]= vN[2];                                        fModelView[14]=  - DotProduct(vEye,vN);
-    fModelView[3]=        0.0f;                                        fModelView[7]= 0.0f;                                        fModelView[11]= 0.0f;                                        fModelView[15]= 1.0f;
-    
-}
 
 
-void gluPerspective(float fovy, float aspect, float zNear, float zFar,matrix_t projectionMatrix)
-{
-    float f  = (float)(1 / tan(fovy*DEG_TO_RAD/2));
-    
-    
-    projectionMatrix[0]= f/aspect;        projectionMatrix[4]= 0;        projectionMatrix[ 8]= 0;                                                                projectionMatrix[12]= 0;
-    projectionMatrix[1]= 0;                 projectionMatrix[5]= f;        projectionMatrix[ 9]= 0;                                                                projectionMatrix[13]= 0;
-    projectionMatrix[2]= 0;                        projectionMatrix[6]= 0;        projectionMatrix[10]=(zFar+zNear)/(zNear-zFar) ;                projectionMatrix[14]= 2*(zFar*zNear)/(zNear-zFar);
-    projectionMatrix[3]= 0;                        projectionMatrix[7]=0;        projectionMatrix[11]=-1;                                                                projectionMatrix[15]= 0;
-}
-
-
-
-
-void Camera::Init(float fovy, float aspect, float zNear, float zFar){
+void Camera::SetPersective(float fovy, float aspect, float zNear, float zFar){
     this->fovy = fovy;
     this->aspect = aspect;
     this->zNear = zNear;
     this->zFar =zFar;
+    
+    float f  = (float)(1 / tan(fovy*DEG_TO_RAD/2));
+    
+    
+    mproj.v[0][0]= f/aspect; mproj.v[1][0]= 0;  mproj.v[2][0]= 0;                         mproj.v[3][0]= 0;
+    mproj.v[0][1]= 0;        mproj.v[1][1]= f;  mproj.v[2][1]= 0;                         mproj.v[3][1]= 0;
+    mproj.v[0][2]= 0;        mproj.v[1][2]= 0;  mproj.v[2][2]=(zFar+zNear)/(zNear-zFar) ; mproj.v[3][2]= 2*(zFar*zNear)/(zNear-zFar);
+    mproj.v[0][3]= 0;        mproj.v[1][3]= 0;  mproj.v[2][3]=-1;                         mproj.v[3][3]= 0;
+
 }
 
-void Camera::SetLookAt(vec3_t lookAt){
-    vectorCopy(this->lookAt, lookAt);
+void Camera::LookAt(Point3D *lookAt){
+    
+    //Update orientation
+    Vector3D vN(this->position);
+    vN.Substract(lookAt);
+    
+    Vector3D up = {0,1,0};
+    Vector3D vU = up.CrossProduct(&vN);
+    
+    vU.Normalize();
+    vN.Normalize();
+    
+    // determine v by crossing n and u
+    Vector3D vV = vN.CrossProduct(&vU);
+    
+    Matrix m;
+    m.v[0][0] = vU.x;  m.v[1][0] = vU.y;  m.v[2][0] = vU.z;  m.v[3][0] = 0;
+    m.v[0][1] = vV.x;  m.v[1][1] = vV.y;  m.v[2][1] = vV.z;  m.v[3][1] = 0;
+    m.v[0][2] = vN.x;  m.v[1][2] = vN.y;  m.v[2][2]= vN.z;   m.v[3][2] = 0;
+    m.v[0][3]=   0.0f; m.v[1][3]= 0.0f;   m.v[2][3]= 0.0f;   m.v[3][3] = 1.0f;
+    
+    orientation.FromMatrix(&m);
+    /*
+    printf("LookAt: injecting into Q:\n");
+    m.Print();
+    orientation.FromMatrix(&m);
+    
+    printf("LookAt: extractib from Q:\n");
+    Matrix out = orientation.ToMatrix();
+    out.Print();
+    
+    printf("LookAt: extractib from Q:\n");
+    Matrix out2 = orientation.ToMatrix();
+    out2.Transpose();
+    out2.Print();
+    */
+    
+    
+    CalcViewMatrix();
 }
 
-void Camera::SetPosition(vec3_t position){
-    vectorCopy(this->position, position);
+void Camera::SetPosition(Point3D* position){
+    this->position = *position;
+    CalcViewMatrix();
 }
 
-void Camera::SetUp(vec3_t up){
-    vectorCopy(this->up, up);
+void Camera::Rotate(float pitch, float yaw, float roll){
+    
+    /*
+    Matrix rollRot;
+    rollRot.Identity();
+    rollRot.v[0][0] = cos(yaw);
+    rollRot.v[0][1] = sin(yaw);
+    rollRot.v[1][0] = -sin(yaw);
+    rollRot.v[1][1] = cos(yaw);
+    Quaternion qRollRot;
+    qRollRot.FromMatrix(&rollRot);
+    orientation.Multiply(&qRollRot);
+    */
+    
+    
+    //Generate all rotation quaternions.
+    Matrix pitchRot;
+    pitchRot.Identity();
+    pitchRot.v[1][1] = cos(pitch);
+    pitchRot.v[1][2] = sin(pitch);
+    pitchRot.v[2][1] = -sin(pitch);
+    pitchRot.v[2][2] = cos(pitch);
+    Quaternion qPitchRot;
+    qPitchRot.FromMatrix(&pitchRot);
+    orientation.Multiply(&qPitchRot);
+    
+    
+    
+    
+    Matrix yawRot;
+    yawRot.Identity();
+    yawRot.v[0][0] = cos(yaw);
+    yawRot.v[0][2] = -sin(yaw);
+    yawRot.v[2][0] = sin(yaw);
+    yawRot.v[2][2] = cos(yaw);
+    Quaternion qYawRot;
+    qYawRot.FromMatrix(&yawRot);
+    orientation.Multiply(&qYawRot);
+    
+    
+    
+    // Rotate orientation per Rotations Quat.
+    
+    
+    CalcViewMatrix();
 }
 
-void Camera::gluPerspective(matrix_t projectionMatrix){
-    ::gluPerspective(fovy,aspect,zNear,zFar,projectionMatrix);
+void Camera::CalcViewMatrix(void){
+    
+    /*
+    // determine the new n
+    //vectorSubtract(vEye,vLookat,vN);
+    Vector3D vN(this->position);
+    vN.Substract(&this->lookAt);
+    
+    // determine the new u by crossing with the up vector
+    //vectorCrossProduct(vUp, vN, vU) ;
+    Vector3D vU = this->up.CrossProduct(&vN);
+    
+    // normalize both the u and n vectors
+    //normalize(vU) ;
+    //normalize(vN);
+    vU.Normalize();
+    vN.Normalize();
+    
+    
+    // determine v by crossing n and u
+    //vectorCrossProduct(vN,vU,vV);
+    Vector3D vV = vN.CrossProduct(&vU);
+    
+    // create a model view matrix
+    viewMatrix->v[0][0] = vU.x;  viewMatrix->v[1][0] = vU.y;  viewMatrix->v[2][0] = vU.z;  viewMatrix->v[3][0] = - position.DotProduct(&vU);
+    viewMatrix->v[0][1] = vV.x;  viewMatrix->v[1][1] = vV.y;  viewMatrix->v[2][1] = vV.z;  viewMatrix->v[3][1] = - position.DotProduct(&vV);
+    viewMatrix->v[0][2] = vN.x;  viewMatrix->v[1][2] = vN.y;  viewMatrix->v[2][2]= vN.z;   viewMatrix->v[3][2] = - position.DotProduct(&vN);
+    viewMatrix->v[0][3]=   0.0f; viewMatrix->v[1][3]= 0.0f;   viewMatrix->v[2][3]= 0.0f;   viewMatrix->v[3][3] = 1.0f;
+    */
+    
+
+    // Note: Instead of doing a matrix multiplication, it would
+    //       save many cycles to just write the translation part
+    //       in the rotation matrix.
+    
+    
+    this->mview  = orientation.ToMatrix();
+//    mview.Transpose();
+    
+    //Set the translation part.
+    Matrix translation;
+    translation.Identity();
+    translation.v[3][0] = - position.x;
+    translation.v[3][1] = - position.y;
+    translation.v[3][2] = - position.z;
+    
+    
+    
+    this->mview.Multiply(&translation);
+    
 }
 
-void Camera::gluLookAt(matrix_t fModelView){
-    ::gluLookAt(position,lookAt, up , fModelView);
+Point3D Camera::GetPosition(void){
+    return this->position;
 }
 
-void Camera::GetPosition(vec3_t position){
-    vectorCopy(position, this->position);
+
+Quaternion Camera::GetOrientation(void){
+    return this->orientation;
 }
+
+Matrix* Camera::GetProjectionMatrix(void){
+    return &this->mproj;
+}
+
+Matrix* Camera::GetViewMatrix(void){
+    return &this->mview;
+}
+
+
+
+void Camera::MoveForward(void){
+    Matrix m = orientation.ToMatrix();
+    this->position.x -= m.v[0][2]*100;
+    this->position.y -= m.v[1][2]*100;
+    this->position.z -= m.v[2][2]*100;
+    CalcViewMatrix();
+}
+
+void Camera::MoveBackward(void){
+    Matrix m = orientation.ToMatrix();
+    this->position.x += m.v[0][2]*100;
+    this->position.y += m.v[1][2]*100;
+    this->position.z += m.v[2][2]*100;
+    CalcViewMatrix();
+}
+
+void Camera::MoveStrafLeft(void){
+    Matrix m = orientation.ToMatrix();
+    this->position.x -= m.v[0][0]*10;
+    this->position.y -= m.v[1][0]*10;
+    this->position.z -= m.v[2][0]*10;
+    CalcViewMatrix();
+}
+
+void Camera::MoveStrafRight(void){
+    Matrix m = orientation.ToMatrix();
+    this->position.x += m.v[0][0]*10;
+    this->position.y += m.v[1][0]*10;
+    this->position.z += m.v[2][0]*10;
+    CalcViewMatrix();
+}
+
+
 
 
 

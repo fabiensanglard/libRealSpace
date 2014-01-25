@@ -48,10 +48,16 @@ public:
     
     bool Decompress(const char* dstDirectory);
     
+    
+    static inline bool Compare(TreEntry* any, TreEntry* other){
+        return any->data < other->data;
+    }
+    
+    inline uint8_t* GetData(void){ return data; }
 private:
     
     
-    std::vector<TreEntry*> orderedEntries;
+    std::vector<TreEntry*> entries;
     
     void ReadEntry(ByteStream* stream, TreEntry* entry);
     void Parse(void);
@@ -67,5 +73,5 @@ private:
     bool initalizedFromFile ;
     
 
-    std::map<const char*,TreEntry*,cmp_str> entries;
+    std::map<const char*,TreEntry*,cmp_str> mappedEntries;
 };

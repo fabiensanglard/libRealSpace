@@ -64,7 +64,7 @@ void RSMapTextureSet::Parse(PakArchive* archive){
             image->Create("MAP_TEXTURE",width,height);
             image->UpdateContent(stream.GetPosition());
             images.push_back(image);
-            printf("RSMapTextureSet img [%3zu] is %lux%lu.\n",i,image->width,image->height);
+            //printf("RSMapTextureSet img [%3zu] is %lux%lu.\n",i,image->width,image->height);
         }
         else
             printf("Cannot make sense of entry %lu:\n REASON: (entry size is %lu but advertised is %d).\n",i,entry->size,size);

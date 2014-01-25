@@ -58,7 +58,7 @@ STRIKE.EXE    746,304 bytes : RETE  6 years
 =============================================
 15 years, 7 months and 2 weeks.
 
-Now, we can assume that a lot of code is shared among excutable (fixed point arithmetics, RLE encoding).
+Now, we can assume that a lot of code is shared among executable (fixed point arithmetics, RLE encoding).
 So we can probably reduce the estimate by 25% for a result of :
 
 11 years.
@@ -68,5 +68,5 @@ Depressing.
 Note: Why breakdown the EXEs ? 
 
  1. DOS RealMode only allowed for 1MB of RAM. A Big EXE would habe never fitted in memory.
- 2. Multiple exes allowed multiple invididual to work on the same project without interfering
+ 2. Multiple exes allowed multiple individual to work on the same project without interfering
  too much.

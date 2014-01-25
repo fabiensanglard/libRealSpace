@@ -14,14 +14,9 @@
 #define LOD_LEVEL_MIN 2
 
 
-typedef struct Vertex{
-    float x;
-    float y;
-    float z;
-} Vertex ;
 
 typedef struct MapVertex{
-    Vertex v;
+    Point3D v;
 
     uint8_t flag;
     uint8_t type;
@@ -36,8 +31,8 @@ typedef struct MapVertex{
 
 
 typedef struct BoudingBox{
-    Vertex min;
-    Vertex max;
+    Point3D min;
+    Point3D max;
 } BoudingBox;
 
 typedef struct UV{
@@ -84,7 +79,7 @@ public:
     void AddImage(RSImage* image);
     size_t NumImages(void);
     
-    void AddVertex(Vertex* vertex);
+    void AddVertex(Point3D* vertex);
     size_t NumVertice(void);
     
     void AddUV(uvxyEntry* uv);
@@ -100,7 +95,7 @@ public:
     
     
     std::vector<RSImage*> images;
-    std::vector<Vertex> vertices;
+    std::vector<Point3D> vertices;
     std::vector<uvxyEntry> uvs;
     std::vector<Lod> lods;
     std::vector<Triangle> triangles;
@@ -110,6 +105,10 @@ public:
     
     BoudingBox* GetBoudingBpx(void);
     
+    
+    //For rendering
+    Point3D position;
+    Quaternion orientation;
     
 private:
     
@@ -125,6 +124,9 @@ private:
     void ParseTXMS(IffChunk* chunk);
     void ParseUVXY(IffChunk* chunk);
     void ParseTXMP(IffChunk* chunk);
+    
+    
+    
 };
 
 #endif /* defined(__libRealSpace__RSEntity__) */

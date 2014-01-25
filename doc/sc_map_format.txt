@@ -1,4 +1,595 @@
-Dec 4th, 2014 :
+Strike Commander Reverse Engineering Project:
+
+Saturday December 7th, 2013 :
+=============================
+
+Checked file in SC folder:
+
+- TRE files (file container, same file format as Privateer files).
+    Format is details here :
+    http://hcl.solsector.net/information/p1_tre_format.txt
+
+- EXE files:
+        SC.EXE is small. Probably just a launcher for STRIKE.EXE
+        STRIKE.EXE. The real engine
+        OPTTEST.EXE 
+        MKGAME. Problaby the exe that generate the maps:
+                       
+- PAK :
+    Same files format as WC1/2
+    i.e: MAURITAN.PAK DOES NOY contains
+             - MAURITAN.AVG    bit soup.
+             - MAURITAN.DAT
+             - MAURITAN.DIF
+             - MAURITAN.MAP
+             - MAURITAN.OBJ    Seems to describe additional OBJs locations. HANGB22 followed by 3 int32 could match to ..\..\DATA\OBJECTS\HANGB22.IFF from OBJECTS.TRE ?
+             - MAURITAN.TRI    Looks like a huffman encoded file (with tree at the bottom ) ?
+
+JEMM.OVL:
+    Crap the game uses an Expanded Memory Manager...would have been much more practical if 
+    it was using DOS/4GW...
+
+IFFs :
+    Interchange File Format…with tones of custom IDs.
+    - Specs of IFF format in file: IFF.txt
+    
+
+
+
+It seems I can leverage a lot of the reverse engineering done for Wing Commander and Privateer.
+
+
+Sunday December 6th, 2013 :
+=============================
+
+I wrote a TRE extractor based on p1_tre_format.txt
+
+Content of TRE files:
+
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/OBJECTS.TRE features 301 files.
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/OBJECTS.TRE is 6932708 bytes.
+File 0: '..\..\DATA\OBJECTS\20MM.IFF'.
+File 1: '..\..\DATA\OBJECTS\23MM.IFF'.
+File 2: '..\..\DATA\OBJECTS\27MM.IFF'.
+File 3: '..\..\DATA\OBJECTS\30MM.IFF'.
+File 4: '..\..\DATA\OBJECTS\30MMGAU.IFF'.
+File 5: '..\..\DATA\OBJECTS\40MM.IFF'.
+File 6: '..\..\DATA\OBJECTS\40MMAA.IFF'.
+File 7: '..\..\DATA\OBJECTS\747.IFF'.
+File 8: '..\..\DATA\OBJECTS\A-10.IFF'.
+File 9: '..\..\DATA\OBJECTS\A10GBULO.IFF'.
+File 10: '..\..\DATA\OBJECTS\A10LOAD.IFF'.
+File 11: '..\..\DATA\OBJECTS\ABRAMS-G.IFF'.
+File 12: '..\..\DATA\OBJECTS\AGM-65D.IFF'.
+File 13: '..\..\DATA\OBJECTS\AIRLOADL.IFF'.
+File 14: '..\..\DATA\OBJECTS\AIRLOADM.IFF'.
+File 15: '..\..\DATA\OBJECTS\AMRAAM.IFF'.
+File 16: '..\..\DATA\OBJECTS\AWACS.IFF'.
+File 17: '..\..\DATA\OBJECTS\BARN22.IFF'.
+File 18: '..\..\DATA\OBJECTS\BARN22D.IFF'.
+File 19: '..\..\DATA\OBJECTS\BLDGDEB1.IFF'.
+File 20: '..\..\DATA\OBJECTS\BLDGDEB2.IFF'.
+File 21: '..\..\DATA\OBJECTS\BLDGDEB3.IFF'.
+File 22: '..\..\DATA\OBJECTS\BMBLOADH.IFF'.
+File 23: '..\..\DATA\OBJECTS\BMBLOADL.IFF'.
+File 24: '..\..\DATA\OBJECTS\BMP-2.IFF'.
+File 25: '..\..\DATA\OBJECTS\BOATX.IFF'.
+File 26: '..\..\DATA\OBJECTS\BRIGC10.IFF'.
+File 27: '..\..\DATA\OBJECTS\BRIGC14D.IFF'.
+File 28: '..\..\DATA\OBJECTS\BUILD1D.IFF'.
+File 29: '..\..\DATA\OBJECTS\BUILD2D.IFF'.
+File 30: '..\..\DATA\OBJECTS\C130DES.IFF'.
+File 31: '..\..\DATA\OBJECTS\C130GRN.IFF'.
+File 32: '..\..\DATA\OBJECTS\CARRIERW.IFF'.
+File 33: '..\..\DATA\OBJECTS\CASB90D.IFF'.
+File 34: '..\..\DATA\OBJECTS\CASC101.IFF'.
+File 35: '..\..\DATA\OBJECTS\CASC84D.IFF'.
+File 36: '..\..\DATA\OBJECTS\CASKPC22.IFF'.
+File 37: '..\..\DATA\OBJECTS\CASKPCD.IFF'.
+File 38: '..\..\DATA\OBJECTS\CASTLE10.IFF'.
+File 39: '..\..\DATA\OBJECTS\CASTW13.IFF'.
+File 40: '..\..\DATA\OBJECTS\CASTW6D.IFF'.
+File 41: '..\..\DATA\OBJECTS\CASWA4.IFF'.
+File 42: '..\..\DATA\OBJECTS\CASWA4D.IFF'.
+File 43: '..\..\DATA\OBJECTS\CHAFF.IFF'.
+File 44: '..\..\DATA\OBJECTS\CHURCH1.IFF'.
+File 45: '..\..\DATA\OBJECTS\CHURCH14.IFF'.
+File 46: '..\..\DATA\OBJECTS\CHUTE.IFF'.
+File 47: '..\..\DATA\OBJECTS\CLUST_BM.IFF'.
+File 48: '..\..\DATA\OBJECTS\D40MMAA.IFF'.
+File 49: '..\..\DATA\OBJECTS\DABRMS-G.IFF'.
+File 50: '..\..\DATA\OBJECTS\DBMP-2.IFF'.
+File 51: '..\..\DATA\OBJECTS\DBOAT.IFF'.
+File 52: '..\..\DATA\OBJECTS\DCARRIER.IFF'.
+File 53: '..\..\DATA\OBJECTS\DCHUTE.IFF'.
+File 54: '..\..\DATA\OBJECTS\DDESTROY.IFF'.
+File 55: '..\..\DATA\OBJECTS\DEBDES.IFF'.
+File 56: '..\..\DATA\OBJECTS\DEBGRAY.IFF'.
+File 57: '..\..\DATA\OBJECTS\DEBHERC.IFF'.
+File 58: '..\..\DATA\OBJECTS\DEBM21.IFF'.
+File 59: '..\..\DATA\OBJECTS\DEBSU27.IFF'.
+File 60: '..\..\DATA\OBJECTS\DESTROYS.IFF'.
+File 61: '..\..\DATA\OBJECTS\DJEEP.IFF'.
+File 62: '..\..\DATA\OBJECTS\DMOBSAM.IFF'.
+File 63: '..\..\DATA\OBJECTS\DOILTANK.IFF'.
+File 64: '..\..\DATA\OBJECTS\DOME28.IFF'.
+File 65: '..\..\DATA\OBJECTS\DOME30D.IFF'.
+File 66: '..\..\DATA\OBJECTS\DRADARST.IFF'.
+File 67: '..\..\DATA\OBJECTS\DRUM1D.IFF'.
+File 68: '..\..\DATA\OBJECTS\DRUMA24.IFF'.
+File 69: '..\..\DATA\OBJECTS\DRUMB16.IFF'.
+File 70: '..\..\DATA\OBJECTS\DRUMC24.IFF'.
+File 71: '..\..\DATA\OBJECTS\DRUMD24.IFF'.
+File 72: '..\..\DATA\OBJECTS\DSPGUN.IFF'.
+File 73: '..\..\DATA\OBJECTS\DT-72.IFF'.
+File 74: '..\..\DATA\OBJECTS\DTRUCK2.IFF'.
+File 75: '..\..\DATA\OBJECTS\DURANDAL.IFF'.
+File 76: '..\..\DATA\OBJECTS\DZSU-23.IFF'.
+File 77: '..\..\DATA\OBJECTS\EASTA10.IFF'.
+File 78: '..\..\DATA\OBJECTS\EASTA10D.IFF'.
+File 79: '..\..\DATA\OBJECTS\EASTB10.IFF'.
+File 80: '..\..\DATA\OBJECTS\EASTB10D.IFF'.
+File 81: '..\..\DATA\OBJECTS\EASTC10.IFF'.
+File 82: '..\..\DATA\OBJECTS\EASTC10D.IFF'.
+File 83: '..\..\DATA\OBJECTS\EASTD10.IFF'.
+File 84: '..\..\DATA\OBJECTS\EASTD10D.IFF'.
+File 85: '..\..\DATA\OBJECTS\EASTE28.IFF'.
+File 86: '..\..\DATA\OBJECTS\EASTE30D.IFF'.
+File 87: '..\..\DATA\OBJECTS\EJECSEAT.IFF'.
+File 88: '..\..\DATA\OBJECTS\EJECT.PAK'.
+File 89: '..\..\DATA\OBJECTS\EJGUY.IFF'.
+File 90: '..\..\DATA\OBJECTS\EXPLODE1.IFF'.
+File 91: '..\..\DATA\OBJECTS\EXPLODE2.IFF'.
+File 92: '..\..\DATA\OBJECTS\F-15.IFF'.
+File 93: '..\..\DATA\OBJECTS\F-15AB.IFF'.
+File 94: '..\..\DATA\OBJECTS\F-16DES.IFF'.
+File 95: '..\..\DATA\OBJECTS\F-16GRAY.IFF'.
+File 96: '..\..\DATA\OBJECTS\F-16GUN.IFF'.
+File 97: '..\..\DATA\OBJECTS\F-18.IFF'.
+File 98: '..\..\DATA\OBJECTS\F-18AB.IFF'.
+File 99: '..\..\DATA\OBJECTS\F-22.IFF'.
+File 100: '..\..\DATA\OBJECTS\F-22AB.IFF'.
+File 101: '..\..\DATA\OBJECTS\F15LOADA.IFF'.
+File 102: '..\..\DATA\OBJECTS\F15LOADG.IFF'.
+File 103: '..\..\DATA\OBJECTS\F16-AB.IFF'.
+File 104: '..\..\DATA\OBJECTS\F16-CKPT.IFF'.
+File 105: '..\..\DATA\OBJECTS\F16DDEB2.IFF'.
+File 106: '..\..\DATA\OBJECTS\F16GDEB2.IFF'.
+File 107: '..\..\DATA\OBJECTS\F16GDEB3.IFF'.
+File 108: '..\..\DATA\OBJECTS\F16GDEB4.IFF'.
+File 109: '..\..\DATA\OBJECTS\F16LOADA.IFF'.
+File 110: '..\..\DATA\OBJECTS\F16PITXP.IFF'.
+File 111: '..\..\DATA\OBJECTS\F18LOADA.IFF'.
+File 112: '..\..\DATA\OBJECTS\F18LOADG.IFF'.
+File 113: '..\..\DATA\OBJECTS\F22-CKPT.IFF'.
+File 114: '..\..\DATA\OBJECTS\F22GEAR0.IFF'.
+File 115: '..\..\DATA\OBJECTS\F22GEAR1.IFF'.
+File 116: '..\..\DATA\OBJECTS\F22GEAR2.IFF'.
+File 117: '..\..\DATA\OBJECTS\F22GEAR3.IFF'.
+File 118: '..\..\DATA\OBJECTS\F22GEAR4.IFF'.
+File 119: '..\..\DATA\OBJECTS\F22LOAD.IFF'.
+File 120: '..\..\DATA\OBJECTS\F22PIT.IFF'.
+File 121: '..\..\DATA\OBJECTS\FAC10.IFF'.
+File 122: '..\..\DATA\OBJECTS\FAC14.IFF'.
+File 123: '..\..\DATA\OBJECTS\FAC14D.IFF'.
+File 124: '..\..\DATA\OBJECTS\FACB10D.IFF'.
+File 125: '..\..\DATA\OBJECTS\FHOUS14.IFF'.
+File 126: '..\..\DATA\OBJECTS\FHOUS14D.IFF'.
+File 127: '..\..\DATA\OBJECTS\FLARE.IFF'.
+File 128: '..\..\DATA\OBJECTS\FORT30.IFF'.
+File 129: '..\..\DATA\OBJECTS\FORT32D.IFF'.
+File 130: '..\..\DATA\OBJECTS\FORTT10.IFF'.
+File 131: '..\..\DATA\OBJECTS\FORTT12D.IFF'.
+File 132: '..\..\DATA\OBJECTS\FORTW2.IFF'.
+File 133: '..\..\DATA\OBJECTS\FORTW2D.IFF'.
+File 134: '..\..\DATA\OBJECTS\FORTWB2.IFF'.
+File 135: '..\..\DATA\OBJECTS\FORTWB2D.IFF'.
+File 136: '..\..\DATA\OBJECTS\FUELEXP1.IFF'.
+File 137: '..\..\DATA\OBJECTS\FUELEXP2.IFF'.
+File 138: '..\..\DATA\OBJECTS\GBU-15G.IFF'.
+File 139: '..\..\DATA\OBJECTS\GBULOADL.IFF'.
+File 140: '..\..\DATA\OBJECTS\GBULOADM.IFF'.
+File 141: '..\..\DATA\OBJECTS\GEAR0.IFF'.
+File 142: '..\..\DATA\OBJECTS\GEAR1.IFF'.
+File 143: '..\..\DATA\OBJECTS\GEAR2.IFF'.
+File 144: '..\..\DATA\OBJECTS\GEAR3.IFF'.
+File 145: '..\..\DATA\OBJECTS\GEAR4.IFF'.
+File 146: '..\..\DATA\OBJECTS\GENDEB1.IFF'.
+File 147: '..\..\DATA\OBJECTS\GENDEB2.IFF'.
+File 148: '..\..\DATA\OBJECTS\GENDEB3.IFF'.
+File 149: '..\..\DATA\OBJECTS\GENDEB4.IFF'.
+File 150: '..\..\DATA\OBJECTS\GENDEB5.IFF'.
+File 151: '..\..\DATA\OBJECTS\GENDEB6.IFF'.
+File 152: '..\..\DATA\OBJECTS\GENDEB7.IFF'.
+File 153: '..\..\DATA\OBJECTS\GENDEB8.IFF'.
+File 154: '..\..\DATA\OBJECTS\GENDEB9.IFF'.
+File 155: '..\..\DATA\OBJECTS\GRNDEX1.IFF'.
+File 156: '..\..\DATA\OBJECTS\GRNDEX2.IFF'.
+File 157: '..\..\DATA\OBJECTS\GRNDEX3.IFF'.
+File 158: '..\..\DATA\OBJECTS\GRNDEX4.IFF'.
+File 159: '..\..\DATA\OBJECTS\GUNLOAD.IFF'.
+File 160: '..\..\DATA\OBJECTS\GUNLOADP.IFF'.
+File 161: '..\..\DATA\OBJECTS\GUNSPARK.IFF'.
+File 162: '..\..\DATA\OBJECTS\HANGAR3.IFF'.
+File 163: '..\..\DATA\OBJECTS\HANGAR3D.IFF'.
+File 164: '..\..\DATA\OBJECTS\HANGB22.IFF'.
+File 165: '..\..\DATA\OBJECTS\HANGB22D.IFF'.
+File 166: '..\..\DATA\OBJECTS\HANGBD.IFF'.
+File 167: '..\..\DATA\OBJECTS\HUD.IFF'.
+File 168: '..\..\DATA\OBJECTS\IRS10.IFF'.
+File 169: '..\..\DATA\OBJECTS\IRS12D.IFF'.
+File 170: '..\..\DATA\OBJECTS\JEEP.IFF'.
+File 171: '..\..\DATA\OBJECTS\KHAFJIGD.IFF'.
+File 172: '..\..\DATA\OBJECTS\KHAFJIGT.IFF'.
+File 173: '..\..\DATA\OBJECTS\LEARJET.IFF'.
+File 174: '..\..\DATA\OBJECTS\LOWCHUTE.IFF'.
+File 175: '..\..\DATA\OBJECTS\LOWDCHUT.IFF'.
+File 176: '..\..\DATA\OBJECTS\LOWEJECT.IFF'.
+File 177: '..\..\DATA\OBJECTS\M21LOADA.IFF'.
+File 178: '..\..\DATA\OBJECTS\M21LOADG.IFF'.
+File 179: '..\..\DATA\OBJECTS\M261.IFF'.
+File 180: '..\..\DATA\OBJECTS\M29LOADA.IFF'.
+File 181: '..\..\DATA\OBJECTS\M29LOADG.IFF'.
+File 182: '..\..\DATA\OBJECTS\MAVLOADL.IFF'.
+File 183: '..\..\DATA\OBJECTS\MAVLOADM.IFF'.
+File 184: '..\..\DATA\OBJECTS\MIG21.IFF'.
+File 185: '..\..\DATA\OBJECTS\MIG21AB.IFF'.
+File 186: '..\..\DATA\OBJECTS\MIG29.IFF'.
+File 187: '..\..\DATA\OBJECTS\MIG29AB.IFF'.
+File 188: '..\..\DATA\OBJECTS\MIG29GRA.IFF'.
+File 189: '..\..\DATA\OBJECTS\MILA10.IFF'.
+File 190: '..\..\DATA\OBJECTS\MILA12D.IFF'.
+File 191: '..\..\DATA\OBJECTS\MILB20.IFF'.
+File 192: '..\..\DATA\OBJECTS\MILB22D.IFF'.
+File 193: '..\..\DATA\OBJECTS\MILC20.IFF'.
+File 194: '..\..\DATA\OBJECTS\MILC22D.IFF'.
+File 195: '..\..\DATA\OBJECTS\MILD30.IFF'.
+File 196: '..\..\DATA\OBJECTS\MILD32D.IFF'.
+File 197: '..\..\DATA\OBJECTS\MILE30.IFF'.
+File 198: '..\..\DATA\OBJECTS\MILE34D.IFF'.
+File 199: '..\..\DATA\OBJECTS\MILF20.IFF'.
+File 200: '..\..\DATA\OBJECTS\MILF22D.IFF'.
+File 201: '..\..\DATA\OBJECTS\MILG22D.IFF'.
+File 202: '..\..\DATA\OBJECTS\MILG2O.IFF'.
+File 203: '..\..\DATA\OBJECTS\MIRAGE.IFF'.
+File 204: '..\..\DATA\OBJECTS\MIRAGEAB.IFF'.
+File 205: '..\..\DATA\OBJECTS\MIRLOADA.IFF'.
+File 206: '..\..\DATA\OBJECTS\MK20.IFF'.
+File 207: '..\..\DATA\OBJECTS\MK82.IFF'.
+File 208: '..\..\DATA\OBJECTS\MOBSAMLN.IFF'.
+File 209: '..\..\DATA\OBJECTS\NBLDG2.IFF'.
+File 210: '..\..\DATA\OBJECTS\NBLDG2D.IFF'.
+File 211: '..\..\DATA\OBJECTS\NORMLOAD.IFF'.
+File 212: '..\..\DATA\OBJECTS\NUC28.IFF'.
+File 213: '..\..\DATA\OBJECTS\NUC28D.IFF'.
+File 214: '..\..\DATA\OBJECTS\OFFA10.IFF'.
+File 215: '..\..\DATA\OBJECTS\OFFA12D.IFF'.
+File 216: '..\..\DATA\OBJECTS\OFFB10.IFF'.
+File 217: '..\..\DATA\OBJECTS\OFFB12D.IFF'.
+File 218: '..\..\DATA\OBJECTS\OFFC10.IFF'.
+File 219: '..\..\DATA\OBJECTS\OFFC10D.IFF'.
+File 220: '..\..\DATA\OBJECTS\OFFD10.IFF'.
+File 221: '..\..\DATA\OBJECTS\OFFD10D.IFF'.
+File 222: '..\..\DATA\OBJECTS\OFFE10.IFF'.
+File 223: '..\..\DATA\OBJECTS\OFFE10D.IFF'.
+File 224: '..\..\DATA\OBJECTS\OFFF10.IFF'.
+File 225: '..\..\DATA\OBJECTS\OFFF10D.IFF'.
+File 226: '..\..\DATA\OBJECTS\OFFG10.IFF'.
+File 227: '..\..\DATA\OBJECTS\OFFG10D.IFF'.
+File 228: '..\..\DATA\OBJECTS\OILA8.IFF'.
+File 229: '..\..\DATA\OBJECTS\OILA8D.IFF'.
+File 230: '..\..\DATA\OBJECTS\OILF23D.IFF'.
+File 231: '..\..\DATA\OBJECTS\OILOF23.IFF'.
+File 232: '..\..\DATA\OBJECTS\OILTANKR.IFF'.
+File 233: '..\..\DATA\OBJECTS\PBLDGB.IFF'.
+File 234: '..\..\DATA\OBJECTS\PBLDGP.IFF'.
+File 235: '..\..\DATA\OBJECTS\PBLDGR.IFF'.
+File 236: '..\..\DATA\OBJECTS\PBLDGS.IFF'.
+File 237: '..\..\DATA\OBJECTS\PBLDGT.IFF'.
+File 238: '..\..\DATA\OBJECTS\POD.IFF'.
+File 239: '..\..\DATA\OBJECTS\PODLOAD.IFF'.
+File 240: '..\..\DATA\OBJECTS\PYRAMD4D.IFF'.
+File 241: '..\..\DATA\OBJECTS\PYRAMID4.IFF'.
+File 242: '..\..\DATA\OBJECTS\RDRSTL2.IFF'.
+File 243: '..\..\DATA\OBJECTS\REFA10.IFF'.
+File 244: '..\..\DATA\OBJECTS\REFA10D.IFF'.
+File 245: '..\..\DATA\OBJECTS\REFB10.IFF'.
+File 246: '..\..\DATA\OBJECTS\REFB12D.IFF'.
+File 247: '..\..\DATA\OBJECTS\REFC10.IFF'.
+File 248: '..\..\DATA\OBJECTS\REFC8D.IFF'.
+File 249: '..\..\DATA\OBJECTS\REFE10.IFF'.
+File 250: '..\..\DATA\OBJECTS\REFE10D.IFF'.
+File 251: '..\..\DATA\OBJECTS\RWYEXT18.IFF'.
+File 252: '..\..\DATA\OBJECTS\RWYEXT27.IFF'.
+File 253: '..\..\DATA\OBJECTS\RWYLOAD.IFF'.
+File 254: '..\..\DATA\OBJECTS\SA2.IFF'.
+File 255: '..\..\DATA\OBJECTS\SA6.IFF'.
+File 256: '..\..\DATA\OBJECTS\SFA46.IFF'.
+File 257: '..\..\DATA\OBJECTS\SFA46D.IFF'.
+File 258: '..\..\DATA\OBJECTS\SFB20.IFF'.
+File 259: '..\..\DATA\OBJECTS\SFB20D.IFF'.
+File 260: '..\..\DATA\OBJECTS\SFGGA.IFF'.
+File 261: '..\..\DATA\OBJECTS\SFGGB.IFF'.
+File 262: '..\..\DATA\OBJECTS\SFGGC.IFF'.
+File 263: '..\..\DATA\OBJECTS\SFGGD.IFF'.
+File 264: '..\..\DATA\OBJECTS\SFTA16.IFF'.
+File 265: '..\..\DATA\OBJECTS\SFTA4D.IFF'.
+File 266: '..\..\DATA\OBJECTS\SILO24.IFF'.
+File 267: '..\..\DATA\OBJECTS\SILO24D.IFF'.
+File 268: '..\..\DATA\OBJECTS\SMOKEGEN.IFF'.
+File 269: '..\..\DATA\OBJECTS\SMOKESET.IFF'.
+File 270: '..\..\DATA\OBJECTS\SPARTGUN.IFF'.
+File 271: '..\..\DATA\OBJECTS\SPHINX-D.IFF'.
+File 272: '..\..\DATA\OBJECTS\SPHINX55.IFF'.
+File 273: '..\..\DATA\OBJECTS\STASAMLN.IFF'.
+File 274: '..\..\DATA\OBJECTS\STRIBASE.IFF'.
+File 275: '..\..\DATA\OBJECTS\SU-27AB.IFF'.
+File 276: '..\..\DATA\OBJECTS\SU27.IFF'.
+File 277: '..\..\DATA\OBJECTS\SUGLOAD.IFF'.
+File 278: '..\..\DATA\OBJECTS\SUJLOAD.IFF'.
+File 279: '..\..\DATA\OBJECTS\SULOAD.IFF'.
+File 280: '..\..\DATA\OBJECTS\SUMLOAD.IFF'.
+File 281: '..\..\DATA\OBJECTS\SUN.IFF'.
+File 282: '..\..\DATA\OBJECTS\SWINDERJ.IFF'.
+File 283: '..\..\DATA\OBJECTS\SWINDERM.IFF'.
+File 284: '..\..\DATA\OBJECTS\T-72.IFF'.
+File 285: '..\..\DATA\OBJECTS\TANKGUN1.IFF'.
+File 286: '..\..\DATA\OBJECTS\TORNCG.IFF'.
+File 287: '..\..\DATA\OBJECTS\TORNCGAB.IFF'.
+File 288: '..\..\DATA\OBJECTS\TORNLOAD.IFF'.
+File 289: '..\..\DATA\OBJECTS\TOWA24.IFF'.
+File 290: '..\..\DATA\OBJECTS\TOWA24D.IFF'.
+File 291: '..\..\DATA\OBJECTS\TOWB24.IFF'.
+File 292: '..\..\DATA\OBJECTS\TOWB24D.IFF'.
+File 293: '..\..\DATA\OBJECTS\TRUCK.IFF'.
+File 294: '..\..\DATA\OBJECTS\TU-20.IFF'.
+File 295: '..\..\DATA\OBJECTS\TU20LOAD.IFF'.
+File 296: '..\..\DATA\OBJECTS\WCB78.IFF'.
+File 297: '..\..\DATA\OBJECTS\WCB78D.IFF'.
+File 298: '..\..\DATA\OBJECTS\YF23.IFF'.
+File 299: '..\..\DATA\OBJECTS\YF23LOAD.IFF'.
+File 300: '..\..\DATA\OBJECTS\ZSU-23.IFF'.
+
+
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/GAMEFLOW.TRE features 34 files.
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/GAMEFLOW.TRE is 10150560 bytes.
+File 0: '..\..\DATA\GAMEFLOW\BWFONT.SHP'.
+File 1: '..\..\DATA\GAMEFLOW\CONV.PAK'.
+File 2: '..\..\DATA\GAMEFLOW\CONVDATA.IFF'.
+File 3: '..\..\DATA\GAMEFLOW\CONVPALS.PAK'.
+File 4: '..\..\DATA\GAMEFLOW\CONVSHPS.PAK'.
+File 5: '..\..\DATA\GAMEFLOW\GAMEFLOW.IFF'.
+File 6: '..\..\DATA\GAMEFLOW\MAINMENU.PAK'.
+File 7: '..\..\DATA\GAMEFLOW\OBJVIEW.IFF'.
+File 8: '..\..\DATA\GAMEFLOW\OBJVIEW.PAK'.
+File 9: '..\..\DATA\GAMEFLOW\OBJWORLD.IFF'.
+File 10: '..\..\DATA\GAMEFLOW\OPTIONS.IFF'.
+File 11: '..\..\DATA\GAMEFLOW\OPTPALS.PAK'.
+File 12: '..\..\DATA\GAMEFLOW\OPTSHPS.PAK'.
+File 13: '..\..\DATA\GAMEFLOW\SAVELOAD.SHP'.
+File 14: '..\..\DATA\GAMEFLOW\TM.SHP'.
+File 15: '..\..\DATA\MIDGAMES\AMUSIC.PAK'.
+File 16: '..\..\DATA\MIDGAMES\ASOUNDFX.PAK'.
+File 17: '..\..\DATA\MIDGAMES\CREDITS.IFF'.
+File 18: '..\..\DATA\MIDGAMES\MID1.PAK'.
+File 19: '..\..\DATA\MIDGAMES\MID12.PAK'.
+File 20: '..\..\DATA\MIDGAMES\MID14.PAK'.
+File 21: '..\..\DATA\MIDGAMES\MID15.PAK'.
+File 22: '..\..\DATA\MIDGAMES\MID16.PAK'.
+File 23: '..\..\DATA\MIDGAMES\MID17.PAK'.
+File 24: '..\..\DATA\MIDGAMES\MID1VOC.PAK'.
+File 25: '..\..\DATA\MIDGAMES\MID2.PAK'.
+File 26: '..\..\DATA\MIDGAMES\MID20.PAK'.
+File 27: '..\..\DATA\MIDGAMES\MID3.PAK'.
+File 28: '..\..\DATA\MIDGAMES\MID36.PAK'.
+File 29: '..\..\DATA\MIDGAMES\MID5.PAK'.
+File 30: '..\..\DATA\MIDGAMES\MIDGAMES.IFF'.
+File 31: '..\..\DATA\MIDGAMES\MIDGAMES.PAK'.
+File 32: '..\..\DATA\MIDGAMES\RMUSIC.PAK'.
+File 33: '..\..\DATA\MIDGAMES\RSOUNDFX.PAK'.
+
+
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/MISSIONS.TRE features 153 files.
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/MISSIONS.TRE is 665456 bytes.
+File 0: '..\..\DATA\COCKPITS\BETTY.PAK'.
+File 1: '..\..\DATA\COCKPITS\NAVMAP.IFF'.
+File 2: '..\..\DATA\COCKPITS\PLAQUES.IFF'.
+File 3: '..\..\DATA\INTEL\A-10.IFF'.
+File 4: '..\..\DATA\INTEL\A-10A.IFF'.
+File 5: '..\..\DATA\INTEL\A-10F.IFF'.
+File 6: '..\..\DATA\INTEL\ACE.IFF'.
+File 7: '..\..\DATA\INTEL\AMIRAGE.IFF'.
+File 8: '..\..\DATA\INTEL\AMIRAGEA.IFF'.
+File 9: '..\..\DATA\INTEL\AMIRAGER.IFF'.
+File 10: '..\..\DATA\INTEL\AMMIG21.IFF'.
+File 11: '..\..\DATA\INTEL\AMMIG21A.IFF'.
+File 12: '..\..\DATA\INTEL\AMMIG21R.IFF'.
+File 13: '..\..\DATA\INTEL\AMMIG29.IFF'.
+File 14: '..\..\DATA\INTEL\AMMIG29A.IFF'.
+File 15: '..\..\DATA\INTEL\AMMIG29R.IFF'.
+File 16: '..\..\DATA\INTEL\BILLY.IFF'.
+File 17: '..\..\DATA\INTEL\BRIT.IFF'.
+File 18: '..\..\DATA\INTEL\BRIT2.IFF'.
+File 19: '..\..\DATA\INTEL\BRIT3.IFF'.
+File 20: '..\..\DATA\INTEL\C-130.IFF'.
+File 21: '..\..\DATA\INTEL\C-130H.IFF'.
+File 22: '..\..\DATA\INTEL\C130.IFF'.
+File 23: '..\..\DATA\INTEL\CV.IFF'.
+File 24: '..\..\DATA\INTEL\DD-1.IFF'.
+File 25: '..\..\DATA\INTEL\DD-2.IFF'.
+File 26: '..\..\DATA\INTEL\DD-3.IFF'.
+File 27: '..\..\DATA\INTEL\DD-4.IFF'.
+File 28: '..\..\DATA\INTEL\F-15.IFF'.
+File 29: '..\..\DATA\INTEL\F-15A.IFF'.
+File 30: '..\..\DATA\INTEL\F-15R.IFF'.
+File 31: '..\..\DATA\INTEL\F-16.IFF'.
+File 32: '..\..\DATA\INTEL\F-16A.IFF'.
+File 33: '..\..\DATA\INTEL\F-16R.IFF'.
+File 34: '..\..\DATA\INTEL\F-18.IFF'.
+File 35: '..\..\DATA\INTEL\F-18A.IFF'.
+File 36: '..\..\DATA\INTEL\F-18R.IFF'.
+File 37: '..\..\DATA\INTEL\GOGOON.IFF'.
+File 38: '..\..\DATA\INTEL\GOGOONA.IFF'.
+File 39: '..\..\DATA\INTEL\GOGOONR.IFF'.
+File 40: '..\..\DATA\INTEL\GWEN.IFF'.
+File 41: '..\..\DATA\INTEL\HAMMER.IFF'.
+File 42: '..\..\DATA\INTEL\HAMMERA.IFF'.
+File 43: '..\..\DATA\INTEL\HAMMERR.IFF'.
+File 44: '..\..\DATA\INTEL\INTEL.IFF'.
+File 45: '..\..\DATA\INTEL\IRSGOON.IFF'.
+File 46: '..\..\DATA\INTEL\IRSGOONA.IFF'.
+File 47: '..\..\DATA\INTEL\IRSGOONR.IFF'.
+File 48: '..\..\DATA\INTEL\JACKAL.IFF'.
+File 49: '..\..\DATA\INTEL\JACKALA.IFF'.
+File 50: '..\..\DATA\INTEL\JACKALR.IFF'.
+File 51: '..\..\DATA\INTEL\JANET.IFF'.
+File 52: '..\..\DATA\INTEL\JANET14B.IFF'.
+File 53: '..\..\DATA\INTEL\LEARJET.IFF'.
+File 54: '..\..\DATA\INTEL\LYLE.IFF'.
+File 55: '..\..\DATA\INTEL\MENDEZ.IFF'.
+File 56: '..\..\DATA\INTEL\MIG-21.IFF'.
+File 57: '..\..\DATA\INTEL\MIG-21A.IFF'.
+File 58: '..\..\DATA\INTEL\MIG-21R.IFF'.
+File 59: '..\..\DATA\INTEL\MIG-29.IFF'.
+File 60: '..\..\DATA\INTEL\MIG-29A.IFF'.
+File 61: '..\..\DATA\INTEL\MIG-29R.IFF'.
+File 62: '..\..\DATA\INTEL\MIGUEL.IFF'.
+File 63: '..\..\DATA\INTEL\MIRAGE.IFF'.
+File 64: '..\..\DATA\INTEL\MIRAGEA.IFF'.
+File 65: '..\..\DATA\INTEL\MIRAGER.IFF'.
+File 66: '..\..\DATA\INTEL\NULL.IFF'.
+File 67: '..\..\DATA\INTEL\PLAYER.IFF'.
+File 68: '..\..\DATA\INTEL\PRIDEAUX.IFF'.
+File 69: '..\..\DATA\INTEL\PUNK.IFF'.
+File 70: '..\..\DATA\INTEL\PUNKA.IFF'.
+File 71: '..\..\DATA\INTEL\PUNKR.IFF'.
+File 72: '..\..\DATA\INTEL\REDSHIRT.IFF'.
+File 73: '..\..\DATA\INTEL\ROOKIE.IFF'.
+File 74: '..\..\DATA\INTEL\SENTRYEA.IFF'.
+File 75: '..\..\DATA\INTEL\SENTRYEC.IFF'.
+File 76: '..\..\DATA\INTEL\SENTRYF.IFF'.
+File 77: '..\..\DATA\INTEL\STERN.IFF'.
+File 78: '..\..\DATA\INTEL\STRIBASE.IFF'.
+File 79: '..\..\DATA\INTEL\SURF2.IFF'.
+File 80: '..\..\DATA\INTEL\SURFDUDE.IFF'.
+File 81: '..\..\DATA\INTEL\TARGET.IFF'.
+File 82: '..\..\DATA\INTEL\TEX.IFF'.
+File 83: '..\..\DATA\INTEL\THE747.IFF'.
+File 84: '..\..\DATA\INTEL\TU-20.IFF'.
+File 85: '..\..\DATA\INTEL\TWPGOON.IFF'.
+File 86: '..\..\DATA\INTEL\TWPGOONA.IFF'.
+File 87: '..\..\DATA\INTEL\TWPGOONR.IFF'.
+File 88: '..\..\DATA\INTEL\VETERAN.IFF'.
+File 89: '..\..\DATA\INTEL\VIXEN.IFF'.
+File 90: '..\..\DATA\MISSIONS\ALASKA.IFF'.
+File 91: '..\..\DATA\MISSIONS\ANDM2-22.IFF'.
+File 92: '..\..\DATA\MISSIONS\ANDMAL1.IFF'.
+File 93: '..\..\DATA\MISSIONS\ANDMAL2.IFF'.
+File 94: '..\..\DATA\MISSIONS\ARENA.IFF'.
+File 95: '..\..\DATA\MISSIONS\CANYON.IFF'.
+File 96: '..\..\DATA\MISSIONS\EGYPT.IFF'.
+File 97: '..\..\DATA\MISSIONS\EUROPE.IFF'.
+File 98: '..\..\DATA\MISSIONS\MAURITAN.IFF'.
+File 99: '..\..\DATA\MISSIONS\MISN-10A.IFF'.
+File 100: '..\..\DATA\MISSIONS\MISN-10B.IFF'.
+File 101: '..\..\DATA\MISSIONS\MISN-10C.IFF'.
+File 102: '..\..\DATA\MISSIONS\MISN-10D.IFF'.
+File 103: '..\..\DATA\MISSIONS\MISN-10X.IFF'.
+File 104: '..\..\DATA\MISSIONS\MISN-11A.IFF'.
+File 105: '..\..\DATA\MISSIONS\MISN-11B.IFF'.
+File 106: '..\..\DATA\MISSIONS\MISN-11C.IFF'.
+File 107: '..\..\DATA\MISSIONS\MISN-11X.IFF'.
+File 108: '..\..\DATA\MISSIONS\MISN-12A.IFF'.
+File 109: '..\..\DATA\MISSIONS\MISN-12B.IFF'.
+File 110: '..\..\DATA\MISSIONS\MISN-13A.IFF'.
+File 111: '..\..\DATA\MISSIONS\MISN-13B.IFF'.
+File 112: '..\..\DATA\MISSIONS\MISN-14A.IFF'.
+File 113: '..\..\DATA\MISSIONS\MISN-14B.IFF'.
+File 114: '..\..\DATA\MISSIONS\MISN-15A.IFF'.
+File 115: '..\..\DATA\MISSIONS\MISN-1A.IFF'.
+File 116: '..\..\DATA\MISSIONS\MISN-1B.IFF'.
+File 117: '..\..\DATA\MISSIONS\MISN-1C.IFF'.
+File 118: '..\..\DATA\MISSIONS\MISN-2A.IFF'.
+File 119: '..\..\DATA\MISSIONS\MISN-3A.IFF'.
+File 120: '..\..\DATA\MISSIONS\MISN-3B.IFF'.
+File 121: '..\..\DATA\MISSIONS\MISN-3C.IFF'.
+File 122: '..\..\DATA\MISSIONS\MISN-3X.IFF'.
+File 123: '..\..\DATA\MISSIONS\MISN-4A.IFF'.
+File 124: '..\..\DATA\MISSIONS\MISN-4B.IFF'.
+File 125: '..\..\DATA\MISSIONS\MISN-4C.IFF'.
+File 126: '..\..\DATA\MISSIONS\MISN-5A.IFF'.
+File 127: '..\..\DATA\MISSIONS\MISN-5B.IFF'.
+File 128: '..\..\DATA\MISSIONS\MISN-5BB.IFF'.
+File 129: '..\..\DATA\MISSIONS\MISN-5C.IFF'.
+File 130: '..\..\DATA\MISSIONS\MISN-6A.IFF'.
+File 131: '..\..\DATA\MISSIONS\MISN-6B.IFF'.
+File 132: '..\..\DATA\MISSIONS\MISN-6C.IFF'.
+File 133: '..\..\DATA\MISSIONS\MISN-6D.IFF'.
+File 134: '..\..\DATA\MISSIONS\MISN-6X.IFF'.
+File 135: '..\..\DATA\MISSIONS\MISN-7A.IFF'.
+File 136: '..\..\DATA\MISSIONS\MISN-7B.IFF'.
+File 137: '..\..\DATA\MISSIONS\MISN-7C.IFF'.
+File 138: '..\..\DATA\MISSIONS\MISN-7D.IFF'.
+File 139: '..\..\DATA\MISSIONS\MISN-8A.IFF'.
+File 140: '..\..\DATA\MISSIONS\MISN-8B.IFF'.
+File 141: '..\..\DATA\MISSIONS\MISN-8C.IFF'.
+File 142: '..\..\DATA\MISSIONS\MISN-8X.IFF'.
+File 143: '..\..\DATA\MISSIONS\MISN-9A.IFF'.
+File 144: '..\..\DATA\MISSIONS\MISN-9AA.IFF'.
+File 145: '..\..\DATA\MISSIONS\MISN-9B.IFF'.
+File 146: '..\..\DATA\MISSIONS\MISN-9X.IFF'.
+File 147: '..\..\DATA\MISSIONS\QUEBEC.IFF'.
+File 148: '..\..\DATA\MISSIONS\RHODEI.IFF'.
+File 149: '..\..\DATA\MISSIONS\SANFRAN.IFF'.
+File 150: '..\..\DATA\MISSIONS\TEMPLATE.IFF'.
+File 151: '..\..\DATA\MISSIONS\TURKEY.IFF'.
+File 152: '..\..\DATA\MISSIONS\TURKEY2.IFF'.
+
+
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/SOUND.TRE features 14 files.
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/SOUND.TRE is 899145 bytes.
+File 0: '..\..\DATA\SOUND\ADLIB.DRV'.
+File 1: '..\..\DATA\SOUND\COMBAT.ADL'.
+File 2: '..\..\DATA\SOUND\COMBAT.DAT'.
+File 3: '..\..\DATA\SOUND\COMBAT.ROL'.
+File 4: '..\..\DATA\SOUND\GAMEFLOW.ADL'.
+File 5: '..\..\DATA\SOUND\GAMEFLOW.DAT'.
+File 6: '..\..\DATA\SOUND\GAMEFLOW.ROL'.
+File 7: '..\..\DATA\SOUND\PAS.DRV'.
+File 8: '..\..\DATA\SOUND\ROLAND.DRV'.
+File 9: '..\..\DATA\SOUND\SB.DRV'.
+File 10: '..\..\DATA\SOUND\SOUNDFX.ADL'.
+File 11: '..\..\DATA\SOUND\SOUNDFX.ROL'.
+File 12: '..\..\DATA\SOUND\STRIKE.AD'.
+File 13: '..\..\DATA\SOUND\STRIKE.MT'.
+
+
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/TEXTURES.TRE features 5 files.
+TRE file /Users/fabiensanglard/Desktop/SC/strikecommander/drive/SC/TEXTURES.TRE is 1681738 bytes.
+File 0: '..\..\DATA\TXM\ACCPACK.PAK'.
+File 1: '..\..\DATA\TXM\ACC_LIST.IFF'.
+File 2: '..\..\DATA\TXM\MOS_LIST.IFF'.
+File 3: '..\..\DATA\TXM\TXMPACK.PAK'.
+File 4: '..\..\DATA\TXM\TXM_LIST.IFF'.
+Program ended with exit code: 0
+
+
+Now working on parsing the .PAK format using wc1g.txt which is GOLD
+
+
+
+A-10.IFF has 1808 VTRI
+
+1808 / 2 = 904
+1808 / 4 = 452
+1808 / 8 = 226
+1808 /16 = 113
+
+LVL0 with 316 bytes (2 bytes per faces indices :) 158 faces.
+LVL1 with 140 bytes (2 bytes per faces indices :)  70 faces.
+LVL2 with   8 bytes (2 bytes per faces indices :)   4 faces.
+
+Jan 4th, 2014 :
 ===============
 
 So close yet so far. 
@@ -147,7 +738,7 @@ I would expect a texture set indice and then a texture index for the texture in 
 
 
 
-Dec 5th, 2014 :
+Jan 5th, 2014 :
 ===============
 
 Crap, it did not work. i get an horrible mess. Let’s go do something else and come back to it later.
@@ -219,7 +810,7 @@ Low level:
 90*90 = 8100 vertices for a map.
 
 
-Dec 7th, 2014 :
+Jan 7th, 2014 :
 ===============
 
 I am so happy, I managed to get the vertices around 4AM: The mystery files were indeed the 3D data. Each entry is
@@ -263,7 +854,7 @@ It seems that all .TRI features 3 files of 4632 bytes organized as follow :
 
 
 
-Dec 7th, 2014 :
+Jan 7th, 2014 :
 ===============
 
 One more major advancement !!! I have identified the terrain type flag. For now
@@ -367,7 +958,7 @@ I guess it was to give room for close up dithering shading ???
 
 
 
-Dec 8th, 2014 :
+January 8th, 2014 :
 ===============
 
 Studying the texture set, I can see a pattern. And more importantly I can see how triangles are
@@ -427,4 +1018,23 @@ to reverse engineer :
 2 byte texture Things to REVERSE ENGINEER !!!!
   
 
+Jan 14th, 2014 :
+================
 
+I cannot figure out the coordinate system of the .OBJ. Therefore I cannot draw them :( !!
+I was quite sure the coordinate would be in block space. But it is not.
+
+Editing ARENA.PAK, I was able to figure out that
+
+0x4A leaves the block to the left
+0xCA leaves the block to the right
+
+Which means those are the coordinate of one block to the left or right since all objects from
+adjacents block are also drawn.
+
+Just spent two hours trying to figure this thing out. This is so hard.
+
+Jan 14th, 2014 :
+================
+
+Switching to Camera and the joy of Quaternions.

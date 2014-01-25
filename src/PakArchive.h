@@ -39,7 +39,13 @@ public:
     void GuessPakEntryContent(PakEntry* entry);
     
     char* GetName(void);
+    
+    inline bool IsReady(void){ return this->ready;}
+    
+    
 private:
+    
+    bool ready;
 
     ByteStream stream;
     

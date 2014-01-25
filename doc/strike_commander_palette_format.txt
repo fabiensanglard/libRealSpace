@@ -1,0 +1,41 @@
+Strike Commander Palette Format :
+=====================================
+
+By Fabien Sanglard
+January 21st, 2014
+
+There are two kinds of palettes in Strike Commander. The most important one is in PALETTE.IFF
+file:
+
+FORM
+1798
+PALT
+  INFO
+  14
+  PALT
+  772
+  BLWH
+  772
+  RANG
+  94
+  TABL
+  8
+  FORM
+  86
+  BILD
+    INFO
+    20
+    TABL
+    46
+
+Two set of palettes are actuall contained there:
+
+Color palette in PALT
+Black and White in BLWH
+
+The other chunk have not been identified
+
+
+Two palettes are actually contained there
+
+Unfortunately, palette are stored in unconsistent formats.

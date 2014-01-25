@@ -1,0 +1,565 @@
+Strike Commander TRE Contents:
+=====================================
+
+Listing content of TRE archive 'GAMEFLOW.TRE'.
+    34 entrie(s) found.
+    Entry [  0] offset[    3379]'..\..\DATA\GAMEFLOW\CONVDATA.IFF' size: 3296 bytes.
+    Entry [  1] offset[    6675]'..\..\DATA\GAMEFLOW\GAMEFLOW.IFF' size: 41468 bytes.
+    Entry [  2] offset[   48143]'..\..\DATA\GAMEFLOW\OPTIONS.IFF' size: 14618 bytes.
+    Entry [  3] offset[   62761]'..\..\DATA\GAMEFLOW\OBJVIEW.IFF' size: 1010 bytes.
+    Entry [  4] offset[   63771]'..\..\DATA\GAMEFLOW\OBJWORLD.IFF' size: 158 bytes.
+    Entry [  5] offset[   63929]'..\..\DATA\MIDGAMES\MIDGAMES.IFF' size: 8642 bytes.
+    Entry [  6] offset[   72571]'..\..\DATA\MIDGAMES\CREDITS.IFF' size: 37174 bytes.
+    Entry [  7] offset[  109745]'..\..\DATA\GAMEFLOW\TM.SHP' size: 62439 bytes.
+    Entry [  8] offset[  172184]'..\..\DATA\GAMEFLOW\BWFONT.SHP' size: 7487 bytes.
+    Entry [  9] offset[  179671]'..\..\DATA\GAMEFLOW\SAVELOAD.SHP' size: 42014 bytes.
+    Entry [ 10] offset[  221685]'..\..\DATA\GAMEFLOW\CONV.PAK' size: 158036 bytes.
+    Entry [ 11] offset[  379721]'..\..\DATA\GAMEFLOW\CONVPALS.PAK' size: 16052 bytes.
+    Entry [ 12] offset[  395773]'..\..\DATA\GAMEFLOW\OPTPALS.PAK' size: 20900 bytes.
+    Entry [ 13] offset[  416673]'..\..\DATA\GAMEFLOW\MAINMENU.PAK' size: 24603 bytes.
+    Entry [ 14] offset[  441276]'..\..\DATA\GAMEFLOW\OBJVIEW.PAK' size: 111920 bytes.
+    Entry [ 15] offset[  553196]'..\..\DATA\MIDGAMES\MID1.PAK' size: 1008588 bytes.
+    Entry [ 16] offset[ 1561784]'..\..\DATA\MIDGAMES\MID12.PAK' size: 284210 bytes.
+    Entry [ 17] offset[ 1845994]'..\..\DATA\MIDGAMES\MID15.PAK' size: 177777 bytes.
+    Entry [ 18] offset[ 2023771]'..\..\DATA\MIDGAMES\MID16.PAK' size: 72166 bytes.
+    Entry [ 19] offset[ 2095937]'..\..\DATA\MIDGAMES\MID17.PAK' size: 175910 bytes.
+    Entry [ 20] offset[ 2271847]'..\..\DATA\MIDGAMES\MID2.PAK' size: 118589 bytes.
+    Entry [ 21] offset[ 2390436]'..\..\DATA\MIDGAMES\MID20.PAK' size: 331387 bytes.
+    Entry [ 22] offset[ 2721823]'..\..\DATA\MIDGAMES\MID3.PAK' size: 322881 bytes.
+    Entry [ 23] offset[ 3044704]'..\..\DATA\MIDGAMES\MID36.PAK' size: 362041 bytes.
+    Entry [ 24] offset[ 3406745]'..\..\DATA\MIDGAMES\MID5.PAK' size: 608720 bytes.
+    Entry [ 25] offset[ 4015465]'..\..\DATA\MIDGAMES\MID14.PAK' size: 369407 bytes.
+    Entry [ 26] offset[ 4384872]'..\..\DATA\MIDGAMES\MIDGAMES.PAK' size: 473178 bytes.
+    Entry [ 27] offset[ 4858050]'..\..\DATA\GAMEFLOW\CONVSHPS.PAK' size: 2077437 bytes.
+    Entry [ 28] offset[ 6935487]'..\..\DATA\GAMEFLOW\OPTSHPS.PAK' size: 2391100 bytes.
+    Entry [ 29] offset[ 9326587]'..\..\DATA\MIDGAMES\RMUSIC.PAK' size: 220326 bytes.
+    Entry [ 30] offset[ 9546913]'..\..\DATA\MIDGAMES\AMUSIC.PAK' size: 198512 bytes.
+    Entry [ 31] offset[ 9745425]'..\..\DATA\MIDGAMES\RSOUNDFX.PAK' size: 15918 bytes.
+    Entry [ 32] offset[ 9761343]'..\..\DATA\MIDGAMES\ASOUNDFX.PAK' size: 12860 bytes.
+    Entry [ 33] offset[ 9774203]'..\..\DATA\MIDGAMES\MID1VOC.PAK' size: 376357 bytes.
+
+Listing content of TRE archive 'MISC.TRE'.
+    39 entrie(s) found.
+    Entry [  0] offset[   13935]'..\..\DATA\PALETTE\CANYNFAD.IFF' size: 13852 bytes.
+    Entry [  1] offset[   27787]'..\..\DATA\PALETTE\CANYNPAL.IFF' size: 2506 bytes.
+    Entry [  2] offset[   30293]'..\..\DATA\PALETTE\PALETTE.IFF' size: 2504 bytes.
+    Entry [  3] offset[   32797]'..\..\DATA\PALETTE\PALFADE.IFF' size: 13852 bytes.
+    Entry [  4] offset[   46649]'..\..\DATA\FONTS\3DSTUFON.SHP' size: 30375 bytes.
+    Entry [  5] offset[   77024]'..\..\DATA\FONTS\AUDIOPT.SHP' size: 14239 bytes.
+    Entry [  6] offset[   91263]'..\..\DATA\FONTS\BOARDFNT.SHP' size: 7594 bytes.
+    Entry [  7] offset[   98857]'..\..\DATA\FONTS\CALCFONT.SHP' size: 2239 bytes.
+    Entry [  8] offset[  101096]'..\..\DATA\FONTS\CAMROPT.SHP' size: 21355 bytes.
+    Entry [  9] offset[  122451]'..\..\DATA\FONTS\CHKEXIT.SHP' size: 5486 bytes.
+    Entry [ 10] offset[  127937]'..\..\DATA\FONTS\COCKOPT.SHP' size: 26118 bytes.
+    Entry [ 11] offset[  154055]'..\..\DATA\FONTS\CONVFONT.SHP' size: 7576 bytes.
+    Entry [ 12] offset[  161631]'..\..\DATA\FONTS\DETLOPT.SHP' size: 38385 bytes.
+    Entry [ 13] offset[  200016]'..\..\DATA\FONTS\FLITOPT.SHP' size: 55407 bytes.
+    Entry [ 14] offset[  255423]'..\..\DATA\FONTS\FORMFONT.SHP' size: 4992 bytes.
+    Entry [ 15] offset[  260415]'..\..\DATA\FONTS\GAMEOPT.SHP' size: 16856 bytes.
+    Entry [ 16] offset[  277271]'..\..\DATA\FONTS\GRAVFONT.SHP' size: 5082 bytes.
+    Entry [ 17] offset[  282353]'..\..\DATA\FONTS\HUDFONT.SHP' size: 5588 bytes.
+    Entry [ 18] offset[  287941]'..\..\DATA\FONTS\JOYCALIB.SHP' size: 15776 bytes.
+    Entry [ 19] offset[  303717]'..\..\DATA\FONTS\LEDGFONT.SHP' size: 3863 bytes.
+    Entry [ 20] offset[  307580]'..\..\DATA\FONTS\MAINOPT.SHP' size: 23236 bytes.
+    Entry [ 21] offset[  330816]'..\..\DATA\FONTS\MAPFONT.SHP' size: 6496 bytes.
+    Entry [ 22] offset[  337312]'..\..\DATA\FONTS\MENBGRND.SHP' size: 43761 bytes.
+    Entry [ 23] offset[  381073]'..\..\DATA\FONTS\MENFONT.SHP' size: 7815 bytes.
+    Entry [ 24] offset[  388888]'..\..\DATA\FONTS\MTYPEBUT.SHP' size: 2336 bytes.
+    Entry [ 25] offset[  391224]'..\..\DATA\FONTS\OPTFONT.SHP' size: 9436 bytes.
+    Entry [ 26] offset[  400660]'..\..\DATA\FONTS\OVBKGRND.SHP' size: 15143 bytes.
+    Entry [ 27] offset[  415803]'..\..\DATA\FONTS\OVBUTUD.SHP' size: 3229 bytes.
+    Entry [ 28] offset[  419032]'..\..\DATA\FONTS\OVPLAT.SHP' size: 5818 bytes.
+    Entry [ 29] offset[  424850]'..\..\DATA\FONTS\RESTART.SHP' size: 10675 bytes.
+    Entry [ 30] offset[  435525]'..\..\DATA\FONTS\SHUDFONT.SHP' size: 4503 bytes.
+    Entry [ 31] offset[  440028]'..\..\DATA\FONTS\SM-FONT.SHP' size: 5612 bytes.
+    Entry [ 32] offset[  445640]'..\..\DATA\FONTS\TR1PLAT.SHP' size: 4001 bytes.
+    Entry [ 33] offset[  449641]'..\..\DATA\FONTS\TR2BUTUD.SHP' size: 12173 bytes.
+    Entry [ 34] offset[  461814]'..\..\DATA\FONTS\TR2PLAT.SHP' size: 21749 bytes.
+    Entry [ 35] offset[  483563]'..\..\DATA\MOUSE\PNT.SHP' size: 610 bytes.
+    Entry [ 36] offset[  484173]'..\..\DATA\MOUSE.SHP' size: 610 bytes.
+    Entry [ 37] offset[  484783]'..\..\DATA\PNT.SHP' size: 610 bytes.
+    Entry [ 38] offset[  485393]'..\..\DATA\AIRDENS.TBL' size: 484 bytes.
+
+Listing content of TRE archive 'MISSIONS.TRE'.
+    153 entrie(s) found.
+    Entry [  0] offset[   11639]'..\..\DATA\MISSIONS\MAURITAN.IFF' size: 1288 bytes.
+    Entry [  1] offset[   12927]'..\..\DATA\MISSIONS\MISN-10A.IFF' size: 3148 bytes.
+    Entry [  2] offset[   16075]'..\..\DATA\MISSIONS\MISN-10B.IFF' size: 2018 bytes.
+    Entry [  3] offset[   18093]'..\..\DATA\MISSIONS\MISN-10C.IFF' size: 2222 bytes.
+    Entry [  4] offset[   20315]'..\..\DATA\MISSIONS\MISN-10D.IFF' size: 1846 bytes.
+    Entry [  5] offset[   22161]'..\..\DATA\MISSIONS\MISN-10X.IFF' size: 2366 bytes.
+    Entry [  6] offset[   24527]'..\..\DATA\MISSIONS\MISN-11A.IFF' size: 2812 bytes.
+    Entry [  7] offset[   27339]'..\..\DATA\MISSIONS\MISN-11B.IFF' size: 3466 bytes.
+    Entry [  8] offset[   30805]'..\..\DATA\MISSIONS\MISN-11C.IFF' size: 1972 bytes.
+    Entry [  9] offset[   32777]'..\..\DATA\MISSIONS\MISN-11X.IFF' size: 3260 bytes.
+    Entry [ 10] offset[   36037]'..\..\DATA\MISSIONS\ALASKA.IFF' size: 1288 bytes.
+    Entry [ 11] offset[   37325]'..\..\DATA\MISSIONS\MISN-12A.IFF' size: 3052 bytes.
+    Entry [ 12] offset[   40377]'..\..\DATA\MISSIONS\MISN-12B.IFF' size: 3450 bytes.
+    Entry [ 13] offset[   43827]'..\..\DATA\MISSIONS\MISN-13A.IFF' size: 2682 bytes.
+    Entry [ 14] offset[   46509]'..\..\DATA\MISSIONS\MISN-13B.IFF' size: 3172 bytes.
+    Entry [ 15] offset[   49681]'..\..\DATA\MISSIONS\MISN-14A.IFF' size: 3078 bytes.
+    Entry [ 16] offset[   52759]'..\..\DATA\MISSIONS\MISN-14B.IFF' size: 1364 bytes.
+    Entry [ 17] offset[   54123]'..\..\DATA\MISSIONS\MISN-15A.IFF' size: 2564 bytes.
+    Entry [ 18] offset[   56687]'..\..\DATA\MISSIONS\MISN-1A.IFF' size: 2062 bytes.
+    Entry [ 19] offset[   58749]'..\..\DATA\MISSIONS\MISN-1B.IFF' size: 2290 bytes.
+    Entry [ 20] offset[   61039]'..\..\DATA\MISSIONS\MISN-1C.IFF' size: 2878 bytes.
+    Entry [ 21] offset[   63917]'..\..\DATA\MISSIONS\MISN-2A.IFF' size: 2080 bytes.
+    Entry [ 22] offset[   65997]'..\..\DATA\MISSIONS\MISN-3A.IFF' size: 3086 bytes.
+    Entry [ 23] offset[   69083]'..\..\DATA\MISSIONS\MISN-3B.IFF' size: 2066 bytes.
+    Entry [ 24] offset[   71149]'..\..\DATA\MISSIONS\MISN-3C.IFF' size: 2474 bytes.
+    Entry [ 25] offset[   73623]'..\..\DATA\MISSIONS\MISN-3X.IFF' size: 2558 bytes.
+    Entry [ 26] offset[   76181]'..\..\DATA\MISSIONS\MISN-4A.IFF' size: 2810 bytes.
+    Entry [ 27] offset[   78991]'..\..\DATA\MISSIONS\MISN-4B.IFF' size: 4236 bytes.
+    Entry [ 28] offset[   83227]'..\..\DATA\MISSIONS\ANDM2-22.IFF' size: 1304 bytes.
+    Entry [ 29] offset[   84531]'..\..\DATA\MISSIONS\MISN-4C.IFF' size: 2186 bytes.
+    Entry [ 30] offset[   86717]'..\..\DATA\MISSIONS\MISN-5A.IFF' size: 2052 bytes.
+    Entry [ 31] offset[   88769]'..\..\DATA\MISSIONS\MISN-5B.IFF' size: 2262 bytes.
+    Entry [ 32] offset[   91031]'..\..\DATA\MISSIONS\MISN-5BB.IFF' size: 5052 bytes.
+    Entry [ 33] offset[   96083]'..\..\DATA\MISSIONS\MISN-5C.IFF' size: 4568 bytes.
+    Entry [ 34] offset[  100651]'..\..\DATA\MISSIONS\MISN-6A.IFF' size: 2822 bytes.
+    Entry [ 35] offset[  103473]'..\..\DATA\MISSIONS\MISN-6B.IFF' size: 3422 bytes.
+    Entry [ 36] offset[  106895]'..\..\DATA\MISSIONS\MISN-6C.IFF' size: 2054 bytes.
+    Entry [ 37] offset[  108949]'..\..\DATA\MISSIONS\MISN-6D.IFF' size: 3736 bytes.
+    Entry [ 38] offset[  112685]'..\..\DATA\MISSIONS\MISN-6X.IFF' size: 3724 bytes.
+    Entry [ 39] offset[  116409]'..\..\DATA\MISSIONS\MISN-7A.IFF' size: 3772 bytes.
+    Entry [ 40] offset[  120181]'..\..\DATA\MISSIONS\MISN-7B.IFF' size: 2766 bytes.
+    Entry [ 41] offset[  122947]'..\..\DATA\MISSIONS\MISN-7C.IFF' size: 3212 bytes.
+    Entry [ 42] offset[  126159]'..\..\DATA\MISSIONS\MISN-7D.IFF' size: 3168 bytes.
+    Entry [ 43] offset[  129327]'..\..\DATA\MISSIONS\MISN-8A.IFF' size: 3182 bytes.
+    Entry [ 44] offset[  132509]'..\..\DATA\MISSIONS\MISN-8B.IFF' size: 3852 bytes.
+    Entry [ 45] offset[  136361]'..\..\DATA\MISSIONS\MISN-8C.IFF' size: 1972 bytes.
+    Entry [ 46] offset[  138333]'..\..\DATA\MISSIONS\MISN-8X.IFF' size: 4362 bytes.
+    Entry [ 47] offset[  142695]'..\..\DATA\MISSIONS\ANDMAL1.IFF' size: 1288 bytes.
+    Entry [ 48] offset[  143983]'..\..\DATA\MISSIONS\MISN-9A.IFF' size: 2316 bytes.
+    Entry [ 49] offset[  146299]'..\..\DATA\MISSIONS\MISN-9AA.IFF' size: 3182 bytes.
+    Entry [ 50] offset[  149481]'..\..\DATA\MISSIONS\MISN-9B.IFF' size: 3652 bytes.
+    Entry [ 51] offset[  153133]'..\..\DATA\MISSIONS\MISN-9X.IFF' size: 3918 bytes.
+    Entry [ 52] offset[  157051]'..\..\DATA\MISSIONS\QUEBEC.IFF' size: 1288 bytes.
+    Entry [ 53] offset[  158339]'..\..\DATA\MISSIONS\RHODEI.IFF' size: 1288 bytes.
+    Entry [ 54] offset[  159627]'..\..\DATA\MISSIONS\SANFRAN.IFF' size: 1304 bytes.
+    Entry [ 55] offset[  160931]'..\..\DATA\MISSIONS\TEMPLATE.IFF' size: 2272 bytes.
+    Entry [ 56] offset[  163203]'..\..\DATA\MISSIONS\TURKEY.IFF' size: 1296 bytes.
+    Entry [ 57] offset[  164499]'..\..\DATA\MISSIONS\TURKEY2.IFF' size: 1296 bytes.
+    Entry [ 58] offset[  165795]'..\..\DATA\INTEL\A-10.IFF' size: 404 bytes.
+    Entry [ 59] offset[  166199]'..\..\DATA\INTEL\A-10A.IFF' size: 306 bytes.
+    Entry [ 60] offset[  166505]'..\..\DATA\INTEL\A-10F.IFF' size: 398 bytes.
+    Entry [ 61] offset[  166903]'..\..\DATA\INTEL\ACE.IFF' size: 310 bytes.
+    Entry [ 62] offset[  167213]'..\..\DATA\INTEL\AMIRAGE.IFF' size: 322 bytes.
+    Entry [ 63] offset[  167535]'..\..\DATA\INTEL\AMIRAGEA.IFF' size: 308 bytes.
+    Entry [ 64] offset[  167843]'..\..\DATA\INTEL\AMIRAGER.IFF' size: 282 bytes.
+    Entry [ 65] offset[  168125]'..\..\DATA\MISSIONS\ANDMAL2.IFF' size: 1304 bytes.
+    Entry [ 66] offset[  169429]'..\..\DATA\INTEL\AMMIG21.IFF' size: 282 bytes.
+    Entry [ 67] offset[  169711]'..\..\DATA\INTEL\AMMIG21A.IFF' size: 306 bytes.
+    Entry [ 68] offset[  170017]'..\..\DATA\INTEL\AMMIG21R.IFF' size: 276 bytes.
+    Entry [ 69] offset[  170293]'..\..\DATA\INTEL\AMMIG29.IFF' size: 296 bytes.
+    Entry [ 70] offset[  170589]'..\..\DATA\INTEL\AMMIG29A.IFF' size: 354 bytes.
+    Entry [ 71] offset[  170943]'..\..\DATA\INTEL\AMMIG29R.IFF' size: 280 bytes.
+    Entry [ 72] offset[  171223]'..\..\DATA\INTEL\BILLY.IFF' size: 884 bytes.
+    Entry [ 73] offset[  172107]'..\..\DATA\INTEL\BRIT.IFF' size: 456 bytes.
+    Entry [ 74] offset[  172563]'..\..\DATA\INTEL\BRIT2.IFF' size: 402 bytes.
+    Entry [ 75] offset[  172965]'..\..\DATA\INTEL\BRIT3.IFF' size: 394 bytes.
+    Entry [ 76] offset[  173359]'..\..\DATA\INTEL\C-130.IFF' size: 762 bytes.
+    Entry [ 77] offset[  174121]'..\..\DATA\INTEL\C-130H.IFF' size: 218 bytes.
+    Entry [ 78] offset[  174339]'..\..\DATA\INTEL\C130.IFF' size: 934 bytes.
+    Entry [ 79] offset[  175273]'..\..\DATA\INTEL\CV.IFF' size: 104 bytes.
+    Entry [ 80] offset[  175377]'..\..\DATA\INTEL\DD-1.IFF' size: 104 bytes.
+    Entry [ 81] offset[  175481]'..\..\DATA\INTEL\DD-2.IFF' size: 104 bytes.
+    Entry [ 82] offset[  175585]'..\..\DATA\INTEL\DD-3.IFF' size: 104 bytes.
+    Entry [ 83] offset[  175689]'..\..\DATA\INTEL\DD-4.IFF' size: 104 bytes.
+    Entry [ 84] offset[  175793]'..\..\DATA\MISSIONS\ARENA.IFF' size: 1204 bytes.
+    Entry [ 85] offset[  176997]'..\..\DATA\INTEL\F-15.IFF' size: 346 bytes.
+    Entry [ 86] offset[  177343]'..\..\DATA\INTEL\F-15A.IFF' size: 314 bytes.
+    Entry [ 87] offset[  177657]'..\..\DATA\INTEL\F-15R.IFF' size: 298 bytes.
+    Entry [ 88] offset[  177955]'..\..\DATA\INTEL\F-16.IFF' size: 300 bytes.
+    Entry [ 89] offset[  178255]'..\..\DATA\INTEL\F-16A.IFF' size: 316 bytes.
+    Entry [ 90] offset[  178571]'..\..\DATA\INTEL\F-16R.IFF' size: 304 bytes.
+    Entry [ 91] offset[  178875]'..\..\DATA\INTEL\F-18.IFF' size: 288 bytes.
+    Entry [ 92] offset[  179163]'..\..\DATA\INTEL\F-18A.IFF' size: 320 bytes.
+    Entry [ 93] offset[  179483]'..\..\DATA\INTEL\F-18R.IFF' size: 284 bytes.
+    Entry [ 94] offset[  179767]'..\..\DATA\INTEL\GOGOON.IFF' size: 322 bytes.
+    Entry [ 95] offset[  180089]'..\..\DATA\INTEL\GOGOONA.IFF' size: 350 bytes.
+    Entry [ 96] offset[  180439]'..\..\DATA\INTEL\GOGOONR.IFF' size: 318 bytes.
+    Entry [ 97] offset[  180757]'..\..\DATA\INTEL\GWEN.IFF' size: 910 bytes.
+    Entry [ 98] offset[  181667]'..\..\DATA\INTEL\HAMMER.IFF' size: 286 bytes.
+    Entry [ 99] offset[  181953]'..\..\DATA\INTEL\HAMMERA.IFF' size: 296 bytes.
+    Entry [100] offset[  182249]'..\..\DATA\INTEL\HAMMERR.IFF' size: 290 bytes.
+    Entry [101] offset[  182539]'..\..\DATA\MISSIONS\CANYON.IFF' size: 1304 bytes.
+    Entry [102] offset[  183843]'..\..\DATA\INTEL\INTEL.IFF' size: 96 bytes.
+    Entry [103] offset[  183939]'..\..\DATA\INTEL\IRSGOON.IFF' size: 414 bytes.
+    Entry [104] offset[  184353]'..\..\DATA\INTEL\IRSGOONA.IFF' size: 394 bytes.
+    Entry [105] offset[  184747]'..\..\DATA\INTEL\IRSGOONR.IFF' size: 358 bytes.
+    Entry [106] offset[  185105]'..\..\DATA\INTEL\JACKAL.IFF' size: 280 bytes.
+    Entry [107] offset[  185385]'..\..\DATA\INTEL\JACKALA.IFF' size: 292 bytes.
+    Entry [108] offset[  185677]'..\..\DATA\INTEL\JACKALR.IFF' size: 310 bytes.
+    Entry [109] offset[  185987]'..\..\DATA\INTEL\JANET.IFF' size: 908 bytes.
+    Entry [110] offset[  186895]'..\..\DATA\INTEL\JANET14B.IFF' size: 898 bytes.
+    Entry [111] offset[  187793]'..\..\DATA\INTEL\LEARJET.IFF' size: 180 bytes.
+    Entry [112] offset[  187973]'..\..\DATA\INTEL\LYLE.IFF' size: 874 bytes.
+    Entry [113] offset[  188847]'..\..\DATA\INTEL\MENDEZ.IFF' size: 560 bytes.
+    Entry [114] offset[  189407]'..\..\DATA\INTEL\MIG-21.IFF' size: 368 bytes.
+    Entry [115] offset[  189775]'..\..\DATA\INTEL\MIG-21A.IFF' size: 318 bytes.
+    Entry [116] offset[  190093]'..\..\DATA\INTEL\MIG-21R.IFF' size: 270 bytes.
+    Entry [117] offset[  190363]'..\..\DATA\INTEL\MIG-29.IFF' size: 310 bytes.
+    Entry [118] offset[  190673]'..\..\DATA\INTEL\MIG-29A.IFF' size: 326 bytes.
+    Entry [119] offset[  190999]'..\..\DATA\INTEL\MIG-29R.IFF' size: 290 bytes.
+    Entry [120] offset[  191289]'..\..\DATA\MISSIONS\EGYPT.IFF' size: 1288 bytes.
+    Entry [121] offset[  192577]'..\..\DATA\INTEL\MIGUEL.IFF' size: 762 bytes.
+    Entry [122] offset[  193339]'..\..\DATA\INTEL\MIRAGE.IFF' size: 294 bytes.
+    Entry [123] offset[  193633]'..\..\DATA\INTEL\MIRAGEA.IFF' size: 298 bytes.
+    Entry [124] offset[  193931]'..\..\DATA\INTEL\MIRAGER.IFF' size: 306 bytes.
+    Entry [125] offset[  194237]'..\..\DATA\INTEL\NULL.IFF' size: 104 bytes.
+    Entry [126] offset[  194341]'..\..\DATA\INTEL\PLAYER.IFF' size: 752 bytes.
+    Entry [127] offset[  195093]'..\..\DATA\INTEL\PRIDEAUX.IFF' size: 562 bytes.
+    Entry [128] offset[  195655]'..\..\DATA\INTEL\PUNK.IFF' size: 316 bytes.
+    Entry [129] offset[  195971]'..\..\DATA\INTEL\PUNKA.IFF' size: 306 bytes.
+    Entry [130] offset[  196277]'..\..\DATA\INTEL\PUNKR.IFF' size: 242 bytes.
+    Entry [131] offset[  196519]'..\..\DATA\INTEL\REDSHIRT.IFF' size: 666 bytes.
+    Entry [132] offset[  197185]'..\..\DATA\INTEL\ROOKIE.IFF' size: 292 bytes.
+    Entry [133] offset[  197477]'..\..\DATA\INTEL\SENTRYEA.IFF' size: 242 bytes.
+    Entry [134] offset[  197719]'..\..\DATA\INTEL\SENTRYEC.IFF' size: 256 bytes.
+    Entry [135] offset[  197975]'..\..\DATA\INTEL\SENTRYF.IFF' size: 508 bytes.
+    Entry [136] offset[  198483]'..\..\DATA\INTEL\STERN.IFF' size: 804 bytes.
+    Entry [137] offset[  199287]'..\..\DATA\INTEL\STRIBASE.IFF' size: 722 bytes.
+    Entry [138] offset[  200009]'..\..\DATA\MISSIONS\EUROPE.IFF' size: 1288 bytes.
+    Entry [139] offset[  201297]'..\..\DATA\INTEL\SURF2.IFF' size: 368 bytes.
+    Entry [140] offset[  201665]'..\..\DATA\INTEL\SURFDUDE.IFF' size: 544 bytes.
+    Entry [141] offset[  202209]'..\..\DATA\INTEL\TARGET.IFF' size: 764 bytes.
+    Entry [142] offset[  202973]'..\..\DATA\INTEL\TEX.IFF' size: 850 bytes.
+    Entry [143] offset[  203823]'..\..\DATA\INTEL\THE747.IFF' size: 204 bytes.
+    Entry [144] offset[  204027]'..\..\DATA\INTEL\TU-20.IFF' size: 276 bytes.
+    Entry [145] offset[  204303]'..\..\DATA\INTEL\TWPGOON.IFF' size: 314 bytes.
+    Entry [146] offset[  204617]'..\..\DATA\INTEL\TWPGOONA.IFF' size: 318 bytes.
+    Entry [147] offset[  204935]'..\..\DATA\INTEL\TWPGOONR.IFF' size: 312 bytes.
+    Entry [148] offset[  205247]'..\..\DATA\INTEL\VETERAN.IFF' size: 294 bytes.
+    Entry [149] offset[  205541]'..\..\DATA\INTEL\VIXEN.IFF' size: 908 bytes.
+    Entry [150] offset[  206449]'..\..\DATA\COCKPITS\NAVMAP.IFF' size: 430112 bytes.
+    Entry [151] offset[  636561]'..\..\DATA\COCKPITS\PLAQUES.IFF' size: 12804 bytes.
+    Entry [152] offset[  649365]'..\..\DATA\COCKPITS\BETTY.PAK' size: 16091 bytes.
+
+Listing content of TRE archive 'OBJECTS.TRE'.
+    301 entrie(s) found.
+    Entry [  0] offset[   24745]'..\..\DATA\OBJECTS\MIRLOADA.IFF' size: 52 bytes.
+    Entry [  1] offset[   24797]'..\..\DATA\OBJECTS\MAVLOADM.IFF' size: 72 bytes.
+    Entry [  2] offset[   24869]'..\..\DATA\OBJECTS\MAVLOADL.IFF' size: 72 bytes.
+    Entry [  3] offset[   24941]'..\..\DATA\OBJECTS\M29LOADG.IFF' size: 62 bytes.
+    Entry [  4] offset[   25003]'..\..\DATA\OBJECTS\M29LOADA.IFF' size: 42 bytes.
+    Entry [  5] offset[   25045]'..\..\DATA\OBJECTS\M21LOADG.IFF' size: 62 bytes.
+    Entry [  6] offset[   25107]'..\..\DATA\OBJECTS\M21LOADA.IFF' size: 42 bytes.
+    Entry [  7] offset[   25149]'..\..\DATA\OBJECTS\GUNLOADP.IFF' size: 42 bytes.
+    Entry [  8] offset[   25191]'..\..\DATA\OBJECTS\GUNLOAD.IFF' size: 42 bytes.
+    Entry [  9] offset[   25233]'..\..\DATA\OBJECTS\GBULOADM.IFF' size: 72 bytes.
+    Entry [ 10] offset[   25305]'..\..\DATA\OBJECTS\GBULOADL.IFF' size: 72 bytes.
+    Entry [ 11] offset[   25377]'..\..\DATA\OBJECTS\F22LOAD.IFF' size: 62 bytes.
+    Entry [ 12] offset[   25439]'..\..\DATA\OBJECTS\F18LOADG.IFF' size: 62 bytes.
+    Entry [ 13] offset[   25501]'..\..\DATA\OBJECTS\F18LOADA.IFF' size: 52 bytes.
+    Entry [ 14] offset[   25553]'..\..\DATA\OBJECTS\F16LOADA.IFF' size: 52 bytes.
+    Entry [ 15] offset[   25605]'..\..\DATA\OBJECTS\F15LOADG.IFF' size: 62 bytes.
+    Entry [ 16] offset[   25667]'..\..\DATA\OBJECTS\F15LOADA.IFF' size: 52 bytes.
+    Entry [ 17] offset[   25719]'..\..\DATA\OBJECTS\747.IFF' size: 82720 bytes.
+    Entry [ 18] offset[  108439]'..\..\DATA\OBJECTS\A-10.IFF' size: 46148 bytes.
+    Entry [ 19] offset[  154587]'..\..\DATA\OBJECTS\27MM.IFF' size: 208 bytes.
+    Entry [ 20] offset[  154795]'..\..\DATA\OBJECTS\A10GBULO.IFF' size: 52 bytes.
+    Entry [ 21] offset[  154847]'..\..\DATA\OBJECTS\A10LOAD.IFF' size: 52 bytes.
+    Entry [ 22] offset[  154899]'..\..\DATA\OBJECTS\ABRAMS-G.IFF' size: 58548 bytes.
+    Entry [ 23] offset[  213447]'..\..\DATA\OBJECTS\20MM.IFF' size: 208 bytes.
+    Entry [ 24] offset[  213655]'..\..\DATA\OBJECTS\AGM-65D.IFF' size: 5334 bytes.
+    Entry [ 25] offset[  218989]'..\..\DATA\OBJECTS\AIRLOADL.IFF' size: 52 bytes.
+    Entry [ 26] offset[  219041]'..\..\DATA\OBJECTS\AIRLOADM.IFF' size: 52 bytes.
+    Entry [ 27] offset[  219093]'..\..\DATA\OBJECTS\30MM.IFF' size: 208 bytes.
+    Entry [ 28] offset[  219301]'..\..\DATA\OBJECTS\AMRAAM.IFF' size: 998 bytes.
+    Entry [ 29] offset[  220299]'..\..\DATA\OBJECTS\AWACS.IFF' size: 45630 bytes.
+    Entry [ 30] offset[  265929]'..\..\DATA\OBJECTS\30MMGAU.IFF' size: 208 bytes.
+    Entry [ 31] offset[  266137]'..\..\DATA\OBJECTS\BARN22.IFF' size: 24514 bytes.
+    Entry [ 32] offset[  290651]'..\..\DATA\OBJECTS\BARN22D.IFF' size: 39234 bytes.
+    Entry [ 33] offset[  329885]'..\..\DATA\OBJECTS\BLDGDEB1.IFF' size: 3786 bytes.
+    Entry [ 34] offset[  333671]'..\..\DATA\OBJECTS\40MM.IFF' size: 208 bytes.
+    Entry [ 35] offset[  333879]'..\..\DATA\OBJECTS\BLDGDEB2.IFF' size: 3062 bytes.
+    Entry [ 36] offset[  336941]'..\..\DATA\OBJECTS\BLDGDEB3.IFF' size: 2860 bytes.
+    Entry [ 37] offset[  339801]'..\..\DATA\OBJECTS\BMBLOADH.IFF' size: 72 bytes.
+    Entry [ 38] offset[  339873]'..\..\DATA\OBJECTS\23MM.IFF' size: 208 bytes.
+    Entry [ 39] offset[  340081]'..\..\DATA\OBJECTS\BMBLOADL.IFF' size: 62 bytes.
+    Entry [ 40] offset[  340143]'..\..\DATA\OBJECTS\BMP-2.IFF' size: 42474 bytes.
+    Entry [ 41] offset[  382617]'..\..\DATA\OBJECTS\BOATX.IFF' size: 90766 bytes.
+    Entry [ 42] offset[  473383]'..\..\DATA\OBJECTS\40MMAA.IFF' size: 23764 bytes.
+    Entry [ 43] offset[  497147]'..\..\DATA\OBJECTS\BRIGC10.IFF' size: 13404 bytes.
+    Entry [ 44] offset[  510551]'..\..\DATA\OBJECTS\BRIGC14D.IFF' size: 13386 bytes.
+    Entry [ 45] offset[  523937]'..\..\DATA\OBJECTS\BUILD1D.IFF' size: 20994 bytes.
+    Entry [ 46] offset[  544931]'..\..\DATA\OBJECTS\BUILD2D.IFF' size: 20994 bytes.
+    Entry [ 47] offset[  565925]'..\..\DATA\OBJECTS\C130DES.IFF' size: 53080 bytes.
+    Entry [ 48] offset[  619005]'..\..\DATA\OBJECTS\C130GRN.IFF' size: 48892 bytes.
+    Entry [ 49] offset[  667897]'..\..\DATA\OBJECTS\CARRIERW.IFF' size: 55258 bytes.
+    Entry [ 50] offset[  723155]'..\..\DATA\OBJECTS\CASB90D.IFF' size: 30432 bytes.
+    Entry [ 51] offset[  753587]'..\..\DATA\OBJECTS\CASC101.IFF' size: 27742 bytes.
+    Entry [ 52] offset[  781329]'..\..\DATA\OBJECTS\CASC84D.IFF' size: 27000 bytes.
+    Entry [ 53] offset[  808329]'..\..\DATA\OBJECTS\CASKPC22.IFF' size: 21300 bytes.
+    Entry [ 54] offset[  829629]'..\..\DATA\OBJECTS\CASKPCD.IFF' size: 21156 bytes.
+    Entry [ 55] offset[  850785]'..\..\DATA\OBJECTS\CASTLE10.IFF' size: 17860 bytes.
+    Entry [ 56] offset[  868645]'..\..\DATA\OBJECTS\CASTW13.IFF' size: 3352 bytes.
+    Entry [ 57] offset[  871997]'..\..\DATA\OBJECTS\CASTW6D.IFF' size: 2244 bytes.
+    Entry [ 58] offset[  874241]'..\..\DATA\OBJECTS\CASWA4.IFF' size: 2964 bytes.
+    Entry [ 59] offset[  877205]'..\..\DATA\OBJECTS\CASWA4D.IFF' size: 2834 bytes.
+    Entry [ 60] offset[  880039]'..\..\DATA\OBJECTS\CHAFF.IFF' size: 3868 bytes.
+    Entry [ 61] offset[  883907]'..\..\DATA\OBJECTS\CHURCH1.IFF' size: 16402 bytes.
+    Entry [ 62] offset[  900309]'..\..\DATA\OBJECTS\CHURCH14.IFF' size: 25724 bytes.
+    Entry [ 63] offset[  926033]'..\..\DATA\OBJECTS\CHUTE.IFF' size: 12714 bytes.
+    Entry [ 64] offset[  938747]'..\..\DATA\OBJECTS\CLUST_BM.IFF' size: 33750 bytes.
+    Entry [ 65] offset[  972497]'..\..\DATA\OBJECTS\D40MMAA.IFF' size: 18122 bytes.
+    Entry [ 66] offset[  990619]'..\..\DATA\OBJECTS\DABRMS-G.IFF' size: 19752 bytes.
+    Entry [ 67] offset[ 1010371]'..\..\DATA\OBJECTS\DBMP-2.IFF' size: 14672 bytes.
+    Entry [ 68] offset[ 1025043]'..\..\DATA\OBJECTS\DBOAT.IFF' size: 18382 bytes.
+    Entry [ 69] offset[ 1043425]'..\..\DATA\OBJECTS\DCARRIER.IFF' size: 14782 bytes.
+    Entry [ 70] offset[ 1058207]'..\..\DATA\OBJECTS\DCHUTE.IFF' size: 47104 bytes.
+    Entry [ 71] offset[ 1105311]'..\..\DATA\OBJECTS\DDESTROY.IFF' size: 18182 bytes.
+    Entry [ 72] offset[ 1123493]'..\..\DATA\OBJECTS\DEBDES.IFF' size: 7144 bytes.
+    Entry [ 73] offset[ 1130637]'..\..\DATA\OBJECTS\DEBGRAY.IFF' size: 7146 bytes.
+    Entry [ 74] offset[ 1137783]'..\..\DATA\OBJECTS\DEBHERC.IFF' size: 13322 bytes.
+    Entry [ 75] offset[ 1151105]'..\..\DATA\OBJECTS\DEBM21.IFF' size: 10328 bytes.
+    Entry [ 76] offset[ 1161433]'..\..\DATA\OBJECTS\DEBSU27.IFF' size: 9640 bytes.
+    Entry [ 77] offset[ 1171073]'..\..\DATA\OBJECTS\DESTROYS.IFF' size: 96308 bytes.
+    Entry [ 78] offset[ 1267381]'..\..\DATA\OBJECTS\DJEEP.IFF' size: 15406 bytes.
+    Entry [ 79] offset[ 1282787]'..\..\DATA\OBJECTS\DMOBSAM.IFF' size: 17582 bytes.
+    Entry [ 80] offset[ 1300369]'..\..\DATA\OBJECTS\DOILTANK.IFF' size: 9628 bytes.
+    Entry [ 81] offset[ 1309997]'..\..\DATA\OBJECTS\DOME28.IFF' size: 17256 bytes.
+    Entry [ 82] offset[ 1327253]'..\..\DATA\OBJECTS\DOME30D.IFF' size: 29994 bytes.
+    Entry [ 83] offset[ 1357247]'..\..\DATA\OBJECTS\DRADARST.IFF' size: 8522 bytes.
+    Entry [ 84] offset[ 1365769]'..\..\DATA\OBJECTS\DRUM1D.IFF' size: 16304 bytes.
+    Entry [ 85] offset[ 1382073]'..\..\DATA\OBJECTS\DRUMA24.IFF' size: 15580 bytes.
+    Entry [ 86] offset[ 1397653]'..\..\DATA\OBJECTS\DRUMB16.IFF' size: 15376 bytes.
+    Entry [ 87] offset[ 1413029]'..\..\DATA\OBJECTS\DRUMC24.IFF' size: 15580 bytes.
+    Entry [ 88] offset[ 1428609]'..\..\DATA\OBJECTS\DRUMD24.IFF' size: 15580 bytes.
+    Entry [ 89] offset[ 1444189]'..\..\DATA\OBJECTS\DSPGUN.IFF' size: 7590 bytes.
+    Entry [ 90] offset[ 1451779]'..\..\DATA\OBJECTS\DT-72.IFF' size: 17584 bytes.
+    Entry [ 91] offset[ 1469363]'..\..\DATA\OBJECTS\DTRUCK2.IFF' size: 20830 bytes.
+    Entry [ 92] offset[ 1490193]'..\..\DATA\OBJECTS\DURANDAL.IFF' size: 2000 bytes.
+    Entry [ 93] offset[ 1492193]'..\..\DATA\OBJECTS\DZSU-23.IFF' size: 15356 bytes.
+    Entry [ 94] offset[ 1507549]'..\..\DATA\OBJECTS\EASTA10.IFF' size: 14706 bytes.
+    Entry [ 95] offset[ 1522255]'..\..\DATA\OBJECTS\EASTA10D.IFF' size: 28912 bytes.
+    Entry [ 96] offset[ 1551167]'..\..\DATA\OBJECTS\EASTB10.IFF' size: 18732 bytes.
+    Entry [ 97] offset[ 1569899]'..\..\DATA\OBJECTS\EASTB10D.IFF' size: 36964 bytes.
+    Entry [ 98] offset[ 1606863]'..\..\DATA\OBJECTS\EASTC10.IFF' size: 16176 bytes.
+    Entry [ 99] offset[ 1623039]'..\..\DATA\OBJECTS\EASTC10D.IFF' size: 32682 bytes.
+    Entry [100] offset[ 1655721]'..\..\DATA\OBJECTS\EASTD10.IFF' size: 25950 bytes.
+    Entry [101] offset[ 1681671]'..\..\DATA\OBJECTS\EASTD10D.IFF' size: 35570 bytes.
+    Entry [102] offset[ 1717241]'..\..\DATA\OBJECTS\EASTE28.IFF' size: 34262 bytes.
+    Entry [103] offset[ 1751503]'..\..\DATA\OBJECTS\EASTE30D.IFF' size: 56832 bytes.
+    Entry [104] offset[ 1808335]'..\..\DATA\OBJECTS\EJECSEAT.IFF' size: 8160 bytes.
+    Entry [105] offset[ 1816495]'..\..\DATA\OBJECTS\EJGUY.IFF' size: 2706 bytes.
+    Entry [106] offset[ 1819201]'..\..\DATA\OBJECTS\EXPLODE1.IFF' size: 55098 bytes.
+    Entry [107] offset[ 1874299]'..\..\DATA\OBJECTS\EXPLODE2.IFF' size: 14018 bytes.
+    Entry [108] offset[ 1888317]'..\..\DATA\OBJECTS\F-15.IFF' size: 49000 bytes.
+    Entry [109] offset[ 1937317]'..\..\DATA\OBJECTS\F-15AB.IFF' size: 454 bytes.
+    Entry [110] offset[ 1937771]'..\..\DATA\OBJECTS\F-16DES.IFF' size: 59078 bytes.
+    Entry [111] offset[ 1996849]'..\..\DATA\OBJECTS\F-16GRAY.IFF' size: 51292 bytes.
+    Entry [112] offset[ 2048141]'..\..\DATA\OBJECTS\F-16GUN.IFF' size: 5690 bytes.
+    Entry [113] offset[ 2053831]'..\..\DATA\OBJECTS\F-18.IFF' size: 51582 bytes.
+    Entry [114] offset[ 2105413]'..\..\DATA\OBJECTS\F-18AB.IFF' size: 426 bytes.
+    Entry [115] offset[ 2105839]'..\..\DATA\OBJECTS\F-22.IFF' size: 45214 bytes.
+    Entry [116] offset[ 2151053]'..\..\DATA\OBJECTS\F-22AB.IFF' size: 454 bytes.
+    Entry [117] offset[ 2151507]'..\..\DATA\OBJECTS\F16-AB.IFF' size: 290 bytes.
+    Entry [118] offset[ 2151797]'..\..\DATA\OBJECTS\F16-CKPT.IFF' size: 295962 bytes.
+    Entry [119] offset[ 2447759]'..\..\DATA\OBJECTS\F16DDEB2.IFF' size: 10308 bytes.
+    Entry [120] offset[ 2458067]'..\..\DATA\OBJECTS\F16GDEB2.IFF' size: 9802 bytes.
+    Entry [121] offset[ 2467869]'..\..\DATA\OBJECTS\F16GDEB3.IFF' size: 5900 bytes.
+    Entry [122] offset[ 2473769]'..\..\DATA\OBJECTS\F16GDEB4.IFF' size: 4280 bytes.
+    Entry [123] offset[ 2478049]'..\..\DATA\OBJECTS\F16PITXP.IFF' size: 168668 bytes.
+    Entry [124] offset[ 2646717]'..\..\DATA\OBJECTS\F22-CKPT.IFF' size: 287224 bytes.
+    Entry [125] offset[ 2933941]'..\..\DATA\OBJECTS\F22GEAR0.IFF' size: 426 bytes.
+    Entry [126] offset[ 2934367]'..\..\DATA\OBJECTS\F22GEAR1.IFF' size: 11022 bytes.
+    Entry [127] offset[ 2945389]'..\..\DATA\OBJECTS\F22GEAR2.IFF' size: 11022 bytes.
+    Entry [128] offset[ 2956411]'..\..\DATA\OBJECTS\F22GEAR3.IFF' size: 11034 bytes.
+    Entry [129] offset[ 2967445]'..\..\DATA\OBJECTS\F22GEAR4.IFF' size: 11022 bytes.
+    Entry [130] offset[ 2978467]'..\..\DATA\OBJECTS\F22PIT.IFF' size: 174376 bytes.
+    Entry [131] offset[ 3152843]'..\..\DATA\OBJECTS\FAC10.IFF' size: 20176 bytes.
+    Entry [132] offset[ 3173019]'..\..\DATA\OBJECTS\FAC14.IFF' size: 30822 bytes.
+    Entry [133] offset[ 3203841]'..\..\DATA\OBJECTS\FAC14D.IFF' size: 26766 bytes.
+    Entry [134] offset[ 3230607]'..\..\DATA\OBJECTS\FACB10D.IFF' size: 9516 bytes.
+    Entry [135] offset[ 3240123]'..\..\DATA\OBJECTS\FHOUS14.IFF' size: 25790 bytes.
+    Entry [136] offset[ 3265913]'..\..\DATA\OBJECTS\FHOUS14D.IFF' size: 42316 bytes.
+    Entry [137] offset[ 3308229]'..\..\DATA\OBJECTS\FLARE.IFF' size: 1528 bytes.
+    Entry [138] offset[ 3309757]'..\..\DATA\OBJECTS\FORT30.IFF' size: 21844 bytes.
+    Entry [139] offset[ 3331601]'..\..\DATA\OBJECTS\FORT32D.IFF' size: 45122 bytes.
+    Entry [140] offset[ 3376723]'..\..\DATA\OBJECTS\FORTT10.IFF' size: 21212 bytes.
+    Entry [141] offset[ 3397935]'..\..\DATA\OBJECTS\FORTT12D.IFF' size: 41220 bytes.
+    Entry [142] offset[ 3439155]'..\..\DATA\OBJECTS\FORTW2.IFF' size: 9090 bytes.
+    Entry [143] offset[ 3448245]'..\..\DATA\OBJECTS\FORTW2D.IFF' size: 8960 bytes.
+    Entry [144] offset[ 3457205]'..\..\DATA\OBJECTS\FORTWB2.IFF' size: 9090 bytes.
+    Entry [145] offset[ 3466295]'..\..\DATA\OBJECTS\FORTWB2D.IFF' size: 8960 bytes.
+    Entry [146] offset[ 3475255]'..\..\DATA\OBJECTS\FUELEXP1.IFF' size: 60268 bytes.
+    Entry [147] offset[ 3535523]'..\..\DATA\OBJECTS\FUELEXP2.IFF' size: 12220 bytes.
+    Entry [148] offset[ 3547743]'..\..\DATA\OBJECTS\GBU-15G.IFF' size: 5500 bytes.
+    Entry [149] offset[ 3553243]'..\..\DATA\OBJECTS\GEAR0.IFF' size: 542 bytes.
+    Entry [150] offset[ 3553785]'..\..\DATA\OBJECTS\GEAR1.IFF' size: 9686 bytes.
+    Entry [151] offset[ 3563471]'..\..\DATA\OBJECTS\GEAR2.IFF' size: 9686 bytes.
+    Entry [152] offset[ 3573157]'..\..\DATA\OBJECTS\GEAR3.IFF' size: 9686 bytes.
+    Entry [153] offset[ 3582843]'..\..\DATA\OBJECTS\GEAR4.IFF' size: 9686 bytes.
+    Entry [154] offset[ 3592529]'..\..\DATA\OBJECTS\GENDEB1.IFF' size: 4888 bytes.
+    Entry [155] offset[ 3597417]'..\..\DATA\OBJECTS\GENDEB2.IFF' size: 5026 bytes.
+    Entry [156] offset[ 3602443]'..\..\DATA\OBJECTS\GENDEB3.IFF' size: 4980 bytes.
+    Entry [157] offset[ 3607423]'..\..\DATA\OBJECTS\GENDEB4.IFF' size: 2318 bytes.
+    Entry [158] offset[ 3609741]'..\..\DATA\OBJECTS\GENDEB5.IFF' size: 3374 bytes.
+    Entry [159] offset[ 3613115]'..\..\DATA\OBJECTS\GENDEB6.IFF' size: 1714 bytes.
+    Entry [160] offset[ 3614829]'..\..\DATA\OBJECTS\GENDEB7.IFF' size: 1802 bytes.
+    Entry [161] offset[ 3616631]'..\..\DATA\OBJECTS\GENDEB8.IFF' size: 1890 bytes.
+    Entry [162] offset[ 3618521]'..\..\DATA\OBJECTS\GENDEB9.IFF' size: 1626 bytes.
+    Entry [163] offset[ 3620147]'..\..\DATA\OBJECTS\GRNDEX1.IFF' size: 53098 bytes.
+    Entry [164] offset[ 3673245]'..\..\DATA\OBJECTS\GRNDEX2.IFF' size: 26564 bytes.
+    Entry [165] offset[ 3699809]'..\..\DATA\OBJECTS\GRNDEX3.IFF' size: 84132 bytes.
+    Entry [166] offset[ 3783941]'..\..\DATA\OBJECTS\GRNDEX4.IFF' size: 17898 bytes.
+    Entry [167] offset[ 3801839]'..\..\DATA\OBJECTS\GUNSPARK.IFF' size: 2720 bytes.
+    Entry [168] offset[ 3804559]'..\..\DATA\OBJECTS\HANGAR3.IFF' size: 15968 bytes.
+    Entry [169] offset[ 3820527]'..\..\DATA\OBJECTS\HANGAR3D.IFF' size: 32542 bytes.
+    Entry [170] offset[ 3853069]'..\..\DATA\OBJECTS\HANGB22.IFF' size: 20442 bytes.
+    Entry [171] offset[ 3873511]'..\..\DATA\OBJECTS\HANGB22D.IFF' size: 37826 bytes.
+    Entry [172] offset[ 3911337]'..\..\DATA\OBJECTS\HANGBD.IFF' size: 8516 bytes.
+    Entry [173] offset[ 3919853]'..\..\DATA\OBJECTS\HUD.IFF' size: 12422 bytes.
+    Entry [174] offset[ 3932275]'..\..\DATA\OBJECTS\IRS10.IFF' size: 16940 bytes.
+    Entry [175] offset[ 3949215]'..\..\DATA\OBJECTS\IRS12D.IFF' size: 24096 bytes.
+    Entry [176] offset[ 3973311]'..\..\DATA\OBJECTS\JEEP.IFF' size: 27840 bytes.
+    Entry [177] offset[ 4001151]'..\..\DATA\OBJECTS\KHAFJIGD.IFF' size: 16150 bytes.
+    Entry [178] offset[ 4017301]'..\..\DATA\OBJECTS\KHAFJIGT.IFF' size: 14774 bytes.
+    Entry [179] offset[ 4032075]'..\..\DATA\OBJECTS\LEARJET.IFF' size: 30608 bytes.
+    Entry [180] offset[ 4062683]'..\..\DATA\OBJECTS\LOWCHUTE.IFF' size: 11786 bytes.
+    Entry [181] offset[ 4074469]'..\..\DATA\OBJECTS\LOWDCHUT.IFF' size: 11724 bytes.
+    Entry [182] offset[ 4086193]'..\..\DATA\OBJECTS\LOWEJECT.IFF' size: 8120 bytes.
+    Entry [183] offset[ 4094313]'..\..\DATA\OBJECTS\M261.IFF' size: 548 bytes.
+    Entry [184] offset[ 4094861]'..\..\DATA\OBJECTS\MIG21.IFF' size: 37758 bytes.
+    Entry [185] offset[ 4132619]'..\..\DATA\OBJECTS\MIG21AB.IFF' size: 310 bytes.
+    Entry [186] offset[ 4132929]'..\..\DATA\OBJECTS\MIG29.IFF' size: 63114 bytes.
+    Entry [187] offset[ 4196043]'..\..\DATA\OBJECTS\MIG29AB.IFF' size: 454 bytes.
+    Entry [188] offset[ 4196497]'..\..\DATA\OBJECTS\MIG29GRA.IFF' size: 65024 bytes.
+    Entry [189] offset[ 4261521]'..\..\DATA\OBJECTS\MILA10.IFF' size: 16698 bytes.
+    Entry [190] offset[ 4278219]'..\..\DATA\OBJECTS\MILA12D.IFF' size: 30122 bytes.
+    Entry [191] offset[ 4308341]'..\..\DATA\OBJECTS\MILB20.IFF' size: 30256 bytes.
+    Entry [192] offset[ 4338597]'..\..\DATA\OBJECTS\MILB22D.IFF' size: 46220 bytes.
+    Entry [193] offset[ 4384817]'..\..\DATA\OBJECTS\MILC20.IFF' size: 31220 bytes.
+    Entry [194] offset[ 4416037]'..\..\DATA\OBJECTS\MILC22D.IFF' size: 56750 bytes.
+    Entry [195] offset[ 4472787]'..\..\DATA\OBJECTS\MILD30.IFF' size: 19980 bytes.
+    Entry [196] offset[ 4492767]'..\..\DATA\OBJECTS\MILD32D.IFF' size: 41422 bytes.
+    Entry [197] offset[ 4534189]'..\..\DATA\OBJECTS\MILE30.IFF' size: 26826 bytes.
+    Entry [198] offset[ 4561015]'..\..\DATA\OBJECTS\MILE34D.IFF' size: 52738 bytes.
+    Entry [199] offset[ 4613753]'..\..\DATA\OBJECTS\MILF20.IFF' size: 24648 bytes.
+    Entry [200] offset[ 4638401]'..\..\DATA\OBJECTS\MILF22D.IFF' size: 51038 bytes.
+    Entry [201] offset[ 4689439]'..\..\DATA\OBJECTS\MILG22D.IFF' size: 42392 bytes.
+    Entry [202] offset[ 4731831]'..\..\DATA\OBJECTS\MILG2O.IFF' size: 24648 bytes.
+    Entry [203] offset[ 4756479]'..\..\DATA\OBJECTS\MIRAGE.IFF' size: 50720 bytes.
+    Entry [204] offset[ 4807199]'..\..\DATA\OBJECTS\MIRAGEAB.IFF' size: 362 bytes.
+    Entry [205] offset[ 4807561]'..\..\DATA\OBJECTS\MK20.IFF' size: 1012 bytes.
+    Entry [206] offset[ 4808573]'..\..\DATA\OBJECTS\MK82.IFF' size: 1086 bytes.
+    Entry [207] offset[ 4809659]'..\..\DATA\OBJECTS\MOBSAMLN.IFF' size: 24520 bytes.
+    Entry [208] offset[ 4834179]'..\..\DATA\OBJECTS\NBLDG2.IFF' size: 21514 bytes.
+    Entry [209] offset[ 4855693]'..\..\DATA\OBJECTS\NBLDG2D.IFF' size: 29116 bytes.
+    Entry [210] offset[ 4884809]'..\..\DATA\OBJECTS\NORMLOAD.IFF' size: 62 bytes.
+    Entry [211] offset[ 4884871]'..\..\DATA\OBJECTS\NUC28.IFF' size: 22482 bytes.
+    Entry [212] offset[ 4907353]'..\..\DATA\OBJECTS\NUC28D.IFF' size: 40914 bytes.
+    Entry [213] offset[ 4948267]'..\..\DATA\OBJECTS\OFFA10.IFF' size: 15090 bytes.
+    Entry [214] offset[ 4963357]'..\..\DATA\OBJECTS\OFFA12D.IFF' size: 19480 bytes.
+    Entry [215] offset[ 4982837]'..\..\DATA\OBJECTS\OFFB10.IFF' size: 7662 bytes.
+    Entry [216] offset[ 4990499]'..\..\DATA\OBJECTS\OFFB12D.IFF' size: 12018 bytes.
+    Entry [217] offset[ 5002517]'..\..\DATA\OBJECTS\OFFC10.IFF' size: 16654 bytes.
+    Entry [218] offset[ 5019171]'..\..\DATA\OBJECTS\OFFC10D.IFF' size: 20350 bytes.
+    Entry [219] offset[ 5039521]'..\..\DATA\OBJECTS\OFFD10.IFF' size: 10190 bytes.
+    Entry [220] offset[ 5049711]'..\..\DATA\OBJECTS\OFFD10D.IFF' size: 9376 bytes.
+    Entry [221] offset[ 5059087]'..\..\DATA\OBJECTS\OFFE10.IFF' size: 27402 bytes.
+    Entry [222] offset[ 5086489]'..\..\DATA\OBJECTS\OFFE10D.IFF' size: 8148 bytes.
+    Entry [223] offset[ 5094637]'..\..\DATA\OBJECTS\OFFF10.IFF' size: 8692 bytes.
+    Entry [224] offset[ 5103329]'..\..\DATA\OBJECTS\OFFF10D.IFF' size: 18728 bytes.
+    Entry [225] offset[ 5122057]'..\..\DATA\OBJECTS\OFFG10.IFF' size: 9070 bytes.
+    Entry [226] offset[ 5131127]'..\..\DATA\OBJECTS\OFFG10D.IFF' size: 6614 bytes.
+    Entry [227] offset[ 5137741]'..\..\DATA\OBJECTS\OILA8.IFF' size: 7922 bytes.
+    Entry [228] offset[ 5145663]'..\..\DATA\OBJECTS\OILA8D.IFF' size: 22454 bytes.
+    Entry [229] offset[ 5168117]'..\..\DATA\OBJECTS\OILF23D.IFF' size: 68040 bytes.
+    Entry [230] offset[ 5236157]'..\..\DATA\OBJECTS\OILOF23.IFF' size: 31544 bytes.
+    Entry [231] offset[ 5267701]'..\..\DATA\OBJECTS\OILTANKR.IFF' size: 20620 bytes.
+    Entry [232] offset[ 5288321]'..\..\DATA\OBJECTS\PBLDGB.IFF' size: 25986 bytes.
+    Entry [233] offset[ 5314307]'..\..\DATA\OBJECTS\PBLDGP.IFF' size: 32898 bytes.
+    Entry [234] offset[ 5347205]'..\..\DATA\OBJECTS\PBLDGR.IFF' size: 32898 bytes.
+    Entry [235] offset[ 5380103]'..\..\DATA\OBJECTS\PBLDGS.IFF' size: 32898 bytes.
+    Entry [236] offset[ 5413001]'..\..\DATA\OBJECTS\PBLDGT.IFF' size: 32898 bytes.
+    Entry [237] offset[ 5445899]'..\..\DATA\OBJECTS\POD.IFF' size: 11236 bytes.
+    Entry [238] offset[ 5457135]'..\..\DATA\OBJECTS\PODLOAD.IFF' size: 72 bytes.
+    Entry [239] offset[ 5457207]'..\..\DATA\OBJECTS\PYRAMD4D.IFF' size: 25838 bytes.
+    Entry [240] offset[ 5483045]'..\..\DATA\OBJECTS\PYRAMID4.IFF' size: 23180 bytes.
+    Entry [241] offset[ 5506225]'..\..\DATA\OBJECTS\RDRSTL2.IFF' size: 42792 bytes.
+    Entry [242] offset[ 5549017]'..\..\DATA\OBJECTS\REFA10.IFF' size: 26666 bytes.
+    Entry [243] offset[ 5575683]'..\..\DATA\OBJECTS\REFA10D.IFF' size: 26522 bytes.
+    Entry [244] offset[ 5602205]'..\..\DATA\OBJECTS\REFB10.IFF' size: 8916 bytes.
+    Entry [245] offset[ 5611121]'..\..\DATA\OBJECTS\REFB12D.IFF' size: 17114 bytes.
+    Entry [246] offset[ 5628235]'..\..\DATA\OBJECTS\REFC10.IFF' size: 5022 bytes.
+    Entry [247] offset[ 5633257]'..\..\DATA\OBJECTS\REFC8D.IFF' size: 13646 bytes.
+    Entry [248] offset[ 5646903]'..\..\DATA\OBJECTS\REFE10.IFF' size: 8066 bytes.
+    Entry [249] offset[ 5654969]'..\..\DATA\OBJECTS\REFE10D.IFF' size: 22048 bytes.
+    Entry [250] offset[ 5677017]'..\..\DATA\OBJECTS\RWYEXT18.IFF' size: 128 bytes.
+    Entry [251] offset[ 5677145]'..\..\DATA\OBJECTS\RWYEXT27.IFF' size: 128 bytes.
+    Entry [252] offset[ 5677273]'..\..\DATA\OBJECTS\RWYLOAD.IFF' size: 72 bytes.
+    Entry [253] offset[ 5677345]'..\..\DATA\OBJECTS\SA2.IFF' size: 950 bytes.
+    Entry [254] offset[ 5678295]'..\..\DATA\OBJECTS\SA6.IFF' size: 950 bytes.
+    Entry [255] offset[ 5679245]'..\..\DATA\OBJECTS\SFA46.IFF' size: 24452 bytes.
+    Entry [256] offset[ 5703697]'..\..\DATA\OBJECTS\SFA46D.IFF' size: 14334 bytes.
+    Entry [257] offset[ 5718031]'..\..\DATA\OBJECTS\SFB20.IFF' size: 7732 bytes.
+    Entry [258] offset[ 5725763]'..\..\DATA\OBJECTS\SFB20D.IFF' size: 9470 bytes.
+    Entry [259] offset[ 5735233]'..\..\DATA\OBJECTS\SFGGA.IFF' size: 6300 bytes.
+    Entry [260] offset[ 5741533]'..\..\DATA\OBJECTS\SFGGB.IFF' size: 7504 bytes.
+    Entry [261] offset[ 5749037]'..\..\DATA\OBJECTS\SFGGC.IFF' size: 6234 bytes.
+    Entry [262] offset[ 5755271]'..\..\DATA\OBJECTS\SFGGD.IFF' size: 6306 bytes.
+    Entry [263] offset[ 5761577]'..\..\DATA\OBJECTS\SFTA16.IFF' size: 5266 bytes.
+    Entry [264] offset[ 5766843]'..\..\DATA\OBJECTS\SFTA4D.IFF' size: 10590 bytes.
+    Entry [265] offset[ 5777433]'..\..\DATA\OBJECTS\SILO24.IFF' size: 23896 bytes.
+    Entry [266] offset[ 5801329]'..\..\DATA\OBJECTS\SILO24D.IFF' size: 30010 bytes.
+    Entry [267] offset[ 5831339]'..\..\DATA\OBJECTS\SMOKEGEN.IFF' size: 17632 bytes.
+    Entry [268] offset[ 5848971]'..\..\DATA\OBJECTS\SMOKESET.IFF' size: 118904 bytes.
+    Entry [269] offset[ 5967875]'..\..\DATA\OBJECTS\SPARTGUN.IFF' size: 44840 bytes.
+    Entry [270] offset[ 6012715]'..\..\DATA\OBJECTS\SPHINX-D.IFF' size: 16598 bytes.
+    Entry [271] offset[ 6029313]'..\..\DATA\OBJECTS\SPHINX55.IFF' size: 38544 bytes.
+    Entry [272] offset[ 6067857]'..\..\DATA\OBJECTS\STASAMLN.IFF' size: 21866 bytes.
+    Entry [273] offset[ 6089723]'..\..\DATA\OBJECTS\STRIBASE.IFF' size: 9188 bytes.
+    Entry [274] offset[ 6098911]'..\..\DATA\OBJECTS\SU-27AB.IFF' size: 426 bytes.
+    Entry [275] offset[ 6099337]'..\..\DATA\OBJECTS\SU27.IFF' size: 40080 bytes.
+    Entry [276] offset[ 6139417]'..\..\DATA\OBJECTS\SUGLOAD.IFF' size: 42 bytes.
+    Entry [277] offset[ 6139459]'..\..\DATA\OBJECTS\SUJLOAD.IFF' size: 52 bytes.
+    Entry [278] offset[ 6139511]'..\..\DATA\OBJECTS\SULOAD.IFF' size: 52 bytes.
+    Entry [279] offset[ 6139563]'..\..\DATA\OBJECTS\SUMLOAD.IFF' size: 52 bytes.
+    Entry [280] offset[ 6139615]'..\..\DATA\OBJECTS\SUN.IFF' size: 660 bytes.
+    Entry [281] offset[ 6140275]'..\..\DATA\OBJECTS\SWINDERJ.IFF' size: 958 bytes.
+    Entry [282] offset[ 6141233]'..\..\DATA\OBJECTS\SWINDERM.IFF' size: 958 bytes.
+    Entry [283] offset[ 6142191]'..\..\DATA\OBJECTS\T-72.IFF' size: 27036 bytes.
+    Entry [284] offset[ 6169227]'..\..\DATA\OBJECTS\TANKGUN1.IFF' size: 430 bytes.
+    Entry [285] offset[ 6169657]'..\..\DATA\OBJECTS\TORNCG.IFF' size: 45184 bytes.
+    Entry [286] offset[ 6214841]'..\..\DATA\OBJECTS\TORNCGAB.IFF' size: 388 bytes.
+    Entry [287] offset[ 6215229]'..\..\DATA\OBJECTS\TORNLOAD.IFF' size: 52 bytes.
+    Entry [288] offset[ 6215281]'..\..\DATA\OBJECTS\TOWA24.IFF' size: 9148 bytes.
+    Entry [289] offset[ 6224429]'..\..\DATA\OBJECTS\TOWA24D.IFF' size: 10712 bytes.
+    Entry [290] offset[ 6235141]'..\..\DATA\OBJECTS\TOWB24.IFF' size: 7220 bytes.
+    Entry [291] offset[ 6242361]'..\..\DATA\OBJECTS\TOWB24D.IFF' size: 6296 bytes.
+    Entry [292] offset[ 6248657]'..\..\DATA\OBJECTS\TRUCK.IFF' size: 45316 bytes.
+    Entry [293] offset[ 6293973]'..\..\DATA\OBJECTS\TU-20.IFF' size: 63608 bytes.
+    Entry [294] offset[ 6357581]'..\..\DATA\OBJECTS\TU20LOAD.IFF' size: 42 bytes.
+    Entry [295] offset[ 6357623]'..\..\DATA\OBJECTS\WCB78.IFF' size: 78456 bytes.
+    Entry [296] offset[ 6436079]'..\..\DATA\OBJECTS\WCB78D.IFF' size: 83060 bytes.
+    Entry [297] offset[ 6519139]'..\..\DATA\OBJECTS\YF23.IFF' size: 29686 bytes.
+    Entry [298] offset[ 6548825]'..\..\DATA\OBJECTS\YF23LOAD.IFF' size: 62 bytes.
+    Entry [299] offset[ 6548887]'..\..\DATA\OBJECTS\ZSU-23.IFF' size: 49078 bytes.
+    Entry [300] offset[ 6597965]'..\..\DATA\OBJECTS\EJECT.PAK' size: 334743 bytes.
+
+Listing content of TRE archive 'SOUND.TRE'.
+    14 entrie(s) found.
+    Entry [  0] offset[  140566]'..\..\DATA\SOUND\SOUNDFX.ADL' size: 1758 bytes.
+    Entry [  1] offset[  142324]'..\..\DATA\SOUND\COMBAT.DAT' size: 1701 bytes.
+    Entry [  2] offset[  144025]'..\..\DATA\SOUND\COMBAT.ROL' size: 143942 bytes.
+    Entry [  3] offset[  287967]'..\..\DATA\SOUND\COMBAT.ADL' size: 126822 bytes.
+    Entry [  4] offset[  414789]'..\..\DATA\SOUND\GAMEFLOW.ROL' size: 206342 bytes.
+    Entry [  5] offset[  621131]'..\..\DATA\SOUND\GAMEFLOW.ADL' size: 166144 bytes.
+    Entry [  6] offset[  787275]'..\..\DATA\SOUND\GAMEFLOW.DAT' size: 4172 bytes.
+    Entry [  7] offset[  791447]'..\..\DATA\SOUND\SOUNDFX.ROL' size: 2208 bytes.
+    Entry [  8] offset[  793655]'..\..\DATA\SOUND\STRIKE.MT' size: 39372 bytes.
+    Entry [  9] offset[  833027]'..\..\DATA\SOUND\STRIKE.AD' size: 30550 bytes.
+    Entry [ 10] offset[  863577]'..\..\DATA\SOUND\ROLAND.DRV' size: 10415 bytes.
+    Entry [ 11] offset[  873992]'..\..\DATA\SOUND\ADLIB.DRV' size: 16385 bytes.
+    Entry [ 12] offset[  890377]'..\..\DATA\SOUND\SB.DRV' size: 4473 bytes.
+    Entry [ 13] offset[  894850]'..\..\DATA\SOUND\PAS.DRV' size: 4295 bytes.
+Listing content of TRE archive 'TEXTURES.TRE'.
+    5 entrie(s) found.
+    Entry [  0] offset[     385]'..\..\DATA\TXM\ACC_LIST.IFF' size: 302 bytes.
+    Entry [  1] offset[     687]'..\..\DATA\TXM\MOS_LIST.IFF' size: 536 bytes.
+    Entry [  2] offset[    1223]'..\..\DATA\TXM\TXM_LIST.IFF' size: 708 bytes.
+    Entry [  3] offset[    1931]'..\..\DATA\TXM\ACCPACK.PAK' size: 305608 bytes.
+    Entry [  4] offset[  307539]'..\..\DATA\TXM\TXMPACK.PAK' size: 1374199 bytes.

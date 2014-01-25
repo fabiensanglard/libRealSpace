@@ -86,7 +86,7 @@ void RSEntity::ParseVERT(IffChunk* chunk){
         int32_t coo ;
         
         
-        Vertex vertex ;
+        Point3D vertex ;
         
         coo = stream.ReadInt32LE();
         vertex.z = (coo>>8) + (coo&0x000000FF)/255.0;
@@ -243,7 +243,7 @@ void RSEntity::CalcBoundingBox(void){
     
     for(size_t i =0; i < this->vertices.size() ; i++){
         
-        Vertex vertex = vertices[i];
+        Point3D vertex = vertices[i];
         
         if (bb.min.x > vertex.x)
             bb.min.x = vertex.x;
@@ -288,7 +288,7 @@ void RSEntity::AddImage(RSImage* image){
     this->images.push_back(image);
 }
 
-void RSEntity::AddVertex(Vertex* vertex){
+void RSEntity::AddVertex(Point3D* vertex){
     this->vertices.push_back(*vertex);
 }
 
