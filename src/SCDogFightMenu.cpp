@@ -71,7 +71,7 @@ void SCDogFightMenu::ParsePalette(PakEntry* entry){
 
 void SCDogFightMenu::Run(void){
     
-    renderer.Init(640, 400);
+    renderer.Init(2);
     
     TreArchive tre ;
     tre.InitFromFile("GAMEFLOW.TRE");

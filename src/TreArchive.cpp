@@ -10,7 +10,8 @@
 
 
 TreArchive::TreArchive():
-    initalizedFromFile(false)
+    initalizedFromFile(false),
+    valid(false)
 {
 
     this->path[0] = '\0';
@@ -127,6 +128,8 @@ void TreArchive::Parse(void){
     }
     
     std::sort(entries.begin(), entries.end(),TreArchive::Compare);
+    
+    valid = true;
 }
 
 void TreArchive::List(FILE* output){
@@ -136,7 +139,7 @@ void TreArchive::List(FILE* output){
 
     for (size_t i=0 ; i < entries.size() ; i++){
         TreEntry* entry = entries[i];
-        fprintf(output,"    Entry [%3lu] offset[%8lu]'%s' size: %lu bytes.\n",i,entry->data-this->data,entry->name,entry->size);
+        fprintf(output,"    Entry [%3lu] offset[0x%8lX]'%s' size: %lu bytes.\n",i,entry->data-this->data,entry->name,entry->size);
     }
 }
 

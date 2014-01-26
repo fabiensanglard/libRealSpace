@@ -9,6 +9,14 @@
 #ifndef __libRealSpace__Math__
 #define __libRealSpace__Math__
 
+class Point2D{
+    float x;
+    float y;
+};
+
+typedef Point2D Vector2D;
+
+
 // Long life to however came up with this. You rule man.
 float InvSqrt(float x);
 

@@ -233,7 +233,7 @@ void SCObjectViewer::Init(void){
 void SCObjectViewer::Run(void){
     
     
-    renderer.Init(640, 400);
+    renderer.Init(2);
     
     
     TreArchive tre ;

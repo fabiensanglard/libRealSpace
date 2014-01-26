@@ -347,7 +347,7 @@ void RSArea::ParseTrigo(){
     
     PakEntry* entry ;
     
-    renderer.Init(640, 400);
+    renderer.Init(2);
     
     entry = archive->GetEntry(4);
     
@@ -625,7 +625,7 @@ void RSArea::AddJets(void){
 
 void RSArea::InitFromPAKFileName(const char* pakFilename){
     
-    renderer.Init(640*2, 400*2);
+    renderer.Init(4);
     
     strcpy(name,pakFilename);
     

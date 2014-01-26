@@ -1,0 +1,35 @@
+//
+//  IActivity.h
+//  libRealSpace
+//
+//  Created by Fabien Sanglard on 1/25/2014.
+//  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
+//
+
+#ifndef __libRealSpace__IActivity__
+#define __libRealSpace__IActivity__
+
+
+class IActivity{
+    
+public:
+    
+    virtual void Init(void) = 0;
+    virtual void Run (void) = 0;
+    
+    void SetTitle(const char* title);
+    
+    inline bool IsRunning(void){ return this->running; }
+    
+    VGAPalette palette;
+    
+protected:
+    IActivity();
+    ~IActivity();
+    
+private:
+    bool running;
+};
+
+
+#endif /* defined(__libRealSpace__IActivity__) */

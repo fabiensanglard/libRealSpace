@@ -54,8 +54,12 @@ public:
     }
     
     inline uint8_t* GetData(void){ return data; }
+    
+    inline bool IsValid(void){ return this->valid;}
+    
 private:
     
+    bool valid;
     
     std::vector<TreEntry*> entries;
     

@@ -91,7 +91,6 @@ public:
     void AddTriangle(Triangle* triangle);
     size_t NumTriangles(void);
     
-    void SetPalette(VGAPalette* palette);
     
     
     std::vector<RSImage*> images;
@@ -110,12 +109,18 @@ public:
     Point3D position;
     Quaternion orientation;
     
+    inline bool IsPrepared(void){
+        return this->prepared;
+    }
+    
+    bool prepared;
+    
 private:
     
     BoudingBox bb;
     void CalcBoundingBox(void);
     
-    VGAPalette* palette;
+    //Has the entity been sent to te GPU and is ready to be renderer.
     
     
     void ParseVERT(IffChunk* chunk);

@@ -14,6 +14,10 @@ typedef struct PakEntry{
     uint8_t* data;
     size_t size;
     
+    static inline bool Compare(PakEntry* any, PakEntry* other){
+        return any->data < other->data;
+    }
+    
 } PakEntry;
 
 class PakArchive{

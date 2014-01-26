@@ -27,7 +27,7 @@ void testTRE(void){
 void testShowAllJetTextures(const char* trePath,const char* jetPath)
 {
     
-    renderer.Init(640,400);
+    renderer.Init(2);
     
     // Let's open the TRE archive.
     TreArchive treArchive;
@@ -77,7 +77,7 @@ void testShowAllJetTextures(const char* trePath,const char* jetPath)
 
 void ShowAllJets(void){
     
-    renderer.Init(1280,800);
+    renderer.Init(4);
     
     const char* trePath = "OBJECTS.TRE";
     
@@ -222,7 +222,7 @@ void testPAKDecompress(void){
 
 void testShowAllTexturesPAK(void){
     
-    renderer.Init(640,400);
+    renderer.Init(2);
     
     const char* trePath = "TEXTURES.TRE";
     TreArchive treArchive;
@@ -511,10 +511,16 @@ void ShowImage(RSImage* img      ){
     }
 }
 
-void ExploreImages(uint8_t* data, size_t size){
+void PrintTabs(int tabs){
+    for (size_t i=0 ; i < tabs; i++) {
+        printf(" ");
+    }
+}
+
+void ExploreImages(uint8_t* data, size_t size, int numTabs){
     
-    
-    
+    PrintTabs(numTabs);
+    printf("Exploring 0X%X\n",data);
     /*
     uint32_t* magic = (uint32_t*)data;
     if (*magic == 'MROF'){
@@ -526,13 +532,16 @@ void ExploreImages(uint8_t* data, size_t size){
     PakArchive font;
     font.InitFromRAM("XXXX",data,size);
     if (font.IsReady()){
+        PrintTabs(numTabs);
+        printf("Pak Found 0X%X\n",data);
         for(size_t i =0 ; i  < font.GetNumEntries() ; i++){
             PakEntry* e = font.GetEntry(i);
-            ExploreImages(e->data,e->size);
+            ExploreImages(e->data,e->size,numTabs++);
             
         }
         return;
     }
+    
     
     //Myabe it is a direct image ?
     RSImage screen;
@@ -542,6 +551,8 @@ void ExploreImages(uint8_t* data, size_t size){
     screen.ClearContent();
     bool error = codex.ReadImage(data, &screen, &byteRead);
     if (!error){
+        PrintTabs(numTabs);
+        printf("Image Found 0X%X\n",data);
         ShowImage(&screen);
         return;
     }
@@ -562,6 +573,8 @@ void ExploreImages(uint8_t* data, size_t size){
         bool error = codex.ReadImage(data+nextImage, &screen, &byteRead);
         if (!error){
             ShowImage(&screen);
+            PrintTabs(numTabs);
+            printf("Image Found 0X%X\n",data+nextImage);
         }
         
         nextImage = s.ReadUInt32LE();
@@ -572,7 +585,7 @@ void ExploreImages(uint8_t* data, size_t size){
 
 void TestMouseCursor(void){
     
-    renderer.Init(640, 400);
+    renderer.Init(2);
 
     
     
@@ -716,7 +729,7 @@ void TestMouseCursor(void){
     gf.InitFromFile("GAMEFLOW.TRE");
     TreEntry* mid1 = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");  // A LLOOOOOOT OF GOOOD STUFFF !!! Background, bar animations, all airplanes
                                                                                 // airplane preparation,
-    ExploreImages(mid1->data,mid1->size);
+    ExploreImages(mid1->data,mid1->size,0);
 
     //Check palettes fro that too
     TreEntry* palettesE = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
@@ -743,7 +756,7 @@ void TestMouseCursor(void){
     */
 }
 
-int main( int argc,char** argv){
+int mainLibFreeSpace( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
     

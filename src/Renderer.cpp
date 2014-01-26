@@ -8,7 +8,7 @@
 
 #include "precomp.h"
 
-Renderer renderer;
+
 
 static SDL_Window *sdlWindow;
 static SDL_Renderer *sdlRenderer;
@@ -39,7 +39,10 @@ void Renderer::ResetPalette(void){
     this->currentPalette = &defaultPalette;
 }
 
-void Renderer::Init(int32_t width , int32_t height){
+void Renderer::Init(size_t zoomFactor){
+    
+    int32_t width  = 320 * zoomFactor;
+    int32_t height = 200 * zoomFactor;
     
     //Load the default palette
     IffLexer lexer ;
@@ -102,6 +105,8 @@ void Renderer::Init(int32_t width , int32_t height){
     SDL_SetRelativeMouseMode(SDL_TRUE);
     
     light.SetWithCoo(300, 300, 300);
+    
+    SDL_ShowWindow(sdlWindow);
     
     initialized = true;
 }
@@ -595,10 +600,22 @@ VGAPalette* Renderer::GetCurrentPalette(void){
     return this->currentPalette;
 }
 
+void Renderer::Prepare(RSEntity* object){
+    
+    for (size_t i = 0; i < object->NumImages(); i++) {
+        object->images[i]->SyncTexture();
+    }
+    
+    object->prepared = true;
+}
+
 void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
     
     if (!initialized)
         return;
+    
+    if (object->IsPrepared())
+        Prepare(object);
     
     glMatrixMode(GL_PROJECTION);
     Matrix* projectionMatrix = camera.GetProjectionMatrix();

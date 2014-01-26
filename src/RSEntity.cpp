@@ -9,7 +9,8 @@
 #include "RSEntity.h"
 
 
-RSEntity::RSEntity()
+RSEntity::RSEntity() :
+    prepared(false)
 {
     
 }
@@ -22,9 +23,7 @@ RSEntity::~RSEntity(){
     }
 }
 
-void RSEntity::SetPalette(VGAPalette* palette){
-    this->palette = palette;
-}
+
 
 void RSEntity::ParseTXMP(IffChunk* chunk){
 

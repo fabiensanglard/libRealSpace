@@ -22,6 +22,7 @@ extern "C" {
 #ifdef __cplusplus
     #include <string.h>
     #include <vector>
+    #include <stack>
     #include <map>
     #include <math.h>
     #include <stdint.h>
@@ -58,7 +59,7 @@ extern "C" {
 // Strike commander specific.
     #include "SCObjectViewer.h"
     #include "SCDogFightMenu.h"
-    #include "SCMainMenu.h"
+   
 
 
 /*

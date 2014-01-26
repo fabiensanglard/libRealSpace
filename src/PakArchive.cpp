@@ -74,6 +74,7 @@ void PakArchive::Parse(void){
     PakEntry* entry = entries[i];
     entry->size = (this->data + this->size) - entries[i]->data;
     
+    std::sort(entries.begin(), entries.end(),PakEntry::Compare);
 }
 
 bool PakArchive::InitFromFile(const char* filepath){
@@ -199,9 +200,9 @@ void PakArchive::List(FILE* output){
         PakEntry* entry = entries[i];
        
         if (entry->size != 0)
-            fprintf(output,"    Entry [%3lu] size: %7lu bytes.\n",i, entry->size);
+            fprintf(output,"    Entry [%3lu] offset[0x%8lX] size: %7lu bytes.\n",i,entry->data-this->data, entry->size);
         else
-            fprintf(output,"    Entry [%3lu] size: %7lu bytes (DUPLICATE).\n",i, entry->size);
+            fprintf(output,"    Entry [%3lu] offset[0x%8lX] size: %7lu bytes (DUPLICATE).\n",i,entry->data-this->data, entry->size);
     }
 }
 

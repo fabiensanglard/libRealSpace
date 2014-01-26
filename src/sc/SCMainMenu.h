@@ -9,17 +9,24 @@
 #ifndef __libRealSpace__SCMainMenu__
 #define __libRealSpace__SCMainMenu__
 
-class SCMainMenu{
+
+class SCMainMenu : public IActivity{
     
 public:
     SCMainMenu();
     ~SCMainMenu();
     
-    void Init(void);
-    
-    void Run(void);
+    virtual void Init(void);
+    virtual void Run(void);
     
 private:
+    
+    void LoadButtons(void);
+    void LoadBoard(void);
+    void LoadBackground(void);
+    
+    std::vector<SCButton*> buttons;
+    RSImage* board;
 };
 
 #endif /* defined(__libRealSpace__SCMainMenu__) */

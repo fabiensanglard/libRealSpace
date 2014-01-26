@@ -22,7 +22,9 @@ public:
      Renderer();
     ~Renderer();
     
-    void Init(int32_t width,int32_t height);
+    void Prepare(void);
+    
+    void Init(size_t zoom);
     
     void Clear(void);
 
@@ -87,7 +89,10 @@ public:
     
     void SetClearColor(uint8_t red, uint8_t green, uint8_t blue);
     
+    void Prepare(RSEntity* object);
+   
 private:
+    
     
     
     void GetNormal(RSEntity* object,Triangle* triangle,Point3D* normal);
