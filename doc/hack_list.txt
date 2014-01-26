@@ -1,0 +1,5 @@
+Palettes:
+
+   Sometimes called colors are on 7 bit/channel or 8 bit/channel
+   Images can be in PAK or SHP files. Extension doesn't seen to mean anything
+   Red line between land textures.
