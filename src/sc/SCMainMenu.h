@@ -28,9 +28,9 @@ private:
     
     void CheckHit(void);
     SCButton buttons[5];
-    RSImage* board;
-    RSImage* sky;
-    RSImage* mountain;
+    RLEShape board;
+    RLEShape sky;
+    RLEShape mountain;
     
     PakArchive mainMenupak;
 };

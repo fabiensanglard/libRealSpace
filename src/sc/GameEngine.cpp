@@ -23,7 +23,9 @@ void GameEngine::Init(){
     Assets.Init();
     
     //Load Main Palette and Initialize the GL
-    renderer.Init(4);
+    Screen.Init(2);
+    
+    VGA.Init();
     
     //Load the Mouse Cursor
     Mouse.Init();
@@ -119,7 +121,7 @@ void GameEngine::Run(){
         PumpEvents();
         
         //Clear the screen
-        renderer.Clear();
+        //enderer.Clear();
         
         //Allow the active activity to Run and Render
         currentActivity = activities.top();
@@ -134,7 +136,7 @@ void GameEngine::Run(){
         
         // Render the mouse if we should
         
-        renderer.Swap();
+        Screen.Refresh();
         
         //Flush all events since they should all have been interpreted.
         SDL_FlushEvents(SDL_FIRSTEVENT,SDL_LASTEVENT);

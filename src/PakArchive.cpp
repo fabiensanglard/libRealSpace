@@ -74,7 +74,7 @@ void PakArchive::Parse(void){
     PakEntry* entry = entries[i];
     entry->size = (this->data + this->size) - entries[i]->data;
     
-    std::sort(entries.begin(), entries.end(),PakEntry::Compare);
+    //std::sort(entries.begin(), entries.end(),PakEntry::Compare);
 }
 
 bool PakArchive::InitFromFile(const char* filepath){

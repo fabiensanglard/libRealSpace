@@ -127,7 +127,7 @@ void TreArchive::Parse(void){
         entries.push_back(entry);
     }
     
-    std::sort(entries.begin(), entries.end(),TreArchive::Compare);
+   // std::sort(entries.begin(), entries.end(),TreArchive::Compare);
     
     valid = true;
 }

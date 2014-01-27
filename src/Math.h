@@ -10,8 +10,8 @@
 #define __libRealSpace__Math__
 
 typedef struct Point2D{
-    float x;
-    float y;
+    int32_t x;
+    int32_t y;
 } Point2D;
 
 typedef Point2D Vector2D;

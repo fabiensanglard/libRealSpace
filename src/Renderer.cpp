@@ -12,6 +12,7 @@
 
 static SDL_Window *sdlWindow;
 static SDL_Renderer *sdlRenderer;
+Renderer renderer;
 
 Renderer::Renderer() :
    initialized(false){

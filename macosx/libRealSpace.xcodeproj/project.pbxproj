@@ -15,7 +15,7 @@
 		2D31091518708A1200D3443F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D31091418708A1200D3443F /* OpenGL.framework */; };
 		2D3DE2B81877529A0080E744 /* SCDogFightMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D3DE2B61877529A0080E744 /* SCDogFightMenu.cpp */; };
 		2D58A416187716A7003EF449 /* SCObjectViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D58A414187716A7003EF449 /* SCObjectViewer.cpp */; };
-		2D58A41918773255003EF449 /* RLECodex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D58A41718773255003EF449 /* RLECodex.cpp */; };
+		2D58A41918773255003EF449 /* RLEShape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D58A41718773255003EF449 /* RLEShape.cpp */; };
 		2D8460E718939D1100B652A8 /* GameEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460E518939D1100B652A8 /* GameEngine.cpp */; };
 		2D8460EA18939D8E00B652A8 /* IActivity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460E818939D8E00B652A8 /* IActivity.cpp */; };
 		2D8460EC18939ECA00B652A8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460EB18939ECA00B652A8 /* main.cpp */; };
@@ -23,6 +23,8 @@
 		2D8460F31893A49400B652A8 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460F11893A49400B652A8 /* AssetManager.cpp */; };
 		2D8460F7189438B300B652A8 /* SCMainMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460F5189438B300B652A8 /* SCMainMenu.cpp */; };
 		2D8460FC189561CA00B652A8 /* SCButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460FA189561CA00B652A8 /* SCButton.cpp */; };
+		2D8460FF189638AE00B652A8 /* VGA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460FD189638AE00B652A8 /* VGA.cpp */; };
+		2D846103189639E700B652A8 /* RSScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D846101189639E700B652A8 /* RSScreen.cpp */; };
 		2D9B61761871EDEA0071ACDA /* Matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B61741871EDEA0071ACDA /* Matrix.cpp */; };
 		2D9B61791871F8470071ACDA /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B61771871F8470071ACDA /* Camera.cpp */; };
 		2D9B617C18725C660071ACDA /* RSMusic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B617A18725C660071ACDA /* RSMusic.cpp */; };
@@ -68,8 +70,8 @@
 		2D3DE2B71877529A0080E744 /* SCDogFightMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCDogFightMenu.h; path = ../src/SCDogFightMenu.h; sourceTree = SOURCE_ROOT; };
 		2D58A414187716A7003EF449 /* SCObjectViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCObjectViewer.cpp; path = ../src/SCObjectViewer.cpp; sourceTree = SOURCE_ROOT; };
 		2D58A415187716A7003EF449 /* SCObjectViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCObjectViewer.h; path = ../src/SCObjectViewer.h; sourceTree = SOURCE_ROOT; };
-		2D58A41718773255003EF449 /* RLECodex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RLECodex.cpp; path = ../src/RLECodex.cpp; sourceTree = SOURCE_ROOT; };
-		2D58A41818773255003EF449 /* RLECodex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RLECodex.h; path = ../src/RLECodex.h; sourceTree = SOURCE_ROOT; };
+		2D58A41718773255003EF449 /* RLEShape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RLEShape.cpp; path = ../src/RLEShape.cpp; sourceTree = SOURCE_ROOT; };
+		2D58A41818773255003EF449 /* RLEShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RLEShape.h; path = ../src/RLEShape.h; sourceTree = SOURCE_ROOT; };
 		2D8460E518939D1100B652A8 /* GameEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameEngine.cpp; path = ../src/sc/GameEngine.cpp; sourceTree = "<group>"; };
 		2D8460E618939D1100B652A8 /* GameEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameEngine.h; path = ../src/sc/GameEngine.h; sourceTree = "<group>"; };
 		2D8460E818939D8E00B652A8 /* IActivity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IActivity.cpp; path = ../src/sc/IActivity.cpp; sourceTree = "<group>"; };
@@ -85,6 +87,10 @@
 		2D8460F818943D6700B652A8 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = main.h; path = ../src/sc/main.h; sourceTree = "<group>"; };
 		2D8460FA189561CA00B652A8 /* SCButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCButton.cpp; path = ../src/sc/SCButton.cpp; sourceTree = "<group>"; };
 		2D8460FB189561CA00B652A8 /* SCButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCButton.h; path = ../src/sc/SCButton.h; sourceTree = "<group>"; };
+		2D8460FD189638AE00B652A8 /* VGA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VGA.cpp; path = ../src/VGA.cpp; sourceTree = SOURCE_ROOT; };
+		2D846100189638E500B652A8 /* RSVGA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSVGA.h; path = ../src/RSVGA.h; sourceTree = SOURCE_ROOT; };
+		2D846101189639E700B652A8 /* RSScreen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSScreen.cpp; path = ../src/RSScreen.cpp; sourceTree = SOURCE_ROOT; };
+		2D846102189639E700B652A8 /* RSScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSScreen.h; path = ../src/RSScreen.h; sourceTree = SOURCE_ROOT; };
 		2D9B61741871EDEA0071ACDA /* Matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix.cpp; path = ../src/Matrix.cpp; sourceTree = SOURCE_ROOT; };
 		2D9B61751871EDEA0071ACDA /* Matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix.h; path = ../src/Matrix.h; sourceTree = SOURCE_ROOT; };
 		2D9B61771871F8470071ACDA /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Camera.cpp; path = ../src/Camera.cpp; sourceTree = SOURCE_ROOT; };
@@ -151,6 +157,8 @@
 				2D31090B18707F1500D3443F /* Texture.cpp */,
 				2D9B61741871EDEA0071ACDA /* Matrix.cpp */,
 				2D9B61771871F8470071ACDA /* Camera.cpp */,
+				2D8460FD189638AE00B652A8 /* VGA.cpp */,
+				2D846101189639E700B652A8 /* RSScreen.cpp */,
 			);
 			name = renderers;
 			sourceTree = "<group>";
@@ -211,7 +219,7 @@
 				2DFEFBB3186F5E21002305A9 /* TreArchive.h */,
 				2D310908186FFD7800D3443F /* PakArchive.h */,
 				2DFEFBC3186F764E002305A9 /* IffLexer.h */,
-				2D58A41818773255003EF449 /* RLECodex.h */,
+				2D58A41818773255003EF449 /* RLEShape.h */,
 				2DFEFBB6186F655A002305A9 /* ByteStream.h */,
 				2DFEFBB9186F65FE002305A9 /* Base.h */,
 				2D58A415187716A7003EF449 /* SCObjectViewer.h */,
@@ -229,6 +237,8 @@
 				2D9B61781871F8470071ACDA /* Camera.h */,
 				2DA7D3FF18847E58003CAA78 /* Math.h */,
 				2DA7D40218850B1F003CAA78 /* Quaternion.h */,
+				2D846100189638E500B652A8 /* RSVGA.h */,
+				2D846102189639E700B652A8 /* RSScreen.h */,
 			);
 			name = headers;
 			sourceTree = "<group>";
@@ -280,7 +290,7 @@
 			children = (
 				2DA7D40118850B1F003CAA78 /* Quaternion.cpp */,
 				2DA7D3FE18847E58003CAA78 /* Math.cpp */,
-				2D58A41718773255003EF449 /* RLECodex.cpp */,
+				2D58A41718773255003EF449 /* RLEShape.cpp */,
 				2DFEFBB5186F655A002305A9 /* ByteStream.cpp */,
 				2DFEFBB8186F65FE002305A9 /* Base.cpp */,
 			);
@@ -358,7 +368,7 @@
 				2D3109131870830200D3443F /* RSEntity.cpp in Sources */,
 				2D9B61761871EDEA0071ACDA /* Matrix.cpp in Sources */,
 				2DFEFBC4186F764E002305A9 /* IffLexer.cpp in Sources */,
-				2D58A41918773255003EF449 /* RLECodex.cpp in Sources */,
+				2D58A41918773255003EF449 /* RLEShape.cpp in Sources */,
 				2D8460EC18939ECA00B652A8 /* main.cpp in Sources */,
 				2DB3FB661872BAAA0081B676 /* RSImage.cpp in Sources */,
 				2D9B61791871F8470071ACDA /* Camera.cpp in Sources */,
@@ -369,10 +379,12 @@
 				2DFEFBC0186F676A002305A9 /* test.cpp in Sources */,
 				2D310909186FFD7800D3443F /* PakArchive.cpp in Sources */,
 				2DFEFBAE186F5C84002305A9 /* TreArchive.cpp in Sources */,
+				2D8460FF189638AE00B652A8 /* VGA.cpp in Sources */,
 				2D31090D18707F1500D3443F /* Texture.cpp in Sources */,
 				2D9D87191895B5B700B46D37 /* SCSelectWeaponsF16.cpp in Sources */,
 				2DFEFBB7186F655A002305A9 /* ByteStream.cpp in Sources */,
 				2DA7D40018847E58003CAA78 /* Math.cpp in Sources */,
+				2D846103189639E700B652A8 /* RSScreen.cpp in Sources */,
 				2DA7D40318850B1F003CAA78 /* Quaternion.cpp in Sources */,
 				2D8460FC189561CA00B652A8 /* SCButton.cpp in Sources */,
 				2D310906186FEAEA00D3443F /* RSPalette.cpp in Sources */,

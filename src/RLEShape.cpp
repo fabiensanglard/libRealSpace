@@ -9,22 +9,22 @@
 #include "precomp.h"
 
 
-#include "ByteStream.h"
-#include <stdio.h>
+RLEShape::RLEShape()
 
-RLECodex::RLECodex(){
+{
+    position.x = 0;
+    position.y = 0;
+}
+
+
+RLEShape::~RLEShape(){
     
 }
 
 
-RLECodex::~RLECodex(){
+void RLEShape::ReadFragment(RLEFragment* frag){
     
-}
-
-
-void RLECodex::ReadFragment(ByteStream* stream,RLEFragment* frag){
-    
-	uint16_t code = stream->ReadUShort();
+	uint16_t code = stream.ReadUShort();
 
     
     if (code == 0){
@@ -32,8 +32,8 @@ void RLECodex::ReadFragment(ByteStream* stream,RLEFragment* frag){
 		return;
 	}
     
-    frag->dx = stream->ReadShort();
-	frag->dy = stream->ReadShort();
+    frag->dx = stream.ReadShort();
+	frag->dy = stream.ReadShort();
 	
     
 	frag->isCompressed = (code & 0x01);
@@ -49,7 +49,7 @@ void RLECodex::ReadFragment(ByteStream* stream,RLEFragment* frag){
 	
 }
 
-bool RLECodex::ExpandFragment(ByteStream* stream,RLEFragment* frag, RSImage* dst ){
+bool RLEShape::ExpandFragment(RLEFragment* frag, uint8_t* dst ){
     
     bool error;
     
@@ -58,8 +58,8 @@ bool RLECodex::ExpandFragment(ByteStream* stream,RLEFragment* frag, RSImage* dst
 		case FRAG_RAW:
 		{
 			for(int i=0 ; i < frag->numTexels ; i++){
-				uint8_t color = stream->ReadByte();
-				error = WriteRLETexel(dst,frag->dx+i,frag->dy,color);
+				uint8_t color = stream.ReadByte();
+				error = WriteColor(dst,frag->dx+i,frag->dy,color);
                 if (error)
                     return true;
 			}
@@ -72,15 +72,15 @@ bool RLECodex::ExpandFragment(ByteStream* stream,RLEFragment* frag, RSImage* dst
             
             while (numOfTexelsWritten < frag->numTexels)
             {
-                uint8_t subCode = stream->ReadByte();
+                uint8_t subCode = stream.ReadByte();
                 uint8_t subCodeType = subCode % 2;
             
                 uint16_t fragNumTexels = subCode >> 1;
             
                 if (subCodeType == SUB_FRAG_RAW){
                     for(int i=0 ; i < fragNumTexels ; i++){
-                        uint8_t color = stream->ReadByte();
-                        error = WriteRLETexel(dst,frag->dx+numOfTexelsWritten,frag->dy,color);
+                        uint8_t color = stream.ReadByte();
+                        error = WriteColor(dst,frag->dx+numOfTexelsWritten,frag->dy,color);
                         if (error)
                             return true;
                         numOfTexelsWritten++;
@@ -88,9 +88,9 @@ bool RLECodex::ExpandFragment(ByteStream* stream,RLEFragment* frag, RSImage* dst
                    
                 }
                 else{
-                    uint8_t color = stream->ReadByte();
+                    uint8_t color = stream.ReadByte();
                     for(int i=0 ; i < fragNumTexels ; i++){
-                        error = WriteRLETexel(dst,frag->dx+numOfTexelsWritten,frag->dy,color);
+                        error = WriteColor(dst,frag->dx+numOfTexelsWritten,frag->dy,color);
                         if (error)
                             return true;
 
@@ -113,52 +113,60 @@ bool RLECodex::ExpandFragment(ByteStream* stream,RLEFragment* frag, RSImage* dst
     return false;
 }
 
-
-bool RLECodex::WriteRLETexel(RSImage* dstImage,int16_t dx,int16_t dy, uint8_t color){
+void RLEShape::Init(uint8_t* idata, size_t isize){
+    stream.Set(idata);
+    this->size = isize;
+    this->data = idata;
     
-    uint8_t* dst = rleCenter;
-    dst+=dx;
-    dst+=dy*dstImage->width;
+    /*this->rightDist=*/  stream.ReadShort();
+    this->leftDist  = stream.ReadShort();
+    this->topDist   = stream.ReadShort();
+    /*this->botDist=*/    stream.ReadShort();
+    /*rleCenter= dst->data + abs(leftDist) + abs(topDist) * dst->width;*/
     
-    
-    
-    if (dst < (dstImage->data+dstImage->width*dstImage->height) && dst >= dstImage->data)
-        *dst = color;
-    else{
-        //printf("Error, trying to write outside texture.\n");
-        return true;
-    }
-    
-    return false;
-
+    data = stream.GetPosition();
 }
 
-bool RLECodex::ReadImage(uint8_t* src, RSImage* dst, size_t* byteRead){
+
+void RLEShape::InitWithPosition(uint8_t* idata, size_t isize,Point2D* position ){
+    Init(idata,isize);
+    SetPosition(position);
+}
+
+bool RLEShape::Expand(uint8_t* dst, size_t* byteRead){
 	
-	ByteStream stream(src);
+	stream.Set(data);
 	
 	RLEFragment frag ;
     
-    this->rightDist = stream.ReadShort();
-    this->leftDist  = stream.ReadShort();
-    this->topDist   = stream.ReadShort();
-    this->botDist   = stream.ReadShort();
-    rleCenter= dst->data + abs(leftDist) + abs(topDist) * dst->width;
     
     
-	ReadFragment(&stream,&frag);
+	ReadFragment(&frag);
     
 	while( frag.type != FRAG_END){
         
-		bool error = ExpandFragment(&stream,&frag,dst);
+		bool error = ExpandFragment(&frag,dst);
         if (error){
-            printf("Error in RLE (%s)\n",dst->name);
+            printf("Error in RLE\n");
             return true;
         }
-		ReadFragment(&stream,&frag);	
+		ReadFragment(&frag);
 	}
     
-    *byteRead = stream.GetPosition()-src;
+    *byteRead = stream.GetPosition()-data;
+    
+    return false;
+}
+
+
+bool RLEShape::WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color){
+    
+    uint8_t* finalDest = dst + leftDist + topDist * 320 + dx + dy * 320 +position.x + position.y * 320;
+    
+    if (finalDest < dst || finalDest >= dst+(320*200))
+        return true;
+    
+    *finalDest = color;
     
     return false;
 }

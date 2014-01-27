@@ -12,6 +12,7 @@
 
 extern GameEngine Game;
 extern SCMouse Mouse;
-extern Renderer renderer;
+extern RSScreen Screen;
+extern RSVGA    VGA;
 extern AssetManager Assets;
 #endif

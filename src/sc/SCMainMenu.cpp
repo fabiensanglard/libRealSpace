@@ -62,7 +62,7 @@ static void showAllImage(PakArchive* archive){
     
     
     
-    
+    /*
     for(size_t i = 0 ; i < archive->GetNumEntries() ; i ++){
         PakEntry* entry = archive->GetEntry(i);
         
@@ -88,7 +88,7 @@ static void showAllImage(PakArchive* archive){
         screen.ClearContent();
     }
     
-    
+    */
 }
 
 void SCMainMenu::Init(void){
@@ -97,6 +97,8 @@ void SCMainMenu::Init(void){
     TreArchive* gameFlow = Assets.tres[AssetManager::TRE_GAMEFLOW];
     TreEntry* entry = gameFlow->GetEntryByName(MAINMENU_PAK_PATH);
     mainMenupak.InitFromRAM("MAINMENU.PAK",entry->data,entry->size);
+    
+    
     
     //mainMenupak.List(stdout);
     
@@ -166,10 +168,15 @@ void SCMainMenu::LoadButton(const char* name, PakArchive* subPak, size_t upIndic
 }
  */
 
+enum ButtonIDS {
+    BUTTON_CONTINUE,
+    BUTTON_LOADGAME,
+    BUTTON_STARTNEWGAME,
+    BUTTON_TRAINING,
+    BUTTON_OBJVIEWER}   ;
+
 void SCMainMenu::LoadButtons(void){
-    
-    RLECodex codec;
-    size_t byteRead;
+
     
     PakEntry* boardEntry = mainMenupak.GetEntry(MAINMENU_PAK_BUTTONS_INDICE);
     
@@ -177,53 +184,37 @@ void SCMainMenu::LoadButtons(void){
     PakArchive subPak;
     subPak.InitFromRAM("subPak Buttons",boardEntry->data ,boardEntry->size);
 
+    Point2D buttonDimension = {211, 15} ;
+    
+    
+    Point2D continuePosition = {44+11,20+10};
+    this->buttons[0].InitBehavior(OnContinue, continuePosition,buttonDimension);
+    this->buttons[0].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(0)->data, subPak.GetEntry(0)->size,&continuePosition);
+    this->buttons[0].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(5)->data, subPak.GetEntry(5)->size,&continuePosition);
 
-    this->buttons[0].appearance[SCButton::APR_UP].Create("CONTINUE_UP", 211, 15);
-    codec.ReadImage(subPak.GetEntry(0)->data,& this->buttons[0].appearance[SCButton::APR_UP], &byteRead);
-    this->buttons[0].appearance[SCButton::APR_DOWN].Create("CONTINUE_DOWN", 211, 15);
-    codec.ReadImage(subPak.GetEntry(0)->data,& this->buttons[0].appearance[SCButton::APR_DOWN], &byteRead);
-    Point2D continuePosition = {0,0};
-    this->buttons[0].InitBehavior(OnContinue, continuePosition);
-    
+    Point2D loadGamePosition = {44+11,continuePosition.y+buttonDimension.y+2};
+    this->buttons[1].InitBehavior(OnLoadGame, loadGamePosition,buttonDimension);
+    this->buttons[1].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(1)->data, subPak.GetEntry(1)->size,&loadGamePosition);
+    this->buttons[1].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(6)->data, subPak.GetEntry(6)->size,&loadGamePosition);
 
-    this->buttons[1].appearance[SCButton::APR_UP].Create("LOADGAME_UP", 211, 15);
-    codec.ReadImage(subPak.GetEntry(1)->data,& this->buttons[1].appearance[SCButton::APR_UP], &byteRead);
-    this->buttons[1].appearance[SCButton::APR_DOWN].Create("LOADGAME_DOWN", 211, 15);
-    codec.ReadImage(subPak.GetEntry(1)->data,& this->buttons[1].appearance[SCButton::APR_DOWN], &byteRead);
-    Point2D loadGamePosition = {0,0};
-    this->buttons[0].InitBehavior(OnLoadGame, loadGamePosition);
+    Point2D startNewGamePosition = {44+11,loadGamePosition.y+buttonDimension.y+2};
+    this->buttons[2].InitBehavior(OnStartNewGame, startNewGamePosition,buttonDimension);
+    this->buttons[2].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(2)->data, subPak.GetEntry(2)->size,&startNewGamePosition);
+    this->buttons[2].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(7)->data, subPak.GetEntry(7)->size,&startNewGamePosition);
     
-    this->buttons[2].appearance[SCButton::APR_UP].Create("STARTNEWGAME_UP", 211, 15);
-    codec.ReadImage(subPak.GetEntry(2)->data,& this->buttons[2].appearance[SCButton::APR_UP], &byteRead);
-    this->buttons[2].appearance[SCButton::APR_DOWN].Create("STARTNEWGAME_DOWN", 211, 15);
-    codec.ReadImage(subPak.GetEntry(2)->data,& this->buttons[2].appearance[SCButton::APR_DOWN], &byteRead);
-    Point2D startNewGamePosition = {0,0};
-    this->buttons[0].InitBehavior(OnStartNewGame, startNewGamePosition);
-    
-    this->buttons[3].appearance[SCButton::APR_UP].Create("TRAINING MISSIONS_UP", 211, 15);
-    codec.ReadImage(subPak.GetEntry(3)->data,& this->buttons[3].appearance[SCButton::APR_UP], &byteRead);
-    this->buttons[3].appearance[SCButton::APR_DOWN].Create("TRAINING MISSIONS_DOWN", 211, 15);
-    codec.ReadImage(subPak.GetEntry(3)->data,& this->buttons[3].appearance[SCButton::APR_DOWN], &byteRead);
-    Point2D trainMissionPosition = {0,0};
-    this->buttons[0].InitBehavior(OnTrainingMission, trainMissionPosition);
-    
-    this->buttons[4].appearance[SCButton::APR_UP].Create("VIEWOBJECTS_UP", 211, 15);
-    codec.ReadImage(subPak.GetEntry(4)->data,& this->buttons[4].appearance[SCButton::APR_UP], &byteRead);
-    this->buttons[4].appearance[SCButton::APR_DOWN].Create("VIEWOBJECTS_DOWN", 211, 15);
-    codec.ReadImage(subPak.GetEntry(4)->data,& this->buttons[4].appearance[SCButton::APR_DOWN], &byteRead);
-    Point2D viewObjPosition = {0,0};
-    this->buttons[0].InitBehavior(OnViewObject, viewObjPosition);
+    Point2D trainingPosition = {44+11,startNewGamePosition.y+buttonDimension.y+2};
+    this->buttons[3].InitBehavior(OnTrainingMission, trainingPosition,buttonDimension);
+    this->buttons[3].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(3)->data, subPak.GetEntry(3)->size,&trainingPosition);
+    this->buttons[3].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(8)->data, subPak.GetEntry(8)->size,&trainingPosition);
+
+    Point2D viewObjectPosition = {44+11,trainingPosition.y+buttonDimension.y+2};
+    this->buttons[4].InitBehavior(OnViewObject, viewObjectPosition,buttonDimension);
+    this->buttons[4].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(4)->data, subPak.GetEntry(4)->size,&viewObjectPosition);
+    this->buttons[4].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(9)->data, subPak.GetEntry(9)->size,&viewObjectPosition);
+
 }
 
 void SCMainMenu::LoadBoard(void){
-    
-    this->board = new RSImage();
-    board->Create("MainMenu Board", 233, 104);
-    Point2D position = {44.0f,48.0f};
-    board->SetPosition(position);
-    
-    
-    
     
     PakEntry* boardEntry = mainMenupak.GetEntry(MAINMENU_PAK_BOARD_INDICE);
     
@@ -232,15 +223,14 @@ void SCMainMenu::LoadBoard(void){
     subPak.InitFromRAM("subPak board",boardEntry->data ,boardEntry->size);
     boardEntry = subPak.GetEntry(0);
     
-    size_t byteRead;
-    RLECodex codec;
-    codec.ReadImage(boardEntry->data, this->board, &byteRead);
-    
+    Point2D position = {44,20};
+    board.InitWithPosition(boardEntry->data, boardEntry->size, &position);
+
 }
 
 void SCMainMenu::LoadPalette(void){
     
-    VGAPalette* rendererPalette = renderer.GetPalette();
+    VGAPalette* rendererPalette = VGA.GetPalette();
     this->palette = *rendererPalette;
     
     
@@ -260,19 +250,12 @@ void SCMainMenu::LoadPalette(void){
     paletteReader.Set(paletteEntry->data);
     this->palette.ReadPatch(&paletteReader);
     
-    Texel transp;
-    transp.r = 255;
-    transp.g = 0;
-    transp.b = 255;
-    transp.a = 0;
-    this->palette.SetColor(255,&transp);
-    
 }
 
 void SCMainMenu::LoadBackgrounds(void){
     
-    size_t byteRead;
-    RLECodex codec;
+   
+
     /*
     Pak entry 44
     Exploring 0XC50FA56
@@ -289,15 +272,13 @@ void SCMainMenu::LoadBackgrounds(void){
     //The board is within an other pak within MAINMENU.PAK !!!!
     PakArchive mountainPak;
     mountainPak.InitFromRAM("subPak board",pak.GetEntry(44)->data ,pak.GetEntry(44)->size);
-    mountain = new RSImage();
-    mountain->Create("Mountain", 320, 200);
-    codec.ReadImage(mountainPak.GetEntry(0)->data, this->mountain, &byteRead);
+    mountain.Init(mountainPak.GetEntry(0)->data, mountainPak.GetEntry(0)->size);
+
     
     PakArchive skyPak;
     skyPak.InitFromRAM("subPak board",pak.GetEntry(116)->data ,pak.GetEntry(116)->size);
-    sky = new RSImage();
-    sky->Create("Sky", 320, 200);
-    codec.ReadImage(skyPak.GetEntry(0)->data, this->sky, &byteRead);
+    sky.Init(skyPak.GetEntry(0)->data, skyPak.GetEntry(0)->size);
+
     //background 116 ?
 }
 
@@ -307,12 +288,19 @@ void SCMainMenu::CheckHit(void){
 
 void SCMainMenu::Run(void){
     
-    renderer.SetPalette(&this->palette);
+    VGA.Activate();
+    VGA.Clear();
+    
+    VGA.SetPalette(&this->palette);
     
     //Draw static
-    renderer.DrawImage(sky);
-    renderer.DrawImage(mountain);
-    renderer.DrawImage(board);
+    //VGA.DrawShape(&sky);
+    VGA.DrawShape(&mountain);
+    VGA.DrawShape(&board);
+    
+    VGA.DrawShape(&buttons[BUTTON_OBJVIEWER].appearance[SCButton::Appearance::APR_UP]);
+    VGA.DrawShape(&buttons[BUTTON_STARTNEWGAME].appearance[SCButton::Appearance::APR_UP]);
+    VGA.DrawShape(&buttons[BUTTON_TRAINING].appearance[SCButton::Appearance::APR_UP]);
     
     //Check Mouse position. If clickable update to visor instead of cursor
     CheckHit();
@@ -320,4 +308,7 @@ void SCMainMenu::Run(void){
     //Draw Mouse
     
     //Check Mouse state.
+    
+    VGA.VSync();
+    
 }

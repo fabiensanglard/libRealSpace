@@ -19,8 +19,11 @@ public:
     
      
     Point2D position;
+    Point2D dimension;
     
-    void InitBehavior(ActionFunction fct, Point2D position);
+    
+    void InitBehavior(ActionFunction fct, Point2D position, Point2D dimension);
+    
     
     void OnAction(void);
     
@@ -29,7 +32,7 @@ public:
     enum State { STATE_UP, STATE_DOWN };
     
     
-    RSImage appearance[2];
+    RLEShape appearance[2];
     
 private:
     

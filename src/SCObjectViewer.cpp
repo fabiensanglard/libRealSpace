@@ -232,7 +232,7 @@ void SCObjectViewer::Init(void){
 
 void SCObjectViewer::Run(void){
     
-    
+    /*
     renderer.Init(2);
     
     
@@ -262,7 +262,7 @@ void SCObjectViewer::Run(void){
     RSImage staticMenuImage;
     staticMenuImage.Create("staticMenuImage", 320, 200);
     errorFound = codex.ReadImage(staticMenuPAK.GetEntry(0)->data, &staticMenuImage, &byteRead);
-    
+    */
     
     
     
@@ -289,6 +289,8 @@ void SCObjectViewer::Run(void){
            showCase.entity->GetBoudingBpx()->max.z-showCase.entity->GetBoudingBpx()->min.z
            );
     */
+    
+    /*
     
     while(1){
         
@@ -339,6 +341,6 @@ void SCObjectViewer::Run(void){
         renderer.ShowWindow();
         renderer.PumpEvents();
     }
-
+    */
     
 }

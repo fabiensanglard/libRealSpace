@@ -17,11 +17,10 @@ SCButton::~SCButton(){
     
 }
 
-void SCButton::InitBehavior(ActionFunction fct, Point2D position){
+void SCButton::InitBehavior(ActionFunction fct, Point2D position,Point2D dimension){
     this->state = STATE_UP;
     this->onClick = fct;
-    this->appearance[APR_DOWN].SetPosition(position);
-    this->appearance[APR_UP].SetPosition(position);
+    this->dimension = dimension;
 }
 
 void SCButton::OnAction(void){

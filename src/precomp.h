@@ -29,6 +29,10 @@ extern "C" {
     #include <float.h>
     #include <algorithm> 
 
+#ifndef _WIN32
+    #include <unistd.h>
+#endif
+
     #include "SDL2/SDL.h"
     #include "SDL2/SDL_opengl.h"
 
@@ -42,6 +46,8 @@ extern "C" {
     #include "ByteStream.h"
     #include "TreArchive.h"
 
+
+
     #include "Camera.h"
     #include "Texture.h"
     #include "RSImage.h"
@@ -54,7 +60,11 @@ extern "C" {
     #include "RSSound.h"
     #include "RSMapTextureSet.h"
     #include "RSArea.h"
-    #include "RLECodex.h"
+    #include "RLEShape.h"
+
+    //VGA and Glide
+    #include "RSScreen.h"
+    #include "RSVGA.h"
 
 // Strike commander specific.
     #include "SCObjectViewer.h"

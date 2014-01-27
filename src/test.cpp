@@ -8,6 +8,8 @@
 
 #include "precomp.h"
 
+static RSScreen Screen;
+static RSVGA VGA;
 
 
 void testTRE(void){
@@ -355,7 +357,7 @@ void DecompressAllTRE(void){
 //DELETE ME
 static void showAllImageInArchive(PakArchive* archive){
     
-    
+    /*
     for(size_t i = 0 ; i < archive->GetNumEntries() ; i ++){
         
         printf("Show all images %lu.\n",i);
@@ -384,6 +386,7 @@ static void showAllImageInArchive(PakArchive* archive){
         }
         screen.ClearContent();
     }
+     */
 }
 
 void ExploreRootIFFS(void){
@@ -517,21 +520,17 @@ void PrintTabs(int tabs){
     }
 }
 
+#define imgSpeed 1000000
 void ExploreImages(uint8_t* data, size_t size, int numTabs){
     
     PrintTabs(numTabs);
     printf("Exploring 0X%X\n",data);
-    /*
-    uint32_t* magic = (uint32_t*)data;
-    if (*magic == 'MROF'){
-        printf("This is likely a palette.");
-    }
-    */
-    
+        
     //SHP files are PAKs containing direct images.
     PakArchive font;
     font.InitFromRAM("XXXX",data,size);
     if (font.IsReady()){
+        font.List(stdout);
         PrintTabs(numTabs);
         printf("Pak Found 0X%X\n",data);
         for(size_t i =0 ; i  < font.GetNumEntries() ; i++){
@@ -546,18 +545,21 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
     
     
     //Myabe it is a direct image ?
-    RSImage screen;
-    screen.Create("Screen",320, 200);
-    RLECodex codex;
-    size_t byteRead;
-    screen.ClearContent();
-    bool error = codex.ReadImage(data, &screen, &byteRead);
-    if (!error){
+    RLEShape shape;
+    shape.Init(data, size);
+    
+    bool errorFound;
+    VGA.Clear();
+    errorFound = VGA.DrawShape(&shape);
+    if (!errorFound){
+        VGA.VSync();
+        Screen.Refresh();
+                usleep(imgSpeed);
         PrintTabs(numTabs);
         printf("Image Found 0X%X\n",data);
-        ShowImage(&screen);
         return;
     }
+    
     
     //TODO there is palette at the end of the sequence of images. It should be retrieved.
     //Maybe it is a sequence of images ?
@@ -572,13 +574,22 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
     uint32_t numImages = nextImage/4 ;
     for(size_t i = 0 ; i < numImages && (data+nextImage < end) ; i++){
         
-        bool error = codex.ReadImage(data+nextImage, &screen, &byteRead);
-        if (!error){
-            ShowImage(&screen);
-            printf("Image Found 0X%X\n",data+nextImage);
+        RLEShape shape;
+        shape.Init(data+nextImage, size);
+        
+        bool errorFound;
+        VGA.Clear();
+        errorFound = VGA.DrawShape(&shape);
+        if (!errorFound){
+            VGA.VSync();
+            Screen.Refresh();
+            usleep(imgSpeed/100);
             PrintTabs(numTabs);
+            printf("Image Found 0X%X\n",data+nextImage);
             
         }
+        //else
+          //  return;
         
         nextImage = s.ReadUInt32LE();
         nextImage = nextImage & 0x00FFFFFF;
@@ -588,158 +599,139 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
 
 void TestMouseCursor(void){
     
-    renderer.Init(4);
-
+    TreArchive gameflow ; gameflow.InitFromFile("GAMEFLOW.TRE");
+    TreArchive misc ;     misc.InitFromFile("MISC.TRE");
+    TreArchive mis ;      mis.InitFromFile("MISSIONS.TRE");
+    TreArchive obj ;      obj.InitFromFile("OBJECTS.TRE");
     
-     TreArchive misc ;
-     misc.InitFromFile("GAMEFLOW.TRE");
-     TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK"); //Camera configuration
-     ExploreImages(mainFont->data,mainFont->size,0);
+    
+     TreEntry* mainFont = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK"); //Camera configuration
+    // ExploreImages(mainFont->data,mainFont->size,0);
      
     
     
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CAMROPT.SHP"); //Camera configuration
-    ExploreImages(mainFont->data,mainFont->size);
-*/
-    
-    /*
-     TreArchive misc ;
-     misc.InitFromFile("MISC.TRE");
-     TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CHKEXIT.SHP"); //Exit to DOS configuration
-     ExploreImages(mainFont->data,mainFont->size);
-     */
-    
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\COCKOPT.SHP"); // Cockpit configuration
-    ExploreImages(mainFont->data,mainFont->size);
-    */
-    
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CONVFONT.SHP"); // Unknown
-    ExploreImages(mainFont->data,mainFont->size);
-    */
     
     
-    /*
-     TreArchive misc ;
-     misc.InitFromFile("MISC.TRE");
-     TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\DETLOPT.SHP"); // Details options
-     ExploreImages(mainFont->data,mainFont->size);
-    */
+    TreEntry* camropt = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CAMROPT.SHP"); //Camera configuration
+    //ExploreImages(camropt->data,camropt->size,0);
+
+    
+    
+   
+     TreEntry* chkexit = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CHKEXIT.SHP"); //Exit to DOS configuration
+     //ExploreImages(chkexit->data,chkexit->size,0);
+    
+    
+    
+  
+    TreEntry* cockopt = misc.GetEntryByName("..\\..\\DATA\\FONTS\\COCKOPT.SHP"); // Cockpit configuration
+    //ExploreImages(cockopt->data,cockopt->size,0);
+    
+    
+    
+     TreEntry* convFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CONVFONT.SHP"); // Unknown but likely a font wiht 128 entries
+    //ExploreImages(convFont->data,convFont->size,0);
+    
+    
+    
+    
+    
+     TreEntry* detlopt = misc.GetEntryByName("..\\..\\DATA\\FONTS\\DETLOPT.SHP"); // Details options
+     //ExploreImages(detlopt->data,detlopt->size);
+    
+    
+    
+   
+    TreEntry* FLITOPT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\FLITOPT.SHP"); // Control options
+    //ExploreImages(FLITOPT->data,FLITOPT->size,0);
+    
+    
+    
+
+    TreEntry* FORMFONT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\FORMFONT.SHP"); // Font option
+    //ExploreImages(FORMFONT->data,FORMFONT->size);
+    
+    
+    
+
+    TreEntry* GAMEOPT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\GAMEOPT.SHP"); // Gameplay option
+    //ExploreImages(GAMEOPT->data,GAMEOPT->size);
+    
+    
+    
+    
+    TreEntry* GRAVFONT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\GRAVFONT.SHP"); // Gameplay option
+    //ExploreImages(GRAVFONT->data,GRAVFONT->size);
+    
+    
+    
+  
+    TreEntry* MENBGRND = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MENBGRND.SHP"); // DogFight background
+   // ExploreImages(MENBGRND->data,MENBGRND->size,0);
+    
+    
+    
+  
+    TreEntry* MTYPEBUT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MTYPEBUT.SHP"); // Dogfight/Search&Destroy ...WHY is is duplicated from MAINMENU.PAK??
+    //ExploreImages(MTYPEBUT->data,MTYPEBUT->size,0);
+    
+    
+    
+  
+    TreEntry* OVBKGRND = misc.GetEntryByName("..\\..\\DATA\\FONTS\\OVBKGRND.SHP"); // Object Viewer background ...WHY is is duplicated from OBJVIEW.PAK??
+    //ExploreImages(OVBKGRND->data,OVBKGRND->size,0);
+    
+    
+    
+ 
+    TreEntry* RESTART = misc.GetEntryByName("..\\..\\DATA\\FONTS\\RESTART.SHP"); // Restart menu
+    //ExploreImages(RESTART->data,RESTART->size,0);
+    
+    
+    
+    TreEntry* BETTY = mis.GetEntryByName("..\\..\\DATA\\COCKPITS\\BETTY.PAK");    // ?
+    //ExploreImages(BETTY->data,BETTY->size,0);
+    
+    
+    
+
+    TreEntry* mid1 = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
+   // ExploreImages(mid1->data,mid1->size,0);
+    
     
     /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\FLITOPT.SHP"); // Control options
-    ExploreImages(mainFont->data,mainFont->size);
-    */
-    
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\FORMFONT.SHP"); // Font option
-    ExploreImages(mainFont->data,mainFont->size);
-    */
-    
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\GAMEOPT.SHP"); // Gameplay option
-    ExploreImages(mainFont->data,mainFont->size);
-    */
-    
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\GRAVFONT.SHP"); // Gameplay option
-    ExploreImages(mainFont->data,mainFont->size);
-    */
-    
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MENBGRND.SHP"); // DogFight background
-    ExploreImages(mainFont->data,mainFont->size);
-    */
-    
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MTYPEBUT.SHP"); // Dogfight/Search&Destroy ...WHY is is duplicated from MAINMENU.PAK??
-    ExploreImages(mainFont->data,mainFont->size);
-    */
-    
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\OVBKGRND.SHP"); // Object Viewer background ...WHY is is duplicated from OBJVIEW.PAK??
-    ExploreImages(mainFont->data,mainFont->size);
-    */
-    
-    /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\RESTART.SHP"); // Restart menu
-    ExploreImages(mainFont->data,mainFont->size);
-    */
-    
-    /*
-    TreArchive mis ;
-    mis.InitFromFile("MISSIONS.TRE");
-    TreEntry* misE = mis.GetEntryByName("..\\..\\DATA\\COCKPITS\\BETTY.PAK");    //
-    ExploreImages(misE->data,misE->size);
-    */
-    
-    /*
-    TreArchive gf ;
-    gf.InitFromFile("GAMEFLOW.TRE");
-    TreEntry* mid1 = gf.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
-    ExploreImages(mid1->data,mid1->size);
-    */
-    
-    /*
-    TreArchive gf ;
-    gf.InitFromFile("GAMEFLOW.TRE");
-    TreEntry* mid1 = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\TM.SHP");  //Training mission builder dialog
-    ExploreImages(mid1->data,mid1->size);
-    */
-    
-    /*
-    TreArchive gf ;
-    gf.InitFromFile("GAMEFLOW.TRE");
-    TreEntry* mid1 = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\MAINMENU.PAK");  //Main Menu buttons. No background :( !
+
+    TreEntry* mid1 = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\TM.SHP");  //Training mission builder dialog
     ExploreImages(mid1->data,mid1->size);
     */
     
     
+
+    TreEntry* MAINMENU = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\MAINMENU.PAK");  //Main Menu buttons. No background :( !
+    ExploreImages(MAINMENU->data,MAINMENU->size,0);
+    
+    
+    
     
     TreArchive gf ;
     gf.InitFromFile("GAMEFLOW.TRE");
-    TreEntry* mid1 = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");  // ALL SETS AND CHARACTERS !!!!!
-    ExploreImages(mid1->data,mid1->size,0);
+    TreEntry* CONVSHPS = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");  // ALL SETS AND CHARACTERS !!!!!
+    //ExploreImages(CONVSHPS->data,miCONVSHPSd1->size,0);
+    
     //Check palettes fro that too
+    /*
     TreEntry* palettesEConv = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
     PakArchive palettesArchiveConv ;
     palettesArchiveConv.InitFromRAM("CONVPALS.PAK", palettesEConv->data, palettesEConv->size);
     palettesArchiveConv.List(stdout);
-    
+    */
     
 
     
-    /*
-    TreArchive gf ;
-    gf.InitFromFile("GAMEFLOW.TRE");
-    /*
-    TreEntry* mid1 = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");  // A LLOOOOOOT OF GOOOD STUFFF !!! Background, bar animations, all airplanes
+   
+    TreEntry* optShps = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");  // A LLOOOOOOT OF GOOOD STUFFF !!! Background, bar animations, all airplanes
                                                                                 // airplane preparation,
-    
+    /*
         118 - > female pinup
         119 -> wild cat base entry
         119 -> deset landing strip
@@ -748,10 +740,13 @@ void TestMouseCursor(void){
      129 map south america
      130 map europe
      131 map africa
-     
-    //ExploreImages(mid1->data,mid1->size,0);
+     */
+    
+    
+    //ExploreImages(optShps->data,optShps->size,0);
 
     //Check palettes fro that too
+    /*
     TreEntry* palettesE = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     PakArchive palettesArchive ;
     palettesArchive.InitFromRAM("OPTPALS.PAK", palettesE->data, palettesE->size);
@@ -762,23 +757,27 @@ void TestMouseCursor(void){
     
     
     /*
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
+   
     TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MAINOPT.SHP");
     ExploreImages(mainFont->data,mainFont->size);
      */
     
     /*
-    TreArchive obj ;
-    obj.InitFromFile("OBJECTS.TRE");
+    
     TreEntry* objE = obj.GetEntryByName("..\\..\\DATA\\OBJECTS\\EJECT.PAK");   //Eject/Crash animation
     ExploreImages(objE->data,objE->size);
     */
 }
 
-int main( int argc,char** argv){
+int mains( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
+    
+    
+    Screen.Init(2);
+    VGA.Init();
+    VGA.Activate();
+
     
     TestMouseCursor();
     

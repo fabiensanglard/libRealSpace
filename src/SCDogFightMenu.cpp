@@ -21,7 +21,7 @@ void SCDogFightMenu::Init( ){
 
 //DELETE ME
 static void showAllImage(PakArchive* archive){
-    
+    /*
     for(size_t i = 0 ; i < archive->GetNumEntries() ; i ++){
         PakEntry* entry = archive->GetEntry(i);
         
@@ -49,7 +49,7 @@ static void showAllImage(PakArchive* archive){
         screen.ClearContent();
     }
     
-    
+    */
 }
 
 void SCDogFightMenu::ParsePalette(PakEntry* entry){

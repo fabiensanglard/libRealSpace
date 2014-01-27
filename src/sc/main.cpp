@@ -9,12 +9,13 @@
 #include "precomp.h"
 
 //Here are all the mean subsystems interacting together
-GameEngine    Game;
-Renderer      renderer;
-SCMouse       Mouse;
-AssetManager  Assets;
+GameEngine      Game;
+RSScreen        Screen;
+RSVGA           VGA;
+SCMouse         Mouse;
+AssetManager    Assets;
 
-int maine(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
     
     Assets.SetBase("/Users/fabiensanglard/SC/SC/");
     

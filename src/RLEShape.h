@@ -9,17 +9,30 @@
 #ifndef __pak__rle__
 #define __pak__rle__
 
-class RLECodex{
+class RLEShape{
 
     
 public:
     
-     RLECodex();
-    ~RLECodex();
+     RLEShape();
+    ~RLEShape();
     
-    bool ReadImage(uint8_t* src, RSImage* dst, size_t* byteRead);
+    void Init(uint8_t* data, size_t size);
+    void InitWithPosition(uint8_t* data, size_t size,Point2D* position );
+    
+    bool Expand(uint8_t* dst, size_t* byteRead);
+    
+    inline void SetPosition(Point2D* position){
+        this->position = *position;
+    }
     
 private:
+    
+    ByteStream stream;
+    size_t size;
+    Point2D position;
+    
+    uint8_t* data;
     
     enum FragmentType {FRAG_END,FRAG_COMPOSITE,FRAG_RAW} ;
     enum FragmentSubType {SUB_FRAG_RAW =0x0, SUB_FRAG_COMPRESSED=0x1} ;
@@ -34,16 +47,13 @@ private:
     } RLEFragment;
     
     
-    void ReadFragment  (ByteStream* stream ,RLEFragment* frag);
-    bool ExpandFragment(ByteStream* stream ,RLEFragment* frag, RSImage* dst );
+    void ReadFragment  (RLEFragment* frag);
+    bool ExpandFragment(RLEFragment* frag, uint8_t* dst );
     
-    
-    int16_t rightDist;
     int16_t leftDist;
     int16_t topDist;
-    int16_t botDist;
-    uint8_t* rleCenter;
-    bool WriteRLETexel(RSImage* dstImage,int16_t dx,int16_t dy, uint8_t color);
+    
+    bool WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color);
 };
 
 
