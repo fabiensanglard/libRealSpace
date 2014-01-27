@@ -24,12 +24,12 @@ public:
     
     void Prepare(void);
     
-    void Init(size_t zoom);
+    void Init(int32_t zoom);
     
     void Clear(void);
 
     void ShowPalette(VGAPalette* palette);
-    void DrawImage(RSImage* image,int zoom);
+    void DrawImage(RSImage* image);
     void DrawModel(RSEntity* object, size_t lodLevel);
     void DisplayModel(RSEntity* object,size_t lodLevel);
     
@@ -101,7 +101,7 @@ private:
     
     int32_t width;
     int32_t height;
-
+    int scale;
     
     VGAPalette defaultPalette;
     VGAPalette* currentPalette;

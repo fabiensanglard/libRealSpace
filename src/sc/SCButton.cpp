@@ -17,14 +17,11 @@ SCButton::~SCButton(){
     
 }
 
-void SCButton::Init(RSImage* upApp, RSImage* downApp,ActionFunction fct){
-    
-    this->apperance[APR_UP] = upApp;
-    this->apperance[APR_DOWN] = downApp;
-    
+void SCButton::InitBehavior(ActionFunction fct, Point2D position){
     this->state = STATE_UP;
-    
     this->onClick = fct;
+    this->appearance[APR_DOWN].SetPosition(position);
+    this->appearance[APR_UP].SetPosition(position);
 }
 
 void SCButton::OnAction(void){

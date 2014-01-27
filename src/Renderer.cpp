@@ -39,10 +39,12 @@ void Renderer::ResetPalette(void){
     this->currentPalette = &defaultPalette;
 }
 
-void Renderer::Init(size_t zoomFactor){
+void Renderer::Init(int32_t zoomFactor){
     
-    int32_t width  = 320 * zoomFactor;
-    int32_t height = 200 * zoomFactor;
+    this->scale =zoomFactor;
+    
+    int32_t width  = 320 * scale;
+    int32_t height = 200 * scale;
     
     //Load the default palette
     IffLexer lexer ;
@@ -63,7 +65,7 @@ void Renderer::Init(size_t zoomFactor){
     SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_HIDDEN, &sdlWindow, &sdlRenderer);
     
     
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
         printf("Unable to initialize SDL:  %s\n",SDL_GetError());
         return ;
     }
@@ -89,7 +91,7 @@ void Renderer::Init(size_t zoomFactor){
 	glMatrixMode(GL_MODELVIEW);							// Select The Modelview Matrix
 	glLoadIdentity();									// Reset The Modelview Matrix
     
-	glClearColor(0.4f, 0.4f, 1.0f, 1.0f);				// Black Background
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);				// Black Background
 	//glClearDepth(1.0f);								// Depth Buffer Setup
 	glDisable(GL_DEPTH_TEST);							// Disable Depth Testing
     
@@ -102,7 +104,7 @@ void Renderer::Init(size_t zoomFactor){
     camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
     
     
-    SDL_SetRelativeMouseMode(SDL_TRUE);
+    //SDL_SetRelativeMouseMode(SDL_TRUE);
     
     light.SetWithCoo(300, 300, 300);
     
@@ -159,7 +161,7 @@ void Renderer::ShowPalette(VGAPalette* palette){
     }
    
 
-    DrawImage(&image, 2);
+    DrawImage(&image);
     
     SetTitle("PALETTE");
     renderer.Swap();
@@ -242,14 +244,14 @@ void Renderer::PumpEvents(void){
 
 
 
-void Renderer::DrawImage(RSImage* image,int zoom){
+void Renderer::DrawImage(RSImage* image){
     
     if (!initialized)
         return;
     
-    running = true;
-    
     image->SetPalette(this->currentPalette);
+    
+  
     
     glDisable(GL_DEPTH_TEST);
     
@@ -262,24 +264,29 @@ void Renderer::DrawImage(RSImage* image,int zoom){
     
     
     glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable(GL_BLEND);
+    glColor4f(1, 1, 1,1);
+    //glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     
     glDisable(GL_CULL_FACE);
      
     glBindTexture(GL_TEXTURE_2D, image->GetTexture()->id);
     glBegin(GL_QUADS);
             glTexCoord2f(0, 1);
-            glVertex2d(0, 0);
+            glVertex2d(0+image->GetPosition().x*this->scale,
+                       0+image->GetPosition().y*this->scale);
     
             glTexCoord2f(1, 1);
-            glVertex2d(image->width*zoom, 0);
+            glVertex2d(image->width*this->scale+image->GetPosition().x*this->scale,
+                       0+image->GetPosition().y*this->scale);
     
             glTexCoord2f(1, 0);
-            glVertex2d(image->width*zoom, image->height*zoom);
+            glVertex2d(image->width*this->scale+image->GetPosition().x*this->scale,
+                       image->height*this->scale+image->GetPosition().y*this->scale);
     
             glTexCoord2f(0, 0);
-            glVertex2d(0, image->height*zoom);
+            glVertex2d(0+image->GetPosition().x*this->scale,
+                       image->height*this->scale+image->GetPosition().y*this->scale);
     glEnd();
     
     glDisable(GL_TEXTURE_2D);
@@ -287,7 +294,7 @@ void Renderer::DrawImage(RSImage* image,int zoom){
     glEnable(GL_DEPTH_TEST);
     
     
-    paused = true;
+  
 }
 
 void Renderer::ShowWindow(void){
@@ -313,6 +320,8 @@ void Renderer::CreateTextureInGPU(Texture* texture){
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     //glDisable(GL_TEXTURE_2D);
 }
 

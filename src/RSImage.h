@@ -47,7 +47,13 @@ public:
     int16_t bottom;
     bool WriteRLETexel(int16_t dx,int16_t dy, uint8_t color);
     
+    
+    inline void SetPosition(const Point2D position){ this->position = position; }
+    inline Point2D GetPosition(void) { return this->position; }
+    
 private:
+    
+    Point2D position;
     
     Texture texture;
     

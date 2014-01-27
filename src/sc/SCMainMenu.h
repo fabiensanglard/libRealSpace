@@ -23,10 +23,16 @@ private:
     
     void LoadButtons(void);
     void LoadBoard(void);
-    void LoadBackground(void);
+    void LoadBackgrounds(void);
+    void LoadPalette(void);
     
-    std::vector<SCButton*> buttons;
+    void CheckHit(void);
+    SCButton buttons[5];
     RSImage* board;
+    RSImage* sky;
+    RSImage* mountain;
+    
+    PakArchive mainMenupak;
 };
 
 #endif /* defined(__libRealSpace__SCMainMenu__) */

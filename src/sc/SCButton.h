@@ -13,27 +13,32 @@ typedef void (*ActionFunction)(void);
 
 class SCButton{
     
+public:
     SCButton();
     ~SCButton();
     
      
     Point2D position;
     
-    void Init(RSImage* upApp, RSImage* downApp,ActionFunction fct);
+    void InitBehavior(ActionFunction fct, Point2D position);
     
     void OnAction(void);
     
+    enum Appearance { APR_UP, APR_DOWN};
+    
+    enum State { STATE_UP, STATE_DOWN };
+    
+    
+    RSImage appearance[2];
     
 private:
     
-    enum Appearance { APR_UP, APR_DOWN};
-
-    enum State { STATE_UP, STATE_DOWN };
+    
     State state;
     
     bool clickable ;
     
-    RSImage* apperance[2];
+    
     
     ActionFunction onClick;
     

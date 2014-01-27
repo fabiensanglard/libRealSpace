@@ -15,6 +15,9 @@ class IActivity{
 public:
     
     virtual void Init(void) = 0;
+    void Start(void) { this->running = true;}
+    void Stop(void) { this->running = false;}
+    
     virtual void Run (void) = 0;
     
     void SetTitle(const char* title);
@@ -23,9 +26,11 @@ public:
     
     VGAPalette palette;
     
+    virtual ~IActivity();
+    
 protected:
     IActivity();
-    ~IActivity();
+    
     
 private:
     bool running;

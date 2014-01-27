@@ -26,6 +26,9 @@ public:
     //Add an activity on the top of the stack.
     void AddActivity(IActivity* activity);
     
+    
+    void PumpEvents(void);
+    
 private:
     
     std::stack<IActivity*> activities;

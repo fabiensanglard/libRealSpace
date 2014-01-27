@@ -69,7 +69,7 @@ void testShowAllJetTextures(const char* trePath,const char* jetPath)
     printf("Model '%s' features %lu textures.\n",jetPath,jet.NumImages());
     for(size_t i = 0 ; i < jet.NumImages(); i++){
         RSImage* image = jet.images[i];
-        renderer.DrawImage(image,2);
+        renderer.DrawImage(image);
         renderer.Swap();
     }
         
@@ -250,7 +250,7 @@ void testShowAllTexturesPAK(void){
         printf("Drawing %lu.\n",i);
         RSImage* image = txmTextureSet.GetImageById(i);
         renderer.Clear();
-        renderer.DrawImage(image,4);
+        renderer.DrawImage(image);
         renderer.Swap();
         renderer.Pause();
         while (renderer.IsPaused()) {
@@ -278,7 +278,7 @@ void testShowAllTexturesPAK(void){
         printf("Drawing %lu.\n",i);
         RSImage* image = accTextureSet.GetImageById(i);
         renderer.Clear();
-        renderer.DrawImage(image,4);
+        renderer.DrawImage(image);
         renderer.Swap();
         renderer.Pause();
         while (renderer.IsPaused()) {
@@ -376,7 +376,7 @@ static void showAllImageInArchive(PakArchive* archive){
             renderer.Pause();
             while(renderer.IsPaused()){
                 
-                renderer.DrawImage(&screen, 2);
+                renderer.DrawImage(&screen);
                 renderer.Swap();
                 renderer.ShowWindow();
                 renderer.PumpEvents();
@@ -505,7 +505,7 @@ void ShowImage(RSImage* img      ){
     renderer.Pause();
     while(renderer.IsPaused()){
         renderer.Clear();
-        renderer.DrawImage(img,2);
+        renderer.DrawImage(img);
         renderer.Swap();
         renderer.PumpEvents();
     }
@@ -536,7 +536,9 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
         printf("Pak Found 0X%X\n",data);
         for(size_t i =0 ; i  < font.GetNumEntries() ; i++){
             PakEntry* e = font.GetEntry(i);
-            ExploreImages(e->data,e->size,numTabs++);
+            PrintTabs(numTabs);
+            printf("Pak entry %lu\n",i);
+            ExploreImages(e->data,e->size,numTabs+1);
             
         }
         return;
@@ -573,8 +575,9 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
         bool error = codex.ReadImage(data+nextImage, &screen, &byteRead);
         if (!error){
             ShowImage(&screen);
-            PrintTabs(numTabs);
             printf("Image Found 0X%X\n",data+nextImage);
+            PrintTabs(numTabs);
+            
         }
         
         nextImage = s.ReadUInt32LE();
@@ -585,8 +588,14 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
 
 void TestMouseCursor(void){
     
-    renderer.Init(2);
+    renderer.Init(4);
 
+    
+     TreArchive misc ;
+     misc.InitFromFile("GAMEFLOW.TRE");
+     TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK"); //Camera configuration
+     ExploreImages(mainFont->data,mainFont->size,0);
+     
     
     
     /*
@@ -710,33 +719,44 @@ void TestMouseCursor(void){
     */
     
     
-    /*
+    
     TreArchive gf ;
     gf.InitFromFile("GAMEFLOW.TRE");
     TreEntry* mid1 = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");  // ALL SETS AND CHARACTERS !!!!!
-    ExploreImages(mid1->data,mid1->size);
+    ExploreImages(mid1->data,mid1->size,0);
     //Check palettes fro that too
     TreEntry* palettesEConv = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
     PakArchive palettesArchiveConv ;
     palettesArchiveConv.InitFromRAM("CONVPALS.PAK", palettesEConv->data, palettesEConv->size);
     palettesArchiveConv.List(stdout);
-    */
+    
     
 
     
-    
+    /*
     TreArchive gf ;
     gf.InitFromFile("GAMEFLOW.TRE");
+    /*
     TreEntry* mid1 = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");  // A LLOOOOOOT OF GOOOD STUFFF !!! Background, bar animations, all airplanes
                                                                                 // airplane preparation,
-    ExploreImages(mid1->data,mid1->size,0);
+    
+        118 - > female pinup
+        119 -> wild cat base entry
+        119 -> deset landing strip
+     
+     128 map north america
+     129 map south america
+     130 map europe
+     131 map africa
+     
+    //ExploreImages(mid1->data,mid1->size,0);
 
     //Check palettes fro that too
     TreEntry* palettesE = gf.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     PakArchive palettesArchive ;
     palettesArchive.InitFromRAM("OPTPALS.PAK", palettesE->data, palettesE->size);
     palettesArchive.List(stdout);
-    
+    */
     
     
     
@@ -756,7 +776,7 @@ void TestMouseCursor(void){
     */
 }
 
-int mainLibFreeSpace( int argc,char** argv){
+int main( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
     

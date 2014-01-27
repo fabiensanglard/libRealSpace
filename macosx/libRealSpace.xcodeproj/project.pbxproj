@@ -28,6 +28,7 @@
 		2D9B617C18725C660071ACDA /* RSMusic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B617A18725C660071ACDA /* RSMusic.cpp */; };
 		2D9B617F18725C8B0071ACDA /* RSSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B617D18725C8B0071ACDA /* RSSound.cpp */; };
 		2D9B618218725CEC0071ACDA /* RSArea.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B618018725CEC0071ACDA /* RSArea.cpp */; };
+		2D9D87191895B5B700B46D37 /* SCSelectWeaponsF16.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9D87171895B5B700B46D37 /* SCSelectWeaponsF16.cpp */; };
 		2DA7D40018847E58003CAA78 /* Math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DA7D3FE18847E58003CAA78 /* Math.cpp */; };
 		2DA7D40318850B1F003CAA78 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DA7D40118850B1F003CAA78 /* Quaternion.cpp */; };
 		2DB3FB63187281850081B676 /* RSMapTextureSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DB3FB61187281850081B676 /* RSMapTextureSet.cpp */; };
@@ -94,6 +95,8 @@
 		2D9B617E18725C8B0071ACDA /* RSSound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSSound.h; path = ../src/RSSound.h; sourceTree = SOURCE_ROOT; };
 		2D9B618018725CEC0071ACDA /* RSArea.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSArea.cpp; path = ../src/RSArea.cpp; sourceTree = SOURCE_ROOT; };
 		2D9B618118725CEC0071ACDA /* RSArea.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSArea.h; path = ../src/RSArea.h; sourceTree = SOURCE_ROOT; };
+		2D9D87171895B5B700B46D37 /* SCSelectWeaponsF16.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCSelectWeaponsF16.cpp; path = ../src/sc/SCSelectWeaponsF16.cpp; sourceTree = "<group>"; };
+		2D9D87181895B5B700B46D37 /* SCSelectWeaponsF16.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCSelectWeaponsF16.h; path = ../src/sc/SCSelectWeaponsF16.h; sourceTree = "<group>"; };
 		2DA7D3FE18847E58003CAA78 /* Math.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Math.cpp; path = ../src/Math.cpp; sourceTree = SOURCE_ROOT; };
 		2DA7D3FF18847E58003CAA78 /* Math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Math.h; path = ../src/Math.h; sourceTree = SOURCE_ROOT; };
 		2DA7D40118850B1F003CAA78 /* Quaternion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Quaternion.cpp; path = ../src/Quaternion.cpp; sourceTree = SOURCE_ROOT; };
@@ -184,8 +187,10 @@
 			children = (
 				2D8460E918939D8E00B652A8 /* IActivity.h */,
 				2D8460E818939D8E00B652A8 /* IActivity.cpp */,
-				2D8460F5189438B300B652A8 /* SCMainMenu.cpp */,
 				2D8460F6189438B300B652A8 /* SCMainMenu.h */,
+				2D8460F5189438B300B652A8 /* SCMainMenu.cpp */,
+				2D9D87181895B5B700B46D37 /* SCSelectWeaponsF16.h */,
+				2D9D87171895B5B700B46D37 /* SCSelectWeaponsF16.cpp */,
 			);
 			name = activities;
 			sourceTree = "<group>";
@@ -365,6 +370,7 @@
 				2D310909186FFD7800D3443F /* PakArchive.cpp in Sources */,
 				2DFEFBAE186F5C84002305A9 /* TreArchive.cpp in Sources */,
 				2D31090D18707F1500D3443F /* Texture.cpp in Sources */,
+				2D9D87191895B5B700B46D37 /* SCSelectWeaponsF16.cpp in Sources */,
 				2DFEFBB7186F655A002305A9 /* ByteStream.cpp in Sources */,
 				2DA7D40018847E58003CAA78 /* Math.cpp in Sources */,
 				2DA7D40318850B1F003CAA78 /* Quaternion.cpp in Sources */,

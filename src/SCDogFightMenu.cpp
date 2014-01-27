@@ -39,7 +39,7 @@ static void showAllImage(PakArchive* archive){
             renderer.Pause();
             while(renderer.IsPaused())
             {
-                renderer.DrawImage(&screen, 2);
+                renderer.DrawImage(&screen);
             
                 renderer.Swap();
                 renderer.ShowWindow();

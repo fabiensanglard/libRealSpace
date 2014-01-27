@@ -9,10 +9,10 @@
 #ifndef __libRealSpace__Math__
 #define __libRealSpace__Math__
 
-class Point2D{
+typedef struct Point2D{
     float x;
     float y;
-};
+} Point2D;
 
 typedef Point2D Vector2D;
 

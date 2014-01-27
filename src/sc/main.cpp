@@ -14,16 +14,16 @@ Renderer      renderer;
 SCMouse       Mouse;
 AssetManager  Assets;
 
-int main(int argc, char* argv[]) {
+int maine(int argc, char* argv[]) {
     
     Assets.SetBase("/Users/fabiensanglard/SC/SC/");
     
     Game.Init();
     
-    
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();
     main->Init();
+    main->Start();
     Game.AddActivity(main);
     
     Game.Run();

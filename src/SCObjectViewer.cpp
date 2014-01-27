@@ -300,8 +300,8 @@ void SCObjectViewer::Run(void){
         modelIndex = (totalTime /4000) % showCases.size();
         
         renderer.Clear();
-        renderer.DrawImage(&backgroundImage, 2);
-        renderer.DrawImage(&staticMenuImage, 2);
+        renderer.DrawImage(&backgroundImage);
+        renderer.DrawImage(&staticMenuImage);
     
         RSShowCase showCase = showCases[modelIndex];
         
