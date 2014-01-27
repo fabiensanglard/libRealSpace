@@ -14,7 +14,12 @@
 #define MAINMENU_PAK_BOARD_INDICE   1
 #define MAINMENU_PAK_BOARD_PALETTE  2
 
-#define GAMEFLOW_PALETTE_PAK_PATH "..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK"
+
+/*
+ 3 eagle
+ 9 letters
+ */
+
 
 
 static void OnContinue(void){
@@ -236,13 +241,20 @@ void SCMainMenu::LoadPalette(void){
     
     ByteStream paletteReader;
     
-    //First patch:
-    TreEntry* firstPaletteUpdate = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(GAMEFLOW_PALETTE_PAK_PATH);
-    PakArchive firstPaletteUpdatePak ;
-    firstPaletteUpdatePak.InitFromRAM("",firstPaletteUpdate->data,firstPaletteUpdate->size);
-//    0-40
-    paletteReader.Set(firstPaletteUpdatePak.GetEntry(24)->data);
-    this->palette.ReadPatch(&paletteReader);
+    
+    
+    TreEntry* mid1Entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK");
+    PakArchive mid1Pak;
+    mid1Pak.InitFromRAM("MID1.PAK",mid1Entry->data,mid1Entry->size);
+    mid1Pak.List(stdout);
+    
+    IffLexer lexer;
+    lexer.InitFromRAM(mid1Pak.GetEntry(9)->data-772-0x14, 772+0x14);
+    RSPalette letterPalette;
+    letterPalette.InitFromIFF(&lexer);
+    //this->palette = *letterPalette.GetColorPalette();
+    
+    
     
     
     //Second palette patch
@@ -253,15 +265,6 @@ void SCMainMenu::LoadPalette(void){
 }
 
 void SCMainMenu::LoadBackgrounds(void){
-    
-   
-
-    /*
-    Pak entry 44
-    Exploring 0XC50FA56
-    Pak Found 0XC50FA56
-    Pak entry 0
-     */
     
     
     TreEntry* entryMountain = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
@@ -276,13 +279,29 @@ void SCMainMenu::LoadBackgrounds(void){
 
     
     PakArchive skyPak;
-    skyPak.InitFromRAM("subPak board",pak.GetEntry(116)->data ,pak.GetEntry(116)->size);
+    skyPak.InitFromRAM("subPak sky",pak.GetEntry(116)->data ,pak.GetEntry(116)->size);
     sky.Init(skyPak.GetEntry(0)->data, skyPak.GetEntry(0)->size);
 
     //background 116 ?
+    
+    TreEntry* entryCloud = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
+    PakArchive subcloudPak;
+    subcloudPak.InitFromRAM("cloud oak entry", entryCloud->data, entryCloud->size);
+    PakArchive cloudPak;
+    cloudPak.InitFromRAM("subPak cloud",subcloudPak.GetEntry(20)->data ,subcloudPak.GetEntry(20)->size);
+    cloud.Init(cloudPak.GetEntry(0)->data, cloudPak.GetEntry(0)->size);
+
 }
 
 void SCMainMenu::CheckHit(void){
+    
+}
+
+void SCMainMenu::DrawMenu(void){
+    VGA.DrawShape(&board);
+    VGA.DrawShape(&buttons[BUTTON_OBJVIEWER].appearance[SCButton::Appearance::APR_UP]);
+    VGA.DrawShape(&buttons[BUTTON_STARTNEWGAME].appearance[SCButton::Appearance::APR_UP]);
+    VGA.DrawShape(&buttons[BUTTON_TRAINING].appearance[SCButton::Appearance::APR_UP]);
     
 }
 
@@ -294,13 +313,11 @@ void SCMainMenu::Run(void){
     VGA.SetPalette(&this->palette);
     
     //Draw static
-    //VGA.DrawShape(&sky);
+    VGA.DrawShape(&sky);
     VGA.DrawShape(&mountain);
-    VGA.DrawShape(&board);
+    VGA.DrawShape(&cloud);
     
-    VGA.DrawShape(&buttons[BUTTON_OBJVIEWER].appearance[SCButton::Appearance::APR_UP]);
-    VGA.DrawShape(&buttons[BUTTON_STARTNEWGAME].appearance[SCButton::Appearance::APR_UP]);
-    VGA.DrawShape(&buttons[BUTTON_TRAINING].appearance[SCButton::Appearance::APR_UP]);
+    DrawMenu();
     
     //Check Mouse position. If clickable update to visor instead of cursor
     CheckHit();

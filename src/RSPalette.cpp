@@ -53,9 +53,9 @@ void RSPalette::ParsePALT(IffChunk* chunk){
             texel.a = 255;
         
         //Since VGA palette RGB are on 6 bits and not 8, we need to adjust
-        texel.r *= 255/64.0f;
-        texel.g *= 255/64.0f;
-        texel.b *= 255/64.0f;
+        texel.r *= 255/63.0f;
+        texel.g *= 255/63.0f;
+        texel.b *= 255/63.0f;
         
         colors.SetColor(i, &texel);
     }
@@ -81,9 +81,9 @@ void RSPalette::ParseBLWH(IffChunk* chunk){
         else
             texel.a = 255;
         
-        texel.r *= 255/64.0f;
-        texel.g *= 255/64.0f;
-        texel.b *= 255/64.0f;
+        texel.r *= 255/63.0f;
+        texel.g *= 255/63.0f;
+        texel.b *= 255/63.0f;
         bwColors.SetColor(i, &texel);
     }
 }

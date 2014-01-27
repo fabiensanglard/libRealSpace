@@ -31,8 +31,11 @@ private:
     RLEShape board;
     RLEShape sky;
     RLEShape mountain;
+    RLEShape cloud;
     
     PakArchive mainMenupak;
+    
+    void DrawMenu(void);
 };
 
 #endif /* defined(__libRealSpace__SCMainMenu__) */

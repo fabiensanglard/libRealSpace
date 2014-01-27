@@ -583,7 +583,7 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
         if (!errorFound){
             VGA.VSync();
             Screen.Refresh();
-            usleep(imgSpeed/100);
+            usleep(imgSpeed);
             PrintTabs(numTabs);
             printf("Image Found 0X%X\n",data+nextImage);
             
@@ -606,7 +606,7 @@ void TestMouseCursor(void){
     
     
      TreEntry* mainFont = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK"); //Camera configuration
-    // ExploreImages(mainFont->data,mainFont->size,0);
+     ExploreImages(mainFont->data,mainFont->size,0);
      
     
     
@@ -696,19 +696,19 @@ void TestMouseCursor(void){
     
 
     TreEntry* mid1 = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
-   // ExploreImages(mid1->data,mid1->size,0);
+    ExploreImages(mid1->data,mid1->size,0);
     
     
-    /*
+    
 
-    TreEntry* mid1 = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\TM.SHP");  //Training mission builder dialog
-    ExploreImages(mid1->data,mid1->size);
-    */
+    TreEntry* tm = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\TM.SHP");  //Training mission builder dialog
+    //ExploreImages(tm->data,tm->size,0);
+    
     
     
 
     TreEntry* MAINMENU = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\MAINMENU.PAK");  //Main Menu buttons. No background :( !
-    ExploreImages(MAINMENU->data,MAINMENU->size,0);
+    //ExploreImages(MAINMENU->data,MAINMENU->size,0);
     
     
     
@@ -756,20 +756,20 @@ void TestMouseCursor(void){
     
     
     
-    /*
-   
-    TreEntry* mainFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MAINOPT.SHP");
-    ExploreImages(mainFont->data,mainFont->size);
-     */
     
-    /*
+   
+    TreEntry* MAINOPT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MAINOPT.SHP");
+    //ExploreImages(MAINOPT->data,MAINOPT->size,0);
+     
+    
+    
     
     TreEntry* objE = obj.GetEntryByName("..\\..\\DATA\\OBJECTS\\EJECT.PAK");   //Eject/Crash animation
-    ExploreImages(objE->data,objE->size);
-    */
+    //ExploreImages(objE->data,objE->size,0);
+    
 }
 
-int mains( int argc,char** argv){
+int maine( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
     

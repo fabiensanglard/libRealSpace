@@ -4,8 +4,12 @@ Strike Commander Palette Format :
 By Fabien Sanglard
 January 21st, 2014
 
-There are two kinds of palettes in Strike Commander. The most important one is in PALETTE.IFF
-file:
+Palettes can be found in four difference formats in SC:
+
+In IFF files, within PALT, BLWH or CMAP chunk.
+
+Here is the example of PALETTE.IFF
+
 
 FORM
 1798
@@ -28,14 +32,19 @@ PALT
     TABL
     46
 
-Two set of palettes are actuall contained there:
+PALETTE.IFF contains the 3D engine palette (PALT) with the colors and also a black and white version in BLWH
+(when a player suffers too many G's the vision turns to greyscale).
 
-Color palette in PALT
-Black and White in BLWH
+Palette can also be found out of IFF files. For example in GAMEFLOW.TRE, entry ..\\..\\DATA\\GAMEFLOW\\MAINMENU.PAK is a PAK with three entries. The two first ones are RLEShapes for the menu
+and the third one is a 388 bytes blog of data.
 
-The other chunk have not been identified
+After inspection it turned out that palette in SC can ocassionally be stored in full but they are also often just "patches" for the current VGA palette.
 
+Format:
 
-Two palettes are actually contained there
+2 bytes: Little Endian offset where to start updating the VGA palette
+2 bytes: Num of colors to update
+Followed by Num Of Colors bytes * 3 bytes.
 
-Unfortunately, palette are stored in unconsistent formats.
+The colors are stored as follow: R, G and B.
+If you want to convert the color to GPU RGB 888, remember to multiply by 254/63.0f since colors channel were stored on 7 bits, the way VGA was expecting them.
