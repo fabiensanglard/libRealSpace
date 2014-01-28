@@ -183,7 +183,7 @@ void SCMainMenu::LoadPalette(void){
     TreEntry* palettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(OPTPALS_PAK_PATH);
     PakArchive palettesPak;
     palettesPak.InitFromRAM("OPTSHPS.PAK",palettesEntry->data,palettesEntry->size);
-    palettesPak.List(stdout);
+    //palettesPak.List(stdout);
     
     paletteReader.Set(palettesPak.GetEntry(OPTPALS_PAK_MOUTAIN_PALETTE_PATCH_ID)->data); //mountains Good but not sky
     this->palette.ReadPatch(&paletteReader);
