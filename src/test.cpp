@@ -522,19 +522,112 @@ void ReverseOBKViewButton(){
 
 }
 
-int maine( int argc,char** argv){
+int32_t ParsePlan(ByteStream* reader){
     
+    uint8_t* startPos = reader->GetPosition();
+    
+    uint8_t type = reader->ReadByte();
+    
+    switch (type) {
+        case 0x00:  // Group plan
+        {
+            printf("GROUP :\n");
+            uint8_t c = reader->ReadByte();
+            while (c != 0x3)
+                c= reader->ReadByte();
+            reader->Set(reader->GetPosition()-1);
+            break;
+        }
+        case 0x03:  // Person talking
+        {
+            uint8_t* speakerName = reader->GetPosition();
+            uint8_t* set         = reader->GetPosition() + 0xA;
+            uint8_t* sentence         = reader->GetPosition() + 0x17;
+            
+            
+            reader->MoveForward(0x17 + strlen((char*)sentence)+1);
+            uint8_t color = reader->ReadByte(); // Color ?
+            
+            printf("CLOSEUP: WHO: %7s WHERE: %7s:     WHAT: '%s' (%2X)\n",speakerName,set,sentence,color);
+            break;
+        }
+        case 0x04:  // Same person keep talking
+        {
+            uint8_t* sentence         = reader->GetPosition();
+            reader->MoveForward(strlen((char*)sentence)+1);
+            printf("MORETEX:                                WHAT: '%s'\n",sentence);
+            break;
+        }
+        case 0xB:  // Same person keep talking
+        {
+            printf("CHOICE YES/NO : %X.\n",type);
+            //Looks like first byte is the offset to skip if the answer is no.
+            //Looks like second byte is the offset to skip if the answer is yes.
+            return 9999;
+            break;
+        }
+        default:
+            printf("Unknown opcode: %X.\n",type);
+            return 9999;
+            break;
+    }
+    
+    
+    return reader->GetPosition() - startPos;
+}
+
+void ParseConv(PakEntry* conv){
+    
+    if (conv->size == 0)
+        return;
+    
+    
+    
+    ByteStream planReader ;
+    planReader.Set(conv->data);
+    
+    int32_t byteToRead = conv->size;
+    while(byteToRead > 0){
+        int32_t byteRead = ParsePlan(&planReader);
+        byteToRead -= byteRead;
+    }
+    
+}
+
+void ParseAllConversations(){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
-    TreArchive archiveSound ;
-    archiveSound.InitFromFile("GAMEFLOW.TRE");
-    //archiveSound.List(stdout);
     
-    TreEntry* convEntry = archiveSound.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
+    
+    TreArchive gameFlow ;
+    gameFlow.InitFromFile("GAMEFLOW.TRE");
+    
+    TreEntry* convEntry = gameFlow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
     
     PakArchive convPak;
     convPak.InitFromRAM("CONV.PAK", convEntry->data, convEntry->size);
     convPak.List(stdout);
+    
+    for (size_t i = 0; i < convPak.GetNumEntries(); i++) {
+    //for (size_t i = 20; i < 21; i++) {
+        if (convPak.GetEntry(i)->size == 0){
+            printf("\nConversation: %lu : EMPTY ENTRY.\n",i);
+            continue;
+        }
+        printf("\nConversation: %lu :\n",i);
+        ParseConv(convPak.GetEntry(i));
+    }
+}
+
+int main( int argc,char** argv){
+    
+    ParseAllConversations();
+    exit(0);
+    //archiveSound.List(stdout);
+    
+    
+    
+    
     
    // ReverseOBKViewButton();
     //TestMouseCursor();
