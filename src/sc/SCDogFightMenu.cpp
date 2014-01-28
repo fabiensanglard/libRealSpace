@@ -54,7 +54,7 @@ void SCDogFightMenu::Init( ){
 
 
 
-void SCDogFightMenu::Run(void){
+void SCDogFightMenu::RunFrame(void){
     
  
 }

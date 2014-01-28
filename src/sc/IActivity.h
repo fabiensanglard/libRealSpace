@@ -18,7 +18,7 @@ public:
     void Start(void) { this->running = true;}
     void Stop(void) { this->running = false;}
     
-    virtual void Run (void) = 0;
+    virtual void RunFrame (void) = 0;
     
     void SetTitle(const char* title);
     

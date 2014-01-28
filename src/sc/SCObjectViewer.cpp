@@ -141,13 +141,12 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     */
     
     //Identified as OBJECT VIEWER STATIC TITLE
-    /*
+    
     PakEntry* entry0 = archive->GetEntry(0);
     PakArchive file0;
     file0.InitFromRAM("OBJVIEW.PAK: file 0",entry0->data, entry0->size);
-    file0.List(stdout);
-    showAllImage(&file0);
-    */
+    title.Init(file0.GetEntry(0)->data, file0.GetEntry(0)->size);
+
     
     //Identified as TRAINING MISSION TITLE
     /*
@@ -213,13 +212,12 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     */
     
     //Identified as blue background
-    /*
+    
     PakEntry* entry8 = archive->GetEntry(8);
     PakArchive file8;
     file8.InitFromRAM("OBJVIEW.PAK: file 8",entry8->data, entry8->size);
-    file8.List(stdout);
-    showAllImage(&file8);
-    */
+    bluePrint.Init(file8.GetEntry(0)->data, file8.GetEntry(0)->size);
+    
     
     
     //Unknown content
@@ -230,6 +228,15 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     file9.List(stdout);
     showAllImage(&file9);
     */
+    
+    
+    IffLexer lexer ;
+    lexer.InitFromFile("PALETTE.IFF");
+    //lexer.List(stdout);
+    
+    RSPalette palette;
+    palette.InitFromIFF(&lexer);
+    this->palette = *palette.GetColorPalette();
 }
 
 void SCObjectViewer::Init(void){
@@ -255,14 +262,12 @@ void SCObjectViewer::Init(void){
     //assets.Decompress("/Users/fabiensanglard/Desktop/ObjViewer.PAK", "MEH");
     ParseAssets(&assets);
     
-
+    
 }
 
-void SCObjectViewer::Run(void){
+void SCObjectViewer::RunFrame(void){
     
     /*
-    renderer.Init(2);
-    
     
     TreArchive tre ;
     tre.InitFromFile("GAMEFLOW.TRE");
@@ -299,15 +304,29 @@ void SCObjectViewer::Run(void){
     PakEntry* menuBGData = assets.GetEntry(PAK_ID_MENU_DYNAMC);
     */
     
-    VGAPalette* palette = renderer.GetDefaultPalette();
-    Texel* texel = palette->GetRGBColor(0);
-    texel->a = 0;
+    CheckButtons();
     
-    float counter=0;
+    VGA.Activate();
+    VGA.Clear();
     
-    uint32_t startTime = SDL_GetTicks();
+    VGA.SetPalette(&this->palette);
     
-    uint32_t modelIndex=0;
+    //Draw static
+    VGA.DrawShape(&bluePrint);
+    VGA.DrawShape(&title);
+    
+    //VGA.DrawShape(&board);
+    
+    
+    DrawButtons();
+    
+    //Draw Mouse
+    Mouse.Draw();
+    
+    //Check Mouse state.
+    
+    VGA.VSync();
+
     
     /*
     RSShowCase showCase = showCases[0];

@@ -55,6 +55,16 @@ void GameEngine::PumpEvents(void){
                 Mouse.SetPosition(newPosition);
                 
                 break;
+                
+            case SDL_MOUSEBUTTONDOWN:
+                printf("SDL_MOUSEBUTTONDOWN %d\n",event->button.button);
+
+                Mouse.buttons[event->button.button-1].event = MouseButton::PRESSED;
+                break;
+            case SDL_MOUSEBUTTONUP:
+                printf("SDL_MOUSEBUTTONUP %d\n",event->button.button);
+                Mouse.buttons[event->button.button-1].event = MouseButton::RELEASED;
+                break;
             default:
                 break;
         }
@@ -135,21 +145,21 @@ void GameEngine::Run(){
         currentActivity = activities.top();
         
         if (currentActivity->IsRunning())
-            currentActivity->Run();
+            currentActivity->RunFrame();
         else{
             activities.pop();
             delete currentActivity;
         }
             
         
-        // Render the mouse if we should
-        
-        printf("mouse x=%d, y=%d.\n",Mouse.GetPosition().x,Mouse.GetPosition().y);
-        
+        //Swap GL buffer
         Screen.Refresh();
         
         //Flush all events since they should all have been interpreted.
         SDL_FlushEvents(SDL_FIRSTEVENT,SDL_LASTEVENT);
+        
+        //Also clear the Mouse flags.
+        Mouse.FlushEvents();
     }
 }
 
@@ -179,7 +189,14 @@ void GameEngine::LogError(const char* text, ...){
 
 
 void GameEngine::AddActivity(IActivity* activity){
+    activity->Start();
     this->activities.push(activity);
+}
+
+void GameEngine::StopTopActivity(void){
+    IActivity* currentActivity;
+    currentActivity = activities.top();
+    currentActivity->Stop();
 }
 
 

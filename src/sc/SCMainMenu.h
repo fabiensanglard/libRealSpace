@@ -17,7 +17,7 @@ public:
     ~SCMainMenu();
     
     virtual void Init(void);
-    virtual void Run(void);
+    virtual void RunFrame(void);
     
 private:
     

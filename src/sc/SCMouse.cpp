@@ -42,16 +42,28 @@ void SCMouse::Draw(void){
     if (! IsVisible())
         return;
     
+    // We need to draw the cursor a little bit higher left than the mouse
+    // position so it is centered.
+    Point2D cursorPos = this->position;
+    cursorPos.x -= 4;
+    cursorPos.y -= 4;
+    
+    
+    //If the mouse is over a clickable button, the current appearance has already been selected.
     if (mode == CURSOR){
-        appearances[1]->SetPosition(&position);
+        appearances[1]->SetPosition(&cursorPos);
         VGA.DrawShape(appearances[1]);
     }
     
     if (mode == VISOR){
-        appearances[0]->SetPosition(&position);
+        appearances[0]->SetPosition(&cursorPos);
         VGA.DrawShape(appearances[0]);
         
     }
-    //If the mouse is over a clickable button, the current appearance has already been selected.
-    
+}
+
+void SCMouse::FlushEvents(void){
+    for (size_t i = 0 ; i < 3 ; i++) {
+        buttons[i].event = MouseButton::NONE;
+    }
 }

@@ -9,7 +9,20 @@
 #ifndef __libRealSpace__SCMouse__
 #define __libRealSpace__SCMouse__
 
+
+
+typedef struct MouseButton{
+    
+    enum BUTTON_ID {LEFT, MIDDLE, RIGHT} ;
+    
+    enum EventType{NONE, PRESSED, RELEASED} ;
+    
+    EventType event;
+    
+} MouseButton;
+
 class SCMouse{
+    
     
 public:
     SCMouse();
@@ -25,11 +38,16 @@ public:
     
     void Draw(void);
     
+    enum Mode {CURSOR, VISOR };
+    void SetMode(Mode mode){this->mode = mode;}
+    
+    void FlushEvents(void);
+    MouseButton buttons[3];
 private:
 
-    enum AppearanceID {CURSOR, VISOR };
+    
     RLEShape* appearances[4];
-    AppearanceID mode;
+    Mode mode;
 
     //The cursor position in VGA 320x200 coordinates.
     Point2D position;

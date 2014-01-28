@@ -19,11 +19,11 @@ SCButton::~SCButton(){
 }
 
 void SCButton::InitBehavior(ActionFunction fct, Point2D position,Point2D dimension){
-    this->state = STATE_UP;
     this->onClick = fct;
+    this->position = position;
     this->dimension = dimension;
 }
 
 void SCButton::OnAction(void){
-    
+    this->onClick();
 }

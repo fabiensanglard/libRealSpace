@@ -26,8 +26,9 @@
 
 
 //Activities
-#include "SCMainMenu.h"
 #include "SCObjectViewer.h"
 #include "SCDogFightMenu.h"
+#include "SCMainMenu.h"
+
 
 #endif

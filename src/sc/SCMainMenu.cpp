@@ -23,26 +23,33 @@
 
 
 static void OnContinue(void){
-    
+    printf("OnContinue\n");
 }
 
 static void OnLoadGame(){
-    
+    printf("OnLoadGame\n");
 }
 
 
 static void OnStartNewGame(){
-    
+    printf("OnStartNewGame\n");
 }
 
 
 static void OnTrainingMission(){
+    printf("OnTrainingMission\n");
+    return;
     
+    SCDogFightMenu* trainingActivity = new SCDogFightMenu();
+    trainingActivity->Init();
+    Game.AddActivity(trainingActivity);
 }
 
 
 static void OnViewObject(){
-    
+    SCObjectViewer* objViewer = new SCObjectViewer();
+    objViewer->Init();
+    Game.AddActivity(objViewer);
 }
 
 
@@ -276,7 +283,7 @@ void SCMainMenu::LoadBackgrounds(void){
 
 
 
-void SCMainMenu::Run(void){
+void SCMainMenu::RunFrame(void){
     
     CheckButtons();
     

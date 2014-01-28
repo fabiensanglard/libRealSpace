@@ -29,7 +29,7 @@ public:
     
     enum Appearance { APR_UP, APR_DOWN};
     
-    enum State { STATE_UP, STATE_DOWN };
+    
     
     
     RLEShape appearance[2];
@@ -37,14 +37,14 @@ public:
     inline bool IsEnabled(void){ return this->enabled; }
     inline void SetEnable(bool enabled){ this->enabled = enabled;}
     
+    inline void SetAppearance(Appearance app){ this->apre = app;}
+    inline Appearance GetAppearance(void){ return this->apre; }
 private:
     
     
-    State state;
-    
     bool enabled ;
     
-    
+    Appearance apre;
     
     ActionFunction onClick;
     

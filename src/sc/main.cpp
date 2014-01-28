@@ -24,7 +24,6 @@ int main(int argc, char* argv[]) {
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();
     main->Init();
-    main->Start();
     Game.AddActivity(main);
     
     Game.Run();

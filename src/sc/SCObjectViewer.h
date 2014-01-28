@@ -17,7 +17,7 @@ public:
     
     void Init( );
     
-    void Run(void);
+    void RunFrame(void);
     
     void ListObjects(void);
     
@@ -40,6 +40,10 @@ private:
     
     void ParseObjList(IffLexer* lexer);
     void ParseAssets(PakArchive* archive);
+    
+    RLEShape bluePrint;
+    RLEShape title;
+    RLEShape board;
 };
 
 #endif /* defined(__libRealSpace__NSObjectViewer__) */

@@ -18,10 +18,12 @@ public:
     
     void Init( );
     
-    void Run(void);
+    void RunFrame(void);
 
 
 private:
+    
+   
     
    // void ParsePalette(PakEntry* entry);
     VGAPalette palette;
