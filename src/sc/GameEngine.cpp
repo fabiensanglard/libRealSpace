@@ -45,6 +45,15 @@ void GameEngine::PumpEvents(void){
         switch (event->type) {
             case SDL_MOUSEMOTION:
                 
+                Point2D newPosition;
+                newPosition.x = event->motion.x;
+                newPosition.y = event->motion.y;
+                
+                newPosition.x *= 320.0f / Screen.width;
+                newPosition.y *= 200.0f / Screen.height;
+                
+                Mouse.SetPosition(newPosition);
+                
                 break;
             default:
                 break;
@@ -84,15 +93,17 @@ void GameEngine::PumpEvents(void){
             case SDL_QUIT:
                 Terminate("System request.");
                 break;
+                
+            //Verify is we should be capturing the mouse or not.
             case SDL_WINDOWEVENT:
                 if (event->window.event == SDL_WINDOWEVENT_ENTER){
-                    
+                    Mouse.SetVisible(true);
                     SDL_ShowCursor(SDL_DISABLE);
                     return;
                 }
                 
                 if (event->window.event == SDL_WINDOWEVENT_LEAVE){
-                    
+                    Mouse.SetVisible(false);
                     SDL_ShowCursor(SDL_ENABLE);
                     return;
                 }
@@ -115,9 +126,6 @@ void GameEngine::Run(){
     
     while (activities.size() > 0) {
         
-        //Verify is we should be capturing the mouse or not.
-        
-        
         PumpEvents();
         
         //Clear the screen
@@ -135,6 +143,8 @@ void GameEngine::Run(){
             
         
         // Render the mouse if we should
+        
+        printf("mouse x=%d, y=%d.\n",Mouse.GetPosition().x,Mouse.GetPosition().y);
         
         Screen.Refresh();
         

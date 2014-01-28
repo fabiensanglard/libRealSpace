@@ -13,9 +13,10 @@
 
 // Core of the game
 
-#include "IActivity.h"
+
 #include "SCMouse.h"
 #include "SCButton.h"
+#include "IActivity.h"
 #include "GameEngine.h"
 #include "AssetManager.h"
 

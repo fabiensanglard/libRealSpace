@@ -20,11 +20,12 @@ public:
     
     void Refresh(void);
     
-private:
-    
     int32_t width;
     int32_t height;
     int32_t scale;
+private:
+    
+    
 };
 
 #endif /* defined(__libRealSpace__Screen__) */

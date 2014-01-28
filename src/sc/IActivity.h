@@ -29,11 +29,17 @@ public:
     virtual ~IActivity();
     
 protected:
-    IActivity();
     
+    IActivity();
+    SCButton* CheckButtons(void);
+    std::vector<SCButton*> buttons;
+    void DrawButtons(void);
     
 private:
     bool running;
+    
+    
+    
 };
 
 

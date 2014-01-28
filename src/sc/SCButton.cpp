@@ -9,7 +9,8 @@
 #include "precomp.h"
 
 
-SCButton::SCButton(){
+SCButton::SCButton():
+    enabled(true){
     
 }
 

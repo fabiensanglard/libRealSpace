@@ -17,16 +17,23 @@ public:
     
     void Init(void);
     
-    bool IsVisible(void);
+    inline bool IsVisible(void){ return this->visible ; }
+    void SetVisible(bool visible){ this->visible = visible; }
     
-    RSImage* GetAppearance(void);
+    inline void SetPosition(Point2D position){ this->position = position;}
+    inline Point2D GetPosition(void) { return this->position ; }
+    
+    void Draw(void);
     
 private:
 
-    enum AppearanceID {INVISIBLE, CURSOR, VISOR };
-    RSImage* appearances[2];
-    AppearanceID currentMode;
+    enum AppearanceID {CURSOR, VISOR };
+    RLEShape* appearances[4];
+    AppearanceID mode;
 
+    //The cursor position in VGA 320x200 coordinates.
+    Point2D position;
+    
     bool visible;
 };
 

@@ -34,12 +34,15 @@ public:
     
     RLEShape appearance[2];
     
+    inline bool IsEnabled(void){ return this->enabled; }
+    inline void SetEnable(bool enabled){ this->enabled = enabled;}
+    
 private:
     
     
     State state;
     
-    bool clickable ;
+    bool enabled ;
     
     
     

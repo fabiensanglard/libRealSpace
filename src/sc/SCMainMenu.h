@@ -26,8 +26,8 @@ private:
     void LoadBackgrounds(void);
     void LoadPalette(void);
     
-    void CheckHit(void);
-    SCButton buttons[5];
+    
+    
     RLEShape board;
     RLEShape sky;
     RLEShape mountain;

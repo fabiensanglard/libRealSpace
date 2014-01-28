@@ -59,43 +59,6 @@ SCMainMenu::~SCMainMenu(){
     
 }
 
-//DELETE ME
-static void showAllImage(PakArchive* archive){
-    
-    
-    
-    
-    
-    
-    /*
-    for(size_t i = 0 ; i < archive->GetNumEntries() ; i ++){
-        PakEntry* entry = archive->GetEntry(i);
-        
-        RLECodex codex ;
-        size_t byteRead;
-        
-        RSImage screen;
-        screen.Create("SCREEN", 320, 200);
-        bool errorFound = codex.ReadImage(entry->data, &screen, &byteRead);
-        
-        
-        renderer.Clear();
-        if (!errorFound){
-            renderer.Pause();
-            while(renderer.IsPaused()){
-
-            renderer.DrawImage(&screen);
-            renderer.Swap();
-            renderer.ShowWindow();
-            renderer.PumpEvents();
-            }
-        }
-        screen.ClearContent();
-    }
-    
-    */
-}
-
 void SCMainMenu::Init(void){
     
     
@@ -173,6 +136,9 @@ void SCMainMenu::LoadButton(const char* name, PakArchive* subPak, size_t upIndic
 }
  */
 
+
+Point2D boardPosition = {44,25};
+
 enum ButtonIDS {
     BUTTON_CONTINUE,
     BUTTON_LOADGAME,
@@ -189,34 +155,49 @@ void SCMainMenu::LoadButtons(void){
     PakArchive subPak;
     subPak.InitFromRAM("subPak Buttons",boardEntry->data ,boardEntry->size);
 
+    
+    
+    SCButton* button;
+    
     Point2D buttonDimension = {211, 15} ;
     
+
+    button = new SCButton();
+    Point2D continuePosition = {boardPosition.x+11,boardPosition.y+10};
+    button->InitBehavior(OnContinue, continuePosition,buttonDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(0)->data, subPak.GetEntry(0)->size,&continuePosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(5)->data, subPak.GetEntry(5)->size,&continuePosition);
+    button->SetEnable(false);
+    buttons.push_back(button);
     
-    Point2D continuePosition = {44+11,20+10};
-    this->buttons[0].InitBehavior(OnContinue, continuePosition,buttonDimension);
-    this->buttons[0].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(0)->data, subPak.GetEntry(0)->size,&continuePosition);
-    this->buttons[0].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(5)->data, subPak.GetEntry(5)->size,&continuePosition);
+    button = new SCButton();
+    Point2D loadGamePosition = {boardPosition.x+11,continuePosition.y+buttonDimension.y+2};
+    button->InitBehavior(OnLoadGame, loadGamePosition,buttonDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(1)->data, subPak.GetEntry(1)->size,&loadGamePosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(6)->data, subPak.GetEntry(6)->size,&loadGamePosition);
+    button->SetEnable(false);
+    buttons.push_back(button);
 
-    Point2D loadGamePosition = {44+11,continuePosition.y+buttonDimension.y+2};
-    this->buttons[1].InitBehavior(OnLoadGame, loadGamePosition,buttonDimension);
-    this->buttons[1].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(1)->data, subPak.GetEntry(1)->size,&loadGamePosition);
-    this->buttons[1].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(6)->data, subPak.GetEntry(6)->size,&loadGamePosition);
-
-    Point2D startNewGamePosition = {44+11,loadGamePosition.y+buttonDimension.y+2};
-    this->buttons[2].InitBehavior(OnStartNewGame, startNewGamePosition,buttonDimension);
-    this->buttons[2].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(2)->data, subPak.GetEntry(2)->size,&startNewGamePosition);
-    this->buttons[2].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(7)->data, subPak.GetEntry(7)->size,&startNewGamePosition);
+    button = new SCButton();
+    Point2D startNewGamePosition = {boardPosition.x+11,loadGamePosition.y+buttonDimension.y+2};
+    button->InitBehavior(OnStartNewGame, startNewGamePosition,buttonDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(2)->data, subPak.GetEntry(2)->size,&startNewGamePosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(7)->data, subPak.GetEntry(7)->size,&startNewGamePosition);
+    buttons.push_back(button);
     
-    Point2D trainingPosition = {44+11,startNewGamePosition.y+buttonDimension.y+2};
-    this->buttons[3].InitBehavior(OnTrainingMission, trainingPosition,buttonDimension);
-    this->buttons[3].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(3)->data, subPak.GetEntry(3)->size,&trainingPosition);
-    this->buttons[3].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(8)->data, subPak.GetEntry(8)->size,&trainingPosition);
-
-    Point2D viewObjectPosition = {44+11,trainingPosition.y+buttonDimension.y+2};
-    this->buttons[4].InitBehavior(OnViewObject, viewObjectPosition,buttonDimension);
-    this->buttons[4].appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(4)->data, subPak.GetEntry(4)->size,&viewObjectPosition);
-    this->buttons[4].appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(9)->data, subPak.GetEntry(9)->size,&viewObjectPosition);
-
+    button = new SCButton();
+    Point2D trainingPosition = {boardPosition.x+11,startNewGamePosition.y+buttonDimension.y+2};
+    button->InitBehavior(OnTrainingMission, trainingPosition,buttonDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(3)->data, subPak.GetEntry(3)->size,&trainingPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(8)->data, subPak.GetEntry(8)->size,&trainingPosition);
+    buttons.push_back(button);
+    
+    button = new SCButton();
+    Point2D viewObjectPosition = {boardPosition.x+11,trainingPosition.y+buttonDimension.y+2};
+    button->InitBehavior(OnViewObject, viewObjectPosition,buttonDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(4)->data, subPak.GetEntry(4)->size,&viewObjectPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(9)->data, subPak.GetEntry(9)->size,&viewObjectPosition);
+    buttons.push_back(button);
 }
 
 void SCMainMenu::LoadBoard(void){
@@ -228,8 +209,8 @@ void SCMainMenu::LoadBoard(void){
     subPak.InitFromRAM("subPak board",boardEntry->data ,boardEntry->size);
     boardEntry = subPak.GetEntry(0);
     
-    Point2D position = {44,20};
-    board.InitWithPosition(boardEntry->data, boardEntry->size, &position);
+    
+    board.InitWithPosition(boardEntry->data, boardEntry->size, &boardPosition);
 
 }
 
@@ -293,19 +274,11 @@ void SCMainMenu::LoadBackgrounds(void){
 
 }
 
-void SCMainMenu::CheckHit(void){
-    
-}
 
-void SCMainMenu::DrawMenu(void){
-    VGA.DrawShape(&board);
-    VGA.DrawShape(&buttons[BUTTON_OBJVIEWER].appearance[SCButton::Appearance::APR_UP]);
-    VGA.DrawShape(&buttons[BUTTON_STARTNEWGAME].appearance[SCButton::Appearance::APR_UP]);
-    VGA.DrawShape(&buttons[BUTTON_TRAINING].appearance[SCButton::Appearance::APR_UP]);
-    
-}
 
 void SCMainMenu::Run(void){
+    
+    CheckButtons();
     
     VGA.Activate();
     VGA.Clear();
@@ -317,12 +290,13 @@ void SCMainMenu::Run(void){
     VGA.DrawShape(&mountain);
     VGA.DrawShape(&cloud);
     
-    DrawMenu();
     
-    //Check Mouse position. If clickable update to visor instead of cursor
-    CheckHit();
+    VGA.DrawShape(&board);
+    
+    DrawButtons();
     
     //Draw Mouse
+    Mouse.Draw();
     
     //Check Mouse state.
     

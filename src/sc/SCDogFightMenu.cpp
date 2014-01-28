@@ -26,8 +26,8 @@ void SCDogFightMenu::Init( ){
     TreArchive tre ;
     tre.InitFromFile("GAMEFLOW.TRE");
     
-    TreEntry* objViewIFF = Assets.tres[]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
-    TreEntry* objViewPAK = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
+    TreEntry* objViewIFF = NULL;//Assets.tres[]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
+    TreEntry* objViewPAK = NULL;//tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
     
     
     IffLexer objToDisplay;
@@ -39,7 +39,7 @@ void SCDogFightMenu::Init( ){
     assets.List(stdout);
     
     PakEntry* paletteEntry = assets.GetEntry(PAK_ID_PALETTE);
-    ParsePalette(paletteEntry);
+    //ParsePalette(paletteEntry);
     renderer.SetPalette(&this->palette);
     
     this->palette.Diff(renderer.GetDefaultPalette());
@@ -48,7 +48,7 @@ void SCDogFightMenu::Init( ){
     PakArchive file0;
     file0.InitFromRAM("OBJVIEW.PAK: file PAK_ID_MENU_DYNAMC",entry0->data, entry0->size);
     file0.List(stdout);
-    showAllImage(&file0);
+    //showAllImage(&file0);
 }
 
 

@@ -23,7 +23,7 @@ public:
 
 private:
     
-    void ParsePalette(PakEntry* entry);
+   // void ParsePalette(PakEntry* entry);
     VGAPalette palette;
 };
 
