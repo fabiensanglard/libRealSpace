@@ -21,6 +21,10 @@ RSScreen::~RSScreen(){
     
 }
 
+void RSScreen::SetTitle(const char* title){
+    SDL_SetWindowTitle(sdlWindow, title);
+}
+
 void RSScreen::Init(int32_t zoomFactor){
     this->scale =zoomFactor;
     

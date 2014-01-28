@@ -73,68 +73,13 @@ void SCMainMenu::Init(void){
     TreEntry* entry = gameFlow->GetEntryByName(MAINMENU_PAK_PATH);
     mainMenupak.InitFromRAM("MAINMENU.PAK",entry->data,entry->size);
     
-    
-    
-    //mainMenupak.List(stdout);
-    
-    
-    //Buttons are X 211 * 15 texels
-    /*
-     
-       CONTINUE UP
-       LOADGAME UP
-       STARTNEWGAME UP
-       TRAINING MISSIONS UP
-       VIEWOBJECTS UP
-     
-       CONTINUE DOWN
-       LOADGAME DOWN
-       STARTNEWGAME DOWN
-       TRAINING MISSIONS DOWN
-       VIEWOBJECTS DOWN
-     
-    */
-    
-    /*
-    PakArchive buttons;
-    buttons.InitFromRAM("1",mainMenupak.GetEntry(0)->data,mainMenupak.GetEntry(0)->size);
-    buttons.List(stdout);
-    showAllImage(&buttons);
-    */
-    
-    /*
-          Full board is 233 * 104
-          First button at 11 * 10
-          Then space between buttons is 2 texels high
-     */
-    /*
-     CONTINUE DOWN
-     LOADGAME DOWN
-     STARTNEWGAME DOWN
-     TRAINING MISSIONS DOWN
-     VIEWOBJECTS DOWN
-     */
-    //PakArchive buttonsGroup;
-    //buttonsGroup.InitFromRAM("2",mainMenupak.GetEntry(1)->data,mainMenupak.GetEntry(1)->size);
-    //buttonsGroup.List(stdout);
-    //showAllImage(&buttonsGroup);
-    
-    //What is in the third entry ?!??!?!
-    /*
-    PakArchive pak3;
-    pak3.InitFromRAM("3",pak.GetEntry(2)->data,pak.GetEntry(2)->size);
-    pak3.List(stdout);
-    showAllImage(&pak3);
-    */
-    
     LoadPalette();
     LoadButtons();
     LoadBoard();
     LoadBackgrounds();
     
     
-    SetTitle("Main Menu");
-    
+    SetTitle("Neo Strike Commander");
 }
 
 /*
@@ -230,7 +175,7 @@ void SCMainMenu::LoadPalette(void){
     ByteStream paletteReader;
     
     
-    
+    /*
     TreEntry* mid1Entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK");
     PakArchive mid1Pak;
     mid1Pak.InitFromRAM("MID1.PAK",mid1Entry->data,mid1Entry->size);
@@ -241,7 +186,7 @@ void SCMainMenu::LoadPalette(void){
     RSPalette letterPalette;
     letterPalette.InitFromIFF(&lexer);
     //this->palette = *letterPalette.GetColorPalette();
-    
+    */
     
     
     

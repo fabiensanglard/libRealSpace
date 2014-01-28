@@ -20,7 +20,7 @@ IActivity::~IActivity()
 
 
 void IActivity::SetTitle(const char* title){
-    renderer.SetTitle(title);
+    Screen.SetTitle(title);
 }
 
 

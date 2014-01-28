@@ -475,6 +475,34 @@ void ExploreRootIFFS(void){
     file8.Decompress("/Users/fabiensanglard/Desktop/DATA/OBJECTS/EJECT/EJECT.PAK.CONTENT/FILE8", "TXT");
 }
 
+void decompressTREs(const char* path){
+    TreArchive gameFlow ;
+    gameFlow.InitFromFile("GAMEFLOW.TRE");
+    gameFlow.Decompress(path);
+    
+    TreArchive misc ;
+    misc.InitFromFile("MISC.TRE");
+    misc.Decompress(path);
+    
+    TreArchive mission ;
+    mission.InitFromFile("MISSIONS.TRE");
+    mission.Decompress(path);
+    
+    TreArchive objects ;
+    objects.InitFromFile("OBJECTS.TRE");
+    objects.Decompress(path);
+    
+    TreArchive sound ;
+    sound.InitFromFile("SOUND.TRE");
+    sound.Decompress(path);
+    
+    TreArchive textures ;
+    textures.InitFromFile("TEXTURES.TRE");
+    textures.Decompress(path);
+    
+
+}
+
 void listTRE(void){
 
     
@@ -769,17 +797,12 @@ void TestMouseCursor(void){
     
 }
 
-int maine( int argc,char** argv){
+int mainw( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
     
-    
-    Screen.Init(2);
-    VGA.Init();
-    VGA.Activate();
 
-    
-    TestMouseCursor();
+    decompressTREs("/Users/fabiensanglard/Desktop/DATA/");
     
     return 0;
 

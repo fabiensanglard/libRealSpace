@@ -262,7 +262,7 @@ void SCObjectViewer::Init(void){
     //assets.Decompress("/Users/fabiensanglard/Desktop/ObjViewer.PAK", "MEH");
     ParseAssets(&assets);
     
-    
+    SetTitle("Neo Object Viewer");
 }
 
 void SCObjectViewer::RunFrame(void){

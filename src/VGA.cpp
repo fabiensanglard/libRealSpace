@@ -33,6 +33,8 @@ bool RSVGA::DrawShape(RLEShape* shape){
 }
 
 void RSVGA::Init(void){
+    
+    
     //Load the default palette
     IffLexer lexer ;
     lexer.InitFromFile("PALETTE.IFF");
