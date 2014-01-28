@@ -21,7 +21,7 @@ RSVGA::~RSVGA(){
 
 void RSVGA::Clear(void){
     memset(frameBuffer, 0, 320*200);
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT);
 }
 
 bool RSVGA::DrawShape(RLEShape* shape){

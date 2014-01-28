@@ -165,7 +165,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     
     
     /*
-    PakEntry* entry0 = archive->GetEntry(PAK_ID_MENU_DYNAMC);
+    PakEntry* entry0 = archive->GetEntry(PAK_ID_MENU_DYNAMC); OBJ_VIEWER BOARD
     PakArchive file0;
     file0.InitFromRAM("OBJVIEW.PAK: file PAK_ID_MENU_DYNAMC",entry0->data, entry0->size);
     file0.List(stdout);
@@ -189,7 +189,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     showAllImage(&file1);
     */
     
-    //Identified as DOGFIGHT SETUP
+    //Identified as DOGFIGHT SETUP FIGHT SETUP # enemies and stuff
     /*
     PakEntry* entry2 = archive->GetEntry(2);
     PakArchive file2;
@@ -198,7 +198,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     showAllImage(&file2);
     */
     
-    //Identified as BUTTONS DODGE FIGHT
+    //Identified as BUTTONS DODGE AIR TO AIR button and AIR TO GROUND BUTTON
     /*
     PakEntry* entry3 = archive->GetEntry(3);
     PakArchive file3;
@@ -208,7 +208,6 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     */
     
     //Identified as BUTTONS OBJ VIEWER
-    
     PakEntry* objButtonEntry = archive->GetEntry(4);
     PakArchive objButtons;
     objButtons.InitFromRAM("OBJVIEW.PAK: file 4",objButtonEntry->data, objButtonEntry->size);
@@ -216,9 +215,6 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     
     SCButton* button;
     Point2D boardPosition = {4, 155} ;
-    
-    
-    
     
     
     //EXIT BUTTON
@@ -302,7 +298,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //showAllImage(&file4);
     
     
-    //Identified as DODGE FIGHT MISSION BUILDER
+    //Identified as DODGE FIGHT MISSION BUILDER ACCEPT CANCEL 12:00 3:00   NUMBERS GOOD FAIR
     /*
     PakEntry* entry5 = archive->GetEntry(5);
     PakArchive file5;
@@ -358,13 +354,9 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
 }
 
 void SCObjectViewer::Init(void){
-    
-    
-    TreArchive tre ;
-    tre.InitFromFile("GAMEFLOW.TRE");
-    
-    TreEntry* objViewIFF = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
-    TreEntry* objViewPAK = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
+
+    TreEntry* objViewIFF = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
+    TreEntry* objViewPAK = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
     
     
     IffLexer objToDisplay;

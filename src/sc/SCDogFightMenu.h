@@ -22,11 +22,7 @@ public:
 
 
 private:
-    
-   
-    
-   // void ParsePalette(PakEntry* entry);
-    VGAPalette palette;
+
 };
 
 #endif /* defined(__libRealSpace__SCDogFightMenu__) */

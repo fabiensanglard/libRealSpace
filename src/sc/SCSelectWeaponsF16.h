@@ -13,8 +13,19 @@
 // 70 74
 //Main image 91	
 
-class SCSelectWeaponF16{
+class SCSelectWeaponF16 : public IActivity{
     
+public:
+    SCSelectWeaponF16();
+    ~SCSelectWeaponF16();
+    
+    void Init( );
+    
+    void RunFrame(void);
+    
+private:
+    
+    RLEShape background;
 };
 
 #endif /* defined(__libRealSpace__SCSelectWeaponsF16__) */

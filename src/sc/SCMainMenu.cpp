@@ -41,10 +41,8 @@ static void OnStartNewGame(){
 
 
 static void OnTrainingMission(){
-    printf("OnTrainingMission\n");
-    return;
     
-    SCDogFightMenu* trainingActivity = new SCDogFightMenu();
+    SCTrainingMenu* trainingActivity = new SCTrainingMenu();
     trainingActivity->Init();
     Game.AddActivity(trainingActivity);
 }
@@ -139,6 +137,7 @@ void SCMainMenu::LoadButtons(void){
     button->InitBehavior(OnStartNewGame, startNewGamePosition,buttonDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(2)->data, subPak.GetEntry(2)->size,&startNewGamePosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(7)->data, subPak.GetEntry(7)->size,&startNewGamePosition);
+    button->SetEnable(false);
     buttons.push_back(button);
     
     button = new SCButton();

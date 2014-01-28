@@ -630,7 +630,7 @@ void TestMouseCursor(void){
     SetBase("/Users/fabiensanglard/SC/SC/");
     Screen.Init(2);
     VGA.Init();
-
+    VGA.Activate();
     
     
     TreArchive gameflow ; gameflow.InitFromFile("GAMEFLOW.TRE");
@@ -640,7 +640,7 @@ void TestMouseCursor(void){
     
     
      TreEntry* mainFont = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK"); //Camera configuration
-     ExploreImages(mainFont->data,mainFont->size,0);
+     //ExploreImages(mainFont->data,mainFont->size,0);
      
     
     
@@ -730,7 +730,7 @@ void TestMouseCursor(void){
     
 
     TreEntry* mid1 = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
-    ExploreImages(mid1->data,mid1->size,0);
+   // ExploreImages(mid1->data,mid1->size,0);
     
     
     
@@ -770,6 +770,20 @@ void TestMouseCursor(void){
         119 -> wild cat base entry
         119 -> deset landing strip
      
+     17 jeep animation
+     18 wildcat hangar
+     20 truck animatiopn
+     22 accountant anim
+     25 tent background
+     35 36 people hangar top down animations
+     
+     40  f16
+     41
+     
+     50 werapons buttons
+     90
+     91 f-16 weapon selection
+     
      128 map north america
      129 map south america
      130 map europe
@@ -777,7 +791,7 @@ void TestMouseCursor(void){
      */
     
     
-    //ExploreImages(optShps->data,optShps->size,0);
+    ExploreImages(optShps->data,optShps->size,0);
 
     //Check palettes fro that too
     /*
@@ -805,29 +819,26 @@ void TestMouseCursor(void){
 
 void ReverseOBKViewButton(){
     SetBase("/Users/fabiensanglard/SC/SC/");
-    
+    Screen.Init(2);
+    VGA.Init();
+    VGA.Activate();
     
     TreArchive tre ;
     tre.InitFromFile("GAMEFLOW.TRE");
+    TreEntry* e = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
+//    ExploreImages(e->data, e->size, 0);
     
-    PakArchive objViewPAK;
-    tre.GetPAKByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK",&objViewPAK);
-    
-    PakArchive objViewButtons;
-    objViewButtons.InitFromRAM("PAK_BUTTONS", objViewPAK.GetEntry(9)->data, objViewPAK.GetEntry(9)->size);
-    
-
-    Screen.Init(2);
-    VGA.Init();
-    
-    
-    
+    TreArchive misc ;
+    misc.InitFromFile("MISC.TRE");
+    misc.List(stdout);
+    TreEntry* MAINOPT = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\TM.SHP");
+    ExploreImages(MAINOPT->data,MAINOPT->size,0);
 
 }
 
 int maine( int argc,char** argv){
     
-    //ReverseOBKViewButton();
+   // ReverseOBKViewButton();
     TestMouseCursor();
     
     //decompressTREs("/Users/fabiensanglard/Desktop/DATA/");

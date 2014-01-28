@@ -28,6 +28,8 @@
 //Activities
 #include "SCObjectViewer.h"
 #include "SCDogFightMenu.h"
+#include "SCTrainingMenu.h"
+#include "SCSelectWeaponsF16.h"
 #include "SCMainMenu.h"
 
 
