@@ -24,7 +24,7 @@ Camera* SCRenderer::GetCamera(void){
 }
 
 VGAPalette* SCRenderer::GetPalette(void){
-    return &this->defaultPalette;
+    return &this->palette;
 }
 
 void SCRenderer::Init(int32_t zoomFactor){
@@ -41,9 +41,7 @@ void SCRenderer::Init(int32_t zoomFactor){
     
     RSPalette palette;
     palette.InitFromIFF(&lexer);
-    this->defaultPalette = *palette.GetColorPalette();
-    
-    this->currentPalette = &defaultPalette;
+    this->palette = *palette.GetColorPalette();
     
     this->width = width;
     this->height = height;
@@ -365,7 +363,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             if (lambertianFactor > 1)
                 lambertianFactor = 1;
             
-            const Texel* texel = currentPalette->GetRGBColor(triangle->color);
+            const Texel* texel = palette.GetRGBColor(triangle->color);
             
             glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,1);
             //glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
@@ -789,9 +787,6 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glLoadMatrixf(projectionMatrix->ToGL());
     
     
-    
-  
-    
     running = true;
     
     glDisable(GL_CULL_FACE);
@@ -824,7 +819,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glFogf(GL_FOG_END, 8000.0f);               // Fog End Depth
     glEnable(GL_FOG);
     
-    while (running) {
+    
         
         glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
         
@@ -892,7 +887,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         RenderJets(area);
         
       
-    }
+    
 
 }
 

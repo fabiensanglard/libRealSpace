@@ -22,9 +22,14 @@ void OnDogFight(){
 }
 
 void OnSearchAndDestroy(){
-    SCSelectWeaponF16* select = new SCSelectWeaponF16();
-    select->Init();
-    Game.AddActivity(select);
+    //SCSelectWeaponF16* select = new SCSelectWeaponF16();
+   // select->Init();
+   // Game.AddActivity(select);
+    
+    
+    SCStrike* strike = new SCStrike();
+    strike->Init();
+    Game.AddActivity(strike);
 }
 
 static void OnExitTraining(void){

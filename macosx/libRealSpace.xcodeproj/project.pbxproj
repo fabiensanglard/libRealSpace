@@ -17,6 +17,7 @@
 		2D44F51A1897ABCE00075C9E /* SCTrainingMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D44F5181897ABCE00075C9E /* SCTrainingMenu.cpp */; };
 		2D58A416187716A7003EF449 /* SCObjectViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D58A414187716A7003EF449 /* SCObjectViewer.cpp */; };
 		2D58A41918773255003EF449 /* RLEShape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D58A41718773255003EF449 /* RLEShape.cpp */; };
+		2D705C461898003000473F18 /* SCStrike.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D705C441898003000473F18 /* SCStrike.cpp */; };
 		2D8460E718939D1100B652A8 /* GameEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460E518939D1100B652A8 /* GameEngine.cpp */; };
 		2D8460EA18939D8E00B652A8 /* IActivity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460E818939D8E00B652A8 /* IActivity.cpp */; };
 		2D8460EC18939ECA00B652A8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D8460EB18939ECA00B652A8 /* main.cpp */; };
@@ -75,6 +76,8 @@
 		2D58A415187716A7003EF449 /* SCObjectViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCObjectViewer.h; path = ../src/sc/SCObjectViewer.h; sourceTree = SOURCE_ROOT; };
 		2D58A41718773255003EF449 /* RLEShape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RLEShape.cpp; path = ../src/RLEShape.cpp; sourceTree = SOURCE_ROOT; };
 		2D58A41818773255003EF449 /* RLEShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RLEShape.h; path = ../src/RLEShape.h; sourceTree = SOURCE_ROOT; };
+		2D705C441898003000473F18 /* SCStrike.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCStrike.cpp; path = ../src/sc/SCStrike.cpp; sourceTree = "<group>"; };
+		2D705C451898003000473F18 /* SCStrike.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCStrike.h; path = ../src/sc/SCStrike.h; sourceTree = "<group>"; };
 		2D8460E518939D1100B652A8 /* GameEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameEngine.cpp; path = ../src/sc/GameEngine.cpp; sourceTree = "<group>"; };
 		2D8460E618939D1100B652A8 /* GameEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameEngine.h; path = ../src/sc/GameEngine.h; sourceTree = "<group>"; };
 		2D8460E818939D8E00B652A8 /* IActivity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IActivity.cpp; path = ../src/sc/IActivity.cpp; sourceTree = "<group>"; };
@@ -206,6 +209,8 @@
 				2D58A414187716A7003EF449 /* SCObjectViewer.cpp */,
 				2D44F5191897ABCE00075C9E /* SCTrainingMenu.h */,
 				2D44F5181897ABCE00075C9E /* SCTrainingMenu.cpp */,
+				2D705C451898003000473F18 /* SCStrike.h */,
+				2D705C441898003000473F18 /* SCStrike.cpp */,
 			);
 			name = activities;
 			sourceTree = "<group>";
@@ -367,6 +372,7 @@
 				2D8460F01893A1E600B652A8 /* SCMouse.cpp in Sources */,
 				2D9B617C18725C660071ACDA /* RSMusic.cpp in Sources */,
 				2D8460E718939D1100B652A8 /* GameEngine.cpp in Sources */,
+				2D705C461898003000473F18 /* SCStrike.cpp in Sources */,
 				2D310910187081F000D3443F /* SCRenderer.cpp in Sources */,
 				2DB3FB63187281850081B676 /* RSMapTextureSet.cpp in Sources */,
 				2D8460F7189438B300B652A8 /* SCMainMenu.cpp in Sources */,

@@ -524,6 +524,18 @@ void ReverseOBKViewButton(){
 
 int maine( int argc,char** argv){
     
+    
+    SetBase("/Users/fabiensanglard/SC/SC/");
+    TreArchive archiveSound ;
+    archiveSound.InitFromFile("GAMEFLOW.TRE");
+    //archiveSound.List(stdout);
+    
+    TreEntry* convEntry = archiveSound.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
+    
+    PakArchive convPak;
+    convPak.InitFromRAM("CONV.PAK", convEntry->data, convEntry->size);
+    convPak.List(stdout);
+    
    // ReverseOBKViewButton();
     //TestMouseCursor();
     

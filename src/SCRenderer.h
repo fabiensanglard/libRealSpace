@@ -100,8 +100,8 @@ private:
     int32_t height;
     int scale;
     
-    VGAPalette defaultPalette;
-    VGAPalette* currentPalette;
+    
+    VGAPalette palette;
     bool running;
     bool paused;
     

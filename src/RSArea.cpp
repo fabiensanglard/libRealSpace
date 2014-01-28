@@ -690,7 +690,7 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     
     AddJets();
     
-    Renderer.RenderWorldSolid(this,BLOCK_LOD_MAX,400);
+    
 }
 
 size_t RSArea::GetNumJets(void){
