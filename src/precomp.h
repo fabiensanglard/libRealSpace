@@ -67,9 +67,6 @@ extern "C" {
     #include "RSVGA.h"
 
 // Strike commander specific.
-    #include "SCObjectViewer.h"
-    #include "SCDogFightMenu.h"
-   
 
 
 /*

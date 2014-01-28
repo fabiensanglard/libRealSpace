@@ -890,12 +890,12 @@ int maine( int argc,char** argv){
     return 0;
     */
     
-    
+    /*
     SCObjectViewer viewer;
     viewer.Init();
     viewer.Run();
     return 0;
-    
+    */
     
     /*
     PakArchive archiveCanyon ;

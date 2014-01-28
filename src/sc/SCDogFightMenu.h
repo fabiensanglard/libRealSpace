@@ -9,7 +9,7 @@
 #ifndef __libRealSpace__SCDogFightMenu__
 #define __libRealSpace__SCDogFightMenu__
 
-class SCDogFightMenu{
+class SCDogFightMenu : public IActivity{
     
 public:
     
@@ -20,10 +20,7 @@ public:
     
     void Run(void);
 
-    static const uint8_t PAK_ID_PALETTE          = 7;
-    static const uint8_t PAK_ID_BACKGROUND       = 6;
-    static const uint8_t PAK_ID_TITLE            = 1 ;
-    static const uint8_t PAK_ID_BUTTONS          = 3 ;
+
 private:
     
     void ParsePalette(PakEntry* entry);
