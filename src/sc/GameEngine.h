@@ -26,7 +26,7 @@ public:
     //Add an activity on the top of the stack.
     void AddActivity(IActivity* activity);
     void StopTopActivity(void);
-    
+    IActivity* GetCurrentActivity(void);
     
     void PumpEvents(void);
     

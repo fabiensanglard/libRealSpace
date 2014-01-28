@@ -38,11 +38,9 @@ void SCDogFightMenu::Init( ){
     assets.InitFromRAM("OBJVIEW.PAK",objViewPAK->data, objViewPAK->size);
     assets.List(stdout);
     
-    PakEntry* paletteEntry = assets.GetEntry(PAK_ID_PALETTE);
-    //ParsePalette(paletteEntry);
-    renderer.SetPalette(&this->palette);
+
     
-    this->palette.Diff(renderer.GetDefaultPalette());
+    this->palette.Diff(Renderer.GetPalette());
     
     PakEntry* entry0 = assets.GetEntry(PAK_ID_BACKGROUND);
     PakArchive file0;

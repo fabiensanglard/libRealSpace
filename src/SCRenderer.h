@@ -15,12 +15,12 @@ class Triangle;
 class RSArea;
 class MapVertex;
 
-class Renderer{
+class SCRenderer{
     
 public:
     
-     Renderer();
-    ~Renderer();
+     SCRenderer();
+    ~SCRenderer();
     
     void Prepare(void);
     
@@ -28,18 +28,18 @@ public:
     
     void Clear(void);
 
-    void ShowPalette(VGAPalette* palette);
-    void DrawImage(RSImage* image);
+
+
     void DrawModel(RSEntity* object, size_t lodLevel);
     void DisplayModel(RSEntity* object,size_t lodLevel);
     
-    void SetTitle(const char* title);
+   
     
     void CreateTextureInGPU(Texture* texture);
     void UploadTextureContentToGPU(Texture* texture);
     void DeleteTextureInGPU(Texture* texture);
     
-    VGAPalette* GetDefaultPalette(void);
+    VGAPalette* GetPalette(void);
     
     
     //Map Rendering
@@ -66,12 +66,9 @@ public:
     
     void RenderJets(RSArea* area);
     
-    VGAPalette* GetPalette(void);
     
-    void Swap(void);
-    void ShowWindow(void);
-    void PumpEvents(void);
     
+   
     Camera* GetCamera(void);
     void SetLight(Point3D* position);
     
@@ -82,22 +79,22 @@ public:
     inline void Pause(void){
         this->paused = true;
     }
-    
-    void SetPalette(VGAPalette* palette);
-    void ResetPalette(void);
-    VGAPalette* GetCurrentPalette(void);
+
+   
     
     void SetClearColor(uint8_t red, uint8_t green, uint8_t blue);
     
     void Prepare(RSEntity* object);
    
+    
 private:
     
     
+    bool initialized;
     
     void GetNormal(RSEntity* object,Triangle* triangle,Point3D* normal);
     
-    bool initialized;
+    
     
     int32_t width;
     int32_t height;
@@ -112,8 +109,6 @@ private:
     Point3D light;
 };
 
-
-extern Renderer renderer;
 
 /*
 void IMG_Init(void);

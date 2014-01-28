@@ -24,158 +24,6 @@ void testTRE(void){
 
 
 
-//const char* trePath = "OBJECTS.TRE";
-//const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
-void testShowAllJetTextures(const char* trePath,const char* jetPath)
-{
-    
-    renderer.Init(2);
-    
-    // Let's open the TRE archive.
-    TreArchive treArchive;
-    treArchive.InitFromFile(trePath);
-    //treArchive.List(stdout);
-    
-    // Let's open the jet IFF file in that archive
-    TreEntry* iffJet = treArchive.GetEntryByName(jetPath);
-    
-    // Oops !
-    if (iffJet == NULL){
-        printf("Unable to find jet '%s' in TRE archive '%s'.\n",jetPath,trePath);
-        return;
-    }
-    
-    
-    
-    
-    
-    IffLexer jetIffLexer;
-    jetIffLexer.InitFromRAM(iffJet->data,iffJet->size);
-    
-    //Verify the object has an appearance
-    if (jetIffLexer.GetChunkByID('APPR') != NULL){
-        ;//printf("This object does have an appearance.\n");
-    }
-    else{
-        printf("This object does NOT have an appearance !!\n");
-        return;
-    }
-    
-    //Render it !
-    renderer.SetTitle(jetPath);
-    
-    
-    RSEntity jet;
-    jet.InitFromIFF(&jetIffLexer);
-    
-    printf("Model '%s' features %lu textures.\n",jetPath,jet.NumImages());
-    for(size_t i = 0 ; i < jet.NumImages(); i++){
-        RSImage* image = jet.images[i];
-        renderer.DrawImage(image);
-        renderer.Swap();
-    }
-        
-}
-
-void ShowAllJets(void){
-    
-    renderer.Init(4);
-    
-    const char* trePath = "OBJECTS.TRE";
-    
-    // Let's open the TRE archive.
-    TreArchive treArchive;
-    treArchive.InitFromFile(trePath);
-    
-    for (size_t i = 0 ; i < treArchive.GetNumEntries(); i++) {
-        
-
-        
-        TreEntry* e = treArchive.GetEntryByID(i);
-
-        printf("Rendering jet [%lu] '%s'.\n",i,e->name);
-        
-        IffLexer lexer;
-        lexer.InitFromRAM(e->data,e->size);
-        
-        if (lexer.GetChunkByID('APPR') == NULL){
-            continue;
-            printf("Skipping '%s' (No APPR).\n",e->name);
-        }
-        
-        //Render it !
-        renderer.SetTitle(e->name);
-        
-        
-        RSEntity jet;
-        jet.InitFromIFF(&lexer);
-        
-        //Oops we don't have that number of level
-        if (jet.NumLods() <= LOD_LEVEL_MAX ){
-            printf("Skipping '%s' (No LOD_LEVEL_MAX).\n",e->name);
-            continue;
-        }
-
-        
-        
-        renderer.DisplayModel(&jet,LOD_LEVEL_MAX);
-    }
-}
-
-void testJet(void){
-    
-    const char* trePath = "OBJECTS.TRE";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\A-10.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\EJECSEAT.IFF";
-    const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-16DES.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIRAGE.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-22.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\F-15.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\YF23.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIG21.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\MIG29.IFF";
-    //const char* jetPath = "..\\..\\DATA\\OBJECTS\\SU27.IFF";
-    
-    
-    // Let's open the TRE archive.
-    TreArchive treArchive;
-    treArchive.InitFromFile(trePath);
-    treArchive.List(stdout);
-    
-    // Let's open the jet IFF file in that archive
-    TreEntry* iffJet = treArchive.GetEntryByName(jetPath);
-    
-    // Oops !
-    if (iffJet == NULL){
-        printf("Unable to find jet '%s' in TRE archive '%s'.\n",jetPath,trePath);
-        return;
-    }
-        
-    
-    
-    
-
-    IffLexer jetIffLexer;
-    jetIffLexer.InitFromRAM(iffJet->data,iffJet->size);
-    
-    //Verify the object has an appearance
-    if (jetIffLexer.GetChunkByID('APPR') != NULL){
-        ;//printf("This object does have an appearance.\n");
-    }
-    else{
-        printf("This object does NOT have an appearance !!\n");
-        return;
-    }
-    
-    //Render it !
-    renderer.SetTitle(jetPath);
-    
-    
-    RSEntity jet;
-    jet.InitFromIFF(&jetIffLexer);
-    renderer.DisplayModel(&jet,LOD_LEVEL_MAX);
-     
-}
 
 void testPalette(void){
     
@@ -222,72 +70,7 @@ void testPAKDecompress(void){
     pakArchive.Decompress(".","VOC");
 }
 
-void testShowAllTexturesPAK(void){
-    
-    renderer.Init(2);
-    
-    const char* trePath = "TEXTURES.TRE";
-    TreArchive treArchive;
-    treArchive.InitFromFile(trePath);
-    
-    //Find the texture PAKS.
-    TreEntry* treEntry = NULL;
-    const char* pakName = "..\\..\\DATA\\TXM\\TXMPACK.PAK";
-    treEntry = treArchive.GetEntryByName(pakName);
-    
-    PakArchive txmPakArchive;
-    txmPakArchive.InitFromRAM(pakName,treEntry->data, treEntry->size);
-   // txmPakArchive.Decompress("/Users/fabiensanglard/Desktop/DATA/", ".TXT");
-    
-    RSMapTextureSet txmTextureSet ;
-    txmTextureSet.InitFromPAK(&txmPakArchive);
-    txmTextureSet.List(stdout);
-    
-    
-    renderer.ShowWindow();
-    renderer.SetTitle("TXMPACK.PAK");
-    
-    //Show all textures
-    for(size_t i=0 ; i < txmTextureSet.GetNumImages() ; i++ ){
-        printf("Drawing %lu.\n",i);
-        RSImage* image = txmTextureSet.GetImageById(i);
-        renderer.Clear();
-        renderer.DrawImage(image);
-        renderer.Swap();
-        renderer.Pause();
-        while (renderer.IsPaused()) {
-            renderer.PumpEvents();
-        }
-    }
-    
-    
-    
-    
-    const char* accPakName = "..\\..\\DATA\\TXM\\ACCPACK.PAK";
-    treEntry = treArchive.GetEntryByName(accPakName);
-    
-    PakArchive accPakArchive;
-    accPakArchive.InitFromRAM(accPakName,treEntry->data, treEntry->size);
-    //accPakArchive.List(stdout);
-    
-        renderer.SetTitle("ACCPACK.PAK");
-    
-    //Show all textures
-    RSMapTextureSet accTextureSet ;
-    accTextureSet.InitFromPAK(&accPakArchive);
-    //Show all textures
-    for(size_t i=0 ; i < accTextureSet.GetNumImages() ; i++ ){
-        printf("Drawing %lu.\n",i);
-        RSImage* image = accTextureSet.GetImageById(i);
-        renderer.Clear();
-        renderer.DrawImage(image);
-        renderer.Swap();
-        renderer.Pause();
-        while (renderer.IsPaused()) {
-            renderer.PumpEvents();
-        }
-    }
-}
+
 
 void testParsePAK(){
     PakArchive archive;
@@ -296,98 +79,10 @@ void testParsePAK(){
     archive.List(stdout);
 }
 
-int testShowPalette(void)
-{
-    
-    IffLexer lexer ;
-    lexer.InitFromFile("PALETTE.IFF");
-    lexer.List(stdout);
-    
-    RSPalette palette;
-    palette.InitFromIFF(&lexer);
-    VGAPalette* vgaPalette = palette.GetColorPalette();
-    
-    
-    renderer.SetTitle(lexer.GetName());
-    
-    renderer.ShowPalette(vgaPalette);
-    
-    return 0;
-}
-
-
-void DecompressAllTRE(void){
-    
-    TreArchive gameflow ;
-    gameflow.InitFromFile("GAMEFLOW.TRE");
-    gameflow.List(stdout);
-    gameflow.Decompress("/Users/fabiensanglard/Desktop/");
-    
-    TreArchive misc ;
-    misc.InitFromFile("MISC.TRE");
-    misc.List(stdout);
-    misc.Decompress("/Users/fabiensanglard/Desktop/");
-    
-    
-    TreArchive missions ;
-    missions.InitFromFile("MISSIONS.TRE");
-    missions.List(stdout);
-    missions.Decompress("/Users/fabiensanglard/Desktop/");
-    
-    
-    TreArchive objects ;
-    objects.InitFromFile("OBJECTS.TRE");
-    objects.List(stdout);
-    objects.Decompress("/Users/fabiensanglard/Desktop/");
-    
-    
-    TreArchive sound ;
-    sound.InitFromFile("SOUND.TRE");
-    sound.List(stdout);
-    sound.Decompress("/Users/fabiensanglard/Desktop/");
-
-    TreArchive textures ;
-    textures.InitFromFile("TEXTURES.TRE");
-    textures.List(stdout);
-    textures.Decompress("/Users/fabiensanglard/Desktop/");
-}
 
 
 
-//DELETE ME
-static void showAllImageInArchive(PakArchive* archive){
-    
-    /*
-    for(size_t i = 0 ; i < archive->GetNumEntries() ; i ++){
-        
-        printf("Show all images %lu.\n",i);
-        PakEntry* entry = archive->GetEntry(i);
-        
-        
-        
-        RLECodex codex ;
-        size_t byteRead;
-        
-        RSImage screen;
-        screen.Create("SCREEN", 320, 200);
-        bool errorFound = codex.ReadImage(entry->data, &screen, &byteRead);
-        
-        
-        renderer.Clear();
-        if (!errorFound){
-            renderer.Pause();
-            while(renderer.IsPaused()){
-                
-                renderer.DrawImage(&screen);
-                renderer.Swap();
-                renderer.ShowWindow();
-                renderer.PumpEvents();
-            }
-        }
-        screen.ClearContent();
-    }
-     */
-}
+
 
 void ExploreRootIFFS(void){
     
@@ -532,15 +227,6 @@ void listTRE(void){
     
 }
 
-void ShowImage(RSImage* img      ){
-    renderer.Pause();
-    while(renderer.IsPaused()){
-        renderer.Clear();
-        renderer.DrawImage(img);
-        renderer.Swap();
-        renderer.PumpEvents();
-    }
-}
 
 void PrintTabs(int tabs){
     for (size_t i=0 ; i < tabs; i++) {
@@ -839,7 +525,7 @@ void ReverseOBKViewButton(){
 int maine( int argc,char** argv){
     
    // ReverseOBKViewButton();
-    TestMouseCursor();
+    //TestMouseCursor();
     
     //decompressTREs("/Users/fabiensanglard/Desktop/DATA/");
     
@@ -976,7 +662,7 @@ int maine( int argc,char** argv){
     
     //testShowAllTexturesPAK();
     
-    
+    SetBase("/Users/fabiensanglard/SC/SC/");
     RSArea* area = new RSArea();
 
     area->InitFromPAKFileName("ARENA.PAK");

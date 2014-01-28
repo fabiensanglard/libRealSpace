@@ -337,7 +337,7 @@ void RSArea::ParseTriFile(PakEntry* entry){
     }
     
     //Render them
-    renderer.RenderVerticeField(vertices,300);
+    Renderer.RenderVerticeField(vertices,300);
     
     delete[] vertices;
 }
@@ -347,7 +347,7 @@ void RSArea::ParseTrigo(){
     
     PakEntry* entry ;
     
-    renderer.Init(2);
+    Renderer.Init(2);
     
     entry = archive->GetEntry(4);
     
@@ -485,7 +485,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             */
             
      
-            Texel* t = renderer.GetDefaultPalette()->GetRGBColor(paletteColor*16+shade);
+            Texel* t = Renderer.GetPalette()->GetRGBColor(paletteColor*16+shade);
             
             //Texel* t = renderer.GetDefaultPalette()->GetRGBColor(vertex->text);
             /*
@@ -541,8 +541,7 @@ void RSArea::ParseHeightMap(void){
     fullPak.InitFromRAM("FULLSIZE",entry->data,entry->size);
    // fullPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MAX,entry,20);
-    sprintf(title, "SC Map Viewer : %s level : MAX",name);
-    renderer.SetTitle(title);
+    
     //renderer.RenderWorldPoints(this,BLOCK_LOD_MAX,400);
 
     
@@ -553,8 +552,7 @@ void RSArea::ParseHeightMap(void){
   //  medPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MED,entry,10);
     
-    sprintf(title, "SC Map Viewer : %s level : MED",name);
-    renderer.SetTitle(title);
+    
     //renderer.RenderWorldSolid(this,BLOCK_LOD_MED,100);
     
     
@@ -565,8 +563,6 @@ void RSArea::ParseHeightMap(void){
     ParseBlocks(BLOCK_LOD_MIN,entry,5);
     
     
-    sprintf(title, "SC Map Viewer : %s level : MIN",name);
-    renderer.SetTitle(title);
     //renderer.RenderWorldSolid(this,BLOCK_LOD_MIN,25);
     
 }
@@ -625,7 +621,7 @@ void RSArea::AddJets(void){
 
 void RSArea::InitFromPAKFileName(const char* pakFilename){
     
-    renderer.Init(4);
+    
     
     strcpy(name,pakFilename);
     
@@ -694,7 +690,7 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     
     AddJets();
     
-    renderer.RenderWorldSolid(this,BLOCK_LOD_MAX,400);
+    Renderer.RenderWorldSolid(this,BLOCK_LOD_MAX,400);
 }
 
 size_t RSArea::GetNumJets(void){

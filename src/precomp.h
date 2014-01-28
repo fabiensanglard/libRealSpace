@@ -52,7 +52,8 @@ extern "C" {
     #include "Camera.h"
     #include "Texture.h"
     #include "RSImage.h"
-    #include "Renderer.h"
+    #include "SCRenderer.h"
+extern SCRenderer Renderer;
     #include "IffLexer.h"
 
     #include "RSPalette.h"

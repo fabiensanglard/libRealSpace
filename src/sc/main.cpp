@@ -14,12 +14,14 @@ RSScreen        Screen;
 RSVGA           VGA;
 SCMouse         Mouse;
 AssetManager    Assets;
+SCRenderer      Renderer;
 
 int main(int argc, char* argv[]) {
     
     Assets.SetBase("/Users/fabiensanglard/SC/SC/");
     
     Game.Init();
+    
     
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();

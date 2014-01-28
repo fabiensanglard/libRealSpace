@@ -15,4 +15,5 @@ extern SCMouse Mouse;
 extern RSScreen Screen;
 extern RSVGA    VGA;
 extern AssetManager Assets;
+extern SCRenderer Renderer;
 #endif

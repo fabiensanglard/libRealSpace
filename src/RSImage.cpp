@@ -9,6 +9,7 @@
 #include "precomp.h"
 
 
+
 RSImage::RSImage() :
 data(0),
 dirty(false),
@@ -27,7 +28,7 @@ void RSImage::Create(const char name[8],uint32_t width,uint32_t height){
     this->width = width;
     this->height = height;
     this->data = (uint8_t*)malloc(this->width*this->height);
-    this->palette = renderer.GetDefaultPalette();
+    this->palette = Renderer.GetPalette();
     
     this->texture.Set(this);
     dirty = true;
@@ -45,14 +46,14 @@ void RSImage::SyncTexture(void){
     //Check that we have a texture with an id on the GPU
     if ((texture.locFlag & Texture::VRAM) != Texture::VRAM){
         //Create texture in the GPU
-        renderer.CreateTextureInGPU(&texture);
+        Renderer.CreateTextureInGPU(&texture);
         texture.locFlag |= Texture::VRAM;
     }
     
     //Check if we are synchornized with GPU
     if (this->dirty){
         texture.UpdateContent(this);
-        renderer.UploadTextureContentToGPU(&texture);
+        Renderer.UploadTextureContentToGPU(&texture);
         dirty = false;
     }
     

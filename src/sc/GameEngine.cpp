@@ -25,6 +25,8 @@ void GameEngine::Init(){
     //Load Main Palette and Initialize the GL
     Screen.Init(2);
     
+    Renderer.Init(2);
+    
     VGA.Init();
     
     //Load the Mouse Cursor
@@ -57,12 +59,12 @@ void GameEngine::PumpEvents(void){
                 break;
                 
             case SDL_MOUSEBUTTONDOWN:
-                printf("SDL_MOUSEBUTTONDOWN %d\n",event->button.button);
+                //printf("SDL_MOUSEBUTTONDOWN %d\n",event->button.button);
 
                 Mouse.buttons[event->button.button-1].event = MouseButton::PRESSED;
                 break;
             case SDL_MOUSEBUTTONUP:
-                printf("SDL_MOUSEBUTTONUP %d\n",event->button.button);
+                //printf("SDL_MOUSEBUTTONUP %d\n",event->button.button);
                 Mouse.buttons[event->button.button-1].event = MouseButton::RELEASED;
                 break;
             default:
@@ -197,6 +199,11 @@ void GameEngine::StopTopActivity(void){
     IActivity* currentActivity;
     currentActivity = activities.top();
     currentActivity->Stop();
+}
+
+
+IActivity* GameEngine::GetCurrentActivity(void){
+    return activities.top();
 }
 
 

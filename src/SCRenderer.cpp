@@ -10,37 +10,24 @@
 
 
 
-static SDL_Window *sdlWindow;
-static SDL_Renderer *sdlRenderer;
-Renderer renderer;
-
-Renderer::Renderer() :
+SCRenderer::SCRenderer() :
    initialized(false){
        
     
 }
 
-Renderer::~Renderer(){
+SCRenderer::~SCRenderer(){
 }
 
-Camera* Renderer::GetCamera(void){
+Camera* SCRenderer::GetCamera(void){
     return &this->camera;
 }
 
-VGAPalette* Renderer::GetPalette(void){
+VGAPalette* SCRenderer::GetPalette(void){
     return &this->defaultPalette;
 }
 
-
-void Renderer::SetPalette(VGAPalette* palette){
-    this->currentPalette = palette;
-}
-
-void Renderer::ResetPalette(void){
-    this->currentPalette = &defaultPalette;
-}
-
-void Renderer::Init(int32_t zoomFactor){
+void SCRenderer::Init(int32_t zoomFactor){
     
     this->scale =zoomFactor;
     
@@ -61,75 +48,35 @@ void Renderer::Init(int32_t zoomFactor){
     this->width = width;
     this->height = height;
     
-   // SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    
-    SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_HIDDEN, &sdlWindow, &sdlRenderer);
-    
-    
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
-        printf("Unable to initialize SDL:  %s\n",SDL_GetError());
-        return ;
-    }
-    
-    sdlWindow = SDL_CreateWindow("RealSpace OBJ Viewer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,this->width,this->height,SDL_WINDOW_OPENGL);
-    
-    // Create an OpenGL context associated with the window.
-    SDL_GL_CreateContext(sdlWindow);
-    
-    
-    glViewport(0,0,this->width,this->height);			// Reset The Current Viewport
-	glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
-	glLoadIdentity();									// Reset The Projection Matrix
-    
-    
-	// Calculate The Aspect Ratio Of The Window
-    int zoom= 30;
-	glOrtho(-this->width/zoom,
-            this->width/zoom,
-            -this->height/zoom,
-            this->height/zoom,-300,300);
-    
-	glMatrixMode(GL_MODELVIEW);							// Select The Modelview Matrix
-	glLoadIdentity();									// Reset The Modelview Matrix
+  
+	
     
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);				// Black Background
 	//glClearDepth(1.0f);								// Depth Buffer Setup
 	glDisable(GL_DEPTH_TEST);							// Disable Depth Testing
     
     
-    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-
     
-    SDL_HideWindow(sdlWindow);
-
     camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
     
     
-    //SDL_SetRelativeMouseMode(SDL_TRUE);
     
     light.SetWithCoo(300, 300, 300);
     
-    SDL_ShowWindow(sdlWindow);
+    
     
     initialized = true;
 }
 
-void Renderer::SetClearColor(uint8_t red, uint8_t green, uint8_t blue){
+void SCRenderer::SetClearColor(uint8_t red, uint8_t green, uint8_t blue){
     if (!initialized)
         return;
     
     glClearColor(red/255.0f, green/255.0f, blue/255.0f, 1.0f);
 }
 
-void Renderer::SetTitle(const char* title){
 
-    if (!initialized)
-        return;
-    
-    SDL_SetWindowTitle(sdlWindow, title);
-}
-
-void Renderer::Clear(void){
+void SCRenderer::Clear(void){
     
     
     if (!initialized)
@@ -139,174 +86,7 @@ void Renderer::Clear(void){
     glColor4f(1, 1, 1, 1);
 }
 
-
-void Renderer::ShowPalette(VGAPalette* palette){
-    
-    
-    int CELLSIZE=16 ;
-    RSImage image ;
-    image.Create("PALETTE_TEXTURE", CELLSIZE*16, CELLSIZE*16);
-    
-    uint8_t* dst = image.GetData();
-    for(int i = 0 ; i < 256 ; i++){
-        
-        
-        int offsetY = (i / CELLSIZE)*CELLSIZE;
-        int offsetX = (i % CELLSIZE)*CELLSIZE* (int)image.width;
-        
-        for(int h = 0 ; h < CELLSIZE ; h++){
-            for(int w = 0 ; w < CELLSIZE; w++){
-                *(dst +offsetX +offsetY + w +h*image.width) = i;
-            }
-        }
-    }
-   
-
-    DrawImage(&image);
-    
-    SetTitle("PALETTE");
-    renderer.Swap();
-    ShowWindow();
-
-    Pause();
-    while (IsPaused()) {
-        PumpEvents();
-    }
-    
-    exit(0);
-
-}
-
-
-void Renderer::PumpEvents(void){
-    
-    if (!initialized)
-        return;
-    
-   
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            switch(event.type) {
-                case SDL_KEYDOWN :{
-                    
-                    SDL_Keycode keyCode = event.key.keysym.sym;
-                    
-                    if (SDLK_ESCAPE == keyCode){
-                        SDL_HideWindow(sdlWindow);
-                        running = false;
-                        exit(0);
-                    }
-                    if (SDLK_p == keyCode ||
-                        SDLK_SPACE == keyCode){
-                        paused = !paused;
-                        running = false;
-                    }
-                    
-                    if (SDLK_w == keyCode ){
-                        camera.MoveForward();
-                    }
-
-                    if (SDLK_s == keyCode ){
-                        camera.MoveBackward();
-                    }
-
-                    if (SDLK_a == keyCode ){
-                        camera.MoveStrafLeft();
-                    }
-                            
-                    if (SDLK_d == keyCode ){
-                        camera.MoveStrafRight();
-                    }
-                    
-//                    printf("%d\n",event.key.keysym.sym);
-                    
-                    
-                } ; break;
-                    
-                case SDL_MOUSEMOTION:
-                    //printf("Mouse motion: x=%d y=%d\n",event.motion.xrel,event.motion.yrel);
-                    camera.Rotate(event.motion.yrel*0.01f, event.motion.xrel*0.01f , 0);
-                    ;
-                    
-                break;
-                    
-                case SDL_QUIT :
-                    exit(0);
-                    break;
-                    
-            }
-        }
-        
-    
-
-}
-
-
-
-
-
-void Renderer::DrawImage(RSImage* image){
-    
-    if (!initialized)
-        return;
-    
-    image->SetPalette(this->currentPalette);
-    
-  
-    
-    glDisable(GL_DEPTH_TEST);
-    
-    glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
-	glLoadIdentity();									// Reset The Projection Matrix
-    glOrtho(0, this->width, 0, this->height, -10, 10) ;
-	glMatrixMode(GL_MODELVIEW);							// Select The Modelview Matrix
-	glLoadIdentity();
-    
-    
-    
-    glEnable(GL_TEXTURE_2D);
-    //glEnable(GL_BLEND);
-    glColor4f(1, 1, 1,1);
-    //glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    
-    glDisable(GL_CULL_FACE);
-     
-    glBindTexture(GL_TEXTURE_2D, image->GetTexture()->id);
-    glBegin(GL_QUADS);
-            glTexCoord2f(0, 1);
-            glVertex2d(0+image->GetPosition().x*this->scale,
-                       0+image->GetPosition().y*this->scale);
-    
-            glTexCoord2f(1, 1);
-            glVertex2d(image->width*this->scale+image->GetPosition().x*this->scale,
-                       0+image->GetPosition().y*this->scale);
-    
-            glTexCoord2f(1, 0);
-            glVertex2d(image->width*this->scale+image->GetPosition().x*this->scale,
-                       image->height*this->scale+image->GetPosition().y*this->scale);
-    
-            glTexCoord2f(0, 0);
-            glVertex2d(0+image->GetPosition().x*this->scale,
-                       image->height*this->scale+image->GetPosition().y*this->scale);
-    glEnd();
-    
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    
-    
-  
-}
-
-void Renderer::ShowWindow(void){
-    SDL_ShowWindow(sdlWindow);
-}
-
-void Renderer::Swap(void){
-    SDL_GL_SwapWindow(sdlWindow);
-}
-
-void Renderer::CreateTextureInGPU(Texture* texture){
+void SCRenderer::CreateTextureInGPU(Texture* texture){
     
     if (!initialized)
         return;
@@ -327,7 +107,7 @@ void Renderer::CreateTextureInGPU(Texture* texture){
 }
 
 
-void Renderer::UploadTextureContentToGPU(Texture* texture){
+void SCRenderer::UploadTextureContentToGPU(Texture* texture){
     
 
     if (!initialized)
@@ -337,7 +117,7 @@ void Renderer::UploadTextureContentToGPU(Texture* texture){
     glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
 }
 
-void Renderer::DeleteTextureInGPU(Texture* texture){
+void SCRenderer::DeleteTextureInGPU(Texture* texture){
     
     if (!initialized)
         return;
@@ -346,7 +126,7 @@ void Renderer::DeleteTextureInGPU(Texture* texture){
 }
 
 
-void Renderer::GetNormal(RSEntity* object,Triangle* triangle,Vector3D* normal){
+void SCRenderer::GetNormal(RSEntity* object,Triangle* triangle,Vector3D* normal){
     
     //Calculate the normal for this triangle
     Vector3D edge1 ;
@@ -387,7 +167,7 @@ void Renderer::GetNormal(RSEntity* object,Triangle* triangle,Vector3D* normal){
     
 }
 
-void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
+void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
 
     if (!initialized)
         return;
@@ -602,15 +382,12 @@ void Renderer::DrawModel(RSEntity* object, size_t lodLevel ){
 
 
 
-void Renderer::SetLight(Point3D* l){
+void SCRenderer::SetLight(Point3D* l){
     this->light = *l;
 }
 
-VGAPalette* Renderer::GetCurrentPalette(void){
-    return this->currentPalette;
-}
 
-void Renderer::Prepare(RSEntity* object){
+void SCRenderer::Prepare(RSEntity* object){
     
     for (size_t i = 0; i < object->NumImages(); i++) {
         object->images[i]->SyncTexture();
@@ -619,7 +396,7 @@ void Renderer::Prepare(RSEntity* object){
     object->prepared = true;
 }
 
-void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
+void SCRenderer::DisplayModel(RSEntity* object,size_t lodLevel){
     
     if (!initialized)
         return;
@@ -667,27 +444,20 @@ void Renderer::DisplayModel(RSEntity* object,size_t lodLevel){
             glVertex3f(light.x,light.y, light.z);
         glEnd();
         
-        
-        SDL_GL_SwapWindow(sdlWindow);
-        PumpEvents();
+       
     }
 
 }
 
 
-VGAPalette* Renderer::GetDefaultPalette(void){
-    return &this->defaultPalette;
-}
 
-
-
-void Renderer::RenderVerticeField(Point3D* vertices, int numVertices){
+void SCRenderer::RenderVerticeField(Point3D* vertices, int numVertices){
     
     glMatrixMode(GL_PROJECTION);
     Matrix* projectionMatrix = camera.GetProjectionMatrix();
     glLoadMatrixf(projectionMatrix->ToGL());
     
-    SDL_ShowWindow(sdlWindow);
+    
     
     running = true;
     float counter=0;
@@ -721,8 +491,6 @@ void Renderer::RenderVerticeField(Point3D* vertices, int numVertices){
         
         
 
-        SDL_GL_SwapWindow(sdlWindow);
-        PumpEvents();
     }
 
 }
@@ -751,7 +519,7 @@ float textTrianCoo[2][3][2] = {
 #define LOWER_TRIANGE 0
 #define UPPER_TRIANGE 1
 
-void Renderer::RenderTexturedTriangle(MapVertex* tri0,
+void SCRenderer::RenderTexturedTriangle(MapVertex* tri0,
                                      MapVertex* tri1,
                                      MapVertex* tri2,
                                      RSArea* area,
@@ -813,14 +581,14 @@ void Renderer::RenderTexturedTriangle(MapVertex* tri0,
 }
 
 
-bool Renderer::IsTextured(MapVertex* tri0,MapVertex* tri1,MapVertex* tri2){
+bool SCRenderer::IsTextured(MapVertex* tri0,MapVertex* tri1,MapVertex* tri2){
     return
             // tri0->type != tri1->type ||
            //tri0->type != tri2->type ||
     tri0->upperImageID == 0xFF || tri0->lowerImageID == 0xFF ;
     
 }
-void Renderer::RenderColoredTriangle(MapVertex* tri0,
+void SCRenderer::RenderColoredTriangle(MapVertex* tri0,
                                      MapVertex* tri1,
                                      MapVertex* tri2){
     
@@ -878,7 +646,7 @@ void Renderer::RenderColoredTriangle(MapVertex* tri0,
 
 
 
-void Renderer::RenderQuad(MapVertex* currentVertex,
+void SCRenderer::RenderQuad(MapVertex* currentVertex,
                 MapVertex* rightVertex,
                 MapVertex* bottomRightVertex,
                           MapVertex* bottomVertex,RSArea* area,bool renderTexture){
@@ -909,7 +677,7 @@ void Renderer::RenderQuad(MapVertex* currentVertex,
     
 }
 
-void Renderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
+void SCRenderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
     
     
     AreaBlock* block = area->GetAreaBlockByID(LOD, i);
@@ -987,7 +755,7 @@ void Renderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
     
 }
 
-void Renderer::RenderJets(RSArea* area){
+void SCRenderer::RenderJets(RSArea* area){
     
     glMatrixMode(GL_MODELVIEW);
     
@@ -1013,7 +781,7 @@ void Renderer::RenderJets(RSArea* area){
     
 }
 
-void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
+void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     
     glMatrixMode(GL_PROJECTION);
@@ -1022,7 +790,7 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     
     
-    SDL_ShowWindow(sdlWindow);
+  
     
     running = true;
     
@@ -1123,13 +891,12 @@ void Renderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         
         RenderJets(area);
         
-        SDL_GL_SwapWindow(sdlWindow);
-        PumpEvents();
+      
     }
 
 }
 
-void Renderer::RenderObjects(RSArea* area,size_t blockID){
+void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
     
     float color[3] = {1,0,0};
     
@@ -1178,7 +945,7 @@ void Renderer::RenderObjects(RSArea* area,size_t blockID){
     
 }
 
-void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
+void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
 {
     
     
@@ -1197,7 +964,7 @@ void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
    
 
     
-    SDL_ShowWindow(sdlWindow);
+   
     
     running = true;
     
@@ -1217,7 +984,7 @@ void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
         
         Point3D lookAt = { 256*16,100,256*16 };
         
-        renderer.GetCamera()->LookAt(&lookAt);
+        Renderer.GetCamera()->LookAt(&lookAt);
         
         Point3D newPosition = camera.GetPosition();
         
@@ -1255,8 +1022,7 @@ void Renderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
         for(int i=0 ; i < 324 ; i++)
             RenderObjects(area,i);
         
-        SDL_GL_SwapWindow(sdlWindow);
-        PumpEvents();
+        
     }
 
 }

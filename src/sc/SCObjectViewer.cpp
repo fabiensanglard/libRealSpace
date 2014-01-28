@@ -56,14 +56,7 @@ void ConvertToUpperCase(char *sPtr)
     }
 }
 
-void SCObjectViewer::ListObjects(void){
-    
-    printf("Listing objects in RSObjecViewer.\n");
-    for(size_t i=0 ; i < showCases.size() ; i++){
-        RSShowCase showCase = showCases[i];
-        printf("%-20s : dist=%.2f\n",showCase.displayName,showCase.cameraDist);
-    }
-}
+
 
 void SCObjectViewer::ParseObjList(IffLexer* lexer){
     
@@ -133,7 +126,9 @@ void OnExit(void){
 }
 
 void OnNext(void){
-    Game.StopTopActivity();
+    //startTime = SDL_GetTicks();
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->NextObject();
 }
 
 void OnZoomOut(void){
@@ -158,6 +153,10 @@ void OnRotateUp(void){
 
 void OnRotateDown(void){
     Game.StopTopActivity();
+}
+
+void SCObjectViewer::NextObject(void){
+    currentObject = (currentObject+ 1) % showCases.size();
 }
 
 void SCObjectViewer::ParseAssets(PakArchive* archive){
@@ -355,65 +354,37 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
 
 void SCObjectViewer::Init(void){
 
+    
+    
     TreEntry* objViewIFF = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
     TreEntry* objViewPAK = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
     
     
-    IffLexer objToDisplay;
-    objToDisplay.InitFromRAM(objViewIFF->data, objViewIFF->size);
-    objToDisplay.List(stdout);
-    ParseObjList(&objToDisplay);
-    ListObjects();
+ 
     
     
     PakArchive assets;
     assets.InitFromRAM("OBJVIEW.PAK",objViewPAK->data, objViewPAK->size);
-    assets.List(stdout);
+    //assets.List(stdout);
     //assets.Decompress("/Users/fabiensanglard/Desktop/ObjViewer.PAK", "MEH");
     ParseAssets(&assets);
     
+    IffLexer objToDisplay;
+    objToDisplay.InitFromRAM(objViewIFF->data, objViewIFF->size);
+    //objToDisplay.List(stdout);
+    ParseObjList(&objToDisplay);
+   // ListObjects();
+    
     SetTitle("Neo Object Viewer");
+    
+    currentObject = 0 ;
+    
+    startTime = SDL_GetTicks();
 }
 
 void SCObjectViewer::RunFrame(void){
     
-    /*
-    
-    TreArchive tre ;
-    tre.InitFromFile("GAMEFLOW.TRE");
-    TreEntry* objViewPAK = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
-    
-    PakArchive assets;
-    assets.InitFromRAM("OBJVIEW.PAK",objViewPAK->data, objViewPAK->size);
-    
-    RLECodex codex ;
-    size_t byteRead;
-    bool errorFound;
-    
-    //Get blue background
-    PakEntry* backgroundPAKEntry = assets.GetEntry(PAK_ID_BACKGROUND);
-    PakArchive backgroundPAK;
-    backgroundPAK.InitFromRAM("PAK_ID_BACKGROUND",backgroundPAKEntry->data, backgroundPAKEntry->size);
-    RSImage backgroundImage;
-    backgroundImage.Create("backgroundImage", 320, 200);
-    errorFound = codex.ReadImage(backgroundPAK.GetEntry(0)->data, &backgroundImage, &byteRead);
-        
-    //Get static manu
-    PakEntry* staticMenuPAKEntry = assets.GetEntry(PAK_ID_MENU_STATIC);
-    PakArchive staticMenuPAK;
-    staticMenuPAK.InitFromRAM("PAK_ID_MENU_STATIC",staticMenuPAKEntry->data, staticMenuPAKEntry->size);
-    RSImage staticMenuImage;
-    staticMenuImage.Create("staticMenuImage", 320, 200);
-    errorFound = codex.ReadImage(staticMenuPAK.GetEntry(0)->data, &staticMenuImage, &byteRead);
-    */
-    
-    
-    
-    
-    /*
-    PakEntry* menuBGData = assets.GetEntry(PAK_ID_MENU_DYNAMC);
-    */
-    
+       
     CheckButtons();
     
     VGA.Activate();
@@ -425,79 +396,51 @@ void SCObjectViewer::RunFrame(void){
     VGA.DrawShape(&bluePrint);
     VGA.DrawShape(&title);
     
-    //VGA.DrawShape(&board);
-    
-    
     DrawButtons();
     
     //Draw Mouse
     Mouse.Draw();
-    
-    //Check Mouse state.
+
     
     VGA.VSync();
 
     
-    /*
-    RSShowCase showCase = showCases[0];
-    printf("F-16 dimensions: x: %.2f y: %.2f z: %.2f\n",
-           showCase.entity->GetBoudingBpx()->max.x-showCase.entity->GetBoudingBpx()->min.x,
-           showCase.entity->GetBoudingBpx()->max.y-showCase.entity->GetBoudingBpx()->min.y,
-           showCase.entity->GetBoudingBpx()->max.z-showCase.entity->GetBoudingBpx()->min.z
-           );
-    */
+    //Ok now time to draw the model
+    glClear(GL_DEPTH_BUFFER_BIT);
     
-    /*
+    uint32_t currentTime = SDL_GetTicks();
+    uint32_t totalTime = currentTime - startTime;
     
-    while(1){
-        
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        
-        uint32_t currentTime = SDL_GetTicks();
-        uint32_t totalTime = currentTime - startTime;
-        
-        modelIndex = (totalTime /4000) % showCases.size();
-        
-        renderer.Clear();
-        renderer.DrawImage(&backgroundImage);
-        renderer.DrawImage(&staticMenuImage);
-    
-        RSShowCase showCase = showCases[modelIndex];
-        
-        Point3D newPosition;
-        newPosition.x= showCase.cameraDist/200 *cos(counter/4);
-        newPosition.y= 10;
-        newPosition.z= showCase.cameraDist/200*sin(counter/4);
-        counter += 0.02;
-        
-        renderer.GetCamera()->SetPosition(&newPosition);
-        Point3D lookAt = {0,0,0};
-        renderer.GetCamera()->LookAt(&lookAt);
-        
-        Point3D light;
-        light.x= 20*cos(-counter/2.0f);
-        light.y= 10;
-        light.z= 20*sin(-counter/2.0f);
-        renderer.SetLight(&light);
 
-        glMatrixMode(GL_PROJECTION);
-        Matrix* projection = renderer.GetCamera()->GetProjectionMatrix();
-        glLoadMatrixf(projection->ToGL());
-        
-        glMatrixMode(GL_MODELVIEW);
-        Matrix* view = renderer.GetCamera()->GetViewMatrix();
-        glLoadMatrixf(view->ToGL());
-        
-        
-        
-        
-        RSEntity* modelToDraw = showCase.entity;
-        renderer.DrawModel(modelToDraw, LOD_LEVEL_MAX);
     
-        renderer.Swap();
-        renderer.ShowWindow();
-        renderer.PumpEvents();
-    }
-    */
+    RSShowCase showCase = showCases[currentObject];
+    
+    Point3D newPosition;
+    newPosition.x= showCase.cameraDist/150 *cos(totalTime/2000.0f);
+    newPosition.y= showCase.cameraDist/350;
+    newPosition.z= showCase.cameraDist/150*sin(totalTime/2000.0f);
+   
+
+    Renderer.GetCamera()->SetPosition(&newPosition);
+    Point3D lookAt = {0,0,0};
+    Renderer.GetCamera()->LookAt(&lookAt);
+    
+    Point3D light;
+    light.x= 4*cos(-totalTime/20000.0f);
+    light.y= 4;
+    light.z= 4*sin(-totalTime/20000.0f);
+    Renderer.SetLight(&light);
+    
+    glMatrixMode(GL_PROJECTION);
+    Matrix* projection = Renderer.GetCamera()->GetProjectionMatrix();
+    glLoadMatrixf(projection->ToGL());
+    
+    glMatrixMode(GL_MODELVIEW);
+    Matrix* view = Renderer.GetCamera()->GetViewMatrix();
+    glLoadMatrixf(view->ToGL());
+    
+    Renderer.DrawModel(showCases[currentObject].entity, LOD_LEVEL_MAX);
+    
+    glDisable(GL_DEPTH_TEST);
     
 }

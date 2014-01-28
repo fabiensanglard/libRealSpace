@@ -19,9 +19,9 @@ public:
     
     void RunFrame(void);
     
-    void ListObjects(void);
     
     
+    void NextObject(void);
     
 private:
 
@@ -44,6 +44,11 @@ private:
     RLEShape bluePrint;
     RLEShape title;
     RLEShape board;
+    
+    uint32_t currentObject;
+    
+    //For rotating the object
+    uint32_t startTime;
 };
 
 #endif /* defined(__libRealSpace__NSObjectViewer__) */
