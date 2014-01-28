@@ -797,7 +797,7 @@ void TestMouseCursor(void){
     
 }
 
-int mainw( int argc,char** argv){
+int maine( int argc,char** argv){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
     

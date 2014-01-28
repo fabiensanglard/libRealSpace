@@ -15,6 +15,10 @@
 #define MAINMENU_PAK_BOARD_PALETTE  2
 
 
+
+#define OPTPALS_PAK_PATH "..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK"
+#define OPTPALS_PAK_MOUTAIN_PALETTE_PATCH_ID 24
+#define OPTPALS_PAK_SKY_PALETTE_PATCH_ID 21
 /*
  3 eagle
  9 letters
@@ -168,31 +172,27 @@ void SCMainMenu::LoadBoard(void){
 
 void SCMainMenu::LoadPalette(void){
     
-    VGAPalette* rendererPalette = VGA.GetPalette();
-    this->palette = *rendererPalette;
-    
-    
     ByteStream paletteReader;
     
-    
-    /*
-    TreEntry* mid1Entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK");
-    PakArchive mid1Pak;
-    mid1Pak.InitFromRAM("MID1.PAK",mid1Entry->data,mid1Entry->size);
-    mid1Pak.List(stdout);
-    
-    IffLexer lexer;
-    lexer.InitFromRAM(mid1Pak.GetEntry(9)->data-772-0x14, 772+0x14);
-    RSPalette letterPalette;
-    letterPalette.InitFromIFF(&lexer);
-    //this->palette = *letterPalette.GetColorPalette();
-    */
+    VGAPalette* rendererPalette = VGA.GetPalette();
+    this->palette = *rendererPalette;
+    //Load the default palette
     
     
     
-    //Second palette patch
-    PakEntry* paletteEntry = mainMenupak.GetEntry(MAINMENU_PAK_BOARD_PALETTE);
-    paletteReader.Set(paletteEntry->data);
+    TreEntry* palettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(OPTPALS_PAK_PATH);
+    PakArchive palettesPak;
+    palettesPak.InitFromRAM("OPTSHPS.PAK",palettesEntry->data,palettesEntry->size);
+    palettesPak.List(stdout);
+    
+    paletteReader.Set(palettesPak.GetEntry(OPTPALS_PAK_MOUTAIN_PALETTE_PATCH_ID)->data); //mountains Good but not sky
+    this->palette.ReadPatch(&paletteReader);
+    paletteReader.Set(palettesPak.GetEntry(OPTPALS_PAK_SKY_PALETTE_PATCH_ID)->data); //Sky Good but not mountains
+    this->palette.ReadPatch(&paletteReader);
+    
+    //Third palette patch (for silver board and buttons)
+    PakEntry* palettePatchEntry = mainMenupak.GetEntry(MAINMENU_PAK_BOARD_PALETTE);
+    paletteReader.Set(palettePatchEntry->data);
     this->palette.ReadPatch(&paletteReader);
     
 }
