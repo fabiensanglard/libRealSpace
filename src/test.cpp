@@ -582,7 +582,7 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
     if (!errorFound){
         VGA.VSync();
         Screen.Refresh();
-                usleep(imgSpeed);
+        usleep(imgSpeed);
         PrintTabs(numTabs);
         printf("Image Found 0X%X\n",data);
         return;
@@ -626,6 +626,12 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
 }
 
 void TestMouseCursor(void){
+    
+    SetBase("/Users/fabiensanglard/SC/SC/");
+    Screen.Init(2);
+    VGA.Init();
+
+    
     
     TreArchive gameflow ; gameflow.InitFromFile("GAMEFLOW.TRE");
     TreArchive misc ;     misc.InitFromFile("MISC.TRE");
@@ -797,14 +803,36 @@ void TestMouseCursor(void){
     
 }
 
-int maine( int argc,char** argv){
-    
+void ReverseOBKViewButton(){
     SetBase("/Users/fabiensanglard/SC/SC/");
     
-
-    decompressTREs("/Users/fabiensanglard/Desktop/DATA/");
     
-    return 0;
+    TreArchive tre ;
+    tre.InitFromFile("GAMEFLOW.TRE");
+    
+    PakArchive objViewPAK;
+    tre.GetPAKByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK",&objViewPAK);
+    
+    PakArchive objViewButtons;
+    objViewButtons.InitFromRAM("PAK_BUTTONS", objViewPAK.GetEntry(9)->data, objViewPAK.GetEntry(9)->size);
+    
+
+    Screen.Init(2);
+    VGA.Init();
+    
+    
+    
+
+}
+
+int maine( int argc,char** argv){
+    
+    //ReverseOBKViewButton();
+    TestMouseCursor();
+    
+    //decompressTREs("/Users/fabiensanglard/Desktop/DATA/");
+    
+    //return 0;
 
 //    listTRE();
 //    return 0;
@@ -955,4 +983,5 @@ int maine( int argc,char** argv){
     area->InitFromPAKFileName("MAURITAN.PAK");
     area->InitFromPAKFileName("RHODEI.PAK");
     
+    return EXIT_SUCCESS;
 }

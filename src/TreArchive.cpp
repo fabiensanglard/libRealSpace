@@ -149,6 +149,19 @@ TreEntry* TreArchive::GetEntryByName(const char* entryName){
     return mappedEntries[entryName];
 }
 
+bool TreArchive::GetPAKByName(const char* entryName,PakArchive* pak){\
+    TreEntry* entry = GetEntryByName(entryName);
+    if (entry == NULL)
+        return false;
+    
+    pak->InitFromRAM(entryName, entry->data, entry->size);
+    
+    if (!pak->IsReady())
+        return false;
+    
+    return true;
+}
+
 TreEntry* TreArchive::GetEntryByID(size_t entryID){
     return entries[entryID];
 }

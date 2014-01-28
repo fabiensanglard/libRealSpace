@@ -42,6 +42,9 @@ public:
     //Direct access to a TRE entry.
     TreEntry* GetEntryByName(const char* entryName);
     
+    //Build a pak directly
+    bool GetPAKByName(const char* entryName,PakArchive* pak);
+    
     //A way to iterate through all entries in the TRE.
     TreEntry* GetEntryByID(size_t entryID);
     size_t GetNumEntries(void);

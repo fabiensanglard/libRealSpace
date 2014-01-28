@@ -44,6 +44,7 @@ extern "C" {
 // Reusable Realspace Classes
     #include "Base.h"
     #include "ByteStream.h"
+    #include "PakArchive.h"
     #include "TreArchive.h"
 
 
@@ -53,7 +54,7 @@ extern "C" {
     #include "RSImage.h"
     #include "Renderer.h"
     #include "IffLexer.h"
-    #include "PakArchive.h"
+
     #include "RSPalette.h"
     #include "RSEntity.h"
     #include "RSMusic.h"

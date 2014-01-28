@@ -128,6 +128,38 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
     
 }
 
+void OnExit(void){
+    Game.StopTopActivity();
+}
+
+void OnNext(void){
+    Game.StopTopActivity();
+}
+
+void OnZoomOut(void){
+    Game.StopTopActivity();
+}
+
+void OnZoomIn(void){
+    Game.StopTopActivity();
+}
+
+void OnRotateLeft(void){
+    Game.StopTopActivity();
+}
+
+void OnRotateRight(void){
+    Game.StopTopActivity();
+}
+
+void OnRotateUp(void){
+    Game.StopTopActivity();
+}
+
+void OnRotateDown(void){
+    Game.StopTopActivity();
+}
+
 void SCObjectViewer::ParseAssets(PakArchive* archive){
     
     
@@ -176,13 +208,99 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     */
     
     //Identified as BUTTONS OBJ VIEWER
-    /*
-    PakEntry* entry4 = archive->GetEntry(4);
-    PakArchive file4;
-    file4.InitFromRAM("OBJVIEW.PAK: file 4",entry4->data, entry4->size);
-    file4.List(stdout);
-    showAllImage(&file4);
-    */
+    
+    PakEntry* objButtonEntry = archive->GetEntry(4);
+    PakArchive objButtons;
+    objButtons.InitFromRAM("OBJVIEW.PAK: file 4",objButtonEntry->data, objButtonEntry->size);
+    objButtons.List(stdout);
+    
+    SCButton* button;
+    Point2D boardPosition = {4, 155} ;
+    
+    
+    
+    
+    
+    //EXIT BUTTON
+    button = new SCButton();
+    Point2D exitDimension = {30, 15} ;
+    Point2D exitPosition = {boardPosition.x+268,boardPosition.y+15};
+    button->InitBehavior(OnExit, exitPosition,exitDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(14)->data, objButtons.GetEntry(14)->size,&exitPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(15)->data, objButtons.GetEntry(15)->size,&exitPosition);
+    buttons.push_back(button);
+    
+    
+    
+    
+    Point2D arrowDimension = {15, 15} ;
+
+    //ROT RIGHT OBJ BUTTON
+    button = new SCButton();
+    
+    Point2D rotRightButtonPosition = {boardPosition.x+232,boardPosition.y+12};
+    button->InitBehavior(OnRotateRight, rotRightButtonPosition,arrowDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(12)->data, objButtons.GetEntry(12)->size,&rotRightButtonPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(13)->data, objButtons.GetEntry(13)->size,&rotRightButtonPosition);
+    buttons.push_back(button);
+    
+    //ROT LEFT OBJ BUTTON
+    button = new SCButton();
+    Point2D rotLeftButtonPosition = {boardPosition.x+174,boardPosition.y+12};
+    button->InitBehavior(OnRotateLeft, rotLeftButtonPosition,arrowDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(10)->data, objButtons.GetEntry(10)->size,&rotLeftButtonPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(11)->data, objButtons.GetEntry(11)->size,&rotLeftButtonPosition);
+    buttons.push_back(button);
+    
+    //ROT DOWN OBJ BUTTON
+    button = new SCButton();
+    Point2D rotDownButtonPosition = {boardPosition.x+198,boardPosition.y+24};
+    button->InitBehavior(OnRotateDown, rotDownButtonPosition,arrowDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(8)->data, objButtons.GetEntry(8)->size,&rotDownButtonPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(9)->data, objButtons.GetEntry(9)->size,&rotDownButtonPosition);
+    buttons.push_back(button);
+    
+    
+    //ROT UP OBJ BUTTON
+    button = new SCButton();
+    Point2D rotUpButtonPosition = {boardPosition.x+198,boardPosition.y+6};
+    button->InitBehavior(OnRotateUp, rotUpButtonPosition,arrowDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(6)->data, objButtons.GetEntry(6)->size,&rotUpButtonPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(7)->data, objButtons.GetEntry(7)->size,&rotUpButtonPosition);
+    buttons.push_back(button);
+    
+
+    
+    //ZOOM OUT OBJ BUTTON
+    button = new SCButton();
+    Point2D zoomOutButtonPosition = {boardPosition.x+122,boardPosition.y+25};
+    button->InitBehavior(OnZoomOut, zoomOutButtonPosition,arrowDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(4)->data, objButtons.GetEntry(4)->size,&zoomOutButtonPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(5)->data, objButtons.GetEntry(5)->size,&zoomOutButtonPosition);
+    buttons.push_back(button);
+    
+    //ZOOM IN OBJ BUTTON
+    button = new SCButton();
+    Point2D zoomInButtonPosition = {boardPosition.x+121,boardPosition.y+7};
+    button->InitBehavior(OnZoomIn, zoomInButtonPosition,arrowDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(2)->data, objButtons.GetEntry(2)->size,&zoomInButtonPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(3)->data, objButtons.GetEntry(3)->size,&zoomInButtonPosition);
+    buttons.push_back(button);
+    
+    //NEXT OBJ BUTTON
+    Point2D nextDimension = {75, 15} ;
+    button = new SCButton();
+    Point2D nextButtonPosition = {boardPosition.x+10,boardPosition.y+15};
+    button->InitBehavior(OnNext, nextButtonPosition,nextDimension);
+    button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(0)->data, objButtons.GetEntry(0)->size,&nextButtonPosition);
+    button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(1)->data, objButtons.GetEntry(1)->size,&nextButtonPosition);
+    buttons.push_back(button);
+    
+    
+    
+    //buttons.push_back(button);
+    //showAllImage(&file4);
+    
     
     //Identified as DODGE FIGHT MISSION BUILDER
     /*

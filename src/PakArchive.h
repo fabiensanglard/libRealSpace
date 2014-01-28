@@ -46,6 +46,7 @@ public:
     
     inline bool IsReady(void){ return this->ready;}
     
+    inline uint8_t* GetData(void){ return this->data;}
     
 private:
     
