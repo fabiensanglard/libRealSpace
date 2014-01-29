@@ -436,7 +436,7 @@ void TestMouseCursor(void){
     TreArchive gf ;
     gf.InitFromFile("GAMEFLOW.TRE");
     TreEntry* CONVSHPS = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");  // ALL SETS AND CHARACTERS !!!!!
-    //ExploreImages(CONVSHPS->data,miCONVSHPSd1->size,0);
+    ExploreImages(CONVSHPS->data,CONVSHPS->size,0);
     
     //Check palettes fro that too
     /*
@@ -522,6 +522,17 @@ void ReverseOBKViewButton(){
 
 }
 
+#define GROUP_SHOT              0x00
+#define GROUP_SHOT_ADD_CHARCTER 0x01
+#define GROUP_SHOT_CHARCTR_TALK 0x02
+#define CLOSEUP                 0x03
+#define CLOSEUP_CONTINUATION    0x04
+#define SHOW_TEXT               0x0A
+#define YESNOCHOICE_BRANCH1     0x0B
+#define YESNOCHOICE_BRANCH2     0x0C
+#define UNKNOWN                 0x0E
+#define CHOOSE_WINGMAN          0x0F
+
 int32_t ParsePlan(ByteStream* reader){
     
     uint8_t* startPos = reader->GetPosition();
@@ -529,16 +540,14 @@ int32_t ParsePlan(ByteStream* reader){
     uint8_t type = reader->ReadByte();
     
     switch (type) {
-        case 0x00:  // Group plan
+        case GROUP_SHOT:  // Group plan
         {
-            printf("GROUP :\n");
-            uint8_t c = reader->ReadByte();
-            while (c != 0x3)
-                c= reader->ReadByte();
-            reader->Set(reader->GetPosition()-1);
+            char* location = (char*)reader->GetPosition();
+            printf("WIDEPLAN : LOCATION: '%s'\n",location);
+            reader->MoveForward(8+1);
             break;
         }
-        case 0x03:  // Person talking
+        case CLOSEUP:  // Person talking
         {
             uint8_t* speakerName = reader->GetPosition();
             uint8_t* set         = reader->GetPosition() + 0xA;
@@ -548,22 +557,68 @@ int32_t ParsePlan(ByteStream* reader){
             reader->MoveForward(0x17 + strlen((char*)sentence)+1);
             uint8_t color = reader->ReadByte(); // Color ?
             
-            printf("CLOSEUP: WHO: %7s WHERE: %7s:     WHAT: '%s' (%2X)\n",speakerName,set,sentence,color);
+            printf("CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X)\n",speakerName,set,sentence,color);
             break;
         }
-        case 0x04:  // Same person keep talking
+        case CLOSEUP_CONTINUATION:  // Same person keep talking
         {
             uint8_t* sentence         = reader->GetPosition();
             reader->MoveForward(strlen((char*)sentence)+1);
-            printf("MORETEX:                                WHAT: '%s'\n",sentence);
+            printf("MORETEX:                                       WHAT: '%s'\n",sentence);
             break;
         }
-        case 0xB:  // Same person keep talking
+        case YESNOCHOICE_BRANCH1:  // Choice Offsets are question
         {
             printf("CHOICE YES/NO : %X.\n",type);
             //Looks like first byte is the offset to skip if the answer is no.
-            //Looks like second byte is the offset to skip if the answer is yes.
-            return 9999;
+            uint8_t noOffset  = reader->ReadByte();
+            uint8_t yesOffset  = reader->ReadByte();
+            break;
+        }
+        case YESNOCHOICE_BRANCH2:  // Choice offset after first branch
+        {
+            printf("CHOICE YES/NO : %X.\n",type);
+            //Looks like first byte is the offset to skip if the answer is no.
+            uint8_t yesOffset  = reader->ReadByte();
+            uint8_t noOffset  = reader->ReadByte();
+            break;
+        }
+        case GROUP_SHOT_ADD_CHARCTER:  // Add person to GROUP
+        {
+            printf("WIDEPLAN ADD PARTICIPANT: '%s'\n",reader->GetPosition());
+            reader->MoveForward(0xD);
+            break;
+        }
+        case GROUP_SHOT_CHARCTR_TALK:  // Make group character talk
+        {
+            char* who = (char*)reader->GetPosition();
+            reader->MoveForward(0xE);
+            char* sentence = (char*)reader->GetPosition();
+            reader->MoveForward(strlen(sentence)+1);
+            printf("WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n",who,sentence);
+
+
+            break;
+        }
+        case SHOW_TEXT:  // Show text
+        {
+            uint8_t color = reader->ReadByte();
+            char* sentence = (char*)reader->GetPosition();
+            printf("Show Text: '%s' \n",sentence);
+            reader->MoveForward(strlen(sentence)+1);
+            
+            break;
+        }
+        case 0xE:
+        {
+            uint8_t unkn  = reader->ReadByte();
+            uint8_t unkn1  = reader->ReadByte();
+            printf("Unknown usage Flag 0xE: (0x%2X 0x%2X) \n",unkn,unkn1);
+            break;
+        }
+        case CHOOSE_WINGMAN:  // Wingman selection trigger
+        {
+            printf("Open pilot selection screen with currennt BG.\n");
             break;
         }
         default:
@@ -597,19 +652,32 @@ void ParseConv(PakEntry* conv){
 void ParseAllConversations(){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
+
     
     
     TreArchive gameFlow ;
     gameFlow.InitFromFile("GAMEFLOW.TRE");
     
+    TreEntry* metaConfEntry = gameFlow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVDATA.IFF");
+    IffLexer iffConData ;
+    iffConData.InitFromRAM(metaConfEntry->data, metaConfEntry->size);
+    //
+    //iffConData.List(stdout);
+    
+    TreEntry* convPalettesEntry = gameFlow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
+    PakArchive convPalettePak;
+    convPalettePak.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
+  //  convPalettePak.List(stdout);
+    
+    
     TreEntry* convEntry = gameFlow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
     
     PakArchive convPak;
     convPak.InitFromRAM("CONV.PAK", convEntry->data, convEntry->size);
-    convPak.List(stdout);
+    //convPak.List(stdout);
     
     for (size_t i = 0; i < convPak.GetNumEntries(); i++) {
-    //for (size_t i = 20; i < 21; i++) {
+    //for (size_t i = 12; i < 13; i++) {
         if (convPak.GetEntry(i)->size == 0){
             printf("\nConversation: %lu : EMPTY ENTRY.\n",i);
             continue;
@@ -617,17 +685,28 @@ void ParseAllConversations(){
         printf("\nConversation: %lu :\n",i);
         ParseConv(convPak.GetEntry(i));
     }
+    
+    /*
+    TreEntry* convShapesEntry = gameFlow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");
+    PakArchive convShapesPak;
+    convShapesPak.InitFromRAM("CONVSHPS.PAK", convShapesEntry->data, convShapesEntry->size);
+    convShapesPak.List(stdout);
+    for (size_t i =0 ; i < convShapesPak.GetNumEntries(); i++) {
+        PakEntry* shape = convShapesPak.GetEntry(i);
+        PakArchive tmp;
+        tmp.InitFromRAM("", shape->data, shape->size);
+        if (tmp.IsReady())
+            printf("CONVSHPS.PAK entry %lu has %d entries.\n",i,tmp.GetNumEntries());
+        else
+            printf("CONVSHPS.PAK entry %lu is not a PAK.\n",i);
+    }
+    */
 }
 
-int maine( int argc,char** argv){
+int main( int argc,char** argv){
     
     ParseAllConversations();
-    exit(0);
-    //archiveSound.List(stdout);
-    
-    
-    
-    
+    return 0;
     
    // ReverseOBKViewButton();
     //TestMouseCursor();
