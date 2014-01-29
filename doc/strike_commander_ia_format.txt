@@ -1,0 +1,32 @@
+Strike Commander PlayTester's Guide :
+
+It seems the IA is made of state machine with goal orientation:
+
+1/ Protect self
+2/ Obey order
+3/ Accomplish Mission
+4/ Secure Area
+5/ Stay in radius of combat
+
+Also, each pilot have levels in 8 differences areas:
+(this is from the Strike Commander PlayTester's Guide)
+
+0(lowest) - 16 (highest)
+
+All characters in SC have specific marks but there are three types of generic pilots:
+
+                         Rookie         Veteran       Ace
+
+Trigger Happy             10               5           0
+Confidence                10              13          16
+Verbosity                 16              10          16
+Loaylty                   10              16          10
+Flying                   6/3/1          10/5/2      16/8/4
+Air-to-Ground            8/4/2          13/6/2      16/8/4
+Air-to-Air               6/3/1          10/5/2      16/8/4
+Showmanship                8               5           8
+Aggressiveness            10              10          16
+
+Some other pilot have specific characteristics (c-130 pilot etc...)
+
+
