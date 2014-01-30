@@ -703,7 +703,7 @@ void ParseAllConversations(){
     */
 }
 
-int main( int argc,char** argv){
+int mainTest( int argc,char** argv){
     
     ParseAllConversations();
     return 0;
