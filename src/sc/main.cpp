@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();
-    //SCSelectWeaponF16* main = new SCSelectWeaponF16();
+    //SCRegister* main = new SCRegister();
     main->Init();
     Game.AddActivity(main);
     

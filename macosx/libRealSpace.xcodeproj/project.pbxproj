@@ -33,6 +33,8 @@
 		2D9B617F18725C8B0071ACDA /* RSSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B617D18725C8B0071ACDA /* RSSound.cpp */; };
 		2D9B618218725CEC0071ACDA /* RSArea.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B618018725CEC0071ACDA /* RSArea.cpp */; };
 		2D9D87191895B5B700B46D37 /* SCSelectWeaponsF16.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9D87171895B5B700B46D37 /* SCSelectWeaponsF16.cpp */; };
+		2D9F30CC189BEA3F00712A62 /* SCWildCatBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9F30CA189BEA3F00712A62 /* SCWildCatBase.cpp */; };
+		2D9F30D0189C090100712A62 /* SCRegister.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9F30CE189C090100712A62 /* SCRegister.cpp */; };
 		2DA7D40018847E58003CAA78 /* Math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DA7D3FE18847E58003CAA78 /* Math.cpp */; };
 		2DA7D40318850B1F003CAA78 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DA7D40118850B1F003CAA78 /* Quaternion.cpp */; };
 		2DB3FB63187281850081B676 /* RSMapTextureSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DB3FB61187281850081B676 /* RSMapTextureSet.cpp */; };
@@ -109,6 +111,11 @@
 		2D9B618118725CEC0071ACDA /* RSArea.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSArea.h; path = ../src/RSArea.h; sourceTree = SOURCE_ROOT; };
 		2D9D87171895B5B700B46D37 /* SCSelectWeaponsF16.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCSelectWeaponsF16.cpp; path = ../src/sc/SCSelectWeaponsF16.cpp; sourceTree = "<group>"; };
 		2D9D87181895B5B700B46D37 /* SCSelectWeaponsF16.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCSelectWeaponsF16.h; path = ../src/sc/SCSelectWeaponsF16.h; sourceTree = "<group>"; };
+		2D9F30CA189BEA3F00712A62 /* SCWildCatBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCWildCatBase.cpp; path = ../src/sc/SCWildCatBase.cpp; sourceTree = "<group>"; };
+		2D9F30CB189BEA3F00712A62 /* SCWildCatBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCWildCatBase.h; path = ../src/sc/SCWildCatBase.h; sourceTree = "<group>"; };
+		2D9F30CD189BF4E400712A62 /* ShapeIDs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ShapeIDs.h; path = ../src/sc/ShapeIDs.h; sourceTree = "<group>"; };
+		2D9F30CE189C090100712A62 /* SCRegister.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCRegister.cpp; path = ../src/sc/SCRegister.cpp; sourceTree = "<group>"; };
+		2D9F30CF189C090100712A62 /* SCRegister.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCRegister.h; path = ../src/sc/SCRegister.h; sourceTree = "<group>"; };
 		2DA7D3FE18847E58003CAA78 /* Math.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Math.cpp; path = ../src/Math.cpp; sourceTree = SOURCE_ROOT; };
 		2DA7D3FF18847E58003CAA78 /* Math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Math.h; path = ../src/Math.h; sourceTree = SOURCE_ROOT; };
 		2DA7D40118850B1F003CAA78 /* Quaternion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Quaternion.cpp; path = ../src/Quaternion.cpp; sourceTree = SOURCE_ROOT; };
@@ -197,6 +204,7 @@
 		2D8460F41894389A00B652A8 /* activities */ = {
 			isa = PBXGroup;
 			children = (
+				2D9F30C9189BEA2900712A62 /* locations */,
 				2D8460E918939D8E00B652A8 /* IActivity.h */,
 				2D8460E818939D8E00B652A8 /* IActivity.cpp */,
 				2D8460F6189438B300B652A8 /* SCMainMenu.h */,
@@ -211,6 +219,7 @@
 				2D44F5181897ABCE00075C9E /* SCTrainingMenu.cpp */,
 				2D705C451898003000473F18 /* SCStrike.h */,
 				2D705C441898003000473F18 /* SCStrike.cpp */,
+				2D9F30CD189BF4E400712A62 /* ShapeIDs.h */,
 			);
 			name = activities;
 			sourceTree = "<group>";
@@ -222,6 +231,17 @@
 				2D8460FA189561CA00B652A8 /* SCButton.cpp */,
 			);
 			name = menues;
+			sourceTree = "<group>";
+		};
+		2D9F30C9189BEA2900712A62 /* locations */ = {
+			isa = PBXGroup;
+			children = (
+				2D9F30CB189BEA3F00712A62 /* SCWildCatBase.h */,
+				2D9F30CA189BEA3F00712A62 /* SCWildCatBase.cpp */,
+				2D9F30CF189C090100712A62 /* SCRegister.h */,
+				2D9F30CE189C090100712A62 /* SCRegister.cpp */,
+			);
+			name = locations;
 			sourceTree = "<group>";
 		};
 		2DA526C6187B7D1500BE1A11 /* headers */ = {
@@ -373,6 +393,7 @@
 				2D9B617C18725C660071ACDA /* RSMusic.cpp in Sources */,
 				2D8460E718939D1100B652A8 /* GameEngine.cpp in Sources */,
 				2D705C461898003000473F18 /* SCStrike.cpp in Sources */,
+				2D9F30D0189C090100712A62 /* SCRegister.cpp in Sources */,
 				2D310910187081F000D3443F /* SCRenderer.cpp in Sources */,
 				2DB3FB63187281850081B676 /* RSMapTextureSet.cpp in Sources */,
 				2D8460F7189438B300B652A8 /* SCMainMenu.cpp in Sources */,
@@ -397,6 +418,7 @@
 				2DFEFBB7186F655A002305A9 /* ByteStream.cpp in Sources */,
 				2DA7D40018847E58003CAA78 /* Math.cpp in Sources */,
 				2D846103189639E700B652A8 /* RSScreen.cpp in Sources */,
+				2D9F30CC189BEA3F00712A62 /* SCWildCatBase.cpp in Sources */,
 				2DA7D40318850B1F003CAA78 /* Quaternion.cpp in Sources */,
 				2D8460FC189561CA00B652A8 /* SCButton.cpp in Sources */,
 				2D310906186FEAEA00D3443F /* RSPalette.cpp in Sources */,

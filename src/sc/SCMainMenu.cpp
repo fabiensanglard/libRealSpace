@@ -36,7 +36,14 @@ static void OnLoadGame(){
 
 
 static void OnStartNewGame(){
-    printf("OnStartNewGame\n");
+    //Stop this activity.
+    SCMainMenu* that =  (SCMainMenu*)Game.GetCurrentActivity();
+    that->Stop();
+    
+    //Add the next activity on the stack
+    SCRegister* reg = new SCRegister();
+    reg->Init();
+    Game.AddActivity(reg);
 }
 
 
@@ -137,7 +144,6 @@ void SCMainMenu::LoadButtons(void){
     button->InitBehavior(OnStartNewGame, startNewGamePosition,buttonDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(subPak.GetEntry(2)->data, subPak.GetEntry(2)->size,&startNewGamePosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(7)->data, subPak.GetEntry(7)->size,&startNewGamePosition);
-    button->SetEnable(false);
     buttons.push_back(button);
     
     button = new SCButton();
@@ -206,15 +212,19 @@ void SCMainMenu::LoadBackgrounds(void){
     
     //The board is within an other pak within MAINMENU.PAK !!!!
     PakArchive mountainPak;
-    mountainPak.InitFromRAM("subPak board",pak.GetEntry(44)->data ,pak.GetEntry(44)->size);
+    mountainPak.InitFromRAM("subPak board",
+                            pak.GetEntry(OptionShapeID::MOUTAINS_BG)->data ,
+                            pak.GetEntry(OptionShapeID::MOUTAINS_BG)->size);
     mountain.Init(mountainPak.GetEntry(0)->data, mountainPak.GetEntry(0)->size);
 
     
     PakArchive skyPak;
-    skyPak.InitFromRAM("subPak sky",pak.GetEntry(116)->data ,pak.GetEntry(116)->size);
+    skyPak.InitFromRAM("subPak sky",
+                       pak.GetEntry(OptionShapeID::SKY)->data ,
+                       pak.GetEntry(OptionShapeID::SKY)->size);
     sky.Init(skyPak.GetEntry(0)->data, skyPak.GetEntry(0)->size);
 
-    //background 116 ?
+
     
     TreEntry* entryCloud = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
     PakArchive subcloudPak;

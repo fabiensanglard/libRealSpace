@@ -9,6 +9,7 @@
 #ifndef libRealSpace_precomp_h
 #define libRealSpace_precomp_h
 
+//libspace include
 #include "../precomp.h"
 
 // Core of the game
@@ -26,6 +27,9 @@
 
 
 //Activities
+#include "ShapeIDs.h"
+#include "SCRegister.h"
+#include "SCWildCatBase.h"
 #include "SCStrike.h"
 #include "SCObjectViewer.h"
 #include "SCDogFightMenu.h"

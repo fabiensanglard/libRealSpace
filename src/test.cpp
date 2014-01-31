@@ -234,11 +234,37 @@ void PrintTabs(int tabs){
     }
 }
 
-#define imgSpeed 1000000
+void waitForSpace(){
+
+    while(1)
+    {
+    SDL_PumpEvents();
+    
+    //Keyboard
+
+    SDL_Event keybEvents[5];
+    int numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_GETEVENT,SDL_KEYUP,SDL_KEYUP);
+    for(int i= 0 ; i < numKeybEvents ; i++){
+        SDL_Event* event = &keybEvents[i];
+        switch (event->key.keysym.sym){
+            case SDLK_SPACE :
+                return;
+            default:
+                break;
+        }
+    }
+    }
+}
 void ExploreImages(uint8_t* data, size_t size, int numTabs){
     
     PrintTabs(numTabs);
     printf("Exploring 0X%X\n",data);
+    
+    if (size == 0){
+        printf("Size == 0 !\n");
+        return;
+    }
+        
         
     //SHP files are PAKs containing direct images.
     PakArchive font;
@@ -268,7 +294,7 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
     if (!errorFound){
         VGA.VSync();
         Screen.Refresh();
-        usleep(imgSpeed);
+        waitForSpace();
         PrintTabs(numTabs);
         printf("Image Found 0X%X\n",data);
         return;
@@ -297,7 +323,7 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
         if (!errorFound){
             VGA.VSync();
             Screen.Refresh();
-            usleep(imgSpeed);
+            waitForSpace();
             PrintTabs(numTabs);
             printf("Image Found 0X%X\n",data+nextImage);
             
@@ -436,7 +462,7 @@ void TestMouseCursor(void){
     TreArchive gf ;
     gf.InitFromFile("GAMEFLOW.TRE");
     TreEntry* CONVSHPS = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");  // ALL SETS AND CHARACTERS !!!!!
-    ExploreImages(CONVSHPS->data,CONVSHPS->size,0);
+    //ExploreImages(CONVSHPS->data,CONVSHPS->size,0);
     
     //Check palettes fro that too
     /*
@@ -731,11 +757,11 @@ void ExploreMIDGAMES(void){
 int mainTest( int argc,char** argv){
 
     
-    ParseAllConversations();
+    //ParseAllConversations();
     
     
    // ReverseOBKViewButton();
-    //TestMouseCursor();
+    TestMouseCursor();
     
     //ExploreMIDGAMES();
     
