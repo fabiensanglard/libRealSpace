@@ -16,7 +16,11 @@ SCMouse         Mouse;
 AssetManager    Assets;
 SCRenderer      Renderer;
 
+<<<<<<< HEAD
 int mainj(int argc, char* argv[]) {
+=======
+int main(int argc, char* argv[]) {
+>>>>>>> b28ce4c4a06ef059793206dc305f2105d1feb574
     
     Assets.SetBase("/Users/fabiensanglard/SC/SC/");
     

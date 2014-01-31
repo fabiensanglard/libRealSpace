@@ -704,6 +704,7 @@ void ParseAllConversations(){
 }
 
 
+
 void ExploreMIDGAMES(void){
     SetBase("/Users/fabiensanglard/SC/SC/");
     
@@ -726,7 +727,9 @@ void ExploreMIDGAMES(void){
     pakArchive.List(stdout);
 }
 
-int main( int argc,char** argv){
+
+int mainTest( int argc,char** argv){
+
     
     ParseAllConversations();
     
