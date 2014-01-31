@@ -12,9 +12,11 @@
 //libspace include
 #include "../precomp.h"
 
+
+#include "PaletteIDs.h"
+#include "ShapeIDs.h"
+
 // Core of the game
-
-
 #include "SCMouse.h"
 #include "SCButton.h"
 #include "IActivity.h"
@@ -27,7 +29,7 @@
 
 
 //Activities
-#include "ShapeIDs.h"
+
 #include "SCAnimationPlayer.h"
 #include "SCRegister.h"
 #include "SCWildCatBase.h"

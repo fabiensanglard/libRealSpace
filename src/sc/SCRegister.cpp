@@ -64,13 +64,13 @@ void SCRegister::Init( ){
     VGAPalette* rendererPalette = VGA.GetPalette();
     this->palette = *rendererPalette;
     
-#define PAK 30
+
     TreEntry* palettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     PakArchive palettesPak;
     palettesPak.InitFromRAM("OPTSHPS.PAK",palettesEntry->data,palettesEntry->size);
     
      ByteStream paletteReader;
-    paletteReader.Set(palettesPak.GetEntry(PAK)->data);
+    paletteReader.Set(palettesPak.GetEntry(OPTPALS_PAK_STARTGAME_REGISTRATION)->data);
     this->palette.ReadPatch(&paletteReader);
 
     
