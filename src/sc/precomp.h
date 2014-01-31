@@ -29,7 +29,7 @@
 
 
 //Activities
-
+#include "SCConvPlayer.h"
 #include "SCAnimationPlayer.h"
 #include "SCRegister.h"
 #include "SCWildCatBase.h"

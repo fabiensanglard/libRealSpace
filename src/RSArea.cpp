@@ -124,7 +124,7 @@ void RSArea::ParseMetadata(){
     
     
     
-    IffChunk* objs = lexer.GetChunkByID('OBJS');
+    //IffChunk* objs = lexer.GetChunkByID('OBJS');
     /*
      OBJS format:
       4 bytes unknown :
@@ -161,13 +161,13 @@ void RSArea::ParseMetadata(){
     ByteStream textureRefStrean(txmsMaps->data);
         
     for (size_t i=0; i < numTexturesSets ; i++) {
-        uint16_t fastID = textureRefStrean.ReadUShort();
+        /*uint16_t fastID =*/ textureRefStrean.ReadUShort();
         char setName[8];
         for(int n=0; n < 8 ; n++){
             setName[n] = textureRefStrean.ReadByte();
         }
-        uint8_t unknown = textureRefStrean.ReadByte();
-        uint8_t numImages = textureRefStrean.ReadByte();
+        /*uint8_t unknown =*/ textureRefStrean.ReadByte();
+        /*uint8_t numImages =*/ textureRefStrean.ReadByte();
         
        // printf("Texture Set Ref [%3lu] 0x%2X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
     }
@@ -530,7 +530,7 @@ void RSArea::ParseElevations(void){
 
 void RSArea::ParseHeightMap(void){
     
-    char title[512];
+    //char title[512];
     
     
     

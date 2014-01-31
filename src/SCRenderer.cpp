@@ -912,7 +912,7 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
         
         offset[0] = blockID % 18 * BLOCK_WIDTH ;
         offset[1] = area->elevation[blockID];
-        offset[2] = blockID / 18 * BLOCK_WIDTH;
+        offset[2] = (int32_t)blockID / 18 * BLOCK_WIDTH;
         
         /*
         glVertex3d(object.position[0]/255*BLOCK_WIDTH+offset[0],
@@ -925,7 +925,7 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
         localDelta[2] = object.position[2]/65355.0f*BLOCK_WIDTH;
         
         
-        int32_t toDraw[3];
+        size_t toDraw[3];
         toDraw[0] = localDelta[0]+offset[0];
         toDraw[1] = offset[1];
         toDraw[2] = localDelta[2]+offset[2];

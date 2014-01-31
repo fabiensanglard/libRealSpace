@@ -38,6 +38,7 @@
 		2DA7D40018847E58003CAA78 /* Math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DA7D3FE18847E58003CAA78 /* Math.cpp */; };
 		2DA7D40318850B1F003CAA78 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DA7D40118850B1F003CAA78 /* Quaternion.cpp */; };
 		2DABC595189C27C9005A172A /* SCAnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DABC593189C27C9005A172A /* SCAnimationPlayer.cpp */; };
+		2DABC599189C2BC5005A172A /* SCConvPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DABC597189C2BC5005A172A /* SCConvPlayer.cpp */; };
 		2DB3FB63187281850081B676 /* RSMapTextureSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DB3FB61187281850081B676 /* RSMapTextureSet.cpp */; };
 		2DB3FB661872BAAA0081B676 /* RSImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DB3FB641872BAAA0081B676 /* RSImage.cpp */; };
 		2DFEFBAE186F5C84002305A9 /* TreArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBA1186F5C84002305A9 /* TreArchive.cpp */; };
@@ -124,6 +125,8 @@
 		2DABC593189C27C9005A172A /* SCAnimationPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCAnimationPlayer.cpp; path = ../src/sc/SCAnimationPlayer.cpp; sourceTree = "<group>"; };
 		2DABC594189C27C9005A172A /* SCAnimationPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCAnimationPlayer.h; path = ../src/sc/SCAnimationPlayer.h; sourceTree = "<group>"; };
 		2DABC596189C2B45005A172A /* PaletteIDs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PaletteIDs.h; path = ../src/sc/PaletteIDs.h; sourceTree = "<group>"; };
+		2DABC597189C2BC5005A172A /* SCConvPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SCConvPlayer.cpp; path = ../src/sc/SCConvPlayer.cpp; sourceTree = "<group>"; };
+		2DABC598189C2BC5005A172A /* SCConvPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SCConvPlayer.h; path = ../src/sc/SCConvPlayer.h; sourceTree = "<group>"; };
 		2DB3FB61187281850081B676 /* RSMapTextureSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSMapTextureSet.cpp; path = ../src/RSMapTextureSet.cpp; sourceTree = SOURCE_ROOT; };
 		2DB3FB62187281850081B676 /* RSMapTextureSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSMapTextureSet.h; path = ../src/RSMapTextureSet.h; sourceTree = SOURCE_ROOT; };
 		2DB3FB641872BAAA0081B676 /* RSImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSImage.cpp; path = ../src/RSImage.cpp; sourceTree = SOURCE_ROOT; };
@@ -190,6 +193,7 @@
 		2D8460E418939CDF00B652A8 /* neoStrikeCommander */ = {
 			isa = PBXGroup;
 			children = (
+				2DABC59A189C2C47005A172A /* ids */,
 				2D8460ED18939EFA00B652A8 /* precomp.h */,
 				2DABC592189C2329005A172A /* conversations */,
 				2DABC591189C2323005A172A /* animations */,
@@ -225,8 +229,6 @@
 				2D44F5181897ABCE00075C9E /* SCTrainingMenu.cpp */,
 				2D705C451898003000473F18 /* SCStrike.h */,
 				2D705C441898003000473F18 /* SCStrike.cpp */,
-				2D9F30CD189BF4E400712A62 /* ShapeIDs.h */,
-				2DABC596189C2B45005A172A /* PaletteIDs.h */,
 			);
 			name = activities;
 			sourceTree = "<group>";
@@ -292,8 +294,19 @@
 		2DABC592189C2329005A172A /* conversations */ = {
 			isa = PBXGroup;
 			children = (
+				2DABC598189C2BC5005A172A /* SCConvPlayer.h */,
+				2DABC597189C2BC5005A172A /* SCConvPlayer.cpp */,
 			);
 			name = conversations;
+			sourceTree = "<group>";
+		};
+		2DABC59A189C2C47005A172A /* ids */ = {
+			isa = PBXGroup;
+			children = (
+				2D9F30CD189BF4E400712A62 /* ShapeIDs.h */,
+				2DABC596189C2B45005A172A /* PaletteIDs.h */,
+			);
+			name = ids;
 			sourceTree = "<group>";
 		};
 		2DFEFB74186F5BED002305A9 = {
@@ -440,6 +453,7 @@
 				2D9D87191895B5B700B46D37 /* SCSelectWeaponsF16.cpp in Sources */,
 				2DABC595189C27C9005A172A /* SCAnimationPlayer.cpp in Sources */,
 				2DFEFBB7186F655A002305A9 /* ByteStream.cpp in Sources */,
+				2DABC599189C2BC5005A172A /* SCConvPlayer.cpp in Sources */,
 				2DA7D40018847E58003CAA78 /* Math.cpp in Sources */,
 				2D846103189639E700B652A8 /* RSScreen.cpp in Sources */,
 				2D9F30CC189BEA3F00712A62 /* SCWildCatBase.cpp in Sources */,

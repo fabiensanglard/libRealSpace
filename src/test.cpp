@@ -258,7 +258,7 @@ void waitForSpace(){
 void ExploreImages(uint8_t* data, size_t size, int numTabs){
     
     PrintTabs(numTabs);
-    printf("Exploring 0X%X\n",data);
+    //printf("Exploring 0X%X\n",data);
     
     if (size == 0){
         printf("Size == 0 !\n");
@@ -272,7 +272,7 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
     if (font.IsReady()){
         font.List(stdout);
         PrintTabs(numTabs);
-        printf("Pak Found 0X%X\n",data);
+        printf("Pak Found\n");
         for(size_t i =0 ; i  < font.GetNumEntries() ; i++){
             PakEntry* e = font.GetEntry(i);
             PrintTabs(numTabs);
@@ -296,7 +296,7 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
         Screen.Refresh();
         waitForSpace();
         PrintTabs(numTabs);
-        printf("Image Found 0X%X\n",data);
+        printf("Image Found \n");
         return;
     }
     
@@ -325,7 +325,7 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
             Screen.Refresh();
             waitForSpace();
             PrintTabs(numTabs);
-            printf("Image Found 0X%X\n",data+nextImage);
+            printf("Image Found\n");
             
         }
         //else
@@ -351,109 +351,109 @@ void TestMouseCursor(void){
     TreArchive obj ;      obj.InitFromFile("OBJECTS.TRE");
     
     
-     TreEntry* mainFont = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK"); //Camera configuration
+    // TreEntry* mainFont = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK"); //Camera configuration
      //ExploreImages(mainFont->data,mainFont->size,0);
      
     
     
     
     
-    TreEntry* camropt = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CAMROPT.SHP"); //Camera configuration
+   // TreEntry* camropt = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CAMROPT.SHP"); //Camera configuration
     //ExploreImages(camropt->data,camropt->size,0);
 
     
     
    
-     TreEntry* chkexit = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CHKEXIT.SHP"); //Exit to DOS configuration
+   //  TreEntry* chkexit = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CHKEXIT.SHP"); //Exit to DOS configuration
      //ExploreImages(chkexit->data,chkexit->size,0);
     
     
     
   
-    TreEntry* cockopt = misc.GetEntryByName("..\\..\\DATA\\FONTS\\COCKOPT.SHP"); // Cockpit configuration
+    //TreEntry* cockopt = misc.GetEntryByName("..\\..\\DATA\\FONTS\\COCKOPT.SHP"); // Cockpit configuration
     //ExploreImages(cockopt->data,cockopt->size,0);
     
     
     
-     TreEntry* convFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CONVFONT.SHP"); // Unknown but likely a font wiht 128 entries
+    // TreEntry* convFont = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CONVFONT.SHP"); // Unknown but likely a font wiht 128 entries
     //ExploreImages(convFont->data,convFont->size,0);
     
     
     
     
     
-     TreEntry* detlopt = misc.GetEntryByName("..\\..\\DATA\\FONTS\\DETLOPT.SHP"); // Details options
+   //  TreEntry* detlopt = misc.GetEntryByName("..\\..\\DATA\\FONTS\\DETLOPT.SHP"); // Details options
      //ExploreImages(detlopt->data,detlopt->size);
     
     
     
    
-    TreEntry* FLITOPT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\FLITOPT.SHP"); // Control options
+   // TreEntry* FLITOPT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\FLITOPT.SHP"); // Control options
     //ExploreImages(FLITOPT->data,FLITOPT->size,0);
     
     
     
 
-    TreEntry* FORMFONT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\FORMFONT.SHP"); // Font option
+  //  TreEntry* FORMFONT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\FORMFONT.SHP"); // Font option
     //ExploreImages(FORMFONT->data,FORMFONT->size);
     
     
     
 
-    TreEntry* GAMEOPT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\GAMEOPT.SHP"); // Gameplay option
+   // TreEntry* GAMEOPT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\GAMEOPT.SHP"); // Gameplay option
     //ExploreImages(GAMEOPT->data,GAMEOPT->size);
     
     
     
     
-    TreEntry* GRAVFONT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\GRAVFONT.SHP"); // Gameplay option
+   // TreEntry* GRAVFONT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\GRAVFONT.SHP"); // Gameplay option
     //ExploreImages(GRAVFONT->data,GRAVFONT->size);
     
     
     
   
-    TreEntry* MENBGRND = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MENBGRND.SHP"); // DogFight background
+   // TreEntry* MENBGRND = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MENBGRND.SHP"); // DogFight background
    // ExploreImages(MENBGRND->data,MENBGRND->size,0);
     
     
     
   
-    TreEntry* MTYPEBUT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MTYPEBUT.SHP"); // Dogfight/Search&Destroy ...WHY is is duplicated from MAINMENU.PAK??
+   /// TreEntry* MTYPEBUT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MTYPEBUT.SHP"); // Dogfight/Search&Destroy ...WHY is is duplicated from MAINMENU.PAK??
     //ExploreImages(MTYPEBUT->data,MTYPEBUT->size,0);
     
     
     
   
-    TreEntry* OVBKGRND = misc.GetEntryByName("..\\..\\DATA\\FONTS\\OVBKGRND.SHP"); // Object Viewer background ...WHY is is duplicated from OBJVIEW.PAK??
+   // TreEntry* OVBKGRND = misc.GetEntryByName("..\\..\\DATA\\FONTS\\OVBKGRND.SHP"); // Object Viewer background ...WHY is is duplicated from OBJVIEW.PAK??
     //ExploreImages(OVBKGRND->data,OVBKGRND->size,0);
     
     
     
  
-    TreEntry* RESTART = misc.GetEntryByName("..\\..\\DATA\\FONTS\\RESTART.SHP"); // Restart menu
+    //TreEntry* RESTART = misc.GetEntryByName("..\\..\\DATA\\FONTS\\RESTART.SHP"); // Restart menu
     //ExploreImages(RESTART->data,RESTART->size,0);
     
     
-    
-    TreEntry* BETTY = mis.GetEntryByName("..\\..\\DATA\\COCKPITS\\BETTY.PAK");    // ?
+   
+   // TreEntry* BETTY = mis.GetEntryByName("..\\..\\DATA\\COCKPITS\\BETTY.PAK");    // ?
     //ExploreImages(BETTY->data,BETTY->size,0);
     
     
     
 
-    TreEntry* mid1 = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
+    //TreEntry* mid1 = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
    // ExploreImages(mid1->data,mid1->size,0);
     
     
     
 
-    TreEntry* tm = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\TM.SHP");  //Training mission builder dialog
+    //TreEntry* tm = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\TM.SHP");  //Training mission builder dialog
     //ExploreImages(tm->data,tm->size,0);
     
     
     
 
-    TreEntry* MAINMENU = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\MAINMENU.PAK");  //Main Menu buttons. No background :( !
+    //TreEntry* MAINMENU = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\MAINMENU.PAK");  //Main Menu buttons. No background :( !
     //ExploreImages(MAINMENU->data,MAINMENU->size,0);
     
     
@@ -461,7 +461,7 @@ void TestMouseCursor(void){
     
     TreArchive gf ;
     gf.InitFromFile("GAMEFLOW.TRE");
-    TreEntry* CONVSHPS = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");  // ALL SETS AND CHARACTERS !!!!!
+    //TreEntry* CONVSHPS = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");  // ALL SETS AND CHARACTERS !!!!!
     //ExploreImages(CONVSHPS->data,CONVSHPS->size,0);
     
     //Check palettes fro that too
@@ -518,13 +518,13 @@ void TestMouseCursor(void){
     
     
    
-    TreEntry* MAINOPT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MAINOPT.SHP");
+    //TreEntry* MAINOPT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\MAINOPT.SHP");
     //ExploreImages(MAINOPT->data,MAINOPT->size,0);
      
     
     
     
-    TreEntry* objE = obj.GetEntryByName("..\\..\\DATA\\OBJECTS\\EJECT.PAK");   //Eject/Crash animation
+    //TreEntry* objE = obj.GetEntryByName("..\\..\\DATA\\OBJECTS\\EJECT.PAK");   //Eject/Crash animation
     //ExploreImages(objE->data,objE->size,0);
     
 }
@@ -537,7 +537,7 @@ void ReverseOBKViewButton(){
     
     TreArchive tre ;
     tre.InitFromFile("GAMEFLOW.TRE");
-    TreEntry* e = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
+    //TreEntry* e = tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
 //    ExploreImages(e->data, e->size, 0);
     
     TreArchive misc ;
@@ -548,132 +548,7 @@ void ReverseOBKViewButton(){
 
 }
 
-#define GROUP_SHOT              0x00
-#define GROUP_SHOT_ADD_CHARCTER 0x01
-#define GROUP_SHOT_CHARCTR_TALK 0x02
-#define CLOSEUP                 0x03
-#define CLOSEUP_CONTINUATION    0x04
-#define SHOW_TEXT               0x0A
-#define YESNOCHOICE_BRANCH1     0x0B
-#define YESNOCHOICE_BRANCH2     0x0C
-#define UNKNOWN                 0x0E
-#define CHOOSE_WINGMAN          0x0F
 
-int32_t ParsePlan(ByteStream* reader){
-    
-    uint8_t* startPos = reader->GetPosition();
-    
-    uint8_t type = reader->ReadByte();
-    
-    switch (type) {
-        case GROUP_SHOT:  // Group plan
-        {
-            char* location = (char*)reader->GetPosition();
-            printf("WIDEPLAN : LOCATION: '%s'\n",location);
-            reader->MoveForward(8+1);
-            break;
-        }
-        case CLOSEUP:  // Person talking
-        {
-            uint8_t* speakerName = reader->GetPosition();
-            uint8_t* set         = reader->GetPosition() + 0xA;
-            uint8_t* sentence         = reader->GetPosition() + 0x17;
-            
-            
-            reader->MoveForward(0x17 + strlen((char*)sentence)+1);
-            uint8_t color = reader->ReadByte(); // Color ?
-            
-            printf("CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X)\n",speakerName,set,sentence,color);
-            break;
-        }
-        case CLOSEUP_CONTINUATION:  // Same person keep talking
-        {
-            uint8_t* sentence         = reader->GetPosition();
-            reader->MoveForward(strlen((char*)sentence)+1);
-            printf("MORETEX:                                       WHAT: '%s'\n",sentence);
-            break;
-        }
-        case YESNOCHOICE_BRANCH1:  // Choice Offsets are question
-        {
-            printf("CHOICE YES/NO : %X.\n",type);
-            //Looks like first byte is the offset to skip if the answer is no.
-            uint8_t noOffset  = reader->ReadByte();
-            uint8_t yesOffset  = reader->ReadByte();
-            break;
-        }
-        case YESNOCHOICE_BRANCH2:  // Choice offset after first branch
-        {
-            printf("CHOICE YES/NO : %X.\n",type);
-            //Looks like first byte is the offset to skip if the answer is no.
-            uint8_t yesOffset  = reader->ReadByte();
-            uint8_t noOffset  = reader->ReadByte();
-            break;
-        }
-        case GROUP_SHOT_ADD_CHARCTER:  // Add person to GROUP
-        {
-            printf("WIDEPLAN ADD PARTICIPANT: '%s'\n",reader->GetPosition());
-            reader->MoveForward(0xD);
-            break;
-        }
-        case GROUP_SHOT_CHARCTR_TALK:  // Make group character talk
-        {
-            char* who = (char*)reader->GetPosition();
-            reader->MoveForward(0xE);
-            char* sentence = (char*)reader->GetPosition();
-            reader->MoveForward(strlen(sentence)+1);
-            printf("WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n",who,sentence);
-
-
-            break;
-        }
-        case SHOW_TEXT:  // Show text
-        {
-            uint8_t color = reader->ReadByte();
-            char* sentence = (char*)reader->GetPosition();
-            printf("Show Text: '%s' \n",sentence);
-            reader->MoveForward(strlen(sentence)+1);
-            
-            break;
-        }
-        case 0xE:
-        {
-            uint8_t unkn  = reader->ReadByte();
-            uint8_t unkn1  = reader->ReadByte();
-            printf("Unknown usage Flag 0xE: (0x%2X 0x%2X) \n",unkn,unkn1);
-            break;
-        }
-        case CHOOSE_WINGMAN:  // Wingman selection trigger
-        {
-            printf("Open pilot selection screen with currennt BG.\n");
-            break;
-        }
-        default:
-            printf("Unknown opcode: %X.\n",type);
-            return 9999;
-            break;
-    }
-    
-    
-    return reader->GetPosition() - startPos;
-}
-
-void ParseConv(PakEntry* conv){
-    
-    if (conv->size == 0)
-        return;
-    
-    
-    
-    ByteStream planReader ;
-    planReader.Set(conv->data);
-    
-    int32_t byteToRead = conv->size;
-    while(byteToRead > 0){
-        int32_t byteRead = ParsePlan(&planReader);
-        byteToRead -= byteRead;
-    }
-    
-}
 
 void ParseAllConversations(){
     
@@ -690,43 +565,8 @@ void ParseAllConversations(){
     //
     //iffConData.List(stdout);
     
-    TreEntry* convPalettesEntry = gameFlow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
-    PakArchive convPalettePak;
-    convPalettePak.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
-  //  convPalettePak.List(stdout);
+ 
     
-    
-    TreEntry* convEntry = gameFlow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
-    
-    PakArchive convPak;
-    convPak.InitFromRAM("CONV.PAK", convEntry->data, convEntry->size);
-    //convPak.List(stdout);
-    
-    for (size_t i = 0; i < convPak.GetNumEntries(); i++) {
-    //for (size_t i = 12; i < 13; i++) {
-        if (convPak.GetEntry(i)->size == 0){
-            printf("\nConversation: %lu : EMPTY ENTRY.\n",i);
-            continue;
-        }
-        printf("\nConversation: %lu :\n",i);
-        ParseConv(convPak.GetEntry(i));
-    }
-    
-    /*
-    TreEntry* convShapesEntry = gameFlow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");
-    PakArchive convShapesPak;
-    convShapesPak.InitFromRAM("CONVSHPS.PAK", convShapesEntry->data, convShapesEntry->size);
-    convShapesPak.List(stdout);
-    for (size_t i =0 ; i < convShapesPak.GetNumEntries(); i++) {
-        PakEntry* shape = convShapesPak.GetEntry(i);
-        PakArchive tmp;
-        tmp.InitFromRAM("", shape->data, shape->size);
-        if (tmp.IsReady())
-            printf("CONVSHPS.PAK entry %lu has %d entries.\n",i,tmp.GetNumEntries());
-        else
-            printf("CONVSHPS.PAK entry %lu is not a PAK.\n",i);
-    }
-    */
 }
 
 

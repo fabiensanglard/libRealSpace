@@ -60,7 +60,7 @@ void RSEntity::ParseTXMS(IffChunk* chunk){
     
     
     ByteStream stream(chunk->childs[0]->data);
-    uint32_t version = stream.ReadUInt32LE();
+    /*uint32_t version =*/ stream.ReadUInt32LE();
     //printf("TXMS Version: %u.\n",);
     
     for(int i =1; i < chunk->childs.size() ; i++){
