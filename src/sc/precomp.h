@@ -28,6 +28,7 @@
 
 //Activities
 #include "ShapeIDs.h"
+#include "SCAnimationPlayer.h"
 #include "SCRegister.h"
 #include "SCWildCatBase.h"
 #include "SCStrike.h"

@@ -15,6 +15,8 @@ public:
     SCRegister();
     ~SCRegister();
     
+    void CheckKeyboard(void);
+    
     void Init( );
     
     void RunFrame(void);

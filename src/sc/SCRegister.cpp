@@ -16,6 +16,35 @@ SCRegister::~SCRegister(){
     
 }
 
+void SCRegister::CheckKeyboard(void){
+    //Keyboard
+    SDL_Event keybEvents[5];
+    int numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_PEEKEVENT,SDL_KEYDOWN,SDL_KEYUP);
+    for(int i= 0 ; i < numKeybEvents ; i++){
+        SDL_Event* event = &keybEvents[i];
+        switch (event->key.keysym.sym) {
+            case SDLK_RETURN :{
+                
+                Stop();
+                
+                //Add both animation and next location on the stack.
+                SCWildCatBase* baseLocation = new SCWildCatBase();
+                baseLocation->Init();
+                Game.AddActivity(baseLocation);
+                
+                SCAnimationPlayer* anim = new SCAnimationPlayer(NULL,NULL);
+                anim->Init();
+                Game.AddActivity(anim);
+                
+                break;
+            }
+            
+            default:
+                break;
+        }
+    }
+}
+
 void SCRegister::Init( ){
     
     //Load book
@@ -23,8 +52,6 @@ void SCRegister::Init( ){
     PakArchive pak;
     pak.InitFromRAM("",entryMountain->data,entryMountain->size);
     
-    
-    //The board is within an other pak within MAINMENU.PAK !!!!
     PakArchive bookPak;
     bookPak.InitFromRAM("subPak board",
                             pak.GetEntry(OptionShapeID::START_GAME_REGISTRATION)->data ,
@@ -53,6 +80,7 @@ void SCRegister::Init( ){
 
 void SCRegister::RunFrame(void){
     CheckButtons();
+    CheckKeyboard();
     
     VGA.Activate();
     VGA.Clear();
