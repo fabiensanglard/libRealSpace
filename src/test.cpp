@@ -703,14 +703,41 @@ void ParseAllConversations(){
     */
 }
 
+
+void ExploreMIDGAMES(void){
+    SetBase("/Users/fabiensanglard/SC/SC/");
+    
+    const char* trePath = "GAMEFLOW.TRE";
+    TreArchive treArchive;
+    treArchive.InitFromFile(trePath);
+    
+    //treArchive.List(stdout);
+    
+    //Find the sounds PAKS.
+    const char* pakName = "..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK";
+    TreEntry* treEntry = treArchive.GetEntryByName(pakName);
+    
+    
+    PakArchive pakArchive;
+    pakArchive.InitFromRAM(pakName,treEntry->data, treEntry->size);
+    
+    //Decompress it
+    pakArchive.Decompress(".","PAK");
+    pakArchive.List(stdout);
+}
+
 int main( int argc,char** argv){
     
     ParseAllConversations();
-    return 0;
+    
     
    // ReverseOBKViewButton();
     //TestMouseCursor();
     
+    //ExploreMIDGAMES();
+    
+    
+    return 0;
     //decompressTREs("/Users/fabiensanglard/Desktop/DATA/");
     
     //return 0;

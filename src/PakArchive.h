@@ -12,11 +12,19 @@
 typedef struct PakEntry{
     
     uint8_t* data;
+    
     size_t size;
+    
+    uint8_t type ;
+    // The mystery bytes at the end of the table.
+    // 0xE0 seems to indicate content. 0xFF indicates an empty entry.
+    enum ContentType {EMPTY = 0xFF, CONTENT = 0xE0};
     
     static inline bool Compare(PakEntry* any, PakEntry* other){
         return any->data < other->data;
     }
+    
+    
     
 } PakEntry;
 

@@ -46,10 +46,17 @@ void PakArchive::Parse(void){
     //First to read all the offsets
     for(int i =0 ; i < numEntries ; i ++){
         
-        PakEntry* entry = new PakEntry();
         
         offset = stream.ReadUInt32LE();
-        offset &= 0x00FFFFFF ; //Remove the leading 0xE0
+        
+        
+        PakEntry* entry = new PakEntry();
+
+        entry->type = (offset & 0xFF000000) >> 24;
+        
+        offset &= 0x00FFFFFF ; //Remove the leading 0xE0 or 0xFF
+        
+        
         
         entry->data = this->data + offset;
         
@@ -158,6 +165,13 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
         
         sprintf(fullDstPath+strlen(fullDstPath),filePattern,i,extension);
         
+        //Convert '\\' to '/'
+        size_t sizeFullPath = strlen(fullDstPath);
+        for (int i =0 ; i < sizeFullPath ; i++){
+            if (fullDstPath[i] =='\\')
+                fullDstPath[i] = '/';
+        }
+        
         //Make sure we have all the directories
         CreateDirectories(fullDstPath);
         
@@ -200,9 +214,9 @@ void PakArchive::List(FILE* output){
         PakEntry* entry = entries[i];
        
         if (entry->size != 0)
-            fprintf(output,"    Entry [%3lu] offset[0x%8lX] size: %7lu bytes.\n",i,entry->data-this->data, entry->size);
+            fprintf(output,"    Entry [%3lu] offset[0x%8lX] size: %7lu bytes, type: %X.\n",i,entry->data-this->data, entry->size,entry->type);
         else
-            fprintf(output,"    Entry [%3lu] offset[0x%8lX] size: %7lu bytes (DUPLICATE).\n",i,entry->data-this->data, entry->size);
+            fprintf(output,"    Entry [%3lu] offset[0x%8lX] size: %7lu bytes, type: %X (DUPLICATE).\n",i,entry->data-this->data, entry->size,entry->type);
     }
 }
 
