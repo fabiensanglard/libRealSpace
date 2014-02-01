@@ -22,6 +22,10 @@ void GameEngine::Init(){
     //Load all TREs and PAKs
     Assets.Init();
     
+    
+    //Load assets needed for Conversations (char and background)
+    ConvAssets.Init();
+    
     //Load Main Palette and Initialize the GL
     Screen.Init(2);
     

@@ -16,4 +16,5 @@ extern RSScreen Screen;
 extern RSVGA    VGA;
 extern AssetManager Assets;
 extern SCRenderer Renderer;
+extern ConvAssetManager ConvAssets;
 #endif

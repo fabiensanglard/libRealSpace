@@ -15,7 +15,7 @@ RSVGA           VGA;
 SCMouse         Mouse;
 AssetManager    Assets;
 SCRenderer      Renderer;
-
+ConvAssetManager ConvAssets;
 
 
 int main(int argc, char* argv[]) {
@@ -30,7 +30,8 @@ int main(int argc, char* argv[]) {
     //SCMainMenu* main = new SCMainMenu();
     SCConvPlayer* main = new SCConvPlayer();
     main->Init();
-    main->SetConvID(150);
+    for(int i=0 ; i < 255 ; i++)
+        main->SetID(i);
     Game.AddActivity(main);
     
     Game.Run();

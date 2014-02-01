@@ -6,11 +6,12 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-
 #include "precomp.h"
 
 
-SCConvPlayer::SCConvPlayer(){
+SCConvPlayer::SCConvPlayer():
+    conversationID(0)
+{
     
 }
 
@@ -29,37 +30,42 @@ SCConvPlayer::~SCConvPlayer(){
 #define UNKNOWN                 0x0E
 #define CHOOSE_WINGMAN          0x0F
 
-size_t SCConvPlayer::ReadConvFrame(ByteStream* reader){
+void SCConvPlayer::ReadNextFrame(void){
     
-    uint8_t* startPos = reader->GetPosition();
+    if (read == size){
+        Stop();
+        return;
+    }
     
-    uint8_t type = reader->ReadByte();
+    uint8_t* startPos = conv.GetPosition();
+    
+    uint8_t type = conv.ReadByte();
     
     switch (type) {
         case GROUP_SHOT:  // Group plan
         {
-            char* location = (char*)reader->GetPosition();
+            char* location = (char*)conv.GetPosition();
             printf("WIDEPLAN : LOCATION: '%s'\n",location);
-            reader->MoveForward(8+1);
+            conv.MoveForward(8+1);
             break;
         }
         case CLOSEUP:  // Person talking
         {
-            uint8_t* speakerName = reader->GetPosition();
-            uint8_t* set         = reader->GetPosition() + 0xA;
-            uint8_t* sentence         = reader->GetPosition() + 0x17;
+            uint8_t* speakerName = conv.GetPosition();
+            uint8_t* set         = conv.GetPosition() + 0xA;
+            uint8_t* sentence         = conv.GetPosition() + 0x17;
             
             
-            reader->MoveForward(0x17 + strlen((char*)sentence)+1);
-            uint8_t color = reader->ReadByte(); // Color ?
+            conv.MoveForward(0x17 + strlen((char*)sentence)+1);
+            uint8_t color = conv.ReadByte(); // Color ?
             
             printf("CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X)\n",speakerName,set,sentence,color);
             break;
         }
         case CLOSEUP_CONTINUATION:  // Same person keep talking
         {
-            uint8_t* sentence         = reader->GetPosition();
-            reader->MoveForward(strlen((char*)sentence)+1);
+            uint8_t* sentence         = conv.GetPosition();
+            conv.MoveForward(strlen((char*)sentence)+1);
             printf("MORETEX:                                       WHAT: '%s'\n",sentence);
             break;
         }
@@ -67,30 +73,30 @@ size_t SCConvPlayer::ReadConvFrame(ByteStream* reader){
         {
             printf("CHOICE YES/NO : %X.\n",type);
             //Looks like first byte is the offset to skip if the answer is no.
-            /*uint8_t noOffset  =*/ reader->ReadByte();
-            /*uint8_t yesOffset  =*/ reader->ReadByte();
+            /*uint8_t noOffset  =*/  conv.ReadByte();
+            /*uint8_t yesOffset  =*/ conv.ReadByte();
             break;
         }
         case YESNOCHOICE_BRANCH2:  // Choice offset after first branch
         {
             printf("CHOICE YES/NO : %X.\n",type);
             //Looks like first byte is the offset to skip if the answer is no.
-            /*uint8_t yesOffset  =*/ reader->ReadByte();
-            /*uint8_t noOffset  =*/ reader->ReadByte();
+            /*uint8_t yesOffset  =*/ conv.ReadByte();
+            /*uint8_t noOffset  =*/  conv.ReadByte();
             break;
         }
         case GROUP_SHOT_ADD_CHARCTER:  // Add person to GROUP
         {
-            printf("WIDEPLAN ADD PARTICIPANT: '%s'\n",reader->GetPosition());
-            reader->MoveForward(0xD);
+            printf("WIDEPLAN ADD PARTICIPANT: '%s'\n",conv.GetPosition());
+            conv.MoveForward(0xD);
             break;
         }
         case GROUP_SHOT_CHARCTR_TALK:  // Make group character talk
         {
-            char* who = (char*)reader->GetPosition();
-            reader->MoveForward(0xE);
-            char* sentence = (char*)reader->GetPosition();
-            reader->MoveForward(strlen(sentence)+1);
+            char* who = (char*)conv.GetPosition();
+            conv.MoveForward(0xE);
+            char* sentence = (char*)conv.GetPosition();
+            conv.MoveForward(strlen(sentence)+1);
             printf("WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n",who,sentence);
             
             
@@ -98,57 +104,52 @@ size_t SCConvPlayer::ReadConvFrame(ByteStream* reader){
         }
         case SHOW_TEXT:  // Show text
         {
-            /*uint8_t color= */  reader->ReadByte();
-            char* sentence = (char*)reader->GetPosition();
+            /*uint8_t color= */  conv.ReadByte();
+            char* sentence = (char*)conv.GetPosition();
             printf("Show Text: '%s' \n",sentence);
-            reader->MoveForward(strlen(sentence)+1);
+            conv.MoveForward(strlen(sentence)+1);
             
             break;
         }
         case 0xE:
         {
-            uint8_t unkn  = reader->ReadByte();
-            uint8_t unkn1  = reader->ReadByte();
+            uint8_t unkn  = conv.ReadByte();
+            uint8_t unkn1  = conv.ReadByte();
             printf("Unknown usage Flag 0xE: (0x%2X 0x%2X) \n",unkn,unkn1);
             break;
         }
         case CHOOSE_WINGMAN:  // Wingman selection trigger
         {
-            printf("Open pilot selection screen with currennt BG.\n");
+            printf("Open pilot selection screen with current BG.\n");
             break;
         }
         default:
             printf("Unknown opcode: %X.\n",type);
-            return 9999;
+            Stop();
+            return ;
             break;
     }
     
     
-    return reader->GetPosition() - startPos;
+    read += conv.GetPosition() - startPos;
 }
 
-void SCConvPlayer::ParseConvArchive(PakEntry* conv){
+void SCConvPlayer::SetArchive(PakEntry* convPakEntry){
     
-    if (conv->size == 0){
+    if (convPakEntry->size == 0){
         Game.Log("Conversation entry is empty: Unable to load it.\n");
         Stop();
         return;
     }
     
-    ByteStream planReader ;
-    planReader.Set(conv->data);
+    this->size = convPakEntry->size;
     
-    size_t byteToRead = conv->size;
-    
-    while(byteToRead > 0){
-        size_t byteRead = ReadConvFrame(&planReader);
-        byteToRead -= byteRead;
-    }
+    this->conv.Set(convPakEntry->data);
     
 }
 
 
-void SCConvPlayer::SetConvID(int32_t id){
+void SCConvPlayer::SetID(int32_t id){
     
     TreEntry* convEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
     
@@ -162,10 +163,7 @@ void SCConvPlayer::SetConvID(int32_t id){
         return;
     }
     
-    
-    
-    
-    ParseConvArchive(convPak.GetEntry(id));
+    SetArchive(convPak.GetEntry(id));
     
 }
 
@@ -175,8 +173,29 @@ void SCConvPlayer::Init( ){
     PakArchive convPalettePak;
     convPalettePak.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
     
+    
+    //Build location database
+    
+    //Build character database
+}
+
+bool SCConvPlayer::IsFrameExpired(void){
+    
+    //A frame expires either after a player press a key, click or 6 seconds elapse.
+    
+    
+    return false;
 }
 
 void SCConvPlayer::RunFrame(void){
+    
+    Game.Log("Conversation %d over.\n",this->conversationID);
     Stop();
+    
+    //If frame needs to be update
+    bool expired = IsFrameExpired();
+    if ( expired )
+        ReadNextFrame();
+    
+    
 }
