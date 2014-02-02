@@ -32,46 +32,70 @@ SCConvPlayer::~SCConvPlayer(){
 
 void SCConvPlayer::ReadNextFrame(void){
     
-    if (read == size){
-        Stop();
-        return;
-    }
     
-    uint8_t* startPos = conv.GetPosition();
     
-    uint8_t type = conv.ReadByte();
+    while (1) {
+        
+        if (read == size){
+            Stop();
+            return;
+        }
+
+        
+        currentFrame.creationTime = SDL_GetTicks();
+        
+        uint8_t* startPos = conv.GetPosition();
     
-    switch (type) {
+        uint8_t type = conv.ReadByte();
+    
+        switch (type) {
         case GROUP_SHOT:  // Group plan
         {
             char* location = (char*)conv.GetPosition();
-            printf("WIDEPLAN : LOCATION: '%s'\n",location);
+            RLEShape* bg = ConvAssets.GetBackGround(location);
+            
+            currentFrame.mode = ConvFrame::CONV_WIDE;
+            currentFrame.participants.clear();
+            currentFrame.bg = bg;
+            
+            //printf("WIDEPLAN : LOCATION: '%s'\n",location);
             conv.MoveForward(8+1);
             break;
         }
         case CLOSEUP:  // Person talking
         {
-            uint8_t* speakerName = conv.GetPosition();
-            uint8_t* set         = conv.GetPosition() + 0xA;
-            uint8_t* sentence         = conv.GetPosition() + 0x17;
+            char* speakerName =       (char*)conv.GetPosition();
+            char* setName         = (char*)conv.GetPosition() + 0xA;
+            char* sentence         = (char*)conv.GetPosition() + 0x17;
             
+            
+            currentFrame.mode = ConvFrame::CONV_CLOSEUP;
+            currentFrame.participants.clear();
+            NPCChar* participant = ConvAssets.GetPNCChar(speakerName);
+            currentFrame.participants.push_back(participant);
+            RLEShape* bg = ConvAssets.GetBackGround(setName);
+            currentFrame.bg = bg;
             
             conv.MoveForward(0x17 + strlen((char*)sentence)+1);
             uint8_t color = conv.ReadByte(); // Color ?
+            currentFrame.textColor = color;
             
-            printf("CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X)\n",speakerName,set,sentence,color);
+            //printf("CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X)\n",speakerName,setName,sentence,color);
             break;
         }
         case CLOSEUP_CONTINUATION:  // Same person keep talking
         {
-            uint8_t* sentence         = conv.GetPosition();
+            char* sentence         = (char*)conv.GetPosition();
+            
+            currentFrame.text = sentence;
+            
             conv.MoveForward(strlen((char*)sentence)+1);
-            printf("MORETEX:                                       WHAT: '%s'\n",sentence);
+            //printf("MORETEX:                                       WHAT: '%s'\n",sentence);
             break;
         }
         case YESNOCHOICE_BRANCH1:  // Choice Offsets are question
         {
-            printf("CHOICE YES/NO : %X.\n",type);
+            //printf("CHOICE YES/NO : %X.\n",type);
             //Looks like first byte is the offset to skip if the answer is no.
             /*uint8_t noOffset  =*/  conv.ReadByte();
             /*uint8_t yesOffset  =*/ conv.ReadByte();
@@ -79,7 +103,7 @@ void SCConvPlayer::ReadNextFrame(void){
         }
         case YESNOCHOICE_BRANCH2:  // Choice offset after first branch
         {
-            printf("CHOICE YES/NO : %X.\n",type);
+            //printf("CHOICE YES/NO : %X.\n",type);
             //Looks like first byte is the offset to skip if the answer is no.
             /*uint8_t yesOffset  =*/ conv.ReadByte();
             /*uint8_t noOffset  =*/  conv.ReadByte();
@@ -87,26 +111,36 @@ void SCConvPlayer::ReadNextFrame(void){
         }
         case GROUP_SHOT_ADD_CHARCTER:  // Add person to GROUP
         {
-            printf("WIDEPLAN ADD PARTICIPANT: '%s'\n",conv.GetPosition());
+            
+            char* participantName  = (char*)conv.GetPosition();
+            NPCChar* participant = ConvAssets.GetPNCChar(participantName);
+            currentFrame.participants.push_back(participant);
+            
+            //printf("WIDEPLAN ADD PARTICIPANT: '%s'\n",conv.GetPosition());
             conv.MoveForward(0xD);
             break;
         }
         case GROUP_SHOT_CHARCTR_TALK:  // Make group character talk
         {
+            
             char* who = (char*)conv.GetPosition();
             conv.MoveForward(0xE);
             char* sentence = (char*)conv.GetPosition();
             conv.MoveForward(strlen(sentence)+1);
-            printf("WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n",who,sentence);
+            //printf("WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n",who,sentence);
             
             
             break;
         }
         case SHOW_TEXT:  // Show text
         {
-            /*uint8_t color= */  conv.ReadByte();
+            int8_t color = conv.ReadByte();
             char* sentence = (char*)conv.GetPosition();
-            printf("Show Text: '%s' \n",sentence);
+            
+            currentFrame.text = sentence;
+            currentFrame.textColor = color;
+            
+            //printf("Show Text: '%s' \n",sentence);
             conv.MoveForward(strlen(sentence)+1);
             
             break;
@@ -115,12 +149,12 @@ void SCConvPlayer::ReadNextFrame(void){
         {
             uint8_t unkn  = conv.ReadByte();
             uint8_t unkn1  = conv.ReadByte();
-            printf("Unknown usage Flag 0xE: (0x%2X 0x%2X) \n",unkn,unkn1);
+            //printf("Unknown usage Flag 0xE: (0x%2X 0x%2X) \n",unkn,unkn1);
             break;
         }
         case CHOOSE_WINGMAN:  // Wingman selection trigger
         {
-            printf("Open pilot selection screen with current BG.\n");
+            //printf("Open pilot selection screen with current BG.\n");
             break;
         }
         default:
@@ -128,10 +162,11 @@ void SCConvPlayer::ReadNextFrame(void){
             Stop();
             return ;
             break;
-    }
+        }
     
     
-    read += conv.GetPosition() - startPos;
+        read += conv.GetPosition() - startPos;
+        }
 }
 
 void SCConvPlayer::SetArchive(PakEntry* convPakEntry){
@@ -146,6 +181,8 @@ void SCConvPlayer::SetArchive(PakEntry* convPakEntry){
     
     this->conv.Set(convPakEntry->data);
     
+    //Read a frame so we are ready to display it.
+    ReadNextFrame();
 }
 
 
@@ -187,15 +224,47 @@ bool SCConvPlayer::IsFrameExpired(void){
     return false;
 }
 
-void SCConvPlayer::RunFrame(void){
+
+void SCConvPlayer::DrawText(const char* text, uint8_t type){
     
-    Game.Log("Conversation %d over.\n",this->conversationID);
-    Stop();
+}
+
+
+
+void SCConvPlayer::RunFrame(void){
     
     //If frame needs to be update
     bool expired = IsFrameExpired();
     if ( expired )
         ReadNextFrame();
+    
+    
+    CheckButtons();
+    
+    VGA.Activate();
+    VGA.Clear();
+    
+    VGA.SetPalette(&this->palette);
+    
+    //Draw static
+    VGA.DrawShape(currentFrame.bg);
+    
+    for (size_t i=0 ; i < currentFrame.participants.size(); i++) {
+        NPCChar* participant = currentFrame.participants[i];
+        VGA.DrawShape(participant->appearance);
+    }
+    
+    //Draw text
+    DrawText(currentFrame.text, currentFrame.textColor);
+    
+    DrawButtons();
+    
+    //Draw Mouse
+    Mouse.Draw();
+    
+    //Check Mouse state.
+    
+    VGA.VSync();
     
     
 }

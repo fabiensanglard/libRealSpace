@@ -15,7 +15,7 @@ class IActivity{
 public:
     
     virtual void Init(void) = 0;
-    void Start(void) { this->running = true;}
+    virtual void Start(void) { this->running = true;}
     void Stop(void) { this->running = false;}
     
     virtual void RunFrame (void) = 0;

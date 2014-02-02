@@ -12,22 +12,21 @@
 
 
 
-enum ConvMode{ WIDE, CLOSEUP};
+
 
 class ConvFrame{
     
     public:
-        uint8_t* convStart  ;
-        uint8_t* convCurrent;
     
         char* text;
         uint8_t textColor;
     
+        enum ConvMode{ CONV_WIDE, CONV_CLOSEUP};
         ConvMode mode;
     
         std::vector<NPCChar*> participants;
     
-        RLEShape bg;
+        RLEShape* bg;
     
     uint32_t creationTime; // Used to check when a frame expires.
 };
@@ -57,7 +56,7 @@ private:
     
     
     
-    
+    void DrawText(const char* text, uint8_t type);
     
     ByteStream conv ;
     size_t size; //In bytes

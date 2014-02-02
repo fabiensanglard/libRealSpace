@@ -22,11 +22,11 @@ void ConvAssetManager::Init(void){
     BuildDB();
 }
 
-NPCChar* ConvAssetManager::GetPNCChar(char* name){
+NPCChar* ConvAssetManager::GetPNCChar(const char* name){
     return NULL;
 }
 
-RLEShape* ConvAssetManager::GetBackGround(char* name){
+RLEShape* ConvAssetManager::GetBackGround(const char* name){
     return NULL;    
 }
 

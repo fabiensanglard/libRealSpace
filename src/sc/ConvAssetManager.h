@@ -11,8 +11,8 @@
 
 typedef struct NPCChar{
     
-    uint8_t color;
-    RLEShape* appearances;
+    char* name;
+    RLEShape* appearance;
     
 } NPCChar;
 
@@ -26,8 +26,8 @@ public:
     
     void Init(void);
     
-    NPCChar* GetPNCChar(char* name);
-    RLEShape* GetBackGround(char* name);
+    NPCChar* GetPNCChar(const char* name);
+    RLEShape* GetBackGround(const char* name);
 
 private:
     
