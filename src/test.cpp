@@ -351,8 +351,8 @@ void TestMouseCursor(void){
     TreArchive obj ;      obj.InitFromFile("OBJECTS.TRE");
     
     
-    TreEntry* BWFONT = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\BWFONT.SHP"); //Camera configuration
-    ExploreImages(BWFONT->data,BWFONT->size,0);
+    //TreEntry* BWFONT = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\BWFONT.SHP"); //Camera configuration
+   // ExploreImages(BWFONT->data,BWFONT->size,0);
     
    
     
@@ -635,9 +635,11 @@ void testoptions(void){
     
 }
 
+
+
 int maine( int argc,char** argv){
 
-    testoptions();
+    //testoptions();
     //ParseAllConversations();
     
     

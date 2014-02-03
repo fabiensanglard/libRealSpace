@@ -147,7 +147,7 @@ bool RLEShape::Expand(uint8_t* dst, size_t* byteRead){
         
 		bool error = ExpandFragment(&frag,dst);
         if (error){
-            printf("Error in RLE\n");
+           // printf("RLE is attempting to write out of the frameBuffer\n");
             return true;
         }
 		ReadFragment(&frag);
@@ -173,11 +173,11 @@ bool RLEShape::WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color){
 
 RLEShape* RLEShape::GetEmptyShape(void){
     
-    static uint8_t data[5] = {0,0,0,0,0};
+    static uint8_t data[9] = {0,0,0,0,0,0,0,0,0};
    
     static RLEShape shape;
     
-    shape.Init(data, 1);
+    shape.Init(data, 9);
     
     return &shape;
 }

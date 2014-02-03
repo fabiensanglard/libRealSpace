@@ -18,11 +18,12 @@ typedef struct NPCChar{
     
 } NPCChar;
 
+
+
 typedef struct ConvBackGround{
-    
-    uint8_t* palettePatch;
-    RLEShape* appearance;
-    
+    std::vector<RLEShape*> layers;
+    std::vector<uint8_t*> palettes;
+    char name[9];
 } ConvBackGround;
 
 
@@ -36,14 +37,30 @@ public:
     
     void Init(void);
     
-    NPCChar* GetPNCChar(const char* name);
-    ConvBackGround* GetBackGround(const char* name);
+    NPCChar* GetPNCChar(char* name);
+    ConvBackGround* GetBackGround(char* name);
 
 private:
     
     void BuildDB(void);
-    std::map<const char*, NPCChar*,Char_String_Comparator> nps;
-    std::map<const char*, ConvBackGround*,Char_String_Comparator> locations;
+    void ReadBackGrounds(const IffChunk* chunk);
+    void ReadFaces(const IffChunk* chunk);
+    void ReadFigures(const IffChunk* chunk);
+    void ReadPFigures(const IffChunk* chunk);
+    //I have no idea what is in there.
+    void ReadFCPL(const IffChunk* chunk);
+    //I have no idea what is in there.
+    void ReadFGPL(const IffChunk* chunk);
+  
+    std::map<char*, NPCChar*,Char_String_Comparator> nps;
+    std::map<char*, ConvBackGround*,Char_String_Comparator> backgrounds;
+    
+    PakArchive convShps;
+    PakArchive convPals;
+    PakArchive optShps;
+    PakArchive optPals;
+    void ParseBGLayer(uint8_t* data, size_t layerID,ConvBackGround* back );
+    
 };
 
 

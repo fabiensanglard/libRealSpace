@@ -28,11 +28,13 @@ int main(int argc, char* argv[]) {
     
     //Add MainMenu activity on the game stack.
     //SCMainMenu* main = new SCMainMenu();
-    SCConvPlayer* main = new SCConvPlayer();
-    main->Init();
-    //for(int i=0 ; i < 255 ; i++)
-        main->SetID(0);
-    Game.AddActivity(main);
+    
+    for(int i=0 ; i < 255 ; i++){
+        SCConvPlayer* main = new SCConvPlayer();
+        main->Init();
+        main->SetID(i);
+        Game.AddActivity(main);
+    }
     
     Game.Run();
     

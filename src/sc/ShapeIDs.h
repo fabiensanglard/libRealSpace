@@ -17,34 +17,36 @@ DESERT_LANDSTRIP,
 HACEIENDA,
 wc_hangar=7,
     tent=9,
-    rich_mansion_entry,
-    wc_changeroom,
-    UNKNOWN,
-    UNKNOWN2,
-    a, //Wildcat hangar conv
-    b, //Wildcat hangar conv
-    tent2,
-    tent3,
-    office_chair,
-    office_wall,
-    wc_changeroom2,
-    wc_changeroom_fullscreen,
-    back_chair,
-    plant,
-    desert_truck,
-    desert_truck2,
-    UNKNOWN3,
-    shelves,
-    wall,
-    windows,
-    ba1_cu = 19,
-    ba2_cu= 20,
-    windows2,
-    map,
-    bar_fs,
-    bar2_fs,
-    bar_coiunter,
-    bar_entry,
+    rich_mansion_entry=12,
+    wc_changeroom=13,
+    office=15,
+    office2=16,
+    wc_hangar2=19, //Wildcat hangar conv
+    wc_hangar3=20, //Wildcat hangar conv
+    tent2=21,
+    tent3=22,
+    virgil_office_chair=23,
+    virgil_office_wall=24,
+    wc_changeroom2=25,
+    wc_changeroom_fullscreen=26, //full screen
+    prideauxCorner_chair = 29,
+    prideauxCorner_wall = 30,
+    desert_truck = 31,
+    desert_truck2 =32,
+    shelves = 33,
+    shelves2= 34,
+    backalley=35,
+    windows = 36,
+    base_cu = 38,
+    ba2_cu= 39,
+    set_windows2=40,
+    set_map=41,
+    bar_fs=42,
+    bar2_fs=43,
+    bar_counter=44,
+    bar_counter2=45,
+    
+    //FACE
     AIR, //46
           /*
          HAIRS
@@ -63,16 +65,59 @@ wc_hangar=7,
     GWEN,  //50
     JANET, //51 betray me girl
     LYLE,
-    MELE,
-    MIGUEL,
-    MULSTAFA,
-    prideau,
-    stern,
-    tex,
-    virgil,
-    walt,
-    tweedly,
-    goon
+    MELE = 53,
+    MIGUEL =54,
+    MULSTAFA =55,
+    prideau =56,
+    stern =57,
+    tex =58,
+    virgil =59,
+    walt =60,
+    tweedly =61,
+    goon =62,
+    
+    
+    //FIGURE
+    FIGURE_AIR = 63,
+    
+    FIGURE_X = 63,
+    
+    FIGURE_STERN = 68,
+    
+    FIGURE_MIGUEL = 70,
+    
+    FIGURE_VIRGIL = 71,
+    
+    FIGURE_GWEN = 72,
+    
+    FIGURE_GENERAK = 74,
+    FIGURE_LYLE = 75,
+    FIGURE_TEX = 76,
+    FIGURE_VIRGIL2 = 77,
+    
+    FACE_MUGGER = 78,
+    
+    WILD_CAT_BASE_DESTROYED= 79, //full screen
+    DONNO= 80, //full screen
+    
+    ALL_FIGURES = 81,
+    TEX_FIGURE = 82,
+    GWEN_FIGURE = 83,
+     X_FIGURE = 84,
+     Y_FIGURE = 85,
+     Z_FIGURE = 86,
+    
+    AIRPLANE_WILDCAT_BACKGROUND = 87,
+    AIRPLACE_OUTDOOR_BACKGROUND = 88,
+    
+    FIGURE_AIR_POINTING = 89, // animation
+    
+    AIRPLANE_WILDCAT_BACKGROUND2 = 90,
+    AIRPLANE_OUTDOOR_BACKGROUND2 = 91,
+    
+    BANKRUPT_VIRGIL_OFFICE = 92,
+    
+   
 };
 
 

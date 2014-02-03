@@ -25,6 +25,17 @@ public:
     //In the case of FORM,CAT  and LIST
     uint32_t subId;
     std::vector<IffChunk*> childs;
+    
+    char name[5];
+    char* GetName(void){
+        name[0] = (id & 0xFF000000) >> 24;
+        name[1] = (id & 0x00FF0000) >> 16;
+        name[2] = (id & 0x0000FF00) >> 8;
+        name[3] = (id & 0x000000FF) >> 0;
+        name[4] = 0;
+        
+        return name;
+    };
 } ;
 
 class IffLexer{

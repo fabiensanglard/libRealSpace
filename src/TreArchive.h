@@ -10,7 +10,7 @@ struct Char_String_Comparator
 {
     bool operator()(char const *a, char const *b) const
     {
-        return std::strcmp(a, b) < 0;
+        return strcmp(a, b) < 0;
     }
 };
 

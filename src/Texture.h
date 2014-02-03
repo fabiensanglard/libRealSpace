@@ -48,8 +48,13 @@ typedef struct VGAPalette{
     
     void ReadPatch(ByteStream* s){
         
-        uint16_t offset = s->ReadUShort();
-        uint16_t numColors = s->ReadUShort();
+        int16_t offset = s->ReadShort();
+        int16_t numColors = s->ReadShort();
+        
+        if (offset + numColors > 256){
+            printf("VGAPalette::ReadPatch => Error, this will overflow.\n");
+            return;
+        }
         
         for (uint16_t i= 0 ; i < numColors ; i++){
             colors[offset+i].r = s->ReadByte() * 255/63.0f;

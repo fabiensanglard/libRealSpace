@@ -21,16 +21,25 @@ class ConvFrame{
         char* text;
         uint8_t textColor;
     
-        enum ConvMode{ CONV_WIDE, CONV_CLOSEUP};
+        enum ConvMode{ CONV_WIDE, CONV_CLOSEUP, CONV_WINGMAN_CHOICE, CONV_CONTRACT_CHOICE};
         ConvMode mode;
     
         std::vector<NPCChar*> participants;
     
-        RLEShape* bg;
     
-    uint8_t* palettePatch;
+    std::vector<RLEShape*>* bgLayers;
+    std::vector<uint8_t*> * bgPalettes;
+    
+    
     
     uint32_t creationTime; // Used to check when a frame expires.
+    
+    
+    inline void SetExpired(bool exp){ this->expired = exp;}
+    inline bool IsExpired(void){ return this->expired;}
+        
+    private:
+        bool expired;
 };
 
 
@@ -45,6 +54,10 @@ public :
     void RunFrame(void);
     
     void   SetID(int32_t id);
+    
+    
+    virtual void Focus(void)  ;
+   
     
 private:
     
@@ -67,9 +80,10 @@ private:
     
     ConvFrame currentFrame;
     
-    bool IsFrameExpired(void);
+    void CheckFrameExpired(void);
     
     
+    bool initialized;
     
 };
 

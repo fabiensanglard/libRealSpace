@@ -94,9 +94,9 @@ VGAPalette* RSVGA::GetPalette(void){
 
 void RSVGA::VSync(void){
     
-    uint8_t data[320*200*4];
+    Texel data[320*200];
     
-    Texel* dst = (Texel*)data;
+    Texel* dst = data;
     for (size_t i = 0; i < 320*200; i++) {
         Texel* rgba = palette.GetRGBColor(frameBuffer[i]);
         *dst = *rgba;

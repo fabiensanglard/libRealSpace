@@ -152,8 +152,11 @@ void GameEngine::Run(){
         //Allow the active activity to Run and Render
         currentActivity = activities.top();
         
-        if (currentActivity->IsRunning())
+        if (currentActivity->IsRunning()){
+            currentActivity->Focus();
             currentActivity->RunFrame();
+            currentActivity->UnFocus();
+        }
         else{
             activities.pop();
             delete currentActivity;
