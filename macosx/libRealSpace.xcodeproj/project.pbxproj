@@ -198,7 +198,7 @@
 			children = (
 				2D8460ED18939EFA00B652A8 /* precomp.h */,
 				2DABC59A189C2C47005A172A /* ids */,
-				2DABC592189C2329005A172A /* conversations */,
+				2DABC592189C2329005A172A /* CONVS */,
 				2DABC591189C2323005A172A /* animations */,
 				2D8460F9189561B800B652A8 /* menues */,
 				2D8460F41894389A00B652A8 /* activities */,
@@ -217,7 +217,7 @@
 		2D8460F41894389A00B652A8 /* activities */ = {
 			isa = PBXGroup;
 			children = (
-				2D9F30C9189BEA2900712A62 /* locations */,
+				2D9F30C9189BEA2900712A62 /* OPTIONS */,
 				2D8460E918939D8E00B652A8 /* IActivity.h */,
 				2D8460E818939D8E00B652A8 /* IActivity.cpp */,
 				2D8460F6189438B300B652A8 /* SCMainMenu.h */,
@@ -245,7 +245,7 @@
 			name = menues;
 			sourceTree = "<group>";
 		};
-		2D9F30C9189BEA2900712A62 /* locations */ = {
+		2D9F30C9189BEA2900712A62 /* OPTIONS */ = {
 			isa = PBXGroup;
 			children = (
 				2D9F30CB189BEA3F00712A62 /* SCWildCatBase.h */,
@@ -253,7 +253,7 @@
 				2D9F30CF189C090100712A62 /* SCRegister.h */,
 				2D9F30CE189C090100712A62 /* SCRegister.cpp */,
 			);
-			name = locations;
+			name = OPTIONS;
 			sourceTree = "<group>";
 		};
 		2DA526C6187B7D1500BE1A11 /* headers */ = {
@@ -294,7 +294,7 @@
 			name = animations;
 			sourceTree = "<group>";
 		};
-		2DABC592189C2329005A172A /* conversations */ = {
+		2DABC592189C2329005A172A /* CONVS */ = {
 			isa = PBXGroup;
 			children = (
 				2DABC598189C2BC5005A172A /* SCConvPlayer.h */,
@@ -302,7 +302,7 @@
 				2DABC59C189D9DF0005A172A /* ConvAssetManager.h */,
 				2DABC59B189D9DF0005A172A /* ConvAssetManager.cpp */,
 			);
-			name = conversations;
+			name = CONVS;
 			sourceTree = "<group>";
 		};
 		2DABC59A189C2C47005A172A /* ids */ = {

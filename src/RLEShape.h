@@ -26,6 +26,8 @@ public:
         this->position = *position;
     }
     
+    static RLEShape* GetEmptyShape(void);
+    
 private:
     
     ByteStream stream;

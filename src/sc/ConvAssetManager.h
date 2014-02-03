@@ -9,9 +9,11 @@
 #ifndef __libRealSpace__ConAssetManager__
 #define __libRealSpace__ConAssetManager__
 
+
+
 typedef struct NPCChar{
     
-    char* name;
+    char name[9];
     RLEShape* appearance;
     
 } NPCChar;
@@ -32,8 +34,8 @@ public:
 private:
     
     void BuildDB(void);
-    static std::map<char*, NPCChar> nps;
-    static std::map<char*, RLEShape> locations;
+    std::map<const char*, NPCChar*,Char_String_Comparator> nps;
+    std::map<const char*, RLEShape*,Char_String_Comparator> locations;
 };
 
 

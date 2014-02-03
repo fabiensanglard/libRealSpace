@@ -30,8 +30,8 @@ int main(int argc, char* argv[]) {
     //SCMainMenu* main = new SCMainMenu();
     SCConvPlayer* main = new SCConvPlayer();
     main->Init();
-    for(int i=0 ; i < 255 ; i++)
-        main->SetID(i);
+    //for(int i=0 ; i < 255 ; i++)
+        main->SetID(0);
     Game.AddActivity(main);
     
     Game.Run();

@@ -38,6 +38,11 @@ public:
 		return *this->cursor++;
 	}
     
+    inline uint8_t PeekByte(void){
+		return *(this->cursor+1);
+	}
+
+    
     inline uint16_t ReadUShort(void){
         uint16_t* ushortP = (uint16_t*)this->cursor;
         this->cursor+=2;
@@ -76,6 +81,7 @@ public:
     
         return toLittleEndian;
     }
+    
     
     
     

@@ -461,8 +461,8 @@ void TestMouseCursor(void){
     
     TreArchive gf ;
     gf.InitFromFile("GAMEFLOW.TRE");
-    //TreEntry* CONVSHPS = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");  // ALL SETS AND CHARACTERS !!!!!
-    //ExploreImages(CONVSHPS->data,CONVSHPS->size,0);
+    TreEntry* CONVSHPS = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");  // ALL SETS AND CHARACTERS !!!!!
+    ExploreImages(CONVSHPS->data,CONVSHPS->size,0);
     
     //Check palettes fro that too
     /*
@@ -594,7 +594,7 @@ void ExploreMIDGAMES(void){
 }
 
 
-int mainTest( int argc,char** argv){
+int maine( int argc,char** argv){
 
     
     //ParseAllConversations();

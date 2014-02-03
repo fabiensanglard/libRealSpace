@@ -34,7 +34,7 @@ void SCConvPlayer::ReadNextFrame(void){
     
     
     
-    while (1) {
+    
         
         if (read == size){
             Stop();
@@ -60,6 +60,10 @@ void SCConvPlayer::ReadNextFrame(void){
             
             //printf("WIDEPLAN : LOCATION: '%s'\n",location);
             conv.MoveForward(8+1);
+            
+            while(conv.PeekByte())
+                ReadNextFrame();
+            
             break;
         }
         case CLOSEUP:  // Person talking
@@ -165,8 +169,8 @@ void SCConvPlayer::ReadNextFrame(void){
         }
     
     
-        read += conv.GetPosition() - startPos;
-        }
+    read += conv.GetPosition() - startPos;
+    
 }
 
 void SCConvPlayer::SetArchive(PakEntry* convPakEntry){
@@ -206,9 +210,21 @@ void SCConvPlayer::SetID(int32_t id){
 
 void SCConvPlayer::Init( ){
     
+    
+    
+    VGAPalette* rendererPalette = VGA.GetPalette();
+    this->palette = *rendererPalette;
+    
+    ByteStream paletteReader;
     TreEntry* convPalettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
     PakArchive convPalettePak;
     convPalettePak.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
+    convPalettePak.List(stdout);
+    
+    //paletteReader.Set(convPalettePak.GetEntry(20)->data); //ba2_cu Good
+    paletteReader.Set(convPalettePak.GetEntry(19)->data);   //ba1_cu Good
+    this->palette.ReadPatch(&paletteReader);
+
     
     
     //Build location database
@@ -251,7 +267,7 @@ void SCConvPlayer::RunFrame(void){
     
     for (size_t i=0 ; i < currentFrame.participants.size(); i++) {
         NPCChar* participant = currentFrame.participants[i];
-        VGA.DrawShape(participant->appearance);
+  //      VGA.DrawShape(participant->appearance);
     }
     
     //Draw text

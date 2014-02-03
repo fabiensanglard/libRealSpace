@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-struct cmp_str
+struct Char_String_Comparator
 {
     bool operator()(char const *a, char const *b) const
     {
@@ -80,5 +80,5 @@ private:
     bool initalizedFromFile ;
     
 
-    std::map<const char*,TreEntry*,cmp_str> mappedEntries;
+    std::map<const char*,TreEntry*,Char_String_Comparator> mappedEntries;
 };

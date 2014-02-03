@@ -171,6 +171,15 @@ bool RLEShape::WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color){
     return false;
 }
 
-
+RLEShape* RLEShape::GetEmptyShape(void){
+    
+    static uint8_t data[5] = {0,0,0,0,0};
+   
+    static RLEShape shape;
+    
+    shape.Init(data, 1);
+    
+    return &shape;
+}
 
 
