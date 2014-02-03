@@ -351,6 +351,11 @@ void TestMouseCursor(void){
     TreArchive obj ;      obj.InitFromFile("OBJECTS.TRE");
     
     
+    TreEntry* BWFONT = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\BWFONT.SHP"); //Camera configuration
+    ExploreImages(BWFONT->data,BWFONT->size,0);
+    
+   
+    
     // TreEntry* mainFont = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK"); //Camera configuration
      //ExploreImages(mainFont->data,mainFont->size,0);
      
@@ -593,10 +598,46 @@ void ExploreMIDGAMES(void){
     pakArchive.List(stdout);
 }
 
+void testoptions(void){
+    
+    SetBase("/Users/fabiensanglard/SC/SC/");
+    Screen.Init(2);
+    VGA.Init();
+    VGA.Activate();
+    
+    
+    TreArchive gameflow ; gameflow.InitFromFile("GAMEFLOW.TRE");
+    TreArchive misc ;     misc.InitFromFile("MISC.TRE");
+    TreArchive mis ;      mis.InitFromFile("MISSIONS.TRE");
+    TreArchive obj ;      obj.InitFromFile("OBJECTS.TRE");
+    
+    /*
+    TreEntry* optionsEntry = gameflow.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF"); //Camera configuration
+    IffLexer lexerOption;
+    lexerOption.InitFromRAM(optionsEntry->data, optionsEntry->size);
+    lexerOption.List(stdout);
+    */
+    TreEntry* midGamesEntry = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.IFF"); //Camera configuration
+    IffLexer lexerMidGame;
+    lexerMidGame.InitFromRAM(midGamesEntry->data, midGamesEntry->size);
+    lexerMidGame.List(stdout);
+    
+    
+    TreEntry* midGamesPAKEntry = gameflow.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK"); //Camera configuration
+    PakArchive miadGamesPAK;
+    miadGamesPAK.InitFromRAM("", midGamesPAKEntry->data, midGamesPAKEntry->size);
+    miadGamesPAK.Decompress("/Users/fabiensanglard/Desktop/DATA/DATA/MIDGAMES.PAK.CONTENT/", "TXT");
+    /*
+     
+     TreEntry* BWFONT = misc.GetEntryByName("..\\..\\DATA\\FONTS\\CONVFONT.SHP"); // OPTFONT.SHP CONVFONT.SHP
+     ExploreImages(BWFONT->data,BWFONT->size,0);
+    */
+    
+}
 
 int maine( int argc,char** argv){
 
-    
+    testoptions();
     //ParseAllConversations();
     
     

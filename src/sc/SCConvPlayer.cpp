@@ -52,11 +52,14 @@ void SCConvPlayer::ReadNextFrame(void){
         case GROUP_SHOT:  // Group plan
         {
             char* location = (char*)conv.GetPosition();
-            RLEShape* bg = ConvAssets.GetBackGround(location);
+            
+            ConvBackGround* bg = ConvAssets.GetBackGround(location);
+            
             
             currentFrame.mode = ConvFrame::CONV_WIDE;
             currentFrame.participants.clear();
-            currentFrame.bg = bg;
+            currentFrame.bg = bg->appearance;
+            currentFrame.palettePatch = bg->palettePatch;
             
             //printf("WIDEPLAN : LOCATION: '%s'\n",location);
             conv.MoveForward(8+1);
@@ -77,8 +80,11 @@ void SCConvPlayer::ReadNextFrame(void){
             currentFrame.participants.clear();
             NPCChar* participant = ConvAssets.GetPNCChar(speakerName);
             currentFrame.participants.push_back(participant);
-            RLEShape* bg = ConvAssets.GetBackGround(setName);
-            currentFrame.bg = bg;
+            
+            ConvBackGround* bg = ConvAssets.GetBackGround(setName);
+            currentFrame.bg = bg->appearance;
+            currentFrame.palettePatch = bg->palettePatch;
+            
             
             conv.MoveForward(0x17 + strlen((char*)sentence)+1);
             uint8_t color = conv.ReadByte(); // Color ?
@@ -235,6 +241,39 @@ void SCConvPlayer::Init( ){
 bool SCConvPlayer::IsFrameExpired(void){
     
     //A frame expires either after a player press a key, click or 6 seconds elapse.
+    //Mouse
+    SDL_Event mouseEvents[5];
+    int numMouseEvents= SDL_PeepEvents(mouseEvents,5,SDL_PEEKEVENT,SDL_MOUSEMOTION,SDL_MOUSEWHEEL);
+    for(int i= 0 ; i < numMouseEvents ; i++){
+        SDL_Event* event = &mouseEvents[i];
+        
+        switch (event->type) {
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+                return true;
+                break;
+            default:
+                break;
+        }
+    }
+    
+    
+    //Keyboard
+    SDL_Event keybEvents[5];
+    int numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_PEEKEVENT,SDL_KEYDOWN,SDL_TEXTINPUT);
+    for(int i= 0 ; i < numKeybEvents ; i++){
+        SDL_Event* event = &keybEvents[i];
+        switch (event->type) {
+            default:
+                return true;
+                break;
+        }
+    }
+    
+    int32_t currentTime = SDL_GetTicks();
+    if(currentTime - currentFrame.creationTime > 5000)
+        return true;
+    
     
     
     return false;
@@ -260,10 +299,16 @@ void SCConvPlayer::RunFrame(void){
     VGA.Activate();
     VGA.Clear();
     
+    //Update the palette for the current background
+    ByteStream paletteReader;
+    paletteReader.Set(currentFrame.palettePatch);
+    this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
+    
     
     //Draw static
     VGA.DrawShape(currentFrame.bg);
+    
     
     for (size_t i=0 ; i < currentFrame.participants.size(); i++) {
         NPCChar* participant = currentFrame.participants[i];

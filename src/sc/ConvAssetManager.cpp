@@ -15,7 +15,7 @@ ConvAssetManager::ConvAssetManager(){
 }
 
 ConvAssetManager::~ConvAssetManager(){
-    
+    Game.Log("We are not freeing the RAM from all the RLEs !!!\n");
 }
 
 void ConvAssetManager::Init(void){
@@ -36,13 +36,17 @@ NPCChar* ConvAssetManager::GetPNCChar(const char* name){
     return npc;
 }
 
-RLEShape* ConvAssetManager::GetBackGround(const char* name){
+ConvBackGround* ConvAssetManager::GetBackGround(const char* name){
     
-    RLEShape* shape = this->locations[name];
+    ConvBackGround* shape = this->locations[name];
     
     if (shape == NULL){
         Game.Log("ConvAssetManager: Cannot find loc '%s', returning dummy loc instead.\n",name);
-        shape = RLEShape::GetEmptyShape();
+        static ConvBackGround dummy;
+        uint8_t dummyPalettePatch[4] = { 0, 0, 0 ,0 };
+        dummy.palettePatch = dummyPalettePatch;
+        dummy.appearance = RLEShape::GetEmptyShape();
+        shape = &dummy;
     }
     
     return shape;    
@@ -52,14 +56,33 @@ RLEShape* ConvAssetManager::GetBackGround(const char* name){
 
 void ConvAssetManager::BuildDB(void){
     
-    RLEShape* s ;
     
     
+    
+    //Open the metadata
+    TreEntry* convDataEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVDATA.IFF");
+    IffLexer convDataLexer;
+    convDataLexer.InitFromRAM(convDataEntry->data, convDataEntry->size);
+    convDataLexer.List(stdout);
+    
+    ReadBackGrounds(convDataLexer.GetChunkByID('BCKS'));
+    
+    ReadFaces(convDataLexer.GetChunkByID('FACE'));
+    
+    ReadFigures(convDataLexer.GetChunkByID('FIGR'));
+    
+    ReadFigures(convDataLexer.GetChunkByID('PFIG'));
+    
+    // What is in chunk FCPL ?
+    // What is in chunk FGPL ?
+    
+    /*
     TreEntry* convShapEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");
     PakArchive convShapeArchive;
     convShapeArchive.InitFromRAM("",convShapEntry->data,convShapEntry->size);
+    */
     
-    
+    /*
     PakEntry* ba2_cuEntry = convShapeArchive.GetEntry(ba2_cu);
     PakArchive ba2_cu;
     ba2_cu.InitFromRAM("", ba2_cuEntry->data,ba2_cuEntry->size);
@@ -73,7 +96,7 @@ void ConvAssetManager::BuildDB(void){
     s = new RLEShape();
     s->Init(ba1_cu.GetEntry(0)->data, ba1_cu.GetEntry(0)->size);
     locations["ba1_cu"] = s ;
-    
+    */
     
     
     TreEntry* convPalettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");

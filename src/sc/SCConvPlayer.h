@@ -28,6 +28,8 @@ class ConvFrame{
     
         RLEShape* bg;
     
+    uint8_t* palettePatch;
+    
     uint32_t creationTime; // Used to check when a frame expires.
 };
 

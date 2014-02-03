@@ -55,22 +55,24 @@ wc_hangar=7,
          visor
          //palette ?
            */
-    BURRITO_GUY,     // 47
+    BETA,     // 47
           //last entry = accept_full screen
-    TEX,  //48
-    MOHAMMED, //49
+    BILLY,  //48
+    FARID, //49
           //not last entry = accept_full screen
     GWEN,  //50
     JANET, //51 betray me girl
     LYLE,
-    FAT_DUDE_SPANISH,
+    MELE,
     MIGUEL,
-    QUATARIS,
-    mustach_DUDE,
-    billy,
-    bold_guy,
-    sun_glasses_guy,
+    MULSTAFA,
+    prideau,
+    stern,
+    tex,
     virgil,
+    walt,
+    tweedly,
+    goon
 };
 
 

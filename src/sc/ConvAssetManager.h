@@ -18,6 +18,14 @@ typedef struct NPCChar{
     
 } NPCChar;
 
+typedef struct ConvBackGround{
+    
+    uint8_t* palettePatch;
+    RLEShape* appearance;
+    
+} ConvBackGround;
+
+
 
 class ConvAssetManager{
 
@@ -29,13 +37,13 @@ public:
     void Init(void);
     
     NPCChar* GetPNCChar(const char* name);
-    RLEShape* GetBackGround(const char* name);
+    ConvBackGround* GetBackGround(const char* name);
 
 private:
     
     void BuildDB(void);
     std::map<const char*, NPCChar*,Char_String_Comparator> nps;
-    std::map<const char*, RLEShape*,Char_String_Comparator> locations;
+    std::map<const char*, ConvBackGround*,Char_String_Comparator> locations;
 };
 
 
