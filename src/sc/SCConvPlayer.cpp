@@ -95,6 +95,8 @@ void SCConvPlayer::ReadNextFrame(void){
             uint8_t color = conv.ReadByte(); // Color ?
             currentFrame.textColor = color;
             
+            currentFrame.facePaletteID = ConvAssets.GetFacePaletteID("normal");
+            
             printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X)\n",this->conversationID,speakerName,setName,sentence,color);
             break;
         }
@@ -328,8 +330,9 @@ void SCConvPlayer::RunFrame(void){
         PakArchive convPals;
         convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
         
+        
         ByteStream paletteReader;
-        paletteReader.Set(convPals.GetEntry(0x2E)->data); //mountains Good but not sky
+        paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data); //mountains Good but not sky
         this->palette.ReadPatch(&paletteReader);
         
         //Face wiht of without hair

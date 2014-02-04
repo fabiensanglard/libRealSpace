@@ -18,6 +18,14 @@ typedef struct CharFace{
     
 } CharFace;
 
+
+typedef struct FacePalette{
+    
+    char name[9];
+    uint8_t index;
+    
+} FacePalette;
+
 typedef struct CharFigure{
     
     char name[9];
@@ -47,6 +55,8 @@ public:
     ConvBackGround* GetBackGround(char* name);
     CharFigure* GetFigure(char* name);
     
+    uint8_t GetFacePaletteID(char* name);
+    
 private:
     
     void BuildDB(void);
@@ -60,8 +70,10 @@ private:
     void ReadFGPL(const IffChunk* chunk);
   
     std::map<char*, CharFace*,Char_String_Comparator> faces;
+    std::map<char*, FacePalette* ,Char_String_Comparator> facePalettes;
     std::map<char*, ConvBackGround*,Char_String_Comparator> backgrounds;
     std::map<char*, CharFigure*,Char_String_Comparator> figures;
+
     
     PakArchive convShps;
     PakArchive convPals;

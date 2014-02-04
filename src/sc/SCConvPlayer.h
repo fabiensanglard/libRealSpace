@@ -29,9 +29,10 @@ class ConvFrame{
     
     //If we are in close up mode
     CharFace* face;
+    int8_t facePaletteID;
     
-        std::vector<RLEShape*>* bgLayers;
-        std::vector<uint8_t*> * bgPalettes;
+    std::vector<RLEShape*>* bgLayers;
+    std::vector<uint8_t*> * bgPalettes;
     
     
     

@@ -60,6 +60,10 @@ CharFigure* ConvAssetManager::GetFigure(char* name){
     return NULL;
 }
 
+uint8_t ConvAssetManager::GetFacePaletteID(char* name){
+    return this->facePalettes[name]->index;
+}
+
 void ConvAssetManager::ParseBGLayer(uint8_t* data, size_t layerID,ConvBackGround* back ){
     
     ByteStream dataReader ;
@@ -192,7 +196,11 @@ void ConvAssetManager::ReadPFigures(const IffChunk* root){
 void ConvAssetManager::ReadFCPL(const IffChunk* root){
     for(size_t i=0 ; i < root->childs.size() ; i ++){
         Game.Log("FCPL %lu: %s %2X\n",root->childs[i]->size,root->childs[i]->data,*(root->childs[i]->data+8));
-        
+        FacePalette* pal = new FacePalette();
+        memcpy(pal->name, root->childs[i]->data, 8);
+        pal->name[8] = '\0';
+        pal->index = *(root->childs[i]->data+8);
+        this->facePalettes[pal->name] = pal;
     }
     
 }
