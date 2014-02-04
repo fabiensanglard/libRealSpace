@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     //Add MainMenu activity on the game stack.
     //SCMainMenu* main = new SCMainMenu();
     
-    for(int i=0 ; i < 255 ; i++){
+    for(int i=12 ; i <15 ; i++){
         SCConvPlayer* main = new SCConvPlayer();
         main->Init();
         main->SetID(i);

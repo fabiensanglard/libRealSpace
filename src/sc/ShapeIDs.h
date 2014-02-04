@@ -47,7 +47,7 @@ wc_hangar=7,
     bar_counter2=45,
     
     //FACE
-    AIR, //46
+    AIR, //46    NOt a PAK, a sequence of 62 entries.
           /*
          HAIRS
          ANIMS

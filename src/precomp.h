@@ -52,8 +52,10 @@ extern "C" {
     #include "Camera.h"
     #include "Texture.h"
     #include "RSImage.h"
+
     #include "SCRenderer.h"
-extern SCRenderer Renderer;
+    extern SCRenderer Renderer;
+
     #include "IffLexer.h"
 
     #include "RSPalette.h"
@@ -63,6 +65,8 @@ extern SCRenderer Renderer;
     #include "RSMapTextureSet.h"
     #include "RSArea.h"
     #include "RLEShape.h"
+
+    #include "RSImageSet.h"
 
     //VGA and Glide
     #include "RSScreen.h"

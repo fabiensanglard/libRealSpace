@@ -24,11 +24,14 @@ class ConvFrame{
         enum ConvMode{ CONV_WIDE, CONV_CLOSEUP, CONV_WINGMAN_CHOICE, CONV_CONTRACT_CHOICE};
         ConvMode mode;
     
-        std::vector<NPCChar*> participants;
+    //If we are in a wide of chose wingman mode
+    std::vector<CharFigure*> participants;
     
+    //If we are in close up mode
+    CharFace* face;
     
-    std::vector<RLEShape*>* bgLayers;
-    std::vector<uint8_t*> * bgPalettes;
+        std::vector<RLEShape*>* bgLayers;
+        std::vector<uint8_t*> * bgPalettes;
     
     
     
@@ -75,7 +78,7 @@ private:
     
     ByteStream conv ;
     size_t size; //In bytes
-    size_t read; //In bytes
+    uint8_t* end; //In bytes
     
     
     ConvFrame currentFrame;

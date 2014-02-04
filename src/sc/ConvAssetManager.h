@@ -11,13 +11,19 @@
 
 
 
-typedef struct NPCChar{
+typedef struct CharFace{
+    
+    char name[9];
+    RSImageSet* appearances;
+    
+} CharFace;
+
+typedef struct CharFigure{
     
     char name[9];
     RLEShape* appearance;
     
-} NPCChar;
-
+} CharFigure;
 
 
 typedef struct ConvBackGround{
@@ -37,9 +43,10 @@ public:
     
     void Init(void);
     
-    NPCChar* GetPNCChar(char* name);
+    CharFace* GetCharFace(char* name);
     ConvBackGround* GetBackGround(char* name);
-
+    CharFigure* GetFigure(char* name);
+    
 private:
     
     void BuildDB(void);
@@ -52,8 +59,9 @@ private:
     //I have no idea what is in there.
     void ReadFGPL(const IffChunk* chunk);
   
-    std::map<char*, NPCChar*,Char_String_Comparator> nps;
+    std::map<char*, CharFace*,Char_String_Comparator> faces;
     std::map<char*, ConvBackGround*,Char_String_Comparator> backgrounds;
+    std::map<char*, CharFigure*,Char_String_Comparator> figures;
     
     PakArchive convShps;
     PakArchive convPals;

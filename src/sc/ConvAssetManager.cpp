@@ -22,16 +22,18 @@ void ConvAssetManager::Init(void){
     BuildDB();
 }
 
-NPCChar* ConvAssetManager::GetPNCChar(char* name){
+CharFace* ConvAssetManager::GetCharFace(char* name){
     
-    NPCChar* npc = this->nps[name];
+    CharFace* npc = this->faces[name];
     
     if (npc == NULL){
-        static NPCChar dummy;
-        dummy.appearance = RLEShape::GetEmptyShape();
+        static CharFace dummy;
+        RSImageSet* set = new RSImageSet();
+        set->Add(RLEShape::GetEmptyShape());
+        dummy.appearances = set;
         npc = &dummy;
         Game.Log("ConvAssetManager: Cannot find npc '%s', returning dummy npc instead.\n",name);
-        this->nps[name] = npc;
+        this->faces[name] = npc;
     }
     
     return npc;
@@ -52,6 +54,10 @@ ConvBackGround* ConvAssetManager::GetBackGround(char* name){
     }
     
     return shape;    
+}
+
+CharFigure* ConvAssetManager::GetFigure(char* name){
+    return NULL;
 }
 
 void ConvAssetManager::ParseBGLayer(uint8_t* data, size_t layerID,ConvBackGround* back ){
@@ -148,13 +154,53 @@ void ConvAssetManager::ReadBackGrounds(const IffChunk* chunkRoot){
         //Game.Log("  Able to reach shape in CONVSHPS.PAK entry %d from background '%s'.\n",shapeID,back->name);
     }
 }
-void ConvAssetManager::ReadFaces(const IffChunk* chunk){}
-void ConvAssetManager::ReadFigures(const IffChunk* chunk){}
-void ConvAssetManager::ReadPFigures(const IffChunk* chunk){}
-//I have no idea what is in there.
-void ConvAssetManager::ReadFCPL(const IffChunk* chunk){}
-//I have no idea what is in there.
-void ConvAssetManager::ReadFGPL(const IffChunk* chunk){}
+
+void ConvAssetManager::ReadFaces(const IffChunk* root){
+    for(size_t i=0 ; i < root->childs.size() ; i ++){
+        IffChunk* chunk = root->childs[i];
+        ByteStream s(chunk->data);
+        
+        CharFace* face = new CharFace();
+        memcpy(face->name, chunk->data,8);
+        face->name[8] = '\0';
+        
+        s.MoveForward(8);
+        
+        uint8_t pakID = s.ReadByte();
+        
+        RSImageSet* imageSet = new RSImageSet();
+        imageSet->InitFromPakEntry(convShps.GetEntry(pakID));
+        face->appearances = imageSet;
+        
+        printf("Face '%s' features %lu images.\n",face->name,imageSet->GetNumImages());
+        
+        this->faces[face->name] = face;
+    }
+}
+
+//FIGR
+void ConvAssetManager::ReadFigures(const IffChunk* root){
+
+}
+
+//PFIG
+void ConvAssetManager::ReadPFigures(const IffChunk* root){
+    
+}
+
+//Face palettes FCPL
+void ConvAssetManager::ReadFCPL(const IffChunk* root){
+    for(size_t i=0 ; i < root->childs.size() ; i ++){
+        Game.Log("FCPL %lu: %s %2X\n",root->childs[i]->size,root->childs[i]->data,*(root->childs[i]->data+8));
+        
+    }
+    
+}
+
+//FGPL I have no idea what is in there.
+void ConvAssetManager::ReadFGPL(const IffChunk* root){
+
+}
 
 void ConvAssetManager::BuildDB(void){
     
@@ -184,21 +230,21 @@ void ConvAssetManager::BuildDB(void){
     TreEntry* convDataEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVDATA.IFF");
     IffLexer convDataLexer;
     convDataLexer.InitFromRAM(convDataEntry->data, convDataEntry->size);
-    
+    convDataLexer.List(stdout);
     
     ReadBackGrounds(convDataLexer.GetChunkByID('BCKS'));
     
-    ReadFaces(convDataLexer.GetChunkByID('FACE'));
+    ReadFaces(convDataLexer.GetChunkByID('FACE'));  //PAK id for Face image collection
     
-    ReadFigures(convDataLexer.GetChunkByID('FIGR'));
+    ReadFigures(convDataLexer.GetChunkByID('FIGR')); //PAK id for Figures image
     
-    ReadPFigures(convDataLexer.GetChunkByID('PFIG'));
+    ReadPFigures(convDataLexer.GetChunkByID('PFIG')); // ??!? Maybe Palette figure ???!?!
     
     //I have no idea what is in there.
-    ReadFCPL(convDataLexer.GetChunkByID('FCPL'));
+    ReadFCPL(convDataLexer.GetChunkByID('FCPL'));  //Face Conv Palette normal and night
 
     //I have no idea what is in there.
-    ReadFGPL(convDataLexer.GetChunkByID('FGPL'));
+    ReadFGPL(convDataLexer.GetChunkByID('FGPL'));  //Face Game palette normal
 
         
 }

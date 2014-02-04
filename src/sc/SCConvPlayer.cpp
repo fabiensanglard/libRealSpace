@@ -33,7 +33,7 @@ SCConvPlayer::~SCConvPlayer(){
 
 void SCConvPlayer::Focus(void) {
     IActivity::Focus();
-    //printf("Conv Player running Frame on convID=%d.\n",this->conversationID);
+    Screen.SetTitle("CONversation Player");
 }
 
 void SCConvPlayer::ReadNextFrame(void){
@@ -42,7 +42,7 @@ void SCConvPlayer::ReadNextFrame(void){
     
     
         
-        if (read == size){
+        if (conv.GetPosition() == end){
             Stop();
             return;
         }
@@ -50,7 +50,7 @@ void SCConvPlayer::ReadNextFrame(void){
         
         currentFrame.creationTime = SDL_GetTicks();
         
-        uint8_t* startPos = conv.GetPosition();
+  
     
         uint8_t type = conv.ReadByte();
     
@@ -83,9 +83,8 @@ void SCConvPlayer::ReadNextFrame(void){
             
             
             currentFrame.mode = ConvFrame::CONV_CLOSEUP;
-            currentFrame.participants.clear();
-            NPCChar* participant = ConvAssets.GetPNCChar(speakerName);
-            currentFrame.participants.push_back(participant);
+            currentFrame.face = ConvAssets.GetCharFace(speakerName);
+            
             
             ConvBackGround* bg = ConvAssets.GetBackGround(setName);
             currentFrame.bgLayers = &bg->layers;
@@ -132,8 +131,8 @@ void SCConvPlayer::ReadNextFrame(void){
         {
             
             char* participantName  = (char*)conv.GetPosition();
-            NPCChar* participant = ConvAssets.GetPNCChar(participantName);
-            currentFrame.participants.push_back(participant);
+            CharFigure* participant = ConvAssets.GetFigure(participantName);
+            //currentFrame.participants.push_back(participant);
             
             printf("ConvID: %d WIDEPLAN ADD PARTICIPANT: '%s'\n",this->conversationID,conv.GetPosition());
             conv.MoveForward(0xD);
@@ -169,6 +168,7 @@ void SCConvPlayer::ReadNextFrame(void){
             uint8_t unkn  = conv.ReadByte();
             uint8_t unkn1  = conv.ReadByte();
             printf("ConvID: %d Unknown usage Flag 0xE: (0x%2X 0x%2X) \n",this->conversationID,unkn,unkn1);
+            ReadNextFrame();
             break;
         }
         case CHOOSE_WINGMAN:  // Wingman selection trigger
@@ -185,7 +185,7 @@ void SCConvPlayer::ReadNextFrame(void){
         }
     
     
-    read += conv.GetPosition() - startPos;
+    
     this->currentFrame.SetExpired(false);
 }
 
@@ -200,6 +200,7 @@ void SCConvPlayer::SetArchive(PakEntry* convPakEntry){
     this->size = convPakEntry->size;
     
     this->conv.Set(convPakEntry->data);
+    end = convPakEntry->data + convPakEntry->size;
     
     //Read a frame so we are ready to display it.
     //ReadNextFrame();
@@ -318,10 +319,107 @@ void SCConvPlayer::RunFrame(void){
     }
 
     
+    //
+    if (currentFrame.mode == ConvFrame::CONV_CLOSEUP ||
+        currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE){
+        
+        
+        TreEntry* convPalettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
+        PakArchive convPals;
+        convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
+        
+        ByteStream paletteReader;
+        paletteReader.Set(convPals.GetEntry(0x2E)->data); //mountains Good but not sky
+        this->palette.ReadPatch(&paletteReader);
+        
+        //Face wiht of without hair
+        //00 nothing
+        //01 rest face
+        //02 hair
+        for (size_t i=1; i< 3; i++) {
+                       VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+        }
+        
+        //Taking animation
+        //03 mouth anim
+        //04 mouth anim
+        //06 mouth anim
+        //07 mouth anim
+        //08 mouth anim
+        //09 mouth pinched
+        //10 mouth opened
+        
+        for (size_t i=03; i< 11; i++) {
+           VGA.DrawShape(currentFrame.face->appearances->GetShape(3+(SDL_GetTicks()/100)%12));
+        }
+        
+        
+        //11 eye closed anim
+        //12 ????
+        
+        //Eyes animation
+        //13 eyes closed
+        //14 eyes closed
+        //15 eyes wide open
+        //16 eagle eyes
+        //16 left wink
+        //17 upper left
+        //18 look right
+        //19 look left
+        //20 eyes straight
+        //21 eyes blink closed
+        //22 eyes blink mid-open
+        //23 eye brows semi-raised
+        //24 left eye brows semi-raised
+        //25 right eye brows semi-raised
+        //26 eye brows something
+        for (size_t i=26; i< 27; i++) {
+            VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+        }
+        
+        //General face expression
+        //27 mouth heart
+        //28 face tensed
+        //29 face smile
+        //30 right face tensed
+        //31 right crooked
+        //32 pinched lips
+        //33 surprise
+        //34 seducing face
+        //35 look of desaproval face
+        for (size_t i=29; i< 30; i++) {
+           //VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+        }
+        
+        //Cloth
+        //35 civil clothes
+        //36 pilot clothes
+        //37 pilot clothes 2
+        //38 sunglasses
+        //39 pilot helmet (if drawing this, don't draw hairs
+        //40 pilot helmet visor (if drawing this draw 39 too
+        for (size_t i=35; i< 36; i++) {
+          VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+        }
+        
+        
+        // ????
+        for (size_t i=36; i< 63; i++) {
+            //What is there ?
+            //VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+        }
+        
+       
+    }
     
-    for (size_t i=0 ; i < currentFrame.participants.size(); i++) {
-        NPCChar* participant = currentFrame.participants[i];
-  //      VGA.DrawShape(participant->appearance);
+    
+    if (currentFrame.mode == ConvFrame::CONV_WIDE ||
+        currentFrame.mode == ConvFrame::CONV_WINGMAN_CHOICE){
+    
+        for (size_t i=0 ; i < currentFrame.participants.size(); i++) {
+            //CharFace* participant = currentFrame.participants[i];
+            //      VGA.DrawShape(participant->appearance);
+        }
     }
     
     //Draw text
