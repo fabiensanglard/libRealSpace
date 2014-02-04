@@ -337,7 +337,7 @@ void SCConvPlayer::RunFrame(void){
         //01 rest face
         //02 hair
         for (size_t i=1; i< 3; i++) {
-                       VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+           VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
         }
         
         //Taking animation
@@ -348,14 +348,16 @@ void SCConvPlayer::RunFrame(void){
         //08 mouth anim
         //09 mouth pinched
         //10 mouth opened
+        //11 mouth something
+        //12 mouth something
         
-        for (size_t i=03; i< 11; i++) {
-           VGA.DrawShape(currentFrame.face->appearances->GetShape(3+(SDL_GetTicks()/100)%12));
+        for (size_t i=03; i< 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP
+             ; i++) {
+           VGA.DrawShape(currentFrame.face->appearances->GetShape(3+(SDL_GetTicks()/100)%10));
         }
         
         
-        //11 eye closed anim
-        //12 ????
+        
         
         //Eyes animation
         //13 eyes closed
@@ -363,18 +365,20 @@ void SCConvPlayer::RunFrame(void){
         //15 eyes wide open
         //16 eagle eyes
         //16 left wink
-        //17 upper left
+        //17 upper left eyes
         //18 look right
         //19 look left
         //20 eyes straight
         //21 eyes blink closed
         //22 eyes blink mid-open
+        
+        
         //23 eye brows semi-raised
         //24 left eye brows semi-raised
         //25 right eye brows semi-raised
         //26 eye brows something
-        for (size_t i=26; i< 27; i++) {
-            VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+        for (size_t i=13; i< 14; i++) {
+            //VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
         }
         
         //General face expression
@@ -395,16 +399,29 @@ void SCConvPlayer::RunFrame(void){
         //35 civil clothes
         //36 pilot clothes
         //37 pilot clothes 2
+        //for (size_t i=36; i< 37; i++) {
+            VGA.DrawShape(currentFrame.face->appearances->GetShape(35));
+        //}
+        
         //38 sunglasses
         //39 pilot helmet (if drawing this, don't draw hairs
         //40 pilot helmet visor (if drawing this draw 39 too
-        for (size_t i=35; i< 36; i++) {
+        for (size_t i=41; i< 40; i++) {
           VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
         }
         
+        //40 to 54 ????
         
-        // ????
-        for (size_t i=36; i< 63; i++) {
+        //54 hand extension
+        if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE){
+            VGA.DrawShape(currentFrame.face->appearances->GetShape(54));
+        }
+        
+        
+        // 60 scary smile
+        // 61 look right
+        // 62 look left
+        for (size_t i=55; i< 63; i++) {
             //What is there ?
             //VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
         }
