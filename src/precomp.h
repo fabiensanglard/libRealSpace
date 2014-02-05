@@ -41,6 +41,7 @@ extern "C" {
     #include "Matrix.h"
     #include "Quaternion.h"
 
+
 // Reusable Realspace Classes
     #include "Base.h"
     #include "ByteStream.h"
@@ -66,7 +67,13 @@ extern "C" {
     #include "RSArea.h"
     #include "RLEShape.h"
 
+//Fonts stuff
+#include "RSFont.h"
+#include "RSFontManager.h"
+
     #include "RSImageSet.h"
+
+
 
     //VGA and Glide
     #include "RSScreen.h"

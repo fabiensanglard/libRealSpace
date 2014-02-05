@@ -18,6 +18,7 @@ class ConvFrame{
     
     public:
     
+        RSFont* font;
         char* text;
         uint8_t textColor;
     
@@ -34,7 +35,7 @@ class ConvFrame{
     std::vector<RLEShape*>* bgLayers;
     std::vector<uint8_t*> * bgPalettes;
     
-    
+
     
     uint32_t creationTime; // Used to check when a frame expires.
     
@@ -75,7 +76,7 @@ private:
     
     
     
-    void DrawText(const char* text, uint8_t type);
+    void DrawText(void);
     
     ByteStream conv ;
     size_t size; //In bytes
@@ -88,6 +89,8 @@ private:
     
     
     bool initialized;
+    
+    
     
 };
 

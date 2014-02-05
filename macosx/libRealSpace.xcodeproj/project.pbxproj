@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		2D25919B18A064DE008894D6 /* RSImageSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D25919918A064DE008894D6 /* RSImageSet.cpp */; };
+		2D2EEDAB18A2C1A7004392A9 /* RSFontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D2EEDA918A2C1A7004392A9 /* RSFontManager.cpp */; };
+		2D2EEDAD18A2C3F1004392A9 /* RSFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D2EEDA618A2C16D004392A9 /* RSFont.cpp */; };
 		2D310906186FEAEA00D3443F /* RSPalette.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D310904186FEAEA00D3443F /* RSPalette.cpp */; };
 		2D310909186FFD7800D3443F /* PakArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D310907186FFD7800D3443F /* PakArchive.cpp */; };
 		2D31090D18707F1500D3443F /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D31090B18707F1500D3443F /* Texture.cpp */; };
@@ -65,6 +67,10 @@
 /* Begin PBXFileReference section */
 		2D25919918A064DE008894D6 /* RSImageSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSImageSet.cpp; path = ../src/RSImageSet.cpp; sourceTree = SOURCE_ROOT; };
 		2D25919A18A064DE008894D6 /* RSImageSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSImageSet.h; path = ../src/RSImageSet.h; sourceTree = SOURCE_ROOT; };
+		2D2EEDA618A2C16D004392A9 /* RSFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSFont.cpp; path = ../src/RSFont.cpp; sourceTree = SOURCE_ROOT; };
+		2D2EEDA718A2C16D004392A9 /* RSFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSFont.h; path = ../src/RSFont.h; sourceTree = "<group>"; };
+		2D2EEDA918A2C1A7004392A9 /* RSFontManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSFontManager.cpp; path = ../src/RSFontManager.cpp; sourceTree = SOURCE_ROOT; };
+		2D2EEDAA18A2C1A7004392A9 /* RSFontManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSFontManager.h; path = ../src/RSFontManager.h; sourceTree = "<group>"; };
 		2D310904186FEAEA00D3443F /* RSPalette.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RSPalette.cpp; path = ../src/RSPalette.cpp; sourceTree = SOURCE_ROOT; };
 		2D310905186FEAEA00D3443F /* RSPalette.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSPalette.h; path = ../src/RSPalette.h; sourceTree = SOURCE_ROOT; };
 		2D310907186FFD7800D3443F /* PakArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PakArchive.cpp; path = ../src/PakArchive.cpp; sourceTree = SOURCE_ROOT; };
@@ -162,6 +168,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2D2EEDA518A2C0F1004392A9 /* font */ = {
+			isa = PBXGroup;
+			children = (
+				2D2EEDA918A2C1A7004392A9 /* RSFontManager.cpp */,
+				2D2EEDA618A2C16D004392A9 /* RSFont.cpp */,
+			);
+			name = font;
+			sourceTree = "<group>";
+		};
 		2D310903186FEAA900D3443F /* objects */ = {
 			isa = PBXGroup;
 			children = (
@@ -189,13 +204,6 @@
 				2D846101189639E700B652A8 /* RSScreen.cpp */,
 			);
 			name = renderers;
-			sourceTree = "<group>";
-		};
-		2D3DE2B5187752820080E744 /* sc */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = sc;
 			sourceTree = "<group>";
 		};
 		2D8460E418939CDF00B652A8 /* neoStrikeCommander */ = {
@@ -264,6 +272,8 @@
 		2DA526C6187B7D1500BE1A11 /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				2D2EEDAA18A2C1A7004392A9 /* RSFontManager.h */,
+				2D2EEDA718A2C16D004392A9 /* RSFont.h */,
 				2DFEFB98186F5C84002305A9 /* precomp.h */,
 				2DFEFBB3186F5E21002305A9 /* TreArchive.h */,
 				2D310908186FFD7800D3443F /* PakArchive.h */,
@@ -341,7 +351,7 @@
 			isa = PBXGroup;
 			children = (
 				2DA526C6187B7D1500BE1A11 /* headers */,
-				2D3DE2B5187752820080E744 /* sc */,
+				2D2EEDA518A2C0F1004392A9 /* font */,
 				2D31090A18707EF300D3443F /* renderers */,
 				2D310903186FEAA900D3443F /* objects */,
 				2DFEFBC1186F7618002305A9 /* iff */,
@@ -433,6 +443,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D2EEDAD18A2C3F1004392A9 /* RSFont.cpp in Sources */,
 				2D8460F31893A49400B652A8 /* AssetManager.cpp in Sources */,
 				2D58A416187716A7003EF449 /* SCObjectViewer.cpp in Sources */,
 				2D8460F01893A1E600B652A8 /* SCMouse.cpp in Sources */,
@@ -468,6 +479,7 @@
 				2DABC599189C2BC5005A172A /* SCConvPlayer.cpp in Sources */,
 				2DA7D40018847E58003CAA78 /* Math.cpp in Sources */,
 				2D846103189639E700B652A8 /* RSScreen.cpp in Sources */,
+				2D2EEDAB18A2C1A7004392A9 /* RSFontManager.cpp in Sources */,
 				2D9F30CC189BEA3F00712A62 /* SCWildCatBase.cpp in Sources */,
 				2DA7D40318850B1F003CAA78 /* Quaternion.cpp in Sources */,
 				2D8460FC189561CA00B652A8 /* SCButton.cpp in Sources */,

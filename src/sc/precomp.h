@@ -16,6 +16,8 @@
 #include "PaletteIDs.h"
 #include "ShapeIDs.h"
 
+
+
 // Core of the game
 #include "SCMouse.h"
 #include "SCButton.h"

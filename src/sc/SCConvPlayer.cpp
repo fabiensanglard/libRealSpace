@@ -67,7 +67,7 @@ void SCConvPlayer::ReadNextFrame(void){
             currentFrame.bgLayers = &bg->layers;
             currentFrame.bgPalettes = &bg->palettes;
             
-            printf("ConvID: %d WIDEPLAN : LOCATION: '%s'\n",this->conversationID, location);
+            //printf("ConvID: %d WIDEPLAN : LOCATION: '%s'\n",this->conversationID, location);
             conv.MoveForward(8+1);
             
             while(conv.PeekByte() == GROUP_SHOT_ADD_CHARCTER)
@@ -81,6 +81,7 @@ void SCConvPlayer::ReadNextFrame(void){
             char* setName         = (char*)conv.GetPosition() + 0xA;
             char* sentence         = (char*)conv.GetPosition() + 0x17;
             
+            currentFrame.text = sentence;
             
             currentFrame.mode = ConvFrame::CONV_CLOSEUP;
             currentFrame.face = ConvAssets.GetCharFace(speakerName);
@@ -97,7 +98,7 @@ void SCConvPlayer::ReadNextFrame(void){
             
             currentFrame.facePaletteID = ConvAssets.GetFacePaletteID("normal");
             
-            printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X)\n",this->conversationID,speakerName,setName,sentence,color);
+            //printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X)\n",this->conversationID,speakerName,setName,sentence,color);
             break;
         }
         case CLOSEUP_CONTINUATION:  // Same person keep talking
@@ -107,7 +108,7 @@ void SCConvPlayer::ReadNextFrame(void){
             currentFrame.text = sentence;
             
             conv.MoveForward(strlen((char*)sentence)+1);
-            printf("ConvID: %d MORETEX:                                       WHAT: '%s'\n",this->conversationID,sentence);
+            //printf("ConvID: %d MORETEX:                                       WHAT: '%s'\n",this->conversationID,sentence);
             break;
         }
         case YESNOCHOICE_BRANCH1:  // Choice Offsets are question
@@ -160,7 +161,7 @@ void SCConvPlayer::ReadNextFrame(void){
             currentFrame.text = sentence;
             currentFrame.textColor = color;
             
-             printf("ConvID: %d Show Text: '%s' \n",this->conversationID,sentence);
+            // printf("ConvID: %d Show Text: '%s' \n",this->conversationID,sentence);
             conv.MoveForward(strlen(sentence)+1);
             
             break;
@@ -235,6 +236,8 @@ void SCConvPlayer::SetID(int32_t id){
 void SCConvPlayer::Init( ){
     VGAPalette* rendererPalette = VGA.GetPalette();
     this->palette = *rendererPalette;
+    
+    currentFrame.font = FontManager.GetFont("");
 }
 
 void SCConvPlayer::CheckFrameExpired(void){
@@ -279,8 +282,10 @@ void SCConvPlayer::CheckFrameExpired(void){
 }
 
 
-void SCConvPlayer::DrawText(const char* text, uint8_t type){
+void SCConvPlayer::DrawText(void){
     
+    Point2D coo = {20,150};
+    VGA.DrawText(currentFrame.font, &coo, currentFrame.text,currentFrame.textColor );
 }
 
 
@@ -443,7 +448,7 @@ void SCConvPlayer::RunFrame(void){
     }
     
     //Draw text
-    DrawText(currentFrame.text, currentFrame.textColor);
+    DrawText();
     
     DrawButtons();
     

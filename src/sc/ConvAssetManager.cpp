@@ -184,7 +184,8 @@ void ConvAssetManager::ReadFaces(const IffChunk* root){
 
 //FIGR
 void ConvAssetManager::ReadFigures(const IffChunk* root){
-
+    for(size_t i=0 ; i < root->childs.size() ; i ++){
+    }
 }
 
 //PFIG
@@ -209,6 +210,8 @@ void ConvAssetManager::ReadFCPL(const IffChunk* root){
 void ConvAssetManager::ReadFGPL(const IffChunk* root){
 
 }
+
+
 
 void ConvAssetManager::BuildDB(void){
     
@@ -254,5 +257,4 @@ void ConvAssetManager::BuildDB(void){
     //I have no idea what is in there.
     ReadFGPL(convDataLexer.GetChunkByID('FGPL'));  //Face Game palette normal
 
-        
 }

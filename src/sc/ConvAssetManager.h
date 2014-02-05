@@ -15,7 +15,7 @@ typedef struct CharFace{
     
     char name[9];
     RSImageSet* appearances;
-    
+    // size_t paletteID;
 } CharFace;
 
 
@@ -30,6 +30,7 @@ typedef struct CharFigure{
     
     char name[9];
     RLEShape* appearance;
+    size_t paletteID;
     
 } CharFigure;
 
@@ -57,6 +58,8 @@ public:
     
     uint8_t GetFacePaletteID(char* name);
     
+    
+    
 private:
     
     void BuildDB(void);
@@ -69,6 +72,9 @@ private:
     //I have no idea what is in there.
     void ReadFGPL(const IffChunk* chunk);
   
+    
+    
+    
     std::map<char*, CharFace*,Char_String_Comparator> faces;
     std::map<char*, FacePalette* ,Char_String_Comparator> facePalettes;
     std::map<char*, ConvBackGround*,Char_String_Comparator> backgrounds;

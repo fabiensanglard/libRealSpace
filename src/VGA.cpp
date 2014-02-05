@@ -124,4 +124,35 @@ void RSVGA::VSync(void){
     
 }
 
+void RSVGA::DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color){
+    
+    
+    if (text == NULL)
+        return;
+    
+    size_t textSize = strlen(text);
+    if ( textSize == 0 )
+        return;
+    
+    int32_t leftMargin = coo->x;
+    
+    // printf("RSVGA: Show Text: '%s' \n",text);
+    for (size_t i =0; i < textSize; i++) {
+        
+        
+        RLEShape* shape = font->GetShapeForChar(text[i]);
+
+        shape->SetPosition(coo);
+        DrawShape(shape);
+        
+        if (coo->x == 320 - leftMargin){
+            coo->x=leftMargin;
+            coo->y+= 10;
+        }
+        else
+            coo->x+=10;
+
+    }
+}
+
 

@@ -19,9 +19,11 @@ GameEngine::~GameEngine(){
 
 void GameEngine::Init(){
     
+    
     //Load all TREs and PAKs
     Assets.Init();
     
+    FontManager.Init();
     
     //Load assets needed for Conversations (char and background)
     ConvAssets.Init();

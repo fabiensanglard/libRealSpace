@@ -17,4 +17,5 @@ extern RSVGA    VGA;
 extern AssetManager Assets;
 extern SCRenderer Renderer;
 extern ConvAssetManager ConvAssets;
+extern RSFontManager FontManager;
 #endif
