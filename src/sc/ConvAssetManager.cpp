@@ -64,6 +64,7 @@ uint8_t ConvAssetManager::GetFacePaletteID(char* name){
     return this->facePalettes[name]->index;
 }
 
+
 void ConvAssetManager::ParseBGLayer(uint8_t* data, size_t layerID,ConvBackGround* back ){
     
     ByteStream dataReader ;
@@ -122,9 +123,13 @@ void ConvAssetManager::ParseBGLayer(uint8_t* data, size_t layerID,ConvBackGround
         *s = *RLEShape::GetEmptyShape();
         return;
     }
-    else
+    else{
         s->Init(subPAK.GetEntry(0)->data, subPAK.GetEntry(0)->size);
-    
+        if (s->GetHeight() < 199){                  //  If this is not a background, we need to move down
+            Point2D pos = {0,CONV_TOP_BAR_HEIGHT+1};  //  to allow the black band on top of the screen
+            s->SetPosition(&pos);
+        }
+    }
     
     back->layers.push_back(s);
     back->palettes.push_back(paletteArchive->GetEntry(paletteID)->data);
@@ -175,6 +180,17 @@ void ConvAssetManager::ReadFaces(const IffChunk* root){
         RSImageSet* imageSet = new RSImageSet();
         imageSet->InitFromPakEntry(convShps.GetEntry(pakID));
         face->appearances = imageSet;
+
+        for (size_t fid=0; fid < imageSet->GetNumImages(); fid++) {
+            RLEShape*s = imageSet->GetShape(fid);
+            
+            
+                Point2D pos = {0,CONV_TOP_BAR_HEIGHT+1}; //  to allow the black band on top of the screen
+                s->SetPosition(&pos);
+            
+        }
+        
+
         
         printf("Face '%s' features %lu images.\n",face->name,imageSet->GetNumImages());
         

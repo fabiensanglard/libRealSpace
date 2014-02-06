@@ -25,6 +25,9 @@ class ConvFrame{
         enum ConvMode{ CONV_WIDE, CONV_CLOSEUP, CONV_WINGMAN_CHOICE, CONV_CONTRACT_CHOICE};
         ConvMode mode;
     
+        enum FacePos{ FACE_DEF=0x0, FACE_LEFT=0x82, FACE_RIGHT=0xBE, FACE_CENTER=0xA0};
+        FacePos facePosition;
+    
     //If we are in a wide of chose wingman mode
     std::vector<CharFigure*> participants;
     

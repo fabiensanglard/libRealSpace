@@ -19,16 +19,20 @@ RSFontManager::~RSFontManager(){
 
 void RSFontManager::Init(void){
     
+    /*
     const char* fontPath = "..\\..\\DATA\\GAMEFLOW\\BWFONT.SHP";
-    
     const char* trePath = "GAMEFLOW.TRE";
     TreArchive GAMEFLOW;
     GAMEFLOW.InitFromFile(trePath);
-    
-    
-    //Find the sounds PAKS.
-    
     TreEntry* convFontEntry = GAMEFLOW.GetEntryByName(fontPath);
+    */
+    
+    
+    const char* fontPath = "..\\..\\DATA\\FONTS\\CONVFONT.SHP";
+    const char* trePath = "MISC.TRE";
+    TreArchive MISC;
+    MISC.InitFromFile(trePath);
+    TreEntry* convFontEntry = MISC.GetEntryByName(fontPath);
     
     
     PakArchive fontArch;

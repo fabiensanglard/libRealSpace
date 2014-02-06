@@ -26,8 +26,21 @@ public:
         this->position = *position;
     }
     
+    inline void SetPositionX(int32_t x){
+        this->position.x = x;
+    }
+
+    
     static RLEShape* GetEmptyShape(void);
     
+    int32_t GetWidth(void){ return leftDist + this->rightDist;}
+    int32_t GetHeight(void){ return topDist+botDist;}
+    int32_t GetTop(void){ return topDist;}
+    int32_t GetBottom(void){ return botDist;}
+    
+    
+    
+    void SetColorOffset(size_t offset){ this->colorOffset = offset;}
 private:
     
     ByteStream stream;
@@ -54,7 +67,10 @@ private:
     
     int16_t leftDist;
     int16_t topDist;
+    int16_t rightDist;
+    int16_t botDist;
     
+    size_t colorOffset;
     bool WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color);
 };
 

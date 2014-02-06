@@ -118,10 +118,10 @@ void RLEShape::Init(uint8_t* idata, size_t isize){
     this->size = isize;
     this->data = idata;
     
-    /*this->rightDist=*/  stream.ReadShort();
-    this->leftDist  = stream.ReadShort();
-    this->topDist   = stream.ReadShort();
-    /*this->botDist=*/    stream.ReadShort();
+    this->rightDist= stream.ReadShort();
+    this->leftDist  =  stream.ReadShort();
+    this->topDist   =  stream.ReadShort();
+    this->botDist=   stream.ReadShort();
     /*rleCenter= dst->data + abs(leftDist) + abs(topDist) * dst->width;*/
     
     data = stream.GetPosition();
@@ -165,6 +165,9 @@ bool RLEShape::WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color){
     
     if (finalDest < dst || finalDest >= dst+(320*200))
         return true;
+    
+    color+= colorOffset;
+    
     
     *finalDest = color;
     

@@ -81,6 +81,10 @@ void SCConvPlayer::ReadNextFrame(void){
             char* setName         = (char*)conv.GetPosition() + 0xA;
             char* sentence         = (char*)conv.GetPosition() + 0x17;
             
+            uint8_t pos = *(conv.GetPosition() + 0x13);
+            
+            currentFrame.facePosition = static_cast<ConvFrame::FacePos>(pos);
+            
             currentFrame.text = sentence;
             
             currentFrame.mode = ConvFrame::CONV_CLOSEUP;
@@ -98,7 +102,7 @@ void SCConvPlayer::ReadNextFrame(void){
             
             currentFrame.facePaletteID = ConvAssets.GetFacePaletteID("normal");
             
-            //printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X)\n",this->conversationID,speakerName,setName,sentence,color);
+            printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X) pos %2X\n",this->conversationID,speakerName,setName,sentence,color,pos);
             break;
         }
         case CLOSEUP_CONTINUATION:  // Same person keep talking
@@ -158,6 +162,7 @@ void SCConvPlayer::ReadNextFrame(void){
             int8_t color = conv.ReadByte();
             char* sentence = (char*)conv.GetPosition();
             
+            currentFrame.mode = ConvFrame::CONV_CLOSEUP;
             currentFrame.text = sentence;
             currentFrame.textColor = color;
             
@@ -284,8 +289,10 @@ void SCConvPlayer::CheckFrameExpired(void){
 
 void SCConvPlayer::DrawText(void){
     
-    Point2D coo = {20,150};
-    VGA.DrawText(currentFrame.font, &coo, currentFrame.text,currentFrame.textColor );
+    Point2D coo = {60,165};
+    
+    
+    VGA.DrawText(currentFrame.font, &coo, currentFrame.text,currentFrame.textColor,0,10 );
 }
 
 
@@ -322,9 +329,21 @@ void SCConvPlayer::RunFrame(void){
     
     //Draw static
     for (size_t i = 0; i < currentFrame.bgLayers->size(); i++) {
-        VGA.DrawShape((*currentFrame.bgLayers)[i]);
+        RLEShape* shape = (*currentFrame.bgLayers)[i];
+        VGA.DrawShape(shape);
     }
-
+    
+    
+    if (currentFrame.mode == ConvFrame::CONV_CLOSEUP){
+        
+        for (size_t i = 0 ; i < CONV_TOP_BAR_HEIGHT; i++)
+            VGA.FillLineColor(i, 0x00);
+    
+    
+        for (size_t i = 0 ; i < CONV_BOTTOM_BAR_HEIGHT; i++) 
+            VGA.FillLineColor(199-i, 0x00);
+    
+    }
     
     //
     if (currentFrame.mode == ConvFrame::CONV_CLOSEUP ||
@@ -340,12 +359,30 @@ void SCConvPlayer::RunFrame(void){
         paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data); //mountains Good but not sky
         this->palette.ReadPatch(&paletteReader);
         
+        
+        
+        int32_t pos = 0 ;
+        
+        if (currentFrame.mode == ConvFrame::CONV_CLOSEUP)
+        {
+            if (currentFrame.facePosition == ConvFrame::FACE_LEFT)
+                pos = -30;
+
+            if (currentFrame.facePosition == ConvFrame::FACE_RIGHT)
+                pos =  30;
+        }
+        
+        if (currentFrame.face == NULL)
+            goto afterFace;
+        
         //Face wiht of without hair
         //00 nothing
         //01 rest face
         //02 hair
         for (size_t i=1; i< 3; i++) {
-           VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+           RLEShape* s = currentFrame.face->appearances->GetShape(i);
+           s->SetPositionX(pos);
+           VGA.DrawShape(s);
         }
         
         //Taking animation
@@ -361,7 +398,12 @@ void SCConvPlayer::RunFrame(void){
         
         for (size_t i=03; i< 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP
              ; i++) {
-           VGA.DrawShape(currentFrame.face->appearances->GetShape(3+(SDL_GetTicks()/100)%10));
+            
+            RLEShape* s = currentFrame.face->appearances->GetShape(3+(SDL_GetTicks()/100)%10);
+           s->SetPositionX(pos);
+            VGA.DrawShape(s);
+            
+           
         }
         
         
@@ -386,7 +428,9 @@ void SCConvPlayer::RunFrame(void){
         //25 right eye brows semi-raised
         //26 eye brows something
         for (size_t i=13; i< 14; i++) {
-            //VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+            RLEShape* s = currentFrame.face->appearances->GetShape(i);
+           s->SetPositionX(pos);
+            //VGA.DrawShape();
         }
         
         //General face expression
@@ -400,7 +444,9 @@ void SCConvPlayer::RunFrame(void){
         //34 seducing face
         //35 look of desaproval face
         for (size_t i=29; i< 30; i++) {
-           //VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+            RLEShape* s = currentFrame.face->appearances->GetShape(i);
+           s->SetPositionX(pos);
+            //VGA.DrawShape();
         }
         
         //Cloth
@@ -408,21 +454,27 @@ void SCConvPlayer::RunFrame(void){
         //36 pilot clothes
         //37 pilot clothes 2
         //for (size_t i=36; i< 37; i++) {
-            VGA.DrawShape(currentFrame.face->appearances->GetShape(35));
+            RLEShape* s = currentFrame.face->appearances->GetShape(35);
+           s->SetPositionX(pos);
+            VGA.DrawShape(s);
         //}
         
         //38 sunglasses
         //39 pilot helmet (if drawing this, don't draw hairs
         //40 pilot helmet visor (if drawing this draw 39 too
         for (size_t i=41; i< 40; i++) {
-          VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+            RLEShape* s = currentFrame.face->appearances->GetShape(i);
+           s->SetPositionX(pos);
+            VGA.DrawShape(s);
         }
         
         //40 to 54 ????
         
         //54 hand extension
         if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE){
-            VGA.DrawShape(currentFrame.face->appearances->GetShape(54));
+            RLEShape* s = currentFrame.face->appearances->GetShape(54);
+           s->SetPositionX(pos);
+            //VGA.DrawShape();
         }
         
         
@@ -431,13 +483,15 @@ void SCConvPlayer::RunFrame(void){
         // 62 look left
         for (size_t i=55; i< 63; i++) {
             //What is there ?
-            //VGA.DrawShape(currentFrame.face->appearances->GetShape(i));
+            RLEShape* s = currentFrame.face->appearances->GetShape(i);
+           s->SetPositionX(pos);
+            //VGA.DrawShape();
         }
         
        
     }
     
-    
+afterFace:
     if (currentFrame.mode == ConvFrame::CONV_WIDE ||
         currentFrame.mode == ConvFrame::CONV_WINGMAN_CHOICE){
     
@@ -458,7 +512,7 @@ void SCConvPlayer::RunFrame(void){
         ;
     
     //Draw Mouse
-    Mouse.Draw();
+    //Mouse.Draw();
     
     //Check Mouse state.
     

@@ -9,7 +9,8 @@
 #ifndef __libRealSpace__ConAssetManager__
 #define __libRealSpace__ConAssetManager__
 
-
+#define CONV_TOP_BAR_HEIGHT 23
+#define CONV_BOTTOM_BAR_HEIGHT 48
 
 typedef struct CharFace{
     

@@ -24,7 +24,7 @@ public:
     VGAPalette* GetPalette(void);
     
     bool DrawShape(RLEShape* shape);
-    void DrawText (RSFont* font, Point2D* coo, char* text, uint8_t color);
+    void DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, size_t end);
     
     void VSync(void);
     
@@ -32,6 +32,7 @@ public:
     
     inline uint8_t* GetFrameBuffer(void){ return frameBuffer;}
     
+    void FillLineColor(size_t lineIndex, uint8_t color);
 private:
     
     VGAPalette palette;
