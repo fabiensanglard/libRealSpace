@@ -91,12 +91,12 @@ void ConvAssetManager::ParseBGLayer(uint8_t* data, size_t layerID,ConvBackGround
     
     
     //Debug Display
-    
+    /*
         printf("\n%8s layer %lu :",back->name,layerID);
         for (size_t x=0; x < 5 ; x++) {
             printf("%3d ",*(data + 5 * layerID+x));
         }
-    
+    */
     
     
     
@@ -192,7 +192,7 @@ void ConvAssetManager::ReadFaces(const IffChunk* root){
         
 
         
-        printf("Face '%s' features %lu images.\n",face->name,imageSet->GetNumImages());
+        //printf("Face '%s' features %lu images.\n",face->name,imageSet->GetNumImages());
         
         this->faces[face->name] = face;
     }
@@ -212,7 +212,7 @@ void ConvAssetManager::ReadPFigures(const IffChunk* root){
 //Face palettes FCPL
 void ConvAssetManager::ReadFCPL(const IffChunk* root){
     for(size_t i=0 ; i < root->childs.size() ; i ++){
-        Game.Log("FCPL %lu: %s %2X\n",root->childs[i]->size,root->childs[i]->data,*(root->childs[i]->data+8));
+        //Game.Log("FCPL %lu: %s %2X\n",root->childs[i]->size,root->childs[i]->data,*(root->childs[i]->data+8));
         FacePalette* pal = new FacePalette();
         memcpy(pal->name, root->childs[i]->data, 8);
         pal->name[8] = '\0';
@@ -257,7 +257,7 @@ void ConvAssetManager::BuildDB(void){
     TreEntry* convDataEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVDATA.IFF");
     IffLexer convDataLexer;
     convDataLexer.InitFromRAM(convDataEntry->data, convDataEntry->size);
-    convDataLexer.List(stdout);
+    //convDataLexer.List(stdout);
     
     ReadBackGrounds(convDataLexer.GetChunkByID('BCKS'));
     

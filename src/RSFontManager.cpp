@@ -36,8 +36,8 @@ void RSFontManager::Init(void){
     
     
     PakArchive fontArch;
-    fontArch.InitFromRAM("BWFONT.SHP",convFontEntry->data,convFontEntry->size);
-    fontArch.List(stdout);
+    fontArch.InitFromRAM("CONVFONT.SHP",convFontEntry->data,convFontEntry->size);
+    //fontArch.List(stdout);
     
     
     font.InitFromPAK(&fontArch);

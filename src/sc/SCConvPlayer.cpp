@@ -112,7 +112,7 @@ void SCConvPlayer::ReadNextFrame(void){
             currentFrame.text = sentence;
             
             conv.MoveForward(strlen((char*)sentence)+1);
-            //printf("ConvID: %d MORETEX:                                       WHAT: '%s'\n",this->conversationID,sentence);
+            printf("ConvID: %d MORETEX:                                       WHAT: '%s'\n",this->conversationID,sentence);
             break;
         }
         case YESNOCHOICE_BRANCH1:  // Choice Offsets are question
@@ -166,7 +166,7 @@ void SCConvPlayer::ReadNextFrame(void){
             currentFrame.text = sentence;
             currentFrame.textColor = color;
             
-            // printf("ConvID: %d Show Text: '%s' \n",this->conversationID,sentence);
+            printf("ConvID: %d Show Text: '%s' \n",this->conversationID,sentence);
             conv.MoveForward(strlen(sentence)+1);
             
             break;
