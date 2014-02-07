@@ -40,7 +40,7 @@ public:
     
     
     
-    void SetColorOffset(size_t offset){ this->colorOffset = offset;}
+    void SetColorOffset(uint8_t offset){ this->colorOffset = offset;}
 private:
     
     ByteStream stream;
@@ -70,7 +70,7 @@ private:
     int16_t rightDist;
     int16_t botDist;
     
-    size_t colorOffset;
+    uint8_t colorOffset;
     bool WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color);
 };
 

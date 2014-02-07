@@ -289,7 +289,7 @@ void SCConvPlayer::CheckFrameExpired(void){
 
 void SCConvPlayer::DrawText(void){
     
-    Point2D coo = {60,165};
+    Point2D coo = {60,CONV_BORDER_MARGIN};
     
     
     VGA.DrawText(currentFrame.font, &coo, currentFrame.text,currentFrame.textColor,0,10 );

@@ -12,6 +12,8 @@
 #define CONV_TOP_BAR_HEIGHT 23
 #define CONV_BOTTOM_BAR_HEIGHT 48
 
+#define CONV_BORDER_MARGIN  165
+
 typedef struct CharFace{
     
     char name[9];
