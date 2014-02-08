@@ -128,40 +128,40 @@ void RSVGA::FillLineColor(size_t lineIndex, uint8_t color){
     memset(frameBuffer+lineIndex*320, color, 320);
 }
 
-void RSVGA::DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, size_t end){
+void RSVGA::DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, uint32_t size,size_t interLetterSpace, size_t spaceSize){
     
     
     if (text == NULL)
         return;
     
-    size_t textSize = strlen(text);
-    if ( start+end > textSize ||start >= textSize)
+    if (size <= 0)
         return;
     
-    int32_t leftMargin = coo->x;
     
-    // printf("RSVGA: Show Text: '%s' \n",text);
-    for (size_t i =start; i < end; i++) {
+    for (size_t i =0; i < size; i++) {
         
+        char chartoDraw = text[start+i];
         
-        RLEShape* shape = font->GetShapeForChar(text[i]);
+        RLEShape* shape = font->GetShapeForChar(chartoDraw);
 
         shape->SetColorOffset(color);
         //Adjust height
         int32_t lineHeight = coo->y;
         coo->y -= shape->GetHeight();
         
-        if (text[i]== 'p' ||
-            text[i]== 'y' ||
-            text[i]== 'g' )
+        if (chartoDraw== 'p' ||
+            chartoDraw== 'y' ||
+            chartoDraw== 'g' )
             coo->y += 1;
         
         shape->SetPosition(coo);
         DrawShape(shape);
         coo->y = lineHeight;
         
-        
-        coo->x+=shape->GetWidth() + 3;
+        if (chartoDraw == ' ')
+            coo->x += spaceSize ;
+        else
+            coo->x+=shape->GetWidth() + interLetterSpace;
         
 
     }

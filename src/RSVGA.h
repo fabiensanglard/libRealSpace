@@ -24,7 +24,7 @@ public:
     VGAPalette* GetPalette(void);
     
     bool DrawShape(RLEShape* shape);
-    void DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, size_t end);
+    void DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, uint32_t size,size_t interLetterSpace, size_t spaceSize);
     
     void VSync(void);
     

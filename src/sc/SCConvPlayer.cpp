@@ -276,11 +276,11 @@ void SCConvPlayer::CheckFrameExpired(void){
         }
     }
     
-    /*
+    
     int32_t currentTime = SDL_GetTicks();
     if(currentTime - currentFrame.creationTime > 5000)
         this->currentFrame.SetExpired(true);
-    */
+    
     
     
    
@@ -289,10 +289,61 @@ void SCConvPlayer::CheckFrameExpired(void){
 
 void SCConvPlayer::DrawText(void){
     
-    Point2D coo = {60,CONV_BORDER_MARGIN};
     
+    if (currentFrame.text == NULL)
+        return;
+
+    size_t textSize = strlen(currentFrame.text);
+    const char* cursor = currentFrame.text;
+    const char* end = cursor + textSize;
     
-    VGA.DrawText(currentFrame.font, &coo, currentFrame.text,currentFrame.textColor,0,10 );
+    uint8_t lineNumber = 0;
+    
+    while (cursor < end){
+        
+        const char* wordSearch = cursor;
+        const char* lastGoodPos = wordSearch;
+        
+        //How many pixels are avaiable for a line.
+        int32_t pixelAvailable = 320-CONV_BORDER_MARGIN*2 ;
+        
+        //Determine what will fit in a line.
+        while (pixelAvailable > 0 && wordSearch < end) {
+            
+            lastGoodPos = wordSearch-1;
+            while (*wordSearch != ' ' && wordSearch < end) {
+                
+                if ( *wordSearch == ' ')
+                    pixelAvailable -= CONV_SPACE_SIZE ;
+                else
+                    pixelAvailable -= currentFrame.font->GetShapeForChar(*wordSearch)->GetWidth() + CONV_INTERLETTER_SPACE;
+                
+                wordSearch++;
+            }
+            
+            if( pixelAvailable > 0)
+                lastGoodPos = currentFrame.text + strlen(currentFrame.text);
+            //Skip the space char
+            wordSearch++;
+            
+            
+        }
+        
+        //Draw the line
+        Point2D coo = {CONV_BORDER_MARGIN,165+lineNumber*13};
+        
+        if (pixelAvailable < 0)
+            pixelAvailable=0;
+        //Don't forget to center the text
+        coo.x += pixelAvailable/2;
+        
+        VGA.DrawText(currentFrame.font, &coo, currentFrame.text,currentFrame.textColor,cursor-currentFrame.text,lastGoodPos-cursor,CONV_INTERLETTER_SPACE,CONV_SPACE_SIZE);
+        
+        //Go to next line
+        cursor = lastGoodPos+1;
+        lineNumber++;
+    }
+    
 }
 
 
