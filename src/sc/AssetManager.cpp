@@ -39,7 +39,7 @@ void AssetManager::Init(void){
         if (tre->IsValid())
             this->tres.push_back(tre);
         else{
-            Game.Terminate("Unable to load asset '%s' (Is the SC base set).",nameIds[i].filename);
+            Game.Terminate("Unable to load asset '%s' (Did you set the SC base folder ?).",nameIds[i].filename);
             
         }
     }

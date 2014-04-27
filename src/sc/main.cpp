@@ -21,20 +21,16 @@ RSFontManager FontManager;
 int main(int argc, char* argv[]) {
 
     
-    Assets.SetBase("/Users/fabiensanglard/SC/SC/");
+    Assets.SetBase("/Users/fabiensanglard/Desktop/SC/");
     
     Game.Init();
     
     
     //Add MainMenu activity on the game stack.
-    //SCMainMenu* main = new SCMainMenu();
+    SCMainMenu* main = new SCMainMenu();
+    main->Init();
+    Game.AddActivity(main);
     
-    for(int i=13 ; i <14 ; i++){
-        SCConvPlayer* main = new SCConvPlayer();
-        main->Init();
-        main->SetID(i);
-        Game.AddActivity(main);
-    }
     
     Game.Run();
     

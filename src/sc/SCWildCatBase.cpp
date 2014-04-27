@@ -18,6 +18,31 @@ SCWildCatBase::~SCWildCatBase(){
     
 }
 
+void SCWildCatBase::CheckKeyboard(void){
+    //Keyboard
+    SDL_Event keybEvents[5];
+    int numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_PEEKEVENT,SDL_KEYDOWN,SDL_KEYUP);
+    for(int i= 0 ; i < numKeybEvents ; i++){
+        SDL_Event* event = &keybEvents[i];
+        switch (event->key.keysym.sym) {
+            case SDLK_RETURN :{
+                
+                Stop();
+                
+                SCConvPlayer* conv = new SCConvPlayer();
+                conv->Init();
+                conv->SetID(14);
+                Game.AddActivity(conv);
+                
+                break;
+            }
+                
+            default:
+                break;
+        }
+    }
+}
+
 void SCWildCatBase::Init( ){
     
     //Load book
@@ -59,6 +84,7 @@ void SCWildCatBase::Init( ){
 void SCWildCatBase::RunFrame(void){
 
     CheckButtons();
+    CheckKeyboard();
     
     VGA.Activate();
     VGA.Clear();

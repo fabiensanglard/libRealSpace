@@ -19,6 +19,8 @@ public:
     
     void RunFrame(void);
     
+    void CheckKeyboard(void);
+    
     RLEShape hangar;
     RLEShape vehicule;
 };
