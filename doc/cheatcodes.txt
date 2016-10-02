@@ -1,5 +1,5 @@
 024D - 024E - Current Score
-019B - # of gorund kills
+019B - # of ground kills
 0199 - # of Air Kills
 018D - 018E - Amount of money lost
 0189 - 018A - Bank balance
@@ -9,8 +9,8 @@
 0179 - # of MK-82 Bombs
 0177 - # of MK-20 Rockeye Cluster Munitions
 0175 - # of Durandal Munitions
-0173 - # of AGM-65D missles
-0171 - # of AIM-9M missles
-016F - # of AIM-9J missles
+0173 - # of AGM-65D missiles
+0171 - # of AIM-9M missiles
+016F - # of AIM-9J missiles
 0009 - Next mission
 0008 - Current mission
