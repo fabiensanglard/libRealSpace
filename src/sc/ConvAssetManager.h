@@ -16,82 +16,82 @@
 #define CONV_INTERLETTER_SPACE  3
 #define CONV_SPACE_SIZE  5
 
-typedef struct CharFace{
-    
-    char name[9];
-    RSImageSet* appearances;
-    // size_t paletteID;
+typedef struct CharFace {
+
+	char name[9];
+	RSImageSet* appearances;
+	// size_t paletteID;
 } CharFace;
 
 
-typedef struct FacePalette{
-    
-    char name[9];
-    uint8_t index;
-    
+typedef struct FacePalette {
+
+	char name[9];
+	uint8_t index;
+
 } FacePalette;
 
-typedef struct CharFigure{
-    
-    char name[9];
-    RLEShape* appearance;
-    size_t paletteID;
-    
+typedef struct CharFigure {
+
+	char name[9];
+	RLEShape* appearance;
+	size_t paletteID;
+
 } CharFigure;
 
 
-typedef struct ConvBackGround{
-    std::vector<RLEShape*> layers;
-    std::vector<uint8_t*> palettes;
-    char name[9];
+typedef struct ConvBackGround {
+	std::vector<RLEShape*> layers;
+	std::vector<uint8_t*> palettes;
+	char name[9];
 } ConvBackGround;
 
 
 
-class ConvAssetManager{
+class ConvAssetManager {
 
 public:
-    
-    ConvAssetManager();
-    ~ConvAssetManager();
-    
-    void Init(void);
-    
-    CharFace* GetCharFace(char* name);
-    ConvBackGround* GetBackGround(char* name);
-    CharFigure* GetFigure(char* name);
-    
-    uint8_t GetFacePaletteID(char* name);
-    
-    
-    
-private:
-    
-    void BuildDB(void);
-    void ReadBackGrounds(const IffChunk* chunk);
-    void ReadFaces(const IffChunk* chunk);
-    void ReadFigures(const IffChunk* chunk);
-    void ReadPFigures(const IffChunk* chunk);
-    //I have no idea what is in there.
-    void ReadFCPL(const IffChunk* chunk);
-    //I have no idea what is in there.
-    void ReadFGPL(const IffChunk* chunk);
-  
-    
-    
-    
-    std::map<char*, CharFace*,Char_String_Comparator> faces;
-    std::map<char*, FacePalette* ,Char_String_Comparator> facePalettes;
-    std::map<char*, ConvBackGround*,Char_String_Comparator> backgrounds;
-    std::map<char*, CharFigure*,Char_String_Comparator> figures;
 
-    
-    PakArchive convShps;
-    PakArchive convPals;
-    PakArchive optShps;
-    PakArchive optPals;
-    void ParseBGLayer(uint8_t* data, size_t layerID,ConvBackGround* back );
-    
+	ConvAssetManager();
+	~ConvAssetManager();
+
+	void Init(void);
+
+	CharFace* GetCharFace(char* name);
+	ConvBackGround* GetBackGround(char* name);
+	CharFigure* GetFigure(char* name);
+
+	uint8_t GetFacePaletteID(char* name);
+
+
+
+private:
+
+	void BuildDB(void);
+	void ReadBackGrounds(const IffChunk* chunk);
+	void ReadFaces(const IffChunk* chunk);
+	void ReadFigures(const IffChunk* chunk);
+	void ReadPFigures(const IffChunk* chunk);
+	//I have no idea what is in there.
+	void ReadFCPL(const IffChunk* chunk);
+	//I have no idea what is in there.
+	void ReadFGPL(const IffChunk* chunk);
+
+
+
+
+	std::map<char*, CharFace*, Char_String_Comparator> faces;
+	std::map<char*, FacePalette*, Char_String_Comparator> facePalettes;
+	std::map<char*, ConvBackGround*, Char_String_Comparator> backgrounds;
+	std::map<char*, CharFigure*, Char_String_Comparator> figures;
+
+
+	PakArchive convShps;
+	PakArchive convPals;
+	PakArchive optShps;
+	PakArchive optPals;
+	void ParseBGLayer(uint8_t* data, size_t layerID, ConvBackGround* back);
+
 };
 
 

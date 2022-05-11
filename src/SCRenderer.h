@@ -6,14 +6,18 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __iff__gfx__
-#define __iff__gfx__
+#pragma once
+#include <Windows.h>
+#include <GL/GL.h>
+#include "Camera.h"
+#include "Texture.h"
 
-class RSEntity;
-
-class Triangle;
 class RSArea;
-class MapVertex;
+class Texture;
+class RSEntity;
+//struct VGAPalette;
+struct MapVertex;
+struct Triangle;
 
 class SCRenderer{
     
@@ -59,7 +63,7 @@ public:
     
     void RenderBlock(RSArea* area,int LOD, int blockID,bool renderTexture);
     void RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock);
-    
+	void RenderWorld(RSArea* area, int LOD, int verticesPerBlock);
     
     void RenderObjects(RSArea* area,size_t blockID);
     
@@ -104,9 +108,10 @@ private:
     VGAPalette palette;
     bool running;
     bool paused;
-    
-    Camera camera;
+	uint32_t counter;
+	Camera camera;
     Point3D light;
+	Point3D playerPosition;
 };
 
 
@@ -116,4 +121,4 @@ void IMG_ShowPalette(Palette* palette,int cellSize);
 void IMG_ShowImage(uint8_t* image, uint16_t width, uint16_t height,Palette* palette,int zoom,bool wait);
 void IMG_ShowModel(RealSpaceObject* object,Palette* palette );
 */
-#endif /* defined(__iff__gfx__) */
+

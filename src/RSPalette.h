@@ -5,13 +5,15 @@
 //  Created by Fabien Sanglard on 12/21/2013.
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
+#pragma once
 
-#ifndef __iff__RealSpacePaletteObject__
-#define __iff__RealSpacePaletteObject__
+#include <stdint.h>
 
+#include "IffLexer.h"
+#include "Texture.h"
+#include "RSEntity.h"
 
-
-
+struct VGAPalette;
 
 class RSPalette{
     
@@ -45,5 +47,3 @@ private:
     uint32_t bwFlag;
     VGAPalette bwColors;
 };
-
-#endif /* defined(__iff__RealSpacePaletteObject__) */

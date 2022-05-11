@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
+#include "PakArchive.h"
 #include <errno.h>
 
 PakArchive::PakArchive() :
@@ -92,7 +92,7 @@ bool PakArchive::InitFromFile(const char* filepath){
     strcat(fullPath, filepath);
     
     
-    FILE* file = fopen(fullPath, "r");
+    FILE* file = fopen(fullPath, "r+b");
     
     if (!file){
         printf("Unable to open PAK archive: '%s'.\n",filepath);
@@ -177,7 +177,7 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
         
         
         //Write content.
-        FILE* dstFile = fopen(fullDstPath,"w");
+        FILE* dstFile = fopen(fullDstPath,"w+b");
         
         if (dstFile == NULL){
             printf("Unable to create destination file: '%s'.\n",fullDstPath);

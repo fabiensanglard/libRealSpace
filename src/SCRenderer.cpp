@@ -6,9 +6,15 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
+#include "SCRenderer.h"
+#include "IffLexer.h"
+#include "RSPalette.h"
+#include "RSArea.h"
+#include "RSEntity.h"
+#include "RSVGA.h"
+#include "Texture.h"
 
-
+extern SCRenderer Renderer;
 
 SCRenderer::SCRenderer() :
    initialized(false){
@@ -30,7 +36,7 @@ VGAPalette* SCRenderer::GetPalette(void){
 void SCRenderer::Init(int32_t zoomFactor){
     
     this->scale =zoomFactor;
-    
+	this->counter = 0;
     int32_t width  = 320 * scale;
     int32_t height = 200 * scale;
     
@@ -171,8 +177,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         return;
     
     if (lodLevel >= object->NumLods()){
-        printf("Unable to render this Level Of Details (out of range): Max level is  %lu\n",
-               std::min(0UL,object->NumLods()-1));
+        /*printf("Unable to render this Level Of Details (out of range): Max level is  %lu\n",
+               std::min(0UL,object->NumLods()-1));*/
         return;
     }
     
@@ -267,14 +273,21 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
     
 
    
-    //Pass 3: Let's draw the transparent stuff render RSEntity::TRANSPARENT)
+    //Pass 3: Let's draw the transparent stuff render RSEntity::SC_TRANSPARENT)
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
-    glBlendEquation(GL_ADD);
+#ifndef _WIN32
+	
 
-    //glDepthFunc(GL_LESS);
-        
+	glBlendEquation(GL_ADD);
+#else 
+	typedef void (APIENTRY * PFNGLBLENDEQUATIONPROC) (GLenum mode);
+	PFNGLBLENDEQUATIONPROC glBlendEquation = NULL;
+	glBlendEquation = (PFNGLBLENDEQUATIONPROC)wglGetProcAddress("glBlendEquation");
+	glBlendEquation(GL_ADD);
+	glDepthFunc(GL_LESS);
+#endif
         
     for(int i = 0 ; i < lod->numTriangles ; i++){
         
@@ -282,7 +295,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
         Triangle* triangle = &object->triangles[triangleID];
         
-        if (triangle->property != RSEntity::TRANSPARENT)
+        if (triangle->property != RSEntity::SC_TRANSPARENT)
             continue;
         
         
@@ -339,7 +352,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
         Triangle* triangle = &object->triangles[triangleID];
         
-        if (triangle->property == RSEntity::TRANSPARENT)
+        if (triangle->property == RSEntity::SC_TRANSPARENT)
             continue;
         
         Vector3D normal;
@@ -785,7 +798,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glMatrixMode(GL_PROJECTION);
     Matrix* projectionMatrix = camera.GetProjectionMatrix();
     glLoadMatrixf(projectionMatrix->ToGL());
-    
+	counter++;
     
     running = true;
     
@@ -796,15 +809,16 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     
     
-   
+	Point3D lookAt = { 3856,0,2856 };
+
     Point3D newPosition;
-    newPosition.x=  4100;//lookAt[0] + 5256*cos(counter/2);
+    newPosition.x=  lookAt.x + counter;
     newPosition.y= 100;
-    newPosition.z=  3000;//lookAt[2];// + 5256*sin(counter/2);
+	newPosition.z = lookAt.z + counter;
     camera.SetPosition(&newPosition);
     
     
-    Point3D lookAt = {3856,0,2856};
+    
     camera.LookAt(&lookAt);
     
     
@@ -850,7 +864,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         newPosition[0]=  lookAt[0] + 256*cos(counter/2);
         newPosition[1]= 60;
         newPosition[2]=  lookAt[2] + 256*sin(counter/2);
-        */
+        /**/
         
         //Canyon
         ///*
@@ -1019,5 +1033,9 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
         
         
     }
+
+}
+
+void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 
 }

@@ -6,8 +6,9 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__SCFont__
-#define __libRealSpace__SCFont__
+#pragma once
+#include "RLEShape.h"
+#include "PakArchive.h"
 
 class RSFont{
 public:
@@ -21,5 +22,3 @@ protected:
 private:
    std::vector<RLEShape*> letters;
 };
-
-#endif /* defined(__libRealSpace__SCFont__) */

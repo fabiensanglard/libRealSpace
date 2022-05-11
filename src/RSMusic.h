@@ -6,8 +6,9 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__RSMusic__
-#define __libRealSpace__RSMusic__
+#pragma once
+#include <stdint.h>
+class PakArchive;
 
 class RSMusic{
     
@@ -15,4 +16,3 @@ public:
     void InitFromPAK(PakArchive* archive, uint32_t index);    
 };
 
-#endif /* defined(__libRealSpace__RSMusic__) */

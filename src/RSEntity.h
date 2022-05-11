@@ -6,8 +6,15 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__RSEntity__
-#define __libRealSpace__RSEntity__
+#pragma once
+#include <vector>
+#include <stdint.h>
+
+#include "Maths.h"
+#include "Matrix.h"
+#include "Quaternion.h"
+#include "IffLexer.h"
+#include "RSImage.h"
 
 #define LOD_LEVEL_MAX 0
 #define LOD_LEVEL_MED 1
@@ -64,7 +71,9 @@ typedef struct Lod{
     uint16_t triangleIDs[256];
 } Lod;
 
+class RSImage;
 
+struct VGAPalette;
 
 class RSEntity{
     
@@ -100,7 +109,7 @@ public:
     std::vector<Triangle> triangles;
 
     
-    enum Property { TRANSPARENT = 0x02};
+    enum Property { SC_TRANSPARENT = 0x02};
     
     BoudingBox* GetBoudingBpx(void);
     
@@ -134,4 +143,3 @@ private:
     
 };
 
-#endif /* defined(__libRealSpace__RSEntity__) */

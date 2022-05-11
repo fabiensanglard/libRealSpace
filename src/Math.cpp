@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
+#include "Maths.h"
 
 
 // Long life to however came up with this. You rule man.

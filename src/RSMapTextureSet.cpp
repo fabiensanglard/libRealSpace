@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
+#include "RSMapTextureSet.h"
 
 RSMapTextureSet::RSMapTextureSet(){
     

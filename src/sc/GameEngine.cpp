@@ -29,13 +29,13 @@ void GameEngine::Init(){
     ConvAssets.Init();
     
     //Load Main Palette and Initialize the GL
-    Screen.Init(2);
+    Screen.Init(4);
     
     
     
     VGA.Init();
     
-    Renderer.Init(2);
+    Renderer.Init(4);
     
     //Load the Mouse Cursor
     Mouse.Init();

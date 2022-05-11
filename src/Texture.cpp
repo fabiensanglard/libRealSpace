@@ -6,9 +6,11 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
+#include "Texture.h"
+#include "RSImage.h"
+#include "SCRenderer.h"
 
-
+extern SCRenderer Renderer;
 
 Texture::Texture()
  : data(0),

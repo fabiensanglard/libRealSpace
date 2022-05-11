@@ -6,8 +6,9 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__Quaternion__
-#define __libRealSpace__Quaternion__
+#pragma once
+
+#include "Matrix.h"
 
 class Quaternion{
     
@@ -38,5 +39,3 @@ class Quaternion{
         float z;
     
 };
-
-#endif /* defined(__libRealSpace__Quaternion__) */

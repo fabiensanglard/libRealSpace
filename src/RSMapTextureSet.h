@@ -6,8 +6,11 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__RSMapTextureSet__
-#define __libRealSpace__RSMapTextureSet__
+#pragma once
+
+#include <stdint.h>
+#include "PakArchive.h"
+#include "RSImage.h"
 
 //TODO: CHANGE CONSTRUCTORE TO USE IFF and MapImageEntry!!!
 
@@ -46,5 +49,3 @@ private:
     std::vector<RSImage*> images;
   
 };
-
-#endif /* defined(__libRealSpace__RSMapTextureSet__) */

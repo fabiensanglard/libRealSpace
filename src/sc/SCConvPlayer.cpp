@@ -99,8 +99,8 @@ void SCConvPlayer::ReadNextFrame(void){
             conv.MoveForward(0x17 + strlen((char*)sentence)+1);
             uint8_t color = conv.ReadByte(); // Color ?
             currentFrame.textColor = color;
-            
-            currentFrame.facePaletteID = ConvAssets.GetFacePaletteID("normal");
+			const char* pszExt = "normal";
+            currentFrame.facePaletteID = ConvAssets.GetFacePaletteID(const_cast<char*>(pszExt));
             
             printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X) pos %2X\n",this->conversationID,speakerName,setName,sentence,color,pos);
             break;

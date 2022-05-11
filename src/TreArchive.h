@@ -5,6 +5,15 @@
 //  Created by Fabien Sanglard on 12/28/2013.
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
+#pragma once
+
+#include <stdint.h>
+#include <string>
+#include <vector>
+#include <map>
+#include "Base.h"
+#include "ByteStream.h"
+#include "PakArchive.h"
 
 struct Char_String_Comparator
 {

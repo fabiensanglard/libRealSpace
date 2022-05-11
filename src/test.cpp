@@ -5,8 +5,13 @@
 //  Created by Fabien Sanglard on 12/28/2013.
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
-
-#include "precomp.h"
+#include "TreArchive.h"
+#include "RSEntity.h"
+#include "RSArea.h"
+#include "RSScreen.h"
+#include "RSVGA.h"
+#include "IffLexer.h"
+#include "RSPalette.h"
 
 static RSScreen Screen;
 static RSVGA VGA;

@@ -6,8 +6,12 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__SCFontManager__
-#define __libRealSpace__SCFontManager__
+#pragma once
+#include <map>
+#include <string.h>
+
+#include "RSFont.h"
+#include "TreArchive.h"
 
 class RSFontManager{
 public:
@@ -23,4 +27,3 @@ private:
     std::map<char*,RSFont*,Char_String_Comparator> fonts;
 };
 
-#endif /* defined(__libRealSpace__SCFontManager__) */

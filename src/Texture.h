@@ -6,8 +6,19 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __iff__Texture__
-#define __iff__Texture__
+#pragma once
+
+#include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <stdlib.h>
+#include <stdio.h>
+
+#ifdef __cplusplus
+}
+#endif
+#include "ByteStream.h"
 
 typedef struct {
     uint8_t r;
@@ -67,7 +78,6 @@ typedef struct VGAPalette{
     
 } VGAPalette ;
 
-
 class RSImage;
 
 class Texture{
@@ -98,5 +108,3 @@ public:
 private:
     
 };
-
-#endif /* defined(__iff__Texture__) */

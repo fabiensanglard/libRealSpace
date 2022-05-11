@@ -32,9 +32,11 @@ extern "C" {
 #ifndef _WIN32
     #include <unistd.h>
 #endif
-
-    #include "SDL2/SDL.h"
-    #include "SDL2/SDL_opengl.h"
+#ifdef _WIN32
+	#include <Windows.h>
+#endif
+    #include <SDL.h>
+    #include <GL/GL.h>
 
 
     #include "Math.h"

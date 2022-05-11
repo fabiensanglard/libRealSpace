@@ -6,10 +6,15 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__RSImage__
-#define __libRealSpace__RSImage__
+#pragma once
+
+#include <stdint.h>
+#include "Maths.h"
+#include "Texture.h"
+
 
 class RSPalette;
+struct VGAPalette;
 
 class RSImage{
     
@@ -60,5 +65,3 @@ private:
     
     bool dirty;
 };
-
-#endif /* defined(__libRealSpace__RSImage__) */

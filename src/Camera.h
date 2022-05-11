@@ -6,8 +6,13 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__Camera__
-#define __libRealSpace__Camera__
+#pragma once
+#include <math.h>
+
+#include "Maths.h"
+#include "Matrix.h"
+#include "Quaternion.h"
+
 
 class Camera{
 
@@ -60,4 +65,3 @@ private:
     Matrix mview;
 };
 
-#endif /* defined(__libRealSpace__Camera__) */

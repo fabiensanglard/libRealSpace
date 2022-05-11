@@ -5,9 +5,13 @@
 //  Created by fabien sanglard on 12/29/2013.
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
+#pragma once
+#include <vector>
+#include <map>
+#include <stdint.h>
 
-#ifndef __libRealSpace__PakArchive__
-#define __libRealSpace__PakArchive__
+#include "Base.h"
+#include "ByteStream.h"
 
 typedef struct PakEntry{
     
@@ -72,4 +76,3 @@ private:
     bool initalizedFromFile ;
 };
 
-#endif /* defined(__libRealSpace__PakArchive__) */

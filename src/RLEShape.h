@@ -6,8 +6,12 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __pak__rle__
-#define __pak__rle__
+#pragma once
+#include <stdint.h>
+
+#include "Base.h"
+#include "ByteStream.h"
+#include "Maths.h"
 
 class RLEShape{
 
@@ -74,9 +78,3 @@ private:
     bool WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color);
 };
 
-
-
-
-
-
-#endif /* defined(__pak__rle__) */

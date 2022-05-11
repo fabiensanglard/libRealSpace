@@ -426,9 +426,9 @@ void SCObjectViewer::RunFrame(void){
     Renderer.GetCamera()->LookAt(&lookAt);
     
     Point3D light;
-    light.x= 4*cos(-totalTime/20000.0f);
+    light.x= 4*cos(-1*totalTime/20000.0f);
     light.y= 4;
-    light.z= 4*sin(-totalTime/20000.0f);
+    light.z= 4*sin(-1*totalTime/20000.0f);
     Renderer.SetLight(&light);
     
     glMatrixMode(GL_PROJECTION);

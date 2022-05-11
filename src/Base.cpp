@@ -26,7 +26,7 @@ void SetBase(const char* newBase){
 
 #ifdef _WIN32
 int Sys_CreateDirectory(const char* path){
-#include <FileAPI.h>
+
     return CreateDirectoryA(path,NULL);
 }
 #else
@@ -35,6 +35,7 @@ int Sys_CreateDirectory(const char* path){
 int Sys_CreateDirectory(const char* path){
     return mkdir(path,S_IRWXU | S_IRUSR | S_IWUSR| S_IXUSR);
 }
+#endif
 
 void printErrorMessage(int error,const char* subPath){
     
@@ -44,7 +45,9 @@ void printErrorMessage(int error,const char* subPath){
     printf("Error while creating '%s': Reason:\n",subPath);
     switch (error) {
         case EACCES: printf("EACCES: Search permission is denied for a component of the path prefix.| Write permission is denied for the parent directory."); break;
-        case EDQUOT: printf("EDQUOT: The new directory cannot be created because the user's quota of disk blocks on the file system that will contain the directory has been exhausted.|The user's quota of inodes on the file system on which the directory is being created has been exhausted."); break;
+#ifndef _WIN32
+		case EDQUOT: printf("EDQUOT: The new directory cannot be created because the user's quota of disk blocks on the file system that will contain the directory has been exhausted.|The user's quota of inodes on the file system on which the directory is being created has been exhausted."); break;
+#endif // !_WIN32
         case EEXIST: printf("EEXIST: The named file exists."); break;
         case EFAULT: printf("EFAULT:  Path points outside the process's allocated addressspace."); break;
         case EIO: printf("EIO: An I/O error occurred while making the directory entryor allocating the inode. | An I/O error occurred while reading from or writing to the file system."); break;
@@ -62,7 +65,7 @@ void printErrorMessage(int error,const char* subPath){
     }
     printf("\n\n");
 }
-#endif
+
 
 
 void CreateDirectories(const char* path){

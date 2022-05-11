@@ -6,9 +6,14 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
+#include "RSImage.h"
+#include "SCRenderer.h"
+#include "Texture.h"
+#include "RSPalette.h"
+#include "RSVGA.h"
 
 
+extern SCRenderer Renderer;
 
 RSImage::RSImage() :
 data(0),

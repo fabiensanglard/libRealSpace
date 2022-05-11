@@ -6,8 +6,12 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__RSImageSet__
-#define __libRealSpace__RSImageSet__
+#pragma once
+
+#include <stdint.h>
+#include <vector>
+#include "RLEShape.h"
+#include "PakArchive.h"
 
 class RSImageSet{
     
@@ -26,5 +30,3 @@ private:
     
     std::vector<RLEShape*> shapes;
 };
-
-#endif /* defined(__libRealSpace__RSImageSet__) */

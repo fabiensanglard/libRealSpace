@@ -6,8 +6,10 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
-
+#include "RSVGA.h"
+#include "RSImage.h"
+#include "IffLexer.h"
+#include "RSPalette.h"
 
 
 

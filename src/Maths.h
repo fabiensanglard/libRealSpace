@@ -6,8 +6,9 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__Math__
-#define __libRealSpace__Math__
+#pragma once
+#include <math.h>
+#include <stdint.h>
 
 typedef struct Point2D{
     int32_t x;
@@ -20,4 +21,3 @@ typedef Point2D Vector2D;
 // Long life to however came up with this. You rule man.
 float InvSqrt(float x);
 
-#endif /* defined(__libRealSpace__Math__) */

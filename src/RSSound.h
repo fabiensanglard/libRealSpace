@@ -5,14 +5,12 @@
 //  Created by Fabien Sanglard on 12/30/2013.
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
-
-#ifndef __libRealSpace__RSSound__
-#define __libRealSpace__RSSound__
+#pragma once
+#include <stdint.h>
+class PakArchive;
 
 class RSSound{
     
 public:
     void InitFromPAK(PakArchive* archive, uint32_t index);
 };
-
-#endif /* defined(__libRealSpace__RSSound__) */

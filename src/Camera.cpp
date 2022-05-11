@@ -6,8 +6,7 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
-
+#include "Camera.h"
 
 
 void Camera::SetPersective(float fovy, float aspect, float zNear, float zFar){

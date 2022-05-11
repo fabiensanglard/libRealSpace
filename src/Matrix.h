@@ -6,9 +6,21 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__Matrix__
-#define __libRealSpace__Matrix__
+#pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <stdlib.h>
+#include <stdio.h>
+
+#ifdef __cplusplus
+}
+#endif
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+#include "Maths.h"
 
 #define DEG_TO_RAD (2.0f*M_PI/360.0f)
 
@@ -118,5 +130,3 @@ public:
 private:
 };
 
-
-#endif /* defined(__libRealSpace__Matrix__) */

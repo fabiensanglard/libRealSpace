@@ -6,9 +6,20 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__Screen__
-#define __libRealSpace__Screen__
+#pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <stdlib.h>
+#include <stdio.h>
+
+#ifdef __cplusplus
+}
+#endif
+#include <Windows.h>
+#include <GL/GL.h>
+#include <SDL.h>
 class RSScreen{
     
 public:
@@ -27,5 +38,3 @@ private:
     
     
 };
-
-#endif /* defined(__libRealSpace__Screen__) */

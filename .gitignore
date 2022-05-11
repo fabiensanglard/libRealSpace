@@ -21,3 +21,7 @@ DerivedData
 
 # CocoaPods
 Pods
+.vs
+SC/Debug/
+libRealSpace/Debug/*
+libRealSpace/packages/*

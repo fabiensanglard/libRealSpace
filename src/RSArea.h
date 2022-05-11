@@ -6,8 +6,26 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__RSMap__
-#define __libRealSpace__RSMap__
+#pragma once
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <stdlib.h>
+#include <stdio.h>
+
+#ifdef __cplusplus
+}
+#endif
+
+#include <stdint.h>
+#include <vector>
+#include "Matrix.h"
+#include "Quaternion.h"
+#include "TreArchive.h"
+#include "PakArchive.h"
+#include "RSEntity.h"
+#include "RSMapTextureSet.h"
+#include "IffLexer.h"
 
 //DIRTY HACK !!! DELETE ME ASAP
 #define  HEIGHT_DIVIDER 17
@@ -48,6 +66,10 @@ typedef struct AreaBlock{
 
 #define BLOCK_PER_MAP_SIDE 18
 #define BLOCKS_PER_MAP (BLOCK_PER_MAP_SIDE*BLOCK_PER_MAP_SIDE)
+
+class RSMapTextureSet;
+class RSImage;
+class PakArchive;
 
 class RSArea{
 public:
@@ -104,5 +126,3 @@ private:
     void AddJets(void);
     std::vector<RSEntity*> jets;
 };
-
-#endif /* defined(__libRealSpace__RSMap__) */

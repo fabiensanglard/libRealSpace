@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 fabien sanglard. All rights reserved.
 //
 
-#include "precomp.h"
+#include "TreArchive.h"
 
 
 TreArchive::TreArchive():
@@ -36,7 +36,7 @@ bool TreArchive::InitFromFile(const char* filepath){
     strcat(fullPath, filepath);
     
     
-    FILE* file = fopen(fullPath, "r");
+    FILE* file = fopen(fullPath, "r+b");
     
     if (!file){
         printf("Unable to open TRE archive: '%s'.\n",filepath);
@@ -207,7 +207,7 @@ bool TreArchive::Decompress(const char* dstDirectory){
         
         //Write file !
         printf("Decompressing TRE file: %lu '%s' %lu (bytes).\n",i,fullPath,entry->size);
-        FILE* file = fopen(fullPath,"w");
+        FILE* file = fopen(fullPath,"w+b");
         fwrite(entry->data, 1, entry->size, file);
         fclose(file);
         

@@ -6,8 +6,10 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
+#include "RSArea.h"
+#include "SCRenderer.h"
 
+extern SCRenderer Renderer;
 
 RSArea::RSArea(){
     
