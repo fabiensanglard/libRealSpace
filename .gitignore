@@ -25,3 +25,4 @@ Pods
 SC/Debug/
 libRealSpace/Debug/*
 libRealSpace/packages/*
+libRealSpace/x64/*

@@ -29,7 +29,7 @@ RSImage::~RSImage(){
 
 void RSImage::Create(const char name[8],uint32_t width,uint32_t height){
 
-    strcpy(this->name,name);
+    strncpy(this->name,name,8);
     this->width = width;
     this->height = height;
     this->data = (uint8_t*)malloc(this->width*this->height);
