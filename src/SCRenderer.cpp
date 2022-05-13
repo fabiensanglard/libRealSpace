@@ -43,7 +43,7 @@ void SCRenderer::Init(int32_t zoomFactor){
     //Load the default palette
     IffLexer lexer ;
     lexer.InitFromFile("PALETTE.IFF");
-    //lexer.List(stdout);
+    lexer.List(stdout);
     
     RSPalette palette;
     palette.InitFromIFF(&lexer);
@@ -208,8 +208,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
         //glDepthFunc(GL_EQUAL);
         
-        //glAlphaFunc ( GL_GREATER, 0.0 ) ;
-        //glEnable ( GL_ALPHA_TEST ) ;
+        glAlphaFunc ( GL_GREATER, 0.0 ) ;
+        glEnable ( GL_ALPHA_TEST ) ;
         
         
         for (int i=0 ; i < object->NumUVs(); i++) {
@@ -265,7 +265,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
         
         glDisable(GL_TEXTURE_2D);
-        //glDisable(GL_BLEND);
+        glDisable(GL_BLEND);
     }
 
 
@@ -274,19 +274,19 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
 
    
     //Pass 3: Let's draw the transparent stuff render RSEntity::SC_TRANSPARENT)
-    //glDisable(GL_TEXTURE_2D);
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_ONE, GL_ONE);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
 #ifndef _WIN32
 	
 
 	glBlendEquation(GL_ADD);
 #else 
-	/*typedef void (APIENTRY * PFNGLBLENDEQUATIONPROC) (GLenum mode);
+	typedef void (APIENTRY * PFNGLBLENDEQUATIONPROC) (GLenum mode);
 	PFNGLBLENDEQUATIONPROC glBlendEquation = NULL;
 	glBlendEquation = (PFNGLBLENDEQUATIONPROC)wglGetProcAddress("glBlendEquation");
 	glBlendEquation(GL_ADD);
-	glDepthFunc(GL_LESS);*/
+	//glDepthFunc(GL_LESS);
 #endif
         
     for(int i = 0 ; i < lod->numTriangles ; i++){
@@ -336,8 +336,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         glEnd();
     }
 
-    //glDisable(GL_TEXTURE_2D);
-    //glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
     
     
     
@@ -378,8 +378,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             
             const Texel* texel = palette.GetRGBColor(triangle->color);
             
-            //glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,1);
-            glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
+            glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,1);
+            //glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
             
             glVertex3f(object->vertices[triangle->ids[j]].x,
                        object->vertices[triangle->ids[j]].y,
@@ -887,8 +887,10 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         glDepthFunc(GL_EQUAL);
         //for(int i=97 ; i < 98 ; i++)
-        for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
-            RenderBlock(area, LOD, i,true);
+		for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+			printf("Rendering block %d\n", i);
+			RenderBlock(area, LOD, i, true);
+		}
         glDisable(GL_BLEND);
         glDisable(GL_TEXTURE_2D);
         
@@ -1038,4 +1040,24 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
 
 void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 
+	
+	glDepthFunc(GL_LESS);
+	glBegin(GL_TRIANGLES);
+	//for(int i=97 ; i < 98 ; i++)
+	for (int i = 0; i < BLOCKS_PER_MAP; i++)
+		RenderBlock(area, LOD, i, false);
+	glEnd();
+
+
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthFunc(GL_EQUAL);
+	//for(int i=97 ; i < 98 ; i++)
+	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+		printf("Rendering block %d\n", i);
+		RenderBlock(area, LOD, i, true);
+	}
+	glDisable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
 }

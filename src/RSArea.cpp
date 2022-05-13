@@ -419,7 +419,8 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             int16_t height ;
             height = vertStream.ReadShort();
-            height /= HEIGHT_DIVIDER;
+			//height = height * 50000;
+            //height /= HEIGHT_DIVIDER;
           
             vertex->flag = vertStream.ReadByte();
             vertex->type = vertStream.ReadByte();
@@ -498,11 +499,11 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     - text
             */
             
-            vertex->v.y = height;//-vertex->text * 10;//height ;
+            vertex->v.y = height*3;//-vertex->text * 10;//height ;
             
-#define BLOCK_WIDTH (512)
-            vertex->v.x = i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH ;
-            vertex->v.z = i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH ;
+#define BLOCK_WIDTH (1000000/18)
+            vertex->v.x = (i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH) - 500000;
+            vertex->v.z = (i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH) - 500000;
            
             
             vertex->color[0] = t->r/255.0f;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
