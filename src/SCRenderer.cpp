@@ -97,7 +97,7 @@ void SCRenderer::CreateTextureInGPU(Texture* texture){
     
     glGenTextures(1, &texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
-	printf("TEXTURE [%s] : %d\n", texture->name, texture->id);
+	//printf("TEXTURE [%s] : %d\n", texture->name, texture->id);
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
@@ -116,7 +116,7 @@ void SCRenderer::UploadTextureContentToGPU(Texture* texture){
 
     if (!initialized)
         return;
-	printf("UPLOAD TEXTURE [%s] : %d\n", texture->name, texture->id);
+	//printf("UPLOAD TEXTURE [%s] : %d\n", texture->name, texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
 }
@@ -125,7 +125,7 @@ void SCRenderer::DeleteTextureInGPU(Texture* texture){
     
     if (!initialized)
         return;
-	printf("DELETE TEXTURE [%s] : %d\n", texture->name, texture->id);
+	//printf("DELETE TEXTURE [%s] : %d\n", texture->name, texture->id);
     glDeleteTextures(1, &texture->id);
 }
 
@@ -225,7 +225,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             Texture* texture = image->GetTexture();
             
             glBindTexture(GL_TEXTURE_2D, texture->id);
-			printf("BIND TEXTURE [%s]:%d\n", texture->name, texture->id);
+			//printf("BIND TEXTURE [%s]:%d\n", texture->name, texture->id);
             Triangle* triangle = &object->triangles[textInfo->triangleID];
             
             Vector3D normal;
@@ -285,8 +285,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
 	typedef void (APIENTRY * PFNGLBLENDEQUATIONPROC) (GLenum mode);
 	PFNGLBLENDEQUATIONPROC glBlendEquation = NULL;
 	glBlendEquation = (PFNGLBLENDEQUATIONPROC)wglGetProcAddress("glBlendEquation");
-	glBlendEquation(GL_ADD);
-	//glDepthFunc(GL_LESS);
+	//glBlendEquation(GL_ADD);
+	glDepthFunc(GL_LESS);
 #endif
         
     for(int i = 0 ; i < lod->numTriangles ; i++){
@@ -542,8 +542,26 @@ void SCRenderer::RenderTexturedTriangle(MapVertex* tri0,
     white[1] = 1;
     white[2] = 1;
     white[3] = 1;
-    glColor4fv(white);
-    
+    //glColor4fv(white);
+	int mainColor = 0;
+	if (tri0->type != tri1->type || tri0->type != tri2->type
+
+		) {
+		mainColor = 1;
+		if (tri1->type > tri0->type)
+			if (tri1->type > tri2->type)
+				glColor4fv(tri1->color);
+			else
+				glColor4fv(tri2->color);
+		else
+			if (tri0->type > tri2->type)
+				glColor4fv(tri0->color);
+			else
+				glColor4fv(tri2->color);
+	}
+
+
+
     RSImage* image = NULL;
     if (triangleType == LOWER_TRIANGE)
         image = area->GetImageByID(tri0->lowerImageID);
@@ -560,35 +578,51 @@ void SCRenderer::RenderTexturedTriangle(MapVertex* tri0,
 
     
     glBindTexture(GL_TEXTURE_2D,image->GetTexture()->GetTextureID());
-    
+	
     glBegin(GL_TRIANGLES);
     
     if (image->width == 64){
         glTexCoord2fv(textTrianCoo64[triangleType][0]);
+		if (!mainColor) {
+			glColor4fv(tri0->color);
+		}
         glVertex3f(tri0->v.x,tri0->v.y,tri0->v.z);
     
-  
+		if (!mainColor) {
+			glColor4fv(tri1->color);
+		}
         glTexCoord2fv(textTrianCoo64[triangleType][1]);
         glVertex3f(tri1->v.x,tri1->v.y,tri1->v.z);
     
-    
+		if (!mainColor) {
+			glColor4fv(tri2->color);
+		}
         glTexCoord2fv(textTrianCoo64[triangleType][2]);
         glVertex3f(tri2->v.x,tri2->v.y,tri2->v.z);
     }
         else{
         glTexCoord2fv(textTrianCoo[triangleType][0]);
+		if (!mainColor) {
+			glColor4fv(tri0->color);
+		}
         glVertex3f(tri0->v.x,tri0->v.y,tri0->v.z);
         
         
         glTexCoord2fv(textTrianCoo[triangleType][1]);
+		if (!mainColor) {
+			glColor4fv(tri1->color);
+		}
         glVertex3f(tri1->v.x,tri1->v.y,tri1->v.z);
         
         
         glTexCoord2fv(textTrianCoo[triangleType][2]);
+		if (!mainColor) {
+			glColor4fv(tri2->color);
+		}
         glVertex3f(tri2->v.x,tri2->v.y,tri2->v.z);
         }
     glEnd();
-    
+	
 }
 
 
@@ -669,8 +703,9 @@ void SCRenderer::RenderQuad(MapVertex* currentVertex,
         //}
     }
     else{
-        if (currentVertex->lowerImageID != 0xFF )
-            RenderTexturedTriangle(currentVertex,bottomRightVertex,bottomVertex,area,LOWER_TRIANGE);
+		if (currentVertex->lowerImageID != 0xFF) {
+			RenderTexturedTriangle(currentVertex, bottomRightVertex, bottomVertex, area, LOWER_TRIANGE);
+		}
     }
     
       //Render Upper triangles
@@ -681,8 +716,9 @@ void SCRenderer::RenderQuad(MapVertex* currentVertex,
        // }
     }
     else{
-        if (currentVertex->upperImageID != 0xFF )
-             RenderTexturedTriangle(currentVertex,rightVertex,bottomRightVertex,area,UPPER_TRIANGE);
+		if (currentVertex->upperImageID != 0xFF) {
+			RenderTexturedTriangle(currentVertex, rightVertex, bottomRightVertex, area, UPPER_TRIANGE);
+		}
     }
     
     
@@ -695,6 +731,7 @@ void SCRenderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
     
     uint32_t sideSize = block->sideSize;
     
+	printf("Rendering block %d at x %f,z %f\n", i, block->vertice[0].v.x, block->vertice[0].v.z);
     for (size_t x=0 ; x < sideSize-1 ; x ++){
         for (size_t y=0 ; y < sideSize-1 ; y ++){
             
@@ -915,20 +952,26 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
     std::vector<MapObject> *objects = &area->objects[blockID];
     
     glColor3fv(color);
-    glPointSize(3);
+    glPointSize(5);
     glDisable(GL_DEPTH_TEST);
     glBegin(GL_POINTS);
     
-    for (size_t i =8 ; i < 9; i++) {
+
+    for (size_t i =0 ; i < objects->size(); i++) {
         MapObject object = objects->at(i);
-        
+		
         int32_t offset[3];
         
-        #define BLOCK_WIDTH (512)
+#define BLOCK_WIDTH (1000000/18)
         
-        offset[0] = blockID % 18 * BLOCK_WIDTH ;
-        offset[1] = area->elevation[blockID];
-        offset[2] = (int32_t)blockID / 18 * BLOCK_WIDTH;
+
+		//float x = (i % 18 * BLOCK_WIDTH + (0 % verticesPerBlock) / (float)(verticesPerBlock)* BLOCK_WIDTH) - 500000;
+		//float z = (i / 18 * BLOCK_WIDTH + (0 / verticesPerBlock) / (float)(verticesPerBlock)* BLOCK_WIDTH) - 500000;
+
+
+        offset[0] = (blockID % 18 * BLOCK_WIDTH + (0 % 400) / 400.0f* BLOCK_WIDTH) - 500000;
+        offset[1] = area->elevation[blockID] * 3;
+        offset[2] = ((int32_t)blockID / 18 * BLOCK_WIDTH + (0 / 400) / 400.0f* BLOCK_WIDTH) - 500000;
         
         /*
         glVertex3d(object.position[0]/255*BLOCK_WIDTH+offset[0],
@@ -936,16 +979,22 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
                    object.position[2]/255*BLOCK_WIDTH+offset[2]);
         */
         int32_t localDelta[3];
-        localDelta[0] = object.position[0]/65355.0f*BLOCK_WIDTH;
-        localDelta[1] = object.position[1];/// HEIGHT_DIVIDER                   ;
-        localDelta[2] = object.position[2]/65355.0f*BLOCK_WIDTH;
+		localDelta[0] = object.position[0]/65355.0f*BLOCK_WIDTH;
+        localDelta[1] = object.position[1] * 3;/// HEIGHT_DIVIDER                   ;
+		localDelta[2] = object.position[2]/ 65355.0f*BLOCK_WIDTH;
         
         
         size_t toDraw[3];
         toDraw[0] = localDelta[0]+offset[0];
-        toDraw[1] = offset[1];
+		toDraw[1] = localDelta[1] + offset[1];
         toDraw[2] = localDelta[2]+offset[2];
         
+		printf("Rendering [%s] at {%d,%d,%d} ofset (%d,%d,%d)+ local(%d,%d,%d)\n",
+			object.name,
+			toDraw[0], toDraw[1], toDraw[2],
+			offset[0], offset[1], offset[2],
+			localDelta[0], localDelta[1], localDelta[2]
+		);
         glVertex3d(toDraw[0],
                    toDraw[1],
                    toDraw[2]);
@@ -953,7 +1002,8 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
     }
     
     glEnd();
-    
+	//glEnable(GL_DEPTH_TEST);
+	//glPointSize(1);
 }
 
 void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
@@ -1040,24 +1090,29 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
 
 void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 
-	
+	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glBegin(GL_TRIANGLES);
 	//for(int i=97 ; i < 98 ; i++)
 	for (int i = 0; i < BLOCKS_PER_MAP; i++)
-		RenderBlock(area, LOD, i, false);
+		//RenderBlock(area, LOD, i, false);
 	glEnd();
 
-
+	
 	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthFunc(GL_EQUAL);
-	//for(int i=97 ; i < 98 ; i++)
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthFunc(GL_LEQUAL);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-		printf("Rendering block %d\n", i);
-		RenderBlock(area, LOD, i, true);
+#define BLOCK_WIDTH (1000000/18)
+		float x = (i % 18 * BLOCK_WIDTH + (0 % verticesPerBlock) / (float)(verticesPerBlock)* BLOCK_WIDTH) - 500000;
+		float z = (i / 18 * BLOCK_WIDTH + (0 / verticesPerBlock) / (float)(verticesPerBlock)* BLOCK_WIDTH) - 500000;
+
+		printf("Rendering block %d [%f,%f]\n", i, x, z);
+		//RenderBlock(area, LOD, i, true);
+		RenderObjects(area, i);
 	}
-	glDisable(GL_BLEND);
+	
+	//glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 }
