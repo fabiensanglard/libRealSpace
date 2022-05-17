@@ -321,9 +321,9 @@ void RSArea::ParseObjects(){
 				RSEntity *entity = new RSEntity();
 				entity->InitFromRAM(entry->data, entry->size);
 				
-				objCache.emplace(hash, entity);
+				this->objCache.emplace(hash, entity);
 				
-				printf("CACHE SIZE %d\n", objCache.size());
+				printf("CACHE SIZE %d\n", this->objCache.size());
 			}
 			objects[i].push_back(mapObject);
         }
