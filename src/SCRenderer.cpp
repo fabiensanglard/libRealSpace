@@ -193,9 +193,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
     glDisable(GL_CULL_FACE);
     
-    //glEnable(GL_BLEND);
-    
-    //glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     
     
     glEnable(GL_DEPTH_TEST);
@@ -285,7 +284,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
 	typedef void (APIENTRY * PFNGLBLENDEQUATIONPROC) (GLenum mode);
 	PFNGLBLENDEQUATIONPROC glBlendEquation = NULL;
 	glBlendEquation = (PFNGLBLENDEQUATIONPROC)wglGetProcAddress("glBlendEquation");
-	//glBlendEquation(GL_ADD);
+	glBlendEquation(GL_ADD);
 	glDepthFunc(GL_LESS);
 #endif
         
@@ -945,65 +944,67 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
 }
 
 void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
-    
-    float color[3] = {1,0,0};
-    
-    
-    std::vector<MapObject> *objects = &area->objects[blockID];
-    
-    glColor3fv(color);
-    glPointSize(5);
-    glDisable(GL_DEPTH_TEST);
-    glBegin(GL_POINTS);
-    
 
+    std::vector<MapObject> *objects = &area->objects[blockID];
+
+    glPointSize(5);
+    glDisable(GL_DEPTH_TEST); 
+	float y = 0;
     for (size_t i =0 ; i < objects->size(); i++) {
         MapObject object = objects->at(i);
 		
         int32_t offset[3];
         
 #define BLOCK_WIDTH (1000000/18)
-        
-
-		//float x = (i % 18 * BLOCK_WIDTH + (0 % verticesPerBlock) / (float)(verticesPerBlock)* BLOCK_WIDTH) - 500000;
-		//float z = (i / 18 * BLOCK_WIDTH + (0 / verticesPerBlock) / (float)(verticesPerBlock)* BLOCK_WIDTH) - 500000;
-
-
-        offset[0] = (blockID % 18 * BLOCK_WIDTH + (0 % 400) / 400.0f* BLOCK_WIDTH) - 500000;
+       
+        offset[0] = (blockID % 18 * BLOCK_WIDTH +(1 / 400.0f* BLOCK_WIDTH)) - 500000;
         offset[1] = area->elevation[blockID] * 3;
-        offset[2] = ((int32_t)blockID / 18 * BLOCK_WIDTH + (0 / 400) / 400.0f* BLOCK_WIDTH) - 500000;
+        offset[2] = ((int32_t)blockID / 18 * BLOCK_WIDTH +(1 / 400.0f* BLOCK_WIDTH)) - 500000;
         
-        /*
-        glVertex3d(object.position[0]/255*BLOCK_WIDTH+offset[0],
-                   object.position[1]+offset[1],
-                   object.position[2]/255*BLOCK_WIDTH+offset[2]);
-        */
         int32_t localDelta[3];
-		localDelta[0] = object.position[0]/65355.0f*BLOCK_WIDTH;
-        localDelta[1] = object.position[1] * 3;/// HEIGHT_DIVIDER                   ;
-		localDelta[2] = object.position[2]/ 65355.0f*BLOCK_WIDTH;
-        
-        
-        size_t toDraw[3];
-        toDraw[0] = localDelta[0]+offset[0];
-		toDraw[1] = localDelta[1] + offset[1];
-        toDraw[2] = localDelta[2]+offset[2];
-        
-		printf("Rendering [%s] at {%d,%d,%d} ofset (%d,%d,%d)+ local(%d,%d,%d)\n",
-			object.name,
-			toDraw[0], toDraw[1], toDraw[2],
-			offset[0], offset[1], offset[2],
-			localDelta[0], localDelta[1], localDelta[2]
-		);
-        glVertex3d(toDraw[0],
-                   toDraw[1],
-                   toDraw[2]);
+		localDelta[0] = object.position[0] / 65355.0f * BLOCK_WIDTH;
+        localDelta[1] = object.position[1] * 3;/// HEIGHT_DIVIDER;
+		localDelta[2] = object.position[2] / 65355.0f * BLOCK_WIDTH;
 
+        size_t toDraw[3];
+		toDraw[0] = localDelta[0] + offset[0];
+		toDraw[1] = localDelta[1];
+		toDraw[2] = localDelta[2] + offset[2];
+        
+		glPushMatrix();
+		
+		glTranslatef(offset[0], 0, offset[2]);
+		glTranslatef(localDelta[0], localDelta[1], localDelta[2]);
+		
+		if (area->objCache[object.name]) {
+			printf("Rendering [%s] at {%d,%d,%d} ofset (%d,%d,%d)+ local(%d,%d,%d)\n",
+				object.name,
+				toDraw[0], toDraw[1], toDraw[2],
+				offset[0], offset[1], offset[2],
+				localDelta[0], localDelta[1], localDelta[2]
+			);
+			glPushMatrix();
+			glScalef(3, 3, 3);
+			DrawModel(area->objCache[std::string(object.name)], BLOCK_LOD_MAX);
+			glPopMatrix();
+		}
+		else {
+			printf("OBJECT [%s] NOT FOUND\n", object.name);
+			glBegin(GL_POINTS);
+				glColor3f(0, 1, 0);
+				glVertex3d(0, 0, 0);
+			glEnd();
+		}
+
+		glPopMatrix();
+
+		glBegin(GL_POINTS);
+			glColor3f(1, 0, 0);
+			glVertex3d(localDelta[0]+offset[0], 10000, localDelta[2]+ offset[2]);
+		glEnd();
     }
-    
-    glEnd();
-	//glEnable(GL_DEPTH_TEST);
-	//glPointSize(1);
+	glEnable(GL_DEPTH_TEST);
+	glPointSize(1);
 }
 
 void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
@@ -1015,40 +1016,24 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
     
     Matrix* projectionMatrix = camera.GetProjectionMatrix();
     glLoadMatrixf(projectionMatrix->ToGL());
-    
-    
-    
-    
+
     glPointSize(4);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-   
 
-    
-   
-    
     running = true;
-    
-    
-    
+
     static float counter = 0;
-    
-    
+
     while (running) {
         
         glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-        
-    
-        
         glMatrixMode(GL_MODELVIEW);
-        
-        
-        Point3D lookAt = { 256*16,100,256*16 };
-        
+
+        Point3D lookAt = { 256*16,100,256*16 };       
         Renderer.GetCamera()->LookAt(&lookAt);
-        
+
         Point3D newPosition = camera.GetPosition();
-        
         newPosition.x= lookAt.x + 5256*cos(counter/2);
         newPosition.y= 3700;
         newPosition.z= lookAt.z + 5256*sin(counter/2);
@@ -1076,7 +1061,7 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
                            v->v.z);
             }
         }
-            glEnd();
+        glEnd();
         
         
         //Render objects on the map
@@ -1093,26 +1078,22 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glBegin(GL_TRIANGLES);
-	//for(int i=97 ; i < 98 ; i++)
 	for (int i = 0; i < BLOCKS_PER_MAP; i++)
-		//RenderBlock(area, LOD, i, false);
+		RenderBlock(area, LOD, i, false);
 	glEnd();
 
-	
 	glEnable(GL_TEXTURE_2D);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LEQUAL);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-#define BLOCK_WIDTH (1000000/18)
-		float x = (i % 18 * BLOCK_WIDTH + (0 % verticesPerBlock) / (float)(verticesPerBlock)* BLOCK_WIDTH) - 500000;
-		float z = (i / 18 * BLOCK_WIDTH + (0 / verticesPerBlock) / (float)(verticesPerBlock)* BLOCK_WIDTH) - 500000;
+		RenderBlock(area, LOD, i, true);
+	}
+	glDisable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
 
-		printf("Rendering block %d [%f,%f]\n", i, x, z);
-		//RenderBlock(area, LOD, i, true);
+	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
 		RenderObjects(area, i);
 	}
 	
-	//glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
 }

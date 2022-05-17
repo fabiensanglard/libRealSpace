@@ -301,10 +301,31 @@ void RSArea::ParseObjects(){
                 printf("%2X ",unknowns[k]);
             
             printf("\n");
-                
-            
-            objects[i].push_back(mapObject);
-            
+			std::string hash = mapObject.name;
+			if (!objCache[hash]) {
+				printf("LOAD NEW OBJECT %s\n", mapObject.name);
+				char modelPath[512];
+				const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
+				const char* OBJ_EXTENSION = ".IFF";
+
+				strcpy(modelPath, OBJ_PATH);
+				strcat(modelPath, mapObject.name);
+				strcat(modelPath, OBJ_EXTENSION);
+				TreEntry* entry = tre->GetEntryByName(modelPath);
+
+				if (entry == NULL) {
+					printf("Object reference '%s' not found in TRE.\n", modelPath);
+					continue;
+				}
+
+				RSEntity *entity = new RSEntity();
+				entity->InitFromRAM(entry->data, entry->size);
+				
+				objCache.emplace(hash, entity);
+				
+				printf("CACHE SIZE %d\n", objCache.size());
+			}
+			objects[i].push_back(mapObject);
         }
         
     }
