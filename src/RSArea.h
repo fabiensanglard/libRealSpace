@@ -95,7 +95,7 @@ public:
 
     size_t GetNumJets(void);
     RSEntity* GetJet(size_t jetID);
-	std::map<std::string, RSEntity *> objCache;
+	std::map<std::string, RSEntity *> *objCache;
 	TreArchive *tre;
 	
 private:

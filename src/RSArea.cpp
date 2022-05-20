@@ -158,20 +158,20 @@ void RSArea::ParseMetadata(){
     
     //Num texture sets
     size_t numTexturesSets = txmsMaps->size/12;
-    //printf("This area features %lu textureSets references.\n",numTexturesSets);
+    printf("This area features %lu textureSets references.\n",numTexturesSets);
     
     ByteStream textureRefStrean(txmsMaps->data);
         
     for (size_t i=0; i < numTexturesSets ; i++) {
-        /*uint16_t fastID =*/ textureRefStrean.ReadUShort();
+        uint16_t fastID = textureRefStrean.ReadUShort();
         char setName[8];
         for(int n=0; n < 8 ; n++){
             setName[n] = textureRefStrean.ReadByte();
         }
-        /*uint8_t unknown =*/ textureRefStrean.ReadByte();
-        /*uint8_t numImages =*/ textureRefStrean.ReadByte();
+        uint8_t unknown = textureRefStrean.ReadByte();
+        uint8_t numImages = textureRefStrean.ReadByte();
         
-       // printf("Texture Set Ref [%3lu] 0x%2X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
+       printf("Texture Set Ref [%3lu] 0x%2X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
     }
     
     /*
@@ -302,7 +302,9 @@ void RSArea::ParseObjects(){
             
             printf("\n");
 			std::string hash = mapObject.name;
-			if (!objCache[hash]) {
+			std::map<std::string, RSEntity *>::iterator it;
+			it = objCache->find(hash);
+			if (it == objCache->end()) {
 				printf("LOAD NEW OBJECT %s\n", mapObject.name);
 				char modelPath[512];
 				const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
@@ -321,9 +323,9 @@ void RSArea::ParseObjects(){
 				RSEntity *entity = new RSEntity();
 				entity->InitFromRAM(entry->data, entry->size);
 				
-				this->objCache.emplace(hash, entity);
+				objCache->emplace(hash, entity);
 				
-				printf("CACHE SIZE %d\n", this->objCache.size());
+				printf("CACHE SIZE %d\n", objCache->size());
 			}
 			objects[i].push_back(mapObject);
         }
@@ -495,7 +497,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             
             
-            vertex->upperImageID    = vertStream.ReadByte();
+            vertex->upperImageID = vertStream.ReadByte();
             vertex->lowerImageID = vertStream.ReadByte();
             
             /*

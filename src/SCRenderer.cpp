@@ -976,7 +976,9 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 		glTranslatef(offset[0], 0, offset[2]);
 		glTranslatef(localDelta[0], localDelta[1], localDelta[2]);
 		
-		if (area->objCache[object.name]) {
+		std::map<std::string, RSEntity *>::iterator it;
+		it = area->objCache->find(object.name);
+		if (it != area->objCache->end()) {
 			printf("Rendering [%s] at {%d,%d,%d} ofset (%d,%d,%d)+ local(%d,%d,%d)\n",
 				object.name,
 				toDraw[0], toDraw[1], toDraw[2],
@@ -985,7 +987,7 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 			);
 			glPushMatrix();
 			glScalef(3, 3, 3);
-			DrawModel(area->objCache[std::string(object.name)], BLOCK_LOD_MAX);
+			DrawModel(it->second, BLOCK_LOD_MAX);
 			glPopMatrix();
 		}
 		else {
