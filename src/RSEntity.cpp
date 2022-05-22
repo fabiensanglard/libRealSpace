@@ -46,6 +46,12 @@ void printChunkF(IffChunk* chunk, const char *name) {
 	printf("\n");
 }
 
+void parsRNWY(IffChunk* chunk, const char* name) {
+	if (chunk != NULL && chunk->data != NULL) {
+		printChunkF(chunk, name);
+	}
+}
+
 RSEntity::RSEntity() :
 	prepared(false)
 {
@@ -260,7 +266,7 @@ void RSEntity::InitFromIFF(IffLexer* lexer) {
 	printChunkF(lexer->GetChunkByID('NONE'), "NONE");
 	printChunkF(lexer->GetChunkByID('DAMG'), "DAMG");
 	printChunkF(lexer->GetChunkByID('TRGT'), "TRGT");
-	printChunkF(lexer->GetChunkByID('RNWY'), "RNWY");
+	parsRNWY(lexer->GetChunkByID('RNWY'), "RNWY");
 	CalcBoundingBox();
 }
 

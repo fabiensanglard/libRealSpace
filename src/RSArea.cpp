@@ -223,7 +223,6 @@ void RSArea::ParseObjects(){
     
     for(size_t i = 0 ; i < objectFiles.GetNumEntries() ; i++){
         PakEntry* entry = objectFiles.GetEntry(i);
-  
         if (entry->size == 0)
             continue;
         

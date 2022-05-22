@@ -160,7 +160,7 @@ void RSMission::parsePART(IffChunk* chunk) {
 		printf("LOADIND obj id[%d], name [%s]\n", id, objName);
 		printf("DATA:\n");
 		int cl = 0;
-		for (int k = 0; k < 16; k++) {
+		for (int k = 0; k < 52; k++) {
 			byte = stream.ReadByte();
 			if (byte >= 40 && byte <= 90) {
 				printf("[%c]", char(byte));
@@ -180,7 +180,7 @@ void RSMission::parsePART(IffChunk* chunk) {
 				cl++;
 			}
 		}
-
+		/*
 		int32_t i1, i2, i3, i4;
 		int32_t px, py, pz, pu;
 #define BLOCK_WIDTH (1000000/18)
@@ -239,7 +239,7 @@ void RSMission::parsePART(IffChunk* chunk) {
 				printf("\t");
 				cl++;
 			}
-		}
+		}*/
 		printf("\nEND\n");
 	}
 }

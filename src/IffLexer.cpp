@@ -250,7 +250,43 @@ void Tab(int tab) {
 		putchar(' ');
 }
 
+void dumpChunk(IffChunk* chunk, const char* name) {
+	printf("PARSING %s\n", name);
+	if (chunk == NULL) {
+		printf("NO CHUNK\n");
+		return;
+	}
+	if (chunk->data == NULL) {
+		printf("%s : NO DATA\n", name);
+		return;
+	}
+	ByteStream stream(chunk->data);
+	size_t fsize = chunk->size;
+	uint8_t byte;
+	int cl = 0;
+	for (int read = 0; read < fsize; read++) {
+		byte = stream.ReadByte();
+		if (byte >= 40 && byte <= 90) {
+			printf("[%c]", char(byte));
+		}
+		else if (byte >= 97 && byte <= 122) {
+			printf("[%c]", char(byte));
+		}
+		else {
+			printf("[0x%X]", byte);
+		}
+		if (cl > 2) {
+			printf("\n");
+			cl = 0;
+		}
+		else {
+			printf("\t");
+			cl++;
+		}
 
+	}
+	printf("\n");
+}
 
 void ListChunkContent(uint32_t level, IffChunk* chunk) {
 
@@ -260,6 +296,7 @@ void ListChunkContent(uint32_t level, IffChunk* chunk) {
 	Tab(level);
 	printf("%lu\n", chunk->size);
 
+	dumpChunk(chunk, GetChunkTextID(chunk->id));
 	if (chunk->subId != 0) {
 		Tab(level);
 		printf("%s\n", GetChunkTextID(chunk->subId));
@@ -272,6 +309,7 @@ void ListChunkContent(uint32_t level, IffChunk* chunk) {
 	}
 
 }
+
 
 void IffLexer::List(FILE* output) {
 

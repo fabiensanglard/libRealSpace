@@ -60,6 +60,8 @@ public:
     
     inline uint8_t* GetData(void){ return this->data;}
     
+    std::vector<PakEntry*> entries;
+
 private:
     
     bool ready;
@@ -70,7 +72,6 @@ private:
     uint8_t* data;
     size_t size;
     char path[512] ;
-    std::vector<PakEntry*> entries;
     
     // allows to know if we should free the TRE data
     bool initalizedFromFile ;

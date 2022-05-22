@@ -69,11 +69,12 @@ public:
     
     inline bool IsValid(void){ return this->valid;}
     
+    std::vector<TreEntry*> entries;
+
 private:
     
     bool valid;
     
-    std::vector<TreEntry*> entries;
     
     void ReadEntry(ByteStream* stream, TreEntry* entry);
     void Parse(void);
