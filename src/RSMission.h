@@ -75,4 +75,6 @@ private:
 	void parseLGHT(IffChunk* chunk);
 	void parseAREA(IffChunk* chunk);
 	void parsePART(IffChunk* chunk);
+	void parseSPOT(IffChunk* chunk);
+	void parsePROG(IffChunk* chunk);
 };

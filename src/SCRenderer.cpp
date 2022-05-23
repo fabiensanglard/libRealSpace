@@ -1095,7 +1095,28 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 	glDisable(GL_TEXTURE_2D);
 
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-		RenderObjects(area, i);
+        if (i != 41)
+		    RenderObjects(area, i);
 	}
 	
+}
+
+void SCRenderer::RenderWorldByID(RSArea* area, int LOD, int verticesPerBlock, int blockId) {
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glBegin(GL_TRIANGLES);
+    RenderBlock(area, LOD, blockId, false);
+    glEnd();
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthFunc(GL_LEQUAL);
+    RenderBlock(area, LOD, blockId, true);
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+    RenderObjects(area, blockId);
+    
+
 }

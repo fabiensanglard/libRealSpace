@@ -1,4 +1,6 @@
 #include "RSMission.h"
+#include "PakArchive.h"
+
 void printChunk(IffChunk* chunk, const char *name) {
 	printf("PARSING %s\n", name);
 	if (chunk == NULL) {
@@ -86,7 +88,7 @@ void RSMission::InitFromIFF(IffLexer* lexer) {
 	parseAREA(chunk);
 
 	chunk = lexer->GetChunkByID('SPOT');
-	printChunk(chunk, "SPOT");
+	parseSPOT(chunk);
 
 	chunk = lexer->GetChunkByID('NUMS');
 	printChunk(chunk, "SPOT");
@@ -101,7 +103,7 @@ void RSMission::InitFromIFF(IffLexer* lexer) {
 	printChunk(chunk, "CAST");
 
 	chunk = lexer->GetChunkByID('PROG');
-	printChunk(chunk, "PROG");
+	parsePROG(chunk);
 	
 	chunk = lexer->GetChunkByID('PART');
 	parsePART(chunk);
@@ -253,4 +255,22 @@ void RSMission::parseSMOK(IffChunk* chunk) {
 
 void RSMission::parseLGHT(IffChunk* chunk) {
 	printChunk(chunk, "LGHT");
+}
+
+void RSMission::parseSPOT(IffChunk* chunk) {
+	/*if (chunk != NULL) {
+		PakArchive p;
+		p.InitFromRAM("SPOT.PAK", chunk->data, chunk->size);
+		p.List(stdout);
+	}*/
+	printChunk(chunk, "SPOT");
+}
+
+void RSMission::parsePROG(IffChunk* chunk) {
+	/*if (chunk != NULL) {
+		PakArchive p;
+		p.InitFromRAM("PROG.PAK", chunk->data, chunk->size);
+		p.List(stdout);
+	}*/
+	printChunk(chunk, "PROG");
 }

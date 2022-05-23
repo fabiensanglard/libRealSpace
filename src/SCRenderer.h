@@ -64,7 +64,7 @@ public:
     void RenderBlock(RSArea* area,int LOD, int blockID,bool renderTexture);
     void RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock);
 	void RenderWorld(RSArea* area, int LOD, int verticesPerBlock);
-    
+    void RenderWorldByID(RSArea* area, int LOD, int verticesPerBlock, int blockId);
     void RenderObjects(RSArea* area,size_t blockID);
     
     

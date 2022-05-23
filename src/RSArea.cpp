@@ -10,7 +10,33 @@
 #include "SCRenderer.h"
 
 extern SCRenderer Renderer;
+void dumpfbyte(uint8_t* data, size_t size) {
+    ByteStream stream(data);
+    size_t fsize = size;
+    uint8_t byte;
+    int cl = 0;
+    for (int read = 0; read < fsize; read++) {
+        byte = stream.ReadByte();
+        if (byte >= 40 && byte <= 90) {
+            printf("[%c]", char(byte));
+        }
+        else if (byte >= 97 && byte <= 122) {
+            printf("[%c]", char(byte));
+        }
+        else {
+            printf("[0x%X]", byte);
+        }
+        if (cl > 2) {
+            printf("\n");
+            cl = 0;
+        }
+        else {
+            printf("\t");
+            cl++;
+        }
 
+    }
+}
 RSArea::RSArea(){
     
     
@@ -100,7 +126,7 @@ void RSArea::ParseMetadata(){
         elevOtherName[13]  = 0;
         
         for (int i=0; i<20 ; i++){
-            printf("%2X ",unknownsElev[i]);
+            printf("0x%X ",unknownsElev[i]);
         }
         
         printf("%-13s %-13s \n",elevName,elevOtherName);
@@ -114,7 +140,7 @@ void RSArea::ParseMetadata(){
     
     ByteStream triStream(atri->data);
     for (int i=0; i < 40; i++) {
-        printf(" %2X",triStream.ReadByte());
+        printf(" 0x%X",triStream.ReadByte());
     }
     char triFileName[13];
     for (int i=0; i < 13; i++)
@@ -171,7 +197,7 @@ void RSArea::ParseMetadata(){
         uint8_t unknown = textureRefStrean.ReadByte();
         uint8_t numImages = textureRefStrean.ReadByte();
         
-       printf("Texture Set Ref [%3lu] 0x%2X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
+       printf("Texture Set Ref [%3lu] 0x0x%X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
     }
     
     /*
@@ -214,10 +240,13 @@ void RSArea::ParseObjects(){
      
     */
     PakEntry* objectsFilesLocation = archive->GetEntry(5);
-    
+    printf("DUMP OBJECT FILES\n");
+    //dumpfbyte(objectsFilesLocation->data, objectsFilesLocation->size);
+    objectsFilesLocation = archive->GetEntry(5);
+
     PakArchive objectFiles;
     objectFiles.InitFromRAM("PAK Objects from RAM",objectsFilesLocation->data, objectsFilesLocation->size);
-    
+    objectFiles.List(stdout);
     printf("This .OBJ features %lu entries.\n",objectFiles.GetNumEntries());
     
     
@@ -225,7 +254,8 @@ void RSArea::ParseObjects(){
         PakEntry* entry = objectFiles.GetEntry(i);
         if (entry->size == 0)
             continue;
-        
+        dumpfbyte(entry->data, entry->size);
+        entry = objectFiles.GetEntry(i);
         ByteStream sizeGetter(entry->data);
         uint16_t numObjs = sizeGetter.ReadUShort();
         printf("OBJ files %lu features %d objects.\n",i,numObjs);
@@ -286,7 +316,7 @@ void RSArea::ParseObjects(){
             for(int k=0 ; k <0x31-12; k++)
                 unknowns[k] = reader.ReadByte();
                 
-            printf("object set [%3lu] obj [%2d] - '%-8s' %2X %2X %2X %2X %2X '%-8s'",i,j,mapObject.name,
+            printf("object set [%3lu] obj [%2d] - '%-8s' 0x%X 0x%X 0x%X 0x%X 0x%X '%-8s'\n",i,j,mapObject.name,
                        unknown09,
                        unknown10,
                        unknown11,
@@ -294,17 +324,17 @@ void RSArea::ParseObjects(){
                        unknown13,mapObject.destroyedName);
             
             for(int k=0 ; k < 12 ; k++)
-                printf("%2X ",coo[k]);
+                printf("\tCOO[%d]=[0x%X]\n",k,coo[k]);
             
+            printf("\n\tCOORD {X [0x%X]-[0x%X],Y :[0x%X]-[0x%X], Z:[0x%X]-[0x%X]}\n", coo[3], coo[2], coo[7], coo[6], coo[11], coo[10]);
             for(int k=0 ; k <0x31-12 ; k++)
-                printf("%2X ",unknowns[k]);
+                printf("\tunknowns[%d]=[0x%X]\n",k,unknowns[k]);
             
-            printf("\n");
+            printf("------\n");
 			std::string hash = mapObject.name;
 			std::map<std::string, RSEntity *>::iterator it;
 			it = objCache->find(hash);
 			if (it == objCache->end()) {
-				printf("LOAD NEW OBJECT %s\n", mapObject.name);
 				char modelPath[512];
 				const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
 				const char* OBJ_EXTENSION = ".IFF";
@@ -323,8 +353,6 @@ void RSArea::ParseObjects(){
 				entity->InitFromRAM(entry->data, entry->size);
 				
 				objCache->emplace(hash, entity);
-				
-				printf("CACHE SIZE %d\n", objCache->size());
 			}
 			objects[i].push_back(mapObject);
         }
@@ -502,7 +530,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             /*
             //City block
             if (blockDim == 20 && i==97){
-                printf("%2X (%2X) ",vertex->lowerImageID,vertex->upperImageID );
+                printf("0x%X (0x%X) ",vertex->lowerImageID,vertex->upperImageID );
                 
                 if (vertexID % 20 == 19)
                     printf("\n");

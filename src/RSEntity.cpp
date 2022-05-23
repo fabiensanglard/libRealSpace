@@ -85,7 +85,6 @@ void RSEntity::ParseTXMP(IffChunk* chunk) {
 
 	image->Create(name, width, height);
 	image->UpdateContent(stream.GetPosition());
-	printf("load image : %s\n", image->name);
 	AddImage(image);
 
 }
@@ -262,11 +261,11 @@ void RSEntity::InitFromIFF(IffLexer* lexer) {
 	if (chunk != NULL)
 		ParseLVL(chunk);
 
-	printChunkF(lexer->GetChunkByID('EXTE'), "EXTE");
+	/*printChunkF(lexer->GetChunkByID('EXTE'), "EXTE");
 	printChunkF(lexer->GetChunkByID('NONE'), "NONE");
 	printChunkF(lexer->GetChunkByID('DAMG'), "DAMG");
 	printChunkF(lexer->GetChunkByID('TRGT'), "TRGT");
-	parsRNWY(lexer->GetChunkByID('RNWY'), "RNWY");
+	parsRNWY(lexer->GetChunkByID('RNWY'), "RNWY");*/
 	CalcBoundingBox();
 }
 
