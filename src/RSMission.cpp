@@ -38,6 +38,30 @@ void printChunk(IffChunk* chunk, const char *name) {
 	printf("\n");
 }
 
+void printBytes(ByteStream *stream, int lenght) {
+	uint8_t byte;
+	int cl = 0;
+	for (int k = 0; k < lenght; k++) {
+		byte = stream->ReadByte();
+		if (byte >= 40 && byte <= 90) {
+			printf("[%c]", char(byte));
+		}
+		else if (byte >= 97 && byte <= 122) {
+			printf("[%c]", char(byte));
+		}
+		else {
+			printf("[0x%X]", byte);
+		}
+		if (cl > 2) {
+			printf("\n");
+			cl = 0;
+		}
+		else {
+			printf("\t");
+			cl++;
+		}
+	}
+}
 
 RSMission::RSMission() {
 	printf("CREATE MISSION\n");
@@ -162,45 +186,32 @@ void RSMission::parsePART(IffChunk* chunk) {
 		printf("LOADIND obj id[%d], name [%s]\n", id, objName);
 		printf("DATA:\n");
 		int cl = 0;
-		for (int k = 0; k < 52; k++) {
-			byte = stream.ReadByte();
-			if (byte >= 40 && byte <= 90) {
-				printf("[%c]", char(byte));
-			}
-			else if (byte >= 97 && byte <= 122) {
-				printf("[%c]", char(byte));
-			}
-			else {
-				printf("[0x%X]", byte);
-			}
-			if (cl > 2) {
-				printf("\n");
-				cl = 0;
-			}
-			else {
-				printf("\t");
-				cl++;
-			}
-		}
-		/*
+		printf("UNKOWN :\n");
+		printBytes(&stream, 8);
+		printf("LOAD \n:");
+		printBytes(&stream, 8);
+
+		printf("UNKOWN :\n");
+		printBytes(&stream, 2);
+
 		int32_t i1, i2, i3, i4;
 		int32_t px, py, pz, pu;
-#define BLOCK_WIDTH (1000000/18)
-		int32_t coo[16];
+
+		int32_t coo[12];
 		coo[0] = stream.ReadByte();
 		coo[1] = stream.ReadByte();
 		i1 = ((coo[1] << 8) | coo[0]);
 		coo[2] = stream.ReadByte();
 		coo[3] = stream.ReadByte();
 		px = ((coo[3] << 8) | coo[2]);
-		
+
 
 		coo[4] = stream.ReadByte();
 		coo[5] = stream.ReadByte();
 		i2 = ((coo[5] << 8) | coo[4]);
 		coo[6] = stream.ReadByte();
 		coo[7] = stream.ReadByte();
-		py = ((coo[7] << 8) | coo[6]);
+		pz = ((coo[7] << 8) | coo[6]);
 
 
 		coo[8] = stream.ReadByte();
@@ -208,40 +219,13 @@ void RSMission::parsePART(IffChunk* chunk) {
 		i3 = ((coo[9] << 8) | coo[8]);
 		coo[10] = stream.ReadByte();
 		coo[11] = stream.ReadByte();
-		pz = ((coo[11] << 8) | coo[10]);
+		py = ((coo[11] << 8) | coo[10]);
 
-		coo[12] = stream.ReadByte();
-		coo[13] = stream.ReadByte();
-		i4 = ((coo[13] << 8) | coo[12]);
-		coo[14] = stream.ReadByte();
-		coo[15] = stream.ReadByte();
-		pu = ((coo[14] << 8) | coo[15]);
 
-		printf("INTEGER\n");
+		printf("\nCOORD{%d,%d,%d} | SIDE [%d,%d,%d]\n", px, py, pz, i1, i2, i3);
 
-		printf("%5d\t%5d\t%5d\t%5d\t\n", i1, px, i2, py);
-		printf("%5d\t%5d\t%5d\t%5d\t\n", i3, pz, i4, pu);
-		cl = 0;
-		for (int k = 0; k < 20; k++) {
-			byte = stream.ReadByte();
-			if (byte >= 40 && byte <= 90) {
-				printf("[%c]", char(byte));
-			}
-			else if (byte >= 97 && byte <= 122) {
-				printf("[%c]", char(byte));
-			}
-			else {
-				printf("[0x%X]", byte);
-			}
-			if (cl > 2) {
-				printf("\n");
-				cl = 0;
-			}
-			else {
-				printf("\t");
-				cl++;
-			}
-		}*/
+		printf("UNKOWN : \n");
+		printBytes(&stream, 22);
 		printf("\nEND\n");
 	}
 }
@@ -258,19 +242,21 @@ void RSMission::parseLGHT(IffChunk* chunk) {
 }
 
 void RSMission::parseSPOT(IffChunk* chunk) {
-	/*if (chunk != NULL) {
+	printf("PARSING SPOT\n");
+	if (chunk != NULL) {
 		PakArchive p;
 		p.InitFromRAM("SPOT.PAK", chunk->data, chunk->size);
 		p.List(stdout);
-	}*/
+	}
 	printChunk(chunk, "SPOT");
 }
 
 void RSMission::parsePROG(IffChunk* chunk) {
-	/*if (chunk != NULL) {
+	printf("PARSING PROG\n");
+	if (chunk != NULL) {
 		PakArchive p;
 		p.InitFromRAM("PROG.PAK", chunk->data, chunk->size);
 		p.List(stdout);
-	}*/
+	}
 	printChunk(chunk, "PROG");
 }

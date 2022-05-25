@@ -27,7 +27,7 @@ void PakArchive::Parse(void){
     uint32_t advertisedSize = stream.ReadUInt32LE();
     
     if (advertisedSize != this->size){
-        //printf("'%s' is not a PAK archive !.\n",this->path);
+        printf("'%s' is not a PAK archive !.\n",this->path);
         return;
     }
     
