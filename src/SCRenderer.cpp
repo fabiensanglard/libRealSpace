@@ -955,15 +955,15 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 		
         int32_t offset[3];
         
-#define BLOCK_WIDTH (1000000/18)
+#define BLOCK_WIDTH (250)
        
-        offset[0] = (blockID % 18 * BLOCK_WIDTH +(1 / 400.0f* BLOCK_WIDTH)) - 500000;
-        offset[1] = area->elevation[blockID] * 3;
-        offset[2] = ((int32_t)blockID / 18 * BLOCK_WIDTH +(1 / 400.0f* BLOCK_WIDTH)) - 500000;
+        offset[0] = (blockID % 18 * BLOCK_WIDTH +(1 / 400.0f* BLOCK_WIDTH));
+        offset[1] = area->elevation[blockID] / 10000.0f;
+        offset[2] = ((int32_t)blockID / 18 * BLOCK_WIDTH +(1 / 400.0f* BLOCK_WIDTH));
         
         int32_t localDelta[3];
 		localDelta[0] = object.position[0] / 65355.0f * BLOCK_WIDTH;
-        localDelta[1] = object.position[1] * 3;/// HEIGHT_DIVIDER;
+        localDelta[1] = object.position[1] / 10000.0f;/// HEIGHT_DIVIDER;
 		localDelta[2] = object.position[2] / 65355.0f * BLOCK_WIDTH;
 
         size_t toDraw[3];

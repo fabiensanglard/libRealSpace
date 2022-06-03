@@ -448,7 +448,8 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
     
     PakArchive blocksPAL;
     blocksPAL.InitFromRAM("BLOCKS",entry->data, entry->size);
-    
+    int orx;
+    int orz;
     for (size_t i=0; i < blocksPAL.GetNumEntries(); i++) { // Iterate over the BLOCKS_PER_MAP block entries.
         
         //SRC Asset Block
@@ -463,10 +464,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
         for(size_t vertexID=0 ; vertexID < blockDim*blockDim ; vertexID++){
             
             MapVertex* vertex = &block->vertice[vertexID];
-            
-            
-            
-            
+
             int16_t height ;
             height = vertStream.ReadShort();
 			//height = height * 50000;
@@ -476,7 +474,6 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             vertex->type = vertStream.ReadByte();
             
             uint8_t paletteColor =0;
-            
             
             // Hardcoding the values since I have no idea where those
             // are coming from. Maybe it was hard-coded in STRIKE.EXE ?
@@ -549,13 +546,17 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     - text
             */
             
-            vertex->v.y = height*3;//-vertex->text * 10;//height ;
+            vertex->v.y = height/10000.0f;//-vertex->text * 10;//height ;
             
 #define BLOCK_WIDTH (1000000/18)
-            vertex->v.x = (i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH) - 500000;
-            vertex->v.z = (i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH) - 500000;
+            //vertex->v.x = (i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH) - 500000;
+            //vertex->v.z = (i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH) - 500000;
 			
+            vertex->v.x = i % 18*250+ (vertexID % blockDim ) / (float)(blockDim)*250;
+            vertex->v.z = i / 18*250+ (vertexID / blockDim ) / (float)(blockDim)*250;
             
+            //printf("%f, %f\n", vertex->v.x, vertex->v.z);
+            //printf("VERTEX ID : %d\n", vertexID);
             vertex->color[0] = t->r/255.0f;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
             vertex->color[1] = t->g/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
             vertex->color[2] = t->b/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;

@@ -169,9 +169,13 @@ void RSMission::parseSKYS(IffChunk* chunk) {
 void RSMission::parseAREA(IffChunk* chunk) {
 	printf("PARSING AREA\n");
 	printChunk(chunk, "AREA");
+
 }
 
 void RSMission::parsePART(IffChunk* chunk) {
+	if (chunk == NULL) {
+		return ;
+	}
 	printf("PARSING PART\n");
 	printf("Number of entries %d\n", chunk->size / 62);
 	ByteStream stream(chunk->data);
@@ -186,45 +190,62 @@ void RSMission::parsePART(IffChunk* chunk) {
 		printf("LOADIND obj id[%d], name [%s]\n", id, objName);
 		printf("DATA:\n");
 		int cl = 0;
-		printf("UNKOWN :\n");
+		printf("UNKNOWN :\n");
 		printBytes(&stream, 8);
-		printf("LOAD \n:");
+		printf("LOAD :\n");
 		printBytes(&stream, 8);
 
-		printf("UNKOWN :\n");
+		printf("UNKNOWN :\n");
 		printBytes(&stream, 2);
 
 		int32_t i1, i2, i3, i4;
 		int32_t px, py, pz, pu;
+		uint32_t fx, fy, fz, fu;
 
 		int32_t coo[12];
 		coo[0] = stream.ReadByte();
 		coo[1] = stream.ReadByte();
-		i1 = ((coo[1] << 8) | coo[0]);
 		coo[2] = stream.ReadByte();
 		coo[3] = stream.ReadByte();
-		px = ((coo[3] << 8) | coo[2]);
-
-
 		coo[4] = stream.ReadByte();
 		coo[5] = stream.ReadByte();
-		i2 = ((coo[5] << 8) | coo[4]);
 		coo[6] = stream.ReadByte();
 		coo[7] = stream.ReadByte();
-		pz = ((coo[7] << 8) | coo[6]);
-
-
 		coo[8] = stream.ReadByte();
 		coo[9] = stream.ReadByte();
-		i3 = ((coo[9] << 8) | coo[8]);
 		coo[10] = stream.ReadByte();
 		coo[11] = stream.ReadByte();
+		
+		i1 = ((coo[1] << 8) | coo[0]);
+		px = ((coo[3] << 8) | coo[2]);
+		fx = (coo[3] << 24 | coo[2]<<16 | coo[1] << 8 | coo[0]);
+		i2 = ((coo[5] << 8) | coo[4]);
+		pz = ((coo[7] << 8) | coo[6]);
+		fz = (coo[7] << 24 | coo[6] << 16 | coo[5] << 8 | coo[4]);
+		i3 = ((coo[9] << 8) | coo[8]);
 		py = ((coo[11] << 8) | coo[10]);
+		fy = (coo[11] << 24 | coo[10] << 16 | coo[9] << 8 | coo[8]);
 
+		
+		printf("\nRAW : \n");
+		for (int i = 0; i < 12; i++) {
+			byte = coo[i];
 
-		printf("\nCOORD{%d,%d,%d} | SIDE [%d,%d,%d]\n", px, py, pz, i1, i2, i3);
+			printf("[0x%X]", byte);
+			
+			if (cl > 2) {
+				printf("\n");
+				cl = 0;
+			}
+			else {
+				printf("\t");
+				cl++;
+			}
+		}
 
-		printf("UNKOWN : \n");
+		printf("\nCOORD{%d,%d,%d} | SIDE [%d,%d,%d] \n", px, py, pz, i1, i2, i3);
+
+		printf("UNKNOWN : \n");
 		printBytes(&stream, 22);
 		printf("\nEND\n");
 	}
