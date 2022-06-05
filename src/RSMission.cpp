@@ -37,7 +37,21 @@ void printChunk(IffChunk* chunk, const char *name) {
 	}
 	printf("\n");
 }
+void printArea(AREA a) {
+	printf("NEW AREA :%s\n", a.AreaName);
+	printf("TYPE : %c\n", a.AreaType);
+	printf("AT : [%d,%d,%d]\n", a.XAxis, a.YAxis, a.ZAxis);
+	printf("SIZE : {%d,%d}\n", a.AreaWidth, a.AreaHeight);
+}
 
+void printPart(PART p) {
+	printf("NEW PART :%s\n", p.MemberName);
+	printf("NUMBER : %d\n", p.MemberNumber);
+	printf("LOAD: %s\n", p.WeaponLoad);
+	printf("AT : [%d,%d,%d]\n", p.XAxisRelative, p.YAxisRelative, p.ZAxisRelative);
+	printf("U0 = %d\n", p.Unknown0);
+	printf("U1 = %d\n", p.Unknown1);
+}
 void printBytes(ByteStream *stream, int lenght) {
 	uint8_t byte;
 	int cl = 0;
@@ -168,7 +182,73 @@ void RSMission::parseSKYS(IffChunk* chunk) {
 
 void RSMission::parseAREA(IffChunk* chunk) {
 	printf("PARSING AREA\n");
-	printChunk(chunk, "AREA");
+	
+	ByteStream stream(chunk->data);
+	size_t fsize = chunk->size;
+	
+	uint8_t buffer;
+	while (fsize >0) {
+		buffer = stream.ReadByte();
+		AREA area;
+		switch (buffer) {
+		case 'S':
+			area.AreaType = 'S';
+			for (int k = 0; k < 33; k++) {
+				area.AreaName[k] = stream.ReadByte();
+			}
+			area.XAxis = stream.ReadUInt32LE();
+			area.YAxis = stream.ReadUInt32LE();
+			area.ZAxis = stream.ReadUInt32LE();
+			area.AreaWidth = stream.ReadUShort();
+			stream.ReadByte();
+			fsize -= 49;
+			break;
+		case 'C':
+			area.AreaType = 'C';
+			for (int k = 0; k < 33; k++) {
+				area.AreaName[k] = stream.ReadByte();
+			}
+			area.XAxis = stream.ReadUInt32LE();
+			area.YAxis = stream.ReadUInt32LE();
+			area.ZAxis = stream.ReadUInt32LE();
+			area.AreaWidth = stream.ReadUShort();
+
+			//unsigned int Blank0; // off 48-49
+			stream.ReadByte();
+			stream.ReadByte();
+			area.AreaHeight = stream.ReadUShort();
+			//unsigned char Blank1; // off 52
+			stream.ReadByte();
+			fsize -= 52;
+			break;
+		case 'B':
+			area.AreaType = 'B';
+			for (int k = 0; k < 33; k++) {
+				area.AreaName[k] = stream.ReadByte();
+			}
+			area.XAxis = stream.ReadUInt32LE();
+			area.YAxis = stream.ReadUInt32LE();
+			area.ZAxis = stream.ReadUInt32LE();
+			area.AreaWidth = stream.ReadUShort();
+
+			//unsigned char Blank0[10]; // off 48-59
+			for (int k = 0; k < 10; k++) {
+				stream.ReadByte();
+			}
+			//unsigned int AreaHeight; // off 60-61
+			area.AreaHeight = stream.ReadUShort();
+
+			//unsigned char Unknown[5]; // off 62-67
+			for (int k = 0; k < 5; k++) {
+				stream.ReadByte();
+			}
+
+			fsize -= 67;
+			break;
+		}
+		printArea(area);
+	}
+	
 
 }
 
@@ -181,73 +261,34 @@ void RSMission::parsePART(IffChunk* chunk) {
 	ByteStream stream(chunk->data);
 	size_t numParts = chunk->size / 62;
 	for (int i = 0; i < numParts; i++) {
-		short id = stream.ReadShort();
-		char objName[9];
-		for (int k = 0; k < 8; k++)
-			objName[k] = stream.ReadByte();
-		objName[8] = 0;
-		uint8_t byte;
-		printf("LOADIND obj id[%d], name [%s]\n", id, objName);
-		printf("DATA:\n");
-		int cl = 0;
-		printf("UNKNOWN :\n");
-		printBytes(&stream, 8);
-		printf("LOAD :\n");
-		printBytes(&stream, 8);
-
-		printf("UNKNOWN :\n");
-		printBytes(&stream, 2);
-
-		int32_t i1, i2, i3, i4;
-		int32_t px, py, pz, pu;
-		uint32_t fx, fy, fz, fu;
-
-		int32_t coo[12];
-		coo[0] = stream.ReadByte();
-		coo[1] = stream.ReadByte();
-		coo[2] = stream.ReadByte();
-		coo[3] = stream.ReadByte();
-		coo[4] = stream.ReadByte();
-		coo[5] = stream.ReadByte();
-		coo[6] = stream.ReadByte();
-		coo[7] = stream.ReadByte();
-		coo[8] = stream.ReadByte();
-		coo[9] = stream.ReadByte();
-		coo[10] = stream.ReadByte();
-		coo[11] = stream.ReadByte();
-		
-		i1 = ((coo[1] << 8) | coo[0]);
-		px = ((coo[3] << 8) | coo[2]);
-		fx = (coo[3] << 24 | coo[2]<<16 | coo[1] << 8 | coo[0]);
-		i2 = ((coo[5] << 8) | coo[4]);
-		pz = ((coo[7] << 8) | coo[6]);
-		fz = (coo[7] << 24 | coo[6] << 16 | coo[5] << 8 | coo[4]);
-		i3 = ((coo[9] << 8) | coo[8]);
-		py = ((coo[11] << 8) | coo[10]);
-		fy = (coo[11] << 24 | coo[10] << 16 | coo[9] << 8 | coo[8]);
-
-		
-		printf("\nRAW : \n");
-		for (int i = 0; i < 12; i++) {
-			byte = coo[i];
-
-			printf("[0x%X]", byte);
-			
-			if (cl > 2) {
-				printf("\n");
-				cl = 0;
-			}
-			else {
-				printf("\t");
-				cl++;
-			}
+		PART prt;
+		prt.MemberNumber = 0;
+		prt.MemberNumber |= stream.ReadByte() << 0;
+		prt.MemberNumber |= stream.ReadByte() << 8;
+		for (int k = 0; k < 16; k++) {
+			prt.MemberName[k] = stream.ReadByte();
 		}
+		for (int k = 0; k < 8; k++) {
+			prt.WeaponLoad[k] = stream.ReadByte();
+		}
+		prt.Unknown0 = 0;
+		prt.Unknown0 |= stream.ReadByte() << 0;
+		prt.Unknown0 |= stream.ReadByte() << 8;
 
-		printf("\nCOORD{%d,%d,%d} | SIDE [%d,%d,%d] \n", px, py, pz, i1, i2, i3);
+		prt.Unknown1 = 0;
+		prt.Unknown1 |= stream.ReadByte() << 0;
+		prt.Unknown1 |= stream.ReadByte() << 8;
 
-		printf("UNKNOWN : \n");
-		printBytes(&stream, 22);
-		printf("\nEND\n");
+		prt.XAxisRelative = stream.ReadUInt32LE();
+		prt.YAxisRelative = stream.ReadUInt32LE();
+		prt.ZAxisRelative = 0;
+		prt.ZAxisRelative |= stream.ReadByte() << 0;
+		prt.ZAxisRelative |= stream.ReadByte() << 8;
+
+		for (int k = 0; k < 22; k++) {
+			prt.Controls[k] = stream.ReadByte();
+		}
+		printPart(prt);
 	}
 }
 void RSMission::parseGLNT(IffChunk* chunk) {
