@@ -36,7 +36,7 @@ typedef struct MapObject{
     char name[9];
     char destroyedName[9];
     
-    uint32_t position[3];
+    int32_t position[3];
     
     RSEntity* entity;
     

@@ -37,11 +37,11 @@ void printChunk(IffChunk* chunk, const char *name) {
 	}
 	printf("\n");
 }
-void printArea(AREA a) {
-	printf("NEW AREA :%s\n", a.AreaName);
-	printf("TYPE : %c\n", a.AreaType);
-	printf("AT : [%d,%d,%d]\n", a.XAxis, a.YAxis, a.ZAxis);
-	printf("SIZE : {%d,%d}\n", a.AreaWidth, a.AreaHeight);
+void printArea(AREA* a) {
+	printf("NEW AREA :%s\n", a->AreaName);
+	printf("TYPE : %c\n", a->AreaType);
+	printf("AT : [%d,%d,%d]\n", a->XAxis, a->YAxis, a->ZAxis);
+	printf("SIZE : {%d,%d}\n", a->AreaWidth, a->AreaHeight);
 }
 
 void printPart(PART p) {
@@ -196,9 +196,9 @@ void RSMission::parseAREA(IffChunk* chunk) {
 			for (int k = 0; k < 33; k++) {
 				area.AreaName[k] = stream.ReadByte();
 			}
-			area.XAxis = stream.ReadUInt32LE();
-			area.YAxis = stream.ReadUInt32LE();
-			area.ZAxis = stream.ReadUInt32LE();
+			area.XAxis = stream.ReadInt24LE();
+			area.YAxis = stream.ReadInt24LE();
+			area.ZAxis = stream.ReadInt24LE();
 			area.AreaWidth = stream.ReadUShort();
 			stream.ReadByte();
 			fsize -= 49;
@@ -208,9 +208,9 @@ void RSMission::parseAREA(IffChunk* chunk) {
 			for (int k = 0; k < 33; k++) {
 				area.AreaName[k] = stream.ReadByte();
 			}
-			area.XAxis = stream.ReadUInt32LE();
-			area.YAxis = stream.ReadUInt32LE();
-			area.ZAxis = stream.ReadUInt32LE();
+			area.XAxis = stream.ReadInt24LE();
+			area.YAxis = stream.ReadInt24LE();
+			area.ZAxis = stream.ReadInt24LE();
 			area.AreaWidth = stream.ReadUShort();
 
 			//unsigned int Blank0; // off 48-49
@@ -226,9 +226,9 @@ void RSMission::parseAREA(IffChunk* chunk) {
 			for (int k = 0; k < 33; k++) {
 				area.AreaName[k] = stream.ReadByte();
 			}
-			area.XAxis = stream.ReadUInt32LE();
-			area.YAxis = stream.ReadUInt32LE();
-			area.ZAxis = stream.ReadUInt32LE();
+			area.XAxis = stream.ReadInt24LE();
+			area.YAxis = stream.ReadInt24LE();
+			area.ZAxis = stream.ReadInt24LE();
 			area.AreaWidth = stream.ReadUShort();
 
 			//unsigned char Blank0[10]; // off 48-59
@@ -246,7 +246,7 @@ void RSMission::parseAREA(IffChunk* chunk) {
 			fsize -= 67;
 			break;
 		}
-		printArea(area);
+ 		printArea(&area);
 	}
 	
 
@@ -279,8 +279,8 @@ void RSMission::parsePART(IffChunk* chunk) {
 		prt.Unknown1 |= stream.ReadByte() << 0;
 		prt.Unknown1 |= stream.ReadByte() << 8;
 
-		prt.XAxisRelative = stream.ReadUInt32LE();
-		prt.YAxisRelative = stream.ReadUInt32LE();
+		prt.XAxisRelative = stream.ReadInt24LE();
+		prt.YAxisRelative = stream.ReadInt24LE();
 		prt.ZAxisRelative = 0;
 		prt.ZAxisRelative |= stream.ReadByte() << 0;
 		prt.ZAxisRelative |= stream.ReadByte() << 8;

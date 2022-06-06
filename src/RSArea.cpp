@@ -289,47 +289,25 @@ void RSArea::ParseObjects(){
                 mapObject.destroyedName[k] = reader.ReadByte();
             mapObject.destroyedName[8] = 0;
             
-            int32_t coo[12];
-            coo[0] = reader.ReadByte();
-            coo[1] = reader.ReadByte();
-            coo[2] = reader.ReadByte();
-            coo[3] = reader.ReadByte();
-            mapObject.position[0] =  (coo[3] << 8) | coo[2];
-            //coo[3] = (uint32_t)reader.ReadByte();
-
-            coo[4] = reader.ReadByte();
-            coo[5] = reader.ReadByte();
-            coo[6] = reader.ReadByte();
-            coo[7] = reader.ReadByte();
-            mapObject.position[2] = (coo[7] << 8) | coo[6];
-
             
-            coo[8] = reader.ReadByte();
-            coo[9] = reader.ReadByte();
-            coo[10] = reader.ReadByte();
-            coo[11] = reader.ReadByte();
-            mapObject.position[1] = (coo[11] << 8) | coo[10];
+            uint8_t unknown14 = reader.ReadByte();
+            uint8_t unknown15 = reader.ReadByte();
+            mapObject.position[0] = reader.ReadInt24LE();
+            mapObject.position[2] = reader.ReadInt24LE();
+            mapObject.position[1] = reader.ReadInt24LE();
            
 
-            uint8_t unknowns[0x31-12];
+            uint8_t unknowns[0x31-10];
 
-            for(int k=0 ; k <0x31-12; k++)
+            for(int k=0 ; k <0x31-10; k++)
                 unknowns[k] = reader.ReadByte();
                 
-            printf("object set [%3lu] obj [%2d] - '%-8s' 0x%X 0x%X 0x%X 0x%X 0x%X '%-8s'\n",i,j,mapObject.name,
-                       unknown09,
-                       unknown10,
-                       unknown11,
-                       unknown12,
-                       unknown13,mapObject.destroyedName);
-            
-            for(int k=0 ; k < 12 ; k++)
-                printf("\tCOO[%d]=[0x%X]\n",k,coo[k]);
-            
-            printf("\n\tCOORD {X [0x%X]-[0x%X],Y :[0x%X]-[0x%X], Z:[0x%X]-[0x%X]}\n", coo[3], coo[2], coo[7], coo[6], coo[11], coo[10]);
-            for(int k=0 ; k <0x31-12 ; k++)
-                printf("\tunknowns[%d]=[0x%X]\n",k,unknowns[k]);
-            
+            printf("object set [%3lu] obj [%2d] - '%-8s' 0x%X 0x%X 0x%X 0x%X 0x%X '%-8s' At {%d,%d,%d}\n", i, j, mapObject.name,
+                unknown09,
+                unknown10,
+                unknown11,
+                unknown12,
+                unknown13, mapObject.destroyedName, mapObject.position[0], mapObject.position[2], mapObject.position[1]);
             printf("------\n");
 			std::string hash = mapObject.name;
 			std::map<std::string, RSEntity *>::iterator it;

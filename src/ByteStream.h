@@ -76,12 +76,33 @@ public:
 		cursor += 4;
 		return *i;
 	}
+	inline int32_t ReadInt24LE(void) {
+		int32_t i = 0;
+		uint8_t buffer[4];
+		buffer[0] = *(cursor++);
+		buffer[1] = *(cursor++);
+		buffer[2] = *(cursor++);
+		buffer[3] = *(cursor++);
+		i = (buffer[2] << 16) | (buffer[1] << 8) | (buffer[0] << 0);
+		if (buffer[2] & 0x80) {
+			i = (0xff << 24) | i;
+		}
+		return i;
+	}
 
 	inline uint32_t ReadUInt32BE(void) {
 
 		uint32_t toLittleEndian = 0;
 		toLittleEndian |= *(cursor++) << 24;
 		toLittleEndian |= *(cursor++) << 16;
+		toLittleEndian |= *(cursor++) << 8;
+		toLittleEndian |= *(cursor++) << 0;
+
+		return toLittleEndian;
+	}
+	inline uint16_t ReadUShortBE(void) {
+
+		uint16_t toLittleEndian = 0;
 		toLittleEndian |= *(cursor++) << 8;
 		toLittleEndian |= *(cursor++) << 0;
 
