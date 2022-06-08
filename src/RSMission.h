@@ -12,6 +12,7 @@ extern "C" {
 #include "IffLexer.h"
 
 struct AREA {
+	int id;
 	unsigned char AreaType; 
 	char AreaName[33]; 
 	long XAxis; 
@@ -70,6 +71,23 @@ struct PART
 	unsigned int ZAxisRelative; // 38-39, Z pos rel to AREA
 	unsigned char Controls[22]; // 40-61, various control bytes
 };
+
+struct SPOT {
+	int id;
+	short unknown;
+
+	long XAxis;
+	long YAxis;
+	long ZAxis;
+};
+struct MSGS {
+	char message[255];
+	int id;
+};
+struct CAST {
+	char actor[9];
+	int id;
+};
 /*
 
 Mission.IFF CHUNK ids
@@ -121,8 +139,20 @@ public:
 	RSMission();
 	~RSMission();
 
+
+
+
 	void InitFromIFF(IffLexer* lexer);
+	void PrintMissionInfos();
 private:
+	void printArea(AREA* a);
+	void printPart(PART* p);
+	void printBytes(ByteStream* stream, int lenght);
+	void parseLOAD(IffChunk* chunk);
+	void parseCAST(IffChunk* chunk);
+	void parseMSGS(IffChunk* chunk);
+	void parseFILE(IffChunk* chunk);
+	void parseNAME(IffChunk* chunk);
 	void parseWORLD(IffChunk* chunk);
 	void parseINFO(IffChunk* chunk);
 	void parsePALT(IffChunk* chunk);
@@ -135,4 +165,14 @@ private:
 	void parsePART(IffChunk* chunk);
 	void parseSPOT(IffChunk* chunk);
 	void parsePROG(IffChunk* chunk);
+
+	char missionInfo[255];
+	char missionName[255];
+	char missionAreaFile[8];
+
+	std::vector<AREA*> missionAreas;
+	std::vector<PART*> missionObjects;
+	std::vector<MSGS*> missionMessages;
+	std::vector<SPOT*> missionSpots;
+	std::vector<CAST*> missionCasting;
 };

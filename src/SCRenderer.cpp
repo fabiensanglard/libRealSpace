@@ -13,6 +13,7 @@
 #include "RSEntity.h"
 #include "RSVGA.h"
 #include "Texture.h"
+#define BLOCK_WIDTH (25000)
 
 extern SCRenderer Renderer;
 
@@ -954,27 +955,33 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
         MapObject object = objects->at(i);
 		
         int32_t offset[3];
+        int centerX = ((20000 * 18) / 2);
+        int centerY = (20000 * 18) / 2;
+        offset[0] = (blockID % 18);
+        offset[1] = 0;
+        offset[2] = (int32_t)blockID / 18;
         
-#define BLOCK_WIDTH (250)
-       
-        offset[0] = (blockID % 18 * BLOCK_WIDTH +(1 / 400.0f* BLOCK_WIDTH));
-        offset[1] = area->elevation[blockID] / 10000.0f;
-        offset[2] = ((int32_t)blockID / 18 * BLOCK_WIDTH +(1 / 400.0f* BLOCK_WIDTH));
+
         
         int32_t localDelta[3];
-		localDelta[0] = object.position[0] / 65355.0f * BLOCK_WIDTH;
-        localDelta[1] = object.position[1] / 10000.0f;/// HEIGHT_DIVIDER;
-		localDelta[2] = object.position[2] / 65355.0f * BLOCK_WIDTH;
+        localDelta[0] = object.position[0];
+        localDelta[1] = 5;
+        localDelta[2] = object.position[2];
 
         size_t toDraw[3];
-		toDraw[0] = localDelta[0] + offset[0];
+		toDraw[0] = centerX+localDelta[0];
 		toDraw[1] = localDelta[1];
-		toDraw[2] = localDelta[2] + offset[2];
+		toDraw[2] = centerY-localDelta[2];
         
+        glBegin(GL_POINTS);
+            glColor3f(1, 0, 0);
+            glVertex3d(toDraw[0], 0, toDraw[2]);
+        glEnd();
+
 		glPushMatrix();
 		
-		glTranslatef(offset[0], 0, offset[2]);
-		glTranslatef(localDelta[0], localDelta[1], localDelta[2]);
+		//glTranslatef(offset[0], 0, offset[2]);
+		glTranslatef(toDraw[0], toDraw[1], toDraw[2]);
 		
 		std::map<std::string, RSEntity *>::iterator it;
 		it = area->objCache->find(object.name);
@@ -1000,10 +1007,7 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 
 		glPopMatrix();
 
-		glBegin(GL_POINTS);
-			glColor3f(1, 0, 0);
-			glVertex3d(localDelta[0]+offset[0], 10000, localDelta[2]+ offset[2]);
-		glEnd();
+		
     }
 	glEnable(GL_DEPTH_TEST);
 	glPointSize(1);
@@ -1077,17 +1081,23 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
 
 void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 
+    glPushMatrix();
+    glScalef(1000000/ 360000, 1, 1000000 / 360000);
+    glTranslatef(-180000,0,-180000);
+
+    
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glBegin(GL_TRIANGLES);
-	for (int i = 0; i < BLOCKS_PER_MAP; i++)
-		RenderBlock(area, LOD, i, false);
+    for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+        RenderBlock(area, LOD, i, false);
+    }
 	glEnd();
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthFunc(GL_LEQUAL);
+	glDepthFunc(GL_EQUAL);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
 		RenderBlock(area, LOD, i, true);
 	}
@@ -1095,14 +1105,19 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 	glDisable(GL_TEXTURE_2D);
 
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-        if (i != 41)
-		    RenderObjects(area, i);
+        RenderObjects(area, i);
 	}
 	
+    glPopMatrix();
 }
 
 void SCRenderer::RenderWorldByID(RSArea* area, int LOD, int verticesPerBlock, int blockId) {
 
+    printf("X:%f,Y:%f", area->GetAreaBlockByID(LOD, blockId)->vertice[0].v.x, area->GetAreaBlockByID(LOD, blockId)->vertice[0].v.z);
+    glPushMatrix();
+    glScalef(1/100.0f, 1/100.0f, 1/100.0f);
+    glTranslatef(-area->GetAreaBlockByID(LOD, blockId)->vertice[0].v.x-12500, 0, -area->GetAreaBlockByID(LOD, blockId)->vertice[0].v.z- 12500);
+    //
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glBegin(GL_TRIANGLES);
@@ -1117,6 +1132,6 @@ void SCRenderer::RenderWorldByID(RSArea* area, int LOD, int verticesPerBlock, in
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
     RenderObjects(area, blockId);
-    
+    glPopMatrix();
 
 }

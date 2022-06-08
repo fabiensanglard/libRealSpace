@@ -63,7 +63,7 @@ void RSArea::ParseMetadata(){
     
     IffLexer lexer;
     lexer.InitFromRAM(entry->data, entry->size);
-    lexer.List(stdout);
+    //lexer.List(stdout);
     
     IffChunk* tera = lexer.GetChunkByID('TERA');
     if (tera == NULL) {
@@ -246,7 +246,7 @@ void RSArea::ParseObjects(){
 
     PakArchive objectFiles;
     objectFiles.InitFromRAM("PAK Objects from RAM",objectsFilesLocation->data, objectsFilesLocation->size);
-    objectFiles.List(stdout);
+    //objectFiles.List(stdout);
     printf("This .OBJ features %lu entries.\n",objectFiles.GetNumEntries());
     
     
@@ -254,7 +254,7 @@ void RSArea::ParseObjects(){
         PakEntry* entry = objectFiles.GetEntry(i);
         if (entry->size == 0)
             continue;
-        dumpfbyte(entry->data, entry->size);
+        //dumpfbyte(entry->data, entry->size);
         entry = objectFiles.GetEntry(i);
         ByteStream sizeGetter(entry->data);
         uint16_t numObjs = sizeGetter.ReadUShort();
@@ -343,33 +343,34 @@ void RSArea::ParseObjects(){
 
 void RSArea::ParseTriFile(PakEntry* entry){
     
-    Point3D* vertices = new Point3D[300];
     
-    ByteStream stream(entry->data);
-    
-    stream.ReadInt32LE();
-    stream.ReadInt32LE();
-    
-    for (int i=0 ; i < 300; i++) {
-        Point3D* v = &vertices[i];
-        int32_t coo ;
+    if (entry->size > 0) {
         
-        coo = stream.ReadInt32LE();
-        v->x = (coo>>8) + (coo&0x000000FF)/255.0;
-        v->x /= 2000;
-        coo = stream.ReadInt32LE();
-        v->z = (coo>>8) + (coo&0x000000FF)/255.0;
-        v->z /= 2000;
+        //dumpfbyte(entry->data, entry->size);
         
-        coo = stream.ReadInt32LE();
-        v->y =   (coo>>8) + (coo&0x000000FF)/255.0;
-        v->y /= 2000;
+        /*
+        ByteStream stream(entry->data);
+        Point3D* vertices = new Point3D[300];
+        for (int i = 0; i < 300; i++) {
+            Point3D* v = &vertices[i];
+            int32_t coo;
+
+            stream.ReadByte();
+            coo = stream.ReadInt24LE();
+            v->x = coo;
+            coo = stream.ReadInt24LE();
+            v->z = coo;
+            coo = stream.ReadShort();
+            v->y = coo;
+            stream.ReadByte();
+            printf("NEW POINT {%f,%f,%f}\n", v->x, v->z, v->y);
+        }
+        //printf("*********************\n");
+        //Render them
+        //Renderer.RenderVerticeField(vertices,300);
+
+        delete[] vertices;*/
     }
-    
-    //Render them
-    Renderer.RenderVerticeField(vertices,300);
-    
-    delete[] vertices;
 }
 
 
@@ -385,7 +386,7 @@ void RSArea::ParseTrigo(){
     // .TRI is a PAK
     PakArchive triFiles;
     triFiles.InitFromRAM(".TRI",entry->data, entry->size);
-    triFiles.List(stdout);
+    //triFiles.List(stdout);
     //triFiles.Decompress("/Users/fabiensanglard/Desktop/MAURITAN.TRIS/","TRI");
     
     printf("Found %zu .TRI files.\n",triFiles.GetNumEntries());
@@ -393,7 +394,8 @@ void RSArea::ParseTrigo(){
     for(size_t i=0 ; i < triFiles.GetNumEntries() ; i++){
         
         PakEntry* entry  = triFiles.GetEntry(i);
-        if (entry->size != 0)
+        if (entry->size > 0)
+            printf("TRI FOR BLOCK %d\n", i);
             ParseTriFile(entry);
     }
 }
@@ -524,14 +526,14 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     - text
             */
             
-            vertex->v.y = height/10000.0f;//-vertex->text * 10;//height ;
+            vertex->v.y = height;//-vertex->text * 10;//height ;
             
 #define BLOCK_WIDTH (1000000/18)
             //vertex->v.x = (i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH) - 500000;
             //vertex->v.z = (i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH) - 500000;
 			
-            vertex->v.x = i % 18*250+ (vertexID % blockDim ) / (float)(blockDim)*250;
-            vertex->v.z = i / 18*250+ (vertexID / blockDim ) / (float)(blockDim)*250;
+            vertex->v.x = i % 18*20000+ (vertexID % blockDim ) / (float)(blockDim)* 20000;
+            vertex->v.z = i / 18* 20000 + (vertexID / blockDim ) / (float)(blockDim)* 20000;
             
             //printf("%f, %f\n", vertex->v.x, vertex->v.z);
             //printf("VERTEX ID : %d\n", vertexID);
@@ -714,7 +716,7 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     ParseElevations();
     ParseMetadata();
     ParseObjects();
-   // ParseTrigo();
+    ParseTrigo();
     
     
     ParseHeightMap();
