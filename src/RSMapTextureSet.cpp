@@ -8,6 +8,33 @@
 
 #include "RSMapTextureSet.h"
 
+void dumpStream(ByteStream *stream, size_t fsize) {
+    
+    uint8_t byte;
+    int cl = 0;
+    for (int read = 0; read < fsize; read++) {
+        byte = stream->ReadByte();
+        if (byte >= 40 && byte <= 90) {
+            printf("[%c]", char(byte));
+        }
+        else if (byte >= 97 && byte <= 122) {
+            printf("[%c]", char(byte));
+        }
+        else {
+            printf("[0x%X]", byte);
+        }
+        if (cl > 2) {
+            printf("\n");
+            cl = 0;
+        }
+        else {
+            printf("\t");
+            cl++;
+        }
+
+    }
+    printf("\n");
+}
 RSMapTextureSet::RSMapTextureSet(){
     
 }
@@ -64,7 +91,7 @@ void RSMapTextureSet::Parse(PakArchive* archive){
             image->Create("MAP_TEXTURE",width,height);
             image->UpdateContent(stream.GetPosition());
             images.push_back(image);
-            //printf("RSMapTextureSet img [%3zu] is %lux%lu.\n",i,image->width,image->height);
+            printf("RSMapTextureSet img [%3zu] is %lux%lu.\n",i,image->width,image->height);
         }
         else
             printf("Cannot make sense of entry %lu:\n REASON: (entry size is %lu but advertised is %d).\n",i,entry->size,size);

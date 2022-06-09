@@ -208,7 +208,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
         //glDepthFunc(GL_EQUAL);
         
-        glAlphaFunc ( GL_GREATER, 0.0 ) ;
+        glAlphaFunc ( GL_ALWAYS, 1.0 ) ;
         glEnable ( GL_ALPHA_TEST ) ;
         
         
@@ -262,8 +262,6 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             
             
         }
-        
-        
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
     }
@@ -387,8 +385,6 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         }
         glEnd();
     }
-    
-
 }
 
 
@@ -965,7 +961,7 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
         
         int32_t localDelta[3];
         localDelta[0] = object.position[0];
-        localDelta[1] = 5;
+        localDelta[1] = object.position[1];
         localDelta[2] = object.position[2];
 
         size_t toDraw[3];
@@ -975,7 +971,7 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
         
         glBegin(GL_POINTS);
             glColor3f(1, 0, 0);
-            glVertex3d(toDraw[0], 0, toDraw[2]);
+            glVertex3d(toDraw[0], toDraw[1], toDraw[2]);
         glEnd();
 
 		glPushMatrix();
@@ -1082,7 +1078,7 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
 void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 
     glPushMatrix();
-    glScalef(1000000/ 360000, 1, 1000000 / 360000);
+    glScalef(1000000.0f/ 360000.0f, 1, 1000000.0f / 360000.0f);
     glTranslatef(-180000,0,-180000);
 
     
@@ -1101,13 +1097,13 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
 		RenderBlock(area, LOD, i, true);
 	}
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
+	
 
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
         RenderObjects(area, i);
 	}
-	
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
     glPopMatrix();
 }
 
