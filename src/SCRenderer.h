@@ -11,6 +11,7 @@
 #include <GL/GL.h>
 #include "Camera.h"
 #include "Texture.h"
+#include "RSMission.h"
 
 class RSArea;
 class Texture;
@@ -89,7 +90,7 @@ public:
     void SetClearColor(uint8_t red, uint8_t green, uint8_t blue);
     
     void Prepare(RSEntity* object);
-   
+    void RenderMissionObjects(RSMission* mission);
     
 private:
     

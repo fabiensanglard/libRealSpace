@@ -9,7 +9,11 @@ extern "C" {
 }
 #endif
 
+#include <stdint.h>
+#include <string>
+#include "RSEntity.h"
 #include "IffLexer.h"
+#include "TreArchive.h"
 
 struct AREA {
 	int id;
@@ -70,6 +74,9 @@ struct PART
 	long YAxisRelative; // 34-37, Y pos rel to AREA
 	unsigned int ZAxisRelative; // 38-39, Z pos rel to AREA
 	unsigned char Controls[22]; // 40-61, various control bytes
+
+	RSEntity* entity;
+
 };
 
 struct SPOT {
@@ -140,7 +147,17 @@ public:
 	~RSMission();
 
 
+	inline char* getMissionName() {
+		return (missionName);
+	}
+	inline char* getMissionAreaFile() {
+		return (missionAreaFile);
+	}
+	std::map<std::string, RSEntity*>* objCache;
+	TreArchive* tre;
+	std::vector<PART*> missionObjects;
 
+	PART* getPlayerCoord();
 
 	void InitFromIFF(IffLexer* lexer);
 	void PrintMissionInfos();
@@ -171,7 +188,7 @@ private:
 	char missionAreaFile[8];
 
 	std::vector<AREA*> missionAreas;
-	std::vector<PART*> missionObjects;
+	
 	std::vector<MSGS*> missionMessages;
 	std::vector<SPOT*> missionSpots;
 	std::vector<CAST*> missionCasting;

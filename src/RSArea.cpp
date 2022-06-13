@@ -532,7 +532,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             //vertex->v.x = (i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH) - 500000;
             //vertex->v.z = (i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH) - 500000;
 			
-            vertex->v.x = i % 18*20000+ (vertexID % blockDim ) / (float)(blockDim)* 20000;
+            vertex->v.x = i % 18* 20000+ (vertexID % blockDim ) / (float)(blockDim)* 20000;
             vertex->v.z = i / 18* 20000 + (vertexID / blockDim ) / (float)(blockDim)* 20000;
             
             //printf("%f, %f\n", vertex->v.x, vertex->v.z);
@@ -733,4 +733,43 @@ size_t RSArea::GetNumJets(void){
 
 RSEntity* RSArea::GetJet(size_t jetID){
     return jets[jetID];
+}
+
+float RSArea::getGroundLevel(int BLOC, float x, float y) {
+    int verticeIndex = 0;
+    int vX = ((x / 1000000.0f * 360000.0f) + 180000) ;
+    int vY = ((y / 1000000.0f * 360000.0f) + 180000) ;
+
+    vX = vX / 1000;
+    vY = vY / 1000;
+
+    vX = vX * 1000;
+    vY = vY * 1000;
+    /*float nvX = (vX - blocks[0][BLOC].vertice[0].v.x);
+    float nvY = (vY - blocks[0][BLOC].vertice[0].v.z);
+
+    int nbX = (int) (nvX/20000.0f*100) ;
+    int nby = (int) (nvY/20000.0f*100) ;
+
+    printf("[%d] [%f;%f] - [%f, %f]\n",(nby*20+nbX), vX, vY, nvX, nvY);
+    printf("N GROUND FROM %d [%f,%f] - [%f, %f, %f]\n", (nby * 20 + nbX), vX, vY,
+        blocks[0][BLOC].vertice[(nby * 18 + nbX)].v.x,
+        blocks[0][BLOC].vertice[(nby * 18 + nbX)].v.y,
+        blocks[0][BLOC].vertice[(nby * 18 + nbX)].v.z
+    );*/
+
+
+    for (int i = 0; i < 400; i++) {
+        
+        if ((blocks[0][BLOC].vertice[i].v.x >= vX) && (blocks[0][BLOC].vertice[i].v.z >= vY)) {
+            printf("GROUND FROM %d [%d,%d] - [%f, %f, %f]\n", i, vX, vY,
+                blocks[0][BLOC].vertice[i].v.x,
+                blocks[0][BLOC].vertice[i].v.y,
+                blocks[0][BLOC].vertice[i].v.z
+            );
+            return (blocks[0][BLOC].vertice[i].v.y+5);
+        }
+            
+    }
+    return (blocks[0][BLOC].vertice[0].v.y);
 }

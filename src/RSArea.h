@@ -97,7 +97,7 @@ public:
     RSEntity* GetJet(size_t jetID);
 	std::map<std::string, RSEntity *> *objCache;
 	TreArchive *tre;
-	
+    float getGroundLevel(int BLOC, float x, float y);
 private:
     
     void ParseMetadata(void );

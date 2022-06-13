@@ -410,6 +410,46 @@ void RSMission::parsePART(IffChunk* chunk) {
 			for (int k = 0; k < 22; k++) {
 				prt->Controls[k] = stream.ReadByte();
 			}
+
+			if (prt->Unknown0 != 65535) {
+				for (int k = 0; k < missionAreas.size(); k++) {
+					if (missionAreas[k]->id == prt->Unknown0) {
+						prt->XAxisRelative += missionAreas[k]->XAxis;
+						prt->YAxisRelative += missionAreas[k]->YAxis;
+						prt->ZAxisRelative += missionAreas[k]->ZAxis;
+						prt->Unknown0 = 65535;
+					}
+				}
+			}
+
+			std::string hash = prt->MemberName;
+			std::map<std::string, RSEntity*>::iterator it;
+			it = objCache->find(hash);
+			RSEntity* entity = new RSEntity();
+			if (it == objCache->end()) {
+				char modelPath[512];
+				const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
+				const char* OBJ_EXTENSION = ".IFF";
+
+				strcpy(modelPath, OBJ_PATH);
+				strcat(modelPath, prt->MemberName);
+				strcat(modelPath, OBJ_EXTENSION);
+				TreEntry* entry = tre->GetEntryByName(modelPath);
+
+				if (entry == NULL) {
+					printf("Object reference '%s' not found in TRE.\n", modelPath);
+					//continue;
+				}
+				else {
+					entity->InitFromRAM(entry->data, entry->size);
+					objCache->emplace(hash, entity);
+				}
+			}
+			else {
+				entity = it->second;
+			}
+
+			prt->entity = entity;
 			missionObjects.push_back(prt);
 		}
 	}
@@ -457,4 +497,22 @@ void RSMission::parsePROG(IffChunk* chunk) {
 		p.List(stdout);
 	}
 	printChunk(chunk, "PROG");
+}
+PART* RSMission::getPlayerCoord() {
+	for (int i=0; i < missionObjects.size(); i++) {
+		if (missionObjects[i]->MemberNumber == 0) {
+			if (missionObjects[i]->Unknown0 != 65535) {
+				for (int k = 0; k < missionAreas.size(); k++) {
+					if (missionAreas[k]->id == missionObjects[i]->Unknown0) {
+						missionObjects[i]->XAxisRelative += missionAreas[k]->XAxis;
+						missionObjects[i]->YAxisRelative += missionAreas[k]->YAxis;
+						missionObjects[i]->ZAxisRelative += missionAreas[k]->ZAxis;
+						missionObjects[i]->Unknown0 = 65535;
+					}
+				}
+			}
+			return (missionObjects[i]);
+		}
+	}
+	return (NULL);
 }

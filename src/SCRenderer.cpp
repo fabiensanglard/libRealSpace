@@ -989,7 +989,7 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 				localDelta[0], localDelta[1], localDelta[2]
 			);
 			glPushMatrix();
-			glScalef(3, 3, 3);
+            glScalef(1.5, 1.5, 1.5);
 			DrawModel(it->second, BLOCK_LOD_MAX);
 			glPopMatrix();
 		}
@@ -1008,6 +1008,62 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 	glEnable(GL_DEPTH_TEST);
 	glPointSize(1);
 }
+
+void SCRenderer::RenderMissionObjects(RSMission* mission) {
+
+    std::vector<PART*> *objects = &mission->missionObjects;
+
+    glPointSize(5);
+    glDisable(GL_DEPTH_TEST);
+    float y = 0;
+    for (size_t i = 0; i < objects->size(); i++) {
+        PART *object = objects->at(i);
+        printf("RENDERING MISSION OBJ : %s at [%d,%d,%d]\n", 
+            object->MemberName,
+            object->XAxisRelative,
+            object->YAxisRelative,
+            object->ZAxisRelative
+        );
+        int32_t offset[3];
+        int centerX = ((20000 * 18) / 2);
+        int centerY = (20000 * 18) / 2;
+        
+        size_t toDraw[3];
+        toDraw[0] = centerX + object->XAxisRelative;
+        toDraw[1] = object->ZAxisRelative;
+        toDraw[2] = centerY - object->YAxisRelative;
+
+        glBegin(GL_POINTS);
+        glColor3f(0, 0, 1);
+        glVertex3d(toDraw[0], toDraw[1], toDraw[2]);
+        glEnd();
+
+        glPushMatrix();
+
+        //glTranslatef(offset[0], 0, offset[2]);
+        glTranslatef(toDraw[0], toDraw[1], toDraw[2]);
+        if (object->entity!=NULL) {
+            glPushMatrix();
+            glScalef(3, 3, 3);
+            DrawModel(object->entity, BLOCK_LOD_MAX);
+            glPopMatrix();
+        }
+        else {
+            printf("OBJECT [%s] NOT FOUND\n", object->MemberName);
+            glBegin(GL_POINTS);
+            glColor3f(0, 1, 0);
+            glVertex3d(0, 0, 0);
+            glEnd();
+        }
+
+        glPopMatrix();
+
+
+    }
+    glEnable(GL_DEPTH_TEST);
+    glPointSize(1);
+}
+
 
 void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
 {
@@ -1089,7 +1145,6 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
         RenderBlock(area, LOD, i, false);
     }
 	glEnd();
-
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1098,10 +1153,10 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 		RenderBlock(area, LOD, i, true);
 	}
 	
-
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
         RenderObjects(area, i);
 	}
+    
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
