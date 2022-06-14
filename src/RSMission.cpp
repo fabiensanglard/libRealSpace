@@ -38,6 +38,12 @@ void printChunk(IffChunk* chunk, const char *name) {
 	printf("\n");
 }
 
+void missionstrtoupper(char* src) {
+	int i = 0;
+	for (int i = 0; i < strlen(src); i++) {
+		src[i] = toupper(src[i]);
+	}
+}
 
 RSMission::RSMission() {
 	printf("CREATE MISSION\n");
@@ -413,7 +419,7 @@ void RSMission::parsePART(IffChunk* chunk) {
 
 			if (prt->Unknown0 != 65535) {
 				for (int k = 0; k < missionAreas.size(); k++) {
-					if (missionAreas[k]->id == prt->Unknown0) {
+					if (missionAreas[k]->id-1 == prt->Unknown0) {
 						prt->XAxisRelative += missionAreas[k]->XAxis;
 						prt->YAxisRelative += missionAreas[k]->YAxis;
 						prt->ZAxisRelative += missionAreas[k]->ZAxis;
@@ -421,7 +427,7 @@ void RSMission::parsePART(IffChunk* chunk) {
 					}
 				}
 			}
-
+			missionstrtoupper(prt->MemberName);
 			std::string hash = prt->MemberName;
 			std::map<std::string, RSEntity*>::iterator it;
 			it = objCache->find(hash);
@@ -434,6 +440,7 @@ void RSMission::parsePART(IffChunk* chunk) {
 				strcpy(modelPath, OBJ_PATH);
 				strcat(modelPath, prt->MemberName);
 				strcat(modelPath, OBJ_EXTENSION);
+				missionstrtoupper(modelPath);
 				TreEntry* entry = tre->GetEntryByName(modelPath);
 
 				if (entry == NULL) {

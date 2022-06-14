@@ -178,8 +178,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         return;
 
     if (lodLevel >= object->NumLods()){
-        /*printf("Unable to render this Level Of Details (out of range): Max level is  %lu\n",
-               std::min(0UL,object->NumLods()-1));*/
+        printf("Unable to render this Level Of Details (out of range): Max level is  %lu\n",
+               min(0UL,object->NumLods()-1));
         return;
     }
     
@@ -989,7 +989,7 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 				localDelta[0], localDelta[1], localDelta[2]
 			);
 			glPushMatrix();
-            glScalef(1.5, 1.5, 1.5);
+            glScalef(0.8, 1.5, 0.8);
 			DrawModel(it->second, BLOCK_LOD_MAX);
 			glPopMatrix();
 		}
@@ -1012,18 +1012,16 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 void SCRenderer::RenderMissionObjects(RSMission* mission) {
 
     std::vector<PART*> *objects = &mission->missionObjects;
+    glPushMatrix();
+    glScalef(1000000.0f / 360000.0f, 1, 1000000.0f / 360000.0f);
+    glTranslatef(-180000, 0, -180000);
 
     glPointSize(5);
     glDisable(GL_DEPTH_TEST);
     float y = 0;
     for (size_t i = 0; i < objects->size(); i++) {
         PART *object = objects->at(i);
-        printf("RENDERING MISSION OBJ : %s at [%d,%d,%d]\n", 
-            object->MemberName,
-            object->XAxisRelative,
-            object->YAxisRelative,
-            object->ZAxisRelative
-        );
+        
         int32_t offset[3];
         int centerX = ((20000 * 18) / 2);
         int centerY = (20000 * 18) / 2;
@@ -1032,6 +1030,16 @@ void SCRenderer::RenderMissionObjects(RSMission* mission) {
         toDraw[0] = centerX + object->XAxisRelative;
         toDraw[1] = object->ZAxisRelative;
         toDraw[2] = centerY - object->YAxisRelative;
+
+        printf("RENDERING MISSION OBJ : %s at [%d,%d,%d] - (%d, %d, %d)\n",
+            object->MemberName,
+            object->XAxisRelative,
+            object->YAxisRelative,
+            object->ZAxisRelative,
+            toDraw[0],
+            toDraw[1],
+            toDraw[2]
+        );
 
         glBegin(GL_POINTS);
         glColor3f(0, 0, 1);
@@ -1044,7 +1052,7 @@ void SCRenderer::RenderMissionObjects(RSMission* mission) {
         glTranslatef(toDraw[0], toDraw[1], toDraw[2]);
         if (object->entity!=NULL) {
             glPushMatrix();
-            glScalef(3, 3, 3);
+            glScalef(0.8, 1.5, 0.8);
             DrawModel(object->entity, BLOCK_LOD_MAX);
             glPopMatrix();
         }
@@ -1062,6 +1070,7 @@ void SCRenderer::RenderMissionObjects(RSMission* mission) {
     }
     glEnable(GL_DEPTH_TEST);
     glPointSize(1);
+    glPopMatrix();
 }
 
 
