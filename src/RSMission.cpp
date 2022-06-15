@@ -204,55 +204,59 @@ void RSMission::parseLOAD(IffChunk* chunk) {
 
 }
 void RSMission::parseCAST(IffChunk* chunk) {
-	CAST* cst;
-	size_t fsize = chunk->size;
-	size_t nbactor = fsize / 9;
-	ByteStream stream(chunk->data);
-	for (int i = 0; i < nbactor; i++) {
-		cst = (CAST*)malloc(sizeof(CAST));
-		if (cst != NULL) {
-			cst->id = i;
-			for (int k = 0; k < 8; k++) {
-				cst->actor[k] = stream.ReadByte();
+	if (chunk != NULL) {
+		CAST* cst;
+		size_t fsize = chunk->size;
+		size_t nbactor = fsize / 9;
+		ByteStream stream(chunk->data);
+		for (int i = 0; i < nbactor; i++) {
+			cst = (CAST*)malloc(sizeof(CAST));
+			if (cst != NULL) {
+				cst->id = i;
+				for (int k = 0; k < 8; k++) {
+					cst->actor[k] = stream.ReadByte();
+				}
+				cst->actor[8] = '\0';
+				stream.ReadByte();
+				missionCasting.push_back(cst);
 			}
-			cst->actor[8] = '\0';
-			stream.ReadByte();
-			missionCasting.push_back(cst);
 		}
 	}
 }
 void RSMission::parseMSGS(IffChunk* chunk) {
-	size_t fsize = chunk->size;
-	size_t read = 0;
-	size_t strc = 0;
-	size_t msgc = 0;
-	ByteStream stream(chunk->data);
-	MSGS* scmsg=NULL;
-	byte r;
-	while (read < fsize) {
-		r = stream.ReadByte();
-		read++;
-		if (r != '\0') {
-			if (scmsg == NULL) {
-				scmsg = (MSGS*)malloc(sizeof(MSGS));
+	if (chunk != NULL) {
+		size_t fsize = chunk->size;
+		size_t read = 0;
+		size_t strc = 0;
+		size_t msgc = 0;
+		ByteStream stream(chunk->data);
+		MSGS* scmsg = NULL;
+		byte r;
+		while (read < fsize) {
+			r = stream.ReadByte();
+			read++;
+			if (r != '\0') {
 				if (scmsg == NULL) {
-					read = fsize + 1;
+					scmsg = (MSGS*)malloc(sizeof(MSGS));
+					if (scmsg == NULL) {
+						read = fsize + 1;
+					}
+					else {
+						strc = 0;
+						scmsg->id = msgc++;
+					}
 				}
-				else {
-					strc = 0;
-					scmsg->id = msgc++;
+				if (scmsg != NULL) {
+					scmsg->message[strc++] = r;
 				}
 			}
-			if (scmsg != NULL) {
-				scmsg->message[strc++] = r;
+			else {
+				if (scmsg != NULL) {
+					scmsg->message[strc++] = '\0';
+					missionMessages.push_back(scmsg);
+				}
+				scmsg = NULL;
 			}
-		}
-		else {
-			if (scmsg != NULL) {
-				scmsg->message[strc++] = '\0';
-				missionMessages.push_back(scmsg);
-			}
-			scmsg = NULL;
 		}
 	}
 }
@@ -280,12 +284,14 @@ void RSMission::parseNAME(IffChunk* chunk) {
 	}
 }
 void RSMission::parseFILE(IffChunk* chunk) {
-	size_t fsize = chunk->size;
-	ByteStream stream(chunk->data);
-	for (int i = 0; i < fsize; i++) {
-		missionAreaFile[i] = stream.ReadByte();
+	if (chunk != NULL) {
+		size_t fsize = chunk->size;
+		ByteStream stream(chunk->data);
+		for (int i = 0; i < fsize; i++) {
+			missionAreaFile[i] = stream.ReadByte();
+		}
+		missionAreaFile[fsize] = '\0';
 	}
-	missionAreaFile[fsize] = '\0';
 }
 void RSMission::parsePALT(IffChunk* chunk) {
 	printChunk(chunk, "PALT");
@@ -300,169 +306,205 @@ void RSMission::parseSKYS(IffChunk* chunk) {
 }
 
 void RSMission::parseAREA(IffChunk* chunk) {
-	printf("PARSING AREA\n");
-	
-	ByteStream stream(chunk->data);
-	size_t fsize = chunk->size;
-	size_t read = 0;
-	uint8_t buffer;
-	int cpt = 0;
-	while (read<fsize) {
-		buffer = stream.ReadByte();
-		AREA *area;
-		area = (AREA *)malloc(sizeof(AREA));
-		if (area != NULL) {
-			area->id = ++cpt;
-			switch (buffer) {
-			case 'S':
-				area->AreaType = 'S';
-				for (int k = 0; k < 33; k++) {
-					area->AreaName[k] = stream.ReadByte();
-				}
-				area->XAxis = stream.ReadInt24LE();
-				area->YAxis = stream.ReadInt24LE();
-				area->ZAxis = stream.ReadInt24LE();
-				area->AreaWidth = stream.ReadUShort();
-				stream.ReadByte();
-				read += 49;
-				break;
-			case 'C':
-				area->AreaType = 'C';
-				for (int k = 0; k < 33; k++) {
-					area->AreaName[k] = stream.ReadByte();
-				}
-				area->XAxis = stream.ReadInt24LE();
-				area->YAxis = stream.ReadInt24LE();
-				area->ZAxis = stream.ReadInt24LE();
-				area->AreaWidth = stream.ReadUShort();
+	if (chunk != NULL) {
+		printf("PARSING AREA\n");
 
-				//unsigned int Blank0; // off 48-49
-				stream.ReadByte();
-				stream.ReadByte();
-				area->AreaHeight = stream.ReadUShort();
-				//unsigned char Blank1; // off 52
-				stream.ReadByte();
-				read += 52;
-				break;
-			case 'B':
-				area->AreaType = 'B';
-				for (int k = 0; k < 33; k++) {
-					area->AreaName[k] = stream.ReadByte();
-				}
-				area->XAxis = stream.ReadInt24LE();
-				area->YAxis = stream.ReadInt24LE();
-				area->ZAxis = stream.ReadInt24LE();
-				area->AreaWidth = stream.ReadUShort();
-
-				//unsigned char Blank0[10]; // off 48-59
-				for (int k = 0; k < 10; k++) {
+		ByteStream stream(chunk->data);
+		size_t fsize = chunk->size;
+		size_t read = 0;
+		uint8_t buffer;
+		int cpt = 0;
+		while (read < fsize) {
+			buffer = stream.ReadByte();
+			AREA* area;
+			area = (AREA*)malloc(sizeof(AREA));
+			if (area != NULL) {
+				area->id = ++cpt;
+				switch (buffer) {
+				case 'S':
+					area->AreaType = 'S';
+					for (int k = 0; k < 33; k++) {
+						area->AreaName[k] = stream.ReadByte();
+					}
+					area->XAxis = stream.ReadInt24LE();
+					area->YAxis = stream.ReadInt24LE();
+					area->ZAxis = stream.ReadInt24LE();
+					area->AreaWidth = stream.ReadUShort();
 					stream.ReadByte();
-				}
-				//unsigned int AreaHeight; // off 60-61
-				area->AreaHeight = stream.ReadUShort();
+					read += 49;
+					break;
+				case 'C':
+					area->AreaType = 'C';
+					for (int k = 0; k < 33; k++) {
+						area->AreaName[k] = stream.ReadByte();
+					}
+					area->XAxis = stream.ReadInt24LE();
+					area->YAxis = stream.ReadInt24LE();
+					area->ZAxis = stream.ReadInt24LE();
+					area->AreaWidth = stream.ReadUShort();
 
-				//unsigned char Unknown[5]; // off 62-67
-				for (int k = 0; k < 5; k++) {
+					//unsigned int Blank0; // off 48-49
 					stream.ReadByte();
-				}
+					stream.ReadByte();
+					area->AreaHeight = stream.ReadUShort();
+					//unsigned char Blank1; // off 52
+					stream.ReadByte();
+					read += 52;
+					break;
+				case 'B':
+					area->AreaType = 'B';
+					for (int k = 0; k < 33; k++) {
+						area->AreaName[k] = stream.ReadByte();
+					}
+					area->XAxis = stream.ReadInt24LE();
+					area->YAxis = stream.ReadInt24LE();
+					area->ZAxis = stream.ReadInt24LE();
+					area->AreaWidth = stream.ReadUShort();
 
-				read += 67;
-				break;
+					//unsigned char Blank0[10]; // off 48-59
+					for (int k = 0; k < 10; k++) {
+						stream.ReadByte();
+					}
+					//unsigned int AreaHeight; // off 60-61
+					area->AreaHeight = stream.ReadUShort();
+
+					//unsigned char Unknown[5]; // off 62-67
+					for (int k = 0; k < 5; k++) {
+						stream.ReadByte();
+					}
+
+					read += 67;
+					break;
+				}
+				missionAreas.push_back(area);
 			}
-			missionAreas.push_back(area);
-		}
-		else {
-			read = fsize + 1;
-			// exit the loop, memory error
+			else {
+				read = fsize + 1;
+				// exit the loop, memory error
+			}
 		}
 	}
 }
 
 void RSMission::parsePART(IffChunk* chunk) {
-	if (chunk == NULL) {
-		return ;
-	}
-	printf("PARSING PART\n");
-	printf("Number of entries %d\n", chunk->size / 62);
-	ByteStream stream(chunk->data);
-	size_t numParts = chunk->size / 62;
-	for (int i = 0; i < numParts; i++) {
-		PART *prt;
-		prt = (PART *)malloc(sizeof(PART));
-		if (prt != NULL) {
-			prt->MemberNumber = 0;
-			prt->MemberNumber |= stream.ReadByte() << 0;
-			prt->MemberNumber |= stream.ReadByte() << 8;
-			for (int k = 0; k < 16; k++) {
-				prt->MemberName[k] = stream.ReadByte();
-			}
-			for (int k = 0; k < 8; k++) {
-				prt->WeaponLoad[k] = stream.ReadByte();
-			}
-			prt->Unknown0 = 0;
-			prt->Unknown0 |= stream.ReadByte() << 0;
-			prt->Unknown0 |= stream.ReadByte() << 8;
+	if (chunk != NULL) {
+		printf("PARSING PART\n");
+		printf("Number of entries %d\n", chunk->size / 62);
+		ByteStream stream(chunk->data);
+		size_t numParts = chunk->size / 62;
+		for (int i = 0; i < numParts; i++) {
+			PART *prt;
+			prt = (PART *)malloc(sizeof(PART));
+			if (prt != NULL) {
+				prt->MemberNumber = 0;
+				prt->MemberNumber |= stream.ReadByte() << 0;
+				prt->MemberNumber |= stream.ReadByte() << 8;
+				for (int k = 0; k < 16; k++) {
+					prt->MemberName[k] = stream.ReadByte();
+				}
+				for (int k = 0; k < 8; k++) {
+					prt->WeaponLoad[k] = stream.ReadByte();
+				}
+				prt->Unknown0 = 0;
+				prt->Unknown0 |= stream.ReadByte() << 0;
+				prt->Unknown0 |= stream.ReadByte() << 8;
 
-			prt->Unknown1 = 0;
-			prt->Unknown1 |= stream.ReadByte() << 0;
-			prt->Unknown1 |= stream.ReadByte() << 8;
+				prt->Unknown1 = 0;
+				prt->Unknown1 |= stream.ReadByte() << 0;
+				prt->Unknown1 |= stream.ReadByte() << 8;
 
-			prt->XAxisRelative = stream.ReadInt24LE();
-			prt->YAxisRelative = stream.ReadInt24LE();
-			prt->ZAxisRelative = 0;
-			prt->ZAxisRelative |= stream.ReadByte() << 0;
-			prt->ZAxisRelative |= stream.ReadByte() << 8;
+				prt->XAxisRelative = stream.ReadInt24LE();
+				prt->YAxisRelative = stream.ReadInt24LE();
+				prt->ZAxisRelative = 0;
+				prt->ZAxisRelative |= stream.ReadByte() << 0;
+				prt->ZAxisRelative |= stream.ReadByte() << 8;
 
-			for (int k = 0; k < 22; k++) {
-				prt->Controls[k] = stream.ReadByte();
-			}
+				for (int k = 0; k < 22; k++) {
+					prt->Controls[k] = stream.ReadByte();
+				}
 
-			if (prt->Unknown0 != 65535) {
-				for (int k = 0; k < missionAreas.size(); k++) {
-					if (missionAreas[k]->id-1 == prt->Unknown0) {
-						prt->XAxisRelative += missionAreas[k]->XAxis;
-						prt->YAxisRelative += missionAreas[k]->YAxis;
-						prt->ZAxisRelative += missionAreas[k]->ZAxis;
-						prt->Unknown0 = 65535;
+				if (prt->Unknown0 != 65535) {
+					for (int k = 0; k < missionAreas.size(); k++) {
+						if (missionAreas[k]->id-1 == prt->Unknown0) {
+							prt->XAxisRelative += missionAreas[k]->XAxis;
+							prt->YAxisRelative += missionAreas[k]->YAxis;
+							prt->ZAxisRelative += missionAreas[k]->ZAxis;
+							prt->Unknown0 = 65535;
+						}
 					}
 				}
-			}
-			missionstrtoupper(prt->MemberName);
-			std::string hash = prt->MemberName;
-			std::map<std::string, RSEntity*>::iterator it;
-			it = objCache->find(hash);
-			RSEntity* entity = new RSEntity();
-			if (it == objCache->end()) {
-				char modelPath[512];
-				const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
-				const char* OBJ_EXTENSION = ".IFF";
+				missionstrtoupper(prt->MemberName);
+				std::string hash = prt->MemberName;
+				std::map<std::string, RSEntity*>::iterator it;
+				it = objCache->find(hash);
+				RSEntity* entity = new RSEntity();
+				if (it == objCache->end()) {
+					char modelPath[512];
+					const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
+					const char* OBJ_EXTENSION = ".IFF";
 
-				strcpy(modelPath, OBJ_PATH);
-				strcat(modelPath, prt->MemberName);
-				strcat(modelPath, OBJ_EXTENSION);
-				missionstrtoupper(modelPath);
-				TreEntry* entry = tre->GetEntryByName(modelPath);
+					strcpy(modelPath, OBJ_PATH);
+					strcat(modelPath, prt->MemberName);
+					strcat(modelPath, OBJ_EXTENSION);
+					missionstrtoupper(modelPath);
+					TreEntry* entry = tre->GetEntryByName(modelPath);
 
-				if (entry == NULL) {
-					printf("Object reference '%s' not found in TRE.\n", modelPath);
-					//continue;
+					if (entry == NULL) {
+						printf("Object reference '%s' not found in TRE.\n", modelPath);
+						//continue;
+					}
+					else {
+						entity->InitFromRAM(entry->data, entry->size);
+						objCache->emplace(hash, entity);
+					}
 				}
 				else {
-					entity->InitFromRAM(entry->data, entry->size);
-					objCache->emplace(hash, entity);
+					entity = it->second;
 				}
-			}
-			else {
-				entity = it->second;
-			}
 
-			prt->entity = entity;
-			missionObjects.push_back(prt);
+				prt->entity = entity;
+				missionObjects.push_back(prt);
+			}
 		}
 	}
 }
 void RSMission::parseGLNT(IffChunk* chunk) {
 	printChunk(chunk, "GLNT");
+	if (chunk != NULL) {
+		PakArchive p;
+		p.InitFromRAM("GLNT", chunk->data, chunk->size);
+		p.List(stdout);
+		for (size_t i = 0; i < p.GetNumEntries(); i++) {
+			PakEntry* blockEntry = p.GetEntry(i);
+			printf("CONTENT OF GLNT PAK ENTRY %d\n", i);
+			ByteStream stream(blockEntry->data);
+			size_t fsize = blockEntry->size;
+			uint8_t byte;
+			int cl = 0;
+			for (int read = 0; read < fsize; read++) {
+				byte = stream.ReadByte();
+				if (byte >= 40 && byte <= 90) {
+					printf("[%c]", char(byte));
+				}
+				else if (byte >= 97 && byte <= 122) {
+					printf("[%c]", char(byte));
+				}
+				else {
+					printf("[0x%X]", byte);
+				}
+				if (cl > 2) {
+					printf("\n");
+					cl = 0;
+				}
+				else {
+					printf("\t");
+					cl++;
+				}
+
+			}
+			printf("\n");
+		}
+	}
 }
 
 void RSMission::parseSMOK(IffChunk* chunk) {
@@ -474,24 +516,26 @@ void RSMission::parseLGHT(IffChunk* chunk) {
 }
 
 void RSMission::parseSPOT(IffChunk* chunk) {
-	size_t numParts = chunk->size / 14;
-	ByteStream stream(chunk->data);
+	if (chunk != NULL) {
+		size_t numParts = chunk->size / 14;
+		ByteStream stream(chunk->data);
 
-	for (int i = 0; i < numParts; i++) {
-		SPOT* spt;
-		spt = (SPOT*)malloc(sizeof(SPOT));
-		if (spt != NULL) {
-			spt->id = i;
-			spt->unknown = 0;
-			spt->unknown |= stream.ReadByte() << 0;
-			spt->unknown |= stream.ReadByte() << 8;
-			
-			stream.ReadByte();
-			spt->XAxis = stream.ReadInt24LE();
-			spt->YAxis = stream.ReadInt24LE();
-			spt->ZAxis = stream.ReadShort();
-			stream.ReadByte();
-			missionSpots.push_back(spt);
+		for (int i = 0; i < numParts; i++) {
+			SPOT* spt;
+			spt = (SPOT*)malloc(sizeof(SPOT));
+			if (spt != NULL) {
+				spt->id = i;
+				spt->unknown = 0;
+				spt->unknown |= stream.ReadByte() << 0;
+				spt->unknown |= stream.ReadByte() << 8;
+
+				stream.ReadByte();
+				spt->XAxis = stream.ReadInt24LE();
+				spt->YAxis = stream.ReadInt24LE();
+				spt->ZAxis = stream.ReadShort();
+				stream.ReadByte();
+				missionSpots.push_back(spt);
+			}
 		}
 	}
 }

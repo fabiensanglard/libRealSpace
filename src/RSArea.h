@@ -58,6 +58,9 @@ typedef struct AreaBlock{
     
 } AreaBlock;
 
+typedef struct AreaOverlay {
+    Point3D* vertices;
+};
 #define BLOCK_LOD_MAX 0
 #define BLOCK_LOD_MED 1
 #define BLOCK_LOD_MIN 2
@@ -91,6 +94,7 @@ public:
     
     //Per block objects list
     std::vector<MapObject> objects[BLOCKS_PER_MAP];
+    std::vector<AreaOverlay> objectOverlay;
     float elevation[BLOCKS_PER_MAP];
 
     size_t GetNumJets(void);

@@ -91,7 +91,7 @@ public:
     
     void Prepare(RSEntity* object);
     void RenderMissionObjects(RSMission* mission);
-    
+    void RenderMapOverlay(RSArea* area);
 private:
     
     

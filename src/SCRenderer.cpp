@@ -1162,6 +1162,7 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 		RenderBlock(area, LOD, i, true);
 	}
 	
+    RenderMapOverlay(area);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
         RenderObjects(area, i);
 	}
@@ -1170,7 +1171,27 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
 }
-
+void SCRenderer::RenderMapOverlay(RSArea* area) {
+    int centerX = ((20000 * 18) / 2);
+    int centerY = (20000 * 18) / 2;
+    glColor3f(0.0, 1.0, 0.0);
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    
+    for (int i = 0; i < area->objectOverlay.size(); i++) {
+        Point3D *v = area->objectOverlay[i].vertices;
+        glBegin(GL_TRIANGLE_STRIP);
+        for (int i = 0; i < 192; i++) {
+            glVertex3f(v[i].x+ centerX, v[i].y, centerY-v[i].z);
+        }
+        glEnd();
+        
+    }
+    
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+}
 void SCRenderer::RenderWorldByID(RSArea* area, int LOD, int verticesPerBlock, int blockId) {
 
     printf("X:%f,Y:%f", area->GetAreaBlockByID(LOD, blockId)->vertice[0].v.x, area->GetAreaBlockByID(LOD, blockId)->vertice[0].v.z);

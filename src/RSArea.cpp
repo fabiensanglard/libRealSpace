@@ -17,15 +17,7 @@ void dumpfbyte(uint8_t* data, size_t size) {
     int cl = 0;
     for (int read = 0; read < fsize; read++) {
         byte = stream.ReadByte();
-        if (byte >= 40 && byte <= 90) {
-            printf("[%c]", char(byte));
-        }
-        else if (byte >= 97 && byte <= 122) {
-            printf("[%c]", char(byte));
-        }
-        else {
-            printf("[0x%X]", byte);
-        }
+        printf("[0x%X]", byte);
         if (cl > 2) {
             printf("\n");
             cl = 0;
@@ -345,31 +337,45 @@ void RSArea::ParseTriFile(PakEntry* entry){
     
     
     if (entry->size > 0) {
-        
+        PakArchive triFiles;
+
         //dumpfbyte(entry->data, entry->size);
         
-        /*
+        /**/
+        AreaOverlay overTheMapIsTheRunway;
+        size_t read = 0;
         ByteStream stream(entry->data);
+        size_t numvertice = stream.ReadByte();
+        read++;
+        for (int i=0;i<6;i++) stream.ReadByte();
+        read += 7;
         Point3D* vertices = new Point3D[300];
-        for (int i = 0; i < 300; i++) {
+        
+        for (int i = 0; i < numvertice; i++) {
             Point3D* v = &vertices[i];
             int32_t coo;
-
-            stream.ReadByte();
+            uint8_t u0 = stream.ReadByte();
+            uint8_t u1 = stream.ReadByte();
             coo = stream.ReadInt24LE();
+            read += 4;
             v->x = coo;
             coo = stream.ReadInt24LE();
+            read += 4;
             v->z = coo;
             coo = stream.ReadShort();
+            read += 2;
             v->y = coo;
-            stream.ReadByte();
-            printf("NEW POINT {%f,%f,%f}\n", v->x, v->z, v->y);
+            uint8_t u2 = stream.ReadByte();
+            read++;
+            printf("NEW POINT {%f,%f,%f} [%d | %d | %d]\n", v->x, v->z, v->y,u0,u1,u2);
         }
+        printf("BYTE READ %d, REMAINING %d\n", read, entry->size - read);
         //printf("*********************\n");
         //Render them
         //Renderer.RenderVerticeField(vertices,300);
-
-        delete[] vertices;*/
+        overTheMapIsTheRunway.vertices = vertices;
+        /**/
+        objectOverlay.push_back(overTheMapIsTheRunway);
     }
 }
 
