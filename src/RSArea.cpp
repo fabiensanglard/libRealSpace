@@ -747,11 +747,11 @@ float RSArea::getGroundLevel(int BLOC, float x, float y) {
     for (int i = 0; i < 400; i++) {
         
         if ((blocks[0][BLOC].vertice[i].v.x >= vX) && (blocks[0][BLOC].vertice[i].v.z >= vY)) {
-            printf("GROUND FROM %d [%d,%d] - [%f, %f, %f]\n", i, vX, vY,
+            /*printf("GROUND FROM %d [%d,%d] - [%f, %f, %f]\n", i, vX, vY,
                 blocks[0][BLOC].vertice[i].v.x,
                 blocks[0][BLOC].vertice[i].v.y,
                 blocks[0][BLOC].vertice[i].v.z
-            );
+            );*/
             return (blocks[0][BLOC].vertice[i].v.y+5);
         }
             

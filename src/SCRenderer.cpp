@@ -19,8 +19,6 @@ extern SCRenderer Renderer;
 
 SCRenderer::SCRenderer() :
    initialized(false){
-       
-    
 }
 
 SCRenderer::~SCRenderer(){
@@ -225,7 +223,6 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             Texture* texture = image->GetTexture();
             
             glBindTexture(GL_TEXTURE_2D, texture->id);
-			//printf("BIND TEXTURE [%s]:%d\n", texture->name, texture->id);
             Triangle* triangle = &object->triangles[textInfo->triangleID];
             
             Vector3D normal;
@@ -284,7 +281,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
 	PFNGLBLENDEQUATIONPROC glBlendEquation = NULL;
 	glBlendEquation = (PFNGLBLENDEQUATIONPROC)wglGetProcAddress("glBlendEquation");
 	glBlendEquation(GL_ADD);
-	glDepthFunc(GL_LESS);
+	//glDepthFunc(GL_LESS);
 #endif
         
     for(int i = 0 ; i < lod->numTriangles ; i++){
@@ -376,8 +373,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             
             const Texel* texel = palette.GetRGBColor(triangle->color);
             
-            glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,1);
-            //glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
+            //glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,1);
+            glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
             
             glVertex3f(object->vertices[triangle->ids[j]].x,
                        object->vertices[triangle->ids[j]].y,
@@ -507,7 +504,7 @@ void SCRenderer::RenderVerticeField(Point3D* vertices, int numVertices){
 
 // What is this offset ? It is used to get rid of the red delimitations
 // in the 64x64 textures.
-#define OFFSET (1/64.0f)
+#define OFFSET (2/64.0f)
 float textTrianCoo64[2][3][2] = {
     
     {{TEX_ZERO,TEX_ZERO+OFFSET},    {TEX_ONE-2*OFFSET,TEX_ONE-OFFSET},    {TEX_ZERO,TEX_ONE-OFFSET} }, // LOWER_TRIANGE
@@ -976,7 +973,6 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 
 		glPushMatrix();
 		
-		//glTranslatef(offset[0], 0, offset[2]);
 		glTranslatef(toDraw[0], toDraw[1], toDraw[2]);
 		
 		std::map<std::string, RSEntity *>::iterator it;
@@ -988,10 +984,7 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 				offset[0], offset[1], offset[2],
 				localDelta[0], localDelta[1], localDelta[2]
 			);
-			glPushMatrix();
-            glScalef(0.8, 1.5, 0.8);
 			DrawModel(it->second, BLOCK_LOD_MAX);
-			glPopMatrix();
 		}
 		else {
 			printf("OBJECT [%s] NOT FOUND\n", object.name);
@@ -1052,7 +1045,7 @@ void SCRenderer::RenderMissionObjects(RSMission* mission) {
         glTranslatef(toDraw[0], toDraw[1], toDraw[2]);
         if (object->entity!=NULL) {
             glPushMatrix();
-            glScalef(0.8, 1.5, 0.8);
+            //glScalef(0.8, 1.5, 0.8);
             DrawModel(object->entity, BLOCK_LOD_MAX);
             glPopMatrix();
         }
@@ -1164,7 +1157,7 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 	
     RenderMapOverlay(area);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-        RenderObjects(area, i);
+       RenderObjects(area, i);
 	}
     
     glDisable(GL_BLEND);
