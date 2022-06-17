@@ -296,7 +296,7 @@ void ListChunkContent(uint32_t level, IffChunk* chunk) {
 	Tab(level);
 	printf("%lu\n", chunk->size);
 
-	dumpChunk(chunk, GetChunkTextID(chunk->id));
+	//dumpChunk(chunk, GetChunkTextID(chunk->id));
 	if (chunk->subId != 0) {
 		Tab(level);
 		printf("%s\n", GetChunkTextID(chunk->subId));

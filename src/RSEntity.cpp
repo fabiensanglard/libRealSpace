@@ -8,48 +8,9 @@
 
 #include "RSEntity.h"
 
-void printChunkF(IffChunk* chunk, const char *name) {
-	printf("PARSING %s\n", name);
-	if (chunk == NULL) {
-		printf("NO CHUNK\n");
-		return;
-	}
-	if (chunk->data == NULL) {
-		printf("%s : NO DATA\n", name);
-		return;
-	}
-	ByteStream stream(chunk->data);
-	size_t fsize = chunk->size;
-	uint8_t byte;
-	int cl = 0;
-	for (int read = 0; read < fsize; read++) {
-		byte = stream.ReadByte();
-		if (byte >= 40 && byte <= 90) {
-			printf("[%c]", char(byte));
-		}
-		else if (byte >= 97 && byte <= 122) {
-			printf("[%c]", char(byte));
-		}
-		else {
-			printf("[0x%X]", byte);
-		}
-		if (cl > 2) {
-			printf("\n");
-			cl = 0;
-		}
-		else {
-			printf("\t");
-			cl++;
-		}
-
-	}
-	printf("\n");
-}
 
 void parsRNWY(IffChunk* chunk, const char* name) {
-	if (chunk != NULL && chunk->data != NULL) {
-		printChunkF(chunk, name);
-	}
+	
 }
 
 RSEntity::RSEntity() :
@@ -261,11 +222,11 @@ void RSEntity::InitFromIFF(IffLexer* lexer) {
 	if (chunk != NULL)
 		ParseLVL(chunk);
 
-	printChunkF(lexer->GetChunkByID('EXTE'), "EXTE");
+	/*printChunkF(lexer->GetChunkByID('EXTE'), "EXTE");
 	printChunkF(lexer->GetChunkByID('NONE'), "NONE");
 	printChunkF(lexer->GetChunkByID('DAMG'), "DAMG");
 	printChunkF(lexer->GetChunkByID('TRGT'), "TRGT");
-	/*parsRNWY(lexer->GetChunkByID('RNWY'), "RNWY"); */
+	parsRNWY(lexer->GetChunkByID('RNWY'), "RNWY"); */
 	CalcBoundingBox();
 }
 

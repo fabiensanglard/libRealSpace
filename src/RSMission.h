@@ -158,7 +158,7 @@ public:
 	std::vector<PART*> missionObjects;
 
 	PART* getPlayerCoord();
-
+	PART* getObject(const char *name);
 	void InitFromIFF(IffLexer* lexer);
 	void PrintMissionInfos();
 private:

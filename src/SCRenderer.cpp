@@ -1013,7 +1013,7 @@ void SCRenderer::RenderMissionObjects(RSMission* mission) {
 
     std::vector<PART*> *objects = &mission->missionObjects;
     glPushMatrix();
-    glScalef(1000000.0f / 360000.0f, 1, 1000000.0f / 360000.0f);
+    glScalef(1000000.0f / 360000.0f, 1000000.0f / 360000.0f, 1000000.0f / 360000.0f);
     glTranslatef(-180000, 0, -180000);
 
     glPointSize(5);
@@ -1143,7 +1143,7 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
 void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 
     glPushMatrix();
-    glScalef(1000000.0f/ 360000.0f, 1, 1000000.0f / 360000.0f);
+    glScalef(1000000.0f/ 360000.0f, 1000000.0f / 360000.0f, 1000000.0f / 360000.0f);
     glTranslatef(-180000,0,-180000);
 
     
@@ -1181,7 +1181,7 @@ void SCRenderer::RenderMapOverlay(RSArea* area) {
     
     for (int i = 0; i < area->objectOverlay.size(); i++) {
         Point3D *v = area->objectOverlay[i].vertices;
-        glBegin(GL_TRIANGLE_STRIP);
+        glBegin(GL_QUAD_STRIP);
         for (int i = 0; i < 192; i++) {
             glVertex3f(v[i].x+ centerX, v[i].y, centerY-v[i].z);
         }

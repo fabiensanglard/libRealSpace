@@ -10,25 +10,7 @@
 #include "SCRenderer.h"
 
 extern SCRenderer Renderer;
-void dumpfbyte(uint8_t* data, size_t size) {
-    ByteStream stream(data);
-    size_t fsize = size;
-    uint8_t byte;
-    int cl = 0;
-    for (int read = 0; read < fsize; read++) {
-        byte = stream.ReadByte();
-        printf("[0x%X]", byte);
-        if (cl > 2) {
-            printf("\n");
-            cl = 0;
-        }
-        else {
-            printf("\t");
-            cl++;
-        }
 
-    }
-}
 RSArea::RSArea(){
     
     
@@ -339,9 +321,6 @@ void RSArea::ParseTriFile(PakEntry* entry){
     if (entry->size > 0) {
         PakArchive triFiles;
 
-        //dumpfbyte(entry->data, entry->size);
-        
-        /**/
         AreaOverlay overTheMapIsTheRunway;
         size_t read = 0;
         ByteStream stream(entry->data);

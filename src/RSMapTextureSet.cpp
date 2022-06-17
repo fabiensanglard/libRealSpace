@@ -8,33 +8,6 @@
 
 #include "RSMapTextureSet.h"
 
-void dumpStream(ByteStream *stream, size_t fsize) {
-    
-    uint8_t byte;
-    int cl = 0;
-    for (int read = 0; read < fsize; read++) {
-        byte = stream->ReadByte();
-        if (byte >= 40 && byte <= 90) {
-            printf("[%c]", char(byte));
-        }
-        else if (byte >= 97 && byte <= 122) {
-            printf("[%c]", char(byte));
-        }
-        else {
-            printf("[0x%X]", byte);
-        }
-        if (cl > 2) {
-            printf("\n");
-            cl = 0;
-        }
-        else {
-            printf("\t");
-            cl++;
-        }
-
-    }
-    printf("\n");
-}
 RSMapTextureSet::RSMapTextureSet(){
     
 }

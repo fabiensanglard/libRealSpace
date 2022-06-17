@@ -567,3 +567,21 @@ PART* RSMission::getPlayerCoord() {
 	}
 	return (NULL);
 }
+PART* RSMission::getObject(const char *name) {
+	for (int i = 0; i < missionObjects.size(); i++) {
+		if (strcmp(missionObjects[i]->MemberName, name) == 0) {
+			if (missionObjects[i]->Unknown0 != 65535) {
+				for (int k = 0; k < missionAreas.size(); k++) {
+					if (missionAreas[k]->id == missionObjects[i]->Unknown0) {
+						missionObjects[i]->XAxisRelative += missionAreas[k]->XAxis;
+						missionObjects[i]->YAxisRelative += missionAreas[k]->YAxis;
+						missionObjects[i]->ZAxisRelative += missionAreas[k]->ZAxis;
+						missionObjects[i]->Unknown0 = 65535;
+					}
+				}
+			}
+			return (missionObjects[i]);
+		}
+	}
+	return (NULL);
+}
