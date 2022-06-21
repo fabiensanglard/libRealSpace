@@ -326,15 +326,18 @@ void RSArea::ParseTriFile(PakEntry* entry){
         ByteStream stream(entry->data);
         size_t numvertice = stream.ReadByte();
         read++;
-        for (int i=0;i<6;i++) stream.ReadByte();
-        read += 7;
-        Point3D* vertices = new Point3D[300];
+        //for (int i=0;i<5;i++) stream.ReadByte();
+        stream.dump(5,0);
+        read += 4;
+        Point3D* vertices = new Point3D[numvertice];
         
         for (int i = 0; i < numvertice; i++) {
             Point3D* v = &vertices[i];
             int32_t coo;
             uint8_t u0 = stream.ReadByte();
             uint8_t u1 = stream.ReadByte();
+            uint8_t u2 = stream.ReadByte();
+            int id = u0 << 16 | u1 << 8 | u2;
             coo = stream.ReadInt24LE();
             read += 4;
             v->x = coo;
@@ -344,15 +347,46 @@ void RSArea::ParseTriFile(PakEntry* entry){
             coo = stream.ReadShort();
             read += 2;
             v->y = coo;
-            uint8_t u2 = stream.ReadByte();
-            read++;
-            printf("NEW POINT {%f,%f,%f} [%d | %d | %d]\n", v->x, v->z, v->y,u0,u1,u2);
+            printf("%f,%f,%f,%d\n", v->x, v->z, v->y, id);
         }
         printf("BYTE READ %d, REMAINING %d\n", read, entry->size - read);
+        overTheMapIsTheRunway.vertices = vertices;
+        stream.dump(8,1);
+        short ispoly = stream.ReadShort();
+        read += 2;
+        short cpt = 0;
+        overTheMapIsTheRunway.nbTriangles = 0;
+        while (ispoly == 1536 || ispoly == -256) {
+            AreaOverlayTriangles aot;
+            aot.color = stream.ReadByte();
+            aot.u0= stream.ReadByte();
+            read += 2;
+            aot.u1 = stream.ReadByte();
+            aot.u2 = stream.ReadByte();
+            aot.u3 = stream.ReadByte();
+            aot.u4 = stream.ReadByte();
+            aot.u5 = stream.ReadByte();
+            aot.u6 = stream.ReadByte();
+            read += 6;
+
+            aot.u7 = stream.ReadByte();
+            aot.verticesIdx[0] = stream.ReadByte();
+            read += 2;
+            aot.u8 = stream.ReadByte();
+            aot.verticesIdx[1] = stream.ReadByte();
+            read += 2;
+            aot.u9 = stream.ReadByte();
+            aot.verticesIdx[2] = stream.ReadByte();
+            read += 2;
+            overTheMapIsTheRunway.trianles[overTheMapIsTheRunway.nbTriangles++] = aot;
+            printf("Poly %d\n", overTheMapIsTheRunway.nbTriangles);
+            ispoly = stream.ReadShort();
+        }
+        stream.dump(entry->size-read, 1);
         //printf("*********************\n");
         //Render them
         //Renderer.RenderVerticeField(vertices,300);
-        overTheMapIsTheRunway.vertices = vertices;
+        
         /**/
         objectOverlay.push_back(overTheMapIsTheRunway);
     }

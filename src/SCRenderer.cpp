@@ -1167,6 +1167,7 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 void SCRenderer::RenderMapOverlay(RSArea* area) {
     int centerX = ((20000 * 18) / 2);
     int centerY = (20000 * 18) / 2;
+
     glColor3f(0.0, 1.0, 0.0);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -1174,12 +1175,19 @@ void SCRenderer::RenderMapOverlay(RSArea* area) {
     
     for (int i = 0; i < area->objectOverlay.size(); i++) {
         Point3D *v = area->objectOverlay[i].vertices;
-        glBegin(GL_QUAD_STRIP);
-        for (int i = 0; i < 192; i++) {
-            glVertex3f(v[i].x+ centerX, v[i].y, centerY-v[i].z);
+        for (int j = 0; j < area->objectOverlay[i].nbTriangles; j++) {
+            Point3D v1, v2, v3;
+            v1 = area->objectOverlay[i].vertices[area->objectOverlay[i].trianles[j].verticesIdx[0]];
+            v2 = area->objectOverlay[i].vertices[area->objectOverlay[i].trianles[j].verticesIdx[1]];
+            v3 = area->objectOverlay[i].vertices[area->objectOverlay[i].trianles[j].verticesIdx[2]];
+            glBegin(GL_TRIANGLES);
+                const Texel* texel = palette.GetRGBColor(area->objectOverlay[i].trianles[j].color);
+                glColor4f(texel->r / 255.0f, texel->g / 255.0f, texel->b / 255.0f, 1);
+                glVertex3f(v1.x + centerX, v1.y, centerY - v1.z);
+                glVertex3f(v2.x + centerX, v2.y, centerY - v2.z);
+                glVertex3f(v3.x + centerX, v3.y, centerY - v3.z);
+            glEnd();
         }
-        glEnd();
-        
     }
     
     glEnable(GL_BLEND);

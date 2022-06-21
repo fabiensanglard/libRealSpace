@@ -31,6 +31,7 @@ public:
 	ByteStream(ByteStream& stream);
 	ByteStream();
 	~ByteStream();
+	void dump(size_t lenght, int hexonly);
 
 	inline void Set(uint8_t* cursor) {
 		this->cursor = cursor;

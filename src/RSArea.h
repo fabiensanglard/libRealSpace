@@ -57,9 +57,16 @@ typedef struct AreaBlock{
     }
     
 } AreaBlock;
-
+typedef struct AreaOverlayTriangles {
+    int verticesIdx[3];
+    uint8_t color;
+    uint8_t u0, u1, u2, u3, u4;
+    uint8_t u5, u6, u7, u8, u9;
+};
 typedef struct AreaOverlay {
     Point3D* vertices;
+    AreaOverlayTriangles trianles[400];
+    int nbTriangles;
 };
 #define BLOCK_LOD_MAX 0
 #define BLOCK_LOD_MED 1
