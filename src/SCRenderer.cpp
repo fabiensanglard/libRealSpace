@@ -1171,7 +1171,7 @@ void SCRenderer::RenderMapOverlay(RSArea* area) {
     glColor3f(0.0, 1.0, 0.0);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
+    //glDisable(GL_CULL_FACE);
     
     for (int i = 0; i < area->objectOverlay.size(); i++) {
         Point3D *v = area->objectOverlay[i].vertices;

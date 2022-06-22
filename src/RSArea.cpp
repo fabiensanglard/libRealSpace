@@ -330,7 +330,11 @@ void RSArea::ParseTriFile(PakEntry* entry){
         stream.dump(5,0);
         read += 4;
         Point3D* vertices = new Point3D[numvertice];
-        
+        overTheMapIsTheRunway.lx = 0;
+        overTheMapIsTheRunway.ly = 0;
+        overTheMapIsTheRunway.hx = 0;
+        overTheMapIsTheRunway.hy = 0;
+
         for (int i = 0; i < numvertice; i++) {
             Point3D* v = &vertices[i];
             int32_t coo;
@@ -347,6 +351,15 @@ void RSArea::ParseTriFile(PakEntry* entry){
             coo = stream.ReadShort();
             read += 2;
             v->y = coo;
+            overTheMapIsTheRunway.lx = ((overTheMapIsTheRunway.lx == 0) && (i == 0)) ? v->x : overTheMapIsTheRunway.lx;
+            overTheMapIsTheRunway.hx = ((overTheMapIsTheRunway.hx == 0) && (i == 0)) ? v->x : overTheMapIsTheRunway.hx;
+            overTheMapIsTheRunway.ly = ((overTheMapIsTheRunway.ly == 0) && (i == 0)) ? v->z : overTheMapIsTheRunway.ly;
+            overTheMapIsTheRunway.hy = ((overTheMapIsTheRunway.hy == 0) && (i == 0)) ? v->z : overTheMapIsTheRunway.hy;
+            
+            overTheMapIsTheRunway.lx = v->x < overTheMapIsTheRunway.lx ? v->x : overTheMapIsTheRunway.lx;
+            overTheMapIsTheRunway.ly = v->z < overTheMapIsTheRunway.ly ? v->z : overTheMapIsTheRunway.ly;
+            overTheMapIsTheRunway.hx = v->x > overTheMapIsTheRunway.hx ? v->x : overTheMapIsTheRunway.hx;
+            overTheMapIsTheRunway.hy = v->z > overTheMapIsTheRunway.hy ? v->z : overTheMapIsTheRunway.hy;
             printf("%f,%f,%f,%d\n", v->x, v->z, v->y, id);
         }
         printf("BYTE READ %d, REMAINING %d\n", read, entry->size - read);
@@ -382,6 +395,12 @@ void RSArea::ParseTriFile(PakEntry* entry){
             printf("Poly %d\n", overTheMapIsTheRunway.nbTriangles);
             ispoly = stream.ReadShort();
         }
+        AreaOverlayTriangles aot;
+        aot.verticesIdx[0] = 0;
+        aot.verticesIdx[1] = 1;
+        aot.verticesIdx[2] = 2;
+        aot.color = 5;
+        overTheMapIsTheRunway.trianles[overTheMapIsTheRunway.nbTriangles++] = aot;
         stream.dump(entry->size-read, 1);
         //printf("*********************\n");
         //Render them
