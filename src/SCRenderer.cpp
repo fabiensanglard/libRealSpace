@@ -1174,9 +1174,9 @@ void SCRenderer::RenderMapOverlay(RSArea* area) {
     //glDisable(GL_CULL_FACE);
     
     for (int i = 0; i < area->objectOverlay.size(); i++) {
-        Point3D *v = area->objectOverlay[i].vertices;
+        AoVPoints*v = area->objectOverlay[i].vertices;
         for (int j = 0; j < area->objectOverlay[i].nbTriangles; j++) {
-            Point3D v1, v2, v3;
+            AoVPoints v1, v2, v3;
             v1 = area->objectOverlay[i].vertices[area->objectOverlay[i].trianles[j].verticesIdx[0]];
             v2 = area->objectOverlay[i].vertices[area->objectOverlay[i].trianles[j].verticesIdx[1]];
             v3 = area->objectOverlay[i].vertices[area->objectOverlay[i].trianles[j].verticesIdx[2]];

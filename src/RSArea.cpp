@@ -324,24 +324,25 @@ void RSArea::ParseTriFile(PakEntry* entry){
         AreaOverlay overTheMapIsTheRunway;
         size_t read = 0;
         ByteStream stream(entry->data);
-        size_t numvertice = stream.ReadByte();
-        read++;
+        int numvertice = stream.ReadShort();
+        read+=2;
+        int nbpoly = stream.ReadShort();
+        read += 2;
         //for (int i=0;i<5;i++) stream.ReadByte();
-        stream.dump(5,0);
+        stream.dump(2,0);
         read += 4;
-        Point3D* vertices = new Point3D[numvertice];
+        AoVPoints* vertices = new AoVPoints[numvertice];
         overTheMapIsTheRunway.lx = 0;
         overTheMapIsTheRunway.ly = 0;
         overTheMapIsTheRunway.hx = 0;
         overTheMapIsTheRunway.hy = 0;
-
+        
         for (int i = 0; i < numvertice; i++) {
-            Point3D* v = &vertices[i];
+            AoVPoints* v = &vertices[i];
             int32_t coo;
-            uint8_t u0 = stream.ReadByte();
-            uint8_t u1 = stream.ReadByte();
-            uint8_t u2 = stream.ReadByte();
-            int id = u0 << 16 | u1 << 8 | u2;
+            v->u0 = stream.ReadByte();
+            v->u1 = stream.ReadByte();
+            v->u2 = stream.ReadByte();
             coo = stream.ReadInt24LE();
             read += 4;
             v->x = coo;
@@ -360,27 +361,21 @@ void RSArea::ParseTriFile(PakEntry* entry){
             overTheMapIsTheRunway.ly = v->z < overTheMapIsTheRunway.ly ? v->z : overTheMapIsTheRunway.ly;
             overTheMapIsTheRunway.hx = v->x > overTheMapIsTheRunway.hx ? v->x : overTheMapIsTheRunway.hx;
             overTheMapIsTheRunway.hy = v->z > overTheMapIsTheRunway.hy ? v->z : overTheMapIsTheRunway.hy;
-            printf("%f,%f,%f,%d\n", v->x, v->z, v->y, id);
+            printf("%f,%f,%f,%d,%d,%d\n", v->x, v->z, v->y, v->u0, v->u1, v->u2);
         }
         printf("BYTE READ %d, REMAINING %d\n", read, entry->size - read);
         overTheMapIsTheRunway.vertices = vertices;
-        stream.dump(8,1);
-        short ispoly = stream.ReadShort();
-        read += 2;
+        
         short cpt = 0;
         overTheMapIsTheRunway.nbTriangles = 0;
-        while (ispoly == 1536 || ispoly == -256) {
+        for (int i=0; i< nbpoly; i++) {
+        
             AreaOverlayTriangles aot;
-            aot.color = stream.ReadByte();
-            aot.u0= stream.ReadByte();
-            read += 2;
+
+            
+            aot.u0 = stream.ReadByte();
             aot.u1 = stream.ReadByte();
-            aot.u2 = stream.ReadByte();
-            aot.u3 = stream.ReadByte();
-            aot.u4 = stream.ReadByte();
-            aot.u5 = stream.ReadByte();
-            aot.u6 = stream.ReadByte();
-            read += 6;
+            read += 2;
 
             aot.u7 = stream.ReadByte();
             aot.verticesIdx[0] = stream.ReadByte();
@@ -391,16 +386,21 @@ void RSArea::ParseTriFile(PakEntry* entry){
             aot.u9 = stream.ReadByte();
             aot.verticesIdx[2] = stream.ReadByte();
             read += 2;
+
+            aot.u2 = stream.ReadByte();
+            aot.u3 = stream.ReadByte();
+            aot.color = stream.ReadByte();
+            aot.u4 = stream.ReadByte();
+            aot.u5 = stream.ReadByte();
+            aot.u6 = stream.ReadByte();
+            aot.u10 = stream.ReadByte();
+            aot.u11 = stream.ReadByte();
+            read += 8;
+
+            
             overTheMapIsTheRunway.trianles[overTheMapIsTheRunway.nbTriangles++] = aot;
             printf("Poly %d\n", overTheMapIsTheRunway.nbTriangles);
-            ispoly = stream.ReadShort();
         }
-        AreaOverlayTriangles aot;
-        aot.verticesIdx[0] = 0;
-        aot.verticesIdx[1] = 1;
-        aot.verticesIdx[2] = 2;
-        aot.color = 5;
-        overTheMapIsTheRunway.trianles[overTheMapIsTheRunway.nbTriangles++] = aot;
         stream.dump(entry->size-read, 1);
         //printf("*********************\n");
         //Render them
