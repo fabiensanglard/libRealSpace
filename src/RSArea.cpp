@@ -361,7 +361,7 @@ void RSArea::ParseTriFile(PakEntry* entry){
             overTheMapIsTheRunway.ly = v->z < overTheMapIsTheRunway.ly ? v->z : overTheMapIsTheRunway.ly;
             overTheMapIsTheRunway.hx = v->x > overTheMapIsTheRunway.hx ? v->x : overTheMapIsTheRunway.hx;
             overTheMapIsTheRunway.hy = v->z > overTheMapIsTheRunway.hy ? v->z : overTheMapIsTheRunway.hy;
-            printf("%f,%f,%f,%d,%d,%d\n", v->x, v->z, v->y, v->u0, v->u1, v->u2);
+            printf("%d,%d,%d,%d,%d,%d\n", v->x, v->z, v->y, v->u0, v->u1, v->u2);
         }
         printf("BYTE READ %d, REMAINING %d\n", read, entry->size - read);
         overTheMapIsTheRunway.vertices = vertices;
