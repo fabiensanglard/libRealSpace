@@ -941,48 +941,20 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 
     std::vector<MapObject> *objects = &area->objects[blockID];
 
-    glPointSize(5);
-    glDisable(GL_DEPTH_TEST); 
 	float y = 0;
     for (size_t i =0 ; i < objects->size(); i++) {
         MapObject object = objects->at(i);
 		
-        int32_t offset[3];
-        int centerX = ((20000 * 18) / 2);
-        int centerY = (20000 * 18) / 2;
-        offset[0] = (blockID % 18);
-        offset[1] = 0;
-        offset[2] = (int32_t)blockID / 18;
-        
-
-        
-        int32_t localDelta[3];
-        localDelta[0] = object.position[0];
-        localDelta[1] = object.position[1];
-        localDelta[2] = object.position[2];
-
-        size_t toDraw[3];
-		toDraw[0] = centerX+localDelta[0];
-		toDraw[1] = localDelta[1];
-		toDraw[2] = centerY-localDelta[2];
-        
-        glBegin(GL_POINTS);
-            glColor3f(1, 0, 0);
-            glVertex3d(toDraw[0], toDraw[1], toDraw[2]);
-        glEnd();
-
 		glPushMatrix();
 		
-		glTranslatef(toDraw[0], toDraw[1], toDraw[2]);
+		glTranslatef(object.position[0], object.position[1], -object.position[2]);
 		
 		std::map<std::string, RSEntity *>::iterator it;
 		it = area->objCache->find(object.name);
 		if (it != area->objCache->end()) {
-			printf("Rendering [%s] at {%d,%d,%d} ofset (%d,%d,%d)+ local(%d,%d,%d)\n",
+			printf("Rendering [%s] at {%d,%d,%d}\n",
 				object.name,
-				toDraw[0], toDraw[1], toDraw[2],
-				offset[0], offset[1], offset[2],
-				localDelta[0], localDelta[1], localDelta[2]
+                object.position[0], object.position[1], object.position[2]
 			);
 			DrawModel(it->second, BLOCK_LOD_MAX);
 		}
@@ -998,56 +970,27 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 
 		
     }
-	glEnable(GL_DEPTH_TEST);
-	glPointSize(1);
 }
 
 void SCRenderer::RenderMissionObjects(RSMission* mission) {
 
     std::vector<PART*> *objects = &mission->missionObjects;
-    glPushMatrix();
-    glScalef(1000000.0f / 360000.0f, 1000000.0f / 360000.0f, 1000000.0f / 360000.0f);
-    glTranslatef(-180000, 0, -180000);
-
-    glPointSize(5);
-    glDisable(GL_DEPTH_TEST);
+   
     float y = 0;
     for (size_t i = 0; i < objects->size(); i++) {
         PART *object = objects->at(i);
-        
-        int32_t offset[3];
-        int centerX = ((20000 * 18) / 2);
-        int centerY = (20000 * 18) / 2;
-        
-        size_t toDraw[3];
-        toDraw[0] = centerX + object->XAxisRelative;
-        toDraw[1] = object->ZAxisRelative;
-        toDraw[2] = centerY - object->YAxisRelative;
-
-        printf("RENDERING MISSION OBJ : %s at [%d,%d,%d] - (%d, %d, %d)\n",
-            object->MemberName,
-            object->XAxisRelative,
-            object->YAxisRelative,
-            object->ZAxisRelative,
-            toDraw[0],
-            toDraw[1],
-            toDraw[2]
-        );
-
-        glBegin(GL_POINTS);
-        glColor3f(0, 0, 1);
-        glVertex3d(toDraw[0], toDraw[1], toDraw[2]);
-        glEnd();
 
         glPushMatrix();
 
-        //glTranslatef(offset[0], 0, offset[2]);
-        glTranslatef(toDraw[0], toDraw[1], toDraw[2]);
+        glTranslatef(object->XAxisRelative, object->ZAxisRelative, -object->YAxisRelative);
         if (object->entity!=NULL) {
-            glPushMatrix();
-            //glScalef(0.8, 1.5, 0.8);
+            printf("RENDERING MISSION OBJ : %s at [%d,%d,%d]\n",
+                object->MemberName,
+                object->XAxisRelative,
+                object->ZAxisRelative,
+                object->YAxisRelative
+            );
             DrawModel(object->entity, BLOCK_LOD_MAX);
-            glPopMatrix();
         }
         else {
             printf("OBJECT [%s] NOT FOUND\n", object->MemberName);
@@ -1056,14 +999,8 @@ void SCRenderer::RenderMissionObjects(RSMission* mission) {
             glVertex3d(0, 0, 0);
             glEnd();
         }
-
         glPopMatrix();
-
-
-    }
-    glEnable(GL_DEPTH_TEST);
-    glPointSize(1);
-    glPopMatrix();
+    }    
 }
 
 
@@ -1135,11 +1072,6 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
 
 void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
 
-    glPushMatrix();
-    glScalef(1000000.0f/ 360000.0f, 1000000.0f / 360000.0f, 1000000.0f / 360000.0f);
-    glTranslatef(-180000,0,-180000);
-
-    
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glBegin(GL_TRIANGLES);
@@ -1162,13 +1094,11 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
     
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
-    glPopMatrix();
 }
 void SCRenderer::RenderMapOverlay(RSArea* area) {
-    int centerX = ((20000 * 18) / 2);
-    int centerY = (20000 * 18) / 2;
+    int centerX = 0;// ((20000 * 18) / 2);
+    int centerY = 0;// (20000 * 18) / 2;
 
-    glColor3f(0.0, 1.0, 0.0);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     //glDisable(GL_CULL_FACE);
