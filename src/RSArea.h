@@ -27,9 +27,8 @@ extern "C" {
 #include "RSMapTextureSet.h"
 #include "IffLexer.h"
 
-//DIRTY HACK !!! DELETE ME ASAP
-#define  HEIGHT_DIVIDER 17
 
+#define BLOCK_WIDTH 20000
 
 typedef struct MapObject{
     

@@ -564,21 +564,16 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     - text
             */
             
-            vertex->v.y = height;//-vertex->text * 10;//height ;
+            vertex->v.y = height;
             
-#define BLOCK_WIDTH 20000
-            //vertex->v.x = (i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH) - 500000;
-            //vertex->v.z = (i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH) - 500000;
-			
             vertex->v.x = i % 18* BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim)*BLOCK_WIDTH;
             vertex->v.z = i / 18* BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim)*BLOCK_WIDTH;
-            vertex->v.x += -180000;
-            vertex->v.z += -180000;
-            //printf("%f, %f\n", vertex->v.x, vertex->v.z);
-            //printf("VERTEX ID : %d\n", vertexID);
-            vertex->color[0] = t->r/255.0f;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
-            vertex->color[1] = t->g/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
-            vertex->color[2] = t->b/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
+            vertex->v.x += -BLOCK_WIDTH * 18;
+            vertex->v.z += -BLOCK_WIDTH * 18;
+            
+            vertex->color[0] = t->r/255.0f;
+            vertex->color[1] = t->g/255.0f;
+            vertex->color[2] = t->b/255.0f;
             vertex->color[3] = 255;
         }
         
@@ -603,10 +598,7 @@ void RSArea::ParseElevations(void){
 
 void RSArea::ParseHeightMap(void){
     
-    //char title[512];
-    
-    
-    
+   
     PakEntry* entry ;
     
     entry = archive->GetEntry(1);

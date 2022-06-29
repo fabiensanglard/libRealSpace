@@ -164,7 +164,7 @@ public:
 private:
 	void printArea(AREA* a);
 	void printPart(PART* p);
-	void printBytes(ByteStream* stream, int lenght);
+
 	void parseLOAD(IffChunk* chunk);
 	void parseCAST(IffChunk* chunk);
 	void parseMSGS(IffChunk* chunk);

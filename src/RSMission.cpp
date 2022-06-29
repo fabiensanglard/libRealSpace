@@ -1,13 +1,6 @@
 #include "RSMission.h"
 #include "PakArchive.h"
 
-void printChunk(IffChunk* chunk, const char *name) {
-	
-	if (chunk != NULL && chunk->size > 0 && chunk->data != NULL) {
-		ByteStream stream(chunk->data);
-		stream.dump(chunk->size,0);
-	}
-}
 
 void missionstrtoupper(char* src) {
 	int i = 0;
@@ -41,30 +34,6 @@ void RSMission::printPart(PART* p) {
 	printf("U0 = %d\n", p->Unknown0);
 	printf("U1 = %d\n", p->Unknown1);
 	printf("--------------------------------------------------\n\n");
-}
-void RSMission::printBytes(ByteStream* stream, int lenght) {
-	uint8_t byte;
-	int cl = 0;
-	for (int k = 0; k < lenght; k++) {
-		byte = stream->ReadByte();
-		if (byte >= 40 && byte <= 90) {
-			printf("[%c]", char(byte));
-		}
-		else if (byte >= 97 && byte <= 122) {
-			printf("[%c]", char(byte));
-		}
-		else {
-			printf("[0x%X]", byte);
-		}
-		if (cl > 2) {
-			printf("\n");
-			cl = 0;
-		}
-		else {
-			printf("\t");
-			cl++;
-		}
-	}
 }
 void RSMission::PrintMissionInfos() {
 	printf("MISSION : %s\n", missionName);
@@ -128,7 +97,7 @@ void RSMission::InitFromIFF(IffLexer* lexer) {
 	parseLGHT(chunk);
 
 	chunk = lexer->GetChunkByID('VERS');
-	printChunk(chunk, "VERS");
+	
 
 	chunk = lexer->GetChunkByID('NAME');
 	parseNAME(chunk);
@@ -143,13 +112,13 @@ void RSMission::InitFromIFF(IffLexer* lexer) {
 	parseSPOT(chunk);
 
 	chunk = lexer->GetChunkByID('NUMS');
-	printChunk(chunk, "SPOT");
+	
 
 	chunk = lexer->GetChunkByID('MSGS');
 	parseMSGS(chunk);
 	
 	chunk = lexer->GetChunkByID('FLAG');
-	printChunk(chunk, "FLAG");
+
 
 	chunk = lexer->GetChunkByID('CAST');
 	parseCAST(chunk);
@@ -161,13 +130,13 @@ void RSMission::InitFromIFF(IffLexer* lexer) {
 	parsePART(chunk);
 
 	chunk = lexer->GetChunkByID('TEAM');
-	printChunk(chunk, "TEAM");
+
 
 	chunk = lexer->GetChunkByID('LOAD');
-	printChunk(chunk, "LOAD");
+
 
 	chunk = lexer->GetChunkByID('SCNE');
-	printChunk(chunk, "SCNE");
+
 	
 	
 }
@@ -233,7 +202,7 @@ void RSMission::parseMSGS(IffChunk* chunk) {
 }
 
 void RSMission::parseWORLD(IffChunk* chunk) {
-	printChunk(chunk, "WRDL");
+	
 }
 
 void RSMission::parseINFO(IffChunk* chunk) {
@@ -265,15 +234,15 @@ void RSMission::parseFILE(IffChunk* chunk) {
 	}
 }
 void RSMission::parsePALT(IffChunk* chunk) {
-	printChunk(chunk, "PALT");
+	
 }
 
 void RSMission::parseTERA(IffChunk* chunk) {
-	printChunk(chunk, "TERA");
+	
 }
 
 void RSMission::parseSKYS(IffChunk* chunk) {
-	printChunk(chunk, "SKYS");
+	
 }
 
 void RSMission::parseAREA(IffChunk* chunk) {
@@ -440,7 +409,7 @@ void RSMission::parsePART(IffChunk* chunk) {
 	}
 }
 void RSMission::parseGLNT(IffChunk* chunk) {
-	printChunk(chunk, "GLNT");
+	
 	if (chunk != NULL) {
 		PakArchive p;
 		p.InitFromRAM("GLNT", chunk->data, chunk->size);
@@ -479,11 +448,11 @@ void RSMission::parseGLNT(IffChunk* chunk) {
 }
 
 void RSMission::parseSMOK(IffChunk* chunk) {
-	printChunk(chunk, "SMOK");
+	
 }
 
 void RSMission::parseLGHT(IffChunk* chunk) {
-	printChunk(chunk, "LGHT");
+	
 }
 
 void RSMission::parseSPOT(IffChunk* chunk) {
@@ -512,13 +481,7 @@ void RSMission::parseSPOT(IffChunk* chunk) {
 }
 
 void RSMission::parsePROG(IffChunk* chunk) {
-	printf("PARSING PROG\n");
-	if (chunk != NULL) {
-		PakArchive p;
-		p.InitFromRAM("PROG.PAK", chunk->data, chunk->size);
-		p.List(stdout);
-	}
-	printChunk(chunk, "PROG");
+	
 }
 PART* RSMission::getPlayerCoord() {
 	for (int i=0; i < missionObjects.size(); i++) {
