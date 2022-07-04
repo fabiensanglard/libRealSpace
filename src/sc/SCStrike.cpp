@@ -19,6 +19,7 @@ SCStrike::~SCStrike(){
 
 void SCStrike::Init(void ){
     area.InitFromPAKFileName("ARENA.PAK");
+    
 }
 
 void SCStrike::RunFrame(void){

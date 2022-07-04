@@ -55,12 +55,11 @@ void SCRenderer::Init(int32_t zoomFactor){
     
     
     
-    camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
+    camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,20000*18);
     
     
     
     light.SetWithCoo(300, 300, 300);
-    
     
     
     initialized = true;
@@ -768,7 +767,7 @@ void SCRenderer::RenderJets(RSArea* area){
         Point3D pos = entity->position;
         objMatrix.v[3][0] = pos.x;
         objMatrix.v[3][1] = pos.y;
-        objMatrix.v[3][2] = pos.z;
+        objMatrix.v[3][2] = -pos.z;
         
         glMultMatrixf(objMatrix.ToGL());
         
@@ -781,7 +780,7 @@ void SCRenderer::RenderJets(RSArea* area){
 
 void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
-    
+    static float counter = 0;
     glMatrixMode(GL_PROJECTION);
     Matrix* projectionMatrix = camera.GetProjectionMatrix();
     glLoadMatrixf(projectionMatrix->ToGL());
@@ -795,16 +794,18 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glDepthFunc(GL_LESS);
     
     
-    
-   
+    //-25750,455,62850
+    counter+=5;
     Point3D newPosition;
-    newPosition.x=  4100;//lookAt[0] + 5256*cos(counter/2);
-    newPosition.y= 100;
-    newPosition.z=  3000;//lookAt[2];// + 5256*sin(counter/2);
+    newPosition.x=  -31759+counter;//lookAt[0] + 5256*cos(counter/2);
+    newPosition.y= 700;
+    newPosition.z=  -73159+counter*1.7;//lookAt[2];// + 5256*sin(counter/2);
+    
     camera.SetPosition(&newPosition);
-    
-    
-    Point3D lookAt = {3856,0,2856};
+   
+    Point3D lookAt = {-25750,600,-62800};
+    lookAt.x+=counter;
+    lookAt.z+=counter*1.7;
     camera.LookAt(&lookAt);
     
     
@@ -817,7 +818,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glHint(GL_FOG_HINT, GL_DONT_CARE);          // Fog Hint Value
     glFogf(GL_FOG_START, 600.0f);             // Fog Start Depth
     glFogf(GL_FOG_END, 8000.0f);               // Fog End Depth
-    glEnable(GL_FOG);
+    //glEnable(GL_FOG);
     
     
         
@@ -881,8 +882,8 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         
         //Render objects on the map
         //for(int i=97 ; i < 98 ; i++)
-        //for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
-        //   RenderObjects(area,i);
+        for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
+           RenderObjects(area,i);
         
         RenderJets(area);
         
@@ -893,51 +894,33 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
 
 void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
     
-    float color[3] = {1,0,0};
-    
-    
     std::vector<MapObject> *objects = &area->objects[blockID];
-    
-    glColor3fv(color);
-    glPointSize(3);
-    glDisable(GL_DEPTH_TEST);
-    glBegin(GL_POINTS);
-    
-    for (size_t i =8 ; i < 9; i++) {
+
+    for (size_t i =0 ; i < objects->size(); i++) {
         MapObject object = objects->at(i);
         
-        int32_t offset[3];
+        glPushMatrix();
         
-        #define BLOCK_WIDTH (512)
+        glTranslatef(object.position[0], object.position[1], -object.position[2]);
         
-        offset[0] = blockID % 18 * BLOCK_WIDTH ;
-        offset[1] = area->elevation[blockID];
-        offset[2] = (int32_t)blockID / 18 * BLOCK_WIDTH;
-        
-        /*
-        glVertex3d(object.position[0]/255*BLOCK_WIDTH+offset[0],
-                   object.position[1]+offset[1],
-                   object.position[2]/255*BLOCK_WIDTH+offset[2]);
-        */
-        int32_t localDelta[3];
-        localDelta[0] = object.position[0]/65355.0f*BLOCK_WIDTH;
-        localDelta[1] = object.position[1];/// HEIGHT_DIVIDER                   ;
-        localDelta[2] = object.position[2]/65355.0f*BLOCK_WIDTH;
-        
-        
-        size_t toDraw[3];
-        toDraw[0] = localDelta[0]+offset[0];
-        toDraw[1] = offset[1];
-        toDraw[2] = localDelta[2]+offset[2];
-        
-        glVertex3d(toDraw[0],
-                   toDraw[1],
-                   toDraw[2]);
+        std::map<std::string, RSEntity *>::iterator it;
+        std::string key = object.name;
+        it = area->objCache.find(key);
+        if (it != area->objCache.end()) {
+            DrawModel(it->second, BLOCK_LOD_MAX);
+        }
+        else {
+            printf("OBJECT [%s] NOT FOUND\n", object.name);
+            glBegin(GL_POINTS);
+                glColor3f(0, 1, 0);
+                glVertex3d(0, 0, 0);
+            glEnd();
+        }
 
+        glPopMatrix();
+
+        
     }
-    
-    glEnd();
-    
 }
 
 void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)

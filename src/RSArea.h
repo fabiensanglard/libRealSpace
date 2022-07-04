@@ -18,7 +18,7 @@ typedef struct MapObject{
     char name[9];
     char destroyedName[9];
     
-    uint32_t position[3];
+    int32_t position[3];
     
     RSEntity* entity;
     
@@ -69,10 +69,13 @@ public:
     
     //Per block objects list
     std::vector<MapObject> objects[BLOCKS_PER_MAP];
+    std::map<std::string, RSEntity *> objCache;
+    
     float elevation[BLOCKS_PER_MAP];
 
     size_t GetNumJets(void);
     RSEntity* GetJet(size_t jetID);
+    void LoadObject(char *name);
     
 private:
     
@@ -103,6 +106,7 @@ private:
     void AddJet(TreArchive* tre, const char* name, Quaternion* orientation, Point3D* position);
     void AddJets(void);
     std::vector<RSEntity*> jets;
+    TreArchive treObj;
 };
 
 #endif /* defined(__libRealSpace__RSMap__) */
