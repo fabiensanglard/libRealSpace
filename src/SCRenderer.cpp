@@ -61,7 +61,6 @@ void SCRenderer::Init(int32_t zoomFactor){
     
     light.SetWithCoo(300, 300, 300);
     
-    counter = 0;
     
     initialized = true;
 }
@@ -768,7 +767,7 @@ void SCRenderer::RenderJets(RSArea* area){
         Point3D pos = entity->position;
         objMatrix.v[3][0] = pos.x;
         objMatrix.v[3][1] = pos.y;
-        objMatrix.v[3][2] = pos.z;
+        objMatrix.v[3][2] = -pos.z;
         
         glMultMatrixf(objMatrix.ToGL());
         
@@ -781,7 +780,7 @@ void SCRenderer::RenderJets(RSArea* area){
 
 void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
-    
+    static float counter = 0;
     glMatrixMode(GL_PROJECTION);
     Matrix* projectionMatrix = camera.GetProjectionMatrix();
     glLoadMatrixf(projectionMatrix->ToGL());
@@ -796,21 +795,17 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     
     //-25750,455,62850
-    counter++;
+    counter+=5;
     Point3D newPosition;
-    newPosition.x=  -26000+counter;//lookAt[0] + 5256*cos(counter/2);
-    newPosition.y= 1500;
-    newPosition.z=  -65000;//lookAt[2];// + 5256*sin(counter/2);
+    newPosition.x=  -31759+counter;//lookAt[0] + 5256*cos(counter/2);
+    newPosition.y= 700;
+    newPosition.z=  -73159+counter*1.7;//lookAt[2];// + 5256*sin(counter/2);
     
-    
-    /*newPosition.x=0;
-    newPosition.y=1500;
-    newPosition.z=0;*/
     camera.SetPosition(&newPosition);
-    
-    
-    Point3D lookAt = {-25750,455,-62850};
-    //Point3D lookAt = {0,500,0};
+   
+    Point3D lookAt = {-25750,600,-62800};
+    lookAt.x+=counter;
+    lookAt.z+=counter*1.7;
     camera.LookAt(&lookAt);
     
     
@@ -912,10 +907,6 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
         std::string key = object.name;
         it = area->objCache.find(key);
         if (it != area->objCache.end()) {
-            printf("Rendering [%s] at {%d,%d,%d}\n",
-                object.name,
-                object.position[0], object.position[1], object.position[2]
-            );
             DrawModel(it->second, BLOCK_LOD_MAX);
         }
         else {

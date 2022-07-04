@@ -605,13 +605,13 @@ void RSArea::AddJets(void){
     rot.FromMatrix(&f16m);
     Point3D pos ;
     
-    pos = {-25750,600,62800};
+    pos = {-25850,600,62800};
     AddJet(&tre,"..\\..\\DATA\\OBJECTS\\F-16DES.IFF",&rot,&pos);
     
     
     f16m.SetRotationX(-0.5f);
     rot.FromMatrix(&f16m);
-    pos = {-25750,600,62900};
+    pos = {-25650,600,62900};
     AddJet(&tre,"..\\..\\DATA\\OBJECTS\\F-22.IFF",&rot,&pos);
     
     //pos = {3886,300,2886};
