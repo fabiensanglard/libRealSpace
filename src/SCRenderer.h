@@ -99,7 +99,7 @@ private:
     int32_t width;
     int32_t height;
     int scale;
-    
+    int counter;
     
     VGAPalette palette;
     bool running;

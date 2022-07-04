@@ -24,7 +24,29 @@ RSArea::~RSArea(){
     }
 }
 
+void RSArea::LoadObject(char *name) {
+    RSEntity* entity = new RSEntity();
+    char modelPath[512];
+    const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
+    const char* OBJ_EXTENSION = ".IFF";
+    std::string hash = name;
+    strcpy(modelPath, OBJ_PATH);
+    strcat(modelPath, name);
+    strcat(modelPath, OBJ_EXTENSION);
+    for (int i = 0; i < strlen(modelPath); i++) {
+        modelPath[i] = toupper(modelPath[i]);
+    }
+    TreEntry* entry = treObj.GetEntryByName(modelPath);
 
+    if (entry == NULL) {
+        printf("Object reference '%s' not found in TRE.\n", modelPath);
+        //continue;
+    }
+    else {
+        entity->InitFromRAM(entry->data, entry->size);
+        objCache.emplace(hash, entity);
+    }
+}
 void RSArea::ParseMetadata(){
     
     //Meta are in the first PAK file.
@@ -258,49 +280,28 @@ void RSArea::ParseObjects(){
                 mapObject.destroyedName[k] = reader.ReadByte();
             mapObject.destroyedName[8] = 0;
             
-            int32_t coo[12];
-            coo[0] = reader.ReadByte();
-            coo[1] = reader.ReadByte();
-            coo[2] = reader.ReadByte();
-            coo[3] = reader.ReadByte();
-            mapObject.position[0] =  (coo[3] << 8) | coo[2];
-            //coo[3] = (uint32_t)reader.ReadByte();
-
-            coo[4] = reader.ReadByte();
-            coo[5] = reader.ReadByte();
-            coo[6] = reader.ReadByte();
-            coo[7] = reader.ReadByte();
-            mapObject.position[2] = (coo[7] << 8) | coo[6];
-
+            uint8_t unknown14 = reader.ReadByte();
+            uint8_t unknown15 = reader.ReadByte();
+            mapObject.position[0] = reader.ReadInt24LE();
+            mapObject.position[2] = reader.ReadInt24LE();
+            mapObject.position[1] = reader.ReadInt24LE();
             
-            coo[8] = reader.ReadByte();
-            coo[9] = reader.ReadByte();
-            coo[10] = reader.ReadByte();
-            coo[11] = reader.ReadByte();
-            mapObject.position[1] = (coo[11] << 8) | coo[10];
-           
 
-            uint8_t unknowns[0x31-12];
+            uint8_t unknowns[0x31-10];
 
-            for(int k=0 ; k <0x31-12; k++)
+            for(int k=0 ; k <0x31-10; k++)
                 unknowns[k] = reader.ReadByte();
-                
-            printf("object set [%3lu] obj [%2d] - '%-8s' %2X %2X %2X %2X %2X '%-8s'",i,j,mapObject.name,
-                       unknown09,
-                       unknown10,
-                       unknown11,
-                       unknown12,
-                       unknown13,mapObject.destroyedName);
             
-            for(int k=0 ; k < 12 ; k++)
-                printf("%2X ",coo[k]);
-            
-            for(int k=0 ; k <0x31-12 ; k++)
-                printf("%2X ",unknowns[k]);
+            printf("object set [%3lu] obj [%2d] - '%-8s' 0x%X 0x%X 0x%X 0x%X 0x%X '%-8s' At {%d,%d,%d}\n", i, j, mapObject.name,
+                unknown09,
+                unknown10,
+                unknown11,
+                unknown12,
+                unknown13, mapObject.destroyedName, mapObject.position[0], mapObject.position[2], mapObject.position[1]);
             
             printf("\n");
                 
-            
+            LoadObject(mapObject.name);
             objects[i].push_back(mapObject);
             
         }
@@ -417,7 +418,7 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             int16_t height ;
             height = vertStream.ReadShort();
-            height /= HEIGHT_DIVIDER;
+            
           
             vertex->flag = vertStream.ReadByte();
             vertex->type = vertStream.ReadByte();
@@ -496,11 +497,15 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     - text
             */
             
-            vertex->v.y = height;//-vertex->text * 10;//height ;
+            vertex->v.y = height;
             
-#define BLOCK_WIDTH (512)
-            vertex->v.x = i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH ;
-            vertex->v.z = i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH ;
+#define BLOCK_WIDTH (20000)
+            vertex->v.y = height;
+            
+            vertex->v.x = i % 18* BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim)*BLOCK_WIDTH;
+            vertex->v.z = i / 18* BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim)*BLOCK_WIDTH;
+            vertex->v.x += -BLOCK_WIDTH * 9;
+            vertex->v.z += -BLOCK_WIDTH * 9;
            
             
             vertex->color[0] = t->r/255.0f;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
@@ -599,13 +604,14 @@ void RSArea::AddJets(void){
     
     rot.FromMatrix(&f16m);
     Point3D pos ;
-    pos = {4066,95,2980};
+    
+    pos = {-25750,600,62800};
     AddJet(&tre,"..\\..\\DATA\\OBJECTS\\F-16DES.IFF",&rot,&pos);
     
     
     f16m.SetRotationX(-0.5f);
     rot.FromMatrix(&f16m);
-    pos = {4010,100,2990};
+    pos = {-25750,600,62900};
     AddJet(&tre,"..\\..\\DATA\\OBJECTS\\F-22.IFF",&rot,&pos);
     
     //pos = {3886,300,2886};
@@ -656,6 +662,8 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     const char* trePath = "TEXTURES.TRE";
     TreArchive treArchive;
     treArchive.InitFromFile(trePath);
+    
+    treObj.InitFromFile("OBJECTS.TRE");
     
     //Find the texture PAKS.
     TreEntry* treEntry = NULL;

@@ -21,7 +21,7 @@ RSFontManager FontManager;
 int main(int argc, char* argv[]) {
 
     
-    Assets.SetBase("/Users/fabiensanglard/Desktop/SC/");
+    Assets.SetBase("/Volumes/Elements/tools/SC");
     
     Game.Init();
     

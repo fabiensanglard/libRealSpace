@@ -50,6 +50,7 @@
 		2DFEFBBA186F65FE002305A9 /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBB8186F65FE002305A9 /* Base.cpp */; };
 		2DFEFBC0186F676A002305A9 /* test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBBF186F676A002305A9 /* test.cpp */; };
 		2DFEFBC4186F764E002305A9 /* IffLexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFEFBC2186F764E002305A9 /* IffLexer.cpp */; };
+		A53644BC2872CAD6001B6D56 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A53644BB2872CAD6001B6D56 /* SDL2.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -154,6 +155,7 @@
 		2DFEFBBF186F676A002305A9 /* test.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = test.cpp; path = ../src/test.cpp; sourceTree = SOURCE_ROOT; };
 		2DFEFBC2186F764E002305A9 /* IffLexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IffLexer.cpp; path = ../src/IffLexer.cpp; sourceTree = SOURCE_ROOT; };
 		2DFEFBC3186F764E002305A9 /* IffLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IffLexer.h; path = ../src/IffLexer.h; sourceTree = SOURCE_ROOT; };
+		A53644BB2872CAD6001B6D56 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,6 +164,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2D31091518708A1200D3443F /* OpenGL.framework in Frameworks */,
+				A53644BC2872CAD6001B6D56 /* SDL2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +339,7 @@
 				2D31091418708A1200D3443F /* OpenGL.framework */,
 				2DFEFB7F186F5BEE002305A9 /* libRealSpace */,
 				2DFEFB7E186F5BEE002305A9 /* Products */,
+				A53644BB2872CAD6001B6D56 /* SDL2.framework */,
 			);
 			sourceTree = "<group>";
 		};
@@ -426,6 +430,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 2DFEFB74186F5BED002305A9;
@@ -582,6 +587,10 @@
 		2DFEFB87186F5BEE002305A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../src/precomp.h;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -591,6 +600,10 @@
 		2DFEFB88186F5BEE002305A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../src/precomp.h;
 				PRODUCT_NAME = "$(TARGET_NAME)";

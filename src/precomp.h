@@ -27,7 +27,8 @@ extern "C" {
     #include <math.h>
     #include <stdint.h>
     #include <float.h>
-    #include <algorithm> 
+    #include <algorithm>
+    #include <string>
 
 #ifndef _WIN32
     #include <unistd.h>
