@@ -260,6 +260,7 @@ void RSMission::parseAREA(IffChunk* chunk) {
 			area = (AREA*)malloc(sizeof(AREA));
 			if (area != NULL) {
 				area->id = ++cpt;
+				area->AreaType = '\0';
 				switch (buffer) {
 				case 'S':
 					area->AreaType = 'S';
@@ -315,14 +316,25 @@ void RSMission::parseAREA(IffChunk* chunk) {
 
 					read += 67;
 					break;
+				default:
+					read++;
+					printf("WE ARE\n");
+					break;
 				}
-				missionAreas.push_back(area);
+				if (area->AreaType != '\0') {
+					printArea(area);
+					printf("READED: %d, SIZE: %d\n", read, fsize);
+					missionAreas.push_back(area);
+				}
+				
 			}
 			else {
 				read = fsize + 1;
+				printf("Can't allocate memory for area\n");
 				// exit the loop, memory error
 			}
 		}
+		
 	}
 }
 
