@@ -25,8 +25,8 @@ typedef struct VertexCache {
     MapVertex *v3;
 }VertexCache;
 
-typedef std::vector<VertexCache>    MyClassSet;
-typedef std::map<int, MyClassSet>   MyClassSetMap;
+typedef std::vector<VertexCache>    VertexVector;
+typedef std::map<int, VertexVector>   TextureVertexMap;
 
 
 class SCRenderer{
@@ -122,7 +122,7 @@ private:
 	Camera camera;
     Point3D light;
 	Point3D playerPosition;
-    MyClassSetMap textureSortedVertex;
+    TextureVertexMap textureSortedVertex;
 };
 
 
