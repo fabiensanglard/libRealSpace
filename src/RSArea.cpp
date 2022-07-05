@@ -568,8 +568,8 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             vertex->v.x = i % 18* BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim)*BLOCK_WIDTH;
             vertex->v.z = i / 18* BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim)*BLOCK_WIDTH;
-            vertex->v.x += -BLOCK_WIDTH * 18;
-            vertex->v.z += -BLOCK_WIDTH * 18;
+            vertex->v.x += -BLOCK_WIDTH * 9;
+            vertex->v.z += -BLOCK_WIDTH * 9;
             
             vertex->color[0] = t->r/255.0f;
             vertex->color[1] = t->g/255.0f;
