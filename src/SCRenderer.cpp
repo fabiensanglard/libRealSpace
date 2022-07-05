@@ -527,19 +527,12 @@ void SCRenderer::RenderTexturedTriangle(MapVertex* tri0,
                                      MapVertex* tri1,
                                      MapVertex* tri2,
                                      RSArea* area,
-                                     int triangleType){
+                                     int triangleType,
+                                     RSImage* image){
     
     
-    float white[4];
-    white[0] = 1;
-    white[1] = 1;
-    white[2] = 1;
-    white[3] = 1;
-    //glColor4fv(white);
 	int mainColor = 0;
-	if (tri0->type != tri1->type || tri0->type != tri2->type
-
-		) {
+	if (tri0->type != tri1->type || tri0->type != tri2->type) {
 		mainColor = 1;
 		if (tri1->type > tri0->type)
 			if (tri1->type > tri2->type)
@@ -555,24 +548,9 @@ void SCRenderer::RenderTexturedTriangle(MapVertex* tri0,
 
 
 
-    RSImage* image = NULL;
-    if (triangleType == LOWER_TRIANGE)
-        image = area->GetImageByID(tri0->lowerImageID);
-    if (triangleType == UPPER_TRIANGE)
-        image = area->GetImageByID(tri0->upperImageID);
     
-    
-    if (image == NULL){
-        printf("This should never happen: Put a break point here.\n");
-        return;
-    }
-        
     
 
-    
-    glBindTexture(GL_TEXTURE_2D,image->GetTexture()->GetTextureID());
-	
-    glBegin(GL_TRIANGLES);
     
     if (image->width == 64){
         glTexCoord2fv(textTrianCoo64[triangleType][0]);
@@ -592,8 +570,7 @@ void SCRenderer::RenderTexturedTriangle(MapVertex* tri0,
 		}
         glTexCoord2fv(textTrianCoo64[triangleType][2]);
         glVertex3f(tri2->v.x,tri2->v.y,tri2->v.z);
-    }
-        else{
+    } else {
         glTexCoord2fv(textTrianCoo[triangleType][0]);
 		if (!mainColor) {
 			glColor4fv(tri0->color);
@@ -614,7 +591,9 @@ void SCRenderer::RenderTexturedTriangle(MapVertex* tri0,
 		}
         glVertex3f(tri2->v.x,tri2->v.y,tri2->v.z);
         }
-    glEnd();
+    
+     
+        
 	
 }
 
@@ -689,32 +668,35 @@ void SCRenderer::RenderQuad(MapVertex* currentVertex,
                 MapVertex* bottomRightVertex,
                           MapVertex* bottomVertex,RSArea* area,bool renderTexture){
     
-    //Render lower triangle
+    
     if (!renderTexture){
-        //if (currentVertex->lowerImageID == 0xFF ){
+        if (currentVertex->lowerImageID == 0xFF ){
+            //Render lower triangle
             RenderColoredTriangle(currentVertex,bottomRightVertex,bottomVertex);
-        //}
+            
+        }
+        if (currentVertex->upperImageID == 0xFF) {
+            //Render Upper triangles
+            RenderColoredTriangle(currentVertex, rightVertex, bottomRightVertex);
+        }
     }
     else{
+        
 		if (currentVertex->lowerImageID != 0xFF) {
-			RenderTexturedTriangle(currentVertex, bottomRightVertex, bottomVertex, area, LOWER_TRIANGE);
-		}
+            MyClassSet& vcache = textureSortedVertex[currentVertex->lowerImageID];
+            VertexCache v = { currentVertex, bottomRightVertex, bottomVertex };
+            vcache.push_back(v);
+            
+        }
+        if (currentVertex->upperImageID != 0xFF) {
+            MyClassSet& vcache = textureSortedVertex[currentVertex->upperImageID];
+            VertexCache v = { currentVertex, rightVertex, bottomRightVertex };
+            vcache.push_back(v);
+        }
+        
     }
     
-      //Render Upper triangles
-    
-    if (!renderTexture){
-       // if (currentVertex->upperImageID == 0xFF ){
-            RenderColoredTriangle(currentVertex,rightVertex,bottomRightVertex);
-       // }
-    }
-    else{
-		if (currentVertex->upperImageID != 0xFF) {
-			RenderTexturedTriangle(currentVertex, rightVertex, bottomRightVertex, area, UPPER_TRIANGE);
-		}
-    }
-    
-    
+       
 }
 
 void SCRenderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
@@ -724,7 +706,7 @@ void SCRenderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
     
     uint32_t sideSize = block->sideSize;
     
-	printf("Rendering block %d at x %f,z %f\n", i, block->vertice[0].v.x, block->vertice[0].v.z);
+	//printf("Rendering block %d at x %f,z %f\n", i, block->vertice[0].v.x, block->vertice[0].v.z);
     for (size_t x=0 ; x < sideSize-1 ; x ++){
         for (size_t y=0 ; y < sideSize-1 ; y ++){
             
@@ -1080,27 +1062,54 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
     }
 	glEnd();
 	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthFunc(GL_EQUAL);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glDepthFunc(GL_LEQUAL);
+    //glBegin(GL_TRIANGLES);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
 		RenderBlock(area, LOD, i, true);
 	}
-	
+    for (auto const& x : textureSortedVertex)
+    {
+         
+         RSImage* image = NULL;
+         
+         image = area->GetImageByID(x.first);
+         if (image == NULL) {
+             printf("This should never happen: Put a break point here.\n");
+             return;
+         }
+         glBindTexture(GL_TEXTURE_2D, image->GetTexture()->GetTextureID());
+
+         glBegin(GL_TRIANGLES);
+         for (int i = 0; i < x.second.size(); i++) {
+             VertexCache v = x.second.at(i);
+             if (v.v1->lowerImageID != '\0') {
+                 RenderTexturedTriangle(v.v1, v.v2, v.v3, area, LOWER_TRIANGE, image);
+             }
+             if (v.v1->upperImageID != '\0') {
+                 RenderTexturedTriangle(v.v1, v.v2, v.v3, area, UPPER_TRIANGE, image);
+             }
+         }
+         glEnd();
+    }
+    //glEnd();
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+    
     RenderMapOverlay(area);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
        RenderObjects(area, i);
 	}
     
-    glDisable(GL_BLEND);
-    glDisable(GL_TEXTURE_2D);
+    
 }
 void SCRenderer::RenderMapOverlay(RSArea* area) {
     int centerX = 0;// ((20000 * 18) / 2);
     int centerY = 0;// (20000 * 18) / 2;
 
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
+    
+    glDepthFunc(GL_LESS);
     //glDisable(GL_CULL_FACE);
     
     for (int i = 0; i < area->objectOverlay.size(); i++) {
@@ -1119,9 +1128,6 @@ void SCRenderer::RenderMapOverlay(RSArea* area) {
             glEnd();
         }
     }
-    
-    glEnable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
 }
 void SCRenderer::RenderWorldByID(RSArea* area, int LOD, int verticesPerBlock, int blockId) {
 

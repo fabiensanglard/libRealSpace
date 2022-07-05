@@ -19,6 +19,15 @@ class RSEntity;
 //struct VGAPalette;
 struct MapVertex;
 struct Triangle;
+typedef struct VertexCache {
+    MapVertex *v1;
+    MapVertex *v2;
+    MapVertex *v3;
+}VertexCache;
+
+typedef std::vector<VertexCache>    MyClassSet;
+typedef std::map<int, MyClassSet>   MyClassSetMap;
+
 
 class SCRenderer{
     
@@ -53,7 +62,7 @@ public:
     
     void RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock);
 
-    void RenderTexturedTriangle(MapVertex* tri0,MapVertex* tri1,MapVertex* tri2,RSArea* area,int triangleType);
+    void RenderTexturedTriangle(MapVertex* tri0,MapVertex* tri1,MapVertex* tri2,RSArea* area,int triangleType,RSImage* image);
     void RenderColoredTriangle (MapVertex* tri0,MapVertex* tri1,MapVertex* tri2);
     bool IsTextured(MapVertex* tri0,MapVertex* tri1,MapVertex* tri2);
     void RenderQuad(MapVertex* currentVertex,
@@ -113,6 +122,7 @@ private:
 	Camera camera;
     Point3D light;
 	Point3D playerPosition;
+    MyClassSetMap textureSortedVertex;
 };
 
 
