@@ -20,9 +20,13 @@ class RSEntity;
 struct MapVertex;
 struct Triangle;
 typedef struct VertexCache {
-    MapVertex *v1;
-    MapVertex *v2;
-    MapVertex *v3;
+    MapVertex *lv1;
+    MapVertex *lv2;
+    MapVertex *lv3;
+    MapVertex* uv1;
+    MapVertex* uv2;
+    MapVertex* uv3;
+
 }VertexCache;
 
 typedef std::vector<VertexCache>    VertexVector;

@@ -685,8 +685,13 @@ void SCRenderer::RenderQuad( MapVertex* currentVertex,
 		if (currentVertex->lowerImageID != 0xFF) {
             VertexVector& vcache = textureSortedVertex[currentVertex->lowerImageID];
             VertexCache v = { currentVertex, bottomRightVertex, bottomVertex };
+            v.lv1 = currentVertex;
+            v.lv2 = bottomRightVertex;
+            v.lv3 = bottomVertex;
+            v.uv1 = v.uv2 = v.uv3 = NULL;
             vcache.push_back(v);
-            /*RSImage* image = NULL;
+            /*
+            RSImage* image = NULL;
 
             image = area->GetImageByID(currentVertex->lowerImageID);
             if (image == NULL) {
@@ -696,13 +701,19 @@ void SCRenderer::RenderQuad( MapVertex* currentVertex,
             glBindTexture(GL_TEXTURE_2D, image->GetTexture()->GetTextureID());
             glBegin(GL_TRIANGLES);
             RenderTexturedTriangle(currentVertex, bottomRightVertex, bottomVertex, area, LOWER_TRIANGE, image);
-            glEnd();*/
+            glEnd();
+            /**/
         }
         if (currentVertex->upperImageID != 0xFF) {
             VertexVector& vcache = textureSortedVertex[currentVertex->upperImageID];
-            VertexCache v = { currentVertex, rightVertex, bottomRightVertex };
+            VertexCache v;
+            v.uv1 = currentVertex;
+            v.uv2 = rightVertex;
+            v.uv3 = bottomRightVertex;
+            v.lv1 = v.lv2 = v.lv3 = NULL;
             vcache.push_back(v);
-            /*RSImage* image = NULL;
+            /*
+            RSImage* image = NULL;
             image = area->GetImageByID(currentVertex->upperImageID);
             if (image == NULL) {
                 printf("This should never happen: Put a break point here.\n");
@@ -711,7 +722,8 @@ void SCRenderer::RenderQuad( MapVertex* currentVertex,
             glBindTexture(GL_TEXTURE_2D, image->GetTexture()->GetTextureID());
             glBegin(GL_TRIANGLES);
             RenderTexturedTriangle(currentVertex, rightVertex, bottomRightVertex, area, UPPER_TRIANGE, image);
-            glEnd();*/
+            glEnd();
+            /**/
         }
         
     }
@@ -1100,16 +1112,11 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
          glBegin(GL_TRIANGLES);
          for (int i = 0; i < x.second.size(); i++) {
              VertexCache v = x.second.at(i);
-             if (v.v1->lowerImageID == x.first) {
-                 RenderTexturedTriangle(v.v1, v.v2, v.v3, area, LOWER_TRIANGE, image);
+             if (v.lv1 != NULL && v.lv1->lowerImageID == x.first) {
+                 RenderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image);
              }
-         }
-         glEnd();
-         glBegin(GL_TRIANGLES);
-         for (int i = 0; i < x.second.size(); i++) {
-             VertexCache v = x.second.at(i);
-             if (v.v1->upperImageID == x.first) {
-                 RenderTexturedTriangle(v.v1, v.v2, v.v3, area, UPPER_TRIANGE, image);
+             if (v.uv1 != NULL && v.uv1->upperImageID == x.first) {
+                 RenderTexturedTriangle(v.uv1, v.uv2, v.uv3, area, UPPER_TRIANGE, image);
              }
          }
          glEnd();
@@ -1175,11 +1182,11 @@ void SCRenderer::RenderWorldByID(RSArea* area, int LOD, int verticesPerBlock, in
         glBegin(GL_TRIANGLES);
         for (int i = 0; i < x.second.size(); i++) {
             VertexCache v = x.second.at(i);
-            if (v.v1->lowerImageID != '\0') {
-                RenderTexturedTriangle(v.v1, v.v2, v.v3, area, LOWER_TRIANGE, image);
+            if (v.lv1->lowerImageID != '\0') {
+                RenderTexturedTriangle(v.lv1, v.lv2, v.uv3, area, LOWER_TRIANGE, image);
             }
-            if (v.v1->upperImageID != '\0') {
-                RenderTexturedTriangle(v.v1, v.v2, v.v3, area, UPPER_TRIANGE, image);
+            if (v.uv1->upperImageID != '\0') {
+                RenderTexturedTriangle(v.uv1, v.uv2, v.lv3, area, UPPER_TRIANGE, image);
             }
         }
         glEnd();
