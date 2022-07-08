@@ -156,6 +156,7 @@ public:
 	std::map<std::string, RSEntity*>* objCache;
 	TreArchive* tre;
 	std::vector<PART*> missionObjects;
+	std::vector<AREA*> missionAreas;
 
 	PART* getPlayerCoord();
 	PART* getObject(const char *name);
@@ -187,7 +188,7 @@ private:
 	char missionName[255];
 	char missionAreaFile[8];
 
-	std::vector<AREA*> missionAreas;
+	
 	
 	std::vector<MSGS*> missionMessages;
 	std::vector<SPOT*> missionSpots;

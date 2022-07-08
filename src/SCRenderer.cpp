@@ -1182,11 +1182,11 @@ void SCRenderer::RenderWorldByID(RSArea* area, int LOD, int verticesPerBlock, in
         glBegin(GL_TRIANGLES);
         for (int i = 0; i < x.second.size(); i++) {
             VertexCache v = x.second.at(i);
-            if (v.lv1->lowerImageID != '\0') {
-                RenderTexturedTriangle(v.lv1, v.lv2, v.uv3, area, LOWER_TRIANGE, image);
+            if (v.lv1 != NULL && v.lv1->lowerImageID == x.first) {
+                RenderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image);
             }
-            if (v.uv1->upperImageID != '\0') {
-                RenderTexturedTriangle(v.uv1, v.uv2, v.lv3, area, UPPER_TRIANGE, image);
+            if (v.uv1 != NULL && v.uv1->upperImageID == x.first) {
+                RenderTexturedTriangle(v.uv1, v.uv2, v.uv3, area, UPPER_TRIANGE, image);
             }
         }
         glEnd();
