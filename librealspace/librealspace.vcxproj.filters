@@ -93,6 +93,9 @@
     <ClCompile Include="..\src\RSMission.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RSOptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\TreArchive.h">
@@ -174,6 +177,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\RSMission.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RSOption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

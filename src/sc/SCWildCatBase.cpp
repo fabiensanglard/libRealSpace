@@ -25,13 +25,13 @@ void SCWildCatBase::CheckKeyboard(void){
     for(int i= 0 ; i < numKeybEvents ; i++){
         SDL_Event* event = &keybEvents[i];
         switch (event->key.keysym.sym) {
-            case SDLK_RETURN :{
+            case SDLK_ESCAPE:{
                 
                 Stop();
                 
                 SCConvPlayer* conv = new SCConvPlayer();
                 conv->Init();
-                conv->SetID(14);
+                conv->SetID(41);
                 Game.AddActivity(conv);
                 
                 break;

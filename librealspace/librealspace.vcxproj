@@ -41,7 +41,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -154,6 +154,7 @@
     <ClCompile Include="..\src\Texture.cpp" />
     <ClCompile Include="..\src\TreArchive.cpp" />
     <ClCompile Include="..\src\VGA.cpp" />
+    <ClCompile Include="RSOptions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Base.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="..\src\SCRenderer.h" />
     <ClInclude Include="..\src\Texture.h" />
     <ClInclude Include="..\src\TreArchive.h" />
+    <ClInclude Include="RSOption.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
