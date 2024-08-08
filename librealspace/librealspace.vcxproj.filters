@@ -96,6 +96,9 @@
     <ClCompile Include="RSOptions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IFFSaxLexer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\TreArchive.h">
@@ -180,6 +183,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RSOption.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RSGameflow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFSaxLexer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

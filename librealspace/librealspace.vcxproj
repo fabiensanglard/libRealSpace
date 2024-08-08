@@ -154,6 +154,7 @@
     <ClCompile Include="..\src\Texture.cpp" />
     <ClCompile Include="..\src\TreArchive.cpp" />
     <ClCompile Include="..\src\VGA.cpp" />
+    <ClCompile Include="IFFSaxLexer.cpp" />
     <ClCompile Include="RSOptions.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +185,8 @@
     <ClInclude Include="..\src\SCRenderer.h" />
     <ClInclude Include="..\src\Texture.h" />
     <ClInclude Include="..\src\TreArchive.h" />
+    <ClInclude Include="IFFSaxLexer.h" />
+    <ClInclude Include="RSGameflow.h" />
     <ClInclude Include="RSOption.h" />
   </ItemGroup>
   <ItemGroup>

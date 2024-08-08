@@ -11,10 +11,41 @@ void missionstrtoupper(char* src) {
 
 RSMission::RSMission() {
 	printf("CREATE MISSION\n");
+	this->missionName[0] = '\0';
+	this->missionAreaFile[0] = '\0';
+	this->missionInfo[0] = '\0';
+	this->objCache = new std::map<std::string, RSEntity*>();
+	this->missionAreas = std::vector<AREA*>();
+	this->missionObjects = std::vector<PART*>();
+	this->missionSpots = std::vector<SPOT*>();
+	this->missionMessages = std::vector<MSGS*>();
+	this->missionCasting = std::vector<CAST*>();
+	this->tre = NULL;
+
 }
 
 RSMission::~RSMission() {
 	printf("DELETE MISSION\n");
+	for (int i = 0; i < missionAreas.size(); i++) {
+		free(missionAreas[i]);
+	}
+	missionAreas.clear();
+	for (int i = 0; i < missionObjects.size(); i++) {
+		free(missionObjects[i]);
+	}
+	missionObjects.clear();
+	for (int i = 0; i < missionSpots.size(); i++) {
+		free(missionSpots[i]);
+	}
+	missionSpots.clear();
+	for (int i = 0; i < missionMessages.size(); i++) {
+		free(missionMessages[i]);
+	}
+	missionMessages.clear();
+	for (int i = 0; i < missionCasting.size(); i++) {
+		free(missionCasting[i]);
+	}
+	delete objCache;
 }
 void RSMission::printArea(AREA* a) {
 	printf("*************************************\n");
@@ -323,7 +354,7 @@ void RSMission::parseAREA(IffChunk* chunk) {
 				}
 				if (area->AreaType != '\0') {
 					printArea(area);
-					printf("READED: %d, SIZE: %d\n", read, fsize);
+					printf("READED: %llu, SIZE: %llu\n", read, fsize);
 					missionAreas.push_back(area);
 				}
 				
@@ -341,7 +372,7 @@ void RSMission::parseAREA(IffChunk* chunk) {
 void RSMission::parsePART(IffChunk* chunk) {
 	if (chunk != NULL) {
 		printf("PARSING PART\n");
-		printf("Number of entries %d\n", chunk->size / 62);
+		printf("Number of entries %llu\n", chunk->size / 62);
 		ByteStream stream(chunk->data);
 		size_t numParts = chunk->size / 62;
 		for (int i = 0; i < numParts; i++) {
@@ -428,7 +459,7 @@ void RSMission::parseGLNT(IffChunk* chunk) {
 		p.List(stdout);
 		for (size_t i = 0; i < p.GetNumEntries(); i++) {
 			PakEntry* blockEntry = p.GetEntry(i);
-			printf("CONTENT OF GLNT PAK ENTRY %d\n", i);
+			printf("CONTENT OF GLNT PAK ENTRY %llu\n", i);
 			ByteStream stream(blockEntry->data);
 			size_t fsize = blockEntry->size;
 			uint8_t byte;

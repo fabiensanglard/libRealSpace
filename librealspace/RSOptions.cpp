@@ -31,5 +31,5 @@ void RSOption::InitFromRam(uint8_t* data) {
 }
 
 void RSOption::parseSCEN(uint8_t* data, size_t size) {
-	printf("Parsing SCEN\n");
+	printf("Parsing SCEN %llu\n", size);
 }
