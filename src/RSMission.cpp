@@ -45,7 +45,7 @@ RSMission::~RSMission() {
 	for (int i = 0; i < missionCasting.size(); i++) {
 		free(missionCasting[i]);
 	}
-	delete objCache;
+	//delete objCache;
 }
 void RSMission::printArea(AREA* a) {
 	printf("*************************************\n");

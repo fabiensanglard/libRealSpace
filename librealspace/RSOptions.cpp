@@ -20,16 +20,23 @@ RSOption::~RSOption() {
 	}
 }
 
-void RSOption::InitFromRam(uint8_t* data) {
+void RSOption::InitFromRam(uint8_t* data, size_t size) {
 	IFFSaxLexer lexer;
 
 	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
-	handlers["SCEN"] = std::bind(&RSOption::parseSCEN, this, std::placeholders::_1, std::placeholders::_2);
+	//handlers["OPTS"] = std::bind(&RSOption::parseOPTS, this, std::placeholders::_1, std::placeholders::_2);
 	
-	lexer.InitFromRAM(data, sizeof(data), handlers);
+	lexer.InitFromRAM(data, size, handlers);
 
 }
 
+void RSOption::parseOPTS(uint8_t* data, size_t size) {
+	IFFSaxLexer lexer;
+	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+	handlers["SCEN"] = std::bind(&RSOption::parseSCEN, this, std::placeholders::_1, std::placeholders::_2);
+
+	lexer.InitFromRAM(data, sizeof(data), handlers);
+}
 void RSOption::parseSCEN(uint8_t* data, size_t size) {
 	printf("Parsing SCEN %llu\n", size);
 }

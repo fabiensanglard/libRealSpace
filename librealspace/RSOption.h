@@ -35,7 +35,7 @@ struct SPRT_SHAP {
 	uint8_t UNKOWN_1;
 	uint8_t UNKOWN_2;
 };
-struct RECT {
+struct OPTION_RECT {
 	uint16_t X1;
 	uint16_t Y1;
 	uint16_t X2;
@@ -44,7 +44,7 @@ struct RECT {
 struct SPRT {
 	SPRT_SHAP sprite;
 	char* label;
-	RECT zone;
+	OPTION_RECT zone;
 	TUNE tune;
 	uint8_t* SEQU;
 };
@@ -95,6 +95,7 @@ class RSOption {
 public:
 	RSOption();
 	~RSOption();
-	void InitFromRam(uint8_t* data);
+	void InitFromRam(uint8_t* data, size_t size);
+	void parseOPTS(uint8_t* data, size_t size);
 	void parseSCEN(uint8_t* data, size_t size);
 };
