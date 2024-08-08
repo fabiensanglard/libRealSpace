@@ -95,4 +95,6 @@ class RSOption {
 public:
 	RSOption();
 	~RSOption();
+	void InitFromRam(uint8_t* data);
+	void parseSCEN(uint8_t* data, size_t size);
 };

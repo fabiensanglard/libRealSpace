@@ -24,8 +24,10 @@ char* GetChunkTextID(uint32_t id) {
 
 IffChunk::IffChunk() :
 	subId(0) {
-
-
+	this->data = NULL;
+	this->size = 0;
+	this->name[0] = '\0';
+	this->id = 0;
 }
 
 
@@ -41,6 +43,8 @@ IffChunk::~IffChunk() {
 #define CHUNK_HEADER_SIZE 8
 
 IffLexer::IffLexer() {
+	this->data = NULL;
+	this->size = 0;
 	this->path[0] = '\0';
 }
 
@@ -92,7 +96,7 @@ bool IffLexer::InitFromFile(const char* filepath) {
 
 	uint8_t* fileData = new uint8_t[fileSize];
 	size_t t = fread(fileData, 1, fileSize, file);
-	printf("file %s read %d bytes should be %d\n", fullPath, t, fileSize);
+	printf("file %s read %llu bytes should be %llu\n", fullPath, t, fileSize);
 	strcpy(this->path, filepath);
 
 	return InitFromRAM(fileData, fileSize);
@@ -294,7 +298,7 @@ void ListChunkContent(uint32_t level, IffChunk* chunk) {
 	printf("%s\n", GetChunkTextID(chunk->id));
 
 	Tab(level);
-	printf("%lu\n", chunk->size);
+	printf("%llu\n", chunk->size);
 
 	//dumpChunk(chunk, GetChunkTextID(chunk->id));
 	if (chunk->subId != 0) {

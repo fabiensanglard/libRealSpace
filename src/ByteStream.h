@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstring>
 #include <array>
+#include <vector>
 
 
 /*
@@ -25,12 +26,11 @@
 class ByteStream {
 public:
 
-
-
 	ByteStream(uint8_t* cursor);
 	ByteStream(ByteStream& stream);
 	ByteStream();
 	~ByteStream();
+
 	void dump(size_t lenght, int hexonly);
 
 	inline void Set(uint8_t* cursor) {
@@ -48,7 +48,6 @@ public:
 	inline uint8_t PeekByte(void) {
 		return *(this->cursor + 1);
 	}
-
 
 	inline uint16_t ReadUShort(void) {
 		uint16_t* ushortP = (uint16_t*)this->cursor;
@@ -77,6 +76,7 @@ public:
 		cursor += 4;
 		return *i;
 	}
+
 	inline int32_t ReadInt24LE(void) {
 		int32_t i = 0;
 		uint8_t buffer[4];
@@ -101,6 +101,7 @@ public:
 
 		return toLittleEndian;
 	}
+
 	inline uint16_t ReadUShortBE(void) {
 
 		uint16_t toLittleEndian = 0;
@@ -110,6 +111,14 @@ public:
 		return toLittleEndian;
 	}
 
+	inline std::vector<uint8_t> ReadBytes(size_t count) {
+		std::vector<uint8_t> bytes;
+		bytes.reserve(count);
+		for (size_t i = 0; i < count; i++) {
+			bytes.push_back(ReadByte());
+		}
+		return bytes;
+	}
 
 
 
