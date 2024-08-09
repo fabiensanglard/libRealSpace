@@ -8,7 +8,16 @@
 #include <map>
 
 
-
+struct QUAD {
+	uint8_t xa1;
+	uint8_t ya1;
+	uint8_t xa2;
+	uint8_t ya2;
+	uint8_t xb1;
+	uint8_t yb1;
+	uint8_t xb2;
+	uint8_t yb2;
+};
 struct INFO {
 	uint8_t ID;
 	uint8_t UNKOWN;
@@ -41,6 +50,12 @@ struct OPTION_RECT {
 	uint16_t X2;
 	uint16_t Y2;
 };
+struct SPRT_INFO {
+	uint8_t ID;
+	uint8_t UNKOWN_1;
+	uint8_t UNKOWN_2;
+	uint8_t UNKOWN_3;
+};
 struct SPRT {
 	SPRT_SHAP sprite;
 	char* label;
@@ -51,12 +66,7 @@ struct SPRT {
 	SPRT_INFO* info;
 	uint8_t* SEQU;
 };
-struct SPRT_INFO {
-	uint8_t ID;
-	uint8_t UNKOWN_1;
-	uint8_t UNKOWN_2;
-	uint8_t UNKOWN_3;
-};
+
 struct BACK {
 	PALT *palette;
 	std::vector<BACK_SHAP*> images;
@@ -82,17 +92,7 @@ struct SHPS {
 	uint8_t x2;
 	uint8_t y2;
 };
-struct QUAD {
-	uint8_t xa1;
-	uint8_t ya1;
-	uint8_t xa2;
-	uint8_t ya2;
-	uint8_t xb1;
-	uint8_t yb1;
-	uint8_t xb2;
-	uint8_t yb2;
 
-};
 struct SHOT {
 	INFO infos;
 	std::vector<SHPS*> images;
@@ -123,6 +123,7 @@ private:
 	FORE* tmpfore;
 	BACK* tmpback;
 	SPRT* tmpsprt;
+	SHOT* tmpshot;
 
 	void parseOPTS(uint8_t* data, size_t size);
 	void parseSCEN(uint8_t* data, size_t size);
@@ -145,6 +146,12 @@ private:
 	void parseRECT(uint8_t* data, size_t size);
 	void parseLABL(uint8_t* data, size_t size);
 	void parseETSB(uint8_t* data, size_t size);
+	void parseSHOT_INFO(uint8_t* data, size_t size);
+	void parseSHOT_SHPS(uint8_t* data, size_t size);
+	void parseSHOT_SHAP(uint8_t* data, size_t size);
+	void parseSHOT_MOBL(uint8_t* data, size_t size);
+	void parseSHOT_PALT(uint8_t* data, size_t size);
+	void parseSHOT_PALS(uint8_t* data, size_t size);
 	void parseSHOT(uint8_t* data, size_t size);
 	void parseMARK(uint8_t* data, size_t size);
 

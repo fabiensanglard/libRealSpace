@@ -29,7 +29,7 @@ void RSOption::InitFromRam(uint8_t* data, size_t size) {
 
 	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
 	handlers["OPTS"] = std::bind(&RSOption::parseOPTS, this, std::placeholders::_1, std::placeholders::_2);
-	handlers["ETSB"] = std::bind(&RSOption::parseETSB, this, std::placeholders::_1, std::placeholders::_2);
+	handlers["ESTB"] = std::bind(&RSOption::parseETSB, this, std::placeholders::_1, std::placeholders::_2);
 	handlers["MARK"] = std::bind(&RSOption::parseMARK, this, std::placeholders::_1, std::placeholders::_2);
 	lexer.InitFromRAM(data, size, handlers);
 
@@ -129,7 +129,6 @@ void RSOption::parsePALT(uint8_t* data, size_t size) {
 }
 
 void RSOption::parseSHAP(uint8_t* data, size_t size) {
-	SHPS *shps = new SHPS();
 	printf("Parsing SHAP %llu\n", size);
 	this->tmpsprt->sprite.GID = *data++;
 	this->tmpsprt->sprite.SHP_ID = *data++;
@@ -168,9 +167,11 @@ void RSOption::parseSPRT(uint8_t* data, size_t size) {
 	lexer.InitFromRAM(data, size, handlers);
 	this->tmpfore->sprites.push_back(this->tmpsprt);
 }
+
 void RSOption::parseCLCK(uint8_t* data, size_t size) {
 	this->tmpsprt->CLCK = 1;
 }
+
 void RSOption::parseQUAD(uint8_t* data, size_t size) {
 	QUAD* quad = new QUAD();
 	printf("Parsing QUAD %llu\n", size);
@@ -184,6 +185,7 @@ void RSOption::parseQUAD(uint8_t* data, size_t size) {
 	quad->yb2 = *data;
 	this->tmpsprt->quad = quad;
 }
+
 void RSOption::parseSPRT_INFO(uint8_t* data, size_t size) {
 	printf("Parsing INFO %llu\n", size);
 	SPRT_INFO *info = new SPRT_INFO();
@@ -191,8 +193,8 @@ void RSOption::parseSPRT_INFO(uint8_t* data, size_t size) {
 	info->UNKOWN_1 = *data++;
 	info->UNKOWN_2 = *data++;
 	info->UNKOWN_3 = *data;
-
 }
+
 void RSOption::parseSPRT_SEQU(uint8_t* data, size_t size) {
 	printf("Parsing SEQU %llu\n", size);
 	if (size > 0) {
@@ -203,6 +205,7 @@ void RSOption::parseSPRT_SEQU(uint8_t* data, size_t size) {
 #pragma warning( pop )
 	}
 }
+
 void RSOption::parseRECT(uint8_t* data, size_t size) {
 	printf("Parsing RECT %llu\n", size);
 	this->tmpsprt->zone.X1 = *data++;
@@ -227,21 +230,83 @@ void RSOption::parseETSB(uint8_t* data, size_t size) {
 	handlers["SHOT"] = std::bind(&RSOption::parseSHOT, this, std::placeholders::_1, std::placeholders::_2);
 	printf("Parsing ETSB %llu\n", size);
 	lexer.InitFromRAM(data, size, handlers);
-
-
 }
+
+void RSOption::parseSHOT_INFO(uint8_t* data, size_t size) {
+	printf("Parsing INFO %llu\n", size);
+	this->tmpshot->infos.ID = *data++;
+	this->tmpshot->infos.UNKOWN = *data;
+}
+
+void RSOption::parseSHOT_SHPS(uint8_t* data, size_t size) {
+	printf("Parsing SHPS %llu\n", size);
+	IFFSaxLexer lexer;
+	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+	handlers["SHAP"] = std::bind(&RSOption::parseSHOT_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+	handlers["MOBL"] = std::bind(&RSOption::parseSHOT_MOBL, this, std::placeholders::_1, std::placeholders::_2);
+	lexer.InitFromRAM(data, size, handlers);
+	
+}
+
+void RSOption::parseSHOT_SHAP(uint8_t* data, size_t size) {
+	printf("Parsing SHAPE %llu\n", size);
+	SHPS* shps = new SHPS();
+	shps->type = 1;
+	shps->OptshapeID = *data++;
+	shps->UNKOWN = *data++;
+	shps->x1 = *data++;
+	shps->y1 = *data++;
+	shps->x2 = *data++;
+	shps->y2 = *data;
+	this->tmpshot->images.push_back(shps);
+}
+
+void RSOption::parseSHOT_MOBL(uint8_t* data, size_t size) {
+	printf("Parsing MOBL %llu\n", size);
+	SHPS* shps = new SHPS();
+	shps->type = 2;
+	shps->OptshapeID = *data++;
+	shps->UNKOWN = *data++;
+	shps->x1 = *data++;
+	shps->y1 = *data++;
+	shps->x2 = *data++;
+	shps->y2 = *data;
+	this->tmpshot->images.push_back(shps);
+}
+
+void RSOption::parseSHOT_PALT(uint8_t* data, size_t size) {
+	printf("Parsing PALT %llu\n", size);
+	PALT* pal = new PALT();
+	pal->ID = *data++;
+	pal->UNKOWN = *data;
+	this->tmpshot->palettes.push_back(pal);
+}
+
+void RSOption::parseSHOT_PALS(uint8_t* data, size_t size) {
+	printf("Parsing PALS %llu\n", size);
+	IFFSaxLexer lexer;
+	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+	handlers["PALT"] = std::bind(&RSOption::parseSHOT_PALT, this, std::placeholders::_1, std::placeholders::_2);
+	lexer.InitFromRAM(data, size, handlers);
+}
+
 void RSOption::parseSHOT(uint8_t* data, size_t size) {
 	printf("Parsing SHOT %llu\n", size);
 	IFFSaxLexer lexer;
 	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
-
+	handlers["INFO"] = std::bind(&RSOption::parseSHOT_INFO, this, std::placeholders::_1, std::placeholders::_2);
+	handlers["SHPS"] = std::bind(&RSOption::parseSHOT_SHPS, this, std::placeholders::_1, std::placeholders::_2);
+	handlers["PALS"] = std::bind(&RSOption::parseSHOT_PALS, this, std::placeholders::_1, std::placeholders::_2);
+	this->tmpshot = new SHOT();
+	lexer.InitFromRAM(data, size, handlers);
+	this->estb[tmpshot->infos.ID] = tmpshot;
 }
+
 void RSOption::parseMARK(uint8_t* data, size_t size) {
 	IFFSaxLexer lexer;
 	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
 
-	handlers["SHOT"] = std::bind(&RSOption::parseSHOT, this, std::placeholders::_1, std::placeholders::_2);
+	//handlers["SHOT"] = std::bind(&RSOption::parseSHOT, this, std::placeholders::_1, std::placeholders::_2);
 	printf("Parsing MARK %llu\n", size);
 	lexer.InitFromRAM(data, size, handlers);
-
 }
