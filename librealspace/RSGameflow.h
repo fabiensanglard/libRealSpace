@@ -64,3 +64,11 @@ struct GAMEFLOW {
 	std::vector<WING*> wngs;
 	std::map<std::uint8_t, CHNG*> stat;
 };
+
+class RSGameFlow {
+
+public:
+	RSGameFlow();
+	~RSGameFlow();
+	void InitFromRam(uint8_t* data, size_t size);
+};

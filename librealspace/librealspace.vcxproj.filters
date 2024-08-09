@@ -99,6 +99,9 @@
     <ClCompile Include="IFFSaxLexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RSGameflow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\TreArchive.h">

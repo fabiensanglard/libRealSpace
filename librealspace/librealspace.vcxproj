@@ -155,6 +155,7 @@
     <ClCompile Include="..\src\TreArchive.cpp" />
     <ClCompile Include="..\src\VGA.cpp" />
     <ClCompile Include="IFFSaxLexer.cpp" />
+    <ClCompile Include="RSGameflow.cpp" />
     <ClCompile Include="RSOptions.cpp" />
   </ItemGroup>
   <ItemGroup>
