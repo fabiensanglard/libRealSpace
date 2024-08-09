@@ -10,6 +10,7 @@ RSOption::RSOption() {
 	this->tmpfore = nullptr;
 	this->tmpscen = nullptr;
 	this->tmpsprt = nullptr;
+	this->tmpshot = nullptr;
 }
 
 RSOption::~RSOption() {
