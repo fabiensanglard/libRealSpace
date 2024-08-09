@@ -63,12 +63,12 @@ void IFFSaxLexer::Parse(std::map<std::string, std::function<void(uint8_t* data, 
 			chunk_stype.assign(bname.begin(), bname.end());
 			read += 8;
 			if (events.count(chunk_stype) > 0) {
-				events.at(chunk_stype)(this->stream.ReadBytes(chunk_size).data(), chunk_size);
-				read += (chunk_size);
+				events.at(chunk_stype)(this->stream.ReadBytes(chunk_size-4).data(), chunk_size-4);
+				read += (chunk_size-4);
 			} else {
 				printf("%s not handled\n", chunk_stype.c_str());
-				std::vector<uint8_t> dump = this->stream.ReadBytes(chunk_size);
-				read += (chunk_size);
+				std::vector<uint8_t> dump = this->stream.ReadBytes(chunk_size-4);
+				read += (chunk_size-4);
 			}
 		}
 	}

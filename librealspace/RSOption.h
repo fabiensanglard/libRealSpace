@@ -98,4 +98,6 @@ public:
 	void InitFromRam(uint8_t* data, size_t size);
 	void parseOPTS(uint8_t* data, size_t size);
 	void parseSCEN(uint8_t* data, size_t size);
+	void parseETSB(uint8_t* data, size_t size);
+	void parseMARK(uint8_t* data, size_t size);
 };
