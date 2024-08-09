@@ -46,21 +46,31 @@ struct SPRT {
 	char* label;
 	OPTION_RECT zone;
 	TUNE tune;
+	uint8_t CLCK;
+	QUAD* quad;
+	SPRT_INFO* info;
 	uint8_t* SEQU;
 };
+struct SPRT_INFO {
+	uint8_t ID;
+	uint8_t UNKOWN_1;
+	uint8_t UNKOWN_2;
+	uint8_t UNKOWN_3;
+};
 struct BACK {
-	PALT palette;
+	PALT *palette;
 	std::vector<BACK_SHAP*> images;
 };
 struct FORE {
-	PALT palette;
-	std::vector<SPRT*> images;
+	PALT *palette;
+	std::vector<SPRT*> sprites;
 };
 struct SCEN {
 	INFO infos;
 	COLR colr;
 	TUNE tune;
-	BACK background;
+	BACK *background;
+	FORE *foreground;
 
 };
 struct SHPS {
@@ -71,6 +81,17 @@ struct SHPS {
 	uint8_t y1;
 	uint8_t x2;
 	uint8_t y2;
+};
+struct QUAD {
+	uint8_t xa1;
+	uint8_t ya1;
+	uint8_t xa2;
+	uint8_t ya2;
+	uint8_t xb1;
+	uint8_t yb1;
+	uint8_t xb2;
+	uint8_t yb2;
+
 };
 struct SHOT {
 	INFO infos;
@@ -96,8 +117,35 @@ public:
 	RSOption();
 	~RSOption();
 	void InitFromRam(uint8_t* data, size_t size);
+private:
+	
+	SCEN* tmpscen;
+	FORE* tmpfore;
+	BACK* tmpback;
+	SPRT* tmpsprt;
+
 	void parseOPTS(uint8_t* data, size_t size);
 	void parseSCEN(uint8_t* data, size_t size);
+	void parseSCEN_INFO(uint8_t* data, size_t size);
+	void parseINFO(uint8_t* data, size_t size);
+	void parseCOLR(uint8_t* data, size_t size);
+	void parseTUNE(uint8_t* data, size_t size);
+	void parseSPRT_TUNE(uint8_t* data, size_t size);
+	void parseBACK(uint8_t* data, size_t size);
+	void parseBACK_PALT(uint8_t* data, size_t size);
+	void parseBACK_SHAP(uint8_t* data, size_t size);
+	void parsePALT(uint8_t* data, size_t size);
+	void parseSHAP(uint8_t* data, size_t size);
+	void parseFORE(uint8_t* data, size_t size);
+	void parseSPRT(uint8_t* data, size_t size);
+	void parseCLCK(uint8_t* data, size_t size);
+	void parseQUAD(uint8_t* data, size_t size);
+	void parseSPRT_INFO(uint8_t* data, size_t size);
+	void parseSPRT_SEQU(uint8_t* data, size_t size);
+	void parseRECT(uint8_t* data, size_t size);
+	void parseLABL(uint8_t* data, size_t size);
 	void parseETSB(uint8_t* data, size_t size);
+	void parseSHOT(uint8_t* data, size_t size);
 	void parseMARK(uint8_t* data, size_t size);
+
 };

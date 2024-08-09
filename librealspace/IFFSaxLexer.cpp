@@ -59,6 +59,7 @@ void IFFSaxLexer::Parse(std::map<std::string, std::function<void(uint8_t* data, 
 
 		if (chunk_stype == "FORM") {
 			size_t chunk_size = this->stream.ReadUInt32BE();
+			chunk_size += chunk_size % 2;
 			std::vector<uint8_t> bname = this->stream.ReadBytes(4);
 			chunk_stype.assign(bname.begin(), bname.end());
 			read += 8;
@@ -69,6 +70,18 @@ void IFFSaxLexer::Parse(std::map<std::string, std::function<void(uint8_t* data, 
 				printf("%s not handled\n", chunk_stype.c_str());
 				std::vector<uint8_t> dump = this->stream.ReadBytes(chunk_size-4);
 				read += (chunk_size-4);
+			}
+		} else {
+			size_t chunk_size = this->stream.ReadUInt32BE();
+			chunk_size += chunk_size % 2;
+			read += 4;
+			if (events.count(chunk_stype) > 0) {
+				events.at(chunk_stype)(this->stream.ReadBytes(chunk_size).data(), chunk_size);
+				read += chunk_size;
+			} else {
+				printf("%s not handled\n", chunk_stype.c_str());
+				std::vector<uint8_t> dump = this->stream.ReadBytes(chunk_size);
+				read += chunk_size;
 			}
 		}
 	}
