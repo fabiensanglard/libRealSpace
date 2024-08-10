@@ -108,51 +108,52 @@ struct MARK {
 	KILL unkown_1;
 	uint8_t *DATA;
 };
-class RSOption {
-	std::map<std::uint8_t, SCEN*> opts;
-	std::map<std::uint8_t, SHOT*> estb;
-	MARK mark;
 
-public:
-	RSOption();
-	~RSOption();
-	void InitFromRam(uint8_t* data, size_t size);
+class RSOption {
+
 private:
-	
 	SCEN* tmpscen;
 	FORE* tmpfore;
 	BACK* tmpback;
 	SPRT* tmpsprt;
 	SHOT* tmpshot;
+	MARK mark;
 
+	std::map<std::uint8_t, SCEN*> opts;
+	std::map<std::uint8_t, SHOT*> estb;
+	
 	void parseOPTS(uint8_t* data, size_t size);
-	void parseSCEN(uint8_t* data, size_t size);
-	void parseSCEN_INFO(uint8_t* data, size_t size);
-	void parseINFO(uint8_t* data, size_t size);
-	void parseCOLR(uint8_t* data, size_t size);
-	void parseTUNE(uint8_t* data, size_t size);
-	void parseSPRT_TUNE(uint8_t* data, size_t size);
-	void parseBACK(uint8_t* data, size_t size);
-	void parseBACK_PALT(uint8_t* data, size_t size);
-	void parseBACK_SHAP(uint8_t* data, size_t size);
-	void parsePALT(uint8_t* data, size_t size);
-	void parseSHAP(uint8_t* data, size_t size);
-	void parseFORE(uint8_t* data, size_t size);
-	void parseSPRT(uint8_t* data, size_t size);
-	void parseCLCK(uint8_t* data, size_t size);
-	void parseQUAD(uint8_t* data, size_t size);
-	void parseSPRT_INFO(uint8_t* data, size_t size);
-	void parseSPRT_SEQU(uint8_t* data, size_t size);
-	void parseRECT(uint8_t* data, size_t size);
-	void parseLABL(uint8_t* data, size_t size);
+	void parseOPTS_SCEN(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_INFO(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_COLR(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_TUNE(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_BACK(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_BACK_PALT(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_BACK_SHAPE(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_PALT(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_SEQU(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_SPRT(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_SPRT_SHAP(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_SPRT_TUNE(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_SPRT_CLCK(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_SPRT_QUAD(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_SPRT_INFO(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_SPRT_RECT(uint8_t* data, size_t size);
+	void parseOPTS_SCEN_FORE_SPRT_LABL(uint8_t* data, size_t size);
 	void parseETSB(uint8_t* data, size_t size);
-	void parseSHOT_INFO(uint8_t* data, size_t size);
-	void parseSHOT_SHPS(uint8_t* data, size_t size);
-	void parseSHOT_SHAP(uint8_t* data, size_t size);
-	void parseSHOT_MOBL(uint8_t* data, size_t size);
-	void parseSHOT_PALT(uint8_t* data, size_t size);
-	void parseSHOT_PALS(uint8_t* data, size_t size);
-	void parseSHOT(uint8_t* data, size_t size);
+	void parseETSB_SHOT(uint8_t* data, size_t size);
+	void parseETSB_SHOT_INFO(uint8_t* data, size_t size);
+	void parseETSB_SHOT_SHPS(uint8_t* data, size_t size);
+	void parseETSB_SHOT_SHPS_SHAPE(uint8_t* data, size_t size);
+	void parseETSB_SHOT_SHPS_MOBL(uint8_t* data, size_t size);
+	void parseETSB_SHOT_PALS(uint8_t* data, size_t size);
+	void parseETSB_SHOT_PALS_PALT(uint8_t* data, size_t size);
 	void parseMARK(uint8_t* data, size_t size);
+
+public:
+	RSOption();
+	~RSOption();
+	void InitFromRam(uint8_t* data, size_t size);
 
 };

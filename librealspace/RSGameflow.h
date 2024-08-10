@@ -5,23 +5,24 @@
 #include <vector>
 #include <map>
 
+struct INFO {
+	uint8_t ID;
+	uint8_t UNKOWN;
+};
 struct GAMEFLOW_SPRT {
 	INFO info;
 	std::vector<uint8_t> efct;
+};
+struct REQU {
+	uint8_t UNKOWN_1;
+	uint8_t UNKOWN_2;
 };
 struct GAMEFLOW_SCEN {
 	INFO info;
 	std::map<uint8_t, GAMEFLOW_SPRT*> sprt;
 	REQU *requ;
 };
-struct REQU {
-	uint8_t UNKOWN_1;
-	uint8_t UNKOWN_2;
-};
-struct INFO {
-	uint8_t ID;
-	uint8_t UNKOWN;
-};
+
 struct MISS {
 	INFO info;
 	std::vector<uint8_t> efct;
@@ -67,8 +68,46 @@ struct GAMEFLOW {
 
 class RSGameFlow {
 
+private:
+	GAMEFLOW game;
+	MISS* tmpmiss;
+	MAP* tmpmap;
+	LOAD* tmpload;
+	MLST* tmpmisslt;
+	WING* tmpwings;
+	CHNG* tmpstat;
+
+	void parseGAME(uint8_t* data, size_t size);
+	void parseMISS(uint8_t* data, size_t size);
+	void parseMISS_INFO(uint8_t* data, size_t size);
+	void parseMISS_EFCT(uint8_t* data, size_t size);
+	void parseMISS_SCEN(uint8_t* data, size_t size);
+	void parseMISS_SCEN_INFO(uint8_t* data, size_t size);
+	void parseMISS_SCEN_SPRT(uint8_t* data, size_t size);
+	void parseMISS_SCEN_SPRT_INFO(uint8_t* data, size_t size);
+	void parseMISS_SCEN_SPRT_EFCT(uint8_t* data, size_t size);
+	void parseWRLD(uint8_t* data, size_t size);
+	void parseWRLD_MAPS(uint8_t* data, size_t size);
+	void parseWRLD_MAPS_INFO(uint8_t* data, size_t size);
+	void parseWRLD_MAPS_SPED(uint8_t* data, size_t size);
+	void parseWRLD_MAPS_DATA(uint8_t* data, size_t size);
+	void parseLOAD(uint8_t* data, size_t size);
+	void parseLOAD_LOAD(uint8_t* data, size_t size);
+	void parseMLST(uint8_t* data, size_t size);
+	void parseMLST_DATA(uint8_t* data, size_t size);
+	void parseMLST_PRTL(uint8_t* data, size_t size);
+	void parseWNGS(uint8_t* data, size_t size);
+	void parseWNGS_WING(uint8_t* data, size_t size);
+	void parseWNGS_WING_INFO(uint8_t* data, size_t size);
+	void parseWNGS_WING_PILT(uint8_t* data, size_t size);
+	void parseSTAT(uint8_t* data, size_t size);
+	void parseSTAT_CHNG(uint8_t* data, size_t size);
+	void parseSTAT_CHNG_INFO(uint8_t* data, size_t size);
+	void parseSTAT_CHNG_PILT(uint8_t* data, size_t size);
+
 public:
 	RSGameFlow();
 	~RSGameFlow();
 	void InitFromRam(uint8_t* data, size_t size);
+	
 };
