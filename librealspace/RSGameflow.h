@@ -3,24 +3,27 @@
 #include <cstddef>
 #include <cstdio>
 #include <vector>
+#include <string>
 #include <map>
 
 struct INFO {
 	uint8_t ID;
 	uint8_t UNKOWN;
 };
-struct GAMEFLOW_SPRT {
-	INFO info;
-	std::vector<uint8_t> efct;
-};
 struct REQU {
 	uint8_t UNKOWN_1;
 	uint8_t UNKOWN_2;
+};
+struct GAMEFLOW_SPRT {
+	INFO info;
+	std::vector<uint8_t> efct;
+	REQU* requ;
 };
 struct GAMEFLOW_SCEN {
 	INFO info;
 	std::map<uint8_t, GAMEFLOW_SPRT*> sprt;
 	REQU *requ;
+	std::vector<uint8_t> weap;
 };
 
 struct MISS {
@@ -43,8 +46,8 @@ struct LOAD {
 	std::vector<uint8_t> load;
 };
 struct MLST {
-	std::vector<char*> data;
-	std::vector<char*> prtl;
+	std::vector<std::string *> data;
+	std::vector<std::string *> prtl;
 };
 struct WING {
 	INFO info;
@@ -72,10 +75,11 @@ private:
 	GAMEFLOW game;
 	MISS* tmpmiss;
 	MAP* tmpmap;
-	LOAD* tmpload;
 	MLST* tmpmisslt;
 	WING* tmpwings;
 	CHNG* tmpstat;
+	GAMEFLOW_SCEN* tmpgfsc;
+	GAMEFLOW_SPRT* tmpscsp;
 
 	void parseGAME(uint8_t* data, size_t size);
 	void parseMISS(uint8_t* data, size_t size);
@@ -86,6 +90,7 @@ private:
 	void parseMISS_SCEN_SPRT(uint8_t* data, size_t size);
 	void parseMISS_SCEN_SPRT_INFO(uint8_t* data, size_t size);
 	void parseMISS_SCEN_SPRT_EFCT(uint8_t* data, size_t size);
+	void parseMISS_SCEN_SPRT_REQU(uint8_t* data, size_t size);
 	void parseWRLD(uint8_t* data, size_t size);
 	void parseWRLD_MAPS(uint8_t* data, size_t size);
 	void parseWRLD_MAPS_INFO(uint8_t* data, size_t size);
@@ -104,6 +109,9 @@ private:
 	void parseSTAT_CHNG(uint8_t* data, size_t size);
 	void parseSTAT_CHNG_INFO(uint8_t* data, size_t size);
 	void parseSTAT_CHNG_PILT(uint8_t* data, size_t size);
+	void parseSTAT_CHNG_CASH(uint8_t* data, size_t size);
+	void parseSTAT_CHNG_OVER(uint8_t* data, size_t size);
+	void parseSTAT_CHNG_WEAP(uint8_t* data, size_t size);
 
 public:
 	RSGameFlow();
