@@ -150,7 +150,7 @@ void RSOption::parseOPTS_SCEN_FORE_SPRT(uint8_t* data, size_t size) {
 	this->tmpsprt = new SPRT();
 	this->tmpsprt->CLCK = 0;
 	lexer.InitFromRAM(data, size, handlers);
-	this->tmpfore->sprites.push_back(this->tmpsprt);
+	this->tmpfore->sprites[this->tmpsprt->sprite.GID] = this->tmpsprt;
 }
 
 void RSOption::parseOPTS_SCEN_FORE_SPRT_TUNE(uint8_t* data, size_t size) {

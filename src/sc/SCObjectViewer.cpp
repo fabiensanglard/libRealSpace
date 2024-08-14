@@ -375,7 +375,7 @@ void SCObjectViewer::Init(void){
     ParseObjList(&objToDisplay);
    // ListObjects();
     
-    SetTitle("Neo Object Viewer");
+    //SetTitle("Neo Object Viewer");
     
     currentObject = 0 ;
     
@@ -404,7 +404,7 @@ void SCObjectViewer::RunFrame(void){
     
     VGA.VSync();
 
-    
+    /**/
     //Ok now time to draw the model
     glClear(GL_DEPTH_BUFFER_BIT);
     
@@ -442,5 +442,5 @@ void SCObjectViewer::RunFrame(void){
     Renderer.DrawModel(showCases[currentObject].entity, LOD_LEVEL_MAX);
     
     glDisable(GL_DEPTH_TEST);
-    
+    /**/
 }

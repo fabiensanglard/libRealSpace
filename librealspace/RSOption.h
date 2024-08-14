@@ -18,7 +18,7 @@ struct QUAD {
 	uint8_t xb2;
 	uint8_t yb2;
 };
-struct INFO {
+struct OPTS_INFO {
 	uint8_t ID;
 	uint8_t UNKOWN;
 };
@@ -73,10 +73,10 @@ struct BACK {
 };
 struct FORE {
 	PALT *palette;
-	std::vector<SPRT*> sprites;
+	std::map<uint8_t, SPRT*> sprites;
 };
 struct SCEN {
-	INFO infos;
+	OPTS_INFO infos;
 	COLR colr;
 	TUNE tune;
 	BACK *background;
@@ -94,7 +94,7 @@ struct SHPS {
 };
 
 struct SHOT {
-	INFO infos;
+	OPTS_INFO infos;
 	std::vector<SHPS*> images;
 	std::vector<PALT*> palettes;
 };
@@ -119,8 +119,7 @@ private:
 	SHOT* tmpshot;
 	MARK mark;
 
-	std::map<std::uint8_t, SCEN*> opts;
-	std::map<std::uint8_t, SHOT*> estb;
+	
 	
 	void parseOPTS(uint8_t* data, size_t size);
 	void parseOPTS_SCEN(uint8_t* data, size_t size);
@@ -155,5 +154,8 @@ public:
 	RSOption();
 	~RSOption();
 	void InitFromRam(uint8_t* data, size_t size);
+
+	std::map<std::uint8_t, SCEN*> opts;
+	std::map<std::uint8_t, SHOT*> estb;
 
 };

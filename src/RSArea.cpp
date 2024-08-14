@@ -12,8 +12,9 @@
 extern SCRenderer Renderer;
 
 RSArea::RSArea(){
-    
-    
+    this->objCache = new std::map<std::string, RSEntity*>();
+    this->tre = new TreArchive();
+    tre->InitFromFile("OBJECTS.TRE");
 }
 
 RSArea::~RSArea(){

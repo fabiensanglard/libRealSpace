@@ -137,6 +137,7 @@
     <ClCompile Include="..\src\sc\SCButton.cpp" />
     <ClCompile Include="..\src\sc\SCConvPlayer.cpp" />
     <ClCompile Include="..\src\sc\SCDogFightMenu.cpp" />
+    <ClCompile Include="..\src\sc\SCGameFlow.cpp" />
     <ClCompile Include="..\src\sc\SCMainMenu.cpp" />
     <ClCompile Include="..\src\sc\SCMouse.cpp" />
     <ClCompile Include="..\src\sc\SCObjectViewer.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="..\src\sc\SCButton.h" />
     <ClInclude Include="..\src\sc\SCConvPlayer.h" />
     <ClInclude Include="..\src\sc\SCDogFightMenu.h" />
+    <ClInclude Include="..\src\sc\SCGameFlow.h" />
     <ClInclude Include="..\src\sc\SCMainMenu.h" />
     <ClInclude Include="..\src\sc\SCMouse.h" />
     <ClInclude Include="..\src\sc\SCObjectViewer.h" />

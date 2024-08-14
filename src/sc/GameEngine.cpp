@@ -29,7 +29,7 @@ void GameEngine::Init(){
     ConvAssets.Init();
     
     //Load Main Palette and Initialize the GL
-    Screen.Init(4);
+    Screen.Init(3);
     
     
     

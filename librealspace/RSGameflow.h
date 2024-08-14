@@ -21,7 +21,7 @@ struct GAMEFLOW_SPRT {
 };
 struct GAMEFLOW_SCEN {
 	INFO info;
-	std::map<uint8_t, GAMEFLOW_SPRT*> sprt;
+	std::vector<GAMEFLOW_SPRT*> sprt;
 	REQU *requ;
 	std::vector<uint8_t> weap;
 };
@@ -29,7 +29,7 @@ struct GAMEFLOW_SCEN {
 struct MISS {
 	INFO info;
 	std::vector<uint8_t> efct;
-	std::map<uint8_t, GAMEFLOW_SCEN*> scen;
+	std::vector<GAMEFLOW_SCEN*> scen;
 };
 struct SPED {
 	std::vector<uint8_t> unkown;
@@ -72,7 +72,7 @@ struct GAMEFLOW {
 class RSGameFlow {
 
 private:
-	GAMEFLOW game;
+	
 	MISS* tmpmiss;
 	MAP* tmpmap;
 	MLST* tmpmisslt;
@@ -114,6 +114,8 @@ private:
 	void parseSTAT_CHNG_WEAP(uint8_t* data, size_t size);
 
 public:
+	GAMEFLOW game;
+
 	RSGameFlow();
 	~RSGameFlow();
 	void InitFromRam(uint8_t* data, size_t size);

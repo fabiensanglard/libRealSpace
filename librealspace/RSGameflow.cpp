@@ -67,7 +67,7 @@ void RSGameFlow::parseMISS_SCEN(uint8_t* data, size_t size) {
 	handlers["SPRT"] = std::bind(&RSGameFlow::parseMISS_SCEN_SPRT, this, std::placeholders::_1, std::placeholders::_2);
 	
 	lexer.InitFromRAM(data, size, handlers);
-	this->tmpmiss->scen[this->tmpgfsc->info.ID] = this->tmpgfsc;
+	this->tmpmiss->scen.push_back(this->tmpgfsc);
 }
 
 void RSGameFlow::parseMISS_SCEN_INFO(uint8_t* data, size_t size) {
@@ -84,7 +84,7 @@ void RSGameFlow::parseMISS_SCEN_SPRT(uint8_t* data, size_t size) {
 	handlers["REQU"] = std::bind(&RSGameFlow::parseMISS_SCEN_SPRT_REQU, this, std::placeholders::_1, std::placeholders::_2);
 
 	lexer.InitFromRAM(data, size, handlers);
-	this->tmpgfsc->sprt[this->tmpscsp->info.ID] = this->tmpscsp;
+	this->tmpgfsc->sprt.push_back(this->tmpscsp);
 }
 
 void RSGameFlow::parseMISS_SCEN_SPRT_INFO(uint8_t* data, size_t size) {

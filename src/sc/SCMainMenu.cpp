@@ -7,7 +7,7 @@
 //
 
 #include "precomp.h"
-
+#include "SCGameFlow.h"
 #define MAINMENU_PAK_PATH "..\\..\\DATA\\GAMEFLOW\\MAINMENU.PAK"
 
 #define MAINMENU_PAK_BUTTONS_INDICE 0
@@ -35,13 +35,13 @@ static void OnLoadGame(){
 
 static void OnStartNewGame(){
     //Stop this activity.
-    SCMainMenu* that =  (SCMainMenu*)Game.GetCurrentActivity();
-    that->Stop();
+    //SCMainMenu* that =  (SCMainMenu*)Game.GetCurrentActivity();
+    //that->Stop();
     
     //Add the next activity on the stack
-    SCRegister* reg = new SCRegister();
-    reg->Init();
-    Game.AddActivity(reg);
+    SCGameFlow* gfl = new SCGameFlow();
+    gfl->Init();
+    Game.AddActivity(gfl);
 }
 
 
