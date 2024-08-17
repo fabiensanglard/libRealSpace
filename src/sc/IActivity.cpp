@@ -61,6 +61,32 @@ SCButton* IActivity::CheckButtons(void){
     return NULL;
 }
 
+SCZone* IActivity::CheckZones(void) {
+    for (size_t i = 0; i < zones.size(); i++) {
+
+        SCZone* zone = zones[i];
+
+        if (Mouse.GetPosition().x > zone->position.x &&
+            Mouse.GetPosition().x < zone->position.x + zone->dimension.x &&
+            Mouse.GetPosition().y > zone->position.y &&
+            Mouse.GetPosition().y < zone->position.y + zone->dimension.y
+            ) {
+            //HIT !
+            Mouse.SetMode(SCMouse::VISOR);
+
+            //If the mouse button has just been released: trigger action.
+            if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                zone->OnAction();
+
+            return zone;
+        }
+    }
+
+    Mouse.SetMode(SCMouse::CURSOR);
+    return NULL;
+    return nullptr;
+}
+
 void IActivity::DrawButtons(void){
     
     

@@ -129,6 +129,69 @@ void RSVGA::VSync(void){
 void RSVGA::FillLineColor(size_t lineIndex, uint8_t color){
     memset(frameBuffer+lineIndex*320, color, 320);
 }
+void RSVGA::plot_pixel(int x, int y, byte color) {
+    /*  y*320 = y*256 + y*64 = y*2^8 + y*2^6   */
+    frameBuffer[(y << 8) + (y << 6) + x] = color;
+}
+
+/**************************************************************************
+ *  line                                                                  *
+ *    draws a line using Bresenham's line-drawing algorithm, which uses   *
+ *    no multiplication or division.                                      *
+ **************************************************************************/
+
+void RSVGA::line(int x1, int y1, int x2, int y2, byte color) {
+    int i, dx, dy, sdx, sdy, dxabs, dyabs, x, y, px, py;
+
+    dx = x2 - x1;      /* the horizontal distance of the line */
+    dy = y2 - y1;      /* the vertical distance of the line */
+    dxabs = abs(dx);
+    dyabs = abs(dy);
+    sdx = sgn(dx);
+    sdy = sgn(dy);
+    x = dyabs >> 1;
+    y = dxabs >> 1;
+    px = x1;
+    py = y1;
+
+    frameBuffer[(py << 8) + (py << 6) + px] = color;
+
+    if (dxabs >= dyabs) /* the line is more horizontal than vertical */
+    {
+        for (i = 0; i < dxabs; i++) {
+            y += dyabs;
+            if (y >= dxabs) {
+                y -= dxabs;
+                py += sdy;
+            }
+            px += sdx;
+            plot_pixel(px, py, color);
+        }
+    } else /* the line is more vertical than horizontal */
+    {
+        for (i = 0; i < dyabs; i++) {
+            x += dxabs;
+            if (x >= dyabs) {
+                x -= dyabs;
+                px += sdx;
+            }
+            py += sdy;
+            plot_pixel(px, py, color);
+        }
+    }
+}
+
+/**************************************************************************
+ *  rect_slow                                                             *
+ *    Draws a rectangle by calling the line function four times.          *
+ **************************************************************************/
+
+void RSVGA::rect_slow(int left, int top, int right, int bottom, byte color) {
+    line(left, top, right, top, color);
+    line(left, top, left, bottom, color);
+    line(right, top, right, bottom, color);
+    line(left, bottom, right, bottom, color);
+}
 
 void RSVGA::DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, uint32_t size,size_t interLetterSpace, size_t spaceSize){
     

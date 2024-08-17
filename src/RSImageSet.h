@@ -20,6 +20,8 @@ public:
     ~RSImageSet();
     
     void InitFromPakEntry(PakEntry* entry);
+
+    void InitFromSubPakEntry(PakArchive* entry);
     
     RLEShape* GetShape(size_t index);
     size_t GetNumImages(void);

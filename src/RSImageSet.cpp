@@ -35,8 +35,6 @@ void RSImageSet::InitFromPakEntry(PakEntry* entry){
         
         nextImage = index.ReadUInt32LE();
         nextImage = nextImage & 0x00FFFFFF;
-        //flag  = (nextImage & 0xFF000000) >> 24;
-        //printf("flag = %2X\n",flag);
         
         size_t size = 0;
         if (i == numImages-1){
@@ -45,12 +43,22 @@ void RSImageSet::InitFromPakEntry(PakEntry* entry){
         else{
             
         }
-        
+        if (entry->data[0] != 'F') {
+            RLEShape* shape = new RLEShape();
+            shape->Init(currImage, size);
+            this->shapes.push_back(shape);
+        }
+    }
+}
+
+void RSImageSet::InitFromSubPakEntry(PakArchive* entry) {
+    for (int i=0; i< entry->GetNumEntries(); i++) {
         RLEShape* shape = new RLEShape();
-        shape->Init(currImage, size);
+        shape->Init(entry->GetEntry(i)->data, entry->GetEntry(i)->size);
+        Point2D pos = { 0, 0 };
+        shape->SetPosition(&pos);
         this->shapes.push_back(shape);
     }
-
 }
 
 RLEShape* RSImageSet::GetShape(size_t index){

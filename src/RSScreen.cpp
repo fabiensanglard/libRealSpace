@@ -60,6 +60,14 @@ void RSScreen::Init(int32_t zoomFactor){
     SDL_ShowWindow(sdlWindow);
 }
 
+void RSScreen::drawRect() {
+    SDL_Rect rectToDraw = { 10,100,20,150 }; // Just some random rect
+
+    //Set Color of Rect with SDL_SetRenderDrawColor if needed
+    SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
+    SDL_RenderDrawRect(sdlRenderer, &rectToDraw);
+}
+
 void RSScreen::Refresh(void){
     SDL_GL_SwapWindow(sdlWindow);
 }

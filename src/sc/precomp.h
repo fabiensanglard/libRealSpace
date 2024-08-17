@@ -21,6 +21,7 @@
 // Core of the game
 #include "SCMouse.h"
 #include "SCButton.h"
+#include "SCZone.h"
 #include "IActivity.h"
 #include "GameEngine.h"
 #include "ConvAssetManager.h"

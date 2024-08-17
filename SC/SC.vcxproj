@@ -69,7 +69,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -146,6 +146,7 @@
     <ClCompile Include="..\src\sc\SCStrike.cpp" />
     <ClCompile Include="..\src\sc\SCTrainingMenu.cpp" />
     <ClCompile Include="..\src\sc\SCWildCatBase.cpp" />
+    <ClCompile Include="..\src\sc\SCZone.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\sc\AssetManager.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="..\src\sc\SCStrike.h" />
     <ClInclude Include="..\src\sc\SCTrainingMenu.h" />
     <ClInclude Include="..\src\sc\SCWildCatBase.h" />
+    <ClInclude Include="..\src\sc\SCZone.h" />
     <ClInclude Include="..\src\sc\ShapeIDs.h" />
   </ItemGroup>
   <ItemGroup>

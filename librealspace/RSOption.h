@@ -59,12 +59,12 @@ struct SPRT_INFO {
 struct SPRT {
 	SPRT_SHAP sprite;
 	char* label;
-	OPTION_RECT zone;
+	OPTION_RECT *zone;
 	TUNE tune;
 	uint8_t CLCK;
 	QUAD* quad;
 	SPRT_INFO* info;
-	uint8_t* SEQU;
+	std::vector<uint8_t>* SEQU;
 };
 
 struct BACK {

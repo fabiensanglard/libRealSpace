@@ -198,20 +198,27 @@ void RSOption::parseOPTS_SCEN_FORE_SPRT_INFO(uint8_t* data, size_t size) {
 void RSOption::parseOPTS_SCEN_FORE_SEQU(uint8_t* data, size_t size) {
 	printf("Parsing SEQU %llu\n", size);
 	if (size > 0) {
-		this->tmpsprt->SEQU = (uint8_t*)malloc(size);
-#pragma warning( push )
-#pragma warning( disable : 6387)
-		memcpy(this->tmpsprt->SEQU, data, size);
-#pragma warning( pop )
+		this->tmpsprt->SEQU = new std::vector<uint8_t>();
+		for (int i = 0; i < size; i++) {
+			if (data[i] != 0) {
+				this->tmpsprt->SEQU->push_back(data[i]);
+			}
+		}
 	}
 }
 
 void RSOption::parseOPTS_SCEN_FORE_SPRT_RECT(uint8_t* data, size_t size) {
 	printf("Parsing RECT %llu\n", size);
-	this->tmpsprt->zone.X1 = *data++;
-	this->tmpsprt->zone.Y1 = *data++;
-	this->tmpsprt->zone.X2 = *data++;
-	this->tmpsprt->zone.Y2 = *data;
+	OPTION_RECT* zone = new OPTION_RECT();
+	zone->X1 = *data++;
+	*data++;
+	zone->Y1 = *data++;
+	*data++;
+	zone->X2 = *data++;
+	*data++;
+	zone->Y2 = *data;
+
+	this->tmpsprt->zone = zone;
 }
 
 void RSOption::parseOPTS_SCEN_FORE_SPRT_LABL(uint8_t* data, size_t size) {

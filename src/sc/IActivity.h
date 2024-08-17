@@ -36,7 +36,9 @@ protected:
     
     IActivity();
     SCButton* CheckButtons(void);
+    SCZone* CheckZones(void);
     std::vector<SCButton*> buttons;
+    std::vector<SCZone*> zones;
     void DrawButtons(void);
     
 private:

@@ -15,6 +15,7 @@
 SCGameFlow::SCGameFlow() {
     this->current_miss = 0;
     this->current_scen = 0;
+    this->fps = SDL_GetTicks() / 100;
 }
 
 SCGameFlow::~SCGameFlow() {
@@ -81,47 +82,61 @@ void SCGameFlow::createMiss() {
         uint8_t paltID = this->optionParser.opts[optionScenID]->background->palette->ID;
         uint8_t forPalTID = this->optionParser.opts[optionScenID]->foreground->palette->ID;
         this->sprites.clear();
+        this->zones.clear();
 
         for (int i=0; i < this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt.size(); i++) {
             uint8_t sprtId = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt[i]->info.ID;
             if (this->optionParser.opts[optionScenID]->foreground->sprites.count(sprtId) > 0) {
                 uint8_t optsprtId = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->sprite.SHP_ID;
+                animatedSprites* sprt = new animatedSprites();
+                if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->zone != nullptr) {
+                    sprt->rect = new sprtRect();
+                    sprt->rect->x1 = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->zone->X1;
+                    sprt->rect->y1 = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->zone->Y1;
+                    sprt->rect->x2 = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->zone->X2;
+                    sprt->rect->y2 = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->zone->Y2;
+                    SCZone* z = new SCZone();
+                    z->position.x = sprt->rect->x1;
+                    z->position.y = sprt->rect->y1;
+                    z->dimension.x = sprt->rect->x2 - sprt->rect->x1;
+                    z->dimension.y = sprt->rect->y2 - sprt->rect->y1;
+                    this->zones.push_back(z);
+                }
                 
-                RLEShape* sprite = this->getShape(optsprtId);
-                this->sprites.push_back(sprite);
+                sprt->img = this->getShape(optsprtId);
+                sprt->frameCounter = 0;
+                if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->SEQU != nullptr) {
+                    sprt->frames = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->SEQU;
+                    sprt->frameCounter = 0;
+                }
+                this->sprites.push_back(sprt);
             } else {
                 printf("%d, ID Sprite not found !!\n", sprtId);
             }
             
         }
-        this->layer = this->getShape(shapeID);
+        this->layer = this->getShape(shapeID)->GetShape(0);
         this->rawPalette = this->optPals.GetEntry(paltID)->data;
         this->forPalette = this->optPals.GetEntry(forPalTID)->data;
     }
 }
-RLEShape* SCGameFlow::getShape(uint8_t shpid) {
+RSImageSet* SCGameFlow::getShape(uint8_t shpid) {
     PakEntry* shapeEntry = this->optShps.GetEntry(shpid);
     PakArchive subPAK;
-    RLEShape* s = new RLEShape();
 
     subPAK.InitFromRAM("", shapeEntry->data, shapeEntry->size);
-
+    RSImageSet* img = new RSImageSet();
     if (!subPAK.IsReady()) {
-
-        //Sometimes the image is not in a PAK but as raw data.
-        Game.Log("Error on Pak %d  => Using dummy instead\n", shpid);
-
-        //Using an empty shape for now...
-        *s = *RLEShape::GetEmptyShape();
+        img->InitFromPakEntry(this->optShps.GetEntry(shpid));
     } else {
-        s->Init(subPAK.GetEntry(0)->data, subPAK.GetEntry(0)->size);
-        Point2D pos = { 0, 0 };
-        s->SetPosition(&pos);
+        img->InitFromSubPakEntry(&subPAK);
     }
-    return (s);
+    return (img);
 }
+
 void SCGameFlow::RunFrame(void) {
     CheckButtons();
+    CheckZones();
     CheckKeyboard();
     VGA.Activate();
     VGA.Clear();
@@ -134,8 +149,36 @@ void SCGameFlow::RunFrame(void) {
     paletteReader.Set((this->forPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
+    int fpsupdate = 0;
+    fpsupdate = SDL_GetTicks() - this->fps > 80;
+    if (fpsupdate) {
+        this->fps = SDL_GetTicks();
+    }
     for (int i = 0; i < this->sprites.size(); i++) {
-        VGA.DrawShape(this->sprites[i]);
+        VGA.DrawShape(this->sprites[i]->img->GetShape(0));
+        if (this->sprites[i]->img->GetNumImages() > 1 && this->sprites[i]->frames != nullptr) {
+            VGA.DrawShape(this->sprites[i]->img->GetShape(this->sprites[i]->frames->at(this->sprites[i]->frameCounter)));
+            this->sprites[i]->frameCounter = (this->sprites[i]->frameCounter + fpsupdate) % this->sprites[i]->frames->size();
+        
+        } else if (this->sprites[i]->img->GetNumImages() > 1 && this->sprites[i]->frames == nullptr) {
+            VGA.DrawShape(this->sprites[i]->img->GetShape(this->sprites[i]->frameCounter));
+            
+            if (this->sprites[i]->frameCounter >= this->sprites[i]->img->GetNumImages()-1) {
+                this->sprites[i]->frameCounter = 1;
+            } else {
+                this->sprites[i]->frameCounter += fpsupdate;
+            }
+            //this->sprites[i]->frameCounter = (this->sprites[i]->frameCounter + 1) % this->sprites[i]->img->GetNumImages()-1;
+        }
+        if (this->sprites[i]->rect != nullptr) {
+            VGA.rect_slow(
+                this->sprites[i]->rect->x1,
+                this->sprites[i]->rect->y1,
+                this->sprites[i]->rect->x2,
+                this->sprites[i]->rect->y2,
+                10
+            );
+        }
     }
 
     DrawButtons();
@@ -146,5 +189,4 @@ void SCGameFlow::RunFrame(void) {
     //Check Mouse state.
 
     VGA.VSync();
-
 }
