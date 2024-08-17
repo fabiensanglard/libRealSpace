@@ -5,18 +5,19 @@
 #include <cstddef>
 #include <cstdio>
 #include <vector>
+#include <string>
 #include <map>
 
 
 struct QUAD {
-	uint8_t xa1;
-	uint8_t ya1;
-	uint8_t xa2;
-	uint8_t ya2;
-	uint8_t xb1;
-	uint8_t yb1;
-	uint8_t xb2;
-	uint8_t yb2;
+	uint16_t xa1;
+	uint16_t ya1;
+	uint16_t xa2;
+	uint16_t ya2;
+	uint16_t xb1;
+	uint16_t yb1;
+	uint16_t xb2;
+	uint16_t yb2;
 };
 struct OPTS_INFO {
 	uint8_t ID;
@@ -58,7 +59,7 @@ struct SPRT_INFO {
 };
 struct SPRT {
 	SPRT_SHAP sprite;
-	char* label;
+	std::string *label;
 	OPTION_RECT *zone;
 	TUNE tune;
 	uint8_t CLCK;

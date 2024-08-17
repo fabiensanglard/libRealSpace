@@ -24,7 +24,9 @@ void SCZone::InitBehavior(ActionFunction fct, Point2D position,Point2D dimension
 }
 
 void SCZone::OnAction(void){
-    this->onClick();
+    if (this->onClick != nullptr) {
+        this->onClick();
+    }
 }
 
 void SCZone::Draw(void) {

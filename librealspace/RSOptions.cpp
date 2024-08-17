@@ -173,16 +173,27 @@ void RSOption::parseOPTS_SCEN_FORE_SPRT_CLCK(uint8_t* data, size_t size) {
 }
 
 void RSOption::parseOPTS_SCEN_FORE_SPRT_QUAD(uint8_t* data, size_t size) {
+	ByteStream* reader = new ByteStream(data);
 	QUAD* quad = new QUAD();
 	printf("Parsing QUAD %llu\n", size);
-	quad->xa1 = *data++;
-	quad->ya1 = *data++;
-	quad->xa2 = *data++;
-	quad->ya2 = *data++;
-	quad->xb1 = *data++;
-	quad->yb1 = *data++;
-	quad->xb2 = *data++;
-	quad->yb2 = *data;
+	quad->xa1 = reader->ReadUShort();
+	quad->ya1 = reader->ReadUShort();
+	quad->xb2 = reader->ReadUShort();
+	quad->yb2 = reader->ReadUShort();
+	quad->xa2 = reader->ReadUShort();
+	quad->ya2 = reader->ReadUShort();
+	quad->xb1 = reader->ReadUShort();
+	quad->yb1 = reader->ReadUShort();
+
+	quad->xa1 = quad->xa1==0?1:quad->xa1;
+	quad->ya1 = quad->ya1 == 200 ? 199 : quad->ya1;
+	quad->xa2 = quad->xa2 == 0 ? 1 : quad->xa2;
+	quad->ya2 = quad->ya2 == 200 ? 199 : quad->ya2;
+	quad->xb1 = quad->xb1 == 0 ? 1 : quad->xb1;
+	quad->yb1 = quad->yb1 == 200 ? 199 : quad->yb1;
+	quad->xb2 = quad->xb2 == 0 ? 1 : quad->xb2;
+	quad->yb2 = quad->yb2 == 200 ? 199 : quad->yb2;
+
 	this->tmpsprt->quad = quad;
 }
 
@@ -210,13 +221,11 @@ void RSOption::parseOPTS_SCEN_FORE_SEQU(uint8_t* data, size_t size) {
 void RSOption::parseOPTS_SCEN_FORE_SPRT_RECT(uint8_t* data, size_t size) {
 	printf("Parsing RECT %llu\n", size);
 	OPTION_RECT* zone = new OPTION_RECT();
-	zone->X1 = *data++;
-	*data++;
-	zone->Y1 = *data++;
-	*data++;
-	zone->X2 = *data++;
-	*data++;
-	zone->Y2 = *data;
+	ByteStream* reader = new ByteStream(data);
+	zone->X1 = reader->ReadUShort();
+	zone->Y1 = reader->ReadUShort();
+	zone->X2 = reader->ReadUShort();
+	zone->Y2 = reader->ReadUShort();
 
 	this->tmpsprt->zone = zone;
 }
@@ -226,7 +235,7 @@ void RSOption::parseOPTS_SCEN_FORE_SPRT_LABL(uint8_t* data, size_t size) {
 	char* label = new char[size + 1];
 	memcpy(label, data, size);
 	label[size] = '\0';
-	this->tmpsprt->label = label;
+	this->tmpsprt->label = new std::string(label);
 	printf("Label %s\n", label);
 }
 

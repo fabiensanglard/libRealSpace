@@ -100,6 +100,37 @@ void SCGameFlow::createMiss() {
                     z->position.y = sprt->rect->y1;
                     z->dimension.x = sprt->rect->x2 - sprt->rect->x1;
                     z->dimension.y = sprt->rect->y2 - sprt->rect->y1;
+                    z->label = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->label;
+                    this->zones.push_back(z);
+                }
+                if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad != nullptr) {
+                    sprt->quad = new std::vector<Point2D*>();
+
+                    Point2D* p;
+
+                    p = new Point2D();
+                    p->x = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad->xa1;
+                    p->y = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad->ya1;
+                    sprt->quad->push_back(p);
+
+                    p = new Point2D();
+                    p->x = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad->xa2;
+                    p->y = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad->ya2;
+                    sprt->quad->push_back(p);
+
+                    p = new Point2D();
+                    p->x = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad->xb1;
+                    p->y = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad->yb1;
+                    sprt->quad->push_back(p);
+
+                    p = new Point2D();
+                    p->x = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad->xb2;
+                    p->y = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad->yb2;
+                    sprt->quad->push_back(p);
+
+                    SCZone* z = new SCZone();
+                    z->quad = sprt->quad;
+                    z->label = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->label;
                     this->zones.push_back(z);
                 }
                 
@@ -136,7 +167,7 @@ RSImageSet* SCGameFlow::getShape(uint8_t shpid) {
 
 void SCGameFlow::RunFrame(void) {
     CheckButtons();
-    CheckZones();
+   
     CheckKeyboard();
     VGA.Activate();
     VGA.Clear();
@@ -179,9 +210,42 @@ void SCGameFlow::RunFrame(void) {
                 10
             );
         }
-    }
+        if (this->sprites[i]->quad != nullptr) {
+            /**/
+            VGA.line(
+                this->sprites[i]->quad->at(0)->x,
+                this->sprites[i]->quad->at(0)->y,
+                this->sprites[i]->quad->at(1)->x,
+                this->sprites[i]->quad->at(1)->y,
+                8
+                );
+            VGA.line(
+                this->sprites[i]->quad->at(1)->x,
+                this->sprites[i]->quad->at(1)->y,
+                this->sprites[i]->quad->at(2)->x,
+                this->sprites[i]->quad->at(2)->y,
+                8
+                );
+            VGA.line(
+                this->sprites[i]->quad->at(2)->x,
+                this->sprites[i]->quad->at(2)->y,
+                this->sprites[i]->quad->at(3)->x,
+                this->sprites[i]->quad->at(3)->y,
+                8
+                );
 
-    DrawButtons();
+            VGA.line(
+                this->sprites[i]->quad->at(3)->x,
+                this->sprites[i]->quad->at(3)->y,
+                this->sprites[i]->quad->at(0)->x,
+                this->sprites[i]->quad->at(0)->y,
+                25
+            );
+            /**/
+        }
+    }
+    CheckZones();
+    //DrawButtons();
 
     //Draw Mouse
     Mouse.Draw();

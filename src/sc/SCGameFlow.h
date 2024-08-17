@@ -14,10 +14,10 @@
 #include "../../librealspace/RSOption.h"
 
 struct sprtRect {
-    uint8_t x1;
-    uint8_t y1;
-    uint8_t x2;
-    uint8_t y2;
+    uint16_t x1;
+    uint16_t y1;
+    uint16_t x2;
+    uint16_t y2;
 };
 
 struct animatedSprites {
@@ -25,6 +25,7 @@ struct animatedSprites {
     std::vector<uint8_t>* frames;
     uint8_t frameCounter;
     sprtRect* rect;
+    std::vector<Point2D*> *quad;
 };
 
 class SCGameFlow : public IActivity {

@@ -20,10 +20,9 @@ public:
      
     Point2D position;
     Point2D dimension;
-    
-    
+    std::vector<Point2D*> *quad;
+    std::string *label;
     void InitBehavior(ActionFunction fct, Point2D position, Point2D dimension);
-    
     
     void OnAction(void);
 
@@ -39,7 +38,8 @@ private:
     bool enabled ;
     
     ActionFunction onClick;
-    
+   
+
 };
 
-#endif /* defined(__libRealSpace__Button__) */
+#endif /* defined(__libRealSpace__Zone__) */
