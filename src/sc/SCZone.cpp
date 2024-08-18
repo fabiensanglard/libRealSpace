@@ -10,25 +10,56 @@
 
 SCZone::SCZone():
     enabled(true){
-    
 }
 
 SCZone::~SCZone(){
     
 }
 
-void SCZone::InitBehavior(ActionFunction fct, Point2D position,Point2D dimension){
-    this->onClick = fct;
-    this->position = position;
-    this->dimension = dimension;
-}
-
 void SCZone::OnAction(void){
-    if (this->onClick != nullptr) {
-        this->onClick();
+    if (this->onclick != nullptr) {
+        this->onclick(this->id);
     }
 }
 
 void SCZone::Draw(void) {
-    //VGA.rect_slow()
+    if (this->quad != nullptr) {
+        VGA.line(
+            this->quad->at(0)->x,
+            this->quad->at(0)->y,
+            this->quad->at(1)->x,
+            this->quad->at(1)->y,
+            8
+        );
+        VGA.line(
+            this->quad->at(1)->x,
+            this->quad->at(1)->y,
+            this->quad->at(2)->x,
+            this->quad->at(2)->y,
+            8
+        );
+        VGA.line(
+            this->quad->at(2)->x,
+            this->quad->at(2)->y,
+            this->quad->at(3)->x,
+            this->quad->at(3)->y,
+            8
+        );
+
+        VGA.line(
+            this->quad->at(3)->x,
+            this->quad->at(3)->y,
+            this->quad->at(0)->x,
+            this->quad->at(0)->y,
+            25
+        );
+    } else {
+        VGA.rect_slow(
+            this->position.x,
+            this->position.y,
+            this->position.x + this->dimension.x,
+            this->position.y + this->dimension.y,
+            8
+        );
+    }
 }

@@ -26,6 +26,7 @@ struct animatedSprites {
     uint8_t frameCounter;
     sprtRect* rect;
     std::vector<Point2D*> *quad;
+    std::vector<uint8_t>* efect;
 };
 
 class SCGameFlow : public IActivity {
@@ -48,12 +49,16 @@ private:
     RLEShape *layer;
     uint8_t* rawPalette;
     uint8_t* forPalette;
-    std::vector<animatedSprites*> sprites;
+    std::map<uint8_t, animatedSprites*> sprites;
     uint8_t current_miss;
     uint8_t current_scen;
+    void clicked(uint8_t id);
+    void runEffect();
     void CheckKeyboard(void);
     RSImageSet* getShape(uint8_t shpid);
     int fps;
+    uint8_t currentOptCode;
+    std::vector<uint8_t> *efect;
 };
 
 #endif

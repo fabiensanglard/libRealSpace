@@ -8,22 +8,21 @@
 
 #ifndef __libRealSpace__Zone__
 #define __libRealSpace__Zone__
-
-typedef void (*ActionFunction)(void);
+#include <functional>
 
 class SCZone{
     
 public:
     SCZone();
     ~SCZone();
-    
+    uint8_t id;
      
     Point2D position;
     Point2D dimension;
     std::vector<Point2D*> *quad;
     std::string *label;
-    void InitBehavior(ActionFunction fct, Point2D position, Point2D dimension);
-    
+    std::function<void(uint8_t id)> onclick;
+
     void OnAction(void);
 
     void Draw(void);
@@ -36,8 +35,6 @@ private:
     
     
     bool enabled ;
-    
-    ActionFunction onClick;
    
 
 };

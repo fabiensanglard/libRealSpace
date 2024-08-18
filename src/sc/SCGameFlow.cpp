@@ -21,7 +21,55 @@ SCGameFlow::SCGameFlow() {
 SCGameFlow::~SCGameFlow() {
 }
 
-
+void SCGameFlow::clicked(uint8_t id) {
+    if (this->sprites[id]->efect != nullptr) {
+        printf("clicked on %d\n", id);
+        this->efect = this->sprites[id]->efect;
+        this->currentOptCode = 0;
+    }
+    
+}
+void SCGameFlow::runEffect() {
+    uint8_t i = this->currentOptCode;
+    if (this->efect == nullptr) {
+        return;
+    }
+    if (i + 1 < this->efect->size()) {
+        this->currentOptCode += 2;
+        switch (this->efect->at(i)) {
+        case 0:
+        {
+            SCConvPlayer* conv = new SCConvPlayer();
+            conv->Init();
+            conv->SetID(this->efect->at(i + 1));
+            Game.AddActivity(conv);
+        }
+        break;
+        case 1:
+            for (int j = 0; j < this->gameFlowParser.game.game[this->current_miss]->scen.size(); j++) {
+                if (this->gameFlowParser.game.game[this->current_miss]->scen.at(j)->info.ID == this->efect->at(i + 1)) {
+                    this->current_scen = j;
+                    this->createMiss();
+                    return;
+                }
+            }
+            break;
+        case 22:
+            this->current_miss = this->efect->at(i + 1);
+            this->current_scen = 0;
+            this->createMiss();
+            return;
+            break;
+        default:
+            printf("Unkown opcode :%d, %d\n", this->efect->at(i), this->efect->at(i + 1));
+            break;
+        };
+        
+    } else {
+        this->efect = nullptr;
+        this->currentOptCode = 0;
+    }
+}
 void SCGameFlow::CheckKeyboard(void) {
     //Keyboard
     SDL_Event keybEvents[1];
@@ -96,11 +144,13 @@ void SCGameFlow::createMiss() {
                     sprt->rect->x2 = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->zone->X2;
                     sprt->rect->y2 = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->zone->Y2;
                     SCZone* z = new SCZone();
+                    z->id = sprtId;
                     z->position.x = sprt->rect->x1;
                     z->position.y = sprt->rect->y1;
                     z->dimension.x = sprt->rect->x2 - sprt->rect->x1;
                     z->dimension.y = sprt->rect->y2 - sprt->rect->y1;
                     z->label = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->label;
+                    z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1);
                     this->zones.push_back(z);
                 }
                 if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad != nullptr) {
@@ -129,18 +179,21 @@ void SCGameFlow::createMiss() {
                     sprt->quad->push_back(p);
 
                     SCZone* z = new SCZone();
+                    z->id = sprtId;
                     z->quad = sprt->quad;
                     z->label = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->label;
+                    z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1);
                     this->zones.push_back(z);
                 }
                 
+                sprt->efect = &this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt[i]->efct;
                 sprt->img = this->getShape(optsprtId);
                 sprt->frameCounter = 0;
                 if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->SEQU != nullptr) {
                     sprt->frames = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->SEQU;
                     sprt->frameCounter = 0;
                 }
-                this->sprites.push_back(sprt);
+                this->sprites[sprtId]=sprt;
             } else {
                 printf("%d, ID Sprite not found !!\n", sprtId);
             }
@@ -166,6 +219,8 @@ RSImageSet* SCGameFlow::getShape(uint8_t shpid) {
 }
 
 void SCGameFlow::RunFrame(void) {
+    this->runEffect();
+
     CheckButtons();
    
     CheckKeyboard();
@@ -185,72 +240,30 @@ void SCGameFlow::RunFrame(void) {
     if (fpsupdate) {
         this->fps = SDL_GetTicks();
     }
-    for (int i = 0; i < this->sprites.size(); i++) {
-        VGA.DrawShape(this->sprites[i]->img->GetShape(0));
-        if (this->sprites[i]->img->GetNumImages() > 1 && this->sprites[i]->frames != nullptr) {
-            VGA.DrawShape(this->sprites[i]->img->GetShape(this->sprites[i]->frames->at(this->sprites[i]->frameCounter)));
-            this->sprites[i]->frameCounter = (this->sprites[i]->frameCounter + fpsupdate) % this->sprites[i]->frames->size();
-        
-        } else if (this->sprites[i]->img->GetNumImages() > 1 && this->sprites[i]->frames == nullptr) {
-            VGA.DrawShape(this->sprites[i]->img->GetShape(this->sprites[i]->frameCounter));
-            
-            if (this->sprites[i]->frameCounter >= this->sprites[i]->img->GetNumImages()-1) {
-                this->sprites[i]->frameCounter = 1;
-            } else {
-                this->sprites[i]->frameCounter += fpsupdate;
-            }
-            //this->sprites[i]->frameCounter = (this->sprites[i]->frameCounter + 1) % this->sprites[i]->img->GetNumImages()-1;
-        }
-        if (this->sprites[i]->rect != nullptr) {
-            VGA.rect_slow(
-                this->sprites[i]->rect->x1,
-                this->sprites[i]->rect->y1,
-                this->sprites[i]->rect->x2,
-                this->sprites[i]->rect->y2,
-                10
-            );
-        }
-        if (this->sprites[i]->quad != nullptr) {
-            /**/
-            VGA.line(
-                this->sprites[i]->quad->at(0)->x,
-                this->sprites[i]->quad->at(0)->y,
-                this->sprites[i]->quad->at(1)->x,
-                this->sprites[i]->quad->at(1)->y,
-                8
-                );
-            VGA.line(
-                this->sprites[i]->quad->at(1)->x,
-                this->sprites[i]->quad->at(1)->y,
-                this->sprites[i]->quad->at(2)->x,
-                this->sprites[i]->quad->at(2)->y,
-                8
-                );
-            VGA.line(
-                this->sprites[i]->quad->at(2)->x,
-                this->sprites[i]->quad->at(2)->y,
-                this->sprites[i]->quad->at(3)->x,
-                this->sprites[i]->quad->at(3)->y,
-                8
-                );
 
-            VGA.line(
-                this->sprites[i]->quad->at(3)->x,
-                this->sprites[i]->quad->at(3)->y,
-                this->sprites[i]->quad->at(0)->x,
-                this->sprites[i]->quad->at(0)->y,
-                25
-            );
-            /**/
+    for (const auto &sprit : this->sprites) {
+        VGA.DrawShape(sprit.second->img->GetShape(0));
+        if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames != nullptr) {
+            VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frames->at(sprit.second->frameCounter)));
+            sprit.second->frameCounter = (sprit.second->frameCounter + fpsupdate) % sprit.second->frames->size();
+
+        } else if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames == nullptr) {
+            VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frameCounter));
+
+            if (sprit.second->frameCounter >= sprit.second->img->GetNumImages() - 1) {
+                sprit.second->frameCounter = 1;
+            } else {
+                sprit.second->frameCounter += fpsupdate;
+            }
         }
     }
     CheckZones();
-    //DrawButtons();
 
-    //Draw Mouse
+    for (int f = 0; f < this->zones.size(); f++) {
+        this->zones.at(f)->Draw();
+    }
+
     Mouse.Draw();
-
-    //Check Mouse state.
 
     VGA.VSync();
 }
