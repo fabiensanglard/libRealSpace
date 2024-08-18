@@ -16,11 +16,11 @@ const char* GetBase(void){
 
 void SetBase(const char* newBase){
     
-    strncpy(base,newBase,512);
+    strncpy_s(base,newBase,512);
     
     //If the last character is not '/', add it
     if (base[strlen(base)-1] != '/')
-        strcat(base,"/");
+        strcat_s(base,"/");
     
 }
 

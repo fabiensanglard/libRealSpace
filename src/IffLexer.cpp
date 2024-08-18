@@ -79,8 +79,8 @@ bool IffLexer::InitFromFile(const char* filepath) {
 	char fullPath[512];
 	fullPath[0] = '\0';
 
-	strcat(fullPath, GetBase());
-	strcat(fullPath, filepath);
+	strcat_s(fullPath, GetBase());
+	strcat_s(fullPath, filepath);
 
 
 	FILE* file = fopen(fullPath, "r+b");
@@ -97,7 +97,7 @@ bool IffLexer::InitFromFile(const char* filepath) {
 	uint8_t* fileData = new uint8_t[fileSize];
 	size_t t = fread(fileData, 1, fileSize, file);
 	printf("file %s read %llu bytes should be %llu\n", fullPath, t, fileSize);
-	strcpy(this->path, filepath);
+	strcpy_s(this->path, filepath);
 
 	return InitFromRAM(fileData, fileSize);
 
@@ -111,7 +111,7 @@ bool IffLexer::InitFromRAM(uint8_t* data, size_t size) {
 	stream.Set(this->data);
 
 	if (this->path[0] == '\0')
-		strcpy(this->path, "PALETTE FROM RAM");
+		strcpy_s(this->path, "PALETTE FROM RAM");
 
 	Parse();
 

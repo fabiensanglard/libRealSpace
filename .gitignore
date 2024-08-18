@@ -29,3 +29,5 @@ libRealSpace/x64/*
 /librealspace/librealspace/x64/Debug
 /SC/SC/x64/Debug
 /SC/x64/Debug
+out/
+.vscode

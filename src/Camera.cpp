@@ -89,10 +89,10 @@ void Camera::Rotate(float pitch, float yaw, float roll){
     //Generate all rotation quaternions.
     Matrix pitchRot;
     pitchRot.Identity();
-    pitchRot.v[1][1] = cos(pitch);
-    pitchRot.v[1][2] = sin(pitch);
-    pitchRot.v[2][1] = -sin(pitch);
-    pitchRot.v[2][2] = cos(pitch);
+    pitchRot.v[1][1] = cosf(pitch);
+    pitchRot.v[1][2] = sinf(pitch);
+    pitchRot.v[2][1] = -sinf(pitch);
+    pitchRot.v[2][2] = cosf(pitch);
     Quaternion qPitchRot;
     qPitchRot.FromMatrix(&pitchRot);
     orientation.Multiply(&qPitchRot);
@@ -102,10 +102,10 @@ void Camera::Rotate(float pitch, float yaw, float roll){
     
     Matrix yawRot;
     yawRot.Identity();
-    yawRot.v[0][0] = cos(yaw);
-    yawRot.v[0][2] = -sin(yaw);
-    yawRot.v[2][0] = sin(yaw);
-    yawRot.v[2][2] = cos(yaw);
+    yawRot.v[0][0] = cosf(yaw);
+    yawRot.v[0][2] = -sinf(yaw);
+    yawRot.v[2][0] = sinf(yaw);
+    yawRot.v[2][2] = cosf(yaw);
     Quaternion qYawRot;
     qYawRot.FromMatrix(&yawRot);
     orientation.Multiply(&qYawRot);

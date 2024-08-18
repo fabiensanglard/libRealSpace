@@ -10,8 +10,7 @@
 #define __libRealSpace__SCGameFow__
 
 #include "precomp.h"
-#include "../../librealspace/RSGameflow.h"
-#include "../../librealspace/RSOption.h"
+
 
 struct sprtRect {
     uint16_t x1;

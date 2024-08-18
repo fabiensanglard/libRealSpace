@@ -15,6 +15,8 @@
 SCGameFlow::SCGameFlow() {
     this->current_miss = 0;
     this->current_scen = 0;
+    this->efect = nullptr;
+    this->currentOptCode = 0;
     this->fps = SDL_GetTicks() / 100;
 }
 
@@ -55,10 +57,12 @@ void SCGameFlow::runEffect() {
             }
             break;
         case 22:
+        {
             this->current_miss = this->efect->at(i + 1);
             this->current_scen = 0;
             this->createMiss();
             return;
+        }
             break;
         default:
             printf("Unkown opcode :%d, %d\n", this->efect->at(i), this->efect->at(i + 1));
@@ -219,10 +223,7 @@ RSImageSet* SCGameFlow::getShape(uint8_t shpid) {
 }
 
 void SCGameFlow::RunFrame(void) {
-    this->runEffect();
-
-    CheckButtons();
-   
+    this->runEffect();   
     CheckKeyboard();
     VGA.Activate();
     VGA.Clear();

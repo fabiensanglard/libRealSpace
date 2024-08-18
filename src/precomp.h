@@ -68,6 +68,9 @@ extern "C" {
     #include "RSMapTextureSet.h"
     #include "RSArea.h"
     #include "RLEShape.h"
+    #include "RSOption.h"
+    #include "RSGameFlow.h"
+    #include "RSMission.h"
 
 //Fonts stuff
 #include "RSFont.h"
