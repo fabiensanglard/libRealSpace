@@ -10,6 +10,12 @@
 
 SCZone::SCZone():
     enabled(true){
+        this->label = nullptr;
+        this->quad = nullptr;
+        this->onclick = nullptr;
+        this->dimension = {0,0};
+        this->position  = {0,0};
+        this->id = 0;
 }
 
 SCZone::~SCZone(){

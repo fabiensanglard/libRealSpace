@@ -155,6 +155,7 @@ void SCGameFlow::createMiss() {
                     z->dimension.y = sprt->rect->y2 - sprt->rect->y1;
                     z->label = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->label;
                     z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1);
+                    z->quad = nullptr;
                     this->zones.push_back(z);
                 }
                 if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->quad != nullptr) {
@@ -258,7 +259,7 @@ void SCGameFlow::RunFrame(void) {
             }
         }
     }
-    CheckZones();
+    this->CheckZones();
 
     for (int f = 0; f < this->zones.size(); f++) {
         this->zones.at(f)->Draw();
