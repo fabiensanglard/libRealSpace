@@ -10,7 +10,11 @@
 #include "precomp.h"
 
 
-
+#define EFECT_OPT_CONV 0
+#define EFECT_OPT_SCEN 1
+#define EFECT_OPT_MISS 22
+#define EFECT_OPT_SHOT 8
+#define EFECT_OPT_FLYM 12
 
 SCGameFlow::SCGameFlow() {
     this->current_miss = 0;
@@ -36,10 +40,15 @@ void SCGameFlow::runEffect() {
     if (this->efect == nullptr) {
         return;
     }
+    if (i >= this->efect->size()) {
+        this->efect = new std::vector<uint8_t>();
+        this->currentOptCode = 0;
+        return;
+    }
     if (i + 1 < this->efect->size()) {
         this->currentOptCode += 2;
         switch (this->efect->at(i)) {
-        case 0:
+        case EFECT_OPT_CONV:
         {
             SCConvPlayer* conv = new SCConvPlayer();
             conv->Init();
@@ -47,21 +56,36 @@ void SCGameFlow::runEffect() {
             Game.AddActivity(conv);
         }
         break;
-        case 1:
+        case EFECT_OPT_SCEN:
             for (int j = 0; j < this->gameFlowParser.game.game[this->current_miss]->scen.size(); j++) {
                 if (this->gameFlowParser.game.game[this->current_miss]->scen.at(j)->info.ID == this->efect->at(i + 1)) {
                     this->current_scen = j;
+                    printf("PLAYING SCEN %d\n", this->current_scen);
                     this->createMiss();
                     return;
                 }
             }
             break;
-        case 22:
+        case EFECT_OPT_MISS:
         {
             this->current_miss = this->efect->at(i + 1);
             this->current_scen = 0;
+            this->efect = nullptr;
+            printf("PLAYING MISS %d\n", this->current_miss);
             this->createMiss();
             return;
+        }
+            break;
+        case EFECT_OPT_SHOT:
+            printf("PLAYING SHOT %d\n", this->efect->at(i + 1));
+            printf("SHOT NOT IMPLEMENTED\n");
+            break;
+        case EFECT_OPT_FLYM:
+        {
+            uint8_t flymID = this->efect->at(i + 1);
+            printf("PLAYING FLYM %d\n", flymID);
+            printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
+            printf("FLYM NOT IMPLEMENTED\n");
         }
             break;
         default:
@@ -92,6 +116,8 @@ void SCGameFlow::CheckKeyboard(void) {
             if (this->current_miss >= this->gameFlowParser.game.game.size()) {
                 this->current_miss = 0;
             }
+            this->efect = nullptr;
+            this->currentOptCode = 0;
             this->createMiss();
             break;
         case SDLK_RETURN:
@@ -104,6 +130,7 @@ void SCGameFlow::CheckKeyboard(void) {
                 }
             }
             this->createMiss();
+            return;
             break;
         default:
             break;
@@ -122,17 +149,23 @@ void SCGameFlow::Init() {
     this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
     TreEntry* optPalettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
+    this->efect = nullptr;
     this->createMiss();
 }
 
 void SCGameFlow::createMiss() {
     printf("current miss : %d, current_scen %d\n", this->current_miss, this->current_scen);
+    if (this->efect == nullptr && this->gameFlowParser.game.game[this->current_miss]->efct.size() > 0) {
+        this->efect = &this->gameFlowParser.game.game[this->current_miss]->efct;
+    }
+    printf("efect size %zd\n", this->efect->size());
     if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
         uint8_t optionScenID = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
-        //printf("%d, ID in optpak for miss 0\n", this->optionParser.opts[optionScenID]->background->images[0]->ID);
         uint8_t shapeID = this->optionParser.opts[optionScenID]->background->images[0]->ID;
         uint8_t paltID = this->optionParser.opts[optionScenID]->background->palette->ID;
         uint8_t forPalTID = this->optionParser.opts[optionScenID]->foreground->palette->ID;
+        
+        
         this->sprites.clear();
         this->zones.clear();
 

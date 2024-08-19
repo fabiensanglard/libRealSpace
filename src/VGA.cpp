@@ -29,7 +29,7 @@ void RSVGA::Clear(void){
 bool RSVGA::DrawShape(RLEShape* shape){
     
     
-    size_t byteRead;
+    size_t byteRead=0;
     return shape->Expand(GetFrameBuffer(), &byteRead);
     
 }
@@ -141,6 +141,8 @@ void RSVGA::plot_pixel(int x, int y, byte color) {
  **************************************************************************/
 
 void RSVGA::line(int x1, int y1, int x2, int y2, byte color) {
+    if (x1 > 320 || x2 > 320 || y1 > 200 || y2 > 200)
+        return;
     int i, dx, dy, sdx, sdy, dxabs, dyabs, x, y, px, py;
 
     dx = x2 - x1;      /* the horizontal distance of the line */

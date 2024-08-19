@@ -50,7 +50,9 @@ void SCConvPlayer::ReadNextFrame(void){
         
         currentFrame.creationTime = SDL_GetTicks();
         currentFrame.text = nullptr;
-  
+        currentFrame.facePaletteID = 0;
+        currentFrame.face = nullptr;
+        
     
         uint8_t type = conv.ReadByte();
     
@@ -100,7 +102,6 @@ void SCConvPlayer::ReadNextFrame(void){
             uint8_t color = conv.ReadByte(); // Color ?
             currentFrame.textColor = color;
 			const char* pszExt = "normal";
-            currentFrame.facePaletteID = 0;
             currentFrame.facePaletteID = ConvAssets.GetFacePaletteID(const_cast<char*>(pszExt));
             
             printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X) pos %2X\n",this->conversationID,speakerName,setName,sentence,color,pos);

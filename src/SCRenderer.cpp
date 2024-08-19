@@ -923,7 +923,6 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         
         glDepthFunc(GL_LESS);
         glBegin(GL_TRIANGLES);
-        //for(int i=97 ; i < 98 ; i++)
         for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
             RenderBlock(area, LOD, i,false);
         glEnd();
@@ -933,9 +932,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         glDepthFunc(GL_EQUAL);
-        //for(int i=97 ; i < 98 ; i++)
 		for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-			printf("Rendering block %d\n", i);
 			RenderBlock(area, LOD, i, true);
 		}
         glDisable(GL_BLEND);
@@ -944,8 +941,8 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         
         //Render objects on the map
         //for(int i=97 ; i < 98 ; i++)
-        //for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
-        //   RenderObjects(area,i);
+        for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
+            RenderObjects(area,i);
         
         RenderJets(area);
         

@@ -89,7 +89,7 @@ public:
     void Set(RSImage* image );
     size_t width;
     size_t height;
-    char name[8];
+    char name[9];
     uint8_t* data;
 
 

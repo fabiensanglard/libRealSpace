@@ -36,7 +36,7 @@ void RSEntity::ParseTXMP(IffChunk* chunk) {
 
 	RSImage* image = new RSImage();
 
-	char name[8];
+	char name[9];
 
 	for (int i = 0; i < 8; i++)
 		name[i] = stream.ReadByte();

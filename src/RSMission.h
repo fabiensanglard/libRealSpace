@@ -66,8 +66,8 @@ struct AREA_TypeB
 struct PART
 {
 	unsigned int MemberNumber; // off 0-1, Cast Member Number
-	char MemberName[16]; // 2-17, IFF File Record name
-	char WeaponLoad[8]; // 18-25, IFF File Record name
+	char MemberName[17]; // 2-17, IFF File Record name
+	char WeaponLoad[9]; // 18-25, IFF File Record name
 	unsigned int Unknown0; // 26-27
 	unsigned int Unknown1; // 28-29
 	long XAxisRelative; // 30-33, X pos rel to AREA
@@ -186,7 +186,7 @@ private:
 
 	char missionInfo[255];
 	char missionName[255];
-	char missionAreaFile[8];
+	char missionAreaFile[9];
 
 	
 	

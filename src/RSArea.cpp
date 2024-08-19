@@ -165,7 +165,7 @@ void RSArea::ParseMetadata(){
         
     for (size_t i=0; i < numTexturesSets ; i++) {
         uint16_t fastID = textureRefStrean.ReadUShort();
-        char setName[8];
+        char setName[9];
         for(int n=0; n < 8 ; n++){
             setName[n] = textureRefStrean.ReadByte();
         }
