@@ -91,13 +91,13 @@ void RSEntity::ParseVERT(IffChunk* chunk) {
 		Point3D vertex;
 
 		coo = stream.ReadInt32LE();
-		vertex.z = (coo >> 8) + (coo & 0x000000FF) / 255.0;
+		vertex.z = (coo >> 8) + static_cast<float>(coo & 0x000000FF) / 255.0f;
 
 		coo = stream.ReadInt32LE();
-		vertex.x = (coo >> 8) + (coo & 0x000000FF) / 255.0;
+		vertex.x = (coo >> 8) + static_cast<float>(coo & 0x000000FF) / 255.0f;
 
 		coo = stream.ReadInt32LE();
-		vertex.y = (coo >> 8) + (coo & 0x000000FF) / 255.0;
+		vertex.y = (coo >> 8) + static_cast<float>(coo & 0x000000FF) / 255.0f;
 		AddVertex(&vertex);
 	}
 
@@ -112,7 +112,7 @@ void RSEntity::ParseLVL(IffChunk* chunk) {
 
 	Lod lod;
 
-	lod.numTriangles = (chunk->size - 4) / 2;
+	lod.numTriangles = static_cast<uint16_t>((chunk->size - 4) / 2);
 
 	lod.dist = stream.ReadUInt32LE();
 

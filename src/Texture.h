@@ -68,9 +68,9 @@ typedef struct VGAPalette{
         }
         
         for (uint16_t i= 0 ; i < numColors ; i++){
-            colors[offset+i].r = s->ReadByte() * 255/63.0f;
-            colors[offset+i].g = s->ReadByte() * 255/63.0f;
-            colors[offset+i].b = s->ReadByte() * 255/63.0f;
+            colors[offset+i].r = s->ReadByte() * (uint8_t) (255.0f/63.0f);
+            colors[offset+i].g = s->ReadByte() * (uint8_t) (255.0f/63.0f);
+            colors[offset+i].b = s->ReadByte() * (uint8_t) (255.0f/63.0f);
             colors[offset+i].a = 1 ;
         }
         
