@@ -208,6 +208,8 @@ void SCGameFlow::createMiss() {
     printf("efect size %zd\n", this->efect->size());
     if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
         uint8_t optionScenID = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
+        // note pour plus tard, une scene peu être composé de plusieur background
+        // donc il faut boucler.
         uint8_t shapeID = this->optionParser.opts[optionScenID]->background->images[0]->ID;
         uint8_t paltID = this->optionParser.opts[optionScenID]->background->palette->ID;
         uint8_t forPalTID = this->optionParser.opts[optionScenID]->foreground->palette->ID;
@@ -217,6 +219,8 @@ void SCGameFlow::createMiss() {
         this->zones.clear();
         for (auto sprite : this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt) {
             uint8_t sprtId = sprite->info.ID;
+            // le clck dans sprite semble indiquer qu'il faut jouer l'animation après avoir cliquer et donc executer le efect 
+            // à la fin de l'animation.
             if (this->optionParser.opts[optionScenID]->foreground->sprites.count(sprtId) > 0) {
                 uint8_t optsprtId = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->sprite.SHP_ID;
                 animatedSprites* sprt = new animatedSprites();
@@ -282,6 +286,7 @@ void SCGameFlow::createMiss() {
                 printf("%d, ID Sprite not found !!\n", sprtId);
             }
         }
+        // le layer de fonds peut être une animation, il faudra changer en RSimageSet
         this->layer = this->getShape(shapeID)->GetShape(0);
         this->rawPalette = this->optPals.GetEntry(paltID)->data;
         this->forPalette = this->optPals.GetEntry(forPalTID)->data;
@@ -343,7 +348,7 @@ void SCGameFlow::RunFrame(void) {
         VGA.DrawShape(sprit.second->img->GetShape(0));
         if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames != nullptr) {
             VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frames->at(sprit.second->frameCounter)));
-            sprit.second->frameCounter = (sprit.second->frameCounter + fpsupdate) % static_cast<size_t>(sprit.second->frames->size());
+            sprit.second->frameCounter = (sprit.second->frameCounter + fpsupdate) % static_cast<uint8_t>(sprit.second->frames->size());
 
         } else if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames == nullptr) {
             VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frameCounter));
