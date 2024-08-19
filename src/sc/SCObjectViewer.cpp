@@ -112,7 +112,7 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
         uint32_t fixedPointDist = stream.ReadInt32LE();
         showCase.cameraDist = (fixedPointDist >> 8) + (fixedPointDist & 0xFF)/255.0f ;
         //showCase.cameraDist = 200000;
-        
+		printf("LOAD [%s]:%s\n", modelPath, showCase.displayName);
         showCases.push_back(showCase);
         
     }
