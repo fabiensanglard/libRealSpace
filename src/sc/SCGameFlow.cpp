@@ -13,6 +13,7 @@
 #define EFECT_OPT_CONV 0
 #define EFECT_OPT_SCEN 1
 #define EFECT_OPT_MISS 22
+#define EFECT_OPT_MIS2 13
 #define EFECT_OPT_SHOT 8
 #define EFECT_OPT_FLYM 12
 
@@ -27,6 +28,13 @@ SCGameFlow::SCGameFlow() {
 SCGameFlow::~SCGameFlow() {
 }
 
+/**
+ * Handles a click event on a sprite.
+ *
+ * @param id The ID of the sprite that was clicked.
+ *
+ * @return None
+ */
 void SCGameFlow::clicked(uint8_t id) {
     if (this->sprites[id]->efect != nullptr) {
         printf("clicked on %d\n", id);
@@ -35,6 +43,14 @@ void SCGameFlow::clicked(uint8_t id) {
     }
     
 }
+/**
+ * Runs the current effect based on the efect vector and currentOptCode.
+ *
+ * Iterates through the efect vector, executing different actions based on the opcode.
+ * Actions include playing conversations, scenes, and missions, as well as handling unknown opcodes.
+ *
+ * @return None
+ */
 void SCGameFlow::runEffect() {
     uint8_t i = this->currentOptCode;
     if (this->efect == nullptr) {
@@ -50,6 +66,7 @@ void SCGameFlow::runEffect() {
         switch (this->efect->at(i)) {
         case EFECT_OPT_CONV:
         {
+            printf("PLAYING CONV %d\n", this->efect->at(i + 1));
             SCConvPlayer* conv = new SCConvPlayer();
             conv->Init();
             conv->SetID(this->efect->at(i + 1));
@@ -76,6 +93,10 @@ void SCGameFlow::runEffect() {
             return;
         }
             break;
+        case EFECT_OPT_MIS2:
+            printf("PLAYING MIS2 %d\n", this->current_miss);
+            printf("MIS2 NOT IMPLEMENTED\n");
+            break;
         case EFECT_OPT_SHOT:
             printf("PLAYING SHOT %d\n", this->efect->at(i + 1));
             printf("SHOT NOT IMPLEMENTED\n");
@@ -98,6 +119,15 @@ void SCGameFlow::runEffect() {
         this->currentOptCode = 0;
     }
 }
+/**
+ * Checks for keyboard events and updates the game state accordingly.
+ *
+ * This function peeks at the SDL event queue to check for keyboard events.
+ * If a key is pressed, it updates the game state based on the key pressed.
+ * The supported keys are escape, space, and return.
+ *
+ * @return None
+ */
 void SCGameFlow::CheckKeyboard(void) {
     //Keyboard
     SDL_Event keybEvents[1];
@@ -138,6 +168,13 @@ void SCGameFlow::CheckKeyboard(void) {
     }
 }
 
+/**
+ * Initializes the SCGameFlow object by loading the necessary IFF files and initializing the optionParser and gameFlowParser.
+ * It also initializes the optShps and optPals objects by loading the OPTSHPS.PAK and OPTPALS.PAK files respectively.
+ * Finally, it sets the efect pointer to nullptr and calls the createMiss() function.
+ *
+ * @throws None
+ */
 void SCGameFlow::Init() {
 
     TreEntry* gameflowIFF = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\GAMEFLOW.IFF");
@@ -153,6 +190,16 @@ void SCGameFlow::Init() {
     this->createMiss();
 }
 
+/**
+ * Creates a new miss in the game flow.
+ *
+ * This function initializes the efect, sprites, and zones for the current miss.
+ * It also sets up the layer, raw palette, and foreground palette.
+ *
+ * @return None
+ *
+ * @throws None
+ */
 void SCGameFlow::createMiss() {
     printf("current miss : %d, current_scen %d\n", this->current_miss, this->current_scen);
     if (this->efect == nullptr && this->gameFlowParser.game.game[this->current_miss]->efct.size() > 0) {
@@ -168,9 +215,8 @@ void SCGameFlow::createMiss() {
         
         this->sprites.clear();
         this->zones.clear();
-
-        for (int i=0; i < this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt.size(); i++) {
-            uint8_t sprtId = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt[i]->info.ID;
+        for (auto sprite : this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt) {
+            uint8_t sprtId = sprite->info.ID;
             if (this->optionParser.opts[optionScenID]->foreground->sprites.count(sprtId) > 0) {
                 uint8_t optsprtId = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->sprite.SHP_ID;
                 animatedSprites* sprt = new animatedSprites();
@@ -224,7 +270,7 @@ void SCGameFlow::createMiss() {
                     this->zones.push_back(z);
                 }
                 
-                sprt->efect = &this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt[i]->efct;
+                sprt->efect = &sprite->efct;
                 sprt->img = this->getShape(optsprtId);
                 sprt->frameCounter = 0;
                 if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->SEQU != nullptr) {
@@ -235,13 +281,21 @@ void SCGameFlow::createMiss() {
             } else {
                 printf("%d, ID Sprite not found !!\n", sprtId);
             }
-            
         }
         this->layer = this->getShape(shapeID)->GetShape(0);
         this->rawPalette = this->optPals.GetEntry(paltID)->data;
         this->forPalette = this->optPals.GetEntry(forPalTID)->data;
     }
 }
+/**
+ * Retrieves an RSImageSet object for the specified shape ID.
+ *
+ * @param shpid The ID of the shape to retrieve.
+ *
+ * @return A pointer to the RSImageSet object containing the shape data.
+ *
+ * @throws None.
+ */
 RSImageSet* SCGameFlow::getShape(uint8_t shpid) {
     PakEntry* shapeEntry = this->optShps.GetEntry(shpid);
     PakArchive subPAK;
@@ -256,6 +310,15 @@ RSImageSet* SCGameFlow::getShape(uint8_t shpid) {
     return (img);
 }
 
+/**
+ * Runs a single frame of the game, updating the game state and rendering the graphics.
+ *
+ * @param None
+ *
+ * @return None
+ *
+ * @throws None
+ */
 void SCGameFlow::RunFrame(void) {
     this->runEffect();   
     CheckKeyboard();

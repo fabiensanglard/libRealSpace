@@ -32,7 +32,6 @@ void RSGameFlow::parseGAME(uint8_t* data, size_t size) {
 	handlers["MISS"] = std::bind(&RSGameFlow::parseMISS, this, std::placeholders::_1, std::placeholders::_2);
 
 	lexer.InitFromRAM(data, size, handlers);
-
 }
 
 void RSGameFlow::parseMISS(uint8_t* data, size_t size) {
@@ -100,10 +99,14 @@ void RSGameFlow::parseMISS_SCEN_SPRT_EFCT(uint8_t* data, size_t size) {
 }
 
 void RSGameFlow::parseMISS_SCEN_SPRT_REQU(uint8_t* data, size_t size) {
-	REQU* tmprequ = new REQU();
-	tmprequ->UNKOWN_1 = *data++;
-	tmprequ->UNKOWN_2 = *data;
-	this->tmpscsp->requ = tmprequ;
+	this->tmpscsp->requ = new std::vector<REQU *>();
+	
+	for (int i=0; i<size; i+=2) {
+		REQU* tmprequ = new REQU();
+		tmprequ->op = data[i];
+		tmprequ->value = data[i+1];
+		this->tmpscsp->requ->push_back(tmprequ);
+	}
 }
 
 void RSGameFlow::parseWRLD(uint8_t* data, size_t size) {

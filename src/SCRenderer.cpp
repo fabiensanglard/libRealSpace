@@ -970,10 +970,6 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 		std::map<std::string, RSEntity *>::iterator it;
 		it = area->objCache->find(object.name);
 		if (it != area->objCache->end()) {
-			printf("Rendering [%s] at {%d,%d,%d}\n",
-				object.name,
-                object.position[0], object.position[1], object.position[2]
-			);
 			DrawModel(it->second, BLOCK_LOD_MAX);
 		}
 		else {
@@ -1006,12 +1002,6 @@ void SCRenderer::RenderMissionObjects(RSMission* mission) {
             static_cast<GLfloat>(-object->YAxisRelative)
         );
         if (object->entity!=NULL) {
-            printf("RENDERING MISSION OBJ : %s at [%d,%d,%d]\n",
-                object->MemberName,
-                object->XAxisRelative,
-                object->ZAxisRelative,
-                object->YAxisRelative
-            );
             DrawModel(object->entity, BLOCK_LOD_MAX);
         }
         else {

@@ -1,9 +1,9 @@
 #pragma once
 //
-//  File.h
+//  SCGameFlow.h
 //  libRealSpace
 //
-//  Created by fabien sanglard on 1/28/2014.
+//  Created by Rémi LEONARD on 19/08/2024.
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 #ifndef __libRealSpace__SCGameFow__
@@ -57,6 +57,7 @@ private:
     RSImageSet* getShape(uint8_t shpid);
     int fps;
     uint8_t currentOptCode;
+    uint8_t requ;
     std::vector<uint8_t> *efect;
 };
 

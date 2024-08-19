@@ -11,13 +11,13 @@ struct INFO {
 	uint8_t UNKOWN;
 };
 struct REQU {
-	uint8_t UNKOWN_1;
-	uint8_t UNKOWN_2;
+	uint8_t op;
+	uint8_t value;
 };
 struct GAMEFLOW_SPRT {
 	INFO info;
 	std::vector<uint8_t> efct;
-	REQU* requ;
+	std::vector<REQU *>*  requ;
 };
 struct GAMEFLOW_SCEN {
 	INFO info;
