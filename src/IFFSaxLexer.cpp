@@ -22,10 +22,11 @@ bool IFFSaxLexer::InitFromFile(const char* filepath, std::map<std::string, std::
 
 
 	FILE* file;
+	printf("IFF SAX:opening %s\n", fullPath);
 	fopen_s(&file, fullPath, "r+b");
 
 	if (!file) {
-		printf("Unable to open IFF archive: '%s'.\n", filepath);
+		printf("IFF SAX:Unable to open IFF archive: '%s'.\n", filepath);
 		return false;
 	}
 
@@ -37,7 +38,7 @@ bool IFFSaxLexer::InitFromFile(const char* filepath, std::map<std::string, std::
 	size_t t = fread(fileData, 1, fileSize, file);
 	printf("file %s read %llu bytes should be %llu\n", fullPath, t, fileSize);
 	strcpy_s(this->path, filepath);
-
+	fclose(file);
 	return InitFromRAM(fileData, fileSize, events);
 }
 

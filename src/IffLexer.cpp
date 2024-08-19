@@ -84,10 +84,12 @@ bool IffLexer::InitFromFile(const char* filepath) {
 
 
 	FILE* file;
+	printf("IFF Lexer: opening %s\n", fullPath);
+
 	fopen_s(&file, fullPath, "r+b");
 
 	if (!file) {
-		printf("Unable to open IFF archive: '%s'.\n", filepath);
+		printf("IFF Lexer: Unable to open IFF archive: '%s'.\n", fullPath);
 		return false;
 	}
 
@@ -99,7 +101,7 @@ bool IffLexer::InitFromFile(const char* filepath) {
 	size_t t = fread(fileData, 1, fileSize, file);
 	printf("file %s read %llu bytes should be %llu\n", fullPath, t, fileSize);
 	strcpy_s(this->path, filepath);
-
+	fclose(file);
 	return InitFromRAM(fileData, fileSize);
 
 }
