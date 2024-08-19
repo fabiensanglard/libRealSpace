@@ -83,7 +83,8 @@ bool IffLexer::InitFromFile(const char* filepath) {
 	strcat_s(fullPath, filepath);
 
 
-	FILE* file = fopen(fullPath, "r+b");
+	FILE* file;
+	fopen_s(&file, fullPath, "r+b");
 
 	if (!file) {
 		printf("Unable to open IFF archive: '%s'.\n", filepath);

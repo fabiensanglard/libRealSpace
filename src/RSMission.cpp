@@ -199,7 +199,7 @@ void RSMission::parseMSGS(IffChunk* chunk) {
 		size_t fsize = chunk->size;
 		size_t read = 0;
 		size_t strc = 0;
-		size_t msgc = 0;
+		int msgc = 0;
 		ByteStream stream(chunk->data);
 		MSGS* scmsg = NULL;
 		byte r;
@@ -214,7 +214,7 @@ void RSMission::parseMSGS(IffChunk* chunk) {
 					}
 					else {
 						strc = 0;
-						scmsg->id = msgc++;
+						scmsg->id = static_cast<int>(msgc++);
 					}
 				}
 				if (scmsg != NULL) {
@@ -426,9 +426,9 @@ void RSMission::parsePART(IffChunk* chunk) {
 					const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
 					const char* OBJ_EXTENSION = ".IFF";
 
-					strcpy(modelPath, OBJ_PATH);
-					strcat(modelPath, prt->MemberName);
-					strcat(modelPath, OBJ_EXTENSION);
+					strcpy_s(modelPath, OBJ_PATH);
+					strcat_s(modelPath, prt->MemberName);
+					strcat_s(modelPath, OBJ_EXTENSION);
 					missionstrtoupper(modelPath);
 					TreEntry* entry = tre->GetEntryByName(modelPath);
 

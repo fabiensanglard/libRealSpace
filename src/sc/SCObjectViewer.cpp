@@ -96,9 +96,9 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
         
         
         char modelPath[512];
-        strcpy(modelPath,OBJ_PATH);
-        strcat(modelPath,objName);
-        strcat(modelPath, OBJ_EXTENSION);
+        strcpy_s(modelPath,OBJ_PATH);
+        strcat_s(modelPath,objName);
+        strcat_s(modelPath, OBJ_EXTENSION);
         TreEntry* entry = tre.GetEntryByName(modelPath);
         
         if (entry == NULL){
@@ -416,9 +416,9 @@ void SCObjectViewer::RunFrame(void){
     RSShowCase showCase = showCases[currentObject];
     
     Point3D newPosition;
-    newPosition.x= showCase.cameraDist/150 *cos(totalTime/2000.0f);
+    newPosition.x= showCase.cameraDist/150 *cosf(totalTime/2000.0f);
     newPosition.y= showCase.cameraDist/350;
-    newPosition.z= showCase.cameraDist/150*sin(totalTime/2000.0f);
+    newPosition.z= showCase.cameraDist/150*sinf(totalTime/2000.0f);
    
 
     Renderer.GetCamera()->SetPosition(&newPosition);
@@ -426,9 +426,9 @@ void SCObjectViewer::RunFrame(void){
     Renderer.GetCamera()->LookAt(&lookAt);
     
     Point3D light;
-    light.x= 4*cos(-1*totalTime/20000.0f);
+    light.x= 4*cosf(-1*totalTime/20000.0f);
     light.y= 4;
-    light.z= 4*sin(-1*totalTime/20000.0f);
+    light.z= 4*sinf(-1*totalTime/20000.0f);
     Renderer.SetLight(&light);
     
     glMatrixMode(GL_PROJECTION);

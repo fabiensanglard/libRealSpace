@@ -32,11 +32,12 @@ bool TreArchive::InitFromFile(const char* filepath){
     char fullPath[512] ;
     fullPath[0] = '\0';
     
-    strcat(fullPath, GetBase());
-    strcat(fullPath, filepath);
+    strcat_s(fullPath, GetBase());
+    strcat_s(fullPath, filepath);
     
     
-    FILE* file = fopen(fullPath, "r+b");
+    FILE* file;
+    fopen_s(&file, fullPath, "r+b");
     
     if (!file){
         printf("Unable to open TRE archive: '%s'.\n",filepath);
@@ -61,7 +62,7 @@ bool TreArchive::InitFromFile(const char* filepath){
 
 void TreArchive::InitFromRAM(const char* name,uint8_t* data, size_t size){
     
-    strcpy(this->path, name);
+    strcpy_s(this->path, name);
     
     this->data = data;
     this->size = size;
@@ -135,11 +136,11 @@ void TreArchive::Parse(void){
 void TreArchive::List(FILE* output){
     
     fprintf(output,"Listing content of TRE archive '%s'.\n",this->path);
-    fprintf(output,"    %lu entrie(s) found.\n",entries.size());
+    fprintf(output,"    %llu entrie(s) found.\n",entries.size());
 
     for (size_t i=0 ; i < entries.size() ; i++){
         TreEntry* entry = entries[i];
-        fprintf(output,"    Entry [%3lu] offset[0x%8lX]'%s' size: %lu bytes.\n",i,entry->data-this->data,entry->name,entry->size);
+        fprintf(output,"    Entry [%3zu] offset[0x%8llX]'%s' size: %zu bytes.\n",i,entry->data-this->data,entry->name,entry->size);
     }
 }
 
@@ -180,12 +181,12 @@ bool TreArchive::Decompress(const char* dstDirectory){
         
         char fullPath[512];
         fullPath[0] = '\0';
-        strcat(fullPath,dstDirectory);
+        strcat_s(fullPath,dstDirectory);
         
         //Make sure the dstDirectory end with a /
         size_t dstSize = strlen(fullPath);
         if (fullPath[dstSize-1] != '/')
-            strcat(fullPath,"/");
+            strcat_s(fullPath,"/");
         
         //Remove the leading . and .. and /
         char* cursor = entry->name;
@@ -193,7 +194,7 @@ bool TreArchive::Decompress(const char* dstDirectory){
               *cursor == '/' ||
               *cursor == '\\')
             cursor++;
-        strcat(fullPath, cursor);
+        strcat_s(fullPath, cursor);
         
         //Convert '\\' to '/'
         size_t sizeFullPath = strlen(fullPath);
@@ -206,8 +207,9 @@ bool TreArchive::Decompress(const char* dstDirectory){
         CreateDirectories(fullPath);
         
         //Write file !
-        printf("Decompressing TRE file: %lu '%s' %lu (bytes).\n",i,fullPath,entry->size);
-        FILE* file = fopen(fullPath,"w+b");
+        printf("Decompressing TRE file: %zu '%s' %zu (bytes).\n",i,fullPath,entry->size);
+        FILE* file;
+        fopen_s(&file, fullPath, "w+b");
         fwrite(entry->data, 1, entry->size, file);
         fclose(file);
         

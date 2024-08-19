@@ -281,7 +281,7 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
         for(size_t i =0 ; i  < font.GetNumEntries() ; i++){
             PakEntry* e = font.GetEntry(i);
             PrintTabs(numTabs);
-            printf("Pak entry %lu\n",i);
+            printf("Pak entry %llu\n",i);
             ExploreImages(e->data,e->size,numTabs+1);
             
         }

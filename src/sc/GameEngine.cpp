@@ -59,8 +59,8 @@ void GameEngine::PumpEvents(void){
                 newPosition.x = event->motion.x;
                 newPosition.y = event->motion.y;
                 
-                newPosition.x *= 320.0f / Screen.width;
-                newPosition.y *= 200.0f / Screen.height;
+                newPosition.x = static_cast<int>(newPosition.x * 320 / Screen.width);
+                newPosition.y = static_cast<int>(newPosition.y * 200 / Screen.height);
                 
                 Mouse.SetPosition(newPosition);
                 

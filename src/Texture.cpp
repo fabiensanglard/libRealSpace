@@ -30,7 +30,7 @@ Texture::~Texture(){
 
 void Texture::Set(RSImage* image){
     
-    strncpy(this->name,image->name,8);
+    strncpy_s(this->name,image->name,8);
     this->width = image->width;
     this->height = image->height;
     this->data = (uint8_t*)malloc(width*height*4);

@@ -76,10 +76,10 @@ void Camera::Rotate(float pitch, float yaw, float roll){
     /*
     Matrix rollRot;
     rollRot.Identity();
-    rollRot.v[0][0] = cos(yaw);
-    rollRot.v[0][1] = sin(yaw);
-    rollRot.v[1][0] = -sin(yaw);
-    rollRot.v[1][1] = cos(yaw);
+    rollRot.v[0][0] = cosf(yaw);
+    rollRot.v[0][1] = sinf(yaw);
+    rollRot.v[1][0] = -sinf(yaw);
+    rollRot.v[1][1] = cosf(yaw);
     Quaternion qRollRot;
     qRollRot.FromMatrix(&rollRot);
     orientation.Multiply(&qRollRot);

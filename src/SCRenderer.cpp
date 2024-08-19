@@ -13,6 +13,9 @@
 #include "RSEntity.h"
 #include "RSVGA.h"
 #include "Texture.h"
+#ifdef BLOCK_WIDTH
+#undef BLOCK_WIDTH
+#endif
 #define BLOCK_WIDTH (25000)
 
 extern SCRenderer Renderer;
@@ -176,7 +179,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         return;
 
     if (lodLevel >= object->NumLods()){
-        printf("Unable to render this Level Of Details (out of range): Max level is  %lu\n",
+        printf("Unable to render this Level Of Details (out of range): Max level is  %llu\n",
                min(0UL,object->NumLods()-1));
         return;
     }
@@ -423,10 +426,10 @@ void SCRenderer::DisplayModel(RSEntity* object,size_t lodLevel){
         
         
         
-        light.x= 20*cos(counter);
-        light.y= 10;
-        light.z= 20*sin(counter);
-        counter += 0.02;
+        light.x= 20.0f*cosf(counter);
+        light.y= 10.0f;
+        light.z= 20.0f*sinf(counter);
+        counter += 0.02f;
         
         //camera.SetPosition(position);
         
@@ -473,10 +476,10 @@ void SCRenderer::RenderVerticeField(Point3D* vertices, int numVertices){
         Matrix* modelViewMatrix;
         
         Point3D newPosition;
-        newPosition.x= 256*cos(counter);
-        newPosition.y= 0;
-        newPosition.z= 256*sin(counter);
-        counter += 0.02;
+        newPosition.x= 256.0f*cosf(counter);
+        newPosition.y= 0.0f;
+        newPosition.z= 256.0f*sinf(counter);
+        counter += 0.02f;
         
         camera.SetPosition(&newPosition);
         
@@ -758,10 +761,10 @@ void SCRenderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
     
     //Inter-block right side
     if ( i % 18 != 17){
-        AreaBlock* currentBlock = area->GetAreaBlockByID(LOD, i);
-        AreaBlock* rightBlock = area->GetAreaBlockByID(LOD, i+1);
+        AreaBlock* currentBlock = area->GetAreaBlockByID(LOD, static_cast<size_t>(i));
+        AreaBlock* rightBlock = area->GetAreaBlockByID(LOD, static_cast<size_t>(i+1));
         
-        for (int y=0 ; y < sideSize-1 ; y ++){
+        for (uint32_t y=0 ; y < sideSize-1 ; y ++){
             MapVertex* currentVertex     =   currentBlock->GetVertice(currentBlock->sideSize-1, y);
             MapVertex* rightVertex       =   rightBlock->GetVertice(0, y);
             MapVertex* bottomRightVertex =   rightBlock->GetVertice(0, y+1);
@@ -777,7 +780,7 @@ void SCRenderer::RenderBlock(RSArea* area, int LOD, int i, bool renderTexture){
         AreaBlock* currentBlock = area->GetAreaBlockByID(LOD, i);
         AreaBlock* bottomBlock = area->GetAreaBlockByID(LOD, i+BLOCK_PER_MAP_SIDE);
         
-        for (int x=0 ; x < sideSize-1 ; x++){
+        for (uint32_t x=0 ; x < sideSize-1 ; x++){
             MapVertex* currentVertex     =   currentBlock->GetVertice(x,currentBlock->sideSize-1);
             MapVertex* rightVertex       =   currentBlock->GetVertice(x+1,currentBlock->sideSize-1);
             MapVertex* bottomRightVertex =   bottomBlock->GetVertice(x+1,0);
@@ -890,9 +893,9 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         
         //Island
         /*
-        newPosition[0]=  2500;//lookAt[0] + 5256*cos(counter/2);
+        newPosition[0]=  2500;//lookAt[0] + 5256*cosf(counter/2);
         newPosition[1]= 350;
-        newPosition[2]=  600;//lookAt[2];// + 5256*sin(counter/2);
+        newPosition[2]=  600;//lookAt[2];// + 5256*sinf(counter/2);
         vec3_t lookAt = {2456,0,256};
         */
 
@@ -905,9 +908,9 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         /*
         counter = 23;
         vec3_t lookAt = {3856,30,2856};
-        newPosition[0]=  lookAt[0] + 256*cos(counter/2);
+        newPosition[0]=  lookAt[0] + 256*cosf(counter/2);
         newPosition[1]= 60;
-        newPosition[2]=  lookAt[2] + 256*sin(counter/2);
+        newPosition[2]=  lookAt[2] + 256*sinf(counter/2);
         /**/
         
         //Canyon
@@ -961,7 +964,11 @@ void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
 		
 		glPushMatrix();
 		
-		glTranslatef(object.position[0], object.position[1], -object.position[2]);
+        glTranslatef(
+            static_cast<GLfloat>(object.position[0]),
+            static_cast<GLfloat>(object.position[1]),
+            -static_cast<GLfloat>(object.position[2])
+        );
 		
 		std::map<std::string, RSEntity *>::iterator it;
 		it = area->objCache->find(object.name);
@@ -996,7 +1003,11 @@ void SCRenderer::RenderMissionObjects(RSMission* mission) {
 
         glPushMatrix();
 
-        glTranslatef(object->XAxisRelative, object->ZAxisRelative, -object->YAxisRelative);
+        glTranslatef(
+            static_cast<GLfloat>(object->XAxisRelative),
+            static_cast<GLfloat>(object->ZAxisRelative),
+            static_cast<GLfloat>(-object->YAxisRelative)
+        );
         if (object->entity!=NULL) {
             printf("RENDERING MISSION OBJ : %s at [%d,%d,%d]\n",
                 object->MemberName,
@@ -1045,9 +1056,9 @@ void SCRenderer::RenderWorldPoints(RSArea* area, int LOD, int verticesPerBlock)
         Renderer.GetCamera()->LookAt(&lookAt);
 
         Point3D newPosition = camera.GetPosition();
-        newPosition.x= lookAt.x + 5256*cos(counter/2);
+        newPosition.x= lookAt.x + 5256*cosf(counter/2);
         newPosition.y= 3700;
-        newPosition.z= lookAt.z + 5256*sin(counter/2);
+        newPosition.z= lookAt.z + 5256*sinf(counter/2);
 
         camera.SetPosition(&newPosition);
         
@@ -1144,9 +1155,21 @@ void SCRenderer::RenderMapOverlay(RSArea* area) {
             glBegin(GL_TRIANGLES);
                 const Texel* texel = palette.GetRGBColor(area->objectOverlay[i].trianles[j].color);
                 glColor4f(texel->r / 255.0f, texel->g / 255.0f, texel->b / 255.0f, 1);
-                glVertex3f(v1.x, v1.y, -v1.z);
-                glVertex3f(v2.x, v2.y, -v2.z);
-                glVertex3f(v3.x, v3.y, -v3.z);
+                glVertex3f(
+                    static_cast<GLfloat>(v1.x),
+                    static_cast<GLfloat>(v1.y),
+                    static_cast<GLfloat>(-v1.z)
+                );
+                glVertex3f(
+                    static_cast<GLfloat>(v2.x),
+                    static_cast<GLfloat>(v2.y),
+                    static_cast<GLfloat>(-v2.z)
+                );
+                glVertex3f(
+                    static_cast<GLfloat>(v3.x),
+                    static_cast<GLfloat>(v3.y),
+                    static_cast<GLfloat>(-v3.z)
+                );
             glEnd();
         }
     }

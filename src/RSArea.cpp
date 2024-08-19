@@ -159,7 +159,7 @@ void RSArea::ParseMetadata(){
     
     //Num texture sets
     size_t numTexturesSets = txmsMaps->size/12;
-    printf("This area features %lu textureSets references.\n",numTexturesSets);
+    printf("This area features %llu textureSets references.\n",numTexturesSets);
     
     ByteStream textureRefStrean(txmsMaps->data);
         
@@ -172,7 +172,7 @@ void RSArea::ParseMetadata(){
         uint8_t unknown = textureRefStrean.ReadByte();
         uint8_t numImages = textureRefStrean.ReadByte();
         
-       printf("Texture Set Ref [%3lu] 0x0x%X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
+       printf("Texture Set Ref [%3llu] 0x0x%X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
     }
     
     /*
@@ -222,7 +222,7 @@ void RSArea::ParseObjects(){
     PakArchive objectFiles;
     objectFiles.InitFromRAM("PAK Objects from RAM",objectsFilesLocation->data, objectsFilesLocation->size);
     //objectFiles.List(stdout);
-    printf("This .OBJ features %lu entries.\n",objectFiles.GetNumEntries());
+    printf("This .OBJ features %llu entries.\n",objectFiles.GetNumEntries());
     
     
     for(size_t i = 0 ; i < objectFiles.GetNumEntries() ; i++){
@@ -233,7 +233,7 @@ void RSArea::ParseObjects(){
         entry = objectFiles.GetEntry(i);
         ByteStream sizeGetter(entry->data);
         uint16_t numObjs = sizeGetter.ReadUShort();
-        printf("OBJ files %lu features %d objects.\n",i,numObjs);
+        printf("OBJ files %llu features %d objects.\n",i,numObjs);
         
         //if (i != 97)
         //    continue;
@@ -277,7 +277,7 @@ void RSArea::ParseObjects(){
             for(int k=0 ; k <0x31-10; k++)
                 unknowns[k] = reader.ReadByte();
                 
-            printf("object set [%3lu] obj [%2d] - '%-8s' 0x%X 0x%X 0x%X 0x%X 0x%X '%-8s' At {%d,%d,%d}\n", i, j, mapObject.name,
+            printf("object set [%3llu] obj [%2d] - '%-8s' 0x%X 0x%X 0x%X 0x%X 0x%X '%-8s' At {%d,%d,%d}\n", i, j, mapObject.name,
                 unknown09,
                 unknown10,
                 unknown11,
@@ -292,9 +292,9 @@ void RSArea::ParseObjects(){
 				const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
 				const char* OBJ_EXTENSION = ".IFF";
 
-				strcpy(modelPath, OBJ_PATH);
-				strcat(modelPath, mapObject.name);
-				strcat(modelPath, OBJ_EXTENSION);
+				strcpy_s(modelPath, OBJ_PATH);
+				strcat_s(modelPath, mapObject.name);
+				strcat_s(modelPath, OBJ_EXTENSION);
 				TreEntry* entry = tre->GetEntryByName(modelPath);
 
 				if (entry == NULL) {
@@ -364,7 +364,7 @@ void RSArea::ParseTriFile(PakEntry* entry){
             overTheMapIsTheRunway.hy = v->z > overTheMapIsTheRunway.hy ? v->z : overTheMapIsTheRunway.hy;
             printf("%d,%d,%d,%d,%d,%d\n", v->x, v->z, v->y, v->u0, v->u1, v->u2);
         }
-        printf("BYTE READ %d, REMAINING %d\n", read, entry->size - read);
+        printf("BYTE READ %llu, REMAINING %llu\n", read, entry->size - read);
         overTheMapIsTheRunway.vertices = vertices;
         
         short cpt = 0;
@@ -421,7 +421,7 @@ void RSArea::ParseTrigo(){
     
     entry = archive->GetEntry(4);
     
-    printf(".TRI file is %lu bytes.\n",entry->size);
+    printf(".TRI file is %llu bytes.\n",entry->size);
     // .TRI is a PAK
     PakArchive triFiles;
     triFiles.InitFromRAM(".TRI",entry->data, entry->size);
@@ -434,7 +434,7 @@ void RSArea::ParseTrigo(){
         
         PakEntry* entry  = triFiles.GetEntry(i);
         if (entry->size > 0)
-            printf("TRI FOR BLOCK %d\n", i);
+            printf("TRI FOR BLOCK %llu\n", i);
             ParseTriFile(entry);
     }
 }
@@ -467,8 +467,6 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
     
     PakArchive blocksPAL;
     blocksPAL.InitFromRAM("BLOCKS",entry->data, entry->size);
-    int orx;
-    int orz;
     for (size_t i=0; i < blocksPAL.GetNumEntries(); i++) { // Iterate over the BLOCKS_PER_MAP block entries.
         
         //SRC Asset Block
@@ -689,7 +687,7 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     
     
     
-    strcpy(name,pakFilename);
+    strcpy_s(name,pakFilename);
     
     //Check the PAK has 5 entries
     this->archive = new PakArchive();
@@ -772,8 +770,8 @@ float RSArea::getGroundLevel(int BLOC, float x, float y) {
     // 180000
     int centerX = 0;
     int centerY = 0;
-    int vX = ((x / 1000000.0f * 360000.0f) + centerX) ;
-    int vY = ((y / 1000000.0f * 360000.0f) + centerY) ;
+    int vX = static_cast<int>((x / 1000000.0f * 360000.0f) + centerX);
+    int vY = static_cast<int>((y / 1000000.0f * 360000.0f) + centerY);
 
     vX = vX / 1000;
     vY = vY / 1000;

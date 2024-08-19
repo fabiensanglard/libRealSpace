@@ -247,7 +247,7 @@ void SCGameFlow::RunFrame(void) {
         VGA.DrawShape(sprit.second->img->GetShape(0));
         if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames != nullptr) {
             VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frames->at(sprit.second->frameCounter)));
-            sprit.second->frameCounter = (sprit.second->frameCounter + fpsupdate) % sprit.second->frames->size();
+            sprit.second->frameCounter = (sprit.second->frameCounter + fpsupdate) % static_cast<size_t>(sprit.second->frames->size());
 
         } else if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames == nullptr) {
             VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frameCounter));

@@ -224,9 +224,9 @@ void RSVGA::DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_
         coo->y = lineHeight;
         
         if (chartoDraw == ' ')
-            coo->x += spaceSize ;
+            coo->x += static_cast<int32_t>(spaceSize);
         else
-            coo->x+=shape->GetWidth() + interLetterSpace;
+            coo->x = static_cast<int32_t>(coo->x + shape->GetWidth() + interLetterSpace);
         
 
     }

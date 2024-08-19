@@ -87,8 +87,8 @@ SCZone* IActivity::CheckZones(void) {
                 //If the mouse button has just been released: trigger action.
                 if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                     zone->OnAction();
-                Point2D p = { 160 - ((zone->label->length() / 2) * 8),180 };
-                VGA.DrawTextA(FontManager.GetFont(""), &p, (char*)zone->label->c_str(), 64, 0, zone->label->length(), 3, 5);
+                Point2D p = { 160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180 };
+                VGA.DrawTextA(FontManager.GetFont(""), &p, (char*)zone->label->c_str(), 64, 0, static_cast<uint32_t>(zone->label->length()), 3, 5);
                 return zone;
             }
         }
@@ -103,8 +103,8 @@ SCZone* IActivity::CheckZones(void) {
             //If the mouse button has just been released: trigger action.
             if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                 zone->OnAction();
-            Point2D p = { 160-((zone->label->length()/2)*8),180};
-            VGA.DrawTextA(FontManager.GetFont(""), &p, (char*)zone->label->c_str(), 64, 0, zone->label->length(), 3, 5);
+            Point2D p = { 160-((int32_t)(zone->label->length()/2)*8),180};
+            VGA.DrawTextA(FontManager.GetFont(""), &p, (char*)zone->label->c_str(), 64, 0, static_cast<uint32_t>(zone->label->length()), 3, 5);
 
             return zone;
         }

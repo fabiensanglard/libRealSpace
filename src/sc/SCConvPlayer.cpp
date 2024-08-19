@@ -338,7 +338,7 @@ void SCConvPlayer::DrawText(void){
         //Don't forget to center the text
         coo.x += pixelAvailable/2;
         
-        VGA.DrawText(currentFrame.font, &coo, currentFrame.text,currentFrame.textColor,cursor-currentFrame.text,lastGoodPos-cursor,CONV_INTERLETTER_SPACE,CONV_SPACE_SIZE);
+        VGA.DrawText(currentFrame.font, &coo, currentFrame.text, static_cast<uint32_t>(currentFrame.textColor), static_cast<uint32_t>(cursor - currentFrame.text), static_cast<uint32_t>(lastGoodPos - cursor), CONV_INTERLETTER_SPACE, CONV_SPACE_SIZE);
         
         //Go to next line
         cursor = lastGoodPos+1;

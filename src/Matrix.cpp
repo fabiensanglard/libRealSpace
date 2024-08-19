@@ -115,22 +115,22 @@ void Matrix::SetTranslation(float x, float y, float z){
 }
 
 void Matrix::SetRotationX(float angle){
-    v[1][1] = cos(angle);
-    v[1][2] = sin(angle);
-    v[2][1] = -sin(angle);
-    v[2][2] = cos(angle);
+    v[1][1] = cosf(angle);
+    v[1][2] = sinf(angle);
+    v[2][1] = -sinf(angle);
+    v[2][2] = cosf(angle);
 }
 
 void Matrix::SetRotationY(float angle){
-    v[0][0] = cos(angle);
-    v[0][2] = -sin(angle);
-    v[2][0] = sin(angle);
-    v[2][2] = cos(angle);
+    v[0][0] = cosf(angle);
+    v[0][2] = -sinf(angle);
+    v[2][0] = sinf(angle);
+    v[2][2] = cosf(angle);
 }
 
 void Matrix::SetRotationZ(float angle){
-    v[0][0] = cos(angle);
-    v[0][1] = sin(angle);
-    v[1][0] = -sin(angle);
-    v[1][1] = cos(angle);
+    v[0][0] = cosf(angle);
+    v[0][1] = sinf(angle);
+    v[1][0] = -sinf(angle);
+    v[1][1] = cosf(angle);
 }
