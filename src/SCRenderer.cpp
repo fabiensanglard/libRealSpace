@@ -341,7 +341,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
     
     
     
-    
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     //Pass 1, draw color
     for(int i = 0 ; i < lod->numTriangles ; i++){
         //for(int i = 60 ; i < 62 ; i++){  //Debug purpose only back governal of F-16 is 60-62
@@ -376,8 +377,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             
             const Texel* texel = palette.GetRGBColor(triangle->color);
             
-            //glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,1);
-            glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
+            glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,texel->a);
+            //glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
             
             glVertex3f(object->vertices[triangle->ids[j]].x,
                        object->vertices[triangle->ids[j]].y,
@@ -385,6 +386,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         }
         glEnd();
     }
+    glDisable(GL_BLEND);
 }
 
 

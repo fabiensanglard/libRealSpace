@@ -44,7 +44,7 @@ void RSEntity::ParseTXMP(IffChunk* chunk) {
 	uint32_t width = stream.ReadShort();
 	uint32_t height = stream.ReadShort();
 
-	image->Create(name, width, height);
+	image->Create(name, width, height, 0);
 	image->UpdateContent(stream.GetPosition());
 	AddImage(image);
 
