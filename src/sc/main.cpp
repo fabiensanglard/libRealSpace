@@ -30,8 +30,6 @@ int main(int argc, char* argv[]) {
     SCMainMenu* main = new SCMainMenu();
     main->Init();
     Game.AddActivity(main);
-    
-    
     Game.Run();
     
     return EXIT_SUCCESS;

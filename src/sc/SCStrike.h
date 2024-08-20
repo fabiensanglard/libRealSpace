@@ -16,11 +16,13 @@ public:
     ~SCStrike();
     
     void Init( );
-    
+    void CheckKeyboard(void);
     void RunFrame(void);
 
 private:
     RSArea area ;
+    RSMission missionObj;
+    std::map<std::string, RSEntity*> objectCache;
 };
 
 #endif /* defined(__libRealSpace__SCStrike__) */

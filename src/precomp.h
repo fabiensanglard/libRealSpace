@@ -12,6 +12,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #include <stdlib.h>
 #include <stdio.h>
     
@@ -35,6 +36,7 @@ extern "C" {
 #ifdef _WIN32
 	#include <Windows.h>
 #endif
+
     #include <SDL.h>
     #include <GL/GL.h>
 
@@ -44,7 +46,7 @@ extern "C" {
     #include "Quaternion.h"
 
 
-// Reusable Realspace Classes
+    // Reusable Realspace Classes
     #include "Base.h"
     #include "ByteStream.h"
     #include "PakArchive.h"
@@ -72,46 +74,16 @@ extern "C" {
     #include "RSGameFlow.h"
     #include "RSMission.h"
 
-//Fonts stuff
-#include "RSFont.h"
-#include "RSFontManager.h"
+    //Fonts stuff
+    #include "RSFont.h"
+    #include "RSFontManager.h"
 
     #include "RSImageSet.h"
-
-
 
     //VGA and Glide
     #include "RSScreen.h"
     #include "RSVGA.h"
 
-// Strike commander specific.
-
-
-/*
-    
-
-    #include "IFFChunkReader.h"
-    #include "IFFReader.h"
-
-    #include "RealSpaceObject.h"
-    #include "IFFObjectReader.h"
-
-    #include "gfx.h"
-    #include "pak.h"
-
-
-
-    #include "IFFReader.h"
- */
 #endif
-
-
-
-
-
-
-
-
-
 
 #endif

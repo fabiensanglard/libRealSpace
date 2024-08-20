@@ -35,6 +35,9 @@ VGAPalette* SCRenderer::GetPalette(void){
     return &this->palette;
 }
 
+void SCRenderer::setPlayerPosition(Point3D* position) {
+    camera.SetPosition(position);
+}
 void SCRenderer::Init(int32_t zoomFactor){
     
     this->scale =zoomFactor;
@@ -209,7 +212,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
         //glDepthFunc(GL_EQUAL);
         
-        glAlphaFunc ( GL_ALWAYS, 1.0 ) ;
+        glAlphaFunc ( GL_ALWAYS, 1.0f ) ;
         glEnable ( GL_ALPHA_TEST ) ;
         
         
@@ -227,8 +230,6 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             
             
             glBindTexture(GL_TEXTURE_2D, texture->id);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);   
 
             Triangle* triangle = &object->triangles[textInfo->triangleID];
             
@@ -267,6 +268,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             
             
         }
+        glDisable(GL_ALPHA_TEST);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
     }
@@ -863,17 +865,8 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     
     
-	Point3D lookAt = { 3856,0,2856 };
-
-    Point3D newPosition;
-    newPosition.x=  lookAt.x + counter;
-    newPosition.y= 100;
-	newPosition.z = lookAt.z + counter;
-    camera.SetPosition(&newPosition);
-    
-    
-    
-    camera.LookAt(&lookAt);
+	Point3D lookat = { 0, 0, -1 };
+    camera.LookAt(&lookat);
     
     
     GLuint fogMode[]= { GL_EXP, GL_EXP2, GL_LINEAR };   // Storage For Three Types Of Fog

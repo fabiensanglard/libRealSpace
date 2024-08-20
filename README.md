@@ -40,3 +40,43 @@ Eye Candies :
 ![Alt text](/pics/F-22.png)
 ![Alt text](/pics/face.png)
 
+Build :
+=======
+
+To build the project using CMake and Vcpkg, follow these instructions:
+
+1. Install CMake: 
+     - Download and install CMake from the official website: https://cmake.org/download/
+     - Follow the installation instructions for your operating system.
+
+2. Install Vcpkg:
+     - Download and install Vcpkg from the official GitHub repository: https://github.com/microsoft/vcpkg
+     - Follow the installation instructions for your operating system.
+
+3. Install dependencies:
+     - Open a terminal or command prompt.
+     - Navigate to the Vcpkg directory.
+     - Run the following command to install the SDL2 library:
+       ```
+       vcpkg install sdl2
+       ```
+
+4. Configure the project:
+     - Open a terminal or command prompt.
+     - Navigate to the project directory.
+     - Run the following command to configure the project using CMake:
+       ```
+       cmake -B build -S .
+       ```
+
+5. Build the project:
+     - Run the following command to build the project using CMake:
+       ```
+       cmake --build build
+       ```
+
+6. Run the project:
+     - After the build is successful, you can run the project using the generated executable.
+
+Remember to adjust the paths and commands according to your specific setup.
+
