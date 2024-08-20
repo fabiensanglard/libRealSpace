@@ -53,8 +53,12 @@ void RSGameFlow::parseMISS_INFO(uint8_t* data, size_t size) {
 }
 
 void RSGameFlow::parseMISS_EFCT(uint8_t* data, size_t size) {
-	for (int i = 0; i < size; i++) {
-		this->tmpmiss->efct.push_back(data[i]);
+	this->tmpmiss->efct = new std::vector<EFCT *>();
+	for (int i = 0; i < size; i=i+2) {
+		EFCT* efct = new EFCT();
+		efct->opcode = data[i];
+		efct->value = data[i + 1];
+		this->tmpmiss->efct->push_back(efct);
 	}
 }
 
@@ -78,6 +82,9 @@ void RSGameFlow::parseMISS_SCEN_INFO(uint8_t* data, size_t size) {
 void RSGameFlow::parseMISS_SCEN_SPRT(uint8_t* data, size_t size) {
 	IFFSaxLexer lexer;
 	this->tmpscsp = new GAMEFLOW_SPRT();
+	this->tmpscsp->efct = nullptr;
+	this->tmpscsp->requ = nullptr;
+	
 	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
 	handlers["INFO"] = std::bind(&RSGameFlow::parseMISS_SCEN_SPRT_INFO, this, std::placeholders::_1, std::placeholders::_2);
 	handlers["EFCT"] = std::bind(&RSGameFlow::parseMISS_SCEN_SPRT_EFCT, this, std::placeholders::_1, std::placeholders::_2);
@@ -93,8 +100,12 @@ void RSGameFlow::parseMISS_SCEN_SPRT_INFO(uint8_t* data, size_t size) {
 }
 
 void RSGameFlow::parseMISS_SCEN_SPRT_EFCT(uint8_t* data, size_t size) {
-	for (int i = 0; i < size; i++) {
-		this->tmpscsp->efct.push_back(data[i]);
+	this->tmpscsp->efct = new std::vector<EFCT *>();
+	for (int i = 0; i < size; i=i+2) {
+		EFCT* efct = new EFCT();
+		efct->opcode = data[i];
+		efct->value = data[i + 1];
+		this->tmpscsp->efct->push_back(efct);
 	}
 }
 

@@ -20,12 +20,13 @@ struct sprtRect {
 };
 
 struct animatedSprites {
-    RSImageSet* img;
-    std::vector<uint8_t>* frames;
-    uint8_t frameCounter;
-    sprtRect* rect;
-    std::vector<Point2D*> *quad;
-    std::vector<uint8_t>* efect;
+    RSImageSet* img {nullptr};
+    std::vector<uint8_t>* frames {nullptr};
+    uint8_t frameCounter {0};
+    sprtRect* rect {nullptr};
+    bool cliked {false};
+    std::vector<Point2D*> *quad {nullptr};
+    std::vector<EFCT *>* efect {nullptr}; 
 };
 
 class SCGameFlow : public IActivity {
@@ -56,9 +57,10 @@ private:
     void CheckKeyboard(void);
     RSImageSet* getShape(uint8_t shpid);
     int fps;
+    uint8_t currentSpriteId {0};
     uint8_t currentOptCode;
     uint8_t requ;
-    std::vector<uint8_t> *efect;
+    std::vector<EFCT *> *efect;
 };
 
 #endif

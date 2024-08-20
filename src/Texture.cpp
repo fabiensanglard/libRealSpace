@@ -47,65 +47,64 @@ uint32_t Texture::GetTextureID(void){
     
 }
 
-void FillAlphaWithAppropriateColors(size_t w, size_t h, uint8_t* data)
+void FillAlphaWithAppropriateColors(size_t width, size_t height, uint8_t* pixels)
 {
-	std::vector<int> dist(w * h, 10000);
+	std::vector<int> distances(width * height, 10000);
 
-	auto copy = [data, w, h] (int fo, int delta) {
-		uint8_t* dst = data + (fo);
-		uint8_t* src = data + (fo + 4 * delta);
+	auto copyPixels = [pixels, width, height] (int fromOffset, int delta) {
+		uint8_t* from = pixels + (fromOffset);
+		uint8_t* to = pixels + (fromOffset + 4 * delta);
 		for (int i = 0; i < 3; ++i) {
-			assert(fo + i >= 0 && fo + i < w * h * 4);
-			dst[i] = src[i];
+			to[i] = from[i];
 		}
 	};
 
-	for(int y = 0 ; y < h; ++y) {
-		int d = 0;
-		for(int x = 0 ; x < w; ++x) {
-			const int bo = y * w + x;
-			const int fo = 4 * bo;
-			const bool alpha = data[fo + 3] == 0;
-			d = alpha ? d + 1 : 0;
-			if (alpha && x - d >= 0) {
-				dist[bo] = d;
-				copy(fo, -d);
+	for (int y = 0; y < height; ++y) {
+		int distance = 0;
+		for (int x = 0; x < width; ++x) {
+			int bufferOffset = y * (int) width + x;
+			int pixelOffset = 4 * bufferOffset;
+			bool isTransparent = pixels[pixelOffset + 3] == 0;
+			distance = isTransparent ? distance + 1 : 0;
+			if (isTransparent && x - distance >= 0) {
+				distances[bufferOffset] = distance;
+				copyPixels(pixelOffset, -distance);
 			}
 		}
-		d = 0;
-		for(int x = w - 1; x >= 0; --x) {
-			const int bo = y * w + x;
-			const int fo = 4 * bo;
-			const bool alpha = data[fo + 3] == 0;
-			d = alpha ? d + 1 : 0;
-			if (alpha && x + d < w && dist[bo] > d) {
-				dist[bo] = d;
-				copy(fo, d);
+		distance = 0;
+		for (int x = (int) width - 1; x >= 0; --x) {
+			int bufferOffset = y * (int) width + x;
+			int pixelOffset = 4 * bufferOffset;
+			bool isTransparent = pixels[pixelOffset + 3] == 0;
+			distance = isTransparent ? distance + 1 : 0;
+			if (isTransparent && x + distance < width && distances[bufferOffset] > distance) {
+				distances[bufferOffset] = distance;
+				copyPixels(pixelOffset, distance);
 			}
 		}
 	}
 
-	for(int x = 0 ; x < w; ++x) {
-		int d = 0;
-		for(int y = 0 ; y < h; ++y) {
-			const int bo = y * w + x;
-			const int fo = 4 * bo;
-			const bool alpha = data[fo + 3] == 0;
-			d = alpha ? d + 1 : 0;
-			if (alpha && y - d >= 0 && dist[bo] > d) {
-				dist[bo] = d;
-				copy(fo, -d * w);
+	for (int x = 0; x < width; ++x) {
+		int distance = 0;
+		for (int y = 0; y < height; ++y) {
+			int bufferOffset = y * int(width) + x;
+			int pixelOffset = 4 * bufferOffset;
+			bool isTransparent = pixels[pixelOffset + 3] == 0;
+			distance = isTransparent ? distance + 1 : 0;
+			if (isTransparent && y - distance >= 0 && distances[bufferOffset] > distance) {
+				distances[bufferOffset] = distance;
+				copyPixels(pixelOffset, -distance * (int)width);
 			}
 		}
-		d = 0;
-		for(int y = h - 1; y >= 0; --y) {
-			const int bo = y * w + x;
-			const int fo = 4 * bo;
-			const bool alpha = data[fo + 3] == 0;
-			d = alpha ? d + 1 : 0;
-			if (alpha && y + d < h && dist[bo] > d) {
-				dist[bo] = d;
-				copy(fo, d * w);
+		distance = 0;
+		for (int y = int(height) - 1; y >= 0; --y) {
+			int bufferOffset = y * int(width) + x;
+			int pixelOffset = 4 * bufferOffset;
+			bool isTransparent = pixels[pixelOffset + 3] == 0;
+			distance = isTransparent ? distance + 1 : 0;
+			if (isTransparent && y + distance < height && distances[bufferOffset] > distance) {
+				distances[bufferOffset] = distance;
+				copyPixels(pixelOffset, distance * int(width));
 			}
 		}
 	}
@@ -129,7 +128,7 @@ void Texture::UpdateContent(RSImage* image){
             dst[0] = src->r;
             dst[1] = src->g;
             dst[2] = src->b;
-            dst[3] = src->a;
+            dst[3] = 0;
 
             if (src->r == 0 && src->g == 0 && src->b == 0) {
                 dst[3] = 0;
@@ -147,20 +146,7 @@ void Texture::UpdateContent(RSImage* image){
         }
     }
 
-    /*if (hasAlpha)
-		FillAlphaWithAppropriateColors(image->width, image->height, data);
-	*/
-	if ((image->flags & IMAGE_FLAG_COPY_PALINDEX_TO_ALPHA) != 0) {
-		dst = this->data;
-		for(int i = 0 ; i < image->height; i++) {
-			for(int j = 0 ; j < image->width; j++) {
-				const uint8_t* psrcIndex = src + j + i * image->width;
-				const uint8_t srcIndex = *psrcIndex;
-				const bool alpha = dst[3] == 0;
-				if (alpha)
-					dst[3] = srcIndex;
-				dst+=4;
-			}
-		}
+    if (hasAlpha) {
+		//FillAlphaWithAppropriateColors(image->width, image->height, data);
 	}
 }

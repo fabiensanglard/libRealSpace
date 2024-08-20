@@ -14,10 +14,15 @@ struct REQU {
 	uint8_t op;
 	uint8_t value;
 };
+struct EFCT {
+	uint8_t opcode;
+	uint8_t value;
+};
+
 struct GAMEFLOW_SPRT {
 	INFO info;
-	std::vector<uint8_t> efct;
-	std::vector<REQU *>*  requ;
+	std::vector<EFCT *>* efct;
+	std::vector<REQU *>* requ;
 };
 struct GAMEFLOW_SCEN {
 	INFO info;
@@ -28,7 +33,7 @@ struct GAMEFLOW_SCEN {
 
 struct MISS {
 	INFO info;
-	std::vector<uint8_t> efct;
+	std::vector<EFCT *>* efct;
 	std::vector<GAMEFLOW_SCEN*> scen;
 };
 struct SPED {

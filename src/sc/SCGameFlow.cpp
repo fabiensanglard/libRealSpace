@@ -39,6 +39,7 @@ void SCGameFlow::clicked(uint8_t id) {
     if (this->sprites[id]->efect != nullptr) {
         printf("clicked on %d\n", id);
         this->efect = this->sprites[id]->efect;
+        this->currentSpriteId = id;
         this->currentOptCode = 0;
     }
     
@@ -53,30 +54,41 @@ void SCGameFlow::clicked(uint8_t id) {
  */
 void SCGameFlow::runEffect() {
     uint8_t i = this->currentOptCode;
+    if (this->currentSpriteId>0 && this->sprites[this->currentSpriteId]->cliked) {
+        int fpsupdate = 0;
+        fpsupdate = SDL_GetTicks() - this->fps > 80;
+        if (this->sprites[this->currentSpriteId]->frameCounter < this->sprites[this->currentSpriteId]->img->GetNumImages()-1) {
+            this->sprites[this->currentSpriteId]->frameCounter += fpsupdate;
+            return;
+        } else {
+            this->currentSpriteId = 0;
+        }
+    }
     if (this->efect == nullptr) {
         return;
     }
     if (i >= this->efect->size()) {
-        this->efect = new std::vector<uint8_t>();
+        this->efect = nullptr;
         this->currentOptCode = 0;
         return;
     }
-    if (i + 1 < this->efect->size()) {
-        this->currentOptCode += 2;
-        switch (this->efect->at(i)) {
+    if (i < this->efect->size()) {
+        this->currentOptCode ++;
+        switch (this->efect->at(i)->opcode) {
         case EFECT_OPT_CONV:
         {
-            printf("PLAYING CONV %d\n", this->efect->at(i + 1));
+            printf("PLAYING CONV %d\n", this->efect->at(i)->value);
             SCConvPlayer* conv = new SCConvPlayer();
             conv->Init();
-            conv->SetID(this->efect->at(i + 1));
+            conv->SetID(this->efect->at(i)->value);
             Game.AddActivity(conv);
         }
         break;
         case EFECT_OPT_SCEN:
             for (int j = 0; j < this->gameFlowParser.game.game[this->current_miss]->scen.size(); j++) {
-                if (this->gameFlowParser.game.game[this->current_miss]->scen.at(j)->info.ID == this->efect->at(i + 1)) {
+                if (this->gameFlowParser.game.game[this->current_miss]->scen.at(j)->info.ID == this->efect->at(i)->value) {
                     this->current_scen = j;
+                    this->currentSpriteId = 0;
                     printf("PLAYING SCEN %d\n", this->current_scen);
                     this->createMiss();
                     return;
@@ -85,8 +97,9 @@ void SCGameFlow::runEffect() {
             break;
         case EFECT_OPT_MISS:
         {
-            this->current_miss = this->efect->at(i + 1);
+            this->current_miss = this->efect->at(i)->value;
             this->current_scen = 0;
+            this->currentSpriteId = 0;
             this->efect = nullptr;
             printf("PLAYING MISS %d\n", this->current_miss);
             this->createMiss();
@@ -98,19 +111,19 @@ void SCGameFlow::runEffect() {
             printf("MIS2 NOT IMPLEMENTED\n");
             break;
         case EFECT_OPT_SHOT:
-            printf("PLAYING SHOT %d\n", this->efect->at(i + 1));
+            printf("PLAYING SHOT %d\n", this->efect->at(i)->value);
             printf("SHOT NOT IMPLEMENTED\n");
             break;
         case EFECT_OPT_FLYM:
         {
-            uint8_t flymID = this->efect->at(i + 1);
+            uint8_t flymID = this->efect->at(i)->value;
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             printf("FLYM NOT IMPLEMENTED\n");
         }
             break;
         default:
-            printf("Unkown opcode :%d, %d\n", this->efect->at(i), this->efect->at(i + 1));
+            printf("Unkown opcode :%d, %d\n", this->efect->at(i)->opcode, this->efect->at(i)->value);
             break;
         };
         
@@ -202,8 +215,8 @@ void SCGameFlow::Init() {
  */
 void SCGameFlow::createMiss() {
     printf("current miss : %d, current_scen %d\n", this->current_miss, this->current_scen);
-    if (this->efect == nullptr && this->gameFlowParser.game.game[this->current_miss]->efct.size() > 0) {
-        this->efect = &this->gameFlowParser.game.game[this->current_miss]->efct;
+    if (this->efect == nullptr && this->gameFlowParser.game.game[this->current_miss]->efct != nullptr) {
+        this->efect = this->gameFlowParser.game.game[this->current_miss]->efct;
     }
     printf("efect size %zd\n", this->efect->size());
     if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
@@ -224,6 +237,9 @@ void SCGameFlow::createMiss() {
             if (this->optionParser.opts[optionScenID]->foreground->sprites.count(sprtId) > 0) {
                 uint8_t optsprtId = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->sprite.SHP_ID;
                 animatedSprites* sprt = new animatedSprites();
+                if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->CLCK == 1) {
+                    sprt->cliked = true;
+                }
                 if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->zone != nullptr) {
                     sprt->rect = new sprtRect();
                     sprt->rect->x1 = this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->zone->X1;
@@ -274,7 +290,7 @@ void SCGameFlow::createMiss() {
                     this->zones.push_back(z);
                 }
                 
-                sprt->efect = &sprite->efct;
+                sprt->efect = sprite->efct;
                 sprt->img = this->getShape(optsprtId);
                 sprt->frameCounter = 0;
                 if (this->optionParser.opts[optionScenID]->foreground->sprites[sprtId]->SEQU != nullptr) {
@@ -350,7 +366,7 @@ void SCGameFlow::RunFrame(void) {
             VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frames->at(sprit.second->frameCounter)));
             sprit.second->frameCounter = (sprit.second->frameCounter + fpsupdate) % static_cast<uint8_t>(sprit.second->frames->size());
 
-        } else if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames == nullptr) {
+        } else if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames == nullptr && sprit.second->cliked == false) {
             VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frameCounter));
 
             if (sprit.second->frameCounter >= sprit.second->img->GetNumImages() - 1) {
@@ -358,6 +374,8 @@ void SCGameFlow::RunFrame(void) {
             } else {
                 sprit.second->frameCounter += fpsupdate;
             }
+        } else if  (sprit.second->img->GetNumImages() > 1 && sprit.second->frames == nullptr && sprit.second->cliked == true) {
+            VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frameCounter));
         }
     }
     this->CheckZones();
