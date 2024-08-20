@@ -57,7 +57,7 @@ void SCStrike::Init(void ){
     Renderer.Init(1);
     this->area.tre = Assets.tres[AssetManager::TRE_OBJECTS];
 	this->area.objCache = &objectCache;
-	this->area.InitFromPAKFileName(areaName);
+	this->area.InitFromPAKFileName(fareaName);
 }
 
 void SCStrike::RunFrame(void){
