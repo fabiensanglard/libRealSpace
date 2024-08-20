@@ -9,9 +9,11 @@
 #include "precomp.h"
 
 
-SCButton::SCButton():
-    enabled(true){
-    
+SCButton::SCButton(){
+    this->enabled = true;
+    this->onClick = nullptr;
+    this->position = Point2D({0,0});
+    this->dimension = Point2D({0,0});
 }
 
 SCButton::~SCButton(){

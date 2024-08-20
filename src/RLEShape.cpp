@@ -15,6 +15,8 @@ RLEShape::RLEShape()
 {
     position.x = 0;
     position.y = 0;
+    this->data = nullptr;
+    this->stream = ByteStream();
 }
 
 

@@ -17,9 +17,8 @@ ByteStream::ByteStream(ByteStream& stream) {
 	this->cursor = stream.cursor;
 }
 
-ByteStream::ByteStream() :cursor(NULL)
-{
-
+ByteStream::ByteStream() {
+	this->cursor = nullptr;
 }
 
 ByteStream::~ByteStream() {
