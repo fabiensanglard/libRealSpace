@@ -128,11 +128,12 @@ void Texture::UpdateContent(RSImage* image){
             dst[0] = src->r;
             dst[1] = src->g;
             dst[2] = src->b;
+			
             dst[3] = src->a;
-
-            if (src->r == 0 && src->g == 0 && src->b == 0) {
+			
+            /*if (src->r == 0 && src->g == 0 && src->b == 0) {
                 dst[3] = 0;
-            }
+            }*/
 				
 			// force alpha on delimiters...
 			if (image->width == 64 && image->height == 64 && src->r == 174 && src->g == 28 && src->b == 0) {

@@ -13,9 +13,12 @@
 #include "RSEntity.h"
 #include "RSVGA.h"
 #include "Texture.h"
+
 #ifdef BLOCK_WIDTH
 #undef BLOCK_WIDTH
 #endif
+#include <SDL_opengl.h>
+#include <SDL_opengl_glext.h>
 #define BLOCK_WIDTH (25000)
 
 extern SCRenderer Renderer;
@@ -104,14 +107,19 @@ void SCRenderer::CreateTextureInGPU(Texture* texture){
     glBindTexture(GL_TEXTURE_2D, texture->id);
 	//printf("TEXTURE [%s] : %d\n", texture->name, texture->id);
     glEnable(GL_TEXTURE_2D);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+
+    
+
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
+    
+
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
     //glDisable(GL_TEXTURE_2D);
 }
 
@@ -123,7 +131,7 @@ void SCRenderer::UploadTextureContentToGPU(Texture* texture){
         return;
 	//printf("UPLOAD TEXTURE [%s] : %d\n", texture->name, texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
-    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
+    glTexImage2D (GL_TEXTURE_2D, 0, 4, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
 }
 
 void SCRenderer::DeleteTextureInGPU(Texture* texture){
@@ -197,23 +205,17 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
         
     glDisable(GL_CULL_FACE);
-    
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    
-    
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    
     
     //Texture pass
     if (lodLevel == 0){
         glEnable(GL_TEXTURE_2D);
         
-        //glDepthFunc(GL_EQUAL);
-        
-        glAlphaFunc ( GL_ALWAYS, 1.0f ) ;
-        glEnable ( GL_ALPHA_TEST ) ;
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        //glAlphaFunc ( GL_ALWAYS, 1.0f ) ;
+        //glEnable ( GL_ALPHA_TEST ) ;
         
         
         for (int i=0 ; i < object->NumUVs(); i++) {
@@ -227,12 +229,22 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             RSImage* image = object->images[textInfo->textureID];
             
             Texture* texture = image->GetTexture();
-            
-            
-            glBindTexture(GL_TEXTURE_2D, texture->id);
-
             Triangle* triangle = &object->triangles[textInfo->triangleID];
-            
+            float alpha = 1.0f;
+            if (triangle->property == 6) {
+                alpha = 0.0f;
+            }
+            if (triangle->property == 7) {
+                alpha = 1.0f;
+            }
+            if (triangle->property == 8) {
+                alpha = 1.0f;
+            }
+            if (triangle->property == 9) {
+                alpha = 0.0f;
+            }
+
+            glBindTexture(GL_TEXTURE_2D, texture->id);
             Vector3D normal;
             GetNormal(object, triangle, &normal);
             
@@ -241,6 +253,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             for(int j=0 ; j < 3 ; j++){
                 
                 Point3D vertice = object->vertices[triangle->ids[j]];
+                
                 
                 Vector3D lighDirection;
                 lighDirection = light;
@@ -257,8 +270,10 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
                 
                 const Texel* texel = palette.GetRGBColor(triangle->color);
                 
-                glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,texel->a/255.0f);
-                //glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
+                //glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,alpha);
+                //glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,alpha);
+                //glColor4f(0, 0, 0,1);
+                glColor4f(lambertianFactor, lambertianFactor, lambertianFactor,alpha);
                 glTexCoord2f(textInfo->uvs[j].u/(float)texture->width, textInfo->uvs[j].v/(float)texture->height);
                 glVertex3f(object->vertices[triangle->ids[j]].x,
                            object->vertices[triangle->ids[j]].y,
@@ -266,11 +281,10 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             }
             glEnd();
             
-            
         }
-        glDisable(GL_ALPHA_TEST);
-        glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
+        
     }
 
 
@@ -302,6 +316,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
         if (triangle->property != RSEntity::SC_TRANSPARENT)
             continue;
+        
         
         
         Vector3D normal;
@@ -347,7 +362,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
     
     
     
-    
+  
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     //Pass 1, draw color
@@ -360,7 +375,18 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         
         if (triangle->property == RSEntity::SC_TRANSPARENT)
             continue;
-        
+        if (triangle->property == 6) {
+            continue;
+        }
+        if (triangle->property == 7) {
+            continue;
+        }
+        if (triangle->property == 8) {
+            continue;
+        }
+        if (triangle->property == 9) {
+            continue;
+        }
         Vector3D normal;
         GetNormal(object, triangle, &normal);
         
@@ -393,6 +419,7 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
         }
         glEnd();
     }
+
     glDisable(GL_BLEND);
 }
 

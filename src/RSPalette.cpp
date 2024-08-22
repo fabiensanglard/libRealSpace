@@ -47,10 +47,14 @@ void RSPalette::ParsePALT(IffChunk* chunk){
         texel.g = stream.ReadByte();
         texel.b = stream.ReadByte();
         
-        if (i == 255)
+        texel.a = 255;
+        if (i == 255) {
             texel.a = 0;
-        else
+            printf("PALT color 255 (%d,%d,%d) is transparent\n",texel.r,texel.g,texel.b);
+        } else {
             texel.a = 255;
+        }
+            
         
         //Since VGA palette RGB are on 6 bits and not 8, we need to adjust
         texel.r = static_cast<uint8_t>(texel.r * 255/63.0f);
@@ -76,10 +80,12 @@ void RSPalette::ParseBLWH(IffChunk* chunk){
         texel.g = stream.ReadByte();
         texel.b = stream.ReadByte();
         
-        if (i == 255)
+        if (i == 255) {
             texel.a = 0;
-        else
+            printf("BLWH color 255 (%d,%d,%d) is transparent\n",texel.r,texel.g,texel.b);
+        } else {
             texel.a = 255;
+        }
         
         texel.r = static_cast<uint8_t>(texel.r * 255/63.0f);
         texel.g *= static_cast<uint8_t>(255/63.0f);
