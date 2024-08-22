@@ -231,14 +231,17 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
             Texture* texture = image->GetTexture();
             Triangle* triangle = &object->triangles[textInfo->triangleID];
             float alpha = 1.0f;
+            int colored = 0;
             if (triangle->property == 6) {
                 alpha = 0.0f;
             }
             if (triangle->property == 7) {
                 alpha = 1.0f;
+                colored = 1;
             }
             if (triangle->property == 8) {
                 alpha = 1.0f;
+                colored = 1;
             }
             if (triangle->property == 9) {
                 alpha = 0.0f;
@@ -270,10 +273,14 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
                 
                 const Texel* texel = palette.GetRGBColor(triangle->color);
                 
-                //glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,alpha);
+                //
                 //glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,alpha);
                 //glColor4f(0, 0, 0,1);
-                glColor4f(lambertianFactor, lambertianFactor, lambertianFactor,alpha);
+                if (colored) {
+                    glColor4f(texel->r/255.0f*lambertianFactor, texel->g/255.0f*lambertianFactor, texel->b/255.0f*lambertianFactor,alpha);
+                } else {
+                    glColor4f(lambertianFactor, lambertianFactor, lambertianFactor,alpha);
+                }
                 glTexCoord2f(textInfo->uvs[j].u/(float)texture->width, textInfo->uvs[j].v/(float)texture->height);
                 glVertex3f(object->vertices[triangle->ids[j]].x,
                            object->vertices[triangle->ids[j]].y,
