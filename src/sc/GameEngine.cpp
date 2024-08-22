@@ -127,6 +127,11 @@ void GameEngine::PumpEvents(void){
                     SDL_ShowCursor(SDL_ENABLE);
                     return;
                 }
+
+                if (event->window.event == SDL_WINDOWEVENT_CLOSE){
+                    Terminate("System request.");
+                    break;
+                }
                         
                
                 break;
