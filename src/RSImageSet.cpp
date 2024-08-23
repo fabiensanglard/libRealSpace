@@ -37,20 +37,16 @@ void RSImageSet::InitFromPakEntry(PakEntry* entry){
         nextImage = nextImage & 0x00FFFFFF;
         
         size_t size = 0;
-        if (i == numImages-1){
-            
-        }
-        else{
-            
-        }
+        
         if (currImage[0] != 'F') {
             RLEShape* shape = new RLEShape();
             shape->Init(currImage, size);
             this->shapes.push_back(shape);
+            this->sequence.push_back(i);        
         } else {
             printf("PALT not supported yet\n");
-            RLEShape* shape = new RLEShape();
-            shape->Init(currImage, size);
+            RLEShape* shape = new RLEShape();;
+            *shape = *RLEShape::GetEmptyShape();
             this->shapes.push_back(shape);
         }
     }
@@ -63,6 +59,7 @@ void RSImageSet::InitFromSubPakEntry(PakArchive* entry) {
         Point2D pos = { 0, 0 };
         shape->SetPosition(&pos);
         this->shapes.push_back(shape);
+        this->sequence.push_back(i);
     }
 }
 

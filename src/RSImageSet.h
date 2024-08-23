@@ -25,7 +25,7 @@ public:
     
     RLEShape* GetShape(size_t index);
     size_t GetNumImages(void);
-    
+    std::vector<uint8_t> sequence;
     void Add(RLEShape* shape);
     
 private:
