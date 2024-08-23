@@ -88,6 +88,7 @@ public:
     
    
     Camera* GetCamera(void);
+    
     void SetLight(Point3D* position);
     
     inline bool IsPaused(void){

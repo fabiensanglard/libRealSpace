@@ -63,14 +63,14 @@ void SCRenderer::Init(int32_t zoomFactor){
   
 	
     
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);				// Black Background
+	glClearColor(0.0f, 0.5f, 1.0f, 1.0f);				// Black Background
 	//glClearDepth(1.0f);								// Depth Buffer Setup
 	glDisable(GL_DEPTH_TEST);							// Disable Depth Testing
     
     
     
-    camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
-    
+    //camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
+    camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,20000*18);
     
     
     light.SetWithCoo(300, 300, 300);
@@ -95,7 +95,7 @@ void SCRenderer::Clear(void){
         return;
     
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-    glColor4f(1, 1, 1, 1);
+    glColor4f(0, 0, 1, 1);
 }
 
 void SCRenderer::CreateTextureInGPU(Texture* texture){
@@ -888,7 +888,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glMatrixMode(GL_PROJECTION);
     Matrix* projectionMatrix = camera.GetProjectionMatrix();
     glLoadMatrixf(projectionMatrix->ToGL());
-	counter++;
+    
     
     running = true;
     
@@ -899,8 +899,8 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     
     
-	Point3D lookat = { 0, 0, -1 };
-    camera.LookAt(&lookat);
+    
+    
     
     
     GLuint fogMode[]= { GL_EXP, GL_EXP2, GL_LINEAR };   // Storage For Three Types Of Fog
@@ -912,7 +912,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glHint(GL_FOG_HINT, GL_DONT_CARE);          // Fog Hint Value
     glFogf(GL_FOG_START, 600.0f);             // Fog Start Depth
     glFogf(GL_FOG_END, 8000.0f);               // Fog End Depth
-    glEnable(GL_FOG);
+    //glEnable(GL_FOG);
     
     
         
@@ -927,9 +927,9 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         
         //Island
         /*
-        newPosition[0]=  2500;//lookAt[0] + 5256*cosf(counter/2);
+        newPosition[0]=  2500;//lookAt[0] + 5256*cos(counter/2);
         newPosition[1]= 350;
-        newPosition[2]=  600;//lookAt[2];// + 5256*sinf(counter/2);
+        newPosition[2]=  600;//lookAt[2];// + 5256*sin(counter/2);
         vec3_t lookAt = {2456,0,256};
         */
 
@@ -942,10 +942,10 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         /*
         counter = 23;
         vec3_t lookAt = {3856,30,2856};
-        newPosition[0]=  lookAt[0] + 256*cosf(counter/2);
+        newPosition[0]=  lookAt[0] + 256*cos(counter/2);
         newPosition[1]= 60;
-        newPosition[2]=  lookAt[2] + 256*sinf(counter/2);
-        /**/
+        newPosition[2]=  lookAt[2] + 256*sin(counter/2);
+        */
         
         //Canyon
         ///*
@@ -953,10 +953,11 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         
         //*/
         
-        //counter += 0.02;
+        counter += 1;
         
         glDepthFunc(GL_LESS);
         glBegin(GL_TRIANGLES);
+        //for(int i=97 ; i < 98 ; i++)
         for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
             RenderBlock(area, LOD, i,false);
         glEnd();
@@ -966,9 +967,9 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         glDepthFunc(GL_EQUAL);
-		for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-			RenderBlock(area, LOD, i, true);
-		}
+        //for(int i=97 ; i < 98 ; i++)
+        for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
+            RenderBlock(area, LOD, i,true);
         glDisable(GL_BLEND);
         glDisable(GL_TEXTURE_2D);
         
@@ -976,7 +977,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
         //Render objects on the map
         //for(int i=97 ; i < 98 ; i++)
         for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
-            RenderObjects(area,i);
+           RenderObjects(area,i);
         
         RenderJets(area);
         

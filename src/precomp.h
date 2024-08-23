@@ -39,7 +39,7 @@ extern "C" {
 
     #include <SDL.h>
     #include <GL/GL.h>
-
+    #include <GL/GLU.h>
 
     #include "Math.h"
     #include "Matrix.h"

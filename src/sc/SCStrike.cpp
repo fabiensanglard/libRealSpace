@@ -9,6 +9,8 @@
 #include "precomp.h"
 #include <cctype> // Include the header for the toupper function
 
+#define SC_WORLD 1100
+
 char* strtoupper(char* dest, const char* src) {
 	char* result = dest;
 	while (*dest++ = toupper(*src++));
@@ -34,36 +36,51 @@ void SCStrike::CheckKeyboard(void) {
             Game.StopTopActivity();
             break;
         }
+        case SDLK_z:
+            //this->camera->MoveForward();
+            this->newPosition.z+=1000;
+            break;
+        case SDLK_s:
+            //this->camera->MoveBackward();
+            this->newPosition.z-=1000;
+            break;
+        case SDLK_q:
+            //this->camera->MoveStrafRight();
+            this->newPosition.x-=1000;
+            break;
+        case SDLK_d:
+            //this->camera->MoveStrafLeft();
+            this->newPosition.x+=1000;
+            break;
+        case SDLK_e:
+            this->yaw+=1;
+            break;
+        case SDLK_a:
+            this->yaw-=1;
+            break;
         default:
             break;
         }
     }
 }
 void SCStrike::Init(void ){
-    TreEntry* mission = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName("..\\..\\DATA\\MISSIONS\\MISN-12A.IFF");
-    IffLexer missionIFF;
-
-    missionIFF.InitFromRAM(mission->data, mission->size);
-
-    this->missionObj.tre = Assets.tres[AssetManager::TRE_OBJECTS];
-    this->missionObj.objCache = &objectCache;
-    this->missionObj.InitFromIFF(&missionIFF);
-
-    char * mname = missionObj.getMissionAreaFile();
-    char areaName[8 + 4 + 1];
-    char fareaName[8 + 4 + 2];
-    strtoupper(areaName, mname);
-    sprintf_s(fareaName, "%s.PAK", areaName);
-    Renderer.Init(1);
-    this->area.tre = Assets.tres[AssetManager::TRE_OBJECTS];
-	this->area.objCache = &objectCache;
-	this->area.InitFromPAKFileName(fareaName);
+    area.InitFromPAKFileName("ARENA.PAK");
+    counter = 0;
+    camera = Renderer.GetCamera();
+    
+    newPosition.x=  4100;
+    newPosition.y= 100;
+    newPosition.z=  3000;
+    camera->SetPosition(&newPosition);
+    
+    
+    Point3D lookAt = {3856,0,2856};
+    
+    camera->Rotate(0.0f,this->yaw,0.0f);
 }
 
 void SCStrike::RunFrame(void){
-    this->CheckKeyboard();
-    Point3D* position = new Point3D({0,0,0});
-    Renderer.setPlayerPosition(position);
-    Renderer.RenderWorld(&area,BLOCK_LOD_MAX,400);
-
+    camera->SetPosition(&this->newPosition);
+    //camera->Rotate(0.0f,this->yaw,0.0f);
+    Renderer.RenderWorldSolid(&area,BLOCK_LOD_MAX,400);
 }

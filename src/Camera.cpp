@@ -191,33 +191,33 @@ Matrix* Camera::GetViewMatrix(void){
 
 void Camera::MoveForward(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x -= m.v[0][2]*100;
-    this->position.y -= m.v[1][2]*100;
-    this->position.z -= m.v[2][2]*100;
+    this->position.x -= m.v[0][2]*1000;
+    this->position.y -= m.v[1][2]*1000;
+    this->position.z -= m.v[2][2]*1000;
     CalcViewMatrix();
 }
 
 void Camera::MoveBackward(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x += m.v[0][2]*100;
-    this->position.y += m.v[1][2]*100;
-    this->position.z += m.v[2][2]*100;
+    this->position.x += m.v[0][2]*1000;
+    this->position.y += m.v[1][2]*1000;
+    this->position.z += m.v[2][2]*1000;
     CalcViewMatrix();
 }
 
 void Camera::MoveStrafLeft(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x -= m.v[0][0]*10;
-    this->position.y -= m.v[1][0]*10;
-    this->position.z -= m.v[2][0]*10;
+    this->position.x -= m.v[0][0]*1000;
+    this->position.y -= m.v[1][0]*1000;
+    this->position.z -= m.v[2][0]*1000;
     CalcViewMatrix();
 }
 
 void Camera::MoveStrafRight(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x += m.v[0][0]*10;
-    this->position.y += m.v[1][0]*10;
-    this->position.z += m.v[2][0]*10;
+    this->position.x += m.v[0][0]*1000;
+    this->position.y += m.v[1][0]*1000;
+    this->position.z += m.v[2][0]*1000;
     CalcViewMatrix();
 }
 

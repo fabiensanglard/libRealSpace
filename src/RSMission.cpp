@@ -353,7 +353,6 @@ void RSMission::parseAREA(IffChunk* chunk) {
 					break;
 				}
 				if (area->AreaType != '\0') {
-					printArea(area);
 					printf("READED: %llu, SIZE: %llu\n", read, fsize);
 					missionAreas.push_back(area);
 				}
@@ -454,39 +453,7 @@ void RSMission::parsePART(IffChunk* chunk) {
 void RSMission::parseGLNT(IffChunk* chunk) {
 	
 	if (chunk != NULL) {
-		PakArchive p;
-		p.InitFromRAM("GLNT", chunk->data, chunk->size);
-		p.List(stdout);
-		for (size_t i = 0; i < p.GetNumEntries(); i++) {
-			PakEntry* blockEntry = p.GetEntry(i);
-			printf("CONTENT OF GLNT PAK ENTRY %llu\n", i);
-			ByteStream stream(blockEntry->data);
-			size_t fsize = blockEntry->size;
-			uint8_t byte;
-			int cl = 0;
-			for (int read = 0; read < fsize; read++) {
-				byte = stream.ReadByte();
-				if (byte >= 40 && byte <= 90) {
-					printf("[%c]", char(byte));
-				}
-				else if (byte >= 97 && byte <= 122) {
-					printf("[%c]", char(byte));
-				}
-				else {
-					printf("[0x%X]", byte);
-				}
-				if (cl > 2) {
-					printf("\n");
-					cl = 0;
-				}
-				else {
-					printf("\t");
-					cl++;
-				}
-
-			}
-			printf("\n");
-		}
+		
 	}
 }
 
