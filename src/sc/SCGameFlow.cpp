@@ -22,7 +22,7 @@ SCGameFlow::SCGameFlow() {
     this->current_scen = 0;
     this->efect = nullptr;
     this->currentOptCode = 0;
-    this->fps = SDL_GetTicks() / 100;
+    this->fps = SDL_GetTicks() / 10;
 }
 
 SCGameFlow::~SCGameFlow() {
@@ -56,9 +56,14 @@ void SCGameFlow::runEffect() {
     uint8_t i = this->currentOptCode;
     if (this->currentSpriteId>0 && this->sprites[this->currentSpriteId]->cliked) {
         int fpsupdate = 0;
-        fpsupdate = SDL_GetTicks() - this->fps > 80;
+        fpsupdate = (SDL_GetTicks()/10) - this->fps > 12;
+        if (fpsupdate) {
+            this->fps = SDL_GetTicks()/10;
+        }
         if (this->sprites[this->currentSpriteId]->frameCounter < this->sprites[this->currentSpriteId]->img->sequence.size()-1) {
-            this->sprites[this->currentSpriteId]->frameCounter += fpsupdate;
+            if (fpsupdate) {
+                this->sprites[this->currentSpriteId]->frameCounter++;
+            }
             return;
         } else {
             this->currentSpriteId = 0;
@@ -225,7 +230,11 @@ void SCGameFlow::createMiss() {
         // donc il faut boucler.
         SCEN * sceneOpts = this->optionParser.opts[optionScenID];
 
-        uint8_t shapeID = sceneOpts->background->images[0]->ID;
+        for (auto bg: sceneOpts->background->images) {
+            background *tmpbg = new background();
+            tmpbg->img = this->getShape(bg->ID);
+            this->layers.push_back(tmpbg);
+        }
         uint8_t paltID = sceneOpts->background->palette->ID;
         uint8_t forPalTID = sceneOpts->foreground->palette->ID;
         
@@ -306,8 +315,7 @@ void SCGameFlow::createMiss() {
                 printf("%d, ID Sprite not found !!\n", sprtId);
             }
         }
-        // le layer de fonds peut être une animation, il faudra changer en RSimageSet
-        this->layer = this->getShape(shapeID)->GetShape(0);
+        
         this->rawPalette = this->optPals.GetEntry(paltID)->data;
         this->forPalette = this->optPals.GetEntry(forPalTID)->data;
     }
@@ -346,6 +354,11 @@ RSImageSet* SCGameFlow::getShape(uint8_t shpid) {
  */
 void SCGameFlow::RunFrame(void) {
     this->runEffect();   
+    int fpsupdate = 0;
+    fpsupdate = (SDL_GetTicks() /10) - this->fps > 12;
+    if (fpsupdate) {
+        this->fps = (SDL_GetTicks()/10);
+    }
     CheckKeyboard();
     VGA.Activate();
     VGA.Clear();
@@ -353,16 +366,17 @@ void SCGameFlow::RunFrame(void) {
     paletteReader.Set((this->rawPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
-
-    VGA.DrawShape(this->layer);
+    for (auto layer: this->layers) {
+        VGA.DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
+        if (layer->img->sequence.size()>1) {
+            layer->frameCounter = (layer->frameCounter + fpsupdate) % layer->img->sequence.size() ;
+        }
+    }
+    
     paletteReader.Set((this->forPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
-    int fpsupdate = 0;
-    fpsupdate = SDL_GetTicks() - this->fps > 80;
-    if (fpsupdate) {
-        this->fps = SDL_GetTicks();
-    }
+    
 
     for (const auto &sprit : this->sprites) {
         VGA.DrawShape(sprit.second->img->GetShape(sprit.second->img->sequence[0]));

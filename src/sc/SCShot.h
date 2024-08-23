@@ -1,13 +1,13 @@
 #pragma once
 //
-//  SCGameFlow.h
+//  SCShot.h
 //  libRealSpace
 //
-//  Created by Rémi LEONARD on 19/08/2024.
+//  Created by Rémi LEONARD on 23/08/2024.
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
-#ifndef __libRealSpace__SCGameFow__
-#define __libRealSpace__SCGameFow__
+#ifndef __libRealSpace__SCShot__
+#define __libRealSpace__SCShot__
 
 #include "precomp.h"
 
@@ -29,43 +29,29 @@ struct animatedSprites {
     std::vector<EFCT *>* efect {nullptr}; 
 };
 
-struct background {
-    RSImageSet* img {nullptr};
-    uint8_t frameCounter {0};
-};
-
-class SCGameFlow : public IActivity {
+class SCShot : public IActivity {
 
 public:
 
-    SCGameFlow();
-    ~SCGameFlow();
+    SCShot();
+    ~SCShot();
 
     void Init();
-    void createMiss();
     void RunFrame(void);
 
 
 private:
-    RSGameFlow gameFlowParser;
     RSOption optionParser;
     PakArchive optShps;
     PakArchive optPals;
-    std::vector<background *>layers;
+    std::vector<RLEShape *>layers;
+    std::vector<RSImageSet *>mobil;
     uint8_t* rawPalette;
     uint8_t* forPalette;
-    std::map<uint8_t, animatedSprites*> sprites;
-    uint8_t current_miss;
-    uint8_t current_scen;
-    void clicked(uint8_t id);
-    void runEffect();
-    void CheckKeyboard(void);
+    
     RSImageSet* getShape(uint8_t shpid);
+    void CheckKeyboard(void);
     int fps;
-    uint8_t currentSpriteId {0};
-    uint8_t currentOptCode;
-    uint8_t requ;
-    std::vector<EFCT *> *efect;
 };
 
 #endif
