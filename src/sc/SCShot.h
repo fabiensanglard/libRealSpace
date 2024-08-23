@@ -12,21 +12,9 @@
 #include "precomp.h"
 
 
-struct sprtRect {
-    uint16_t x1;
-    uint16_t y1;
-    uint16_t x2;
-    uint16_t y2;
-};
-
-struct animatedSprites {
+struct shotBackground {
     RSImageSet* img {nullptr};
-    std::vector<uint8_t>* frames {nullptr};
     uint8_t frameCounter {0};
-    sprtRect* rect {nullptr};
-    bool cliked {false};
-    std::vector<Point2D*> *quad {nullptr};
-    std::vector<EFCT *>* efect {nullptr}; 
 };
 
 class SCShot : public IActivity {
@@ -37,6 +25,7 @@ public:
     ~SCShot();
 
     void Init();
+    void SetShotId(uint8_t shotid);
     void RunFrame(void);
 
 
@@ -44,8 +33,7 @@ private:
     RSOption optionParser;
     PakArchive optShps;
     PakArchive optPals;
-    std::vector<RLEShape *>layers;
-    std::vector<RSImageSet *>mobil;
+    std::vector<shotBackground *>layers;
     uint8_t* rawPalette;
     uint8_t* forPalette;
     

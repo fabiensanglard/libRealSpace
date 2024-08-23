@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#include "SCShot.h"
 #include "precomp.h"
 
 SCShot::SCShot() {
@@ -58,6 +57,17 @@ void SCShot::Init() {
     this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
     TreEntry* optPalettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
+
+}
+
+void SCShot::SetShotId(uint8_t shotid) {
+    for (auto s: this->optionParser.estb[shotid]->images) {
+        shotBackground *bg = new shotBackground();
+        bg->img = this->getShape(s->OptshapeID);
+        this->layers.push_back(bg);
+    }
+    uint8_t paltID = this->optionParser.estb[shotid]->palettes[0]->ID;
+    this->rawPalette = this->optPals.GetEntry(paltID)->data;
 }
 
 /**
@@ -97,21 +107,29 @@ void SCShot::RunFrame(void) {
     VGA.Activate();
     VGA.Clear();
     ByteStream paletteReader;
+    int fpsupdate = 0;
+    fpsupdate = (SDL_GetTicks() /10) - this->fps > 12;
+    if (fpsupdate) {
+        this->fps = (SDL_GetTicks()/10);
+    }
     paletteReader.Set((this->rawPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
-
+    bool ended = false;
     for (auto layer: this->layers) {
-        VGA.DrawShape(layer);
-    }
-    
-    int fpsupdate = 0;
-    fpsupdate = (SDL_GetTicks() / 100) - this->fps > 80;
-    if (fpsupdate) {
-        this->fps = (SDL_GetTicks() / 100);
+        VGA.DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
+        if (layer->img->sequence.size()>1) {
+            layer->frameCounter = layer->frameCounter + fpsupdate;
+            if (layer->frameCounter>=layer->img->sequence.size()) {
+                ended = true;
+            }
+        }
     }
 
     Mouse.Draw();
 
     VGA.VSync();
+    if (ended) {
+        Game.StopTopActivity();
+    }
 }

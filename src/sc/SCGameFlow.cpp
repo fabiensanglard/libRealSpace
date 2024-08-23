@@ -6,9 +6,7 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#include "SCGameFlow.h"
 #include "precomp.h"
-
 
 #define EFECT_OPT_CONV 0
 #define EFECT_OPT_SCEN 1
@@ -18,7 +16,7 @@
 #define EFECT_OPT_FLYM 12
 
 SCGameFlow::SCGameFlow() {
-    this->current_miss = 9;
+    this->current_miss = 0;
     this->current_scen = 0;
     this->efect = nullptr;
     this->currentOptCode = 0;
@@ -116,8 +114,16 @@ void SCGameFlow::runEffect() {
             printf("MIS2 NOT IMPLEMENTED\n");
             break;
         case EFECT_OPT_SHOT:
+        {
             printf("PLAYING SHOT %d\n", this->efect->at(i)->value);
             printf("SHOT NOT IMPLEMENTED\n");
+            SCShot *sht =  new SCShot();
+            sht->Init();
+            sht->SetShotId(this->efect->at(i)->value);
+            Game.AddActivity(sht);
+            return;
+        }
+        
             break;
         case EFECT_OPT_FLYM:
         {

@@ -43,6 +43,7 @@
 #include "SCTrainingMenu.h"
 #include "SCSelectWeaponsF16.h"
 #include "SCMainMenu.h"
-
+#include "SCShot.h"
+#include "SCGameFlow.h"
 
 #endif
