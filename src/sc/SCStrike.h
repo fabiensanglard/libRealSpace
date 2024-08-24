@@ -27,8 +27,10 @@ public:
     ~SCStrike();
     
     void Init( );
+    void SetMission(char* missionName);
     void CheckKeyboard(void);
     void RunFrame(void);
+    float getY(float x, float z);
 
 private:
     Point3D* position = new Point3D({0,0,0});
@@ -38,7 +40,7 @@ private:
     Quaternion newOrientation;
     PlanePosition *pp;
     RSArea area ;
-    RSMission missionObj;
+    RSMission *missionObj;
     float counter;
     std::map<std::string, RSEntity*> objectCache;
 };

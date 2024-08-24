@@ -11,11 +11,6 @@
 
 #define SC_WORLD 1100
 
-char* strtoupper(char* dest, const char* src) {
-	char* result = dest;
-	while (*dest++ = toupper(*src++));
-	return result;
-}
 
 SCStrike::SCStrike(){
 
@@ -76,20 +71,50 @@ void SCStrike::CheckKeyboard(void) {
     }
 }
 void SCStrike::Init(void ){
-    area.InitFromPAKFileName("ARENA.PAK");
-    counter = 0;
-    camera = Renderer.GetCamera();
+
     
-    newPosition.x=  4100;
-    newPosition.y= 100;
-    newPosition.z=  3000;
-    this->yaw = 0.0f;
-    camera->SetPosition(&newPosition);
+    this->SetMission("TEMPLATE.IFF");
 }
 
+void SCStrike::SetMission(char *missionName) {
+    char missFileName[33];
+    sprintf_s(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
+
+    TreEntry* mission = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(missFileName);
+    IffLexer missionIFF;
+    missionIFF.InitFromRAM(mission->data, mission->size);
+
+    missionObj = new RSMission();
+    missionObj->tre = Assets.tres[AssetManager::TRE_OBJECTS];
+    missionObj->objCache = &objectCache;
+    missionObj->InitFromIFF(&missionIFF);
+    
+    char filename[13];
+    sprintf_s(filename, "%s.PAK", missionObj->getMissionAreaFile());
+    area.InitFromPAKFileName(filename);
+
+    PART* playerCoord = missionObj->getPlayerCoord();
+
+    newPosition.x=  (float) playerCoord->XAxisRelative;
+    newPosition.z=  (float) -playerCoord->YAxisRelative;
+    newPosition.y= this->getY(newPosition.x, newPosition.z) + 10;
+    camera = Renderer.GetCamera();
+    camera->SetPosition(&newPosition);
+    yaw = 0.0f;
+}
+float SCStrike::getY(float x, float z) {
+	
+	int centerX = 180000;
+	int centerY = 180000;
+	int blocX = (int)(x + centerX)/20000;
+	int blocY = (int)(z + centerY)/20000;
+
+	return (area.getGroundLevel(blocY * 18 + blocX, x, z));
+}
 void SCStrike::RunFrame(void){
     this->CheckKeyboard();
     camera->SetPosition(&this->newPosition);
     camera->Rotate(0.0f,this->yaw*(M_PI/180.0f),0.0f);
     Renderer.RenderWorldSolid(&area,BLOCK_LOD_MAX,400);
+    Renderer.RenderMissionObjects(missionObj);
 }

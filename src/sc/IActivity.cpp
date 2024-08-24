@@ -8,6 +8,11 @@
 
 #include "precomp.h"
 
+char* strtoupper(char* dest, const char* src) {
+	char* result = dest;
+	while (*dest++ = toupper(*src++));
+	return result;
+}
 
 bool isPointInQuad(const Point2D& p, const std::vector<Point2D *>* quad) {
     int intersections = 0;
@@ -118,9 +123,7 @@ SCZone* IActivity::CheckZones(void) {
 void IActivity::DrawButtons(void){
     
     for (auto button: buttons) {
-        if (button->IsEnabled() )
-            VGA.DrawShape(&button->appearance[button->GetAppearance()]);
-        else
-            VGA.DrawShape(&button->appearance[SCButton::Appearance::APR_DOWN]);
+        RLEShape ap =button->appearance[button->GetAppearance()]; 
+        VGA.DrawShape(&ap);
     }
 }

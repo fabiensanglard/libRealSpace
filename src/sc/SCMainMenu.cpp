@@ -116,7 +116,7 @@ void SCMainMenu::LoadButtons(void){
 
     
     
-    SCButton* button;
+    SCButton* button =  nullptr;
     
     Point2D buttonDimension = {211, 15} ;
     

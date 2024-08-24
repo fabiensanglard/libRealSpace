@@ -65,6 +65,7 @@ private:
     uint8_t currentSpriteId {0};
     uint8_t currentOptCode;
     uint8_t requ;
+    char *missionToFly;
     std::vector<EFCT *> *efect;
 };
 

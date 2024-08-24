@@ -209,7 +209,9 @@ size_t PakArchive::GetNumEntries(void){
 }
 
 PakEntry* PakArchive::GetEntry(size_t index){
-    return this->entries[index];
+    if (index < this->entries.size());
+        return this->entries[index];
+    return nullptr;
 }
 
 void PakArchive::List(FILE* output){

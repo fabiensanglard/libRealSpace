@@ -84,7 +84,7 @@ void SCTrainingMenu::Init( ){
     Point2D positionBoard = {6,150};
     board.Init(trButtonsPack.GetEntry(0)->data, trButtonsPack.GetEntry(0)->size);
     board.SetPosition(&positionBoard);
-    
+    PakEntry *pak = nullptr;
     //Search and destroy button
     SCButton* button;
     button = new SCButton();

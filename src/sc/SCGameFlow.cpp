@@ -15,6 +15,7 @@
 #define EFECT_OPT_SHOT 8
 #define EFECT_OPT_FLYM 12
 
+
 SCGameFlow::SCGameFlow() {
     this->current_miss = 0;
     this->current_scen = 0;
@@ -100,6 +101,14 @@ void SCGameFlow::runEffect() {
             break;
         case EFECT_OPT_MISS:
         {
+            if (this->missionToFly != nullptr) {
+                SCStrike* fly = new SCStrike();
+                fly->Init();
+                fly->SetMission(this->missionToFly);
+                this->missionToFly = nullptr;
+                Game.AddActivity(fly);
+                return;
+            }
             this->current_miss = this->efect->at(i)->value;
             this->current_scen = 0;
             this->currentSpriteId = 0;
@@ -130,6 +139,9 @@ void SCGameFlow::runEffect() {
             uint8_t flymID = this->efect->at(i)->value;
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
+            this->missionToFly = (char *)malloc(13);
+            sprintf(this->missionToFly, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
+            strtoupper(this->missionToFly, this->missionToFly);
             printf("FLYM NOT IMPLEMENTED\n");
         }
             break;
@@ -225,6 +237,7 @@ void SCGameFlow::Init() {
  * @throws None
  */
 void SCGameFlow::createMiss() {
+    this->missionToFly = nullptr;
     printf("current miss : %d, current_scen %d\n", this->current_miss, this->current_scen);
     if (this->efect == nullptr && this->gameFlowParser.game.game[this->current_miss]->efct != nullptr) {
         this->efect = this->gameFlowParser.game.game[this->current_miss]->efct;

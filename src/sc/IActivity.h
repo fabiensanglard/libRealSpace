@@ -8,7 +8,7 @@
 
 #ifndef __libRealSpace__IActivity__
 #define __libRealSpace__IActivity__
-
+char* strtoupper(char* dest, const char* src);
 
 class IActivity{
     

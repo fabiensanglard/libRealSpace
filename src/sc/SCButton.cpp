@@ -14,6 +14,7 @@ SCButton::SCButton(){
     this->onClick = nullptr;
     this->position = Point2D({0,0});
     this->dimension = Point2D({0,0});
+    this->apre = APR_UP;
 }
 
 SCButton::~SCButton(){

@@ -27,11 +27,11 @@ void RSVGA::Clear(void){
 }
 
 bool RSVGA::DrawShape(RLEShape* shape){
-    
-    
-    size_t byteRead=0;
-    return shape->Expand(GetFrameBuffer(), &byteRead);
-    
+    if (shape != nullptr) {
+        size_t byteRead=0;
+        return shape->Expand(GetFrameBuffer(), &byteRead);
+    }
+    return (false);
 }
 
 void RSVGA::Init(void){

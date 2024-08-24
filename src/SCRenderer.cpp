@@ -189,9 +189,12 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
     if (!initialized)
         return;
 
+    if (object->vertices.size() == 0)
+        return;
+
     if (lodLevel >= object->NumLods()){
-        printf("Unable to render this Level Of Details (out of range): Max level is  %llu\n",
-               min(0UL,object->NumLods()-1));
+        printf("Unable to render this Level Of Details (out of range): Max level is  %llu %llu\n",
+               min(0UL,object->NumLods()-1), lodLevel);
         return;
     }
     
@@ -908,82 +911,64 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     GLfloat fogColor[4]= {1.0f, 1.0f, 1.0f, 1.0f};
     glFogi(GL_FOG_MODE, fogMode[fogfilter]);        // Fog Mode
     glFogfv(GL_FOG_COLOR, fogColor);            // Set Fog Color
-    glFogf(GL_FOG_DENSITY, 0.0002f);              // How Dense Will The Fog Be
+    glFogf(GL_FOG_DENSITY, 0.00002f);              // How Dense Will The Fog Be
     glHint(GL_FOG_HINT, GL_DONT_CARE);          // Fog Hint Value
-    glFogf(GL_FOG_START, 600.0f);             // Fog Start Depth
-    glFogf(GL_FOG_END, 8000.0f);               // Fog End Depth
-    //glEnable(GL_FOG);
+    glFogf(GL_FOG_START, 800000.0f);             // Fog Start Depth
+    glFogf(GL_FOG_END, 1600000.0f);               // Fog End Depth
+    glEnable(GL_FOG);
     
     
         
-        glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-        
-        glMatrixMode(GL_MODELVIEW);
-        Matrix* modelViewMatrix = camera.GetViewMatrix();
-        glLoadMatrixf(modelViewMatrix->ToGL());
-
-        
-        
-        
-        //Island
-        /*
-        newPosition[0]=  2500;//lookAt[0] + 5256*cos(counter/2);
-        newPosition[1]= 350;
-        newPosition[2]=  600;//lookAt[2];// + 5256*sin(counter/2);
-        vec3_t lookAt = {2456,0,256};
-        */
-
-        
-        //City Top
-        
-        
-        
-        //City view on mountains
-        /*
-        counter = 23;
-        vec3_t lookAt = {3856,30,2856};
-        newPosition[0]=  lookAt[0] + 256*cos(counter/2);
-        newPosition[1]= 60;
-        newPosition[2]=  lookAt[2] + 256*sin(counter/2);
-        */
-        
-        //Canyon
-        ///*
-        
-        
-        //*/
-        
-        counter += 1;
-        
-        glDepthFunc(GL_LESS);
-        glBegin(GL_TRIANGLES);
-        //for(int i=97 ; i < 98 ; i++)
-        for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
-            RenderBlock(area, LOD, i,false);
-        glEnd();
-        
-        
-        glEnable(GL_TEXTURE_2D);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-        glDepthFunc(GL_EQUAL);
-        //for(int i=97 ; i < 98 ; i++)
-        for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
-            RenderBlock(area, LOD, i,true);
-        glDisable(GL_BLEND);
-        glDisable(GL_TEXTURE_2D);
-        
-        
-        //Render objects on the map
-        //for(int i=97 ; i < 98 ; i++)
-        for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
-           RenderObjects(area,i);
-        
-        RenderJets(area);
-        
-      
+    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     
+    glMatrixMode(GL_MODELVIEW);
+    Matrix* modelViewMatrix = camera.GetViewMatrix();
+    glLoadMatrixf(modelViewMatrix->ToGL());
+    
+    textureSortedVertex.clear();
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glBegin(GL_TRIANGLES);
+    for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+        RenderBlock(area, LOD, i, false);
+    }
+	glEnd();
+	glEnable(GL_TEXTURE_2D);
+	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+		RenderBlock(area, LOD, i, true);
+	}
+    for (auto const& x : textureSortedVertex)
+    {
+         
+         RSImage* image = NULL;
+         
+         image = area->GetImageByID(x.first);
+         if (image == NULL) {
+             printf("This should never happen: Put a break point here.\n");
+             return;
+         }
+         glBindTexture(GL_TEXTURE_2D, image->GetTexture()->GetTextureID());
 
+         glBegin(GL_TRIANGLES);
+         for (int i = 0; i < x.second.size(); i++) {
+             VertexCache v = x.second.at(i);
+             if (v.lv1 != NULL && v.lv1->lowerImageID == x.first) {
+                 RenderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image);
+             }
+             if (v.uv1 != NULL && v.uv1->upperImageID == x.first) {
+                 RenderTexturedTriangle(v.uv1, v.uv2, v.uv3, area, UPPER_TRIANGE, image);
+             }
+         }
+         glEnd();
+    }
+    glDisable(GL_TEXTURE_2D);
+    
+    
+        
+    //Render objects on the map
+    //for(int i=97 ; i < 98 ; i++)
+    for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
+        RenderObjects(area,i);
 }
 
 void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
@@ -1026,9 +1011,8 @@ void SCRenderer::RenderMissionObjects(RSMission* mission) {
     std::vector<PART*> *objects = &mission->missionObjects;
    
     float y = 0;
-    for (size_t i = 0; i < objects->size(); i++) {
-        PART *object = objects->at(i);
-
+    for (auto object : *objects) {
+        
         glPushMatrix();
 
         glTranslatef(
