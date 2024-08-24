@@ -29,6 +29,8 @@ public:
     
     //Update orientation and Matrix view
     void Rotate(float pitch, float yaw, float roll);
+
+    void SetOrientation(Quaternion* orientation);
     /*
     void gluPerspective(Matrix* projectionMatrix);
     void gluLookAt(Matrix* fModelView);

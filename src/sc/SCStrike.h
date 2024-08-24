@@ -35,6 +35,7 @@ private:
     Camera *camera;
     float yaw;
     Point3D newPosition;
+    Quaternion newOrientation;
     PlanePosition *pp;
     RSArea area ;
     RSMission missionObj;

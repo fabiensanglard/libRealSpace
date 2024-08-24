@@ -117,13 +117,10 @@ SCZone* IActivity::CheckZones(void) {
 
 void IActivity::DrawButtons(void){
     
-    
-    for(size_t i = 0 ; i < buttons.size() ; i++){
-        SCButton* button = buttons[i];
+    for (auto button: buttons) {
         if (button->IsEnabled() )
             VGA.DrawShape(&button->appearance[button->GetAppearance()]);
         else
             VGA.DrawShape(&button->appearance[SCButton::Appearance::APR_DOWN]);
     }
-    
 }

@@ -71,24 +71,36 @@ void Camera::SetPosition(Point3D* position){
     CalcViewMatrix();
 }
 
+void Camera::SetOrientation(Quaternion* orientation){
+    this->orientation = *orientation;
+    CalcViewMatrix();
+}
+
 void Camera::Rotate(float pitch, float yaw, float roll){
     
-    /*
+    
     Matrix rollRot;
     rollRot.Identity();
-    rollRot.v[0][0] = cosf(yaw);
-    rollRot.v[0][1] = sinf(yaw);
-    rollRot.v[1][0] = -sinf(yaw);
-    rollRot.v[1][1] = cosf(yaw);
+
+    orientation.FromMatrix(&rollRot);
+
+    rollRot.v[0][0] = cosf(roll);
+    rollRot.v[0][1] = sinf(roll);
+    rollRot.v[1][0] = -sinf(roll);
+    rollRot.v[1][1] = cosf(roll);
     Quaternion qRollRot;
     qRollRot.FromMatrix(&rollRot);
     orientation.Multiply(&qRollRot);
-    */
+    
     
     
     //Generate all rotation quaternions.
+    
     Matrix pitchRot;
     pitchRot.Identity();
+
+    
+
     pitchRot.v[1][1] = cosf(pitch);
     pitchRot.v[1][2] = sinf(pitch);
     pitchRot.v[2][1] = -sinf(pitch);
@@ -191,33 +203,33 @@ Matrix* Camera::GetViewMatrix(void){
 
 void Camera::MoveForward(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x -= m.v[0][2]*1000;
-    this->position.y -= m.v[1][2]*1000;
-    this->position.z -= m.v[2][2]*1000;
+    this->position.x -= m.v[0][2]*100;
+    this->position.y -= m.v[1][2]*100;
+    this->position.z -= m.v[2][2]*100;
     CalcViewMatrix();
 }
 
 void Camera::MoveBackward(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x += m.v[0][2]*1000;
-    this->position.y += m.v[1][2]*1000;
-    this->position.z += m.v[2][2]*1000;
+    this->position.x += m.v[0][2]*100;
+    this->position.y += m.v[1][2]*100;
+    this->position.z += m.v[2][2]*100;
     CalcViewMatrix();
 }
 
 void Camera::MoveStrafLeft(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x -= m.v[0][0]*1000;
-    this->position.y -= m.v[1][0]*1000;
-    this->position.z -= m.v[2][0]*1000;
+    this->position.x -= m.v[0][0]*100;
+    this->position.y -= m.v[1][0]*100;
+    this->position.z -= m.v[2][0]*100;
     CalcViewMatrix();
 }
 
 void Camera::MoveStrafRight(void){
     Matrix m = orientation.ToMatrix();
-    this->position.x += m.v[0][0]*1000;
-    this->position.y += m.v[1][0]*1000;
-    this->position.z += m.v[2][0]*1000;
+    this->position.x += m.v[0][0]*100;
+    this->position.y += m.v[1][0]*100;
+    this->position.z += m.v[2][0]*100;
     CalcViewMatrix();
 }
 
