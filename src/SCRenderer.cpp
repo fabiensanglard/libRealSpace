@@ -105,12 +105,8 @@ void SCRenderer::CreateTextureInGPU(Texture* texture){
     
     glGenTextures(1, &texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
-	//printf("TEXTURE [%s] : %d\n", texture->name, texture->id);
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-
-    
-
     glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
     
 
@@ -120,7 +116,6 @@ void SCRenderer::CreateTextureInGPU(Texture* texture){
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     
-    //glDisable(GL_TEXTURE_2D);
 }
 
 
@@ -129,7 +124,6 @@ void SCRenderer::UploadTextureContentToGPU(Texture* texture){
 
     if (!initialized)
         return;
-	//printf("UPLOAD TEXTURE [%s] : %d\n", texture->name, texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glTexImage2D (GL_TEXTURE_2D, 0, 4, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
 }
@@ -138,7 +132,6 @@ void SCRenderer::DeleteTextureInGPU(Texture* texture){
     
     if (!initialized)
         return;
-	//printf("DELETE TEXTURE [%s] : %d\n", texture->name, texture->id);
     glDeleteTextures(1, &texture->id);
 }
 
@@ -965,8 +958,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     
     
         
-    //Render objects on the map
-    //for(int i=97 ; i < 98 ; i++)
+    RenderMapOverlay(area);
     for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
         RenderObjects(area,i);
 }

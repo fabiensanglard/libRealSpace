@@ -22,7 +22,7 @@ public:
     
     
     void NextObject(void);
-    
+    float rotateUpDownAngle;
 private:
 
     
@@ -46,7 +46,7 @@ private:
     RLEShape board;
     
     uint32_t currentObject;
-    
+
     //For rotating the object
     uint32_t startTime;
 };

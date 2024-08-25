@@ -39,7 +39,7 @@ static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_EXIT_PRESSED          =15;
 static const uint8_t PAK_ID_BACKGROUND  = 8;
 
 SCObjectViewer::SCObjectViewer(){
-    
+    this->rotateUpDownAngle = 0;
 }
 
 SCObjectViewer::~SCObjectViewer(){
@@ -132,27 +132,29 @@ void OnNext(void){
 }
 
 void OnZoomOut(void){
-    Game.StopTopActivity();
+
 }
 
 void OnZoomIn(void){
-    Game.StopTopActivity();
+
 }
 
 void OnRotateLeft(void){
-    Game.StopTopActivity();
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
 }
 
 void OnRotateRight(void){
-    Game.StopTopActivity();
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
 }
 
 void OnRotateUp(void){
-    Game.StopTopActivity();
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->rotateUpDownAngle += 10.0f;
 }
 
 void OnRotateDown(void){
-    Game.StopTopActivity();
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->rotateUpDownAngle -= 10.0f;
 }
 
 void SCObjectViewer::NextObject(void){
@@ -438,9 +440,10 @@ void SCObjectViewer::RunFrame(void){
     glMatrixMode(GL_MODELVIEW);
     Matrix* view = Renderer.GetCamera()->GetViewMatrix();
     glLoadMatrixf(view->ToGL());
-    
+    glPushMatrix();
+    glRotatef(this->rotateUpDownAngle, 1, 0, 0);
     Renderer.DrawModel(showCases[currentObject].entity, LOD_LEVEL_MAX);
-    
+    glPopMatrix();
     glDisable(GL_DEPTH_TEST);
     /**/
 }

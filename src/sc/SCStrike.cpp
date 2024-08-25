@@ -32,28 +32,26 @@ void SCStrike::CheckKeyboard(void) {
             break;
         }
         case SDLK_z:
-            //this->camera->MoveForward();
-            this->newPosition.z+=100;
+            this->camera->MoveForward();
+            this->newPosition = this->camera->GetPosition();
             break;
         case SDLK_s:
-            //this->camera->MoveBackward();
-            this->newPosition.z-=100;
+            this->camera->MoveBackward();
+            this->newPosition = this->camera->GetPosition();
             break;
         case SDLK_q:
-            //this->camera->MoveStrafRight();
-            this->newPosition.x+=100;
+            this->camera->MoveStrafLeft();
+            this->newPosition = this->camera->GetPosition();
             break;
         case SDLK_d:
-            //this->camera->MoveStrafLeft();
-            this->newPosition.x-=100;
+            this->camera->MoveStrafRight();
+            this->newPosition = this->camera->GetPosition();
             break;
         case SDLK_e:
             this->yaw+=1;
-            printf("yaw: %f\n",yaw);
             break;
         case SDLK_a:
             this->yaw-=1;
-            printf("yaw: %f\n",yaw);
             break;
         case SDLK_UP:
             printf("UP\n");
