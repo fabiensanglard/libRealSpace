@@ -118,6 +118,8 @@ public:
 	std::map<std::string, RSEntity *> *objCache;
 	TreArchive *tre;
     float getGroundLevel(int BLOC, float x, float y);
+    float getY(float x, float z);
+    
 private:
     
     void ParseMetadata(void );

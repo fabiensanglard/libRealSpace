@@ -806,3 +806,13 @@ float RSArea::getGroundLevel(int BLOC, float x, float y) {
     }
     return (blocks[0][BLOC].vertice[0].v.y);
 }
+
+float RSArea::getY(float x, float z) {
+	
+	int centerX = 180000;
+	int centerY = 180000;
+	int blocX = (int)(x + centerX)/20000;
+	int blocY = (int)(z + centerY)/20000;
+
+	return (this->getGroundLevel(blocY * 18 + blocX, x, z));
+}

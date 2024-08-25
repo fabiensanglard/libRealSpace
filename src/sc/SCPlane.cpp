@@ -1,0 +1,537 @@
+#include  "SCPlane.h"
+
+void gl_sincos(float a, float* b, float* c) {
+	if (b != NULL) {
+		*b = sinf((a) / 1800.0f * M_PI);
+	}
+	if (c != NULL) {
+		*c = cosf((a) / 1800.0f * M_PI);
+	}
+}
+int mrandom(int maxr) {
+	static unsigned long randx = 1;
+	register int n, retval;
+
+	for (n = 1; n < 32 && (1 << n) < maxr; n++);
+
+	retval = maxr << 1;
+	while (retval > maxr) {
+		randx = randx * 1103515245 + 12345;
+		retval = (randx & 0x7fffffff) >> (31 - n);
+	}
+	randx = randx * 1103515245 + 12345;
+	if (randx & 0x40000000)
+		return (retval);
+	else return (-retval);
+}
+
+SCPlane::SCPlane() {
+    this->plane_type = "F-15";
+    this->planeid = 0;
+    this->version = 0;
+    this->cmd = 0;
+    this->type = 0;
+    this->alive = 0;
+    this->myname[0] = '\0';
+    this->status = 0;
+    this->won = 0;
+    this->lost = 0;
+    this->x = 0.0f;
+    this->y = 0.0f;
+    this->z = 0.0f;
+    this->twist = 0;
+    this->roll_speed = 0;
+    this->azimuthf = 0.0f;
+    this->elevationf = 0.0f;
+    this->elevation_speedf = 0.0f;
+    this->azimuth_speedf = 0.0f;
+    this->mstatus = 0;
+    this->mx = 0.0f;
+    this->my = 0.0f;
+    this->mz = 0.0f;
+    this->last_mx = 0.0f;
+    this->last_my = 0.0f;
+    this->last_mz = 0.0f;
+    this->mkill = 0;
+    this->airspeed = 0;
+    this->thrust = 0;
+    this->mtype = 0;
+    this->rollers = 0.0f;
+    this->rudder = 0.0f;
+    this->elevator = 0.0f;
+}
+SCPlane::~SCPlane() {
+
+}
+void SCPlane::Simulate() {
+    int itemp;
+    float temp;
+    float elevtemp = 0.0f; 
+    this->tick_counter ++;
+    int groundlevel = this->area->getY(this->x, this->z);
+
+    if (this->status > MEXPLODE) {
+        /* tenths of degrees per tick	*/
+        this->rollers = (this->ROLLF * ((this->msx + 8) >> 4) );
+        itemp = (int) (this->rollers * this->vz - this->roll_speed);	/* delta	*/
+        if (itemp != 0) {
+            if (itemp >= DELAY || itemp <= -DELAY) {
+                itemp /= DELAY;
+            }
+            else {
+                itemp = itemp > 0 ? 1 : -1;
+            }
+        }
+        if (this->wing_stall > 0) {
+            itemp >>= this->wing_stall;
+            itemp += mrandom(this->wing_stall << 3);
+        }
+        this->roll_speed += itemp;		
+        this->elevator = -1.0f*(this->ELEVF * ((this->msy + 8) >> 4));
+        itemp = (int)(this->elevator * this->vz + this->vy - this->elevation_speedf);
+        elevtemp = this->elevator * this->vz + this->vy - this->elevation_speedf;
+        if (itemp != 0) {
+            if (itemp >= DELAY || itemp <= -DELAY) {
+                itemp /= DELAY;
+            }
+            else {
+                itemp = itemp > 0 ? 1 : -1;
+            }
+        }
+        if (this->wing_stall > 0) {
+            itemp >>= this->wing_stall;
+            elevtemp = elevtemp / powf(2, this->wing_stall);
+            itemp += mrandom(this->wing_stall *2);
+            elevtemp += mrandom(this->wing_stall * 2);
+        }
+        this->elevation_speedf += itemp;
+        float aztemp;
+        temp = this->rudder * this->vz - (2.0f*this->tps/20.0f) * this->vx;
+        if (this->on_ground) {
+            itemp = (int)(16.0f * temp);
+            if (itemp < -MAX_TURNRATE || itemp > MAX_TURNRATE) {
+                /* clip turn rate	*/
+                if (itemp < 0) {		
+                    itemp = -MAX_TURNRATE;
+                }
+                else {
+                    itemp = MAX_TURNRATE;
+                }
+                /* decrease with velocity */
+                if (fabs(this->vz) > 10.0f / this->tps) {
+                    /* skid effect */
+                    temp = 0.4f * this->tps * (this->rudder * this->vz - .75f); 
+                    if (temp < -MAX_TURNRATE || temp > MAX_TURNRATE) {
+                        temp = (float) itemp;
+                    }
+                    itemp -= (int)temp;
+                }
+            }
+            temp = (float)itemp;
+        } else {
+            itemp = (int)temp;	/* itemp is desired azimuth speed	*/
+        }
+        
+        aztemp = temp;
+        /* itemp is now desired-actual		*/
+        itemp -= (int) this->azimuth_speedf;	
+        aztemp -= this->azimuth_speedf;
+        if (itemp != 0) {
+            if (itemp >= DELAY || itemp <= -DELAY) {
+                itemp /= DELAY;
+            }
+            else {
+                itemp = itemp > 0 ? 1 : -1;
+            }
+        }
+        this->azimuth_speedf += itemp;
+        if (this->on_ground) {
+            /* dont allow negative pitch unless positive elevation	*/
+            if (this->elevation_speedf < 0) {
+                if (this->elevationf <= 0) {
+                    this->elevation_speedf = 0;
+                }
+            }
+            else {		
+                /* mimic gravitational torque	*/
+                elevtemp = -(this->vz * this->tps + this->MIN_LIFT_SPEED) / 4.0f;
+                if (elevtemp < 0 && this->elevationf <= 0) {
+                    elevtemp = 0.0f;
+                }
+                if (this->elevation_speedf > elevtemp) {
+                    this->elevation_speedf = elevtemp;
+                }
+            }
+            this->roll_speed = 0;
+        }
+
+        /****************************************************************
+        /*	concat incremental rotations and get new angles back
+        /****************************************************************/
+        if (this->tick_counter%100 == 1) {
+            // rebuild old ptw	
+            // to keep it normalized
+           
+            this->ptw.Identity();
+            this->ptw.translateM(this->x, this->y, this->z);
+            
+            this->ptw.rotateM(this->azimuthf, 0, 1, 0);
+            this->ptw.rotateM(this->elevationf, 1, 0, 0);
+            this->ptw.rotateM(this->twist, 0, 0, 1);
+        }
+        this->ptw.translateM(this->vx, this->vy, this->vz);
+        if (round(this->azimuth_speedf) != 0) this->ptw.rotateM(round(this->azimuth_speedf), 0, 1, 0);
+        if (round(this->elevation_speedf) != 0) this->ptw.rotateM(round(this->elevation_speedf), 1, 0, 0);
+        if (round(this->roll_speed) != 0) this->ptw.rotateM(round(this->roll_speed), 0, 0, 1);
+
+
+        /* analyze new ptw	*/
+        temp = 0.0f;
+        this->elevationf = -asinf(this->ptw.v[2][1]) / M_PI *1800.0f;
+        
+        float ascos = 0.0f;
+
+        temp = cosf(this->elevationf / 1800.0f * M_PI);
+        
+        if (temp != 0.0) {
+            
+            float sincosas = this->ptw.v[2][0] / temp;
+
+            if (sincosas > 1) {
+                sincosas = 1.0f;
+            }
+            else if (sincosas < -1) {
+                sincosas = -1;
+            }
+            this->azimuthf = asinf(sincosas) / M_PI * 1800.0f;
+            if (this->ptw.v[2][2] < 0.0) {
+                /* if heading into z	*/
+                
+                this->azimuthf = 1800 - this->azimuthf;	
+            }	
+            if (this->azimuthf < 0) {
+                /* then adjust		*/
+                this->azimuthf += 3600;
+            }
+
+            this->twist = asinf(this->ptw.v[0][1] / temp) / M_PI * 1800.0f;
+                if (this->ptw.v[1][1] < 0.0) {
+                /* if upside down	*/
+                this->twist = 1800 - this->twist;
+            }
+            if (this->twist < 0) {
+                this->twist += 3600;
+            }
+        }
+        /* save last position	*/
+        this->last_px = this->x;			
+        this->last_py = this->y;
+        this->last_pz = this->z;
+        this->x = this->ptw.v[3][0];
+        this->y = this->ptw.v[3][1];
+        this->z = this->ptw.v[3][2];
+        
+        /****************************************************************
+        /*	perform incremental rotations on velocities
+        /****************************************************************/
+
+        this->incremental.Identity();
+        if (this->roll_speed) this->incremental.rotateM(-this->roll_speed, 0, 0, 1);
+        if (this->elevation_speedf) this->incremental.rotateM(-this->elevation_speedf, 1, 0, 0);
+        if (this->azimuth_speedf) this->incremental.rotateM(-this->azimuth_speedf, 0, 1, 0);
+        this->incremental.translateM(this->vx, this->vy, this->vz);
+
+
+        this->vx = this->incremental.v[3][0];
+        this->vy = this->incremental.v[3][1];
+        this->vz = this->incremental.v[3][2];
+
+        /****************************************************************/
+        /*	check altitude for too high, and landing/takeoff            */
+        /****************************************************************/
+        /* flame out		*/
+        if (this->y > 50000.0) this->thrust = 0;	
+        else if (this->y > groundlevel + 4.0) {
+            /* not on ground	*/
+            
+            if (this->on_ground) {
+                this->Cdp /= 3.0;	
+                this->min_throttle = 0;		
+            }
+            this->on_ground = FALSE;
+        }
+        else if (this->y < groundlevel) {
+            /* check for on the ground */
+            if (this->nocrash == 0) {
+                if (this->isOnRunWay())
+                    /* and not on ground before */
+                    if (!this->on_ground) {
+                        int rating;
+                        /* increase drag	*/
+                        this->Cdp *= 3.0;
+                        /* allow reverse engines*/
+                        this->min_throttle = -this->max_throttle;
+                        rating = report_card(-this->climbspeed, this->twist, (int)(this->vx * this->tps), (int)(-this->vz * this->fps_knots), this->wheels);
+                        /* oops - you crashed	*/
+                        if (rating == -1) {
+                            /* set to exploding	*/
+                            this->status = MEXPLODE;
+                            /* increment count	*/
+                            this->lost++;
+                        }
+                        else {
+                            this->fuel += rating << 7;
+                            if (this->fuel > (100 << 7))  this->fuel = 100 << 7;
+                            this->max_throttle = 100;
+                        }
+                    }
+                else {
+                    this->status = MEXPLODE;
+                }
+            }
+            this->ptw.v[3][1] = this->y = groundlevel;
+            this->on_ground = TRUE;
+            if (this->status > MEXPLODE) {
+                /* kill negative elevation */
+                if (this->elevationf < 0) {
+                    this->elevationf = 0;
+                }
+                /* kill any twist	*/
+                if (this->twist != 0) {
+                    this->twist = 0;
+                }
+            }
+        }
+    }	/* end not crashing	*/
+
+
+
+    /****************************************************************
+    /*	compute new velocities, accelerations
+    /****************************************************************/
+
+    /* out of gas	*/
+    if (this->fuel <= 0) {		
+        this->thrust = 0;
+        this->max_throttle = 0;
+        this->min_throttle = 0;
+    }
+
+    if (this->status > MEXPLODE) {
+        if (this->y > this->gefy) {
+            // ground effect factor
+            this->kl = 1.0f;
+        } 
+        else {
+            this->kl = (this->y / this->b);
+            if (this->kl > .225f ) {
+                this->kl = .484f * this->kl + .661f;
+            }
+            else {
+                this->kl = 2.533f * this->kl + .20f;
+            }
+        }
+
+        /* compute new accelerations, lift: only if vz is negative	*/
+        this->val = (this->vz >= 0.0);
+        if (!this->val) {
+            this->ae = this->vy / this->vz + this->tilt_factor;
+            this->Cl = this->uCl = this->ae / (.17f + this->kl * this->ipi_AR);
+            /* check for positive stall	*/
+            if (this->Cl > this->max_cl) {		
+                this->Cl = 3.0f * this->max_cl - 2.0f * this->Cl;
+                this->wing_stall = 1;
+                if (this->Cl < 0.0f) {
+                    this->wing_stall += 1 - (int)(this->Cl / this->max_cl);
+                    this->Cl = 0.0f;
+                }
+                if (this->uCl > 5.0f) {
+                    this->uCl = 5.0f;
+                }
+                
+            }
+            else if (this->Cl < this->min_cl) {	
+                /* check for negative stall	*/
+                this->Cl = 3.0f * this->min_cl - 2.0f * this->Cl;
+                this->wing_stall = 1;
+                if (this->Cl > 0.0f) {
+                    this->wing_stall += 1 - (int)(this->Cl / this->min_cl);
+                    this->Cl = 0.0f;
+                }
+                if (this->uCl < -5.0f) {
+                    this->uCl = -5.0f;
+                }
+            }
+            else {
+                this->wing_stall = FALSE;
+            }
+        }
+        else {
+            this->Cl = this->uCl = 0.0f;
+            this->wing_stall = this->on_ground ? 0 : (int)this->vz;
+            this->ae = 0.0f;
+        }
+        if (this->wing_stall > 64) {
+            this->wing_stall = 64;
+        }
+        if ((this->tick_counter & 1) == 0) {	
+            /* only do on even ticks	*/
+            /* compute speed of sound	*/
+            if (this->y <= 36000.0f) {
+                this->sos = -1116.0f / this->tps + (1116.0f - 968.0f) / this->tps / 36000.0f * this->y;
+            }
+            else {
+                this->sos = -968.0f / this->tps;
+            }
+            itemp = ((int)this->y) >> 10;
+            if (itemp > 74) {
+                itemp = 74;
+            }
+            else if (itemp < 0) {
+                itemp = 0;
+            }
+            this->ro2 = .5f * ro[itemp];
+            if (this->Cl < .2) {
+                this->mcc = .7166666f + .1666667f * this->Cl;
+            }
+            else {
+                this->mcc = .7833333f - .1666667f * this->Cl;
+            }
+            /* and current mach number	*/
+            this->mach = this->vz / this->sos;		
+            this->mratio = this->mach / this->mcc;
+            if (this->mratio < 1.034f) {
+                this->Cdc = 0.0f;
+            }
+            else {
+                this->Cdc = .082f * this->mratio - 0.084788f;
+                if (this->Cdc > .03f) this->Cdc = .03f;
+            }
+            if (this->spoilers > 0.0f) {
+                this->Cdc += this->Spdf;
+            }
+        }
+
+        /* assume V approx = vz	*/
+        this->qs = this->ro2 * this->vz * this->s;		
+
+        this->lift = this->Cl * this->qs;
+        this->g_limit = FALSE;
+        if (this->spoilers > 0) {
+            this->lift *= this->Splf;
+        }
+    relift:
+        this->ay = this->vz * this->lift;
+        this->az = -this->vy * this->lift;
+        /* save for wing loading meter	*/
+        this->lift = this->ay * this->inverse_mass;	
+        if (this->lift > this->Lmax) {
+            this->lift = .99f * this->Lmax / this->inverse_mass / this->vz;
+            this->g_limit = TRUE;
+            goto relift;
+        }
+        else if (this->lift < this->Lmin) {
+            this->lift = .99f * this->Lmin / this->inverse_mass / this->vz;
+            this->g_limit = TRUE;
+            goto relift;
+        }
+
+        /* engine thrust		*/
+        this->az = this->az - (.01f / this->tps / this->tps * this->thrust * this->Mthrust);
+
+        /* drag - needs to be broken into y/z components		*/
+        this->Cd = this->Cdp + this->kl * this->uCl * this->uCl * this->ie_pi_AR + this->Cdc;
+        this->zdrag = this->Cd * this->qs;
+        this->ydrag = this->vy * this->zdrag;
+        this->zdrag = this->vz * this->zdrag;
+        /* if vz is positive	*/
+        if (this->val) {			
+            this->ay -= this->ydrag;
+            this->az -= this->zdrag;
+        }
+        else {
+            this->ay += this->ydrag;
+            this->az += this->zdrag;
+        }
+
+        /* now convert forces to accelerations (A=F/M)	*/
+        this->ax = 0.0f;
+        this->ay *= this->inverse_mass;
+        this->az *= this->inverse_mass;
+
+        /* add in gravity which is an acceleration	*/
+        /**/
+        this->ax -= this->ptw.v[0][1] * this->gravity;
+        this->ay -= this->ptw.v[1][1] * this->gravity;
+        this->az -= this->ptw.v[2][1] * this->gravity;
+        /**/
+        this->vx += this->ax;	
+        this->vz += this->az;
+        if (this->on_ground && this->status > MEXPLODE) {
+            temp = 0.0f;
+            float mcos;
+            this->vx = 0.0;
+            gl_sincos(this->elevationf, &temp, &mcos);
+            temp = this->vz * temp / mcos;
+            if (this->vy + this->ay < temp) {
+                this->ay = temp - this->vy;
+            }
+        }
+        this->vy += this->ay;
+
+        this->airspeed = -(int)(this->fps_knots * this->vz);
+        this->climbspeed = this->tps * (this->y - this->last_py);
+
+
+        this->vx += this->vx_add;
+        this->vy += this->vy_add;
+        this->vz += this->vz_add;
+        if (this->thrust > 0) {
+            itemp = this->thrust;
+        }
+        else {
+            itemp = -this->thrust;
+        }
+        if (this->tick_counter%(100*TPS) == 1) {
+            this->fuel_rate = fuel_consump(this->Mthrust, this->W);
+            this->fuel -= (int)(itemp * this->fuel_rate);
+            this->inverse_mass = G_ACC / (this->W + this->fuel / 12800.0f * this->fuel_weight);
+        }
+    }
+}
+
+int SCPlane::IN_BOX(int llx,int urx, int llz, int urz) {
+    return (llx <= this->x && this->x <= urx && llz <= this->z && this->z <= urz);
+}
+int SCPlane::isOnRunWay() {
+	
+	for (int i = 0; i < area->objectOverlay.size(); i++) {
+		
+		if (IN_BOX(area->objectOverlay[i].lx, area->objectOverlay[i].hx, area->objectOverlay[i].ly, area->objectOverlay[i].hy)) {
+			
+			return 1;
+		}
+	}
+	return 0;
+}
+float SCPlane::fuel_consump(float f, float b) {
+	return  0.3f * f / b;
+}
+int SCPlane::report_card(int descent_rate, int roll_angle, int velocity_x, int velocity_z, int wheels_down) {
+    int on_runway = isOnRunWay();
+    int rating = 1;
+
+    roll_angle /= 10;
+    if (roll_angle > 180) roll_angle -= 360;
+
+    if (!wheels_down) rating = 0;
+    if (descent_rate > 100) rating = 0;
+    if (roll_angle < 0) roll_angle = -roll_angle;
+    if (roll_angle > 10) rating = 0;
+    if (!on_runway) rating = 0;
+    else if (velocity_x > 10 || velocity_x < -10) rating = 0;
+
+    if (roll_angle > 20 || descent_rate > 20 || velocity_x > 20 || velocity_x < -20) rating = -1;
+
+    return rating;
+}
