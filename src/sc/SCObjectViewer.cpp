@@ -40,6 +40,8 @@ static const uint8_t PAK_ID_BACKGROUND  = 8;
 
 SCObjectViewer::SCObjectViewer(){
     this->rotateUpDownAngle = 0;
+    this->zoomFactor = 1;
+    this->rotateLeftRightAngle = 0;
 }
 
 SCObjectViewer::~SCObjectViewer(){
@@ -132,19 +134,25 @@ void OnNext(void){
 }
 
 void OnZoomOut(void){
-
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->zoomFactor += 0.1f;
+    if (that->zoomFactor > 2.5f) that->zoomFactor = 2.5f;
 }
 
 void OnZoomIn(void){
-
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->zoomFactor -= 0.1f;
+    if (that->zoomFactor < 0.4f) that->zoomFactor = 0.4f;
 }
 
 void OnRotateLeft(void){
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->rotateLeftRightAngle -= 10.0f;
 }
 
 void OnRotateRight(void){
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->rotateLeftRightAngle += 10.0f;
 }
 
 void OnRotateUp(void){
@@ -163,52 +171,11 @@ void SCObjectViewer::NextObject(void){
 
 void SCObjectViewer::ParseAssets(PakArchive* archive){
     
-    
-    
-    /*
-    PakEntry* entry0 = archive->GetEntry(PAK_ID_MENU_DYNAMC); OBJ_VIEWER BOARD
-    PakArchive file0;
-    file0.InitFromRAM("OBJVIEW.PAK: file PAK_ID_MENU_DYNAMC",entry0->data, entry0->size);
-    file0.List(stdout);
-    showAllImage(&file0);
-    */
-    
-    //Identified as OBJECT VIEWER STATIC TITLE
-    
     PakEntry* entry0 = archive->GetEntry(0);
     PakArchive file0;
     file0.InitFromRAM("OBJVIEW.PAK: file 0",entry0->data, entry0->size);
     title.Init(file0.GetEntry(0)->data, file0.GetEntry(0)->size);
 
-    
-    //Identified as TRAINING MISSION TITLE
-    /*
-    PakEntry* entry1 = archive->GetEntry(1);
-    PakArchive file1;
-    file1.InitFromRAM("OBJVIEW.PAK: file 1",entry1->data, entry1->size);
-    file1.List(stdout);
-    showAllImage(&file1);
-    */
-    
-    //Identified as DOGFIGHT SETUP FIGHT SETUP # enemies and stuff
-    /*
-    PakEntry* entry2 = archive->GetEntry(2);
-    PakArchive file2;
-    file2.InitFromRAM("OBJVIEW.PAK: file 2",entry2->data, entry2->size);
-    file2.List(stdout);
-    showAllImage(&file2);
-    */
-    
-    //Identified as BUTTONS DODGE AIR TO AIR button and AIR TO GROUND BUTTON
-    /*
-    PakEntry* entry3 = archive->GetEntry(3);
-    PakArchive file3;
-    file3.InitFromRAM("OBJVIEW.PAK: file 3",entry3->data, entry3->size);
-    file3.List(stdout);
-    showAllImage(&file3);
-    */
-    
-    //Identified as BUTTONS OBJ VIEWER
     PakEntry* objButtonEntry = archive->GetEntry(4);
     PakArchive objButtons;
     objButtons.InitFromRAM("OBJVIEW.PAK: file 4",objButtonEntry->data, objButtonEntry->size);
@@ -226,8 +193,6 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(14)->data, objButtons.GetEntry(14)->size,&exitPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(15)->data, objButtons.GetEntry(15)->size,&exitPosition);
     buttons.push_back(button);
-    
-    
     
     
     Point2D arrowDimension = {15, 15} ;
@@ -293,61 +258,13 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(1)->data, objButtons.GetEntry(1)->size,&nextButtonPosition);
     buttons.push_back(button);
     
-    
-    
-    //buttons.push_back(button);
-    //showAllImage(&file4);
-    
-    
-    //Identified as DODGE FIGHT MISSION BUILDER ACCEPT CANCEL 12:00 3:00   NUMBERS GOOD FAIR
-    /*
-    PakEntry* entry5 = archive->GetEntry(5);
-    PakArchive file5;
-    file5.InitFromRAM("OBJVIEW.PAK: file 5",entry5->data, entry5->size);
-    file5.List(stdout);
-    showAllImage(&file5);
-    */
-    
-    //Identified as Dodge Fight background
-    /*
-    PakEntry* entry6 = archive->GetEntry(6);
-    PakArchive file6;
-    file6.InitFromRAM("OBJVIEW.PAK: file 6",entry6->data, entry6->size);
-    file6.List(stdout);
-    showAllImage(&file6);
-    */
-    
-    //Identified as DOGFIGHT PALETTE
-    /*
-    PakEntry* entry7 = archive->GetEntry(7);
-    PakArchive file7;
-    file7.InitFromRAM("OBJVIEW.PAK: file 7",entry7->data, entry7->size);
-    file7.List(stdout);
-    //showAllImage(&file7);
-    */
-    
-    //Identified as blue background
-    
     PakEntry* entry8 = archive->GetEntry(8);
     PakArchive file8;
     file8.InitFromRAM("OBJVIEW.PAK: file 8",entry8->data, entry8->size);
     bluePrint.Init(file8.GetEntry(0)->data, file8.GetEntry(0)->size);
     
-    
-    
-    //Unknown content
-    /*
-    PakEntry* entry9 = archive->GetEntry(9);
-    PakArchive file9;
-    file9.InitFromRAM("OBJVIEW.PAK: file 9",entry9->data, entry9->size);
-    file9.List(stdout);
-    showAllImage(&file9);
-    */
-    
-    
     IffLexer lexer ;
     lexer.InitFromFile("PALETTE.IFF");
-    //lexer.List(stdout);
     
     RSPalette palette;
     palette.InitFromIFF(&lexer);
@@ -367,17 +284,14 @@ void SCObjectViewer::Init(void){
     
     PakArchive assets;
     assets.InitFromRAM("OBJVIEW.PAK",objViewPAK->data, objViewPAK->size);
-    //assets.List(stdout);
-    //assets.Decompress("/Users/fabiensanglard/Desktop/ObjViewer.PAK", "MEH");
     ParseAssets(&assets);
     
     IffLexer objToDisplay;
     objToDisplay.InitFromRAM(objViewIFF->data, objViewIFF->size);
-    //objToDisplay.List(stdout);
-    ParseObjList(&objToDisplay);
-   // ListObjects();
     
-    //SetTitle("Neo Object Viewer");
+    ParseObjList(&objToDisplay);
+   
+    SetTitle("Neo Object Viewer");
     
     currentObject = 0 ;
     
@@ -441,9 +355,15 @@ void SCObjectViewer::RunFrame(void){
     Matrix* view = Renderer.GetCamera()->GetViewMatrix();
     glLoadMatrixf(view->ToGL());
     glPushMatrix();
-    glRotatef(this->rotateUpDownAngle, 1, 0, 0);
+    glRotatef(this->rotateLeftRightAngle, 1, 0, 0);
+    glPushMatrix();
+    glRotatef(this->rotateUpDownAngle, 0, 0, 1);
+    
+    
+    glScalef(1/this->zoomFactor, 1/this->zoomFactor, 1/this->zoomFactor);
     Renderer.DrawModel(showCases[currentObject].entity, LOD_LEVEL_MAX);
     glPopMatrix();
+    glPushMatrix();
     glDisable(GL_DEPTH_TEST);
     /**/
 }

@@ -109,7 +109,6 @@ void SCRenderer::CreateTextureInGPU(Texture* texture){
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
     glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
     
-
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -117,7 +116,6 @@ void SCRenderer::CreateTextureInGPU(Texture* texture){
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     
 }
-
 
 void SCRenderer::UploadTextureContentToGPU(Texture* texture){
     
@@ -732,19 +730,6 @@ void SCRenderer::RenderQuad( MapVertex* currentVertex,
             v.lv3 = bottomVertex;
             v.uv1 = v.uv2 = v.uv3 = NULL;
             vcache.push_back(v);
-            /*
-            RSImage* image = NULL;
-
-            image = area->GetImageByID(currentVertex->lowerImageID);
-            if (image == NULL) {
-                printf("This should never happen: Put a break point here.\n");
-                return;
-            }
-            glBindTexture(GL_TEXTURE_2D, image->GetTexture()->GetTextureID());
-            glBegin(GL_TRIANGLES);
-            RenderTexturedTriangle(currentVertex, bottomRightVertex, bottomVertex, area, LOWER_TRIANGE, image);
-            glEnd();
-            /**/
         }
         if (currentVertex->upperImageID != 0xFF) {
             VertexVector& vcache = textureSortedVertex[currentVertex->upperImageID];
@@ -754,18 +739,6 @@ void SCRenderer::RenderQuad( MapVertex* currentVertex,
             v.uv3 = bottomRightVertex;
             v.lv1 = v.lv2 = v.lv3 = NULL;
             vcache.push_back(v);
-            /*
-            RSImage* image = NULL;
-            image = area->GetImageByID(currentVertex->upperImageID);
-            if (image == NULL) {
-                printf("This should never happen: Put a break point here.\n");
-                return;
-            }
-            glBindTexture(GL_TEXTURE_2D, image->GetTexture()->GetTextureID());
-            glBegin(GL_TRIANGLES);
-            RenderTexturedTriangle(currentVertex, rightVertex, bottomRightVertex, area, UPPER_TRIANGE, image);
-            glEnd();
-            /**/
         }
         
     }

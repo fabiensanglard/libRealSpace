@@ -23,6 +23,8 @@ public:
     
     void NextObject(void);
     float rotateUpDownAngle;
+    float rotateLeftRightAngle;
+    float zoomFactor;
 private:
 
     
