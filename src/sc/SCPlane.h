@@ -126,27 +126,13 @@ private:
     /* in 10'ths degrees per tick	*/
     float elevation_speedf;
     float azimuth_speedf;
-
-    /* missile data		*/
-    short mstatus;
-    float mx;
-    float my;
-    float mz;
-    float last_mx;
-    float last_my;
-    float last_mz;
-    long mkill;
     
     int thrust;
 
 
     char mtype;
 
-    /* rollers position 	*/
-    float rollers;
-    float rudder;
-    /* elevator position 	*/
-    float elevator;
+   
     float ELEVF_CSTE;
     float ROLLFF_CSTE;
     float LminDEF;
@@ -169,8 +155,6 @@ private:
     float zdrag;
     /* fuel consumption rate	*/
     float fuel_rate;
-    /* lift acceleration		*/
-    float lift;
     /* maximum height for ground effect	*/
     float gefy;
     /* angle of attack for wing		*/
@@ -264,9 +248,7 @@ private:
     /* number of armaments		*/
     int sidewinders, rockets;
     
-    /* my ptw matrix, temp matrix	*/
-    Matrix ptw;
-    Matrix incremental;
+    
 
     RSArea *area;
     RSEntity *object;
@@ -310,6 +292,16 @@ public:
     short twist;
     float azimuthf;
     float elevationf;
+
+    float rollers;
+    float rudder;
+    float elevator;
+
+    float lift;
+
+    /* my ptw matrix, temp matrix	*/
+    Matrix ptw;
+    Matrix incremental;
 
     SCPlane();
     SCPlane(

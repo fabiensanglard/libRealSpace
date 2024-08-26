@@ -49,14 +49,6 @@ SCPlane::SCPlane() {
     this->elevationf = 0.0f;
     this->elevation_speedf = 0.0f;
     this->azimuth_speedf = 0.0f;
-    this->mstatus = 0;
-    this->mx = 0.0f;
-    this->my = 0.0f;
-    this->mz = 0.0f;
-    this->last_mx = 0.0f;
-    this->last_my = 0.0f;
-    this->last_mz = 0.0f;
-    this->mkill = 0;
     this->airspeed = 0;
     this->thrust = 0;
     this->mtype = 0;
@@ -89,6 +81,33 @@ SCPlane::SCPlane(
     float y,
     float z
     ) {
+    
+        this->planeid = 0;
+    this->version = 0;
+    this->cmd = 0;
+    this->type = 0;
+    this->alive = 0;
+    this->myname[0] = '\0';
+    this->status = 0;
+    this->won = 0;
+    this->lost = 0;
+    this->x = 0.0f;
+    this->y = 0.0f;
+    this->z = 0.0f;
+    this->twist = 0;
+    this->roll_speed = 0;
+    this->azimuthf = 0.0f;
+    this->elevationf = 0.0f;
+    this->elevation_speedf = 0.0f;
+    this->azimuth_speedf = 0.0f;
+    this->airspeed = 0;
+    this->thrust = 0;
+    this->mtype = 0;
+    this->rollers = 0.0f;
+    this->rudder = 0.0f;
+    this->elevator = 0.0f;
+    this->object = nullptr;
+
     this->LmaxDEF = LmaxDEF;
     this->LminDEF = LminDEF;
     this->Fmax = Fmax;
@@ -124,8 +143,6 @@ SCPlane::~SCPlane() {
 }
 void SCPlane::Init() {
     
-
-    this->mstatus = 0;
     this->twist = 0;
     
     this->status = 580000;

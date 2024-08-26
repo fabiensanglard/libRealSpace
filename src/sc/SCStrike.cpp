@@ -28,8 +28,25 @@ void SCStrike::CheckKeyboard(void) {
 
     int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
     int upEvents = SDL_PeepEvents(keybEvents, 1, SDL_GETEVENT, SDL_KEYUP, SDL_KEYUP);
-    int controlStickX = 0;
-    int controlStickY = 0;
+    for (int i =0; i < upEvents; i++) {
+        SDL_Event* event = &keybEvents[i];
+        switch (event->key.keysym.sym) {
+        case SDLK_UP:
+            this->playerplane->control_stick_y = 0;
+            break;
+        case SDLK_DOWN:
+            this->playerplane->control_stick_y = 0;
+            break;
+        case SDLK_LEFT:
+            this->playerplane->control_stick_x = 0;
+            break;
+        case SDLK_RIGHT:
+            this->playerplane->control_stick_x = 0;
+            break;
+        default:
+            break;
+        }
+    }
     for (int i = 0; i < numKeybEvents; i++) {
         SDL_Event* event = &keybEvents[i];
 
@@ -57,16 +74,16 @@ void SCStrike::CheckKeyboard(void) {
             
             break;
         case SDLK_UP:
-            controlStickY = 45;
+            this->playerplane->control_stick_y = -100;
             break;
         case SDLK_DOWN:
-            controlStickY = -45;
+            this->playerplane->control_stick_y = 100;
             break;
         case SDLK_LEFT:
-            controlStickX = -45;
+            this->playerplane->control_stick_x = -100;
             break;
         case SDLK_RIGHT:
-            controlStickX = 45;
+            this->playerplane->control_stick_x = 100;
             break;
         case SDLK_1:
             this->playerplane->SetThrottle(10);
@@ -108,12 +125,11 @@ void SCStrike::CheckKeyboard(void) {
             break;
         }
     }
-    this->playerplane->SetControlStick(controlStickX, controlStickY);
 }
 void SCStrike::Init(void ){
 
     this->SetMission("TEMPLATE.IFF");
-    this->playerplane->SetThrottle(0);
+    
 }
 
 void SCStrike::SetMission(char *missionName) {
@@ -137,7 +153,7 @@ void SCStrike::SetMission(char *missionName) {
 
     newPosition.x=  (float) playerCoord->XAxisRelative;
     newPosition.z=  (float) -playerCoord->YAxisRelative;
-    newPosition.y= this->area.getY(newPosition.x, newPosition.z) + 10000;
+    newPosition.y= this->area.getY(newPosition.x, newPosition.z);
     camera = Renderer.GetCamera();
     camera->SetPosition(&newPosition);
     yaw = 0.0f;
@@ -166,7 +182,7 @@ void SCStrike::SetMission(char *missionName) {
         newPosition.y,
         newPosition.z
     );
-    this->playerplane->on_ground = 0;
+    
 }
 void SCStrike::RunFrame(void){
     this->CheckKeyboard();
@@ -196,7 +212,17 @@ void SCStrike::RunFrame(void){
     ImGui::Text("Control Stick %d %d", this->playerplane->control_stick_x, this->playerplane->control_stick_y);
     ImGui::Text("Elevation %.0f, Twist %.0f", this->playerplane->elevationf, this->playerplane->twist);
     ImGui::Text("Y %.0f, On ground %d", this->playerplane->y, this->playerplane->on_ground);
-
+    ImGui::Text("flight [roller:%f, elevator:%f, rudder:%f]", 
+        this->playerplane->rollers,
+        this->playerplane->elevator,
+        this->playerplane->rudder
+    );
+    ImGui::Text("Acceleration per tick (x,y,z) [%.3f ,%.3f ,%.3f ]",
+        this->playerplane->vx,
+        this->playerplane->vy,
+        this->playerplane->vz
+    );
+    ImGui::Text("Lift %.3f", this->playerplane->lift);
     ImGui::End();
 
     // Rendering
