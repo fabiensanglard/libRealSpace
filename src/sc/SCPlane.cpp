@@ -1,11 +1,15 @@
-#include  "SCPlane.h"
+#include  "precomp.h"
+
+float tenthOfDegreeToRad(float angle) {
+    return angle / 1800.0f * (float) M_PI;
+}
 
 void gl_sincos(float a, float* b, float* c) {
 	if (b != NULL) {
-		*b = sinf((a) / 1800.0f * M_PI);
+		*b = sinf(tenthOfDegreeToRad(a));
 	}
 	if (c != NULL) {
-		*c = cosf((a) / 1800.0f * M_PI);
+		*c = cosf(tenthOfDegreeToRad(a));
 	}
 }
 int mrandom(int maxr) {
@@ -25,8 +29,8 @@ int mrandom(int maxr) {
 	else return (-retval);
 }
 
+
 SCPlane::SCPlane() {
-    this->plane_type = "F-15";
     this->planeid = 0;
     this->version = 0;
     this->cmd = 0;
@@ -59,20 +63,152 @@ SCPlane::SCPlane() {
     this->rollers = 0.0f;
     this->rudder = 0.0f;
     this->elevator = 0.0f;
+    this->object = nullptr;
+}
+SCPlane::SCPlane(
+    float LmaxDEF,
+    float LminDEF,
+    float Fmax,
+    float Smax,
+    float ELEVF_CSTE,
+    float ROLLFF_CSTE,
+    int obj,
+    float s,
+    double W,
+    float fuel_weight,
+    double Mthrust,
+    float b,
+    float ie_pi_AR,
+    int MAX_RK,
+    int MAX_SW,
+    int MIN_LIFT_SPEED,
+    float pilot_y,
+    float pilot_z,
+    RSArea *area,
+    float x,
+    float y,
+    float z
+    ) {
+    this->LmaxDEF = LmaxDEF;
+    this->LminDEF = LminDEF;
+    this->Fmax = Fmax;
+    this->Smax = Smax;
+    this->ELEVF_CSTE = ELEVF_CSTE;
+    this->ROLLFF_CSTE = ROLLFF_CSTE;
+    this->obj = obj;
+    this->s = s;
+    this->W = W;
+    this->fuel_weight = fuel_weight;
+    this->Mthrust = Mthrust;
+    this->b = b;
+    this->ie_pi_AR = ie_pi_AR;
+    this->MAX_RK = MAX_RK;
+    this->MAX_SW = MAX_SW;
+    this->MIN_LIFT_SPEED = MIN_LIFT_SPEED;
+    this->pilot_y = pilot_y;
+    this->pilot_z = pilot_z;
+    this->object = nullptr;
+    this->area = area;
+    this->tps = 60;
+    this->last_time = SDL_GetTicks();
+    this->tick_counter = 0;
+    this->last_tick = 0;
+    this->x = x/COORD_SCALE;
+    this->y = y/COORD_SCALE;
+    this->z = z/COORD_SCALE;
+    this->ro2 = .5f * ro[0];
+    Init();
 }
 SCPlane::~SCPlane() {
 
+}
+void SCPlane::Init() {
+    
+
+    this->mstatus = 0;
+    this->twist = 0;
+    
+    this->status = 580000;
+    this->alive = this->tps << 2;
+    this->flaps = 0;
+    this->spoilers = 0;
+    this->rollers = 0;
+    this->rudder = 0;
+    this->elevator = 0;
+
+    this->ELEVF = this->ELEVF_CSTE * 10.0f / (20.0f * 400.0f);			/* elevator rate in degrees/sec	*/
+    this->ROLLF = this->ROLLFF_CSTE  * 10.0f / (30.0f * 400.0f);			/* roll rate (both at 300 mph)	*/
+
+    this->zdrag = 0.0f;
+    this->ydrag = 0.0f;
+    this->Cdp = .015f;				/* coefficient of parasitic drag*/
+    this->ipi_AR = 1.0f / ((float) M_PI * this->b * this->b / this->s);	/* 1.0 / pi * wing Aspect Ratio	*/
+    this->ie_pi_AR = this->ipi_AR / this->ie_pi_AR;		/* 1.0 / pi * AR * efficiency	*/
+    this->gravity = G_ACC / this->tps / this->tps;
+    this->fps_knots = this->tps * (3600.0f / 6082.0f);
+    this->Lmax = this->LmaxDEF * this->gravity;
+    this->Lmin = this->LminDEF * this->gravity;
+    this->wheels = 1;
+    this->Cdp *= 2.0;
+    this->sidewinders = this->MAX_SW;
+    this->rockets = this->MAX_RK;
+    this->fuel = 100 << 7;
+    this->gefy = .7f * this->b;
+    this->thrust = 0;
+    this->tilt_factor = 0.17f;
+    this->roll_speed = 0;
+    this->azimuth_speedf = 0.0f;
+    this->elevation_speedf = 0.0f;
+    this->elevationf = 0.0f;
+    this->inverse_mass = G_ACC / (this->W + this->fuel / 12800.0f * this->fuel_weight);
+    this->on_ground = 1;
+    this->vx = 0.0f;
+    this->vy = 0.0f;
+    this->vz = 0.0f;
+
+    this->az = 0.0f;
+    this->ay = 0.0f;
+    this->ax = 0.0f;
+
+    this->roll_speed = 0;
+    this->azimuthf = 0.0f;
+    this->elevationf = 0.0f;
+    this->elevation_speedf = 0.0f;
+    this->azimuth_speedf = 0.0f;
+    this->vx_add = 0.0f;
+    this->vy_add = 0.0f;
+    this->vz_add = 0.0f;
+    this->control_stick_x = 0;
+    this->control_stick_y = 0;
+    this->ptw.Clear();
+    this->incremental.Clear();
 }
 void SCPlane::Simulate() {
     int itemp;
     float temp;
     float elevtemp = 0.0f; 
-    this->tick_counter ++;
-    int groundlevel = this->area->getY(this->x, this->z);
+    
+    uint32_t current_time = SDL_GetTicks();
+    uint32_t elapsed_time = (current_time - this->last_time) / 1000;
+    if (elapsed_time > 1) {
+        uint32_t ticks = this->tick_counter - this->last_tick;
+        this->tps = ticks / elapsed_time;
+        if (tps != 0) {
+            this->last_time = current_time;
+            this->last_tick = this->tick_counter;
+        }
+    }
+
+    this->gravity = G_ACC / this->tps / this->tps;
+    this->fps_knots = this->tps * (3600.0f / 6082.0f);
+    this->Lmax = this->LmaxDEF * this->gravity;
+	this->Lmin = this->LminDEF * this->gravity;
+
+    float groundlevel = this->area->getY(this->x*COORD_SCALE, this->z*COORD_SCALE)/COORD_SCALE;
 
     if (this->status > MEXPLODE) {
         /* tenths of degrees per tick	*/
-        this->rollers = (this->ROLLF * ((this->msx + 8) >> 4) );
+        this->rollers = (this->ROLLF * ((this->control_stick_x + 8) >> 4) );
         itemp = (int) (this->rollers * this->vz - this->roll_speed);	/* delta	*/
         if (itemp != 0) {
             if (itemp >= DELAY || itemp <= -DELAY) {
@@ -87,7 +223,7 @@ void SCPlane::Simulate() {
             itemp += mrandom(this->wing_stall << 3);
         }
         this->roll_speed += itemp;		
-        this->elevator = -1.0f*(this->ELEVF * ((this->msy + 8) >> 4));
+        this->elevator = -1.0f*(this->ELEVF * ((this->control_stick_y + 8) >> 4));
         itemp = (int)(this->elevator * this->vz + this->vy - this->elevation_speedf);
         elevtemp = this->elevator * this->vz + this->vy - this->elevation_speedf;
         if (itemp != 0) {
@@ -168,30 +304,30 @@ void SCPlane::Simulate() {
         /****************************************************************
         /*	concat incremental rotations and get new angles back
         /****************************************************************/
-        if (this->tick_counter%100 == 1) {
+        if (this->tick_counter%100 == 0) {
             // rebuild old ptw	
             // to keep it normalized
            
             this->ptw.Identity();
             this->ptw.translateM(this->x, this->y, this->z);
             
-            this->ptw.rotateM(this->azimuthf, 0, 1, 0);
-            this->ptw.rotateM(this->elevationf, 1, 0, 0);
-            this->ptw.rotateM(this->twist, 0, 0, 1);
+            this->ptw.rotateM(tenthOfDegreeToRad(this->azimuthf), 0, 1, 0);
+            this->ptw.rotateM(tenthOfDegreeToRad(this->elevationf), 1, 0, 0);
+            this->ptw.rotateM(tenthOfDegreeToRad(this->twist), 0, 0, 1);
         }
         this->ptw.translateM(this->vx, this->vy, this->vz);
-        if (round(this->azimuth_speedf) != 0) this->ptw.rotateM(round(this->azimuth_speedf), 0, 1, 0);
-        if (round(this->elevation_speedf) != 0) this->ptw.rotateM(round(this->elevation_speedf), 1, 0, 0);
-        if (round(this->roll_speed) != 0) this->ptw.rotateM(round(this->roll_speed), 0, 0, 1);
+        if (round(this->azimuth_speedf) != 0) this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->azimuth_speedf)), 0, 1, 0);
+        if (round(this->elevation_speedf) != 0) this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->elevation_speedf)), 1, 0, 0);
+        if (round(this->roll_speed) != 0) this->ptw.rotateM(tenthOfDegreeToRad((float) this->roll_speed), 0, 0, 1);
 
 
         /* analyze new ptw	*/
         temp = 0.0f;
-        this->elevationf = -asinf(this->ptw.v[2][1]) / M_PI *1800.0f;
+        this->elevationf = -asinf(this->ptw.v[2][1]) / (float) M_PI * 1800.0f;
         
         float ascos = 0.0f;
 
-        temp = cosf(this->elevationf / 1800.0f * M_PI);
+        temp = cosf(tenthOfDegreeToRad(this->elevationf));
         
         if (temp != 0.0) {
             
@@ -203,7 +339,7 @@ void SCPlane::Simulate() {
             else if (sincosas < -1) {
                 sincosas = -1;
             }
-            this->azimuthf = asinf(sincosas) / M_PI * 1800.0f;
+            this->azimuthf = asinf(sincosas) / (float) M_PI * 1800.0f;
             if (this->ptw.v[2][2] < 0.0) {
                 /* if heading into z	*/
                 
@@ -214,7 +350,7 @@ void SCPlane::Simulate() {
                 this->azimuthf += 3600;
             }
 
-            this->twist = asinf(this->ptw.v[0][1] / temp) / M_PI * 1800.0f;
+            this->twist = (short) asinf(this->ptw.v[0][1] / temp) / (float) M_PI * 1800.0f;
                 if (this->ptw.v[1][1] < 0.0) {
                 /* if upside down	*/
                 this->twist = 1800 - this->twist;
@@ -236,9 +372,9 @@ void SCPlane::Simulate() {
         /****************************************************************/
 
         this->incremental.Identity();
-        if (this->roll_speed) this->incremental.rotateM(-this->roll_speed, 0, 0, 1);
-        if (this->elevation_speedf) this->incremental.rotateM(-this->elevation_speedf, 1, 0, 0);
-        if (this->azimuth_speedf) this->incremental.rotateM(-this->azimuth_speedf, 0, 1, 0);
+        if (this->roll_speed) this->incremental.rotateM(tenthOfDegreeToRad((float) -this->roll_speed), 0, 0, 1);
+        if (this->elevation_speedf) this->incremental.rotateM(tenthOfDegreeToRad(-this->elevation_speedf), 1, 0, 0);
+        if (this->azimuth_speedf) this->incremental.rotateM(tenthOfDegreeToRad(-this->azimuth_speedf), 0, 1, 0);
         this->incremental.translateM(this->vx, this->vy, this->vz);
 
 
@@ -480,7 +616,7 @@ void SCPlane::Simulate() {
         this->vy += this->ay;
 
         this->airspeed = -(int)(this->fps_knots * this->vz);
-        this->climbspeed = this->tps * (this->y - this->last_py);
+        this->climbspeed = (short) (this->tps * (this->y - this->last_py));
 
 
         this->vx += this->vx_add;
@@ -498,6 +634,7 @@ void SCPlane::Simulate() {
             this->inverse_mass = G_ACC / (this->W + this->fuel / 12800.0f * this->fuel_weight);
         }
     }
+    this->tick_counter ++;
 }
 
 int SCPlane::IN_BOX(int llx,int urx, int llz, int urz) {
@@ -534,4 +671,29 @@ int SCPlane::report_card(int descent_rate, int roll_angle, int velocity_x, int v
     if (roll_angle > 20 || descent_rate > 20 || velocity_x > 20 || velocity_x < -20) rating = -1;
 
     return rating;
+}
+
+void SCPlane::SetThrottle(int throttle){
+    this->thrust = throttle;
+}
+int SCPlane::GetThrottle(){
+    return this->thrust;
+}
+void SCPlane::SetFlaps(int flaps) {
+    this->flaps = flaps;
+}
+void SCPlane::SetSpoilers(int spoilers) {
+    this->spoilers = spoilers;
+}
+void SCPlane::SetGears(int gears){
+    this->wheels = gears;
+}
+void SCPlane::SetControlStick(int x, int y) {
+    this->control_stick_x = x;
+    this->control_stick_y = y;
+}
+void SCPlane::getPosition(Point3D* position) {
+    position->x = this->x*COORD_SCALE;
+    position->y = this->y*COORD_SCALE;
+    position->z = this->z*COORD_SCALE;
 }

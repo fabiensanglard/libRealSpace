@@ -7,7 +7,9 @@
 //
 
 #include "precomp.h"
-
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_opengl3.h"
 
 GameEngine::GameEngine(){
     
@@ -49,6 +51,7 @@ void GameEngine::PumpEvents(void){
     //Mouse
     SDL_Event mouseEvents[5];
     int numMouseEvents= SDL_PeepEvents(mouseEvents,5,SDL_PEEKEVENT,SDL_MOUSEMOTION,SDL_MOUSEWHEEL);
+    ImGui_ImplSDL2_ProcessEvent(mouseEvents);
     for(int i= 0 ; i < numMouseEvents ; i++){
         SDL_Event* event = &mouseEvents[i];
         
@@ -85,6 +88,7 @@ void GameEngine::PumpEvents(void){
     //Keyboard
     SDL_Event keybEvents[5];
     int numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_PEEKEVENT,SDL_KEYDOWN,SDL_TEXTINPUT);
+    ImGui_ImplSDL2_ProcessEvent(keybEvents);
     for(int i= 0 ; i < numKeybEvents ; i++){
         SDL_Event* event = &keybEvents[i];
         switch (event->type) {

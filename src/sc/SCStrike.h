@@ -1,3 +1,4 @@
+#pragma once
 //
 //  SCStrike.h
 //  libRealSpace
@@ -8,17 +9,6 @@
 
 #ifndef __libRealSpace__SCStrike__
 #define __libRealSpace__SCStrike__
-struct PlanePosition {
-    float twist;
-    float elevationf;
-    float azimuthf;
-
-    float x;
-    float y;
-    float z;
-};
-
-#define SC_WORLD 1;
 
 class SCStrike : public IActivity{
     
@@ -30,17 +20,17 @@ public:
     void SetMission(char* missionName);
     void CheckKeyboard(void);
     void RunFrame(void);
-    float getY(float x, float z);
 
 private:
-    Point3D* position = new Point3D({0,0,0});
+    
+    Point3D* position;
     Camera *camera;
     float yaw;
     Point3D newPosition;
     Quaternion newOrientation;
-    PlanePosition *pp;
     RSArea area ;
     RSMission *missionObj;
+    SCPlane *playerplane;
     float counter;
     std::map<std::string, RSEntity*> objectCache;
 };

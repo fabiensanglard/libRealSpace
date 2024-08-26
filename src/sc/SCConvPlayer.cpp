@@ -559,16 +559,6 @@ afterFace:
     
     DrawButtons();
     
-    
-    if (currentFrame.mode == ConvFrame::CONV_WIDE ||
-        currentFrame.mode == ConvFrame::CONV_CLOSEUP)
-        ;
-    
-    //Draw Mouse
-    //Mouse.Draw();
-    
-    //Check Mouse state.
-    
     VGA.VSync();
     
     

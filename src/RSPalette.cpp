@@ -82,7 +82,6 @@ void RSPalette::ParseBLWH(IffChunk* chunk){
         
         if (i == 255) {
             texel.a = 0;
-            printf("BLWH color 255 (%d,%d,%d) is transparent\n",texel.r,texel.g,texel.b);
         } else {
             texel.a = 255;
         }

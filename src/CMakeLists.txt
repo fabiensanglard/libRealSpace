@@ -4,9 +4,6 @@ file(GLOB LIBRARY_HEADERS "*.h")
 
 add_library(librealspace STATIC ${LIBRARY_SOURCES} ${LIBRARY_HEADERS})
 
-if(MSVC)
-    target_link_options(librealspace PUBLIC /DEBUG)
-endif()
 
 target_include_directories(librealspace PUBLIC ${SDL2_INCLUDE_DIRS})
 target_include_directories(librealspace PUBLIC ${OPENGL_INCLUDE_DIR})

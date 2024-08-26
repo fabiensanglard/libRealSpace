@@ -85,7 +85,6 @@ void RSArea::ParseMetadata(){
     for(size_t e=0 ; e < numEleRecords ; e++)
     {
         
-        printf("elev record [%zu] ",e);
         uint8_t unknownsElev[20];
         for(int i=0; i < 20 ; i++)
             unknownsElev[i] = elevStream.ReadByte();
@@ -100,27 +99,19 @@ void RSArea::ParseMetadata(){
             elevOtherName[i] = elevStream.ReadByte();
         elevOtherName[13]  = 0;
         
-        for (int i=0; i<20 ; i++){
-            printf("0x%X ",unknownsElev[i]);
-        }
-        
-        printf("%-13s %-13s \n",elevName,elevOtherName);
     }
     
    
     
     
     IffChunk* atri = lexer.GetChunkByID('ATRI');
-    printf("Content of trigo chunk:\n");
+    
     
     ByteStream triStream(atri->data);
-    for (int i=0; i < 40; i++) {
-        printf(" 0x%X",triStream.ReadByte());
-    }
+    
     char triFileName[13];
     for (int i=0; i < 13; i++)
         triFileName[i] = triStream.ReadByte();
-    printf(" '%-13s' \n",triFileName);
     
     
     
@@ -329,8 +320,6 @@ void RSArea::ParseTriFile(PakEntry* entry){
         read+=2;
         int nbpoly = stream.ReadShort();
         read += 2;
-        //for (int i=0;i<5;i++) stream.ReadByte();
-        stream.dump(2,0);
         read += 4;
         AoVPoints* vertices = new AoVPoints[numvertice];
         overTheMapIsTheRunway.lx = 0;
@@ -362,9 +351,7 @@ void RSArea::ParseTriFile(PakEntry* entry){
             overTheMapIsTheRunway.ly = v->z < overTheMapIsTheRunway.ly ? v->z : overTheMapIsTheRunway.ly;
             overTheMapIsTheRunway.hx = v->x > overTheMapIsTheRunway.hx ? v->x : overTheMapIsTheRunway.hx;
             overTheMapIsTheRunway.hy = v->z > overTheMapIsTheRunway.hy ? v->z : overTheMapIsTheRunway.hy;
-            printf("%d,%d,%d,%d,%d,%d\n", v->x, v->z, v->y, v->u0, v->u1, v->u2);
         }
-        printf("BYTE READ %llu, REMAINING %llu\n", read, entry->size - read);
         overTheMapIsTheRunway.vertices = vertices;
         
         short cpt = 0;
@@ -400,14 +387,7 @@ void RSArea::ParseTriFile(PakEntry* entry){
 
             
             overTheMapIsTheRunway.trianles[overTheMapIsTheRunway.nbTriangles++] = aot;
-            printf("Poly %d\n", overTheMapIsTheRunway.nbTriangles);
         }
-        stream.dump(entry->size-read, 1);
-        //printf("*********************\n");
-        //Render them
-        //Renderer.RenderVerticeField(vertices,300);
-        
-        /**/
         objectOverlay.push_back(overTheMapIsTheRunway);
     }
 }

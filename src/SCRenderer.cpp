@@ -900,6 +900,8 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     }
 	glEnd();
 	glEnable(GL_TEXTURE_2D);
+    glPushAttrib(GL_TEXTURE_BIT);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
 		RenderBlock(area, LOD, i, true);
 	}
@@ -928,7 +930,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
          glEnd();
     }
     glDisable(GL_TEXTURE_2D);
-    
+    glPopAttrib();
     
         
     RenderMapOverlay(area);
@@ -1075,6 +1077,7 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
         RenderBlock(area, LOD, i, false);
     }
 	glEnd();
+    glPushAttrib(GL_TEXTURE_BIT);
 	glEnable(GL_TEXTURE_2D);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
 		RenderBlock(area, LOD, i, true);
@@ -1104,7 +1107,7 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
          glEnd();
     }
     glDisable(GL_TEXTURE_2D);
-    
+    glPopAttrib();
     RenderMapOverlay(area);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
        RenderObjects(area, i);

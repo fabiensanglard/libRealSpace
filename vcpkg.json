@@ -1,7 +1,14 @@
 {
   "dependencies": [
-    "imgui",
+    { 
+      "name": "imgui", 
+      "features": [
+        "opengl3-binding", 
+        "sdl2-binding"
+      ] 
+    },
     "sdl2",
-    "sdl2-mixer-ext"
+    "sdl2-mixer-ext",
+    "opengl"
   ]
 }

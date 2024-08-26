@@ -1,9 +1,7 @@
-#pragma once
-
 #ifndef __libRealSpace__SCPlane__
 #define __libRealSpace__SCPlane__
 
-#include "precomp.h"
+
 
 #define  NAME_LENGTH  8
 static float ro[75] =
@@ -85,7 +83,7 @@ static float ro[75] =
 	.00011022f,		/* 75000 feet	*/
 };
 
-#define MEXPLODE -1
+#define MEXPLODE 0
 #define TPS 20
 #define MAX_TURNRATE (600/TPS)
 #define DELAY_FACTOR 4
@@ -94,11 +92,11 @@ static float ro[75] =
 
 
 #define G_ACC 32.17f
+
+#define COORD_SCALE 0.36f
 class SCPlane {
 
 private:
-    /* plane type ("F-15")		*/
-    char* plane_type;
     long planeid;
     /* flight version	*/
     char  version;
@@ -115,17 +113,14 @@ private:
     unsigned short lost;
 
     /* plane position	*/
-    float x;
-    float y;
-    float z;
+    
 
-    short twist;
+
     /*roll, elevation, azimuth speeds	* /
     /* in 10'ths degrees per tick	*/
     int roll_speed;
 
-    float azimuthf;
-    float elevationf;
+    
 
     /* roll, elevation, azimuth speeds	*/
     /* in 10'ths degrees per tick	*/
@@ -141,7 +136,7 @@ private:
     float last_my;
     float last_mz;
     long mkill;
-    int airspeed;
+    
     int thrust;
 
 
@@ -224,8 +219,6 @@ private:
     float last_zdrag;
 
     short val;
-    /* TRUE if plane is on ground	*/
-    short on_ground;
     /* TRUE if the wheels are down	*/
     short wheels;
     /* wheel position 	*/
@@ -259,10 +252,7 @@ private:
     int flaps;
     int spoilers;
     int obj;
-    /* plane velocity */
-    float vx;
-    float vy;
-    float vz;
+    
     /* missile velocity */
     float missile_vx;
     float missile_vy;
@@ -279,17 +269,17 @@ private:
     Matrix incremental;
 
     RSArea *area;
+    RSEntity *object;
 
     float vx_add;
     float vy_add;
     float vz_add;
 
-    int msx;
-    int msy;
+    
 
     int nocrash;
     
-    int tick_counter;
+    
     int tps;
 
     int IN_BOX(int llx,int urx, int llz, int urz);
@@ -297,11 +287,65 @@ private:
     int isOnRunWay();
     float fuel_consump(float f, float b);
 
+    uint32_t last_time;
+    uint32_t tick_counter;
+    uint32_t last_tick;
 public:
 
+    /* plane velocity */
+    float vx;
+    float vy;
+    float vz;
+
+    float x;
+    float y;
+    float z;
+
+    int control_stick_x;
+    int control_stick_y;
+
+    short on_ground;
+
+    int airspeed;
+    short twist;
+    float azimuthf;
+    float elevationf;
+
     SCPlane();
+    SCPlane(
+        float LmaxDEF,
+        float LminDEF,
+        float Fmax,
+        float Smax,
+        float ELEVF_CSTE,
+        float ROLLFF_CSTE,
+        int obj,
+        float s,
+        double W,
+        float fuel_weight,
+        double Mthrust,
+        float b,
+        float ie_pi_AR,
+        int MAX_RK,
+        int MAX_SW,
+        int MIN_LIFT_SPEED,
+        float pilot_y,
+        float pilot_z,
+        RSArea *area,
+        float x,
+        float y,
+        float z
+    );
     ~SCPlane();
+    void Init();
+    void SetThrottle(int throttle);
+    int GetThrottle();
+    void SetFlaps(int flaps);
+    void SetSpoilers(int spoilers);
+    void SetGears(int gears);
+    void SetControlStick(int x, int y);
     void Simulate();
+    void getPosition(Point3D* position);
 };
 
 #endif

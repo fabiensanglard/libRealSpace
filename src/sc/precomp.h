@@ -26,7 +26,7 @@
 #include "GameEngine.h"
 #include "ConvAssetManager.h"
 #include "AssetManager.h"
-
+#include "SCPlane.h"
 #include "main.h"
 
 
