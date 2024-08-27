@@ -9,14 +9,15 @@
 #include "precomp.h"
 #include <cctype> // Include the header for the toupper function
 #include <imgui.h>
-#include <imgui_impl_opengl3.h>
+#include <imgui_impl_opengl2.h>
 #include <imgui_impl_sdl2.h>
 
 #define SC_WORLD 1100
 
 
 SCStrike::SCStrike(){
-
+    this->camera_mode = 0;
+    this->camera_pos = {0,0,0};
 }
 
 SCStrike::~SCStrike(){
@@ -28,20 +29,33 @@ void SCStrike::CheckKeyboard(void) {
 
     int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
     int upEvents = SDL_PeepEvents(keybEvents, 1, SDL_GETEVENT, SDL_KEYUP, SDL_KEYUP);
+    int msx = 0;
+    int msy = 0;
+    SDL_GetMouseState(&msx, &msy);
+    msy = msy - (Screen.height / 2);
+    msx = msx - (Screen.width / 2);
+    if (this->mouse_control) {
+        this->player_plane->control_stick_x = msx;
+        this->player_plane->control_stick_y = msy;
+    }
     for (int i =0; i < upEvents; i++) {
         SDL_Event* event = &keybEvents[i];
         switch (event->key.keysym.sym) {
         case SDLK_UP:
-            this->playerplane->control_stick_y = 0;
+            if (!this->mouse_control)
+                this->player_plane->control_stick_y = 0;
             break;
         case SDLK_DOWN:
-            this->playerplane->control_stick_y = 0;
+            if (!this->mouse_control)
+                this->player_plane->control_stick_y = 0;
             break;
         case SDLK_LEFT:
-            this->playerplane->control_stick_x = 0;
+            if (!this->mouse_control)
+                this->player_plane->control_stick_x = 0;
             break;
         case SDLK_RIGHT:
-            this->playerplane->control_stick_x = 0;
+            if (!this->mouse_control)
+                this->player_plane->control_stick_x = 0;
             break;
         default:
             break;
@@ -55,71 +69,85 @@ void SCStrike::CheckKeyboard(void) {
             Game.StopTopActivity();
             break;
         }
-        case SDLK_z:
-            
+        case SDLK_F1:
+            this->camera_mode = 0;
             break;
-        case SDLK_s:
-            
+        case SDLK_F2:
+            this->camera_mode = 1;
             break;
-        case SDLK_q:
-            
+        case SDLK_KP_8:
+            this->camera_pos.z += 1;
             break;
-        case SDLK_d:
-            
+        case SDLK_KP_2:
+            this->camera_pos.z -= 1;
             break;
-        case SDLK_e:
-            
+        case SDLK_KP_4:
+            this->camera_pos.x -= 1;
             break;
-        case SDLK_a:
-            
+        case SDLK_KP_6:
+            this->camera_pos.x += 1;
+            break;
+        case SDLK_KP_7:
+            this->camera_pos.y += 1;
+            break;
+        case SDLK_KP_9:
+            this->camera_pos.y -= 1;
+            break;
+        case SDLK_m:
+            this->mouse_control = !this->mouse_control; 
             break;
         case SDLK_UP:
-            this->playerplane->control_stick_y = -100;
+            if (!this->mouse_control)
+                this->player_plane->control_stick_y = -100;
             break;
         case SDLK_DOWN:
-            this->playerplane->control_stick_y = 100;
+            if (!this->mouse_control)
+                this->player_plane->control_stick_y = 100;
             break;
         case SDLK_LEFT:
-            this->playerplane->control_stick_x = -100;
+            if (!this->mouse_control)
+                this->player_plane->control_stick_x = -50;
             break;
         case SDLK_RIGHT:
-            this->playerplane->control_stick_x = 100;
+            if (!this->mouse_control)
+                this->player_plane->control_stick_x = 50;
             break;
         case SDLK_1:
-            this->playerplane->SetThrottle(10);
+            if (!this->mouse_control)
+                this->player_plane->SetThrottle(10);
             break;
         case SDLK_2:
-            this->playerplane->SetThrottle(20);
+            this->player_plane->SetThrottle(20);
             break;
         case SDLK_3:
-            this->playerplane->SetThrottle(30);
+            this->player_plane->SetThrottle(30);
             break;
         case SDLK_4:
-            this->playerplane->SetThrottle(40);
+            this->player_plane->SetThrottle(40);
             break;
         case SDLK_5:
-            this->playerplane->SetThrottle(50);
+            this->player_plane->SetThrottle(50);
             break;
         case SDLK_6:
-            this->playerplane->SetThrottle(60);
+            this->player_plane->SetThrottle(60);
             break;
         case SDLK_7:
-            this->playerplane->SetThrottle(70);
+            this->player_plane->SetThrottle(70);
             break;
         case SDLK_8:
-            this->playerplane->SetThrottle(80);
+            this->player_plane->SetThrottle(80);
             break;
         case SDLK_9:
-            this->playerplane->SetThrottle(90);
+            this->player_plane->SetThrottle(90);
             break;
         case SDLK_0:
-            this->playerplane->SetThrottle(100);
+            this->player_plane->SetThrottle(100);
             break;
         case SDLK_MINUS:
-            this->playerplane->SetThrottle(this->playerplane->GetThrottle()-1);
+            this->player_plane->SetThrottle(this->player_plane->GetThrottle()-1);
             break;
         case SDLK_PLUS:
-            this->playerplane->SetThrottle(this->playerplane->GetThrottle()+1);
+            this->player_plane->SetThrottle(this->player_plane->GetThrottle()+1);
             break;
         default:
             break;
@@ -127,7 +155,7 @@ void SCStrike::CheckKeyboard(void) {
     }
 }
 void SCStrike::Init(void ){
-
+    this->mouse_control = false;
     this->SetMission("TEMPLATE.IFF");
     
 }
@@ -157,23 +185,20 @@ void SCStrike::SetMission(char *missionName) {
     camera = Renderer.GetCamera();
     camera->SetPosition(&newPosition);
     yaw = 0.0f;
-
-    this->playerplane = new SCPlane(
+    
+    this->player_plane = new SCPlane(
         10.0f,
         -7.0f,
         40.0f,
         40.0f,
         30.0f,
         100.0f,
-        0,
         390.0f,
-        18000.0,
+        18000.0f,
         8000.0f,
-        23000.0,
+        23000.0f,
         32.0f,
         .93f,
-        2,
-        2,
         120,
         9.0f,
         18.0f,
@@ -182,50 +207,140 @@ void SCStrike::SetMission(char *missionName) {
         newPosition.y,
         newPosition.z
     );
+    for (auto obj: missionObj->missionObjects) {
+        if (strcmp(obj->MemberName,"F-16DES") == 0) {
+            this->player_plane->object = obj;
+        }
+    }
     
 }
 void SCStrike::RunFrame(void){
     this->CheckKeyboard();
-    this->playerplane->Simulate();
-    this->playerplane->getPosition(&newPosition);
-    camera->SetPosition(&this->newPosition);
-    camera->Rotate(
-        -this->playerplane->elevationf*((float)M_PI/1800.0f),
-        this->playerplane->azimuthf*((float)M_PI/1800.0f),
-        (float)this->playerplane->twist*((float)M_PI/1800.0f)
-    );
+    this->player_plane->Simulate();
+    this->player_plane->getPosition(&newPosition);
+    if (this->player_plane->object!=nullptr) {
+        this->player_plane->object->XAxisRelative = (long) newPosition.x;
+        this->player_plane->object->YAxisRelative = (long) newPosition.y;
+        this->player_plane->object->ZAxisRelative = (long) newPosition.z;
+    }
+    
+    
+    switch (this->camera_mode) {
+        case 0:
+            camera->SetPosition(&this->newPosition);
+            camera->Rotate(
+                (-0.1f * this->player_plane->elevationf) * ((float)M_PI/180.0f),
+                (-0.1f * this->player_plane->azimuthf) * ((float)M_PI/180.0f),
+                (-0.1f * (float)this->player_plane->twist) * ((float)M_PI/180.0f)
+            );
+        break;
+        case 1:
+        {
+            Vector3D pos = {
+                this->newPosition.x+this->camera_pos.x,
+                this->newPosition.y+this->camera_pos.y,
+                this->newPosition.z+this->camera_pos.z
+            };
+            camera->SetPosition(&pos);
+            camera->LookAt(&this->newPosition);
+        }
+        break;
+        default:
+            camera->SetPosition(&this->newPosition);
+            camera->Rotate(
+                (-this->player_plane->elevationf/10.0f)*((float)M_PI/180.0f),
+                (-this->player_plane->azimuthf/10.0f)*((float)M_PI/180.0f),
+                (-(float)this->player_plane->twist/10.0f)*((float)M_PI/180.0f)
+            );
+        break;
+    }
+    
     Renderer.RenderWorldSolid(&area,BLOCK_LOD_MAX,400);
     Renderer.RenderMissionObjects(missionObj);
+    if (this->camera_mode != 0) {
+        this->player_plane->Render();
+    }
+    this->RenderMenu();
+}
 
-    ImGui_ImplOpenGL3_NewFrame();
+void SCStrike::RenderMenu() {
+    ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
-
     ImGui::Begin("Simulation"); 
-
-    ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", 
-        this->playerplane->airspeed,
-        this->newPosition.y,
-        this->playerplane->azimuthf
-    );
-    ImGui::Text("Throttle %d", this->playerplane->GetThrottle());
-    ImGui::Text("Control Stick %d %d", this->playerplane->control_stick_x, this->playerplane->control_stick_y);
-    ImGui::Text("Elevation %.0f, Twist %.0f", this->playerplane->elevationf, this->playerplane->twist);
-    ImGui::Text("Y %.0f, On ground %d", this->playerplane->y, this->playerplane->on_ground);
-    ImGui::Text("flight [roller:%f, elevator:%f, rudder:%f]", 
-        this->playerplane->rollers,
-        this->playerplane->elevator,
-        this->playerplane->rudder
-    );
-    ImGui::Text("Acceleration per tick (x,y,z) [%.3f ,%.3f ,%.3f ]",
-        this->playerplane->vx,
-        this->playerplane->vy,
-        this->playerplane->vz
-    );
-    ImGui::Text("Lift %.3f", this->playerplane->lift);
+        ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", 
+            this->player_plane->airspeed,
+            this->newPosition.y,
+            this->player_plane->azimuthf
+        );
+        ImGui::Text("Twist %d", this->player_plane->twist);
+        ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
+        ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
+        ImGui::Text(
+            "Elevation %.3f, Twist %.3f, RollSpeed %d",
+            this->player_plane->elevationf,
+            this->player_plane->twist,
+            this->player_plane->roll_speed
+        );
+        ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
+        ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", 
+            this->player_plane->rollers,
+            this->player_plane->elevator,
+            this->player_plane->rudder
+        );
+        ImGui::Text("Acceleration (vx,vy,vz) [%.3f ,%.3f ,%.3f ]",
+            this->player_plane->vx,
+            this->player_plane->vy,
+            this->player_plane->vz
+        );
+        ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]",
+            this->player_plane->ax,
+            this->player_plane->ay,
+            this->player_plane->az
+        );
+        ImGui::Text("Lift %.3f", this->player_plane->lift);
+        ImGui::Text("%.3f %.3f %.3f %.3f %.3f %.3f", 
+            this->player_plane->uCl,
+            this->player_plane->Cl,
+            this->player_plane->Cd,
+            this->player_plane->Cdc,
+            this->player_plane->kl,
+            this->player_plane->qs
+        );
+        ImGui::Text("Gravity %.3f", this->player_plane->gravity);
+        ImGui::Text("ptw");
+        for (int o = 0; o < 4; o++) {
+            ImGui::Text(
+                "PTW[%d]=[%f,%f,%f,%f]",
+                o, 
+                this->player_plane->ptw.v[o][0],
+                this->player_plane->ptw.v[o][1],
+                this->player_plane->ptw.v[o][2],
+                this->player_plane->ptw.v[o][3]
+            );
+        }
+        ImGui::Text("incremental");
+        for (int o = 0; o < 4; o++) {
+            ImGui::Text(
+                "INC[%d]=[%f,%f,%f,%f]",
+                o, 
+                this->player_plane->incremental.v[o][0],
+                this->player_plane->incremental.v[o][1],
+                this->player_plane->incremental.v[o][2],
+                this->player_plane->incremental.v[o][3]
+            );
+        }
     ImGui::End();
-
+    ImGui::Begin("Camera"); 
+        ImGui::Text("Tps %d", this->player_plane->tps);
+        ImGui::Text("Camera mode %d", this->camera_mode);
+        ImGui::Text("Position [%.3f,%.3f,%.3f]", 
+            this->camera_pos.x,
+            this->camera_pos.y,
+            this->camera_pos.z
+        );
+    ImGui::End();
     // Rendering
     ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }

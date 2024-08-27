@@ -118,7 +118,7 @@ private:
 
     /*roll, elevation, azimuth speeds	* /
     /* in 10'ths degrees per tick	*/
-    int roll_speed;
+    
 
     
 
@@ -146,10 +146,7 @@ private:
     float last_px;
     float last_py;
     float last_pz;
-    /* plane acceleration	*/
-    float ax;
-    float ay;
-    float az;
+    
     /* drag force in y and z	*/
     float ydrag;
     float zdrag;
@@ -167,21 +164,12 @@ private:
     /* spoiler factors on lift and drag	*/
     float Splf;
     float Spdf;
-    /* air density / 2.0, speed of sound	*/
-    float ro2;
-    float sos;
+   
     /* mach #, crest critical #, ratio	*/
     float mach;
     float mcc;
     float mratio;
-    /* coefficients of lift and drag	*/
-    float uCl;
-    float Cl;
-    float Cd;
-    float Cdc;
-    float kl;
-    /* ground effect, ro/2*Vz*s		*/
-    float qs;
+    
     /* weight of fuel			*/
     float fuel_weight;
     /* 1.0 / mass of plane			*/
@@ -236,22 +224,16 @@ private:
     int flaps;
     int spoilers;
     int obj;
-    
-    /* missile velocity */
-    float missile_vx;
-    float missile_vy;
-    float missile_vz;
+
     /* fps to knots conversion factor */
     float fps_knots;
-    /* the effect of gravity realtive to tps */
-    float gravity;
-    /* number of armaments		*/
-    int sidewinders, rockets;
+    
+
     
     
 
     RSArea *area;
-    RSEntity *object;
+    
 
     float vx_add;
     float vy_add;
@@ -262,10 +244,10 @@ private:
     int nocrash;
     
     
-    int tps;
+    
 
     int IN_BOX(int llx,int urx, int llz, int urz);
-    int report_card(int descent, int roll, int vx, int vz, int wheels);
+    int report_card(int descent, float roll, int vx, int vz, int wheels);
     int isOnRunWay();
     float fuel_consump(float f, float b);
 
@@ -273,7 +255,7 @@ private:
     uint32_t tick_counter;
     uint32_t last_tick;
 public:
-
+    int tps;
     /* plane velocity */
     float vx;
     float vy;
@@ -283,13 +265,34 @@ public:
     float y;
     float z;
 
+    /* plane acceleration	*/
+    float ax;
+    float ay;
+    float az;
+
+    /* the effect of gravity realtive to tps */
+    float gravity;
+
+    /* coefficients of lift and drag	*/
+    float uCl;
+    float Cl;
+    float Cd;
+    float Cdc;
+    float kl;
+    /* ground effect, ro/2*Vz*s		*/
+    float qs;
+
+     /* air density / 2.0, speed of sound	*/
+    float ro2;
+    float sos;
+
     int control_stick_x;
     int control_stick_y;
-
+    int roll_speed;
     short on_ground;
 
     int airspeed;
-    short twist;
+    float twist;
     float azimuthf;
     float elevationf;
 
@@ -298,6 +301,8 @@ public:
     float elevator;
 
     float lift;
+
+    PART *object;
 
     /* my ptw matrix, temp matrix	*/
     Matrix ptw;
@@ -311,15 +316,12 @@ public:
         float Smax,
         float ELEVF_CSTE,
         float ROLLFF_CSTE,
-        int obj,
         float s,
-        double W,
+        float W,
         float fuel_weight,
-        double Mthrust,
+        float Mthrust,
         float b,
         float ie_pi_AR,
-        int MAX_RK,
-        int MAX_SW,
         int MIN_LIFT_SPEED,
         float pilot_y,
         float pilot_z,
@@ -338,6 +340,7 @@ public:
     void SetControlStick(int x, int y);
     void Simulate();
     void getPosition(Point3D* position);
+    void Render();
 };
 
 #endif

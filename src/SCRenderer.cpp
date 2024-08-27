@@ -858,19 +858,12 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     Matrix* projectionMatrix = camera.GetProjectionMatrix();
     glLoadMatrixf(projectionMatrix->ToGL());
     
-    
     running = true;
     
     glDisable(GL_CULL_FACE);
     
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    
-    
-    
-    
-    
-    
     
     GLuint fogMode[]= { GL_EXP, GL_EXP2, GL_LINEAR };   // Storage For Three Types Of Fog
     GLuint fogfilter= 0;                    // Which Fog To Use
@@ -882,9 +875,7 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     glFogf(GL_FOG_START, 800000.0f);             // Fog Start Depth
     glFogf(GL_FOG_END, 1600000.0f);               // Fog End Depth
     glEnable(GL_FOG);
-    
-    
-        
+
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     
     glMatrixMode(GL_MODELVIEW);
@@ -931,7 +922,6 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     }
     glDisable(GL_TEXTURE_2D);
     glPopAttrib();
-    
         
     RenderMapOverlay(area);
     for(int i=0 ; i < BLOCKS_PER_MAP ; i++)

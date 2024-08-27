@@ -1,7 +1,7 @@
 #include  "precomp.h"
 
 float tenthOfDegreeToRad(float angle) {
-    return angle / 1800.0f * (float) M_PI;
+    return (angle/10) * (float(M_PI)/180.0f);
 }
 
 void gl_sincos(float a, float* b, float* c) {
@@ -64,15 +64,12 @@ SCPlane::SCPlane(
     float Smax,
     float ELEVF_CSTE,
     float ROLLFF_CSTE,
-    int obj,
     float s,
-    double W,
+    float W,
     float fuel_weight,
-    double Mthrust,
+    float Mthrust,
     float b,
     float ie_pi_AR,
-    int MAX_RK,
-    int MAX_SW,
     int MIN_LIFT_SPEED,
     float pilot_y,
     float pilot_z,
@@ -167,8 +164,6 @@ void SCPlane::Init() {
     this->Lmin = this->LminDEF * this->gravity;
     this->wheels = 1;
     this->Cdp *= 2.0;
-    this->sidewinders = this->MAX_SW;
-    this->rockets = this->MAX_RK;
     this->fuel = 100 << 7;
     this->gefy = .7f * this->b;
     this->thrust = 0;
@@ -220,6 +215,13 @@ void SCPlane::Simulate() {
     this->fps_knots = this->tps * (3600.0f / 6082.0f);
     this->Lmax = this->LmaxDEF * this->gravity;
 	this->Lmin = this->LminDEF * this->gravity;
+
+    this->max_cl = 1.5f + this->flaps / 62.5f;
+    this->min_cl = this->flaps / 62.5f - 1.5f;
+    this->tilt_factor = .005f * this->flaps + .017f;
+
+    this->Spdf = .0025f * this->spoilers;
+    this->Splf = 1.0f - .005f * this->spoilers;
 
     float groundlevel = this->area->getY(this->x*COORD_SCALE, this->z*COORD_SCALE)/COORD_SCALE;
 
@@ -282,12 +284,12 @@ void SCPlane::Simulate() {
             }
             temp = (float)itemp;
         } else {
-            itemp = (int)temp;	/* itemp is desired azimuth speed	*/
+            itemp = (int) temp;	/* itemp is desired azimuth speed	*/
         }
         
         aztemp = temp;
         /* itemp is now desired-actual		*/
-        itemp -= (int) this->azimuth_speedf;	
+        itemp -=  (int) this->azimuth_speedf;	
         aztemp -= this->azimuth_speedf;
         if (itemp != 0) {
             if (itemp >= DELAY || itemp <= -DELAY) {
@@ -340,7 +342,7 @@ void SCPlane::Simulate() {
 
         /* analyze new ptw	*/
         temp = 0.0f;
-        this->elevationf = -asinf(this->ptw.v[2][1]) / (float) M_PI * 1800.0f;
+        this->elevationf = (-asinf(this->ptw.v[2][1]) * 180.0f / (float) M_PI) * 10;
         
         float ascos = 0.0f;
 
@@ -356,7 +358,7 @@ void SCPlane::Simulate() {
             else if (sincosas < -1) {
                 sincosas = -1;
             }
-            this->azimuthf = asinf(sincosas) / (float) M_PI * 1800.0f;
+            this->azimuthf = (asinf(sincosas) *180.0f / (float) M_PI) * 10.0f;
             if (this->ptw.v[2][2] < 0.0) {
                 /* if heading into z	*/
                 
@@ -367,13 +369,13 @@ void SCPlane::Simulate() {
                 this->azimuthf += 3600;
             }
 
-            this->twist = (short) asinf(this->ptw.v[0][1] / temp) / (float) M_PI * 1800.0f;
+            this->twist = (asinf(this->ptw.v[0][1] / temp) * 180.0f / (float) M_PI) * 10.0f;
                 if (this->ptw.v[1][1] < 0.0) {
                 /* if upside down	*/
-                this->twist = 1800 - this->twist;
+                this->twist = 1800.0f - this->twist;
             }
             if (this->twist < 0) {
-                this->twist += 3600;
+                this->twist += 3600.0f;
             }
         }
         /* save last position	*/
@@ -671,7 +673,7 @@ int SCPlane::isOnRunWay() {
 float SCPlane::fuel_consump(float f, float b) {
 	return  0.3f * f / b;
 }
-int SCPlane::report_card(int descent_rate, int roll_angle, int velocity_x, int velocity_z, int wheels_down) {
+int SCPlane::report_card(int descent_rate, float roll_angle, int velocity_x, int velocity_z, int wheels_down) {
     int on_runway = isOnRunWay();
     int rating = 1;
 
@@ -713,4 +715,25 @@ void SCPlane::getPosition(Point3D* position) {
     position->x = this->x*COORD_SCALE;
     position->y = this->y*COORD_SCALE;
     position->z = this->z*COORD_SCALE;
+}
+void SCPlane::Render() {
+    if (this->object != nullptr) {
+        glPushMatrix();
+        Matrix rotation;
+        rotation.Clear();
+        rotation.Identity();
+        rotation.translateM(
+            this->x*COORD_SCALE,
+            this->y*COORD_SCALE,
+            this->z*COORD_SCALE
+        );
+        rotation.rotateM(((this->azimuthf+900)/10.0f)*((float)M_PI/180.0f) , 0.0f, 1.0f, 0.0f);
+        rotation.rotateM((this->elevationf/10.0f)*((float)M_PI/180.0f), 0.0f, 0.0f, 1.0f);
+        rotation.rotateM(-(this->twist/10.0f)*((float)M_PI/180.0f), 1.0f, 0.0f, 0.0f);
+        
+        glMultMatrixf((float *)rotation.v);
+        
+        Renderer.DrawModel(this->object->entity, LOD_LEVEL_MAX);
+        glPopMatrix();
+    }
 }

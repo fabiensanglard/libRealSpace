@@ -3,7 +3,7 @@
     { 
       "name": "imgui", 
       "features": [
-        "opengl3-binding", 
+        "opengl2-binding", 
         "sdl2-binding"
       ] 
     },

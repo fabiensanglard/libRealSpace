@@ -20,17 +20,19 @@ public:
     void SetMission(char* missionName);
     void CheckKeyboard(void);
     void RunFrame(void);
-
+    void RenderMenu();
 private:
-    
+    uint8_t camera_mode;
+    bool mouse_control;
     Point3D* position;
     Camera *camera;
+    Point3D camera_pos;
     float yaw;
     Point3D newPosition;
     Quaternion newOrientation;
     RSArea area ;
     RSMission *missionObj;
-    SCPlane *playerplane;
+    SCPlane *player_plane;
     float counter;
     std::map<std::string, RSEntity*> objectCache;
 };
