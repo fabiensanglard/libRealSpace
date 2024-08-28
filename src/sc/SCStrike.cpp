@@ -182,6 +182,7 @@ void SCStrike::SetMission(char *missionName) {
     newPosition.x=  (float) playerCoord->XAxisRelative;
     newPosition.z=  (float) -playerCoord->YAxisRelative;
     newPosition.y= this->area.getY(newPosition.x, newPosition.z);
+
     camera = Renderer.GetCamera();
     camera->SetPosition(&newPosition);
     yaw = 0.0f;
@@ -273,7 +274,6 @@ void SCStrike::RenderMenu() {
             this->newPosition.y,
             this->player_plane->azimuthf
         );
-        ImGui::Text("Twist %d", this->player_plane->twist);
         ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
         ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
         ImGui::Text(
@@ -340,7 +340,29 @@ void SCStrike::RenderMenu() {
             this->camera_pos.z
         );
     ImGui::End();
-    // Rendering
+    ImGui::Begin("Mission"); 
+        ImGui::Text("Mission %s", missionObj->getMissionName());
+        ImGui::Text("Area %s", missionObj->getMissionAreaFile());
+        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->XAxisRelative, missionObj->getPlayerCoord()->YAxisRelative);
+        static ImGuiComboFlags flags = 0;
+        if (ImGui::BeginCombo("List des missions", mission_list[mission_idx], flags)) {
+                for (int n = 0; n < SCSTRIKE_MAX_MISSIONS; n++)
+                {
+                    const bool is_selected = (mission_idx == n);
+                    if (ImGui::Selectable(mission_list[n], is_selected))
+                        mission_idx = n;
+
+                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+            ImGui::EndCombo();
+        }
+        if (ImGui::Button("Load Mission")) {
+            this->SetMission((char *)mission_list[mission_idx]);
+        }
+            
+    ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }

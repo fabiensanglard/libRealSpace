@@ -73,12 +73,10 @@ void CreateDirectories(const char* path){
     const char* cursor = path;
     const char* endPath = path+strlen(path);
     
-
     char subPath[512];
     char* dst=subPath;
     
     while(1){
-        
         while (*cursor != '\\' &&
                *cursor!= '/'  &&
                cursor != endPath) {
@@ -92,21 +90,14 @@ void CreateDirectories(const char* path){
         
         
         *dst = 0;
-        
-        
-            
-            
-            int error = Sys_CreateDirectory(subPath);
-            if (error == -1){
-                printErrorMessage(errno,subPath);
-            }
-        else
+        int error = Sys_CreateDirectory(subPath);
+        if (error == -1){
+            printErrorMessage(errno,subPath);
+        } else {
             printf("Created folder: '%s'.\n",subPath);
-        
+        }
         *dst=*cursor;
         cursor++;
         dst++;
-        
     }
-    
 }

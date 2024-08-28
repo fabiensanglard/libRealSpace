@@ -672,7 +672,11 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     //Check the PAK has 5 entries
     this->archive = new PakArchive();
     this->archive->InitFromFile(pakFilename);
-    
+    this->objects->clear();
+    this->objectOverlay.clear();
+    this->jets.clear();
+    this->textures.clear();
+    this->jets.clear();
     //Check that we have 6 entries.
     if (archive->GetNumEntries() != 7){
         printf("***Error: An area PAK file should have 7 files:\n");
@@ -750,8 +754,8 @@ float RSArea::getGroundLevel(int BLOC, float x, float y) {
     // 180000
     int centerX = 0;
     int centerY = 0;
-    int vX = static_cast<int>((x / 1000000.0f * 360000.0f) + centerX);
-    int vY = static_cast<int>((y / 1000000.0f * 360000.0f) + centerY);
+    int vX = static_cast<int>((x) + centerX);
+    int vY = static_cast<int>((y) + centerY);
 
     vX = vX / 1000;
     vY = vY / 1000;

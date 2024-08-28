@@ -205,7 +205,8 @@ void SCRenderer::DrawModel(RSEntity* object, size_t lodLevel ){
     //Texture pass
     if (lodLevel == 0){
         glEnable(GL_TEXTURE_2D);
-        
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+        glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
         //glAlphaFunc ( GL_ALWAYS, 1.0f ) ;
@@ -891,7 +892,6 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
     }
 	glEnd();
 	glEnable(GL_TEXTURE_2D);
-    glPushAttrib(GL_TEXTURE_BIT);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
 		RenderBlock(area, LOD, i, true);
@@ -921,11 +921,12 @@ void SCRenderer::RenderWorldSolid(RSArea* area, int LOD, int verticesPerBlock){
          glEnd();
     }
     glDisable(GL_TEXTURE_2D);
-    glPopAttrib();
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
         
-    RenderMapOverlay(area);
+    //RenderMapOverlay(area);
     for(int i=0 ; i < BLOCKS_PER_MAP ; i++)
         RenderObjects(area,i);
+    glDisable(GL_FOG);
 }
 
 void SCRenderer::RenderObjects(RSArea* area,size_t blockID){
@@ -1067,7 +1068,7 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
         RenderBlock(area, LOD, i, false);
     }
 	glEnd();
-    glPushAttrib(GL_TEXTURE_BIT);
+    //glPushAttrib(GL_TEXTURE_BIT);
 	glEnable(GL_TEXTURE_2D);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
 		RenderBlock(area, LOD, i, true);
@@ -1097,7 +1098,7 @@ void SCRenderer::RenderWorld(RSArea* area, int LOD, int verticesPerBlock) {
          glEnd();
     }
     glDisable(GL_TEXTURE_2D);
-    glPopAttrib();
+    //glPopAttrib();
     RenderMapOverlay(area);
 	for (int i = 0; i < BLOCKS_PER_MAP; i++) {
        RenderObjects(area, i);

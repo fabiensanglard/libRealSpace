@@ -31,7 +31,7 @@ void RSScreen::Init(int32_t zoomFactor){
     this->scale =zoomFactor;
     
     int32_t width  = 320 * scale;
-    int32_t height = 200 * scale;
+    int32_t height = (int32_t) (width / (4.0f/3.0f));
     
     
     this->width = width;
