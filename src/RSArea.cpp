@@ -308,8 +308,6 @@ void RSArea::ParseObjects(){
 
 
 void RSArea::ParseTriFile(PakEntry* entry){
-    
-    
     if (entry->size > 0) {
         PakArchive triFiles;
 
@@ -320,6 +318,7 @@ void RSArea::ParseTriFile(PakEntry* entry){
         read+=2;
         int nbpoly = stream.ReadShort();
         read += 2;
+        stream.MoveForward(2);
         read += 4;
         AoVPoints* vertices = new AoVPoints[numvertice];
         overTheMapIsTheRunway.lx = 0;
@@ -388,6 +387,8 @@ void RSArea::ParseTriFile(PakEntry* entry){
             
             overTheMapIsTheRunway.trianles[overTheMapIsTheRunway.nbTriangles++] = aot;
         }
+        // TODO figure out what is the remaining data is used for.
+        stream.MoveForward(entry->size-read);
         objectOverlay.push_back(overTheMapIsTheRunway);
     }
 }

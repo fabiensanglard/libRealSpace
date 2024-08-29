@@ -140,7 +140,7 @@ void SCGameFlow::runEffect() {
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             this->missionToFly = (char *)malloc(13);
-            sprintf(this->missionToFly, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
+            sprintf_s(this->missionToFly, 13, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             strtoupper(this->missionToFly, this->missionToFly);
             printf("FLYM NOT IMPLEMENTED\n");
         }
@@ -388,7 +388,7 @@ void SCGameFlow::RunFrame(void) {
     for (auto layer: this->layers) {
         VGA.DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
         if (layer->img->sequence.size()>1) {
-            layer->frameCounter = (layer->frameCounter + fpsupdate) % layer->img->sequence.size() ;
+            layer->frameCounter = (uint8_t) (layer->frameCounter + fpsupdate) % layer->img->sequence.size() ;
         }
     }
     

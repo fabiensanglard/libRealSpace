@@ -272,6 +272,9 @@ void SCConvPlayer::CheckFrameExpired(void){
     for(int i= 0 ; i < numKeybEvents ; i++){
         SDL_Event* event = &keybEvents[i];
         switch (event->type) {
+            case SDLK_SPACE:
+                this->currentFrame.SetExpired(true);
+                break;
             default:
                 this->currentFrame.SetExpired(true);
                 break;

@@ -14,17 +14,14 @@
 
 #define SC_WORLD 1100
 
-
-SCStrike::SCStrike(){
+SCStrike::SCStrike() {
     this->camera_mode = 0;
-    this->camera_pos = {0,0,0};
+    this->camera_pos = {0, 0, 0};
 }
 
-SCStrike::~SCStrike(){
-
-}
+SCStrike::~SCStrike() {}
 void SCStrike::CheckKeyboard(void) {
-    //Keyboard
+    // Keyboard
     SDL_Event keybEvents[1];
 
     int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
@@ -38,8 +35,8 @@ void SCStrike::CheckKeyboard(void) {
         this->player_plane->control_stick_x = msx;
         this->player_plane->control_stick_y = msy;
     }
-    for (int i =0; i < upEvents; i++) {
-        SDL_Event* event = &keybEvents[i];
+    for (int i = 0; i < upEvents; i++) {
+        SDL_Event *event = &keybEvents[i];
         switch (event->key.keysym.sym) {
         case SDLK_UP:
             if (!this->mouse_control)
@@ -62,7 +59,7 @@ void SCStrike::CheckKeyboard(void) {
         }
     }
     for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event* event = &keybEvents[i];
+        SDL_Event *event = &keybEvents[i];
 
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
@@ -94,7 +91,7 @@ void SCStrike::CheckKeyboard(void) {
             this->camera_pos.y -= 1;
             break;
         case SDLK_m:
-            this->mouse_control = !this->mouse_control; 
+            this->mouse_control = !this->mouse_control;
             break;
         case SDLK_UP:
             if (!this->mouse_control)
@@ -144,27 +141,35 @@ void SCStrike::CheckKeyboard(void) {
             this->player_plane->SetThrottle(100);
             break;
         case SDLK_MINUS:
-            this->player_plane->SetThrottle(this->player_plane->GetThrottle()-1);
+            this->player_plane->SetThrottle(this->player_plane->GetThrottle() - 1);
             break;
         case SDLK_PLUS:
-            this->player_plane->SetThrottle(this->player_plane->GetThrottle()+1);
+            this->player_plane->SetThrottle(this->player_plane->GetThrottle() + 1);
+            break;
+        case SDLK_l:
+            this->player_plane->SetWheel();
+            break;
+        case SDLK_f:
+            this->player_plane->SetFlaps();
+            break;
+        case SDLK_b:
+            this->player_plane->SetSpoilers();
             break;
         default:
             break;
         }
     }
 }
-void SCStrike::Init(void ){
+void SCStrike::Init(void) {
     this->mouse_control = false;
     this->SetMission("TEMPLATE.IFF");
-    
 }
 
 void SCStrike::SetMission(char *missionName) {
     char missFileName[33];
     sprintf_s(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
 
-    TreEntry* mission = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(missFileName);
+    TreEntry *mission = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(missFileName);
     IffLexer missionIFF;
     missionIFF.InitFromRAM(mission->data, mission->size);
 
@@ -172,91 +177,63 @@ void SCStrike::SetMission(char *missionName) {
     missionObj->tre = Assets.tres[AssetManager::TRE_OBJECTS];
     missionObj->objCache = &objectCache;
     missionObj->InitFromIFF(&missionIFF);
-    
+
     char filename[13];
     sprintf_s(filename, "%s.PAK", missionObj->getMissionAreaFile());
     area.InitFromPAKFileName(filename);
 
-    PART* playerCoord = missionObj->getPlayerCoord();
+    PART *playerCoord = missionObj->getPlayerCoord();
 
-    newPosition.x=  (float) playerCoord->XAxisRelative;
-    newPosition.z=  (float) -playerCoord->YAxisRelative;
-    newPosition.y= this->area.getY(newPosition.x, newPosition.z);
+    newPosition.x = (float)playerCoord->XAxisRelative;
+    newPosition.z = (float)-playerCoord->YAxisRelative;
+    newPosition.y = this->area.getY(newPosition.x, newPosition.z);
 
     camera = Renderer.GetCamera();
     camera->SetPosition(&newPosition);
     yaw = 0.0f;
-    
-    this->player_plane = new SCPlane(
-        10.0f,
-        -7.0f,
-        40.0f,
-        40.0f,
-        30.0f,
-        100.0f,
-        390.0f,
-        18000.0f,
-        8000.0f,
-        23000.0f,
-        32.0f,
-        .93f,
-        120,
-        9.0f,
-        18.0f,
-        &this->area,
-        newPosition.x,
-        newPosition.y,
-        newPosition.z
-    );
-    for (auto obj: missionObj->missionObjects) {
-        if (strcmp(obj->MemberName,"F-16DES") == 0) {
+
+    this->player_plane =
+        new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
+                    9.0f, 18.0f, &this->area,0, 0, 0);
+    this->player_plane->azimuthf = 1800.0f;
+    for (auto obj : missionObj->missionObjects) {
+        if (strcmp(obj->MemberName, "F-16DES") == 0) {
             this->player_plane->object = obj;
         }
     }
-    
 }
-void SCStrike::RunFrame(void){
+void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
     this->player_plane->Simulate();
     this->player_plane->getPosition(&newPosition);
-    if (this->player_plane->object!=nullptr) {
-        this->player_plane->object->XAxisRelative = (long) newPosition.x;
-        this->player_plane->object->YAxisRelative = (long) newPosition.y;
-        this->player_plane->object->ZAxisRelative = (long) newPosition.z;
+    if (this->player_plane->object != nullptr) {
+        this->player_plane->object->XAxisRelative = (long)newPosition.x;
+        this->player_plane->object->YAxisRelative = (long)newPosition.y;
+        this->player_plane->object->ZAxisRelative = (long)newPosition.z;
     }
-    
-    
+
     switch (this->camera_mode) {
-        case 0:
-            camera->SetPosition(&this->newPosition);
-            camera->Rotate(
-                (-0.1f * this->player_plane->elevationf) * ((float)M_PI/180.0f),
-                (-0.1f * this->player_plane->azimuthf) * ((float)M_PI/180.0f),
-                (-0.1f * (float)this->player_plane->twist) * ((float)M_PI/180.0f)
-            );
+    case 0:
+        camera->SetPosition(&this->newPosition);
+        camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
+                       (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
+                       (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
-        case 1:
-        {
-            Vector3D pos = {
-                this->newPosition.x+this->camera_pos.x,
-                this->newPosition.y+this->camera_pos.y,
-                this->newPosition.z+this->camera_pos.z
-            };
-            camera->SetPosition(&pos);
-            camera->LookAt(&this->newPosition);
-        }
-        break;
-        default:
-            camera->SetPosition(&this->newPosition);
-            camera->Rotate(
-                (-this->player_plane->elevationf/10.0f)*((float)M_PI/180.0f),
-                (-this->player_plane->azimuthf/10.0f)*((float)M_PI/180.0f),
-                (-(float)this->player_plane->twist/10.0f)*((float)M_PI/180.0f)
-            );
+    case 1: {
+        Vector3D pos = {this->newPosition.x + this->camera_pos.x, this->newPosition.y + this->camera_pos.y,
+                        this->newPosition.z + this->camera_pos.z};
+        camera->SetPosition(&pos);
+        camera->LookAt(&this->newPosition);
+    } break;
+    default:
+        camera->SetPosition(&this->newPosition);
+        camera->Rotate((-this->player_plane->elevationf / 10.0f) * ((float)M_PI / 180.0f),
+                       (-this->player_plane->azimuthf / 10.0f) * ((float)M_PI / 180.0f),
+                       (-(float)this->player_plane->twist / 10.0f) * ((float)M_PI / 180.0f));
         break;
     }
-    
-    Renderer.RenderWorldSolid(&area,BLOCK_LOD_MAX,400);
+
+    Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     Renderer.RenderMissionObjects(missionObj);
     if (this->camera_mode != 0) {
         this->player_plane->Render();
@@ -268,100 +245,77 @@ void SCStrike::RenderMenu() {
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
-    ImGui::Begin("Simulation"); 
-        ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", 
-            this->player_plane->airspeed,
-            this->newPosition.y,
-            this->player_plane->azimuthf
-        );
-        ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
-        ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
-        ImGui::Text(
-            "Elevation %.3f, Twist %.3f, RollSpeed %d",
-            this->player_plane->elevationf,
-            this->player_plane->twist,
-            this->player_plane->roll_speed
-        );
-        ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
-        ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", 
-            this->player_plane->rollers,
-            this->player_plane->elevator,
-            this->player_plane->rudder
-        );
-        ImGui::Text("Acceleration (vx,vy,vz) [%.3f ,%.3f ,%.3f ]",
-            this->player_plane->vx,
-            this->player_plane->vy,
-            this->player_plane->vz
-        );
-        ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]",
-            this->player_plane->ax,
-            this->player_plane->ay,
-            this->player_plane->az
-        );
-        ImGui::Text("Lift %.3f", this->player_plane->lift);
-        ImGui::Text("%.3f %.3f %.3f %.3f %.3f %.3f", 
-            this->player_plane->uCl,
-            this->player_plane->Cl,
-            this->player_plane->Cd,
-            this->player_plane->Cdc,
-            this->player_plane->kl,
-            this->player_plane->qs
-        );
-        ImGui::Text("Gravity %.3f", this->player_plane->gravity);
-        ImGui::Text("ptw");
-        for (int o = 0; o < 4; o++) {
-            ImGui::Text(
-                "PTW[%d]=[%f,%f,%f,%f]",
-                o, 
-                this->player_plane->ptw.v[o][0],
-                this->player_plane->ptw.v[o][1],
-                this->player_plane->ptw.v[o][2],
-                this->player_plane->ptw.v[o][3]
-            );
-        }
-        ImGui::Text("incremental");
-        for (int o = 0; o < 4; o++) {
-            ImGui::Text(
-                "INC[%d]=[%f,%f,%f,%f]",
-                o, 
-                this->player_plane->incremental.v[o][0],
-                this->player_plane->incremental.v[o][1],
-                this->player_plane->incremental.v[o][2],
-                this->player_plane->incremental.v[o][3]
-            );
-        }
+    ImGui::Begin("Simulation");
+    ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", this->player_plane->airspeed, this->newPosition.y,
+                this->player_plane->azimuthf);
+    ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
+    ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
+    ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf, this->player_plane->twist,
+                this->player_plane->roll_speed);
+    ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
+    ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", this->player_plane->rollers,
+                this->player_plane->elevator, this->player_plane->rudder);
+    ImGui::Text("Acceleration (vx,vy,vz) [%.3f ,%.3f ,%.3f ]", this->player_plane->vx, this->player_plane->vy,
+                this->player_plane->vz);
+    ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]", this->player_plane->ax, this->player_plane->ay,
+                this->player_plane->az);
+    ImGui::Text("Lift %.3f", this->player_plane->lift);
+    ImGui::Text("%.3f %.3f %.3f %.3f %.3f %.3f", this->player_plane->uCl, this->player_plane->Cl,
+                this->player_plane->Cd, this->player_plane->Cdc, this->player_plane->kl, this->player_plane->qs);
+    ImGui::Text("Gravity %.3f", this->player_plane->gravity);
+    ImGui::Text("ptw");
+    for (int o = 0; o < 4; o++) {
+        ImGui::Text("PTW[%d]=[%f,%f,%f,%f]", o, this->player_plane->ptw.v[o][0], this->player_plane->ptw.v[o][1],
+                    this->player_plane->ptw.v[o][2], this->player_plane->ptw.v[o][3]);
+    }
+    ImGui::Text("incremental");
+    for (int o = 0; o < 4; o++) {
+        ImGui::Text("INC[%d]=[%f,%f,%f,%f]", o, this->player_plane->incremental.v[o][0],
+                    this->player_plane->incremental.v[o][1], this->player_plane->incremental.v[o][2],
+                    this->player_plane->incremental.v[o][3]);
+    }
     ImGui::End();
-    ImGui::Begin("Camera"); 
-        ImGui::Text("Tps %d", this->player_plane->tps);
-        ImGui::Text("Camera mode %d", this->camera_mode);
-        ImGui::Text("Position [%.3f,%.3f,%.3f]", 
-            this->camera_pos.x,
-            this->camera_pos.y,
-            this->camera_pos.z
-        );
+    ImGui::Begin("Camera");
+    ImGui::Text("Tps %d", this->player_plane->tps);
+    ImGui::Text("Camera mode %d", this->camera_mode);
+    ImGui::Text("Position [%.3f,%.3f,%.3f]", this->camera_pos.x, this->camera_pos.y, this->camera_pos.z);
     ImGui::End();
-    ImGui::Begin("Mission"); 
-        ImGui::Text("Mission %s", missionObj->getMissionName());
-        ImGui::Text("Area %s", missionObj->getMissionAreaFile());
-        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->XAxisRelative, missionObj->getPlayerCoord()->YAxisRelative);
-        static ImGuiComboFlags flags = 0;
-        if (ImGui::BeginCombo("List des missions", mission_list[mission_idx], flags)) {
-                for (int n = 0; n < SCSTRIKE_MAX_MISSIONS; n++)
-                {
-                    const bool is_selected = (mission_idx == n);
-                    if (ImGui::Selectable(mission_list[n], is_selected))
-                        mission_idx = n;
+    ImGui::Begin("Cockpit");
+    if (this->player_plane->GetWheel()) {
+        ImGui::Text("Wheel down");
+    } else {
+        ImGui::Text("Wheel up");
+    }
+    if (this->player_plane->GetFlaps()) {
+        ImGui::Text("Flaps");
+    }
+    if (this->player_plane->GetSpoilers()) {
+        ImGui::Text("Breaks");
+    }
+    ImGui::End();
+    ImGui::Begin("Mission");
+    ImGui::Text("Mission %s", missionObj->getMissionName());
+    ImGui::Text("Area %s", missionObj->getMissionAreaFile());
+    ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->XAxisRelative,
+                missionObj->getPlayerCoord()->YAxisRelative);
+    static ImGuiComboFlags flags = 0;
+    if (ImGui::BeginCombo("List des missions", mission_list[mission_idx], flags)) {
+        for (int n = 0; n < SCSTRIKE_MAX_MISSIONS; n++) {
+            const bool is_selected = (mission_idx == n);
+            if (ImGui::Selectable(mission_list[n], is_selected))
+                mission_idx = n;
 
-                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                    if (is_selected)
-                        ImGui::SetItemDefaultFocus();
-                }
-            ImGui::EndCombo();
+            // Set the initial focus when opening the combo (scrolling +
+            // keyboard navigation focus)
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
         }
-        if (ImGui::Button("Load Mission")) {
-            this->SetMission((char *)mission_list[mission_idx]);
-        }
-            
+        ImGui::EndCombo();
+    }
+    if (ImGui::Button("Load Mission")) {
+        this->SetMission((char *)mission_list[mission_idx]);
+    }
+
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
