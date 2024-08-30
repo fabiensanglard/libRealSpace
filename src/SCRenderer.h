@@ -13,6 +13,7 @@
 #include <GL/GL.h>
 #include <Windows.h>
 
+#define MAP_SIZE 200000
 class RSArea;
 class Texture;
 class RSEntity;

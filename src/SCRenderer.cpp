@@ -56,7 +56,7 @@ void SCRenderer::Init(int32_t zoomFactor) {
     glDisable(GL_DEPTH_TEST); // Disable Depth Testing
 
     // camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
-    camera.SetPersective(50.0f, this->width / (float)this->height, 10.0f, 20000 * 18);
+    camera.SetPersective(50.0f, this->width / (float)this->height, 10.0f, 40000 * 18);
 
     light.SetWithCoo(300, 300, 300);
 
@@ -673,7 +673,7 @@ void SCRenderer::RenderJets(RSArea *area) {
     }
 }
 void SCRenderer::RenderWorldSkyAndGround() {
-    static const int max_int = 138890;
+    static const int max_int = MAP_SIZE;
 
     GLfloat skycolor[2][3] = {
         {80.0f / 255.0f, 160.0f / 255.0f, 240.0f / 255.0f},
@@ -741,7 +741,7 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glFogf(GL_FOG_DENSITY, 0.000009f);        // How Dense Will The Fog Be
     glHint(GL_FOG_HINT, GL_DONT_CARE);       // Fog Hint Value
     glFogf(GL_FOG_START, 8000.0f);         // Fog Start Depth
-    glFogf(GL_FOG_END, 136000.0f);          // Fog End Depth
+    glFogf(GL_FOG_END, MAP_SIZE);          // Fog End Depth
     glEnable(GL_FOG);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

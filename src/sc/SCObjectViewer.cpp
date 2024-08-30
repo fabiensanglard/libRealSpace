@@ -288,8 +288,8 @@ void SCObjectViewer::RunFrame(void){
     //Draw Mouse
     Mouse.Draw();
 
-    
     VGA.VSync();
+    
 
     /**/
     //Ok now time to draw the model
@@ -336,5 +336,7 @@ void SCObjectViewer::RunFrame(void){
     glPopMatrix();
     glPushMatrix();
     glDisable(GL_DEPTH_TEST);
+
+    
     /**/
 }

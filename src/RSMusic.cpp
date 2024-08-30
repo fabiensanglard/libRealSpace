@@ -7,3 +7,9 @@
 //
 
 #include "RSMusic.h"
+void RSMusic::Init() {
+    
+}
+void RSMusic::PlayMusic(int id) {
+
+}
