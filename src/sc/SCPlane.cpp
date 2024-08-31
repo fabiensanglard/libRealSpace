@@ -673,14 +673,14 @@ void SCPlane::SetFlaps() {
     if (this->flaps == this->Fmax) {
         this->flaps = 0;
     } else {
-        this->flaps = this->Fmax;
+        this->flaps = (int) this->Fmax;
     }
 }
 void SCPlane::SetSpoilers() {
     if (this->spoilers == this->Smax) {
         this->spoilers = 0;
     } else {
-        this->spoilers = this->Smax;
+        this->spoilers = (int) this->Smax;
     }
 }
 void SCPlane::SetWheel() { this->wheels = !this->wheels; }

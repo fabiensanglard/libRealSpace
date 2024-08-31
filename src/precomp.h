@@ -73,6 +73,7 @@ extern "C" {
     #include "RSOption.h"
     #include "RSGameFlow.h"
     #include "RSMission.h"
+    #include "RSNavMap.h"
 
     //Fonts stuff
     #include "RSFont.h"

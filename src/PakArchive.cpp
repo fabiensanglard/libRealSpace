@@ -209,8 +209,9 @@ size_t PakArchive::GetNumEntries(void){
 }
 
 PakEntry* PakArchive::GetEntry(size_t index){
-    if (index < this->entries.size());
+    if (index < this->entries.size()) {
         return this->entries[index];
+    }
     return nullptr;
 }
 

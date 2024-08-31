@@ -42,7 +42,7 @@ void RSImageSet::InitFromPakEntry(PakEntry* entry){
             RLEShape* shape = new RLEShape();
             shape->Init(currImage, size);
             this->shapes.push_back(shape);
-            this->sequence.push_back(i);        
+            this->sequence.push_back((uint8_t) i);        
         } else {
             printf("PALT not supported yet\n");
             RLEShape* shape = new RLEShape();;

@@ -7,7 +7,7 @@ void RSNavMap::parseNMAP(uint8_t *data, size_t size) {
 	handlers["MAPS"] = std::bind(&RSNavMap::parseNMAP_MAPS, this, std::placeholders::_1, std::placeholders::_2);
 	handlers["FONT"] = std::bind(&RSNavMap::parseNMAP_FONT, this, std::placeholders::_1, std::placeholders::_2);
 	handlers["TEXT"] = std::bind(&RSNavMap::parseNMAP_TEXT, this, std::placeholders::_1, std::placeholders::_2);
-	handlers["SHAP"] = std::bind(&RSNavMap::parseNMAP_SHAPE, this, std::placeholders::_1, std::placeholders::_2);
+	handlers["SHAP"] = std::bind(&RSNavMap::parseNMAP_SHAP, this, std::placeholders::_1, std::placeholders::_2);
 	
     lexer.InitFromRAM(data, size, handlers);
 }

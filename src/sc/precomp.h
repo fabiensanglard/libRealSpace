@@ -27,6 +27,7 @@
 #include "ConvAssetManager.h"
 #include "AssetManager.h"
 #include "SCPlane.h"
+#include "SCNavMap.h"
 #include "main.h"
 
 
