@@ -36,7 +36,13 @@ public:
 	inline void Set(uint8_t* cursor) {
 		this->cursor = cursor;
 	}
-
+	inline std::string ReadString(void) {
+		std::string str;
+		while (PeekByte() != 0) {
+			str += ReadByte();
+		}
+		return str;
+	}
 	inline void MoveForward(size_t bytes) {
 		this->cursor += bytes;
 	}
