@@ -20,8 +20,10 @@ void RSNavMap::parseNMAP_MAPS(uint8_t *data, size_t size) {
 		read+=8;
 		uint32_t shape_size = stream.ReadUInt32LE();
 		read+=4;
+		uint8_t *shape_data = (uint8_t*) malloc(shape_size);
+		memcpy(shape_data, stream.GetPosition()+4, shape_size);
 		maps[name] = new RLEShape();
-		maps[name]->Init(stream.GetPosition()+4, 0);
+		maps[name]->Init(shape_data, 0);
 		stream.MoveForward(shape_size-4);
 		read+=(shape_size-4);
 	}
@@ -35,7 +37,10 @@ void RSNavMap::parseNMAP_TEXT(uint8_t *data, size_t size) {
 void RSNavMap::parseNMAP_SHAP(uint8_t* data, size_t size) {
 	ByteStream stream(data);
 	this->background = new RLEShape();
-	this->background->Init(stream.GetPosition(), 0);
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, stream.GetPosition()+8, size);
+	this->background->Init(shape_data, 0);
 }
 
 RSNavMap::RSNavMap() {

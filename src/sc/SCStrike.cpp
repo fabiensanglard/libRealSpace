@@ -161,7 +161,7 @@ void SCStrike::CheckKeyboard(void) {
                 char *arena_name = new char[8];
                 char *arena_file_name = this->missionObj->getMissionAreaFile();
                 for (int i = 0; i < 8; i++) {
-                    arena_name[i] = arena_file_name[i];
+                    arena_name[i] = toupper(arena_file_name[i]);
                 }
                 
                 nav_screen->Init();
