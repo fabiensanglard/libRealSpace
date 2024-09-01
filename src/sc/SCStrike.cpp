@@ -155,6 +155,20 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_b:
             this->player_plane->SetSpoilers();
             break;
+        case SDLK_n:
+            {
+                SCNavMap *nav_screen = new SCNavMap();
+                char *arena_name = new char[8];
+                char *arena_file_name = this->missionObj->getMissionAreaFile();
+                for (int i = 0; i < 8; i++) {
+                    arena_name[i] = arena_file_name[i];
+                }
+                
+                nav_screen->Init();
+                nav_screen->SetName(arena_name);
+                Game.AddActivity(nav_screen);
+            }
+            break;
         default:
             break;
         }

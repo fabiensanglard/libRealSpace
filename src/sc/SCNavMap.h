@@ -1,30 +1,27 @@
-#pragma once
 //
-//  NSObjectViewer.h
+//  SCNavMap.h
 //  libRealSpace
 //
 //  Created by Rémi LEONARD on 31/08/2024.
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#ifndef __libRealSpace__SCNavMap__
-#define __libRealSpace__SCNavMap__
-
+#pragma once
 #include "precomp.h"
 
-class SCNavMap : public IActivity{
+class SCNavMap : public IActivity {
     
 public:
     SCNavMap();
     ~SCNavMap();
     
-    void Init( );
-    
+    void Init();
+    void SetName(char *name);
     void RunFrame(void);
     
 private:
+    std::string *name;
     RSNavMap* navMap;
-    
+    VGAPalette palette;
+    void CheckKeyboard(void);
 };
-
-#endif /* defined(__libRealSpace__SCNavMap__) */

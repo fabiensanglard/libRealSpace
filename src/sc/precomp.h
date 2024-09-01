@@ -27,7 +27,6 @@
 #include "ConvAssetManager.h"
 #include "AssetManager.h"
 #include "SCPlane.h"
-#include "SCNavMap.h"
 #include "main.h"
 
 
@@ -38,6 +37,7 @@
 #include "SCAnimationPlayer.h"
 #include "SCRegister.h"
 #include "SCWildCatBase.h"
+#include "SCNavMap.h"
 #include "SCStrike.h"
 #include "SCObjectViewer.h"
 #include "SCDogFightMenu.h"

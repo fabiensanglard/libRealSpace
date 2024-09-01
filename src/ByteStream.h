@@ -37,10 +37,14 @@ public:
 	inline void Set(uint8_t* cursor) {
 		this->cursor = cursor;
 	}
-	inline std::string ReadString(void) {
+	inline std::string ReadString(size_t lenght) {
 		std::string str;
-		while (PeekByte() != 0) {
-			str += ReadByte();
+		uint8_t c = ReadByte();
+		for (size_t i = 1; i < lenght; i++) {
+			if (c != 0) {
+				str += c;
+			}
+			c=ReadByte();
 		}
 		return str;
 	}
@@ -91,6 +95,19 @@ public:
 		buffer[1] = *(cursor++);
 		buffer[2] = *(cursor++);
 		buffer[3] = *(cursor++);
+		i = (buffer[2] << 16) | (buffer[1] << 8) | (buffer[0] << 0);
+		if (buffer[2] & 0x80) {
+			i = (0xff << 24) | i;
+		}
+		return i;
+	}
+
+	inline int32_t ReadInt24LEByte3(void) {
+		int32_t i = 0;
+		uint8_t buffer[3];
+		buffer[0] = *(cursor++);
+		buffer[1] = *(cursor++);
+		buffer[2] = *(cursor++);
 		i = (buffer[2] << 16) | (buffer[1] << 8) | (buffer[0] << 0);
 		if (buffer[2] & 0x80) {
 			i = (0xff << 24) | i;

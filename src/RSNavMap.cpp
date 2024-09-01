@@ -15,19 +15,15 @@ void RSNavMap::parseNMAP_MAPS(uint8_t *data, size_t size) {
     ByteStream stream(data);
 	std::string name;
 	size_t read=0;
-
 	while (read < size) {
-		name = stream.ReadString();
-		read+=name.size()+1;
-		if (read<9) {
-			stream.MoveForward(9-read);
-			read+=9-read;
-		};
-		int32_t shape_size = stream.ReadUInt32BE();
+		name = stream.ReadString(8);
+		read+=8;
+		uint32_t shape_size = stream.ReadUInt32LE();
 		read+=4;
 		maps[name] = new RLEShape();
-		maps[name]->Init(stream.ReadBytes(shape_size).data(), shape_size);
-		read+=shape_size;
+		maps[name]->Init(stream.GetPosition()+4, 0);
+		stream.MoveForward(shape_size-4);
+		read+=(shape_size-4);
 	}
 }
 void RSNavMap::parseNMAP_FONT(uint8_t *data, size_t size) {
@@ -37,8 +33,9 @@ void RSNavMap::parseNMAP_TEXT(uint8_t *data, size_t size) {
 
 }
 void RSNavMap::parseNMAP_SHAP(uint8_t* data, size_t size) {
+	ByteStream stream(data);
 	this->background = new RLEShape();
-	this->background->Init(data, size);
+	this->background->Init(stream.GetPosition(), 0);
 }
 
 RSNavMap::RSNavMap() {

@@ -6,9 +6,12 @@
 //  Created by fabien sanglard on 1/28/2014.
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
+#include "precomp.h"
 
 #ifndef __libRealSpace__SCStrike__
 #define __libRealSpace__SCStrike__
+
+
 
 #define SCSTRIKE_MAX_MISSIONS 46
 static const char *mission_list[] = {
@@ -21,6 +24,7 @@ static const char *mission_list[] = {
     "MISN-3X.IFF",  "MISN-6X.IFF",  "MISN-8X.IFF",  "MISN-10X.IFF", "MISN-11X.IFF",
 };
 static int mission_idx = 0;
+
 
 class SCStrike : public IActivity {
 
@@ -45,7 +49,9 @@ private:
     Quaternion newOrientation;
     RSArea area;
     RSMission *missionObj;
+    SCNavMap *nav_screen;
     SCPlane *player_plane;
+
     float counter;
     std::map<std::string, RSEntity *> objectCache;
 };

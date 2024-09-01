@@ -9,9 +9,9 @@
 #include "ByteStream.h"
 
 class RSNavMap {
-    std::map<std::string, RLEShape*> maps;
+    
     RLEShape *font;
-    RLEShape *background;
+    
     std::vector<uint8_t> texts;
 
     void parseNMAP(uint8_t* data, size_t size);
@@ -21,6 +21,8 @@ class RSNavMap {
     void parseNMAP_SHAP(uint8_t* data, size_t size);
 
 public:
+    std::map<std::string, RLEShape*> maps;
+    RLEShape *background;
     RSNavMap();
 	~RSNavMap();
 	void InitFromRam(uint8_t* data, size_t size);

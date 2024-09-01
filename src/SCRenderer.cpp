@@ -42,7 +42,6 @@ void SCRenderer::Init(int32_t zoomFactor) {
     // Load the default palette
     IffLexer lexer;
     lexer.InitFromFile("PALETTE.IFF");
-    lexer.List(stdout);
 
     RSPalette palette;
     palette.InitFromIFF(&lexer);
