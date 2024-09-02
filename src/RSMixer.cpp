@@ -18,3 +18,6 @@ void RSMixer::PlayMusic(uint32_t index) {
         printf("Error playing music: %s\n", Mix_GetError());
     }
 }
+void RSMixer::StopMusic() { 
+    Mix_HaltMusic();
+}

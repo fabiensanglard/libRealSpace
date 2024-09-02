@@ -13,6 +13,7 @@ SCObjectViewer::SCObjectViewer(){
     this->rotateUpDownAngle = 0;
     this->zoomFactor = 1;
     this->rotateLeftRightAngle = 0;
+    this->music_playing = false;
 }
 
 SCObjectViewer::~SCObjectViewer(){
@@ -94,50 +95,65 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
     
 }
 
-void OnExit(void){
+void SCObjectViewer::OnExit(void){
     Game.StopTopActivity();
 }
 
-void OnNext(void){
+void SCObjectViewer::OnNext(void){
     //startTime = SDL_GetTicks();
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
     that->NextObject();
 }
 
-void OnZoomOut(void){
+void SCObjectViewer::OnZoomOut(void){
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
     that->zoomFactor += 0.1f;
     if (that->zoomFactor > 2.5f) that->zoomFactor = 2.5f;
 }
 
-void OnZoomIn(void){
+void SCObjectViewer::OnZoomIn(void){
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
     that->zoomFactor -= 0.1f;
     if (that->zoomFactor < 0.4f) that->zoomFactor = 0.4f;
 }
 
-void OnRotateLeft(void){
+void SCObjectViewer::OnRotateLeft(void){
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
     that->rotateLeftRightAngle -= 10.0f;
 }
 
-void OnRotateRight(void){
+void SCObjectViewer::OnRotateRight(void){
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
     that->rotateLeftRightAngle += 10.0f;
 }
 
-void OnRotateUp(void){
+void SCObjectViewer::OnRotateUp(void){
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
     that->rotateUpDownAngle += 10.0f;
 }
 
-void OnRotateDown(void){
+void SCObjectViewer::OnRotateDown(void){
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
     that->rotateUpDownAngle -= 10.0f;
 }
 
 void SCObjectViewer::NextObject(void){
     currentObject = (currentObject+ 1) % showCases.size();
+}
+
+void SCObjectViewer::Focus(void) {
+    this->focused = true;
+    if (!this->music_playing) {
+        Mixer.PlayMusic(25);
+        this->music_playing = true;
+    }
+}
+void SCObjectViewer::UnFocus(void) {
+    this->focused = false;
+    if (this->music_playing) {
+        Mixer.StopMusic();
+        this->music_playing = false;
+    }
 }
 
 void SCObjectViewer::ParseAssets(PakArchive* archive){
@@ -160,7 +176,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     button = new SCButton();
     Point2D exitDimension = {30, 15} ;
     Point2D exitPosition = {boardPosition.x+268,boardPosition.y+15};
-    button->InitBehavior(OnExit, exitPosition,exitDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnExit, this), exitPosition,exitDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(14)->data, objButtons.GetEntry(14)->size,&exitPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(15)->data, objButtons.GetEntry(15)->size,&exitPosition);
     buttons.push_back(button);
@@ -172,7 +188,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     button = new SCButton();
     
     Point2D rotRightButtonPosition = {boardPosition.x+232,boardPosition.y+12};
-    button->InitBehavior(OnRotateRight, rotRightButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnRotateRight, this), rotRightButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(12)->data, objButtons.GetEntry(12)->size,&rotRightButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(13)->data, objButtons.GetEntry(13)->size,&rotRightButtonPosition);
     buttons.push_back(button);
@@ -180,7 +196,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ROT LEFT OBJ BUTTON
     button = new SCButton();
     Point2D rotLeftButtonPosition = {boardPosition.x+174,boardPosition.y+12};
-    button->InitBehavior(OnRotateLeft, rotLeftButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnRotateLeft, this), rotLeftButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(10)->data, objButtons.GetEntry(10)->size,&rotLeftButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(11)->data, objButtons.GetEntry(11)->size,&rotLeftButtonPosition);
     buttons.push_back(button);
@@ -188,7 +204,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ROT DOWN OBJ BUTTON
     button = new SCButton();
     Point2D rotDownButtonPosition = {boardPosition.x+198,boardPosition.y+24};
-    button->InitBehavior(OnRotateDown, rotDownButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnRotateDown, this), rotDownButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(8)->data, objButtons.GetEntry(8)->size,&rotDownButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(9)->data, objButtons.GetEntry(9)->size,&rotDownButtonPosition);
     buttons.push_back(button);
@@ -197,7 +213,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ROT UP OBJ BUTTON
     button = new SCButton();
     Point2D rotUpButtonPosition = {boardPosition.x+198,boardPosition.y+6};
-    button->InitBehavior(OnRotateUp, rotUpButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnRotateUp, this), rotUpButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(6)->data, objButtons.GetEntry(6)->size,&rotUpButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(7)->data, objButtons.GetEntry(7)->size,&rotUpButtonPosition);
     buttons.push_back(button);
@@ -207,7 +223,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ZOOM OUT OBJ BUTTON
     button = new SCButton();
     Point2D zoomOutButtonPosition = {boardPosition.x+122,boardPosition.y+25};
-    button->InitBehavior(OnZoomOut, zoomOutButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnZoomOut, this), zoomOutButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(4)->data, objButtons.GetEntry(4)->size,&zoomOutButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(5)->data, objButtons.GetEntry(5)->size,&zoomOutButtonPosition);
     buttons.push_back(button);
@@ -215,7 +231,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ZOOM IN OBJ BUTTON
     button = new SCButton();
     Point2D zoomInButtonPosition = {boardPosition.x+121,boardPosition.y+7};
-    button->InitBehavior(OnZoomIn, zoomInButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnZoomIn, this), zoomInButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(2)->data, objButtons.GetEntry(2)->size,&zoomInButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(3)->data, objButtons.GetEntry(3)->size,&zoomInButtonPosition);
     buttons.push_back(button);
@@ -224,7 +240,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     Point2D nextDimension = {75, 15} ;
     button = new SCButton();
     Point2D nextButtonPosition = {boardPosition.x+10,boardPosition.y+15};
-    button->InitBehavior(OnNext, nextButtonPosition,nextDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnNext, this), nextButtonPosition,nextDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(0)->data, objButtons.GetEntry(0)->size,&nextButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(1)->data, objButtons.GetEntry(1)->size,&nextButtonPosition);
     buttons.push_back(button);

@@ -17,7 +17,7 @@ private:
 public:
     RSMixer();
     ~RSMixer();
-
-    void init();
+    
     void PlayMusic(uint32_t index);
+    void StopMusic();
 };

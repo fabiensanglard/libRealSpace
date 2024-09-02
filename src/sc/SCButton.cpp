@@ -21,7 +21,7 @@ SCButton::~SCButton(){
     
 }
 
-void SCButton::InitBehavior(ActionFunction fct, Point2D position,Point2D dimension){
+void SCButton::InitBehavior(std::function<void()> fct, Point2D position,Point2D dimension){
     this->onClick = fct;
     this->position = position;
     this->dimension = dimension;

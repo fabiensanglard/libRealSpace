@@ -9,6 +9,13 @@
 #ifndef __libRealSpace__SCMainMenu__
 #define __libRealSpace__SCMainMenu__
 
+enum ButtonIDS { BUTTON_CONTINUE, BUTTON_LOADGAME, BUTTON_STARTNEWGAME, BUTTON_TRAINING, BUTTON_OBJVIEWER };
+
+#define MAINMENU_PAK_PATH "..\\..\\DATA\\GAMEFLOW\\MAINMENU.PAK"
+
+#define MAINMENU_PAK_BUTTONS_INDICE 0
+#define MAINMENU_PAK_BOARD_INDICE 1
+#define MAINMENU_PAK_BOARD_PALETTE 2
 
 class SCMainMenu : public IActivity{
     
@@ -18,6 +25,8 @@ public:
     
     virtual void Init(void);
     virtual void RunFrame(void);
+    virtual void Focus(void);
+    virtual void UnFocus(void);
     
 private:
     
@@ -34,8 +43,14 @@ private:
     RLEShape cloud;
     
     PakArchive mainMenupak;
-    
-    void DrawMenu(void);
+    Point2D boardPosition;
+
+    void OnViewObject();
+    void OnTrainingMission();
+    void OnStartNewGame();
+    void OnLoadGame();
+    void OnContinue(void);
+
 };
 
 #endif /* defined(__libRealSpace__SCMainMenu__) */

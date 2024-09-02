@@ -33,7 +33,8 @@ public:
     
     
 protected:
-    
+    bool music_playing;
+    bool focused;
     IActivity();
     SCButton* CheckButtons(void);
     SCZone* CheckZones(void);
@@ -43,9 +44,6 @@ protected:
     
 private:
     bool running;
-    bool focused;
-    
-    
 };
 
 

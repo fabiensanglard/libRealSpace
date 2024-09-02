@@ -18,8 +18,8 @@ public:
     void Init( );
     
     void RunFrame(void);
-    
-    
+    void Focus(void);
+    void UnFocus(void);
     
     void NextObject(void);
     float rotateUpDownAngle;
@@ -51,6 +51,15 @@ private:
 
     //For rotating the object
     uint32_t startTime;
+
+    void OnExit(void);
+    void OnNext(void);
+    void OnZoomOut(void);
+    void OnZoomIn(void);
+    void OnRotateLeft(void);
+    void OnRotateRight(void);
+    void OnRotateUp(void);
+    void OnRotateDown(void);
 };
 
 #endif /* defined(__libRealSpace__NSObjectViewer__) */

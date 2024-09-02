@@ -137,7 +137,7 @@ void GameEngine::Run() {
         if (currentActivity->IsRunning()) {
             currentActivity->Focus();
             currentActivity->RunFrame();
-            currentActivity->UnFocus();
+            //currentActivity->UnFocus();
         } else {
             activities.pop();
             delete currentActivity;
@@ -179,6 +179,11 @@ void GameEngine::LogError(const char *text, ...) {
 }
 
 void GameEngine::AddActivity(IActivity *activity) {
+    if (activities.size()>0) {
+        IActivity *currentActivity;
+        currentActivity = activities.top();
+        currentActivity->UnFocus();
+    }
     activity->Start();
     this->activities.push(activity);
 }

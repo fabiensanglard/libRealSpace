@@ -6,51 +6,57 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#include "SCGameFlow.h"
 #include "precomp.h"
-#define MAINMENU_PAK_PATH "..\\..\\DATA\\GAMEFLOW\\MAINMENU.PAK"
-
-#define MAINMENU_PAK_BUTTONS_INDICE 0
-#define MAINMENU_PAK_BOARD_INDICE 1
-#define MAINMENU_PAK_BOARD_PALETTE 2
 
 /*
  3 eagle
  9 letters
  */
 
-static void OnContinue(void) { printf("OnContinue\n"); }
+void SCMainMenu::OnContinue(void) { printf("OnContinue\n"); }
 
-static void OnLoadGame() { printf("OnLoadGame\n"); }
+void SCMainMenu::OnLoadGame() { printf("OnLoadGame\n"); }
 
-static void OnStartNewGame() {
-    // Stop this activity.
-    // SCMainMenu* that =  (SCMainMenu*)Game.GetCurrentActivity();
-    // that->Stop();
-
-    // Add the next activity on the stack
+void SCMainMenu::OnStartNewGame() {
     SCGameFlow *gfl = new SCGameFlow();
     gfl->Init();
     Game.AddActivity(gfl);
 }
 
-static void OnTrainingMission() {
+void SCMainMenu::OnTrainingMission() {
 
     SCTrainingMenu *trainingActivity = new SCTrainingMenu();
     trainingActivity->Init();
     Game.AddActivity(trainingActivity);
 }
 
-static void OnViewObject() {
+void SCMainMenu::OnViewObject() {
     SCObjectViewer *objViewer = new SCObjectViewer();
     objViewer->Init();
     Game.AddActivity(objViewer);
 }
 
-SCMainMenu::SCMainMenu() {}
+SCMainMenu::SCMainMenu() { 
+    this->boardPosition = {44, 25}; 
+    this->music_playing = false;
+}
 
 SCMainMenu::~SCMainMenu() {}
 
+void SCMainMenu::Focus(void) {
+    this->focused = true;
+    if (!this->music_playing) {
+        Mixer.PlayMusic(23);
+        this->music_playing = true;
+    }
+}
+void SCMainMenu::UnFocus(void) {
+    this->focused = false;
+    if (this->music_playing) {
+        Mixer.StopMusic();
+        this->music_playing = false;
+    }
+}
 void SCMainMenu::Init(void) {
 
     TreArchive *gameFlow = Assets.tres[AssetManager::TRE_GAMEFLOW];
@@ -63,19 +69,7 @@ void SCMainMenu::Init(void) {
     LoadBackgrounds();
 
     SetTitle("Neo Strike Commander");
-    Mixer.PlayMusic(23);
 }
-
-/*
-void SCMainMenu::LoadButton(const char* name, PakArchive* subPak, size_t upIndice, size_t downIndice, Point2D
-dimensions, ActionFunction onClick){
-
-}
- */
-
-Point2D boardPosition = {44, 25};
-
-enum ButtonIDS { BUTTON_CONTINUE, BUTTON_LOADGAME, BUTTON_STARTNEWGAME, BUTTON_TRAINING, BUTTON_OBJVIEWER };
 
 void SCMainMenu::LoadButtons(void) {
 
@@ -91,7 +85,8 @@ void SCMainMenu::LoadButtons(void) {
 
     button = new SCButton();
     Point2D continuePosition = {boardPosition.x + 11, boardPosition.y + 10};
-    button->InitBehavior(OnContinue, continuePosition, buttonDimension);
+
+    button->InitBehavior(std::bind(&SCMainMenu::OnContinue, this), continuePosition, buttonDimension);
     button->appearance[SCButton::APR_UP].InitWithPosition(subPak.GetEntry(0)->data, subPak.GetEntry(0)->size,
                                                           &continuePosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(5)->data, subPak.GetEntry(5)->size,
@@ -101,7 +96,7 @@ void SCMainMenu::LoadButtons(void) {
 
     button = new SCButton();
     Point2D loadGamePosition = {boardPosition.x + 11, continuePosition.y + buttonDimension.y + 2};
-    button->InitBehavior(OnLoadGame, loadGamePosition, buttonDimension);
+    button->InitBehavior(std::bind(&SCMainMenu::OnLoadGame, this), loadGamePosition, buttonDimension);
     button->appearance[SCButton::APR_UP].InitWithPosition(subPak.GetEntry(1)->data, subPak.GetEntry(1)->size,
                                                           &loadGamePosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(6)->data, subPak.GetEntry(6)->size,
@@ -111,7 +106,7 @@ void SCMainMenu::LoadButtons(void) {
 
     button = new SCButton();
     Point2D startNewGamePosition = {boardPosition.x + 11, loadGamePosition.y + buttonDimension.y + 2};
-    button->InitBehavior(OnStartNewGame, startNewGamePosition, buttonDimension);
+    button->InitBehavior(std::bind(&SCMainMenu::OnStartNewGame, this), startNewGamePosition, buttonDimension);
     button->appearance[SCButton::APR_UP].InitWithPosition(subPak.GetEntry(2)->data, subPak.GetEntry(2)->size,
                                                           &startNewGamePosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(7)->data, subPak.GetEntry(7)->size,
@@ -120,7 +115,7 @@ void SCMainMenu::LoadButtons(void) {
 
     button = new SCButton();
     Point2D trainingPosition = {boardPosition.x + 11, startNewGamePosition.y + buttonDimension.y + 2};
-    button->InitBehavior(OnTrainingMission, trainingPosition, buttonDimension);
+    button->InitBehavior(std::bind(&SCMainMenu::OnTrainingMission, this), trainingPosition, buttonDimension);
     button->appearance[SCButton::APR_UP].InitWithPosition(subPak.GetEntry(3)->data, subPak.GetEntry(3)->size,
                                                           &trainingPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(8)->data, subPak.GetEntry(8)->size,
@@ -129,7 +124,7 @@ void SCMainMenu::LoadButtons(void) {
 
     button = new SCButton();
     Point2D viewObjectPosition = {boardPosition.x + 11, trainingPosition.y + buttonDimension.y + 2};
-    button->InitBehavior(OnViewObject, viewObjectPosition, buttonDimension);
+    button->InitBehavior(std::bind(&SCMainMenu::OnViewObject, this), viewObjectPosition, buttonDimension);
     button->appearance[SCButton::APR_UP].InitWithPosition(subPak.GetEntry(4)->data, subPak.GetEntry(4)->size,
                                                           &viewObjectPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(9)->data, subPak.GetEntry(9)->size,
