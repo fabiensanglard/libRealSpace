@@ -11,6 +11,15 @@ void RSCockpit::InitFromRam(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
 
 	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+	handlers["CKPT"] = std::bind(&RSCockpit::parseCKPT, this, std::placeholders::_1, std::placeholders::_2);
+	
+	lexer.InitFromRAM(data, size, handlers);
+}
+
+void RSCockpit::parseCKPT(uint8_t* data, size_t size) {
+    IFFSaxLexer lexer;
+
+	std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
 	handlers["INFO"] = std::bind(&RSCockpit::parseINFO, this, std::placeholders::_1, std::placeholders::_2);
 	handlers["ARTP"] = std::bind(&RSCockpit::parseARTP, this, std::placeholders::_1, std::placeholders::_2);
 	handlers["VTMP"] = std::bind(&RSCockpit::parseVTMP, this, std::placeholders::_1, std::placeholders::_2);

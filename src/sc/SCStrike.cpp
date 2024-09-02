@@ -17,6 +17,7 @@
 SCStrike::SCStrike() {
     this->camera_mode = 0;
     this->camera_pos = {0, 0, 0};
+    this->counter = 0;
 }
 
 SCStrike::~SCStrike() {}
@@ -177,6 +178,8 @@ void SCStrike::CheckKeyboard(void) {
 void SCStrike::Init(void) {
     this->mouse_control = false;
     this->SetMission("TEMPLATE.IFF");
+    this->cockpit = new SCCockpit();
+    this->cockpit->Init();
 }
 
 void SCStrike::SetMission(char *missionName) {

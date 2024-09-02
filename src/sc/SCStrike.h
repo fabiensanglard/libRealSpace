@@ -51,7 +51,7 @@ private:
     RSMission *missionObj;
     SCNavMap *nav_screen;
     SCPlane *player_plane;
-
+    SCCockpit *cockpit;
     float counter;
     std::map<std::string, RSEntity *> objectCache;
 };
