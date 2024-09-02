@@ -10,6 +10,8 @@ Tools to parse and render Origin Systems RealSpace engine assets.
 - Render Textures 3D Jets for all Level Of Details
 - Render animation layers (individually).
 - Render Map Textures.
+- Render ingame screen (conversation, transition animation, scenes)
+- Fly in mission
 
 - Guess PAK contents:
      - VOC sound effects.
@@ -32,6 +34,8 @@ Dependencies :
 ==============
 
 SDL 2
+Dear IM Gui
+SDL 2 Mixer ext
 
 Eye Candies :
 =============

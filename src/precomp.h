@@ -81,6 +81,10 @@ extern "C" {
 
     #include "RSImageSet.h"
 
+    // Music Stuff
+    #include "RSMusic.h"
+    #include "RSMixer.h"
+    
     //VGA and Glide
     #include "RSScreen.h"
     #include "RSVGA.h"

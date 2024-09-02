@@ -7,17 +7,20 @@
 //
 
 #pragma once
-#include "precomp.h"
-#include <vector>
-#include <stdint.h>
 #include "SDL_mixer_ext.h"
+#include "precomp.h"
+#include <stdint.h>
+#include <vector>
 
+struct MemMusic {
+    uint8_t *data;
+    size_t size;
+};
 
-class RSMusic{
-    std::vector<uint8_t *> musics;
+class RSMusic {
+    std::vector<MemMusic *> musics;
 
 public:
     void Init();
-    void PlayMusic(int id);    
+    MemMusic *GetMusic(uint32_t index);
 };
-

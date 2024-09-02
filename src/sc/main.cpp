@@ -17,6 +17,7 @@ AssetManager    Assets;
 SCRenderer      Renderer;
 ConvAssetManager ConvAssets;
 RSFontManager FontManager;
+RSMixer Mixer;
 
 int main(int argc, char* argv[]) {
 

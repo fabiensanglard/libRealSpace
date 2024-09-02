@@ -8,6 +8,13 @@
       ] 
     },
     "sdl2",
+    {
+      "name" : "sdl2-mixer-ext",
+      "features": [
+        "libadlmidi",
+        "libopnmidi"
+      ]
+    },
     "sdl2-mixer-ext",
     "opengl"
   ]
