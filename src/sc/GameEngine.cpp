@@ -137,7 +137,6 @@ void GameEngine::Run() {
         if (currentActivity->IsRunning()) {
             currentActivity->Focus();
             currentActivity->RunFrame();
-            //currentActivity->UnFocus();
         } else {
             activities.pop();
             delete currentActivity;

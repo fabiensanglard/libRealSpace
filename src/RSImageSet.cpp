@@ -8,70 +8,56 @@
 
 #include "RSImageSet.h"
 
+RSImageSet::RSImageSet() {}
 
-RSImageSet::RSImageSet(){
-    
-}
+RSImageSet::~RSImageSet() {}
 
-RSImageSet::~RSImageSet(){
-    
-}
+void RSImageSet::InitFromPakEntry(PakEntry *entry) {
 
-void RSImageSet::InitFromPakEntry(PakEntry* entry){
-    
-    uint8_t* end = entry->data + entry->size;
+    uint8_t *end = entry->data + entry->size;
     ByteStream index(entry->data);
-    
-    
+
     uint32_t nextImage = index.ReadUInt32LE();
-    //uint8_t flag  = (nextImage & 0xFF000000) >> 24;
-    //printf("flag = %2X\n",flag);
     nextImage = nextImage & 0x00FFFFFF;
-    
-    uint32_t numImages = nextImage/4 ;
-    for(size_t i = 0 ; i < numImages && (entry->data+nextImage < end) ; i++){
-        
-        uint8_t* currImage = entry->data+nextImage;
-        
+
+    uint32_t numImages = nextImage / 4;
+    for (size_t i = 0; i < numImages && (entry->data + nextImage < end); i++) {
+
+        uint8_t *currImage = entry->data + nextImage;
+
         nextImage = index.ReadUInt32LE();
         nextImage = nextImage & 0x00FFFFFF;
-        
+
         size_t size = 0;
-        
+
         if (currImage[0] != 'F') {
-            RLEShape* shape = new RLEShape();
+            RLEShape *shape = new RLEShape();
             shape->Init(currImage, size);
             this->shapes.push_back(shape);
-            this->sequence.push_back((uint8_t) i);        
+            this->sequence.push_back((uint8_t)i);
         } else {
             printf("PALT not supported yet\n");
-            RLEShape* shape = new RLEShape();;
+            RLEShape *shape = new RLEShape();
+            ;
             *shape = *RLEShape::GetEmptyShape();
             this->shapes.push_back(shape);
         }
     }
 }
 
-void RSImageSet::InitFromSubPakEntry(PakArchive* entry) {
-    for (int i=0; i< entry->GetNumEntries(); i++) {
-        RLEShape* shape = new RLEShape();
+void RSImageSet::InitFromSubPakEntry(PakArchive *entry) {
+    for (int i = 0; i < entry->GetNumEntries(); i++) {
+        RLEShape *shape = new RLEShape();
         shape->Init(entry->GetEntry(i)->data, entry->GetEntry(i)->size);
-        Point2D pos = { 0, 0 };
+        Point2D pos = {0, 0};
         shape->SetPosition(&pos);
         this->shapes.push_back(shape);
         this->sequence.push_back(i);
     }
 }
 
-RLEShape* RSImageSet::GetShape(size_t index){
-    return this->shapes[index];
-}
+RLEShape *RSImageSet::GetShape(size_t index) { return this->shapes[index]; }
 
+void RSImageSet::Add(RLEShape *shape) { this->shapes.push_back(shape); }
 
-void RSImageSet::Add(RLEShape* shape){
-    this->shapes.push_back(shape);
-}
-
-size_t RSImageSet::GetNumImages(void){
-    return this->shapes.size();
-}
+size_t RSImageSet::GetNumImages(void) { return this->shapes.size(); }

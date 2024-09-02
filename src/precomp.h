@@ -58,6 +58,12 @@ extern "C" {
     #include "Texture.h"
     #include "RSImage.h"
 
+//Fonts stuff
+    #include "RSFont.h"
+    #include "RSFontManager.h"
+
+    #include "RSImageSet.h"
+    
     #include "SCRenderer.h"
     extern SCRenderer Renderer;
 
@@ -72,14 +78,11 @@ extern "C" {
     #include "RLEShape.h"
     #include "RSOption.h"
     #include "RSGameFlow.h"
+    #include "RSCockpit.h"
     #include "RSMission.h"
     #include "RSNavMap.h"
 
-    //Fonts stuff
-    #include "RSFont.h"
-    #include "RSFontManager.h"
-
-    #include "RSImageSet.h"
+    
 
     // Music Stuff
     #include "RSMusic.h"
