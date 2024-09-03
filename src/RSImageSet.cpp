@@ -48,7 +48,7 @@ void RSImageSet::InitFromPakEntry(PakEntry *entry) {
 void RSImageSet::InitFromSubPakEntry(PakArchive *entry) {
     for (int i = 0; i < entry->GetNumEntries(); i++) {
         RLEShape *shape = new RLEShape();
-        shape->Init(entry->GetEntry(i)->data, entry->GetEntry(i)->size);
+        shape->Init(entry->GetEntry(i)->data, 0);
         Point2D pos = {0, 0};
         shape->SetPosition(&pos);
         this->shapes.push_back(shape);

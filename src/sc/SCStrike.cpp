@@ -72,6 +72,16 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_F2:
             this->camera_mode = 1;
+            this->camera_pos = {-2, 4, -43};
+            break;
+        case SDLK_F3:
+            this->camera_mode = 2;
+            break;
+        case SDLK_F4:
+            this->camera_mode = 3;
+            break;
+        case SDLK_F5:
+            this->camera_mode = 4;
             break;
         case SDLK_KP_8:
             this->camera_pos.z += 1;
@@ -156,20 +166,18 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_b:
             this->player_plane->SetSpoilers();
             break;
-        case SDLK_n:
-            {
-                SCNavMap *nav_screen = new SCNavMap();
-                char *arena_name = new char[8];
-                char *arena_file_name = this->missionObj->getMissionAreaFile();
-                for (int i = 0; i < 8; i++) {
-                    arena_name[i] = toupper(arena_file_name[i]);
-                }
-                
-                nav_screen->Init();
-                nav_screen->SetName(arena_name);
-                Game.AddActivity(nav_screen);
+        case SDLK_n: {
+            SCNavMap *nav_screen = new SCNavMap();
+            char *arena_name = new char[8];
+            char *arena_file_name = this->missionObj->getMissionAreaFile();
+            for (int i = 0; i < 8; i++) {
+                arena_name[i] = toupper(arena_file_name[i]);
             }
-            break;
+
+            nav_screen->Init();
+            nav_screen->SetName(arena_name);
+            Game.AddActivity(nav_screen);
+        } break;
         default:
             break;
         }
@@ -211,7 +219,7 @@ void SCStrike::SetMission(char *missionName) {
 
     this->player_plane =
         new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
-                    9.0f, 18.0f, &this->area,newPosition.x, newPosition.y, newPosition.z);
+                    9.0f, 18.0f, &this->area, newPosition.x, newPosition.y, newPosition.z);
     this->player_plane->azimuthf = 1800.0f;
     for (auto obj : missionObj->missionObjects) {
         if (strcmp(obj->MemberName, "F-16DES") == 0) {
@@ -242,6 +250,25 @@ void SCStrike::RunFrame(void) {
         camera->SetPosition(&pos);
         camera->LookAt(&this->newPosition);
     } break;
+    case 2:
+        camera->SetPosition(&this->newPosition);
+        camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
+                       (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
+                       (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
+
+        break;
+    case 3:
+        camera->SetPosition(&this->newPosition);
+        camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
+                       (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
+                       (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
+        break;
+    case 4:
+        camera->SetPosition(&this->newPosition);
+        camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
+                       (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
+                       (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
+        break;
     default:
         camera->SetPosition(&this->newPosition);
         camera->Rotate((-this->player_plane->elevationf / 10.0f) * ((float)M_PI / 180.0f),
@@ -252,8 +279,22 @@ void SCStrike::RunFrame(void) {
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     Renderer.RenderMissionObjects(missionObj);
-    if (this->camera_mode != 0) {
+    switch (this->camera_mode) {
+    case 0:
+        this->cockpit->Render(0);
+        break;
+    case 1:
         this->player_plane->Render();
+        break;
+    case 2:
+        this->cockpit->Render(1);
+        break;
+    case 3:
+        this->cockpit->Render(2);
+        break;
+    case 4:
+        this->cockpit->Render(3);
+        break;
     }
     this->RenderMenu();
 }

@@ -12,12 +12,13 @@
 #include "precomp.h"
 
 class SCCockpit {
+    VGAPalette palette;
     RSCockpit* cockpit;
 
 public :
     SCCockpit();
     ~SCCockpit();
     void Init( );
-    void Render();
+    void Render(int face);
 };
 #endif

@@ -38,28 +38,39 @@ void RSCockpit::parseINFO(uint8_t* data, size_t size) {
     this->INFO = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseARTP(uint8_t* data, size_t size) {
+    
+    uint8_t* data2 = (uint8_t*) malloc(size);
+    memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("ARTP", data, size);
+    pak->InitFromRAM("ARTP", data2, size);
     this->ARTP.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseVTMP(uint8_t* data, size_t size) {
+    uint8_t* data2 = (uint8_t*) malloc(size);
+    memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("VTMP", data, size);
+    pak->InitFromRAM("VTMP", data2, size);
     this->VTMP.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseEJEC(uint8_t* data, size_t size) {
+    uint8_t* data2 = (uint8_t*) malloc(size);
+    memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("EJEC", data, size);
+    pak->InitFromRAM("EJEC", data2, size);
     this->EJEC.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseGUNF(uint8_t* data, size_t size) {
+    uint8_t* data2 = (uint8_t*) malloc(size);
+    memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("GUNF", data, size);
+    pak->InitFromRAM("GUNF", data2, size);
     this->GUNF.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseGHUD(uint8_t* data, size_t size) {
+    uint8_t* data2 = (uint8_t*) malloc(size);
+    memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("GHUD", data, size);
+    pak->InitFromRAM("GHUD", data2, size);
     this->GHUD.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseREAL(uint8_t* data, size_t size) {
@@ -72,7 +83,6 @@ void RSCockpit::parseREAL(uint8_t* data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSCockpit::parseREAL_INFO(uint8_t* data, size_t size) {
-    ByteStream* reader = new ByteStream(data);
     REAL.INFO = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseREAL_OBJS(uint8_t* data, size_t size) {
@@ -103,16 +113,22 @@ void RSCockpit::parseMONI(uint8_t* data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSCockpit::parseMONI_INFO(uint8_t* data, size_t size) {
-    
+    this->MONI.INFO = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseMONI_SPOT(uint8_t* data, size_t size) {
-    
+    this->MONI.SPOT = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseMONI_SHAP(uint8_t* data, size_t size) {
-    
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data, size);
+    this->MONI.SHAP.Init(shape_data, 0);
 }
 void RSCockpit::parseMONI_DAMG(uint8_t* data, size_t size) {
-    
+	uint8_t *data2;
+	data2 = (uint8_t*) malloc(size);
+	memcpy(data2, data, size);
+    this->MONI.DAMG.Init(data2, size);
 }
 void RSCockpit::parseMONI_MFDS(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
@@ -120,7 +136,7 @@ void RSCockpit::parseMONI_MFDS(uint8_t* data, size_t size) {
 
     handlers["COMM"] = std::bind(&RSCockpit::parseMONI_MFDS_COMM, this, std::placeholders::_1, std::placeholders::_2);
     handlers["AARD"] = std::bind(&RSCockpit::parseMONI_MFDS_AARD, this, std::placeholders::_1, std::placeholders::_2);
-    handlers["ARGD"] = std::bind(&RSCockpit::parseMONI_MFDS_ARGD, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["AGRD"] = std::bind(&RSCockpit::parseMONI_MFDS_AGRD, this, std::placeholders::_1, std::placeholders::_2);
     handlers["GCAM"] = std::bind(&RSCockpit::parseMONI_MFDS_GCAM, this, std::placeholders::_1, std::placeholders::_2);
     handlers["WEAP"] = std::bind(&RSCockpit::parseMONI_MFDS_WEAP, this, std::placeholders::_1, std::placeholders::_2);
     handlers["DAMG"] = std::bind(&RSCockpit::parseMONI_MFDS_DAMG, this, std::placeholders::_1, std::placeholders::_2);
@@ -128,22 +144,94 @@ void RSCockpit::parseMONI_MFDS(uint8_t* data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSCockpit::parseMONI_MFDS_COMM(uint8_t* data, size_t size) {
-    
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_MFDS_COMM_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSCockpit::parseMONI_MFDS_COMM_INFO(uint8_t* data, size_t size) {
+    this->MONI.MFDS.COMM.INFO = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseMONI_MFDS_AARD(uint8_t* data, size_t size) {
-    
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_MFDS_AARD_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] = std::bind(&RSCockpit::parseMONI_MFDS_AARD_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
 }
-void RSCockpit::parseMONI_MFDS_ARGD(uint8_t* data, size_t size) {
-    
+void RSCockpit::parseMONI_MFDS_AARD_INFO(uint8_t* data, size_t size) {
+    this->MONI.MFDS.AARD.INFO = std::vector<uint8_t>(data, data + size);
+}
+void RSCockpit::parseMONI_MFDS_AARD_SHAP(uint8_t* data, size_t size) {
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data+4, size-4);
+    this->MONI.MFDS.AARD.SHAP.Init(shape_data, size);
+}
+void RSCockpit::parseMONI_MFDS_AGRD(uint8_t* data, size_t size) {
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_MFDS_AGRD_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] = std::bind(&RSCockpit::parseMONI_MFDS_AGRD_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSCockpit::parseMONI_MFDS_AGRD_INFO(uint8_t* data, size_t size) {
+    this->MONI.MFDS.AGRD.INFO = std::vector<uint8_t>(data, data + size);
+}
+void RSCockpit::parseMONI_MFDS_AGRD_SHAP(uint8_t* data, size_t size) {
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data+4, size);
+    this->MONI.MFDS.AGRD.SHAP.Init(shape_data, size);
 }
 void RSCockpit::parseMONI_MFDS_GCAM(uint8_t* data, size_t size) {
-    
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_MFDS_GCAM_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] = std::bind(&RSCockpit::parseMONI_MFDS_GCAM_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSCockpit::parseMONI_MFDS_GCAM_INFO(uint8_t* data, size_t size) {
+    this->MONI.MFDS.GCAM.INFO = std::vector<uint8_t>(data, data + size);
+}
+void RSCockpit::parseMONI_MFDS_GCAM_SHAP(uint8_t* data, size_t size) {
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data+4, size);
+    this->MONI.MFDS.GCAM.SHAP.Init(shape_data, size);
 }
 void RSCockpit::parseMONI_MFDS_WEAP(uint8_t* data, size_t size) {
-    
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_MFDS_WEAP_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] = std::bind(&RSCockpit::parseMONI_MFDS_WEAP_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
 }
+void RSCockpit::parseMONI_MFDS_WEAP_INFO(uint8_t* data, size_t size) {
+    this->MONI.MFDS.WEAP.INFO = std::vector<uint8_t>(data, data + size);
+}
+void RSCockpit::parseMONI_MFDS_WEAP_SHAP(uint8_t* data, size_t size) {
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data+4, size);
+    this->MONI.MFDS.WEAP.SHAP.Init(shape_data, size);
+}
+
 void RSCockpit::parseMONI_MFDS_DAMG(uint8_t* data, size_t size) {
-    
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_MFDS_DAMG_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] = std::bind(&RSCockpit::parseMONI_MFDS_DAMG_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSCockpit::parseMONI_MFDS_DAMG_INFO(uint8_t* data, size_t size) {
+    this->MONI.MFDS.DAMG.INFO = std::vector<uint8_t>(data, data + size);
+}
+void RSCockpit::parseMONI_MFDS_DAMG_SHAP(uint8_t* data, size_t size) {
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data+4, size);
+    this->MONI.MFDS.DAMG.SHAP.Init(shape_data, size);
 }
 void RSCockpit::parseMONI_INST(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
@@ -157,18 +245,72 @@ void RSCockpit::parseMONI_INST(uint8_t* data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSCockpit::parseMONI_INST_RAWS(uint8_t* data, size_t size) {
-    
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_INST_RAWS_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] = std::bind(&RSCockpit::parseMONI_INST_RAWS_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSCockpit::parseMONI_INST_RAWS_INFO(uint8_t* data, size_t size) {
+    this->MONI.INST.RAWS.INFO = std::vector<uint8_t>(data, data + size);
+}
+void RSCockpit::parseMONI_INST_RAWS_SHAP(uint8_t* data, size_t size) {
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data+4, size);
+    this->MONI.INST.RAWS.SHAP.Init(shape_data, size);
 }
 void RSCockpit::parseMONI_INST_ALTI(uint8_t* data, size_t size) {
-    
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_INST_ALTI_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] = std::bind(&RSCockpit::parseMONI_INST_ALTI_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSCockpit::parseMONI_INST_ALTI_INFO(uint8_t* data, size_t size) {
+    this->MONI.INST.ALTI.INFO = std::vector<uint8_t>(data, data + size);
+}
+void RSCockpit::parseMONI_INST_ALTI_SHAP(uint8_t* data, size_t size) {
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data+4, size);
+    this->MONI.INST.ALTI.SHAP.Init(shape_data, size);
 }
 void RSCockpit::parseMONI_INST_AIRS(uint8_t* data, size_t size) {
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_INST_AIRS_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] = std::bind(&RSCockpit::parseMONI_INST_AIRS_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
 
+void RSCockpit::parseMONI_INST_AIRS_INFO(uint8_t* data, size_t size) {
+    this->MONI.INST.AIRS.INFO = std::vector<uint8_t>(data, data + size);
+}
+void RSCockpit::parseMONI_INST_AIRS_SHAP(uint8_t* data, size_t size) {
+	uint8_t *data2;
+	data2 = (uint8_t*) malloc(size);
+	memcpy(data2, data, size);
+    PakArchive* pak = new PakArchive();
+    pak->InitFromRAM("ARTP", data2, size);
+    this->MONI.INST.AIRS.ARTS.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseMONI_INST_MWRN(uint8_t* data, size_t size) {
-   
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSCockpit::parseMONI_INST_MWRN_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] = std::bind(&RSCockpit::parseMONI_INST_MWRN_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
 }
-
+void RSCockpit::parseMONI_INST_MWRN_INFO(uint8_t* data, size_t size) {
+    this->MONI.INST.MWRN.INFO = std::vector<uint8_t>(data, data + size);
+}
+void RSCockpit::parseMONI_INST_MWRN_SHAP(uint8_t* data, size_t size) {
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data+4, size);
+    this->MONI.INST.MWRN.SHAP.Init(shape_data, size);
+}
 void RSCockpit::parseFADE(uint8_t* data, size_t size) {
-
+    this->FADE = std::vector<uint8_t>(data, data + size);
 }

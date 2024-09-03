@@ -2,7 +2,7 @@
 //  IffSaxLexer.h
 //  libRealSpace
 //
-//  Created by Rémi LEONARD on 08/08/2024.
+//  Created by Rï¿½mi LEONARD on 08/08/2024.
 //
 
 #pragma once
@@ -33,7 +33,7 @@ private:
 
 	void Parse(std::map<std::string, std::function<void(uint8_t* data, size_t size)>> events);
 
-	ByteStream stream;
+	ByteStream *stream;
 	uint8_t* data;
 	size_t size;
 

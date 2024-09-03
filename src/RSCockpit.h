@@ -27,7 +27,7 @@
                     AARD
                         INFO   vector<uint8_t> 
                         SHAP   RLEShape
-                    ARGD
+                    AGRD
                         INFO    vector<uint8_t> 
                         SHAP    RLEShape
                     GCAM
@@ -57,6 +57,7 @@
 struct InfoShape {
     std::vector<uint8_t> INFO;
     RLEShape SHAP;
+    RSImageSet ARTS;
 };
 struct RealObjs {
     std::vector<uint8_t> INFO;
@@ -70,7 +71,7 @@ struct Moni {
     struct Mfds {
         InfoShape COMM;
         InfoShape AARD;
-        InfoShape ARGD;
+        InfoShape AGRD;
         InfoShape GCAM;
         InfoShape WEAP;
         InfoShape DAMG;
@@ -87,7 +88,7 @@ class RSCockpit {
 
 private:
     std::vector<uint8_t> INFO;
-    RSImageSet ARTP;
+    
     RSImageSet VTMP;
     RSImageSet EJEC;
     RSImageSet GUNF;
@@ -120,20 +121,41 @@ private:
     void parseMONI_DAMG(uint8_t* data, size_t size);
     void parseMONI_MFDS(uint8_t* data, size_t size);
     void parseMONI_MFDS_COMM(uint8_t* data, size_t size);
+    void parseMONI_MFDS_COMM_INFO(uint8_t* data, size_t size);
     void parseMONI_MFDS_AARD(uint8_t* data, size_t size);
-    void parseMONI_MFDS_ARGD(uint8_t* data, size_t size);
+    void parseMONI_MFDS_AARD_INFO(uint8_t* data, size_t size);
+    void parseMONI_MFDS_AARD_SHAP(uint8_t* data, size_t size);
+    void parseMONI_MFDS_AGRD(uint8_t* data, size_t size);
+    void parseMONI_MFDS_AGRD_INFO(uint8_t* data, size_t size);
+    void parseMONI_MFDS_AGRD_SHAP(uint8_t* data, size_t size);
     void parseMONI_MFDS_GCAM(uint8_t* data, size_t size);
+    void parseMONI_MFDS_GCAM_INFO(uint8_t* data, size_t size);
+    void parseMONI_MFDS_GCAM_SHAP(uint8_t* data, size_t size);
     void parseMONI_MFDS_WEAP(uint8_t* data, size_t size);
+    void parseMONI_MFDS_WEAP_INFO(uint8_t* data, size_t size);
+    void parseMONI_MFDS_WEAP_SHAP(uint8_t* data, size_t size);
     void parseMONI_MFDS_DAMG(uint8_t* data, size_t size);
+    void parseMONI_MFDS_DAMG_INFO(uint8_t* data, size_t size);
+    void parseMONI_MFDS_DAMG_SHAP(uint8_t* data, size_t size);
     void parseMONI_INST(uint8_t* data, size_t size);
-
+    void parseMONI_INST_RAWS_INFO(uint8_t* data, size_t size);
+    void parseMONI_INST_RAWS_SHAP(uint8_t* data, size_t size);
     void parseMONI_INST_RAWS(uint8_t* data, size_t size);
     void parseMONI_INST_ALTI(uint8_t* data, size_t size);
+    void parseMONI_INST_ALTI_INFO(uint8_t* data, size_t size);
+    void parseMONI_INST_ALTI_SHAP(uint8_t* data, size_t size);
     void parseMONI_INST_AIRS(uint8_t* data, size_t size);
+    void parseMONI_INST_AIRS_INFO(uint8_t* data, size_t size);
+    void parseMONI_INST_AIRS_SHAP(uint8_t* data, size_t size);
     void parseMONI_INST_MWRN(uint8_t* data, size_t size);
+    void parseMONI_INST_MWRN_INFO(uint8_t* data, size_t size);
+    void parseMONI_INST_MWRN_SHAP(uint8_t* data, size_t size);
 
 
 public:
+
+    RSImageSet ARTP;
+    
     RSCockpit();
     ~RSCockpit();
     void InitFromRam(uint8_t* data, size_t size);

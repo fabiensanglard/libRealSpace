@@ -35,7 +35,7 @@ public:
     void line(int x1, int y1, int x2, int y2, byte color);
     void rect_slow(int left, int top, int right, int bottom, byte color);
     void DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, uint32_t size,size_t interLetterSpace, size_t spaceSize);
-    
+    void SwithBuffers();
     void VSync(void);
     
     void Clear(void);
@@ -47,7 +47,9 @@ public:
 private:
     
     VGAPalette palette;
-    uint8_t frameBuffer[320*200];
+    uint8_t* frameBuffer;
+    uint8_t frameBufferA[320*200];
+    uint8_t frameBufferB[320*200];
     
     uint32_t textureID;
 };
