@@ -17,11 +17,16 @@ void SCCockpit::Init( ) {
     cockpit->InitFromRam(cockpit_def->data, cockpit_def->size);
 }
 void SCCockpit::Render(int face) {
-    VGA.SwithBuffers();
-    VGA.Activate();
-    VGA.Clear();
-    VGA.SetPalette(&this->palette);
-    VGA.DrawShape(this->cockpit->ARTP.GetShape(face));
-    VGA.VSync();
-    VGA.SwithBuffers(); 
+    if (face>=0) {
+        VGA.SwithBuffers();
+        VGA.Activate();
+        VGA.Clear();
+        VGA.SetPalette(&this->palette);
+        VGA.DrawShape(this->cockpit->ARTP.GetShape(face));
+        VGA.VSync();
+        VGA.SwithBuffers(); 
+    } else {
+        Renderer.DrawModel(&this->cockpit->REAL.OBJS,0);
+    }
+    
 }

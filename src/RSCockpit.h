@@ -93,7 +93,7 @@ private:
     RSImageSet EJEC;
     RSImageSet GUNF;
     RSImageSet GHUD;
-    RealObjs REAL;
+    
     struct Chud {
         std::string FILE;
     } CHUD;
@@ -155,6 +155,7 @@ private:
 public:
 
     RSImageSet ARTP;
+    RealObjs REAL;
     
     RSCockpit();
     ~RSCockpit();

@@ -13,9 +13,9 @@
 
 class SCCockpit {
     VGAPalette palette;
-    RSCockpit* cockpit;
 
 public :
+    RSCockpit* cockpit;
     SCCockpit();
     ~SCCockpit();
     void Init( );

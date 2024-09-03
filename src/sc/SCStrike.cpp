@@ -83,6 +83,9 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_F5:
             this->camera_mode = 4;
             break;
+        case SDLK_F6:
+            this->camera_mode = 5;
+            break;
         case SDLK_KP_8:
             this->camera_pos.z += 1;
             break;
@@ -238,6 +241,7 @@ void SCStrike::RunFrame(void) {
     }
 
     switch (this->camera_mode) {
+    case 5:
     case 0:
         camera->SetPosition(&this->newPosition);
         camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
@@ -294,6 +298,22 @@ void SCStrike::RunFrame(void) {
         break;
     case 4:
         this->cockpit->Render(3);
+        break;
+    case 5:
+        glPushMatrix();
+        Matrix rotation;
+        rotation.Clear();
+        rotation.Identity();
+        rotation.translateM(newPosition.x, newPosition.y, newPosition.z);
+        
+        rotation.rotateM(-0.1f *(this->player_plane->azimuthf+900.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
+        rotation.rotateM(-0.1f * (this->player_plane->elevationf) * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);
+        rotation.rotateM(-0.1f * (this->player_plane->twist) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
+
+        glMultMatrixf((float *)rotation.v);
+
+        Renderer.DrawModel(&this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX);
+        glPopMatrix();
         break;
     }
     this->RenderMenu();
