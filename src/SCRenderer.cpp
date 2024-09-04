@@ -55,7 +55,7 @@ void SCRenderer::Init(int32_t zoomFactor) {
     glDisable(GL_DEPTH_TEST); // Disable Depth Testing
 
     // camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
-    camera.SetPersective(50.0f, this->width / (float)this->height, 10.0f, 40000 * 18);
+    camera.SetPersective(50.0f, this->width / (float)this->height, 1.0f, 40000 * 18);
 
     light.SetWithCoo(300, 300, 300);
 
