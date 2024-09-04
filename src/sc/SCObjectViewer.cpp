@@ -290,19 +290,16 @@ void SCObjectViewer::RunFrame(void){
        
     CheckButtons();
     
+    
     VGA.Activate();
     VGA.Clear();
+    VGA.SetPalette(&this->palette);
     
     VGA.SetPalette(&this->palette);
     
     //Draw static
     VGA.DrawShape(&bluePrint);
-    VGA.DrawShape(&title);
     
-    DrawButtons();
-    
-    //Draw Mouse
-    Mouse.Draw();
 
     VGA.VSync();
     
@@ -353,6 +350,19 @@ void SCObjectViewer::RunFrame(void){
     glPushMatrix();
     glDisable(GL_DEPTH_TEST);
 
+    VGA.SwithBuffers();
+    VGA.Activate();
+    VGA.Clear();
+    VGA.SetPalette(&this->palette);
+
+    VGA.DrawShape(&title);
     
+    DrawButtons();
+    
+    //Draw Mouse
+    Mouse.Draw();
+
+    VGA.VSync();
+    VGA.SwithBuffers();
     /**/
 }
