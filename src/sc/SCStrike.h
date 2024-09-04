@@ -11,8 +11,6 @@
 #ifndef __libRealSpace__SCStrike__
 #define __libRealSpace__SCStrike__
 
-
-
 #define SCSTRIKE_MAX_MISSIONS 46
 static const char *mission_list[] = {
     "MISN-1A.IFF",  "MISN-1B.IFF",  "MISN-1C.IFF",  "MISN-2A.IFF",  "MISN-3A.IFF",  "MISN-3B.IFF",  "MISN-3C.IFF",
@@ -24,7 +22,6 @@ static const char *mission_list[] = {
     "MISN-3X.IFF",  "MISN-6X.IFF",  "MISN-8X.IFF",  "MISN-10X.IFF", "MISN-11X.IFF",
 };
 static int mission_idx = 0;
-
 
 class SCStrike : public IActivity {
 

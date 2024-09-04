@@ -37,8 +37,8 @@ void SCStrike::CheckKeyboard(void) {
         this->player_plane->control_stick_y = msy;
     }
     if (this->camera_mode == 5) {
-        this->pilote_lookat.x = ((Screen.width / 360) * msx) *.2;
-        this->pilote_lookat.y = ((Screen.height / 360) * msy) *.2;
+        this->pilote_lookat.x = ((Screen.width / 360) * msx) * .2;
+        this->pilote_lookat.y = ((Screen.height / 360) * msy) * .2;
     }
     for (int i = 0; i < upEvents; i++) {
         SDL_Event *event = &keybEvents[i];
@@ -198,7 +198,7 @@ void SCStrike::Init(void) {
     this->SetMission("TEMPLATE.IFF");
     this->cockpit = new SCCockpit();
     this->cockpit->Init();
-    this->pilote_lookat = {0,0};
+    this->pilote_lookat = {0, 0};
 }
 
 void SCStrike::SetMission(char *missionName) {
@@ -249,7 +249,7 @@ void SCStrike::RunFrame(void) {
     }
 
     switch (this->camera_mode) {
-    
+
     case 0:
         camera->SetPosition(&this->newPosition);
         camera->ResetRotate();
@@ -268,7 +268,7 @@ void SCStrike::RunFrame(void) {
     case 4:
         camera->SetPosition(&this->newPosition);
         camera->ResetRotate();
-        camera->Rotate(0.0f,this->pilote_lookat.x*((float)M_PI / 180.0f),0.0f);
+        camera->Rotate(0.0f, this->pilote_lookat.x * ((float)M_PI / 180.0f), 0.0f);
         camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
@@ -277,10 +277,9 @@ void SCStrike::RunFrame(void) {
     default:
         camera->SetPosition(&this->newPosition);
         camera->ResetRotate();
-        
-        camera->Rotate(-this->pilote_lookat.y*((float)M_PI / 180.0f),0.0f,0.0f);
-        camera->Rotate(0.0f,this->pilote_lookat.x*((float)M_PI / 180.0f),0.0f);
-        
+
+        camera->Rotate(-this->pilote_lookat.y * ((float)M_PI / 180.0f), 0.0f, 0.0f);
+        camera->Rotate(0.0f, this->pilote_lookat.x * ((float)M_PI / 180.0f), 0.0f);
 
         camera->Rotate((-this->player_plane->elevationf / 10.0f) * ((float)M_PI / 180.0f),
                        (-this->player_plane->azimuthf / 10.0f) * ((float)M_PI / 180.0f),
@@ -311,8 +310,10 @@ void SCStrike::RunFrame(void) {
         Matrix cockpit_rotation;
         cockpit_rotation.Clear();
         cockpit_rotation.Identity();
-        cockpit_rotation.translateM(this->player_plane->x * COORD_SCALE, (this->player_plane->y * COORD_SCALE)-2.0f, this->player_plane->z * COORD_SCALE);
-        cockpit_rotation.rotateM(((this->player_plane->azimuthf + 900) / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
+        cockpit_rotation.translateM(this->player_plane->x * COORD_SCALE, (this->player_plane->y * COORD_SCALE) - 2.0f,
+                                    this->player_plane->z * COORD_SCALE);
+        cockpit_rotation.rotateM(((this->player_plane->azimuthf + 900) / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f,
+                                 0.0f);
         cockpit_rotation.rotateM((this->player_plane->elevationf / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);
         cockpit_rotation.rotateM(-(this->player_plane->twist / 10.0f) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
 
@@ -327,8 +328,8 @@ void SCStrike::RunFrame(void) {
         rotation.Clear();
         rotation.Identity();
         rotation.translateM(newPosition.x, newPosition.y, newPosition.z);
-        
-        rotation.rotateM(-0.1f *(this->player_plane->azimuthf+900.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
+
+        rotation.rotateM(-0.1f * (this->player_plane->azimuthf + 900.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
         rotation.rotateM(-0.1f * (this->player_plane->elevationf) * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);
         rotation.rotateM(-0.1f * (this->player_plane->twist) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
 
