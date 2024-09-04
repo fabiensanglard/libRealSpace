@@ -70,9 +70,9 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
         
         
         char modelPath[512];
-        strcpy_s(modelPath,OBJ_PATH);
-        strcat_s(modelPath,objName);
-        strcat_s(modelPath, OBJ_EXTENSION);
+        strcpy(modelPath,OBJ_PATH);
+        strcat(modelPath,objName);
+        strcat(modelPath, OBJ_EXTENSION);
         TreEntry* entry = tre.GetEntryByName(modelPath);
         
         if (entry == NULL){

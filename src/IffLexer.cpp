@@ -79,14 +79,14 @@ bool IffLexer::InitFromFile(const char* filepath) {
 	char fullPath[512];
 	fullPath[0] = '\0';
 
-	strcat_s(fullPath, GetBase());
-	strcat_s(fullPath, filepath);
+	strcat(fullPath, GetBase());
+	strcat(fullPath, filepath);
 
 
-	FILE* file;
+	FILE* file = fopen(fullPath, "r+b");
 	printf("IFF Lexer: opening %s\n", fullPath);
 
-	fopen_s(&file, fullPath, "r+b");
+	
 
 	if (!file) {
 		printf("IFF Lexer: Unable to open IFF archive: '%s'.\n", fullPath);
@@ -100,7 +100,7 @@ bool IffLexer::InitFromFile(const char* filepath) {
 	uint8_t* fileData = new uint8_t[fileSize];
 	size_t t = fread(fileData, 1, fileSize, file);
 	printf("file %s read %llu bytes should be %llu\n", fullPath, t, fileSize);
-	strcpy_s(this->path, filepath);
+	strcpy(this->path, filepath);
 	fclose(file);
 	return InitFromRAM(fileData, fileSize);
 
@@ -114,7 +114,7 @@ bool IffLexer::InitFromRAM(uint8_t* data, size_t size) {
 	stream.Set(this->data);
 
 	if (this->path[0] == '\0')
-		strcpy_s(this->path, "PALETTE FROM RAM");
+		strcpy(this->path, "PALETTE FROM RAM");
 
 	Parse();
 

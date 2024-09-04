@@ -203,7 +203,7 @@ void SCStrike::Init(void) {
 
 void SCStrike::SetMission(char *missionName) {
     char missFileName[33];
-    sprintf_s(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
+    sprintf(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
 
     TreEntry *mission = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(missFileName);
     IffLexer missionIFF;
@@ -215,7 +215,7 @@ void SCStrike::SetMission(char *missionName) {
     missionObj->InitFromIFF(&missionIFF);
 
     char filename[13];
-    sprintf_s(filename, "%s.PAK", missionObj->getMissionAreaFile());
+    sprintf(filename, "%s.PAK", missionObj->getMissionAreaFile());
     area.InitFromPAKFileName(filename);
 
     PART *playerCoord = missionObj->getPlayerCoord();

@@ -23,7 +23,7 @@ RSMapTextureSet::~RSMapTextureSet(){
 
 void RSMapTextureSet::InitFromPAK(PakArchive* archive){
     
-    strcpy_s(name,archive->GetName());
+    strcpy(name,archive->GetName());
     
     Parse(archive);
 }

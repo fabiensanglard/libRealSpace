@@ -283,9 +283,9 @@ void RSArea::ParseObjects(){
 				const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
 				const char* OBJ_EXTENSION = ".IFF";
 
-				strcpy_s(modelPath, OBJ_PATH);
-				strcat_s(modelPath, mapObject.name);
-				strcat_s(modelPath, OBJ_EXTENSION);
+				strcpy(modelPath, OBJ_PATH);
+				strcat(modelPath, mapObject.name);
+				strcat(modelPath, OBJ_EXTENSION);
 				TreEntry* entry = tre->GetEntryByName(modelPath);
 
 				if (entry == NULL) {
@@ -668,7 +668,7 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     
     
     
-    strcpy_s(name,pakFilename);
+    strcpy(name,pakFilename);
     
     //Check the PAK has 5 entries
     this->archive = new PakArchive();

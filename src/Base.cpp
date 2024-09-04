@@ -14,11 +14,11 @@ const char *GetBase(void) { return base; }
 
 void SetBase(const char *newBase) {
 
-    strncpy_s(base, newBase, 512);
+    strncpy(base, newBase, 512);
 
     // If the last character is not '/', add it
     if (base[strlen(base) - 1] != '/')
-        strcat_s(base, "/");
+        strcat(base, "/");
 }
 
 #ifdef _WIN32

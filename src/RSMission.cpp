@@ -425,9 +425,9 @@ void RSMission::parsePART(IffChunk* chunk) {
 					const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
 					const char* OBJ_EXTENSION = ".IFF";
 
-					strcpy_s(modelPath, OBJ_PATH);
-					strcat_s(modelPath, prt->MemberName);
-					strcat_s(modelPath, OBJ_EXTENSION);
+					strcpy(modelPath, OBJ_PATH);
+					strcat(modelPath, prt->MemberName);
+					strcat(modelPath, OBJ_EXTENSION);
 					missionstrtoupper(modelPath);
 					TreEntry* entry = tre->GetEntryByName(modelPath);
 

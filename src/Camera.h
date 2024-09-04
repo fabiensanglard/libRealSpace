@@ -29,7 +29,7 @@ public:
     
     //Update orientation and Matrix view
     void Rotate(float pitch, float yaw, float roll);
-    void Camera::ResetRotate();
+    void ResetRotate();
     void SetOrientation(Quaternion* orientation);
     /*
     void gluPerspective(Matrix* projectionMatrix);

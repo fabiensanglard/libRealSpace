@@ -140,7 +140,7 @@ void SCGameFlow::runEffect() {
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             this->missionToFly = (char *)malloc(13);
-            sprintf_s(this->missionToFly, 13, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
+            sprintf(this->missionToFly, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             strtoupper(this->missionToFly, this->missionToFly);
             printf("FLYM NOT IMPLEMENTED\n");
         }

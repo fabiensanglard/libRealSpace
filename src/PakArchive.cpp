@@ -88,12 +88,11 @@ bool PakArchive::InitFromFile(const char* filepath){
     char fullPath[512] ;
     fullPath[0] = '\0';
     
-    strcat_s(fullPath, GetBase());
-    strcat_s(fullPath, filepath);
+    strcat(fullPath, GetBase());
+    strcat(fullPath, filepath);
     
     
-    FILE* file;
-    fopen_s(&file, fullPath, "r+b");
+    FILE* file = fopen(fullPath, "r+b");
     
     if (!file){
         printf("Unable to open PAK archive: '%s'.\n",filepath);
@@ -120,7 +119,7 @@ bool PakArchive::InitFromFile(const char* filepath){
 
 void PakArchive::InitFromRAM(const char* name,uint8_t* data, size_t size){
     
-    strcpy_s(this->path,name);
+    strcpy(this->path,name);
     
     this->data = data;
     this->size = size;
@@ -150,22 +149,21 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
         
         //Build dst path
         fullDstPath[0] = '\0';
-        strcat_s(fullDstPath, dstDirectory);
+        strcat(fullDstPath, dstDirectory);
         
         //Make sure we have a slash at the end of the dst.
         size_t pathLength = strlen(fullDstPath);
         if (fullDstPath[pathLength-1] != '/')
-            strcat_s(fullDstPath,"/");
+            strcat(fullDstPath,"/");
         
         //Append the PAK archive name
-        strcat_s(fullDstPath, this->path);
+        strcat(fullDstPath, this->path);
         
         //Append the subdirectory name.
-        strcat_s(fullDstPath, suffix);
+        strcat(fullDstPath, suffix);
         
         
-        sprintf_s(fullDstPath+strlen(fullDstPath), sizeof(fullDstPath)-strlen(fullDstPath), filePattern, i, extension);
-        
+        sprintf(fullDstPath+strlen(fullDstPath),filePattern,i,extension);
         //Convert '\\' to '/'
         size_t sizeFullPath = strlen(fullDstPath);
         for (int i =0 ; i < sizeFullPath ; i++){
@@ -178,8 +176,8 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
         
         
         //Write content.
-        FILE* dstFile;
-        fopen_s(&dstFile, fullDstPath, "w+b");
+        FILE* dstFile = fopen(fullDstPath, "w+b");
+        
         
         if (dstFile == NULL){
             printf("Unable to create destination file: '%s'.\n",fullDstPath);
@@ -190,9 +188,7 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
         
         if (byteWritten != entry->size){
 
-            char errorBuffer[256];
-            strerror_s(errorBuffer, sizeof(errorBuffer), errno);
-            printf("*Error while writing entry (errono: %s) size(size: %llu).\n", errorBuffer, entry->size);
+            printf("*Error while writing entry (errono: %s) size(size: %llu).\n",strerror(errno),entry->size);
         }
         else
             printf("Extracted file: '%s. (size: %llu).'\n",fullDstPath,entry->size);
