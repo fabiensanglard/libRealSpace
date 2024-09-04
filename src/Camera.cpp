@@ -88,10 +88,19 @@ void Camera::Rotate(float pitch, float yaw, float roll) {
     rollRot.rotateM(roll, 0, 0, 1);
     rollRot.rotateM(pitch, 1, 0, 0);
     rollRot.rotateM(yaw, 0, 1, 0);
+    Matrix m = orientation.ToMatrix();
+    m.Multiply(&rollRot);
+    orientation.FromMatrix(&m);
+    CalcViewMatrix();
+}
+void Camera::ResetRotate() {
 
+    Matrix rollRot;
+    rollRot.Identity();
     orientation.FromMatrix(&rollRot);
     CalcViewMatrix();
 }
+
 
 void Camera::CalcViewMatrix(void) {
 

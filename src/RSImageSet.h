@@ -21,7 +21,7 @@ public:
 
     void InitFromPakEntry(PakEntry *entry);
     void InitFromSubPakEntry(PakArchive *entry);
-
+    void InitFromPakArchive(PakArchive *entry);
     RLEShape *GetShape(size_t index);
     size_t GetNumImages(void);
     std::vector<uint8_t> sequence;

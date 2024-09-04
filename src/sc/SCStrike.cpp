@@ -244,6 +244,7 @@ void SCStrike::RunFrame(void) {
     case 5:
     case 0:
         camera->SetPosition(&this->newPosition);
+        camera->ResetRotate();
         camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
@@ -256,6 +257,8 @@ void SCStrike::RunFrame(void) {
     } break;
     case 2:
         camera->SetPosition(&this->newPosition);
+        camera->ResetRotate();
+        camera->Rotate(0.0f,90.0f*((float)M_PI / 180.0f),0.0f);
         camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
@@ -263,18 +266,23 @@ void SCStrike::RunFrame(void) {
         break;
     case 3:
         camera->SetPosition(&this->newPosition);
+        camera->ResetRotate();
+        camera->Rotate(0.0f,270.0f*((float)M_PI / 180.0f),0.0f);
         camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
     case 4:
         camera->SetPosition(&this->newPosition);
+        camera->ResetRotate();
+        camera->Rotate(0.0f,180.0f*((float)M_PI / 180.0f),0.0f);
         camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
     default:
         camera->SetPosition(&this->newPosition);
+        camera->ResetRotate();
         camera->Rotate((-this->player_plane->elevationf / 10.0f) * ((float)M_PI / 180.0f),
                        (-this->player_plane->azimuthf / 10.0f) * ((float)M_PI / 180.0f),
                        (-(float)this->player_plane->twist / 10.0f) * ((float)M_PI / 180.0f));

@@ -43,7 +43,7 @@ void RSCockpit::parseARTP(uint8_t* data, size_t size) {
     memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
     pak->InitFromRAM("ARTP", data2, size);
-    this->ARTP.InitFromSubPakEntry(pak);
+    this->ARTP.InitFromPakArchive(pak);
 }
 void RSCockpit::parseVTMP(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
