@@ -17,7 +17,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #include <Windows.h>
 #endif
 #include <GL/gl.h>

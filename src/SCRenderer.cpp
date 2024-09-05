@@ -156,7 +156,7 @@ void SCRenderer::DrawModel(RSEntity *object, size_t lodLevel) {
 
     if (lodLevel >= object->NumLods()) {
         printf("Unable to render this Level Of Details (out of range): Max level is  %llu %llu\n",
-               std::min(0UL, object->NumLods() - 1), lodLevel);
+               (object->NumLods() - 1), lodLevel);
         return;
     }
 
