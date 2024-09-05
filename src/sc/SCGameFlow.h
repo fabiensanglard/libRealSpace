@@ -34,6 +34,10 @@ struct background {
     uint8_t frameCounter {0};
 };
 
+struct SCStrikeMenu {
+    bool show_scene_window;
+};
+
 class SCGameFlow : public IActivity {
 
 public:
@@ -67,6 +71,8 @@ private:
     uint8_t requ;
     char *missionToFly;
     std::vector<EFCT *> *efect;
+    void RenderMenu();
+    SCStrikeMenu strike_menu;
 };
 
 #endif

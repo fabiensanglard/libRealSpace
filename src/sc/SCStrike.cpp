@@ -37,8 +37,8 @@ void SCStrike::CheckKeyboard(void) {
         this->player_plane->control_stick_y = msy;
     }
     if (this->camera_mode == 5) {
-        this->pilote_lookat.x = ((Screen.width / 360) * msx) * .2;
-        this->pilote_lookat.y = ((Screen.height / 360) * msy) * .2;
+        this->pilote_lookat.x = ((Screen.width / 360) * msx) / 6;
+        this->pilote_lookat.y = ((Screen.height / 360) * msy) / 6;
     }
     for (int i = 0; i < upEvents; i++) {
         SDL_Event *event = &keybEvents[i];
@@ -72,26 +72,26 @@ void SCStrike::CheckKeyboard(void) {
             break;
         }
         case SDLK_F1:
-            this->camera_mode = 0;
+            this->camera_mode = View::FRONT;
             break;
         case SDLK_F2:
-            this->camera_mode = 1;
+            this->camera_mode = View::FOLLOW;
             this->camera_pos = {-2, 4, -43};
             break;
         case SDLK_F3:
-            this->camera_mode = 2;
+            this->camera_mode = View::RIGHT;
             this->pilote_lookat.x = 90;
             break;
         case SDLK_F4:
-            this->camera_mode = 3;
+            this->camera_mode = View::LEFT;
             this->pilote_lookat.x = 270;
             break;
         case SDLK_F5:
-            this->camera_mode = 4;
+            this->camera_mode = View::REAR;
             this->pilote_lookat.x = 180;
             break;
         case SDLK_F6:
-            this->camera_mode = 5;
+            this->camera_mode = View::REAL;
             break;
         case SDLK_KP_8:
             this->camera_pos.z += 1;
@@ -250,22 +250,22 @@ void SCStrike::RunFrame(void) {
 
     switch (this->camera_mode) {
 
-    case 0:
+    case View::FRONT:
         camera->SetPosition(&this->newPosition);
         camera->ResetRotate();
         camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
-    case 1: {
+    case View::FOLLOW: {
         Vector3D pos = {this->newPosition.x + this->camera_pos.x, this->newPosition.y + this->camera_pos.y,
                         this->newPosition.z + this->camera_pos.z};
         camera->SetPosition(&pos);
         camera->LookAt(&this->newPosition);
     } break;
-    case 2:
-    case 3:
-    case 4:
+    case View::RIGHT:
+    case View::LEFT:
+    case View::REAR:
         camera->SetPosition(&this->newPosition);
         camera->ResetRotate();
         camera->Rotate(0.0f, this->pilote_lookat.x * ((float)M_PI / 180.0f), 0.0f);
@@ -273,7 +273,7 @@ void SCStrike::RunFrame(void) {
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
-    case 5:
+    case View::REAL:
     default:
         camera->SetPosition(&this->newPosition);
         camera->ResetRotate();
@@ -290,22 +290,22 @@ void SCStrike::RunFrame(void) {
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     Renderer.RenderMissionObjects(missionObj);
     switch (this->camera_mode) {
-    case 0:
+    case View::FRONT:
         this->cockpit->Render(0);
         break;
-    case 1:
+    case View::FOLLOW:
         this->player_plane->Render();
         break;
-    case 2:
+    case View::RIGHT:
         this->cockpit->Render(1);
         break;
-    case 3:
+    case View::LEFT:
         this->cockpit->Render(2);
         break;
-    case 4:
+    case View::REAR:
         this->cockpit->Render(3);
         break;
-    case 5:
+    case View::REAL:
         glPushMatrix();
         Matrix cockpit_rotation;
         cockpit_rotation.Clear();

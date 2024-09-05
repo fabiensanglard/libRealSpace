@@ -8,6 +8,10 @@
 
 #include "precomp.h"
 
+#include <imgui.h>
+#include <imgui_impl_opengl2.h>
+#include <imgui_impl_sdl2.h>
+
 #define EFECT_OPT_CONV 0
 #define EFECT_OPT_SCEN 1
 #define EFECT_OPT_MISS 22
@@ -224,6 +228,7 @@ void SCGameFlow::Init() {
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     this->efect = nullptr;
     this->createMiss();
+    this->strike_menu.show_scene_window = false;
 }
 
 /**
@@ -420,7 +425,53 @@ void SCGameFlow::RunFrame(void) {
         this->zones.at(f)->Draw();
     }
 
-    Mouse.Draw();
+    
 
     VGA.VSync();
+
+    this->RenderMenu();
+    VGA.SwithBuffers();
+    VGA.Activate();
+    VGA.Clear();
+    Mouse.Draw();
+    VGA.VSync();
+    VGA.SwithBuffers();
+}
+void SCGameFlow::RenderMenu() {
+    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+    ImGui_ImplOpenGL2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+    static bool show_scene_window = false;
+    static bool quit_gameflow = false;
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("GameFlow")) {
+            ImGui::MenuItem("Info", NULL, &show_scene_window);
+            ImGui::MenuItem("Quit", NULL, &quit_gameflow);
+            ImGui::EndMenu();
+        }
+        ImGui::Text("Current Miss %d, Current Scen", this->current_miss, this->current_scen);
+        ImGui::EndMainMenuBar();
+    }
+    if (show_scene_window) {
+        ImGui::Begin("Infos");
+        ImGui::Text("Nb Actor %d", this->sprites.size());
+        ImGui::Text("Nb Zones %d", this->zones.size());
+        for (auto sprite : this->sprites) {
+            ImGui::Text("Sprite %d", sprite.first);
+            ImGui::Text("Frame %d", sprite.second->frameCounter);
+            if (sprite.second->frames != nullptr) {
+                ImGui::Text("Frames %d", sprite.second->frames->size());
+            }
+            if (sprite.second->quad != nullptr) {
+                ImGui::Text("Quad %d", sprite.second->quad->size());
+            }
+        }
+        ImGui::End();
+    }
+    if (quit_gameflow) {
+        Game.StopTopActivity();
+    }
+    ImGui::Render();
+    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }
