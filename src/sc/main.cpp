@@ -17,11 +17,12 @@ AssetManager    Assets;
 SCRenderer      Renderer;
 ConvAssetManager ConvAssets;
 RSFontManager FontManager;
+RSMixer Mixer;
 
 int main(int argc, char* argv[]) {
 
     
-    Assets.SetBase("G:/DOS/SC");
+    Assets.SetBase("./");
     
     Game.Init();
     
@@ -30,8 +31,6 @@ int main(int argc, char* argv[]) {
     SCMainMenu* main = new SCMainMenu();
     main->Init();
     Game.AddActivity(main);
-    
-    
     Game.Run();
     
     return EXIT_SUCCESS;

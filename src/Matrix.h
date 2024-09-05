@@ -126,7 +126,8 @@ public:
     void SetRotationX(float angle);
     void SetRotationY(float angle);
     void SetRotationZ(float angle);
-    
+    void translateM(float x, float y, float z);
+    void rotateM(float angle, float x, float y, float z);
 private:
 };
 

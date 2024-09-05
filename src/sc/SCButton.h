@@ -8,8 +8,8 @@
 
 #ifndef __libRealSpace__Button__
 #define __libRealSpace__Button__
+#include <functional>
 
-typedef void (*ActionFunction)(void);
 
 class SCButton{
     
@@ -22,7 +22,7 @@ public:
     Point2D dimension;
     
     
-    void InitBehavior(ActionFunction fct, Point2D position, Point2D dimension);
+    void InitBehavior(std::function<void()> fct, Point2D position, Point2D dimension);
     
     
     void OnAction(void);
@@ -46,7 +46,7 @@ private:
     
     Appearance apre;
     
-    ActionFunction onClick;
+    std::function<void()> onClick;
     
 };
 

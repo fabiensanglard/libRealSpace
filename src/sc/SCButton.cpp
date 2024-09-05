@@ -9,16 +9,19 @@
 #include "precomp.h"
 
 
-SCButton::SCButton():
-    enabled(true){
-    
+SCButton::SCButton(){
+    this->enabled = true;
+    this->onClick = nullptr;
+    this->position = Point2D({0,0});
+    this->dimension = Point2D({0,0});
+    this->apre = APR_UP;
 }
 
 SCButton::~SCButton(){
     
 }
 
-void SCButton::InitBehavior(ActionFunction fct, Point2D position,Point2D dimension){
+void SCButton::InitBehavior(std::function<void()> fct, Point2D position,Point2D dimension){
     this->onClick = fct;
     this->position = position;
     this->dimension = dimension;

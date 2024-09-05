@@ -61,16 +61,16 @@ void RSMapTextureSet::Parse(PakArchive* archive){
             //That does look like a map texture !
             RSImage* image = new RSImage();
             
-            image->Create("MAP_TEXTURE",width,height);
+            image->Create("MAP_TEXTURE",width,height, 0);
             image->UpdateContent(stream.GetPosition());
             images.push_back(image);
-            //printf("RSMapTextureSet img [%3zu] is %lux%lu.\n",i,image->width,image->height);
+            printf("RSMapTextureSet img [%3zu] is %lux%lu.\n",i,(unsigned long)image->width,(unsigned long)image->height);
         }
         else
-            printf("Cannot make sense of entry %lu:\n REASON: (entry size is %lu but advertised is %d).\n",i,entry->size,size);
+            printf("Cannot make sense of entry %zu:\n REASON: (entry size is %zu but advertised is %d).\n",i,entry->size,size);
     }
     
-    printf("RSMapTextureSet found %lu textures in %s.\n",archive->GetNumEntries(),archive->GetName());
+    printf("RSMapTextureSet found %zu textures in %s.\n", archive->GetNumEntries(), archive->GetName());
 }
 
 void RSMapTextureSet::List(FILE* output){
@@ -79,7 +79,7 @@ void RSMapTextureSet::List(FILE* output){
     
     for(size_t i = 0 ; i < images.size() ; i++){
         RSImage* image = images[i];
-        printf("Image [%3lu] width: %zu height: %zu size: %lu bytes.\n",i,image->width,image->height,image->width*image->height);
+        printf("Image [%3zu] width: %zu height: %zu size: %zu bytes.\n",i,image->width,image->height,image->width*image->height);
     }
     
 }

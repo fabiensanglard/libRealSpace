@@ -27,7 +27,7 @@ void PakArchive::Parse(void){
     uint32_t advertisedSize = stream.ReadUInt32LE();
     
     if (advertisedSize != this->size){
-        //printf("'%s' is not a PAK archive !.\n",this->path);
+        printf("'%s' is not a PAK archive !.\n",this->path);
         return;
     }
     
@@ -138,7 +138,7 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
     const char* filePattern = "FILE%d.%s";
     char fullDstPath[512];
     
-    printf("Decompressing PAK %s (size: %lu bytes)\n.",this->path,this->size);
+    printf("Decompressing PAK %s (size: %llu bytes)\n.",this->path,this->size);
     
     for( size_t i = 0 ; i < this->entries.size() ; i++){
         
@@ -164,7 +164,6 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
         
         
         sprintf(fullDstPath+strlen(fullDstPath),filePattern,i,extension);
-        
         //Convert '\\' to '/'
         size_t sizeFullPath = strlen(fullDstPath);
         for (int i =0 ; i < sizeFullPath ; i++){
@@ -177,7 +176,8 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
         
         
         //Write content.
-        FILE* dstFile = fopen(fullDstPath,"w+b");
+        FILE* dstFile = fopen(fullDstPath, "w+b");
+        
         
         if (dstFile == NULL){
             printf("Unable to create destination file: '%s'.\n",fullDstPath);
@@ -188,10 +188,10 @@ bool PakArchive::Decompress(const char* dstDirectory,const char* extension){
         
         if (byteWritten != entry->size){
 
-            printf("*Error while writing entry (errono: %s) size(size: %lu).\n",strerror(errno),entry->size);
+            printf("*Error while writing entry (errono: %s) size(size: %llu).\n",strerror(errno),entry->size);
         }
         else
-            printf("Extracted file: '%s. (size: %lu).'\n",fullDstPath,entry->size);
+            printf("Extracted file: '%s. (size: %llu).'\n",fullDstPath,entry->size);
         fclose(dstFile);
         
         
@@ -205,7 +205,10 @@ size_t PakArchive::GetNumEntries(void){
 }
 
 PakEntry* PakArchive::GetEntry(size_t index){
-    return this->entries[index];
+    if (index < this->entries.size()) {
+        return this->entries[index];
+    }
+    return nullptr;
 }
 
 void PakArchive::List(FILE* output){
@@ -214,9 +217,9 @@ void PakArchive::List(FILE* output){
         PakEntry* entry = entries[i];
        
         if (entry->size != 0)
-            fprintf(output,"    Entry [%3lu] offset[0x%8lX] size: %7lu bytes, type: %X.\n",i,entry->data-this->data, entry->size,entry->type);
+            fprintf(output,"    Entry [%3zu] offset[0x%8llX] size: %7llu bytes, type: %X.\n",i,entry->data-this->data, entry->size,entry->type);
         else
-            fprintf(output,"    Entry [%3lu] offset[0x%8lX] size: %7lu bytes, type: %X (DUPLICATE).\n",i,entry->data-this->data, entry->size,entry->type);
+            fprintf(output,"    Entry [%3llu] offset[0x%8llX] size: %7llu bytes, type: %X (DUPLICATE).\n",i,entry->data-this->data, entry->size,entry->type);
     }
 }
 

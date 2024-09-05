@@ -8,7 +8,7 @@
 
 #ifndef __libRealSpace__IActivity__
 #define __libRealSpace__IActivity__
-
+char* strtoupper(char* dest, const char* src);
 
 class IActivity{
     
@@ -33,17 +33,17 @@ public:
     
     
 protected:
-    
+    bool music_playing;
+    bool focused;
     IActivity();
     SCButton* CheckButtons(void);
+    SCZone* CheckZones(void);
     std::vector<SCButton*> buttons;
+    std::vector<SCZone*> zones;
     void DrawButtons(void);
     
 private:
     bool running;
-    bool focused;
-    
-    
 };
 
 

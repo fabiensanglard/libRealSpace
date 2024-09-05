@@ -9,6 +9,7 @@
 #include "Texture.h"
 #include "RSImage.h"
 #include "SCRenderer.h"
+#include <cassert>
 
 extern SCRenderer Renderer;
 
@@ -46,26 +47,27 @@ uint32_t Texture::GetTextureID(void){
     
 }
 
-
 void Texture::UpdateContent(RSImage* image){
     
     uint8_t* src = image->data;
     uint8_t* dst = this->data;
     VGAPalette* palette = image->palette;
-    
+    bool hasAlpha = false;
+
     for(int i=0 ; i < image->height ; i++){
-    for(int j=0 ; j < image->width  ; j++){
-        
-        uint8_t* srcIndex = src + j + i* image->width;
-        
-        const Texel* src = palette->GetRGBColor( (*srcIndex) );
-        
-        dst[0] = src->r;
-        dst[1] = src->g;
-        dst[2] = src->b;
-        dst[3] = src->a;
-        
-        dst+=4;
-    }
+        for(int j=0 ; j < image->width  ; j++){
+            
+            uint8_t* srcIndex = src + j + i* image->width;
+            
+            const Texel* src = palette->GetRGBColor( (*srcIndex) );
+            
+            dst[0] = src->r;
+            dst[1] = src->g;
+            dst[2] = src->b;
+			
+            dst[3] = src->a;
+
+            dst+=4;
+        }
     }
 }

@@ -45,6 +45,13 @@ typedef struct VGAPalette{
         return &colors[value];
     }
     
+    Texel* GetRGBColorSetAlpha(uint8_t value, bool setAlpha){
+        if (setAlpha){
+            colors[value].a = 0;
+        }
+        return &colors[value];
+    }
+    
     void Diff(VGAPalette* other){
         for (int i=0  ;i <256 ; i++){
             if(colors[i].r != other->colors[i].r ||
@@ -68,10 +75,10 @@ typedef struct VGAPalette{
         }
         
         for (uint16_t i= 0 ; i < numColors ; i++){
-            colors[offset+i].r = s->ReadByte() * 255/63.0f;
-            colors[offset+i].g = s->ReadByte() * 255/63.0f;
-            colors[offset+i].b = s->ReadByte() * 255/63.0f;
-            colors[offset+i].a = 1 ;
+            colors[offset+i].r = s->ReadByte() * (uint8_t) (255.0f/63.0f);
+            colors[offset+i].g = s->ReadByte() * (uint8_t) (255.0f/63.0f);
+            colors[offset+i].b = s->ReadByte() * (uint8_t) (255.0f/63.0f);
+            colors[offset+i].a = 255 ;
         }
         
     }
@@ -89,7 +96,7 @@ public:
     void Set(RSImage* image );
     size_t width;
     size_t height;
-    char name[8];
+    char name[9];
     uint8_t* data;
 
 

@@ -61,7 +61,10 @@ CharFigure* ConvAssetManager::GetFigure(char* name) {
 }
 
 uint8_t ConvAssetManager::GetFacePaletteID(char* name) {
-	return this->facePalettes[name]->index;
+	if (this->facePalettes.count(name) > 0) {
+		return this->facePalettes[name]->index;
+	}
+	return 0;
 }
 
 

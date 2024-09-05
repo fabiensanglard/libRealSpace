@@ -8,38 +8,12 @@
 
 #include "precomp.h"
 
-static const uint8_t PAK_ID_MENU_STATIC       = 0;
-static const uint8_t PAK_ID_MENU_DYNAMC       = 4;
-
-
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_BACKGROUND_RELEASED   = 0;
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_BACKGROUND_PRESSED    = 1;
-
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_UPARROW_RELEASED      = 2;
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_UPARROW_PRESSED       = 3;
-
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_DOWNARROW_RELEASED    = 4;
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_DOWNARROW_PRESSED     = 5;
-
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_UPARROW2_RELEASED     = 6;
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_UPARROW2_PRESSED      = 7;
-
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_DOWN2ARROW_RELEASED   = 8;
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_DOWN2ARROW_PRESSED    = 9;
-
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_LEFTARROW_RELEASED    =10;
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_LEFTARROW_PRESSED     =11;
-
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_RIGHTARROW_RELEASED   =12;
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_RIGHTARROW_PRESSED    =13;
-
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_EXIT_RELEASED         =14;
-static const uint8_t PAK_ID_MENU_DYNAMC_JETNAME_EXIT_PRESSED          =15;
-
-static const uint8_t PAK_ID_BACKGROUND  = 8;
 
 SCObjectViewer::SCObjectViewer(){
-    
+    this->rotateUpDownAngle = 0;
+    this->zoomFactor = 1;
+    this->rotateLeftRightAngle = 0;
+    this->music_playing = false;
 }
 
 SCObjectViewer::~SCObjectViewer(){
@@ -112,7 +86,7 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
         uint32_t fixedPointDist = stream.ReadInt32LE();
         showCase.cameraDist = (fixedPointDist >> 8) + (fixedPointDist & 0xFF)/255.0f ;
         //showCase.cameraDist = 200000;
-        
+		printf("LOAD [%s]:%s\n", modelPath, showCase.displayName);
         showCases.push_back(showCase);
         
     }
@@ -121,92 +95,74 @@ void SCObjectViewer::ParseObjList(IffLexer* lexer){
     
 }
 
-void OnExit(void){
+void SCObjectViewer::OnExit(void){
     Game.StopTopActivity();
 }
 
-void OnNext(void){
+void SCObjectViewer::OnNext(void){
     //startTime = SDL_GetTicks();
     SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
     that->NextObject();
 }
 
-void OnZoomOut(void){
-    Game.StopTopActivity();
+void SCObjectViewer::OnZoomOut(void){
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->zoomFactor += 0.1f;
+    if (that->zoomFactor > 2.5f) that->zoomFactor = 2.5f;
 }
 
-void OnZoomIn(void){
-    Game.StopTopActivity();
+void SCObjectViewer::OnZoomIn(void){
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->zoomFactor -= 0.1f;
+    if (that->zoomFactor < 0.4f) that->zoomFactor = 0.4f;
 }
 
-void OnRotateLeft(void){
-    Game.StopTopActivity();
+void SCObjectViewer::OnRotateLeft(void){
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->rotateLeftRightAngle -= 10.0f;
 }
 
-void OnRotateRight(void){
-    Game.StopTopActivity();
+void SCObjectViewer::OnRotateRight(void){
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->rotateLeftRightAngle += 10.0f;
 }
 
-void OnRotateUp(void){
-    Game.StopTopActivity();
+void SCObjectViewer::OnRotateUp(void){
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->rotateUpDownAngle += 10.0f;
 }
 
-void OnRotateDown(void){
-    Game.StopTopActivity();
+void SCObjectViewer::OnRotateDown(void){
+    SCObjectViewer* that =  (SCObjectViewer*)Game.GetCurrentActivity();
+    that->rotateUpDownAngle -= 10.0f;
 }
 
 void SCObjectViewer::NextObject(void){
     currentObject = (currentObject+ 1) % showCases.size();
 }
 
+void SCObjectViewer::Focus(void) {
+    this->focused = true;
+    if (!this->music_playing) {
+        Mixer.PlayMusic(25);
+        this->music_playing = true;
+    }
+}
+void SCObjectViewer::UnFocus(void) {
+    this->focused = false;
+    if (this->music_playing) {
+        Mixer.StopMusic();
+        this->music_playing = false;
+    }
+}
+
 void SCObjectViewer::ParseAssets(PakArchive* archive){
-    
-    
-    
-    /*
-    PakEntry* entry0 = archive->GetEntry(PAK_ID_MENU_DYNAMC); OBJ_VIEWER BOARD
-    PakArchive file0;
-    file0.InitFromRAM("OBJVIEW.PAK: file PAK_ID_MENU_DYNAMC",entry0->data, entry0->size);
-    file0.List(stdout);
-    showAllImage(&file0);
-    */
-    
-    //Identified as OBJECT VIEWER STATIC TITLE
     
     PakEntry* entry0 = archive->GetEntry(0);
     PakArchive file0;
     file0.InitFromRAM("OBJVIEW.PAK: file 0",entry0->data, entry0->size);
     title.Init(file0.GetEntry(0)->data, file0.GetEntry(0)->size);
 
-    
-    //Identified as TRAINING MISSION TITLE
-    /*
-    PakEntry* entry1 = archive->GetEntry(1);
-    PakArchive file1;
-    file1.InitFromRAM("OBJVIEW.PAK: file 1",entry1->data, entry1->size);
-    file1.List(stdout);
-    showAllImage(&file1);
-    */
-    
-    //Identified as DOGFIGHT SETUP FIGHT SETUP # enemies and stuff
-    /*
-    PakEntry* entry2 = archive->GetEntry(2);
-    PakArchive file2;
-    file2.InitFromRAM("OBJVIEW.PAK: file 2",entry2->data, entry2->size);
-    file2.List(stdout);
-    showAllImage(&file2);
-    */
-    
-    //Identified as BUTTONS DODGE AIR TO AIR button and AIR TO GROUND BUTTON
-    /*
-    PakEntry* entry3 = archive->GetEntry(3);
-    PakArchive file3;
-    file3.InitFromRAM("OBJVIEW.PAK: file 3",entry3->data, entry3->size);
-    file3.List(stdout);
-    showAllImage(&file3);
-    */
-    
-    //Identified as BUTTONS OBJ VIEWER
     PakEntry* objButtonEntry = archive->GetEntry(4);
     PakArchive objButtons;
     objButtons.InitFromRAM("OBJVIEW.PAK: file 4",objButtonEntry->data, objButtonEntry->size);
@@ -220,12 +176,10 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     button = new SCButton();
     Point2D exitDimension = {30, 15} ;
     Point2D exitPosition = {boardPosition.x+268,boardPosition.y+15};
-    button->InitBehavior(OnExit, exitPosition,exitDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnExit, this), exitPosition,exitDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(14)->data, objButtons.GetEntry(14)->size,&exitPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(15)->data, objButtons.GetEntry(15)->size,&exitPosition);
     buttons.push_back(button);
-    
-    
     
     
     Point2D arrowDimension = {15, 15} ;
@@ -234,7 +188,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     button = new SCButton();
     
     Point2D rotRightButtonPosition = {boardPosition.x+232,boardPosition.y+12};
-    button->InitBehavior(OnRotateRight, rotRightButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnRotateRight, this), rotRightButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(12)->data, objButtons.GetEntry(12)->size,&rotRightButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(13)->data, objButtons.GetEntry(13)->size,&rotRightButtonPosition);
     buttons.push_back(button);
@@ -242,7 +196,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ROT LEFT OBJ BUTTON
     button = new SCButton();
     Point2D rotLeftButtonPosition = {boardPosition.x+174,boardPosition.y+12};
-    button->InitBehavior(OnRotateLeft, rotLeftButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnRotateLeft, this), rotLeftButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(10)->data, objButtons.GetEntry(10)->size,&rotLeftButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(11)->data, objButtons.GetEntry(11)->size,&rotLeftButtonPosition);
     buttons.push_back(button);
@@ -250,7 +204,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ROT DOWN OBJ BUTTON
     button = new SCButton();
     Point2D rotDownButtonPosition = {boardPosition.x+198,boardPosition.y+24};
-    button->InitBehavior(OnRotateDown, rotDownButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnRotateDown, this), rotDownButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(8)->data, objButtons.GetEntry(8)->size,&rotDownButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(9)->data, objButtons.GetEntry(9)->size,&rotDownButtonPosition);
     buttons.push_back(button);
@@ -259,7 +213,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ROT UP OBJ BUTTON
     button = new SCButton();
     Point2D rotUpButtonPosition = {boardPosition.x+198,boardPosition.y+6};
-    button->InitBehavior(OnRotateUp, rotUpButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnRotateUp, this), rotUpButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(6)->data, objButtons.GetEntry(6)->size,&rotUpButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(7)->data, objButtons.GetEntry(7)->size,&rotUpButtonPosition);
     buttons.push_back(button);
@@ -269,7 +223,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ZOOM OUT OBJ BUTTON
     button = new SCButton();
     Point2D zoomOutButtonPosition = {boardPosition.x+122,boardPosition.y+25};
-    button->InitBehavior(OnZoomOut, zoomOutButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnZoomOut, this), zoomOutButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(4)->data, objButtons.GetEntry(4)->size,&zoomOutButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(5)->data, objButtons.GetEntry(5)->size,&zoomOutButtonPosition);
     buttons.push_back(button);
@@ -277,7 +231,7 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     //ZOOM IN OBJ BUTTON
     button = new SCButton();
     Point2D zoomInButtonPosition = {boardPosition.x+121,boardPosition.y+7};
-    button->InitBehavior(OnZoomIn, zoomInButtonPosition,arrowDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnZoomIn, this), zoomInButtonPosition,arrowDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(2)->data, objButtons.GetEntry(2)->size,&zoomInButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(3)->data, objButtons.GetEntry(3)->size,&zoomInButtonPosition);
     buttons.push_back(button);
@@ -286,66 +240,18 @@ void SCObjectViewer::ParseAssets(PakArchive* archive){
     Point2D nextDimension = {75, 15} ;
     button = new SCButton();
     Point2D nextButtonPosition = {boardPosition.x+10,boardPosition.y+15};
-    button->InitBehavior(OnNext, nextButtonPosition,nextDimension);
+    button->InitBehavior(std::bind(&SCObjectViewer::OnNext, this), nextButtonPosition,nextDimension);
     button->appearance[SCButton::APR_UP]  .InitWithPosition(objButtons.GetEntry(0)->data, objButtons.GetEntry(0)->size,&nextButtonPosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(objButtons.GetEntry(1)->data, objButtons.GetEntry(1)->size,&nextButtonPosition);
     buttons.push_back(button);
-    
-    
-    
-    //buttons.push_back(button);
-    //showAllImage(&file4);
-    
-    
-    //Identified as DODGE FIGHT MISSION BUILDER ACCEPT CANCEL 12:00 3:00   NUMBERS GOOD FAIR
-    /*
-    PakEntry* entry5 = archive->GetEntry(5);
-    PakArchive file5;
-    file5.InitFromRAM("OBJVIEW.PAK: file 5",entry5->data, entry5->size);
-    file5.List(stdout);
-    showAllImage(&file5);
-    */
-    
-    //Identified as Dodge Fight background
-    /*
-    PakEntry* entry6 = archive->GetEntry(6);
-    PakArchive file6;
-    file6.InitFromRAM("OBJVIEW.PAK: file 6",entry6->data, entry6->size);
-    file6.List(stdout);
-    showAllImage(&file6);
-    */
-    
-    //Identified as DOGFIGHT PALETTE
-    /*
-    PakEntry* entry7 = archive->GetEntry(7);
-    PakArchive file7;
-    file7.InitFromRAM("OBJVIEW.PAK: file 7",entry7->data, entry7->size);
-    file7.List(stdout);
-    //showAllImage(&file7);
-    */
-    
-    //Identified as blue background
     
     PakEntry* entry8 = archive->GetEntry(8);
     PakArchive file8;
     file8.InitFromRAM("OBJVIEW.PAK: file 8",entry8->data, entry8->size);
     bluePrint.Init(file8.GetEntry(0)->data, file8.GetEntry(0)->size);
     
-    
-    
-    //Unknown content
-    /*
-    PakEntry* entry9 = archive->GetEntry(9);
-    PakArchive file9;
-    file9.InitFromRAM("OBJVIEW.PAK: file 9",entry9->data, entry9->size);
-    file9.List(stdout);
-    showAllImage(&file9);
-    */
-    
-    
     IffLexer lexer ;
     lexer.InitFromFile("PALETTE.IFF");
-    //lexer.List(stdout);
     
     RSPalette palette;
     palette.InitFromIFF(&lexer);
@@ -365,16 +271,13 @@ void SCObjectViewer::Init(void){
     
     PakArchive assets;
     assets.InitFromRAM("OBJVIEW.PAK",objViewPAK->data, objViewPAK->size);
-    //assets.List(stdout);
-    //assets.Decompress("/Users/fabiensanglard/Desktop/ObjViewer.PAK", "MEH");
     ParseAssets(&assets);
     
     IffLexer objToDisplay;
     objToDisplay.InitFromRAM(objViewIFF->data, objViewIFF->size);
-    //objToDisplay.List(stdout);
-    ParseObjList(&objToDisplay);
-   // ListObjects();
     
+    ParseObjList(&objToDisplay);
+   
     SetTitle("Neo Object Viewer");
     
     currentObject = 0 ;
@@ -387,24 +290,21 @@ void SCObjectViewer::RunFrame(void){
        
     CheckButtons();
     
+    
     VGA.Activate();
     VGA.Clear();
+    VGA.SetPalette(&this->palette);
     
     VGA.SetPalette(&this->palette);
     
     //Draw static
     VGA.DrawShape(&bluePrint);
-    VGA.DrawShape(&title);
     
-    DrawButtons();
-    
-    //Draw Mouse
-    Mouse.Draw();
 
-    
     VGA.VSync();
-
     
+
+    /**/
     //Ok now time to draw the model
     glClear(GL_DEPTH_BUFFER_BIT);
     
@@ -416,9 +316,9 @@ void SCObjectViewer::RunFrame(void){
     RSShowCase showCase = showCases[currentObject];
     
     Point3D newPosition;
-    newPosition.x= showCase.cameraDist/150 *cos(totalTime/2000.0f);
+    newPosition.x= showCase.cameraDist/150 *cosf(totalTime/2000.0f);
     newPosition.y= showCase.cameraDist/350;
-    newPosition.z= showCase.cameraDist/150*sin(totalTime/2000.0f);
+    newPosition.z= showCase.cameraDist/150*sinf(totalTime/2000.0f);
    
 
     Renderer.GetCamera()->SetPosition(&newPosition);
@@ -426,9 +326,9 @@ void SCObjectViewer::RunFrame(void){
     Renderer.GetCamera()->LookAt(&lookAt);
     
     Point3D light;
-    light.x= 4*cos(-1*totalTime/20000.0f);
+    light.x= 4*cosf(-1*totalTime/20000.0f);
     light.y= 4;
-    light.z= 4*sin(-1*totalTime/20000.0f);
+    light.z= 4*sinf(-1*totalTime/20000.0f);
     Renderer.SetLight(&light);
     
     glMatrixMode(GL_PROJECTION);
@@ -438,9 +338,31 @@ void SCObjectViewer::RunFrame(void){
     glMatrixMode(GL_MODELVIEW);
     Matrix* view = Renderer.GetCamera()->GetViewMatrix();
     glLoadMatrixf(view->ToGL());
+    glPushMatrix();
+    glRotatef(this->rotateLeftRightAngle, 1, 0, 0);
+    glPushMatrix();
+    glRotatef(this->rotateUpDownAngle, 0, 0, 1);
     
+    
+    glScalef(1/this->zoomFactor, 1/this->zoomFactor, 1/this->zoomFactor);
     Renderer.DrawModel(showCases[currentObject].entity, LOD_LEVEL_MAX);
-    
+    glPopMatrix();
+    glPushMatrix();
     glDisable(GL_DEPTH_TEST);
+
+    VGA.SwithBuffers();
+    VGA.Activate();
+    VGA.Clear();
+    VGA.SetPalette(&this->palette);
+
+    VGA.DrawShape(&title);
     
+    DrawButtons();
+    
+    //Draw Mouse
+    Mouse.Draw();
+
+    VGA.VSync();
+    VGA.SwithBuffers();
+    /**/
 }

@@ -12,6 +12,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #include <stdlib.h>
 #include <stdio.h>
     
@@ -35,16 +36,17 @@ extern "C" {
 #ifdef _WIN32
 	#include <Windows.h>
 #endif
+
     #include <SDL.h>
-    #include <GL/GL.h>
+    #include <GL/gl.h>
+    #include <GL/glu.h>
 
-
-    #include "Math.h"
+    #include "Maths.h"
     #include "Matrix.h"
     #include "Quaternion.h"
 
 
-// Reusable Realspace Classes
+    // Reusable Realspace Classes
     #include "Base.h"
     #include "ByteStream.h"
     #include "PakArchive.h"
@@ -56,6 +58,12 @@ extern "C" {
     #include "Texture.h"
     #include "RSImage.h"
 
+//Fonts stuff
+    #include "RSFont.h"
+    #include "RSFontManager.h"
+
+    #include "RSImageSet.h"
+    
     #include "SCRenderer.h"
     extern SCRenderer Renderer;
 
@@ -68,47 +76,22 @@ extern "C" {
     #include "RSMapTextureSet.h"
     #include "RSArea.h"
     #include "RLEShape.h"
+    #include "RSOption.h"
+    #include "RSGameflow.h"
+    #include "RSCockpit.h"
+    #include "RSMission.h"
+    #include "RSNavMap.h"
 
-//Fonts stuff
-#include "RSFont.h"
-#include "RSFontManager.h"
+    
 
-    #include "RSImageSet.h"
-
-
-
+    // Music Stuff
+    #include "RSMusic.h"
+    #include "RSMixer.h"
+    
     //VGA and Glide
     #include "RSScreen.h"
     #include "RSVGA.h"
 
-// Strike commander specific.
-
-
-/*
-    
-
-    #include "IFFChunkReader.h"
-    #include "IFFReader.h"
-
-    #include "RealSpaceObject.h"
-    #include "IFFObjectReader.h"
-
-    #include "gfx.h"
-    #include "pak.h"
-
-
-
-    #include "IFFReader.h"
- */
 #endif
-
-
-
-
-
-
-
-
-
 
 #endif

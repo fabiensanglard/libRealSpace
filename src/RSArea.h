@@ -27,16 +27,15 @@ extern "C" {
 #include "RSMapTextureSet.h"
 #include "IffLexer.h"
 
-//DIRTY HACK !!! DELETE ME ASAP
-#define  HEIGHT_DIVIDER 17
 
+#define BLOCK_WIDTH 20000
 
 typedef struct MapObject{
     
     char name[9];
     char destroyedName[9];
     
-    uint32_t position[3];
+    int32_t position[3];
     
     RSEntity* entity;
     
@@ -57,7 +56,27 @@ typedef struct AreaBlock{
     }
     
 } AreaBlock;
-
+struct AreaOverlayTriangles {
+    int verticesIdx[3];
+    uint8_t color;
+    uint8_t u0, u1, u2, u3, u4;
+    uint8_t u5, u6, u7, u8, u9;
+    uint8_t u10,u11;
+};
+struct AoVPoints {
+    int x;
+    int y;
+    int z;
+    int u0;
+    int u1;
+    int u2;
+};
+struct AreaOverlay {
+    AoVPoints* vertices;
+    AreaOverlayTriangles trianles[400];
+    int lx, ly, hx, hy;
+    int nbTriangles;
+};
 #define BLOCK_LOD_MAX 0
 #define BLOCK_LOD_MED 1
 #define BLOCK_LOD_MIN 2
@@ -91,10 +110,15 @@ public:
     
     //Per block objects list
     std::vector<MapObject> objects[BLOCKS_PER_MAP];
+    std::vector<AreaOverlay> objectOverlay;
     float elevation[BLOCKS_PER_MAP];
 
     size_t GetNumJets(void);
     RSEntity* GetJet(size_t jetID);
+	std::map<std::string, RSEntity *> *objCache;
+	TreArchive *tre;
+    float getGroundLevel(int BLOC, float x, float y);
+    float getY(float x, float z);
     
 private:
     

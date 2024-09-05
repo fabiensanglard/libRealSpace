@@ -17,7 +17,7 @@
 typedef struct{
     
     uint16_t startingIDs;
-    char name[8];
+    char name[9];
     
     uint8_t unknown0;
     uint8_t numImages;

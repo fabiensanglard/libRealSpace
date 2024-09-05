@@ -12,8 +12,9 @@
 extern SCRenderer Renderer;
 
 RSArea::RSArea(){
-    
-    
+    this->objCache = new std::map<std::string, RSEntity*>();
+    this->tre = new TreArchive();
+    tre->InitFromFile("OBJECTS.TRE");
 }
 
 RSArea::~RSArea(){
@@ -37,7 +38,7 @@ void RSArea::ParseMetadata(){
     
     IffLexer lexer;
     lexer.InitFromRAM(entry->data, entry->size);
-    lexer.List(stdout);
+    //lexer.List(stdout);
     
     IffChunk* tera = lexer.GetChunkByID('TERA');
     if (tera == NULL) {
@@ -84,7 +85,6 @@ void RSArea::ParseMetadata(){
     for(size_t e=0 ; e < numEleRecords ; e++)
     {
         
-        printf("elev record [%zu] ",e);
         uint8_t unknownsElev[20];
         for(int i=0; i < 20 ; i++)
             unknownsElev[i] = elevStream.ReadByte();
@@ -99,27 +99,19 @@ void RSArea::ParseMetadata(){
             elevOtherName[i] = elevStream.ReadByte();
         elevOtherName[13]  = 0;
         
-        for (int i=0; i<20 ; i++){
-            printf("%2X ",unknownsElev[i]);
-        }
-        
-        printf("%-13s %-13s \n",elevName,elevOtherName);
     }
     
    
     
     
     IffChunk* atri = lexer.GetChunkByID('ATRI');
-    printf("Content of trigo chunk:\n");
+    
     
     ByteStream triStream(atri->data);
-    for (int i=0; i < 40; i++) {
-        printf(" %2X",triStream.ReadByte());
-    }
+    
     char triFileName[13];
     for (int i=0; i < 13; i++)
         triFileName[i] = triStream.ReadByte();
-    printf(" '%-13s' \n",triFileName);
     
     
     
@@ -158,20 +150,20 @@ void RSArea::ParseMetadata(){
     
     //Num texture sets
     size_t numTexturesSets = txmsMaps->size/12;
-    //printf("This area features %lu textureSets references.\n",numTexturesSets);
+    printf("This area features %llu textureSets references.\n",numTexturesSets);
     
     ByteStream textureRefStrean(txmsMaps->data);
         
     for (size_t i=0; i < numTexturesSets ; i++) {
-        /*uint16_t fastID =*/ textureRefStrean.ReadUShort();
-        char setName[8];
+        uint16_t fastID = textureRefStrean.ReadUShort();
+        char setName[9];
         for(int n=0; n < 8 ; n++){
             setName[n] = textureRefStrean.ReadByte();
         }
-        /*uint8_t unknown =*/ textureRefStrean.ReadByte();
-        /*uint8_t numImages =*/ textureRefStrean.ReadByte();
+        uint8_t unknown = textureRefStrean.ReadByte();
+        uint8_t numImages = textureRefStrean.ReadByte();
         
-       // printf("Texture Set Ref [%3lu] 0x%2X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
+       printf("Texture Set Ref [%3llu] 0x0x%X[%-8s] %02X (%2u files).\n",i,fastID,setName,unknown,numImages);
     }
     
     /*
@@ -214,22 +206,25 @@ void RSArea::ParseObjects(){
      
     */
     PakEntry* objectsFilesLocation = archive->GetEntry(5);
-    
+    printf("DUMP OBJECT FILES\n");
+    //dumpfbyte(objectsFilesLocation->data, objectsFilesLocation->size);
+    objectsFilesLocation = archive->GetEntry(5);
+
     PakArchive objectFiles;
     objectFiles.InitFromRAM("PAK Objects from RAM",objectsFilesLocation->data, objectsFilesLocation->size);
-    
-    printf("This .OBJ features %lu entries.\n",objectFiles.GetNumEntries());
+    //objectFiles.List(stdout);
+    printf("This .OBJ features %llu entries.\n",objectFiles.GetNumEntries());
     
     
     for(size_t i = 0 ; i < objectFiles.GetNumEntries() ; i++){
         PakEntry* entry = objectFiles.GetEntry(i);
-  
         if (entry->size == 0)
             continue;
-        
+        //dumpfbyte(entry->data, entry->size);
+        entry = objectFiles.GetEntry(i);
         ByteStream sizeGetter(entry->data);
         uint16_t numObjs = sizeGetter.ReadUShort();
-        printf("OBJ files %lu features %d objects.\n",i,numObjs);
+        printf("OBJ files %llu features %d objects.\n",i,numObjs);
         
         //if (i != 97)
         //    continue;
@@ -260,51 +255,50 @@ void RSArea::ParseObjects(){
                 mapObject.destroyedName[k] = reader.ReadByte();
             mapObject.destroyedName[8] = 0;
             
-            int32_t coo[12];
-            coo[0] = reader.ReadByte();
-            coo[1] = reader.ReadByte();
-            coo[2] = reader.ReadByte();
-            coo[3] = reader.ReadByte();
-            mapObject.position[0] =  (coo[3] << 8) | coo[2];
-            //coo[3] = (uint32_t)reader.ReadByte();
-
-            coo[4] = reader.ReadByte();
-            coo[5] = reader.ReadByte();
-            coo[6] = reader.ReadByte();
-            coo[7] = reader.ReadByte();
-            mapObject.position[2] = (coo[7] << 8) | coo[6];
-
             
-            coo[8] = reader.ReadByte();
-            coo[9] = reader.ReadByte();
-            coo[10] = reader.ReadByte();
-            coo[11] = reader.ReadByte();
-            mapObject.position[1] = (coo[11] << 8) | coo[10];
+            uint8_t unknown14 = reader.ReadByte();
+            uint8_t unknown15 = reader.ReadByte();
+            mapObject.position[0] = reader.ReadInt24LE();
+            mapObject.position[2] = reader.ReadInt24LE();
+            mapObject.position[1] = reader.ReadInt24LE();
            
 
-            uint8_t unknowns[0x31-12];
+            uint8_t unknowns[0x31-10];
 
-            for(int k=0 ; k <0x31-12; k++)
+            for(int k=0 ; k <0x31-10; k++)
                 unknowns[k] = reader.ReadByte();
                 
-            printf("object set [%3lu] obj [%2d] - '%-8s' %2X %2X %2X %2X %2X '%-8s'",i,j,mapObject.name,
-                       unknown09,
-                       unknown10,
-                       unknown11,
-                       unknown12,
-                       unknown13,mapObject.destroyedName);
-            
-            for(int k=0 ; k < 12 ; k++)
-                printf("%2X ",coo[k]);
-            
-            for(int k=0 ; k <0x31-12 ; k++)
-                printf("%2X ",unknowns[k]);
-            
-            printf("\n");
-                
-            
-            objects[i].push_back(mapObject);
-            
+            printf("object set [%3llu] obj [%2d] - '%-8s' 0x%X 0x%X 0x%X 0x%X 0x%X '%-8s' At {%d,%d,%d}\n", i, j, mapObject.name,
+                unknown09,
+                unknown10,
+                unknown11,
+                unknown12,
+                unknown13, mapObject.destroyedName, mapObject.position[0], mapObject.position[2], mapObject.position[1]);
+            printf("------\n");
+			std::string hash = mapObject.name;
+			std::map<std::string, RSEntity *>::iterator it;
+			it = objCache->find(hash);
+			if (it == objCache->end()) {
+				char modelPath[512];
+				const char* OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
+				const char* OBJ_EXTENSION = ".IFF";
+
+				strcpy(modelPath, OBJ_PATH);
+				strcat(modelPath, mapObject.name);
+				strcat(modelPath, OBJ_EXTENSION);
+				TreEntry* entry = tre->GetEntryByName(modelPath);
+
+				if (entry == NULL) {
+					printf("Object reference '%s' not found in TRE.\n", modelPath);
+					continue;
+				}
+
+				RSEntity *entity = new RSEntity();
+				entity->InitFromRAM(entry->data, entry->size);
+				
+				objCache->emplace(hash, entity);
+			}
+			objects[i].push_back(mapObject);
         }
         
     }
@@ -314,34 +308,89 @@ void RSArea::ParseObjects(){
 
 
 void RSArea::ParseTriFile(PakEntry* entry){
-    
-    Point3D* vertices = new Point3D[300];
-    
-    ByteStream stream(entry->data);
-    
-    stream.ReadInt32LE();
-    stream.ReadInt32LE();
-    
-    for (int i=0 ; i < 300; i++) {
-        Point3D* v = &vertices[i];
-        int32_t coo ;
+    if (entry->size > 0) {
+        PakArchive triFiles;
+
+        AreaOverlay overTheMapIsTheRunway;
+        size_t read = 0;
+        ByteStream stream(entry->data);
+        int numvertice = stream.ReadShort();
+        read+=2;
+        int nbpoly = stream.ReadShort();
+        read += 2;
+        stream.MoveForward(2);
+        read += 4;
+        AoVPoints* vertices = new AoVPoints[numvertice];
+        overTheMapIsTheRunway.lx = 0;
+        overTheMapIsTheRunway.ly = 0;
+        overTheMapIsTheRunway.hx = 0;
+        overTheMapIsTheRunway.hy = 0;
         
-        coo = stream.ReadInt32LE();
-        v->x = (coo>>8) + (coo&0x000000FF)/255.0;
-        v->x /= 2000;
-        coo = stream.ReadInt32LE();
-        v->z = (coo>>8) + (coo&0x000000FF)/255.0;
-        v->z /= 2000;
+        for (int i = 0; i < numvertice; i++) {
+            AoVPoints* v = &vertices[i];
+            int32_t coo;
+            v->u0 = stream.ReadByte();
+            v->u1 = stream.ReadByte();
+            v->u2 = stream.ReadByte();
+            coo = stream.ReadInt24LE();
+            read += 4;
+            v->x = coo;
+            coo = stream.ReadInt24LE();
+            read += 4;
+            v->z = coo;
+            coo = stream.ReadShort();
+            read += 2;
+            v->y = coo;
+            overTheMapIsTheRunway.lx = ((overTheMapIsTheRunway.lx == 0) && (i == 0)) ? v->x : overTheMapIsTheRunway.lx;
+            overTheMapIsTheRunway.hx = ((overTheMapIsTheRunway.hx == 0) && (i == 0)) ? v->x : overTheMapIsTheRunway.hx;
+            overTheMapIsTheRunway.ly = ((overTheMapIsTheRunway.ly == 0) && (i == 0)) ? v->z : overTheMapIsTheRunway.ly;
+            overTheMapIsTheRunway.hy = ((overTheMapIsTheRunway.hy == 0) && (i == 0)) ? v->z : overTheMapIsTheRunway.hy;
+            
+            overTheMapIsTheRunway.lx = v->x < overTheMapIsTheRunway.lx ? v->x : overTheMapIsTheRunway.lx;
+            overTheMapIsTheRunway.ly = v->z < overTheMapIsTheRunway.ly ? v->z : overTheMapIsTheRunway.ly;
+            overTheMapIsTheRunway.hx = v->x > overTheMapIsTheRunway.hx ? v->x : overTheMapIsTheRunway.hx;
+            overTheMapIsTheRunway.hy = v->z > overTheMapIsTheRunway.hy ? v->z : overTheMapIsTheRunway.hy;
+        }
+        overTheMapIsTheRunway.vertices = vertices;
         
-        coo = stream.ReadInt32LE();
-        v->y =   (coo>>8) + (coo&0x000000FF)/255.0;
-        v->y /= 2000;
+        short cpt = 0;
+        overTheMapIsTheRunway.nbTriangles = 0;
+        for (int i=0; i< nbpoly; i++) {
+        
+            AreaOverlayTriangles aot;
+
+            
+            aot.u0 = stream.ReadByte();
+            aot.u1 = stream.ReadByte();
+            read += 2;
+
+            aot.u7 = stream.ReadByte();
+            aot.verticesIdx[0] = stream.ReadByte();
+            read += 2;
+            aot.u8 = stream.ReadByte();
+            aot.verticesIdx[1] = stream.ReadByte();
+            read += 2;
+            aot.u9 = stream.ReadByte();
+            aot.verticesIdx[2] = stream.ReadByte();
+            read += 2;
+
+            aot.u2 = stream.ReadByte();
+            aot.u3 = stream.ReadByte();
+            aot.color = stream.ReadByte();
+            aot.u4 = stream.ReadByte();
+            aot.u5 = stream.ReadByte();
+            aot.u6 = stream.ReadByte();
+            aot.u10 = stream.ReadByte();
+            aot.u11 = stream.ReadByte();
+            read += 8;
+
+            
+            overTheMapIsTheRunway.trianles[overTheMapIsTheRunway.nbTriangles++] = aot;
+        }
+        // TODO figure out what is the remaining data is used for.
+        stream.MoveForward(entry->size-read);
+        objectOverlay.push_back(overTheMapIsTheRunway);
     }
-    
-    //Render them
-    Renderer.RenderVerticeField(vertices,300);
-    
-    delete[] vertices;
 }
 
 
@@ -353,11 +402,11 @@ void RSArea::ParseTrigo(){
     
     entry = archive->GetEntry(4);
     
-    printf(".TRI file is %lu bytes.\n",entry->size);
+    printf(".TRI file is %llu bytes.\n",entry->size);
     // .TRI is a PAK
     PakArchive triFiles;
     triFiles.InitFromRAM(".TRI",entry->data, entry->size);
-    triFiles.List(stdout);
+    //triFiles.List(stdout);
     //triFiles.Decompress("/Users/fabiensanglard/Desktop/MAURITAN.TRIS/","TRI");
     
     printf("Found %zu .TRI files.\n",triFiles.GetNumEntries());
@@ -365,7 +414,8 @@ void RSArea::ParseTrigo(){
     for(size_t i=0 ; i < triFiles.GetNumEntries() ; i++){
         
         PakEntry* entry  = triFiles.GetEntry(i);
-        if (entry->size != 0)
+        if (entry->size > 0)
+            printf("TRI FOR BLOCK %llu\n", i);
             ParseTriFile(entry);
     }
 }
@@ -398,7 +448,6 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
     
     PakArchive blocksPAL;
     blocksPAL.InitFromRAM("BLOCKS",entry->data, entry->size);
-    
     for (size_t i=0; i < blocksPAL.GetNumEntries(); i++) { // Iterate over the BLOCKS_PER_MAP block entries.
         
         //SRC Asset Block
@@ -413,19 +462,16 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
         for(size_t vertexID=0 ; vertexID < blockDim*blockDim ; vertexID++){
             
             MapVertex* vertex = &block->vertice[vertexID];
-            
-            
-            
-            
+
             int16_t height ;
             height = vertStream.ReadShort();
-            height /= HEIGHT_DIVIDER;
+			//height = height * 50000;
+            //height /= HEIGHT_DIVIDER;
           
             vertex->flag = vertStream.ReadByte();
             vertex->type = vertStream.ReadByte();
             
             uint8_t paletteColor =0;
-            
             
             // Hardcoding the values since I have no idea where those
             // are coming from. Maybe it was hard-coded in STRIKE.EXE ?
@@ -473,13 +519,13 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
             
             
             
-            vertex->upperImageID    = vertStream.ReadByte();
+            vertex->upperImageID = vertStream.ReadByte();
             vertex->lowerImageID = vertStream.ReadByte();
             
             /*
             //City block
             if (blockDim == 20 && i==97){
-                printf("%2X (%2X) ",vertex->lowerImageID,vertex->upperImageID );
+                printf("0x%X (0x%X) ",vertex->lowerImageID,vertex->upperImageID );
                 
                 if (vertexID % 20 == 19)
                     printf("\n");
@@ -498,16 +544,16 @@ void RSArea::ParseBlocks(size_t lod,PakEntry* entry, size_t blockDim){
                     - text
             */
             
-            vertex->v.y = height;//-vertex->text * 10;//height ;
+            vertex->v.y = height;
             
-#define BLOCK_WIDTH (512)
-            vertex->v.x = i % 18 * BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim) * BLOCK_WIDTH ;
-            vertex->v.z = i / 18 * BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim) *BLOCK_WIDTH ;
-           
+            vertex->v.x = i % 18* BLOCK_WIDTH + (vertexID % blockDim ) / (float)(blockDim)*BLOCK_WIDTH;
+            vertex->v.z = i / 18* BLOCK_WIDTH + (vertexID / blockDim ) / (float)(blockDim)*BLOCK_WIDTH;
+            vertex->v.x += -BLOCK_WIDTH * 9;
+            vertex->v.z += -BLOCK_WIDTH * 9;
             
-            vertex->color[0] = t->r/255.0f;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
-            vertex->color[1] = t->g/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
-            vertex->color[2] = t->b/255.0f;;//*1-(vertex->z/(float)(BLOCK_WIDTH*blockDim))/2;
+            vertex->color[0] = t->r/255.0f;
+            vertex->color[1] = t->g/255.0f;
+            vertex->color[2] = t->b/255.0f;
             vertex->color[3] = 255;
         }
         
@@ -532,10 +578,7 @@ void RSArea::ParseElevations(void){
 
 void RSArea::ParseHeightMap(void){
     
-    //char title[512];
-    
-    
-    
+   
     PakEntry* entry ;
     
     entry = archive->GetEntry(1);
@@ -630,7 +673,11 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     //Check the PAK has 5 entries
     this->archive = new PakArchive();
     this->archive->InitFromFile(pakFilename);
-    
+    this->objects->clear();
+    this->objectOverlay.clear();
+    this->jets.clear();
+    this->textures.clear();
+    this->jets.clear();
     //Check that we have 6 entries.
     if (archive->GetNumEntries() != 7){
         printf("***Error: An area PAK file should have 7 files:\n");
@@ -684,7 +731,7 @@ void RSArea::InitFromPAKFileName(const char* pakFilename){
     ParseElevations();
     ParseMetadata();
     ParseObjects();
-   // ParseTrigo();
+    ParseTrigo();
     
     
     ParseHeightMap();
@@ -701,4 +748,56 @@ size_t RSArea::GetNumJets(void){
 
 RSEntity* RSArea::GetJet(size_t jetID){
     return jets[jetID];
+}
+
+float RSArea::getGroundLevel(int BLOC, float x, float y) {
+    int verticeIndex = 0;
+    // 180000
+    int centerX = 0;
+    int centerY = 0;
+    int vX = static_cast<int>((x) + centerX);
+    int vY = static_cast<int>((y) + centerY);
+
+    vX = vX / 1000;
+    vY = vY / 1000;
+
+    vX = vX * 1000;
+    vY = vY * 1000;
+    /*float nvX = (vX - blocks[0][BLOC].vertice[0].v.x);
+    float nvY = (vY - blocks[0][BLOC].vertice[0].v.z);
+
+    int nbX = (int) (nvX/20000.0f*100) ;
+    int nby = (int) (nvY/20000.0f*100) ;
+
+    printf("[%d] [%f;%f] - [%f, %f]\n",(nby*20+nbX), vX, vY, nvX, nvY);
+    printf("N GROUND FROM %d [%f,%f] - [%f, %f, %f]\n", (nby * 20 + nbX), vX, vY,
+        blocks[0][BLOC].vertice[(nby * 18 + nbX)].v.x,
+        blocks[0][BLOC].vertice[(nby * 18 + nbX)].v.y,
+        blocks[0][BLOC].vertice[(nby * 18 + nbX)].v.z
+    );*/
+
+
+    for (int i = 0; i < 400; i++) {
+        
+        if ((blocks[0][BLOC].vertice[i].v.x >= vX) && (blocks[0][BLOC].vertice[i].v.z >= vY)) {
+            /*printf("GROUND FROM %d [%d,%d] - [%f, %f, %f]\n", i, vX, vY,
+                blocks[0][BLOC].vertice[i].v.x,
+                blocks[0][BLOC].vertice[i].v.y,
+                blocks[0][BLOC].vertice[i].v.z
+            );*/
+            return (blocks[0][BLOC].vertice[i].v.y+5);
+        }
+            
+    }
+    return (blocks[0][BLOC].vertice[0].v.y);
+}
+
+float RSArea::getY(float x, float z) {
+	
+	int centerX = 180000;
+	int centerY = 180000;
+	int blocX = (int)(x + centerX)/20000;
+	int blocY = (int)(z + centerY)/20000;
+
+	return (this->getGroundLevel(blocY * 18 + blocX, x, z));
 }

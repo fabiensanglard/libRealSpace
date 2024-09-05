@@ -49,8 +49,10 @@ void SCConvPlayer::ReadNextFrame(void){
 
         
         currentFrame.creationTime = SDL_GetTicks();
+        currentFrame.text = nullptr;
+        currentFrame.facePaletteID = 0;
+        currentFrame.face = nullptr;
         
-  
     
         uint8_t type = conv.ReadByte();
     
@@ -270,6 +272,9 @@ void SCConvPlayer::CheckFrameExpired(void){
     for(int i= 0 ; i < numKeybEvents ; i++){
         SDL_Event* event = &keybEvents[i];
         switch (event->type) {
+            case SDLK_SPACE:
+                this->currentFrame.SetExpired(true);
+                break;
             default:
                 this->currentFrame.SetExpired(true);
                 break;
@@ -337,7 +342,7 @@ void SCConvPlayer::DrawText(void){
         //Don't forget to center the text
         coo.x += pixelAvailable/2;
         
-        VGA.DrawText(currentFrame.font, &coo, currentFrame.text,currentFrame.textColor,cursor-currentFrame.text,lastGoodPos-cursor,CONV_INTERLETTER_SPACE,CONV_SPACE_SIZE);
+        VGA.DrawText(currentFrame.font, &coo, currentFrame.text, static_cast<uint32_t>(currentFrame.textColor), static_cast<uint32_t>(cursor - currentFrame.text), static_cast<uint32_t>(lastGoodPos - cursor), CONV_INTERLETTER_SPACE, CONV_SPACE_SIZE);
         
         //Go to next line
         cursor = lastGoodPos+1;
@@ -556,16 +561,6 @@ afterFace:
     DrawText();
     
     DrawButtons();
-    
-    
-    if (currentFrame.mode == ConvFrame::CONV_WIDE ||
-        currentFrame.mode == ConvFrame::CONV_CLOSEUP)
-        ;
-    
-    //Draw Mouse
-    //Mouse.Draw();
-    
-    //Check Mouse state.
     
     VGA.VSync();
     

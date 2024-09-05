@@ -18,4 +18,6 @@ extern AssetManager Assets;
 extern SCRenderer Renderer;
 extern ConvAssetManager ConvAssets;
 extern RSFontManager FontManager;
+extern RSMixer Mixer;
+
 #endif

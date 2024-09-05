@@ -21,11 +21,13 @@
 // Core of the game
 #include "SCMouse.h"
 #include "SCButton.h"
+#include "SCZone.h"
 #include "IActivity.h"
 #include "GameEngine.h"
 #include "ConvAssetManager.h"
 #include "AssetManager.h"
-
+#include "SCPlane.h"
+#include "SCCockpit.h"
 #include "main.h"
 
 
@@ -36,12 +38,14 @@
 #include "SCAnimationPlayer.h"
 #include "SCRegister.h"
 #include "SCWildCatBase.h"
+#include "SCNavMap.h"
 #include "SCStrike.h"
 #include "SCObjectViewer.h"
 #include "SCDogFightMenu.h"
 #include "SCTrainingMenu.h"
 #include "SCSelectWeaponsF16.h"
 #include "SCMainMenu.h"
-
+#include "SCShot.h"
+#include "SCGameFlow.h"
 
 #endif

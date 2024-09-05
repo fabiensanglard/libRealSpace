@@ -10,10 +10,10 @@
 
 
 Quaternion::Quaternion(){
-    w = 1;
-    x = 0;
-    y = 0;
-    z = 0;
+    w = 1.0f;
+    x = 0.0f;
+    y = 0.0f;
+    z = 0.0f;
 }
 
 
@@ -39,7 +39,7 @@ void Quaternion::Multiply(Quaternion* other){
 Matrix Quaternion::ToMatrix(void){
     Matrix m;
     
-    double wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
+    float wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
     
     /* calculate coefficients */
     
@@ -50,24 +50,24 @@ Matrix Quaternion::ToMatrix(void){
     yy = this->y * y2;   yz = this->y * z2;   zz = this->z * z2;
     wx = this->w * x2;   wy = this->w * y2;   wz = this->w * z2;
     
-    m.v[0][0] = 1.0 - (yy + zz);    m.v[0][1] = xy - wz;
-    m.v[0][2] = xz + wy;            m.v[0][3] = 0.0;
+    m.v[0][0] = 1.0f - (yy + zz);    m.v[0][1] = xy - wz;
+    m.v[0][2] = xz + wy;            m.v[0][3] = 0.0f;
     
-    m.v[1][0] = xy + wz;            m.v[1][1] = 1.0 - (xx + zz);
-    m.v[1][2] = yz - wx;            m.v[1][3] = 0.0;
+    m.v[1][0] = xy + wz;            m.v[1][1] = 1.0f - (xx + zz);
+    m.v[1][2] = yz - wx;            m.v[1][3] = 0.0f;
     
     m.v[2][0] = xz - wy;            m.v[2][1] = yz + wx;
-    m.v[2][2] = 1.0 - (xx + yy);    m.v[2][3] = 0.0;
+    m.v[2][2] = 1.0f - (xx + yy);    m.v[2][3] = 0.0f;
     
-    m.v[3][0] = 0;                  m.v[3][1] = 0;
-    m.v[3][2] = 0;                  m.v[3][3] = 1;
+    m.v[3][0] = 0.0f;                  m.v[3][1] = 0.0f;
+    m.v[3][2] = 0.0f;                  m.v[3][3] = 1.0f;
     
     return m;
 }
 
 void Quaternion::FromMatrix(Matrix* m){
     
-    double  tr, s, q[4];
+    float  tr, s, q[4];
     int    i, j, k;
     
     int nxt[3] = {1, 2, 0};
@@ -76,9 +76,9 @@ void Quaternion::FromMatrix(Matrix* m){
     
     /* check the diagonal */
     if (tr > 0.0) {
-        s = sqrt (tr + 1.0);
-        this->w = s / 2.0;
-        s = 0.5 / s;
+        s = sqrtf (tr + 1.0f);
+        this->w = s / 2.0f;
+        s = 0.5f / s;
         this->x = (m->v[2][1] - m->v[1][2]) * s;
         this->y = (m->v[0][2] - m->v[2][0]) * s;
         this->z = (m->v[1][0] - m->v[0][1]) * s;
@@ -90,11 +90,11 @@ void Quaternion::FromMatrix(Matrix* m){
         j = nxt[i];
         k = nxt[j];
         
-        s = sqrt ((m->v[i][i] - (m->v[j][j] + m->v[k][k])) + 1.0);
+        s = sqrtf ((m->v[i][i] - (m->v[j][j] + m->v[k][k])) + 1.0f);
         
-        q[i] = s * 0.5;
+        q[i] = s * 0.5f;
         
-        if (s != 0.0) s = 0.5 / s;
+        if (s != 0.0f) s = 0.5f / s;
         
         q[3] = (m->v[k][j] - m->v[j][k]) * s;
         q[j] = (m->v[i][j] + m->v[j][i]) * s;
@@ -125,18 +125,18 @@ float Quaternion::DotProduct(Quaternion* other){
 
 
 Quaternion Quaternion::Slerp(Quaternion* other, float alpha ){
-    double beta;			// complementary interp parameter
-    double theta;			// angle between A and B
-    double sin_t, cos_t;		// sine, cosine of theta
-    double phi;				// theta plus spins
-    int    bflip;			// use negation of B?
+    float beta;			// complementary interp parameter
+    float theta;			// angle between A and B
+    float sin_t, cos_t;		// sine, cosine of theta
+    float phi;				// theta plus spins
+    int   bflip;			// use negation of B?
     
     int spin = 1;
     // cosine theta = dot product of A and B
     cos_t = this->DotProduct(other);//QuatDot(q1,q2);
     
     // if B is on opposite hemisphere from A, use -B instead
-    if (cos_t < 0.0) {
+    if (cos_t < 0.0f) {
         cos_t = -cos_t;
         bflip = 1;
     } else
@@ -147,13 +147,13 @@ Quaternion Quaternion::Slerp(Quaternion* other, float alpha ){
      * Can't do spins, since we don't know what direction to spin.
      */
     if (1.0 - cos_t < 1e-7) {
-        beta = 1.0 - alpha;
+        beta = 1.0f - alpha;
     } else {				/* normal case */
-        theta = acos(cos_t);
-        phi   = theta + spin * M_PI;
-        sin_t = sin(theta);
-        beta  = sin(theta - alpha*phi) / sin_t;
-        alpha = sin(alpha*phi) / sin_t;
+        theta = acosf(cos_t);
+        phi   = theta + spin * static_cast<float>(M_PI);
+        sin_t = sinf(theta);
+        beta  = sinf(theta - alpha*phi) / sin_t;
+        alpha = sinf(alpha*phi) / sin_t;
     }
     
     if (bflip)
@@ -174,14 +174,13 @@ Quaternion Quaternion::Slerp(Quaternion* other, float alpha ){
 
 }
 
-static double MIN_NORM = 1.0e-7;
+static float MIN_NORM = 1.0e-7f;
 
 void Quaternion::Normalize(void){
     
     Quaternion *v  = this;
     
-    double denom =
-    sqrt( v->w*v->w + v->x*v->x + v->y*v->y + v->z*v->z );
+    float denom = sqrtf( v->w*v->w + v->x*v->x + v->y*v->y + v->z*v->z );
     if(denom > MIN_NORM){ v->x /= denom;
         v->y /= denom;
         v->z /= denom;

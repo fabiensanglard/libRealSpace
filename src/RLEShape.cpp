@@ -15,6 +15,8 @@ RLEShape::RLEShape()
 {
     position.x = 0;
     position.y = 0;
+    this->data = nullptr;
+    this->stream = ByteStream();
 }
 
 
@@ -135,13 +137,10 @@ void RLEShape::InitWithPosition(uint8_t* idata, size_t isize,Point2D* position )
 }
 
 bool RLEShape::Expand(uint8_t* dst, size_t* byteRead){
-	
-	stream.Set(data);
-	
+
+	this->stream.Set(data);
 	RLEFragment frag ;
-    
-    
-    
+        
 	ReadFragment(&frag);
     
 	while( frag.type != FRAG_END){

@@ -115,22 +115,65 @@ void Matrix::SetTranslation(float x, float y, float z){
 }
 
 void Matrix::SetRotationX(float angle){
-    v[1][1] = cos(angle);
-    v[1][2] = sin(angle);
-    v[2][1] = -sin(angle);
-    v[2][2] = cos(angle);
+    v[1][1] = cosf(angle);
+    v[1][2] = sinf(angle);
+    v[2][1] = -sinf(angle);
+    v[2][2] = cosf(angle);
 }
 
 void Matrix::SetRotationY(float angle){
-    v[0][0] = cos(angle);
-    v[0][2] = -sin(angle);
-    v[2][0] = sin(angle);
-    v[2][2] = cos(angle);
+    v[0][0] = cosf(angle);
+    v[0][2] = -sinf(angle);
+    v[2][0] = sinf(angle);
+    v[2][2] = cosf(angle);
 }
 
 void Matrix::SetRotationZ(float angle){
-    v[0][0] = cos(angle);
-    v[0][1] = sin(angle);
-    v[1][0] = -sin(angle);
-    v[1][1] = cos(angle);
+    v[0][0] = cosf(angle);
+    v[0][1] = sinf(angle);
+    v[1][0] = -sinf(angle);
+    v[1][1] = cosf(angle);
+}
+
+void Matrix::translateM(float x, float y, float z) {
+	Matrix transMatrix = { {
+		{1,0,0,0},
+		{0,1,0,0},
+		{0,0,1,0},
+		{x,y,z,1}
+	}};
+	this->Multiply(&transMatrix);
+}
+
+void Matrix::rotateM(float radangle, float x, float y, float z) {
+    Matrix mxrot;
+
+	Matrix xrot = { { 
+		{1					,0				,0					,0},
+		{0					,cosf(radangle)	,sinf(radangle)		,0},
+		{0					,-sinf(radangle),cosf(radangle)		,0},
+		{0					,0				,0					,1}
+	} };
+    
+	Matrix yrot = { {
+		{cosf(radangle)		,0				,-sinf(radangle)	,0},
+		{0					,1				,0					,0},
+		{sinf(radangle)		,0				,cosf(radangle)		,0},
+		{0					,0				,0					,1}
+	}} ;
+	Matrix zrot = {{
+		{cosf(radangle)		,sinf(radangle)	,0					,0},
+		{-sinf(radangle)	,cosf(radangle)	,0					,0},
+		{0					,0				,1					,0},
+		{0					,0				,0					,1},
+	}};
+	if (x != 0) {
+		this->Multiply(&xrot);
+	}
+	if (y != 0) {
+        this->Multiply(&yrot);
+	}
+	if (z != 0) {
+        this->Multiply(&zrot);
+	}
 }

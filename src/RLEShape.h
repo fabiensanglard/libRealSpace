@@ -45,11 +45,12 @@ public:
     
     
     void SetColorOffset(uint8_t offset){ this->colorOffset = offset;}
+    Point2D position;
 private:
     
     ByteStream stream;
     size_t size;
-    Point2D position;
+    
     
     uint8_t* data;
     

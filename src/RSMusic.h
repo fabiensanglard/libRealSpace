@@ -7,12 +7,20 @@
 //
 
 #pragma once
+#include "SDL_mixer_ext.h"
+#include "precomp.h"
 #include <stdint.h>
-class PakArchive;
+#include <vector>
 
-class RSMusic{
-    
-public:
-    void InitFromPAK(PakArchive* archive, uint32_t index);    
+struct MemMusic {
+    uint8_t *data;
+    size_t size;
 };
 
+class RSMusic {
+    std::vector<MemMusic *> musics;
+
+public:
+    void Init();
+    MemMusic *GetMusic(uint32_t index);
+};

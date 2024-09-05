@@ -36,7 +36,7 @@ bool TreArchive::InitFromFile(const char* filepath){
     strcat(fullPath, filepath);
     
     
-    FILE* file = fopen(fullPath, "r+b");
+    FILE* file=fopen(fullPath, "r+b");
     
     if (!file){
         printf("Unable to open TRE archive: '%s'.\n",filepath);
@@ -135,11 +135,11 @@ void TreArchive::Parse(void){
 void TreArchive::List(FILE* output){
     
     fprintf(output,"Listing content of TRE archive '%s'.\n",this->path);
-    fprintf(output,"    %lu entrie(s) found.\n",entries.size());
+    fprintf(output,"    %llu entrie(s) found.\n",entries.size());
 
     for (size_t i=0 ; i < entries.size() ; i++){
         TreEntry* entry = entries[i];
-        fprintf(output,"    Entry [%3lu] offset[0x%8lX]'%s' size: %lu bytes.\n",i,entry->data-this->data,entry->name,entry->size);
+        fprintf(output,"    Entry [%3zu] offset[0x%8llX]'%s' size: %zu bytes.\n",i,entry->data-this->data,entry->name,entry->size);
     }
 }
 
@@ -206,8 +206,8 @@ bool TreArchive::Decompress(const char* dstDirectory){
         CreateDirectories(fullPath);
         
         //Write file !
-        printf("Decompressing TRE file: %lu '%s' %lu (bytes).\n",i,fullPath,entry->size);
-        FILE* file = fopen(fullPath,"w+b");
+        printf("Decompressing TRE file: %zu '%s' %zu (bytes).\n",i,fullPath,entry->size);
+        FILE* file=fopen(fullPath, "w+b");
         fwrite(entry->data, 1, entry->size, file);
         fclose(file);
         

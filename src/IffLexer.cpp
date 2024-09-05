@@ -24,8 +24,10 @@ char* GetChunkTextID(uint32_t id) {
 
 IffChunk::IffChunk() :
 	subId(0) {
-
-
+	this->data = NULL;
+	this->size = 0;
+	this->name[0] = '\0';
+	this->id = 0;
 }
 
 
@@ -41,6 +43,8 @@ IffChunk::~IffChunk() {
 #define CHUNK_HEADER_SIZE 8
 
 IffLexer::IffLexer() {
+	this->data = NULL;
+	this->size = 0;
 	this->path[0] = '\0';
 }
 
@@ -80,9 +84,12 @@ bool IffLexer::InitFromFile(const char* filepath) {
 
 
 	FILE* file = fopen(fullPath, "r+b");
+	printf("IFF Lexer: opening %s\n", fullPath);
+
+	
 
 	if (!file) {
-		printf("Unable to open IFF archive: '%s'.\n", filepath);
+		printf("IFF Lexer: Unable to open IFF archive: '%s'.\n", fullPath);
 		return false;
 	}
 
@@ -92,9 +99,9 @@ bool IffLexer::InitFromFile(const char* filepath) {
 
 	uint8_t* fileData = new uint8_t[fileSize];
 	size_t t = fread(fileData, 1, fileSize, file);
-	printf("file %s read %d bytes should be %d\n", fullPath, t, fileSize);
+	printf("file %s read %llu bytes should be %llu\n", fullPath, t, fileSize);
 	strcpy(this->path, filepath);
-
+	fclose(file);
 	return InitFromRAM(fileData, fileSize);
 
 }
@@ -250,7 +257,43 @@ void Tab(int tab) {
 		putchar(' ');
 }
 
+void dumpChunk(IffChunk* chunk, const char* name) {
+	printf("PARSING %s\n", name);
+	if (chunk == NULL) {
+		printf("NO CHUNK\n");
+		return;
+	}
+	if (chunk->data == NULL) {
+		printf("%s : NO DATA\n", name);
+		return;
+	}
+	ByteStream stream(chunk->data);
+	size_t fsize = chunk->size;
+	uint8_t byte;
+	int cl = 0;
+	for (int read = 0; read < fsize; read++) {
+		byte = stream.ReadByte();
+		if (byte >= 40 && byte <= 90) {
+			printf("[%c]", char(byte));
+		}
+		else if (byte >= 97 && byte <= 122) {
+			printf("[%c]", char(byte));
+		}
+		else {
+			printf("[0x%X]", byte);
+		}
+		if (cl > 2) {
+			printf("\n");
+			cl = 0;
+		}
+		else {
+			printf("\t");
+			cl++;
+		}
 
+	}
+	printf("\n");
+}
 
 void ListChunkContent(uint32_t level, IffChunk* chunk) {
 
@@ -258,8 +301,9 @@ void ListChunkContent(uint32_t level, IffChunk* chunk) {
 	printf("%s\n", GetChunkTextID(chunk->id));
 
 	Tab(level);
-	printf("%lu\n", chunk->size);
+	printf("%llu\n", chunk->size);
 
+	//dumpChunk(chunk, GetChunkTextID(chunk->id));
 	if (chunk->subId != 0) {
 		Tab(level);
 		printf("%s\n", GetChunkTextID(chunk->subId));
@@ -272,6 +316,7 @@ void ListChunkContent(uint32_t level, IffChunk* chunk) {
 	}
 
 }
+
 
 void IffLexer::List(FILE* output) {
 
