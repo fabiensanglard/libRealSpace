@@ -30,7 +30,7 @@ public:
     ~SCStrike();
 
     void Init();
-    void SetMission(char *missionName);
+    void SetMission(char const *missionName);
     void CheckKeyboard(void);
     void RunFrame(void);
     void RenderMenu();

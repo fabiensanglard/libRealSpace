@@ -7,7 +7,7 @@
 //
 
 #include "RSEntity.h"
-
+#include <cfloat>
 
 void parsRNWY(IffChunk* chunk, const char* name) {
 	

@@ -202,7 +202,7 @@ void RSMission::parseMSGS(IffChunk* chunk) {
 		int msgc = 0;
 		ByteStream stream(chunk->data);
 		MSGS* scmsg = NULL;
-		byte r;
+		uint8_t r;
 		while (read < fsize) {
 			r = stream.ReadByte();
 			read++;

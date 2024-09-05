@@ -38,10 +38,10 @@ extern "C" {
 #endif
 
     #include <SDL.h>
-    #include <GL/GL.h>
-    #include <GL/GLU.h>
+    #include <GL/gl.h>
+    #include <GL/glu.h>
 
-    #include "Math.h"
+    #include "Maths.h"
     #include "Matrix.h"
     #include "Quaternion.h"
 
@@ -77,7 +77,7 @@ extern "C" {
     #include "RSArea.h"
     #include "RLEShape.h"
     #include "RSOption.h"
-    #include "RSGameFlow.h"
+    #include "RSGameflow.h"
     #include "RSCockpit.h"
     #include "RSMission.h"
     #include "RSNavMap.h"

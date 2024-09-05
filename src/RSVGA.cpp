@@ -120,7 +120,7 @@ void RSVGA::VSync(void) {
 }
 
 void RSVGA::FillLineColor(size_t lineIndex, uint8_t color) { memset(frameBuffer + lineIndex * 320, color, 320); }
-void RSVGA::plot_pixel(int x, int y, byte color) {
+void RSVGA::plot_pixel(int x, int y, uint8_t color) {
     /*  y*320 = y*256 + y*64 = y*2^8 + y*2^6   */
     frameBuffer[(y << 8) + (y << 6) + x] = color;
 }
@@ -131,7 +131,7 @@ void RSVGA::plot_pixel(int x, int y, byte color) {
  *    no multiplication or division.                                      *
  **************************************************************************/
 
-void RSVGA::line(int x1, int y1, int x2, int y2, byte color) {
+void RSVGA::line(int x1, int y1, int x2, int y2, uint8_t color) {
     if (x1 > 320 || x2 > 320 || y1 > 200 || y2 > 200)
         return;
     int i, dx, dy, sdx, sdy, dxabs, dyabs, x, y, px, py;
@@ -179,7 +179,7 @@ void RSVGA::line(int x1, int y1, int x2, int y2, byte color) {
  *    Draws a rectangle by calling the line function four times.          *
  **************************************************************************/
 
-void RSVGA::rect_slow(int left, int top, int right, int bottom, byte color) {
+void RSVGA::rect_slow(int left, int top, int right, int bottom, uint8_t color) {
     line(left, top, right, top, color);
     line(left, top, left, bottom, color);
     line(right, top, right, bottom, color);

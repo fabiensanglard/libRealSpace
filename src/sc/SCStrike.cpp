@@ -201,7 +201,7 @@ void SCStrike::Init(void) {
     this->pilote_lookat = {0, 0};
 }
 
-void SCStrike::SetMission(char *missionName) {
+void SCStrike::SetMission(char const *missionName) {
     char missFileName[33];
     sprintf(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
 

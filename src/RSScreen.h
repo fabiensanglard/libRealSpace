@@ -17,8 +17,10 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+#ifdef WIN32
 #include <Windows.h>
-#include <GL/GL.h>
+#endif
+#include <GL/gl.h>
 #include <SDL.h>
 class RSScreen{
     

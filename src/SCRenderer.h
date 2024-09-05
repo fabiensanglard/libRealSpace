@@ -10,9 +10,10 @@
 #include "Camera.h"
 #include "RSMission.h"
 #include "Texture.h"
+#ifdef WIN32
 #include <GL/GL.h>
 #include <Windows.h>
-
+#endif
 #define MAP_SIZE 200000
 class RSArea;
 class Texture;

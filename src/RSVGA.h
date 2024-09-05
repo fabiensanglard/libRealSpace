@@ -7,8 +7,10 @@
 //
 
 #pragma once
+#ifdef win32
 #include <Windows.h>
-#include <GL/GL.h>
+#endif
+#include <GL/gl.h>
 #include "RLEShape.h"
 #include "RSFont.h"
 #include "Texture.h"
@@ -32,8 +34,8 @@ public:
     VGAPalette* GetPalette(void);
     
     bool DrawShape(RLEShape* shape);
-    void line(int x1, int y1, int x2, int y2, byte color);
-    void rect_slow(int left, int top, int right, int bottom, byte color);
+    void line(int x1, int y1, int x2, int y2, uint8_t color);
+    void rect_slow(int left, int top, int right, int bottom, uint8_t color);
     void DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, uint32_t size,size_t interLetterSpace, size_t spaceSize);
     void SwithBuffers();
     void VSync(void);
@@ -43,7 +45,7 @@ public:
     inline uint8_t* GetFrameBuffer(void){ return frameBuffer;}
     
     void FillLineColor(size_t lineIndex, uint8_t color);
-    void plot_pixel(int x, int y, byte color);
+    void plot_pixel(int x, int y, uint8_t color);
 private:
     
     VGAPalette palette;

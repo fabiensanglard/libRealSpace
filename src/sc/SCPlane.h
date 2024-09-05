@@ -2,6 +2,12 @@
 #define __libRealSpace__SCPlane__
 
 #define NAME_LENGTH 8
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
 static float ro[75] = {
     .0023081f,                                                  /* 1000 feet	*/
     .0022409f,  .0021752f,  .0021110f,  .0020482f,              /* 5000 feet	*/
