@@ -1,8 +1,8 @@
 //
-//  Button.h
+//  SCZone.h
 //  libRealSpace
 //
-//  Created by Fabien Sanglard on 1/26/2014.
+//  Created by Rémi LEONARD on 22/08/2024.
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 

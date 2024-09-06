@@ -1,3 +1,10 @@
+//
+//  SCNavMap.cpp
+//  libRealSpace
+//
+//  Created by Rémi LEONARD on 31/08/2024.
+//  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
+//
 #include "precomp.h"
 
 SCNavMap::SCNavMap(){
@@ -6,6 +13,15 @@ SCNavMap::SCNavMap(){
 SCNavMap::~SCNavMap(){
 
 }
+/**
+ * Checks for keyboard events and updates the game state accordingly.
+ *
+ * This function peeks at the SDL event queue to check for keyboard events.
+ * If a key is pressed, it updates the game state based on the key pressed.
+ * The supported keys are escape, space, and return.
+ *
+ * @return None
+ */
 void SCNavMap::CheckKeyboard(void) {
     //Keyboard
     SDL_Event keybEvents[1];
@@ -23,6 +39,14 @@ void SCNavMap::CheckKeyboard(void) {
         }
     }
 }
+/**
+ * Initializes the SCNavMap object.
+ *
+ * This function reads in the PALETTE.IFF file and sets the object's color palette.
+ * It also reads in the NAMAP.IFF file and sets the object's navMap property.
+ *
+ * @return None
+ */
 void SCNavMap::Init(){
     IffLexer lexer;
     lexer.InitFromFile("PALETTE.IFF");
@@ -34,9 +58,27 @@ void SCNavMap::Init(){
     this->navMap = new RSNavMap();
     this->navMap->InitFromRam(nav_map->data, nav_map->size);
 }
+/**
+ * Sets the name of the current mission.
+ *
+ * This function takes a C-style string as its argument and sets the object's
+ * name to that string.
+ *
+ * @param name the name of the current mission
+ */
 void SCNavMap::SetName(char *name) {
     this->name = new std::string(name);
 }
+/**
+ * SCNavMap::RunFrame
+ *
+ * This function runs the frame of the navigation map.
+ *
+ * It clears the screen, sets the palette, draws the background and the shape
+ * corresponding to the current mission, and draws the mouse.
+ *
+ * @return None
+ */
 void SCNavMap::RunFrame(void) {
     this->CheckKeyboard();
     VGA.Activate();

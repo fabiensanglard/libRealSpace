@@ -7,6 +7,15 @@ RSCockpit::~RSCockpit(){
 
 }
 
+/**
+ * \brief Initialize the cockpit object from a block of memory
+ *
+ * Given a block of memory, parse it into an RSCockpit object. The
+ * format of the data is assumed to be an IFF CKPT chunk.
+ *
+ * \param data Pointer to the memory block to parse
+ * \param size The size of the block of memory to parse
+ */
 void RSCockpit::InitFromRam(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
 
@@ -16,6 +25,14 @@ void RSCockpit::InitFromRam(uint8_t* data, size_t size) {
 	lexer.InitFromRAM(data, size, handlers);
 }
 
+/**
+ * \brief Parse an IFF CKPT chunk
+ *
+ * Parse an IFF CKPT chunk, which contains all the cockpit data
+ *
+ * \param data Pointer to the memory block to parse
+ * \param size The size of the block of memory to parse
+ */
 void RSCockpit::parseCKPT(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
 
@@ -85,6 +102,16 @@ void RSCockpit::parseREAL(uint8_t* data, size_t size) {
 void RSCockpit::parseREAL_INFO(uint8_t* data, size_t size) {
     REAL.INFO = std::vector<uint8_t>(data, data + size);
 }
+/**
+ * Parse a REAL.OBJS block.
+ *
+ * This function parses a REAL.OBJS block. This block contains the name of a
+ * model file that is to be loaded. The model file is loaded from the
+ * OBJECTS.TRE archive and is stored in the REAL.OBJS structure.
+ *
+ * @param data The data to parse.
+ * @param size The size of the data to parse.
+ */
 void RSCockpit::parseREAL_OBJS(uint8_t* data, size_t size) {
     ByteStream* reader = new ByteStream(data);
     std::string name = reader->ReadString(size+1);
@@ -136,6 +163,14 @@ void RSCockpit::parseMONI_DAMG(uint8_t* data, size_t size) {
 	memcpy(data2, data, size);
     this->MONI.DAMG.Init(data2, size);
 }
+/**
+ * @brief Parse an IFF MONI_MFDS chunk
+ *
+ * Parse an IFF MONI_MFDS chunk, which contains the MFDs of the cockpit
+ *
+ * @param data Pointer to the memory block to parse
+ * @param size The size of the block of memory to parse
+ */
 void RSCockpit::parseMONI_MFDS(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
     std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
@@ -239,6 +274,14 @@ void RSCockpit::parseMONI_MFDS_DAMG_SHAP(uint8_t* data, size_t size) {
 	memcpy(shape_data, data+4, size);
     this->MONI.MFDS.DAMG.SHAP.Init(shape_data, size);
 }
+/**
+ * @brief Parse an IFF MONI_INST chunk
+ *
+ * Parse an IFF MONI_INST chunk, which contains the instruments of the cockpit
+ *
+ * @param data Pointer to the memory block to parse
+ * @param size The size of the block of memory to parse
+ */
 void RSCockpit::parseMONI_INST(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
     std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;

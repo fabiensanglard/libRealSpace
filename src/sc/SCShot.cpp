@@ -1,8 +1,8 @@
 //
-//  File.cpp
+//  SCShot.cpp
 //  libRealSpace
 //
-//  Created by fabien sanglard on 1/28/2014.
+//  Created by Rémi LEONARD on 23/08/2024.
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
@@ -60,6 +60,13 @@ void SCShot::Init() {
 
 }
 
+/**
+ * Sets the shot ID of the SCShot object and updates the layers and palette accordingly.
+ *
+ * @param shotid The shot ID to set.
+ *
+ * @throws None
+ */
 void SCShot::SetShotId(uint8_t shotid) {
     for (auto s: this->optionParser.estb[shotid]->images) {
         shotBackground *bg = new shotBackground();

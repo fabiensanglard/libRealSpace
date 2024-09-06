@@ -63,6 +63,20 @@ struct RealObjs {
     std::vector<uint8_t> INFO;
     RSEntity OBJS;
 };
+
+/**
+ * @struct Moni
+ * @brief Struct that represents the Moni hierarchy
+ *
+ * This struct represents the Moni hierarchy from the RealSpace game.
+ * It contains the following fields:
+ * - INFO: A vector of bytes containing the INFO data
+ * - SPOT: A vector of bytes containing the SPOT data
+ * - SHAP: An RLEShape object representing the shape of the cockpit
+ * - DAMG: An RLEShape object representing the damaged shape of the cockpit
+ * - MFDS: A struct containing the MFDs of the cockpit
+ * - INST: A struct containing the instruments of the cockpit
+ */
 struct Moni {
     std::vector<uint8_t> INFO;
     std::vector<uint8_t> SPOT;
@@ -84,6 +98,18 @@ struct Moni {
     } INST;
 };
 
+/**
+ * @class RSCockpit
+ * @brief Class that represents a RealSpace cockpit
+ *
+ * This class represents a RealSpace cockpit and is used to parse the data
+ * from the RealSpace game. The data is parsed from a blob of memory and the
+ * resulting data is stored in this class.
+ *
+ * @warning This class is still in development and is not fully tested.
+ *
+ * @see RSCockpit.cpp
+ */
 class RSCockpit {
 
 private:

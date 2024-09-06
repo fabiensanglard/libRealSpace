@@ -19,6 +19,41 @@
 #define EFECT_OPT_SHOT 8
 #define EFECT_OPT_FLYM 12
 
+/**
+ * \brief Test if a 2D point is inside a quad.
+ *
+ * This is the "Ray Casting Algorithm" also known as the "Even-Odd Rule Algorithm"
+ * (https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm).
+ *
+ * \param p The point to test.
+ * \param quad The quad to test against.
+ * \return true if the point is inside the quad, false otherwise.
+ */
+bool isPointInQuad(const Point2D &p, const std::vector<Point2D *> *quad) {
+    int intersections = 0;
+    for (size_t i = 0; i < quad->size(); ++i) {
+        Point2D a = *quad->at(i);
+        Point2D b = *quad->at((i + 1) % quad->size());
+
+        if ((a.y > p.y) != (b.y > p.y)) {
+            double atX = (double)(b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x;
+            if (p.x < atX) {
+                intersections++;
+            }
+        }
+    }
+    return (intersections % 2) != 0;
+}
+
+/**
+ * SCGameFlow constructor.
+ *
+ * Initializes the SCGameFlow object with default values.
+ *
+ * @return None
+ *
+ * @throws None
+ */
 SCGameFlow::SCGameFlow() {
     this->current_miss = 0;
     this->current_scen = 0;
@@ -42,7 +77,45 @@ void SCGameFlow::clicked(uint8_t id) {
         this->efect = this->sprites[id]->efect;
         this->currentSpriteId = id;
         this->currentOptCode = 0;
+        this->runEffect();
     }
+}
+SCZone *SCGameFlow::CheckZones(void) {
+    for (size_t i = 0; i < zones.size(); i++) {
+
+        SCZone *zone = zones[i];
+        if (zone->quad != nullptr) {
+            if (isPointInQuad(Mouse.GetPosition(), zone->quad)) {
+                Mouse.SetMode(SCMouse::VISOR);
+
+                // If the mouse button has just been released: trigger action.
+                if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                    zone->OnAction();
+                Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
+                VGA.DrawText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                              static_cast<uint32_t>(zone->label->length()), 3, 5);
+                return zone;
+            }
+        }
+        if (Mouse.GetPosition().x > zone->position.x && Mouse.GetPosition().x < zone->position.x + zone->dimension.x &&
+            Mouse.GetPosition().y > zone->position.y && Mouse.GetPosition().y < zone->position.y + zone->dimension.y) {
+            // HIT !
+            Mouse.SetMode(SCMouse::VISOR);
+
+            // If the mouse button has just been released: trigger action.
+            if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                zone->OnAction();
+            Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
+            VGA.DrawText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                          static_cast<uint32_t>(zone->label->length()), 3, 5);
+
+            return zone;
+        }
+    }
+
+    Mouse.SetMode(SCMouse::CURSOR);
+    return NULL;
+    return nullptr;
 }
 /**
  * Runs the current effect based on the efect vector and currentOptCode.
@@ -53,32 +126,14 @@ void SCGameFlow::clicked(uint8_t id) {
  * @return None
  */
 void SCGameFlow::runEffect() {
-    uint8_t i = this->currentOptCode;
-    if (this->currentSpriteId > 0 && this->sprites[this->currentSpriteId]->cliked) {
-        int fpsupdate = 0;
-        fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
-        if (fpsupdate) {
-            this->fps = SDL_GetTicks() / 10;
-        }
-        if (this->sprites[this->currentSpriteId]->frameCounter <
-            this->sprites[this->currentSpriteId]->img->sequence.size() - 1) {
-            if (fpsupdate) {
-                this->sprites[this->currentSpriteId]->frameCounter++;
-            }
-            return;
-        } else {
-            this->currentSpriteId = 0;
-        }
+    if (this->currentSpriteId > 0 && this->sprites.size() > 0 && this->sprites[this->currentSpriteId]->cliked) {
+        // play the animation first
+        return;
     }
     if (this->efect == nullptr) {
         return;
     }
-    if (i >= this->efect->size()) {
-        this->efect = nullptr;
-        this->currentOptCode = 0;
-        return;
-    }
-    if (i < this->efect->size()) {
+    for (int i = 0; i < this->efect->size(); i++) {
         this->currentOptCode++;
         switch (this->efect->at(i)->opcode) {
         case EFECT_OPT_CONV: {
@@ -86,7 +141,8 @@ void SCGameFlow::runEffect() {
             SCConvPlayer *conv = new SCConvPlayer();
             conv->Init();
             conv->SetID(this->efect->at(i)->value);
-            Game.AddActivity(conv);
+            this->convs.push(conv);
+            
         } break;
         case EFECT_OPT_SCEN:
             for (int j = 0; j < this->gameFlowParser.game.game[this->current_miss]->scen.size(); j++) {
@@ -95,42 +151,25 @@ void SCGameFlow::runEffect() {
                     this->current_scen = j;
                     this->currentSpriteId = 0;
                     printf("PLAYING SCEN %d\n", this->current_scen);
-                    this->createMiss();
-                    return;
+                    this->createScen();
                 }
             }
             break;
         case EFECT_OPT_MISS: {
-            if (this->missionToFly != nullptr) {
-                SCStrike *fly = new SCStrike();
-                fly->Init();
-                fly->SetMission(this->missionToFly);
-                this->missionToFly = nullptr;
-                Game.AddActivity(fly);
-                return;
-            }
-            this->current_miss = this->efect->at(i)->value;
-            this->current_scen = 0;
-            this->currentSpriteId = 0;
-            this->efect = nullptr;
-            printf("PLAYING MISS %d\n", this->current_miss);
-            this->createMiss();
-            return;
+            this->next_miss = this->efect->at(i)->value;
+            printf("NEXT MISS %d\n", this->next_miss);
         } break;
         case EFECT_OPT_MIS2:
-            printf("PLAYING MIS2 %d\n", this->current_miss);
-            printf("MIS2 NOT IMPLEMENTED\n");
+            //this->next_miss = this->efect->at(i)->value;
+            printf("PLAYING MIS2 %d\n", this->efect->at(i)->value);
             break;
         case EFECT_OPT_SHOT: {
             printf("PLAYING SHOT %d\n", this->efect->at(i)->value);
-            printf("SHOT NOT IMPLEMENTED\n");
             SCShot *sht = new SCShot();
             sht->Init();
             sht->SetShotId(this->efect->at(i)->value);
-            Game.AddActivity(sht);
-            return;
+            this->cutsenes.push(sht);
         }
-
         break;
         case EFECT_OPT_FLYM: {
             uint8_t flymID = this->efect->at(i)->value;
@@ -139,17 +178,19 @@ void SCGameFlow::runEffect() {
             this->missionToFly = (char *)malloc(13);
             sprintf(this->missionToFly, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             strtoupper(this->missionToFly, this->missionToFly);
-            printf("FLYM NOT IMPLEMENTED\n");
+            SCStrike *fly = new SCStrike();
+            fly->Init();
+            fly->SetMission(this->missionToFly);
+            this->missionToFly = nullptr;
+            fly_mission.push(fly);
         } break;
         default:
             printf("Unkown opcode :%d, %d\n", this->efect->at(i)->opcode, this->efect->at(i)->value);
             break;
         };
 
-    } else {
-        this->efect = nullptr;
-        this->currentOptCode = 0;
-    }
+    } 
+    this->efect = nullptr;
 }
 /**
  * Checks for keyboard events and updates the game state accordingly.
@@ -224,7 +265,6 @@ void SCGameFlow::Init() {
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     this->efect = nullptr;
     this->createMiss();
-    this->strike_menu.show_scene_window = false;
 }
 
 /**
@@ -239,11 +279,33 @@ void SCGameFlow::Init() {
  */
 void SCGameFlow::createMiss() {
     this->missionToFly = nullptr;
+    this->next_miss = 0;
+    this->sprites.clear();
+    this->zones.clear();
+    this->layers.clear();
+    this->convs = std::queue<SCConvPlayer *>();
+    this->cutsenes = std::queue<SCShot *>();
+    this->fly_mission = std::queue<SCStrike *>();
     printf("current miss : %d, current_scen %d\n", this->current_miss, this->current_scen);
-    if (this->efect == nullptr && this->gameFlowParser.game.game[this->current_miss]->efct != nullptr) {
+    if (this->gameFlowParser.game.game[this->current_miss]->efct != nullptr) {
         this->efect = this->gameFlowParser.game.game[this->current_miss]->efct;
     }
+
     printf("efect size %zd\n", this->efect->size());
+    this->createScen();
+    this->runEffect();
+}
+/**
+ * Creates a new scene in the current miss.
+ *
+ * This function initializes the layers, sprites, and zones for the current scene.
+ * It also sets up the raw palette and foreground palette.
+ *
+ * @return None
+ *
+ * @throws None
+ */
+void SCGameFlow::createScen() {
     if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
         uint8_t optionScenID = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
         // note pour plus tard, une scene peu être composé de plusieur background
@@ -375,7 +437,33 @@ RSImageSet *SCGameFlow::getShape(uint8_t shpid) {
  * @throws None
  */
 void SCGameFlow::RunFrame(void) {
-    this->runEffect();
+    
+    if (this->cutsenes.size() > 0) {
+        SCShot *c = this->cutsenes.front();
+        this->cutsenes.pop();
+        Game.AddActivity(c);
+        return;
+    }
+    if (this->convs.size() > 0) {
+        SCConvPlayer *c = this->convs.front();
+        this->convs.pop();
+        Game.AddActivity(c);
+        return;
+    }
+    if (this->fly_mission.size() > 0) {
+        SCStrike *c = this->fly_mission.front();
+        this->fly_mission.pop();
+        Game.AddActivity(c);
+        return;
+    }
+    if (this->next_miss>0) {
+        this->current_miss = this->next_miss;
+        this->next_miss = 0;
+        this->current_scen = 0;
+        this->createMiss();
+        return;
+    }
+    
     int fpsupdate = 0;
     fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
     if (fpsupdate) {
@@ -398,7 +486,18 @@ void SCGameFlow::RunFrame(void) {
     paletteReader.Set((this->forPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
-
+    if (this->currentSpriteId > 0 && this->sprites.size() > 0 && this->sprites[this->currentSpriteId]->cliked) {
+        if (this->sprites[this->currentSpriteId]->frameCounter <
+            this->sprites[this->currentSpriteId]->img->sequence.size() - 1) {
+            if (fpsupdate) {
+                this->sprites[this->currentSpriteId]->frameCounter++;
+            }
+        } else {
+            this->sprites[this->currentSpriteId]->cliked = false;
+            this->currentSpriteId = 0;
+            this->runEffect();
+        }
+    }
     for (const auto &sprit : this->sprites) {
         VGA.DrawShape(sprit.second->img->GetShape(sprit.second->img->sequence[0]));
         if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames != nullptr) {
@@ -435,6 +534,35 @@ void SCGameFlow::RunFrame(void) {
     VGA.VSync();
     VGA.SwithBuffers();
 }
+/**
+ * Draw the menu for the game flow.
+ *
+ * The menu is drawn using ImGui.
+ *
+ * The menu contains the following elements:
+ * - A menu with the following items:
+ *   - "Load Miss" which will open a window to select a mission to load.
+ *   - "Info" which will open a window with informations about the current miss.
+ *   - "Quit" which will stop the current activity.
+ * - A text with the current miss number and the current scene number.
+ *
+ * If the "Load Miss" menu is selected, a window will open with a combo box
+ * containing the list of all the missions in the game. When a mission is selected,
+ * the current miss number will be updated and the createMiss function will be
+ * called.
+ *
+ * If the "Info" menu is selected, a window will open with informations about the
+ * current miss, including the number of scenes, the number of layers, and the
+ * number of actors. If the miss has an efect, it will be displayed in a tree view.
+ * For each actor, the frame number, the shape id, and the unknown value will be
+ * displayed. If the actor has an efect, it will be displayed in a tree view.
+ * If the actor has a quad selection area or a rect selection area, it will be
+ * displayed.
+ *
+ * If the "Quit" menu is selected, the current activity will be stopped.
+ *
+ * The menu is rendered using ImGui::Render and ImGui_ImplOpenGL2_RenderDrawData.
+ */
 void SCGameFlow::RenderMenu() {
     ImGui::SetMouseCursor(ImGuiMouseCursor_None);
     ImGui_ImplOpenGL2_NewFrame();

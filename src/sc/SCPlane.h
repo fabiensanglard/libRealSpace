@@ -1,3 +1,11 @@
+//
+//  SCPlane.h
+//  libRealSpace
+//
+//  Created by Rémi LEONARD on 31/08/2024.
+//  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
+//
+#pragma once
 #ifndef __libRealSpace__SCPlane__
 #define __libRealSpace__SCPlane__
 

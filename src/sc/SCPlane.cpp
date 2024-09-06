@@ -1,7 +1,21 @@
+//
+//  SCPlane.cpp
+//  libRealSpace
+//
+//  Created by Rémi LEONARD on 31/08/2024.
+//  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
+//
 #include "precomp.h"
 
 float tenthOfDegreeToRad(float angle) { return (angle / 10) * (float(M_PI) / 180.0f); }
 
+/**
+ * \brief Computes sine and cosine of angle a, given in 10th of degree.
+ *
+ * \param a angle in 10th of degree.
+ * \param b pointer to float where the sine of a will be stored (if not null).
+ * \param c pointer to float where the cosine of a will be stored (if not null).
+ */
 void gl_sincos(float a, float *b, float *c) {
     if (b != NULL) {
         *b = sinf(tenthOfDegreeToRad(a));
@@ -10,6 +24,16 @@ void gl_sincos(float a, float *b, float *c) {
         *c = cosf(tenthOfDegreeToRad(a));
     }
 }
+/**
+ * Returns a random number between 0 and maxr (inclusive) using a
+ * simple linear congruential generator. The seed is initialized to
+ * 1 at startup and is advanced every time the function is called.
+ *
+ * @param maxr The maximum value that can be returned.
+ *
+ * @returns A random number between 0 and maxr (inclusive). If maxr
+ *          is odd, the returned value can be negative.
+ */
 int mrandom(int maxr) {
     static unsigned long randx = 1;
     register int n, retval;
@@ -29,6 +53,13 @@ int mrandom(int maxr) {
         return (-retval);
 }
 
+/**
+ * SCPlane constructor. Initializes all members to 0.
+ *
+ * SCPlane is a structure that represents a plane in the game.
+ *
+ * @see SCPlane
+ */
 SCPlane::SCPlane() {
     this->planeid = 0;
     this->version = 0;
@@ -56,6 +87,29 @@ SCPlane::SCPlane() {
     this->elevator = 0.0f;
     this->object = nullptr;
 }
+/**
+ * Constructor for SCPlane.
+ *
+ * @param LmaxDEF the maximum lift coefficient.
+ * @param LminDEF the minimum lift coefficient.
+ * @param Fmax the maximum flap deflection.
+ * @param Smax the maximum spoiler deflection.
+ * @param ELEVF_CSTE the elevator rate in degrees per second.
+ * @param ROLLFF_CSTE the roll rate in degrees per second.
+ * @param s the wing span.
+ * @param W the plane weight.
+ * @param fuel_weight the fuel weight.
+ * @param Mthrust the maximum thrust.
+ * @param b the wing aspect ratio.
+ * @param ie_pi_AR the inverse of the aspect ratio times pi.
+ * @param MIN_LIFT_SPEED the minimum lift speed.
+ * @param pilot_y the pilot y position.
+ * @param pilot_z the pilot z position.
+ * @param area the terrain area.
+ * @param x the initial x position.
+ * @param y the initial y position.
+ * @param z the initial z position.
+ */
 SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELEVF_CSTE, float ROLLFF_CSTE, float s,
                  float W, float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED, float pilot_y,
                  float pilot_z, RSArea *area, float x, float y, float z) {
@@ -117,6 +171,9 @@ SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELE
     Init();
 }
 SCPlane::~SCPlane() {}
+/**
+ * Initializes the SCPlane object by setting the default values for all its properties.
+ */
 void SCPlane::Init() {
 
     this->twist = 0;
@@ -178,6 +235,26 @@ void SCPlane::Init() {
     this->ptw.Clear();
     this->incremental.Clear();
 }
+/**
+ * Simulate the plane's motion.
+ *
+ * This is the main loop of the simulator. It is responsible for updating the
+ * plane's state based on user input and physics.
+ *
+ * The simulation is divided into two parts: the first part updates the plane's
+ * orientation and position based on the user's control inputs, and the second
+ * part updates the plane's velocity and acceleration based on the physics of
+ * flight.
+ *
+ * The simulation is done in discrete time steps, with the time step being
+ * determined by the TPS (ticks per second) value. The simulation is done in
+ * two parts so that the user can see the plane's response to control inputs
+ * immediately, rather than having to wait for the next time step.
+ *
+ * The simulation is also responsible for updating the plane's state variables
+ * such as its position, velocity, and acceleration. These variables are used
+ * by the rendering code to draw the plane on the screen.
+ */
 void SCPlane::Simulate() {
     int itemp;
     float temp;
@@ -191,6 +268,8 @@ void SCPlane::Simulate() {
         if (tps != 0) {
             this->last_time = current_time;
             this->last_tick = this->tick_counter;
+        } else {
+            tps = 60;
         }
     }
 
@@ -624,9 +703,23 @@ void SCPlane::Simulate() {
     this->tick_counter++;
 }
 
+/**
+ * IN_BOX: Check if the plane is inside a box.
+ * 
+ * @param llx Lower left X of the box.
+ * @param urx Upper right X of the box.
+ * @param llz Lower left Z of the box.
+ * @param urz Upper right Z of the box.
+ * @return 1 if the plane is inside, 0 otherwise.
+ */
 int SCPlane::IN_BOX(int llx, int urx, int llz, int urz) {
     return (llx <= this->x && this->x <= urx && llz <= this->z && this->z <= urz);
 }
+/**
+ * Check if the plane is currently on a runway.
+ *
+ * @return 1 if the plane is on a runway, 0 otherwise.
+ */
 int SCPlane::isOnRunWay() {
 
     for (int i = 0; i < area->objectOverlay.size(); i++) {
@@ -640,6 +733,20 @@ int SCPlane::isOnRunWay() {
     return 0;
 }
 float SCPlane::fuel_consump(float f, float b) { return 0.3f * f / b; }
+/**
+ * report_card: Evaluate the landing quality of the plane.
+ *
+ * @param descent_rate Vertical speed of the plane at landing.
+ * @param roll_angle Angle of roll at landing.
+ * @param velocity_x Horizontal speed of the plane at landing.
+ * @param velocity_z Vertical speed of the plane at landing.
+ * @param wheels_down Is the landing gear down?
+ *
+ * @return A score indicating the quality of the landing:
+ *         1: Good
+ *         0: Fair
+ *        -1: Bad
+ */
 int SCPlane::report_card(int descent_rate, float roll_angle, int velocity_x, int velocity_z, int wheels_down) {
     int on_runway = isOnRunWay();
     int rating = 1;
@@ -696,6 +803,11 @@ void SCPlane::getPosition(Point3D *position) {
     position->y = this->y * COORD_SCALE;
     position->z = this->z * COORD_SCALE;
 }
+/**
+ * Renders the plane object in 3D space. The plane is positioned using the
+ * plane's x, y and z coordinates, and rotated using the plane's azimuth and
+ * elevation angles. The plane is drawn using the highest level of detail.
+ */
 void SCPlane::Render() {
     if (this->object != nullptr) {
         glPushMatrix();
