@@ -1,8 +1,8 @@
 //
-//  File.cpp
+//  SCGameFlow.cpp
 //  libRealSpace
 //
-//  Created by fabien sanglard on 1/28/2014.
+//  Created by Rémi LEONARD on 16/08/2024.
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
@@ -19,7 +19,6 @@
 #define EFECT_OPT_SHOT 8
 #define EFECT_OPT_FLYM 12
 
-
 SCGameFlow::SCGameFlow() {
     this->current_miss = 0;
     this->current_scen = 0;
@@ -28,8 +27,7 @@ SCGameFlow::SCGameFlow() {
     this->fps = SDL_GetTicks() / 10;
 }
 
-SCGameFlow::~SCGameFlow() {
-}
+SCGameFlow::~SCGameFlow() {}
 
 /**
  * Handles a click event on a sprite.
@@ -45,7 +43,6 @@ void SCGameFlow::clicked(uint8_t id) {
         this->currentSpriteId = id;
         this->currentOptCode = 0;
     }
-    
 }
 /**
  * Runs the current effect based on the efect vector and currentOptCode.
@@ -57,13 +54,14 @@ void SCGameFlow::clicked(uint8_t id) {
  */
 void SCGameFlow::runEffect() {
     uint8_t i = this->currentOptCode;
-    if (this->currentSpriteId>0 && this->sprites[this->currentSpriteId]->cliked) {
+    if (this->currentSpriteId > 0 && this->sprites[this->currentSpriteId]->cliked) {
         int fpsupdate = 0;
-        fpsupdate = (SDL_GetTicks()/10) - this->fps > 12;
+        fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
         if (fpsupdate) {
-            this->fps = SDL_GetTicks()/10;
+            this->fps = SDL_GetTicks() / 10;
         }
-        if (this->sprites[this->currentSpriteId]->frameCounter < this->sprites[this->currentSpriteId]->img->sequence.size()-1) {
+        if (this->sprites[this->currentSpriteId]->frameCounter <
+            this->sprites[this->currentSpriteId]->img->sequence.size() - 1) {
             if (fpsupdate) {
                 this->sprites[this->currentSpriteId]->frameCounter++;
             }
@@ -81,20 +79,19 @@ void SCGameFlow::runEffect() {
         return;
     }
     if (i < this->efect->size()) {
-        this->currentOptCode ++;
+        this->currentOptCode++;
         switch (this->efect->at(i)->opcode) {
-        case EFECT_OPT_CONV:
-        {
+        case EFECT_OPT_CONV: {
             printf("PLAYING CONV %d\n", this->efect->at(i)->value);
-            SCConvPlayer* conv = new SCConvPlayer();
+            SCConvPlayer *conv = new SCConvPlayer();
             conv->Init();
             conv->SetID(this->efect->at(i)->value);
             Game.AddActivity(conv);
-        }
-        break;
+        } break;
         case EFECT_OPT_SCEN:
             for (int j = 0; j < this->gameFlowParser.game.game[this->current_miss]->scen.size(); j++) {
-                if (this->gameFlowParser.game.game[this->current_miss]->scen.at(j)->info.ID == this->efect->at(i)->value) {
+                if (this->gameFlowParser.game.game[this->current_miss]->scen.at(j)->info.ID ==
+                    this->efect->at(i)->value) {
                     this->current_scen = j;
                     this->currentSpriteId = 0;
                     printf("PLAYING SCEN %d\n", this->current_scen);
@@ -103,10 +100,9 @@ void SCGameFlow::runEffect() {
                 }
             }
             break;
-        case EFECT_OPT_MISS:
-        {
+        case EFECT_OPT_MISS: {
             if (this->missionToFly != nullptr) {
-                SCStrike* fly = new SCStrike();
+                SCStrike *fly = new SCStrike();
                 fly->Init();
                 fly->SetMission(this->missionToFly);
                 this->missionToFly = nullptr;
@@ -120,26 +116,23 @@ void SCGameFlow::runEffect() {
             printf("PLAYING MISS %d\n", this->current_miss);
             this->createMiss();
             return;
-        }
-            break;
+        } break;
         case EFECT_OPT_MIS2:
             printf("PLAYING MIS2 %d\n", this->current_miss);
             printf("MIS2 NOT IMPLEMENTED\n");
             break;
-        case EFECT_OPT_SHOT:
-        {
+        case EFECT_OPT_SHOT: {
             printf("PLAYING SHOT %d\n", this->efect->at(i)->value);
             printf("SHOT NOT IMPLEMENTED\n");
-            SCShot *sht =  new SCShot();
+            SCShot *sht = new SCShot();
             sht->Init();
             sht->SetShotId(this->efect->at(i)->value);
             Game.AddActivity(sht);
             return;
         }
-        
-            break;
-        case EFECT_OPT_FLYM:
-        {
+
+        break;
+        case EFECT_OPT_FLYM: {
             uint8_t flymID = this->efect->at(i)->value;
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
@@ -147,13 +140,12 @@ void SCGameFlow::runEffect() {
             sprintf(this->missionToFly, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             strtoupper(this->missionToFly, this->missionToFly);
             printf("FLYM NOT IMPLEMENTED\n");
-        }
-            break;
+        } break;
         default:
             printf("Unkown opcode :%d, %d\n", this->efect->at(i)->opcode, this->efect->at(i)->value);
             break;
         };
-        
+
     } else {
         this->efect = nullptr;
         this->currentOptCode = 0;
@@ -169,11 +161,11 @@ void SCGameFlow::runEffect() {
  * @return None
  */
 void SCGameFlow::CheckKeyboard(void) {
-    //Keyboard
+    // Keyboard
     SDL_Event keybEvents[1];
     int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
     for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event* event = &keybEvents[i];
+        SDL_Event *event = &keybEvents[i];
 
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
@@ -209,22 +201,26 @@ void SCGameFlow::CheckKeyboard(void) {
 }
 
 /**
- * Initializes the SCGameFlow object by loading the necessary IFF files and initializing the optionParser and gameFlowParser.
- * It also initializes the optShps and optPals objects by loading the OPTSHPS.PAK and OPTPALS.PAK files respectively.
- * Finally, it sets the efect pointer to nullptr and calls the createMiss() function.
+ * Initializes the SCGameFlow object by loading the necessary IFF files and initializing the optionParser and
+ * gameFlowParser. It also initializes the optShps and optPals objects by loading the OPTSHPS.PAK and OPTPALS.PAK files
+ * respectively. Finally, it sets the efect pointer to nullptr and calls the createMiss() function.
  *
  * @throws None
  */
 void SCGameFlow::Init() {
 
-    TreEntry* gameflowIFF = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\GAMEFLOW.IFF");
-    TreEntry* optionIFF = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
+    TreEntry *gameflowIFF =
+        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\GAMEFLOW.IFF");
+    TreEntry *optionIFF =
+        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
     this->optionParser.InitFromRam(optionIFF->data, optionIFF->size);
     this->gameFlowParser.InitFromRam(gameflowIFF->data, gameflowIFF->size);
 
-    TreEntry* optShapEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
+    TreEntry *optShapEntry =
+        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
     this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
-    TreEntry* optPalettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
+    TreEntry *optPalettesEntry =
+        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     this->efect = nullptr;
     this->createMiss();
@@ -252,34 +248,33 @@ void SCGameFlow::createMiss() {
         uint8_t optionScenID = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
         // note pour plus tard, une scene peu être composé de plusieur background
         // donc il faut boucler.
-        SCEN * sceneOpts = this->optionParser.opts[optionScenID];
+        SCEN *sceneOpts = this->optionParser.opts[optionScenID];
 
-        for (auto bg: sceneOpts->background->images) {
+        for (auto bg : sceneOpts->background->images) {
             background *tmpbg = new background();
             tmpbg->img = this->getShape(bg->ID);
             this->layers.push_back(tmpbg);
         }
         uint8_t paltID = sceneOpts->background->palette->ID;
         uint8_t forPalTID = sceneOpts->foreground->palette->ID;
-        
-        
+
         this->sprites.clear();
         this->zones.clear();
         for (auto sprite : this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt) {
             uint8_t sprtId = sprite->info.ID;
-            // le clck dans sprite semble indiquer qu'il faut jouer l'animation après avoir cliquer et donc executer le efect 
-            // à la fin de l'animation.
+            // le clck dans sprite semble indiquer qu'il faut jouer l'animation après avoir cliquer et donc executer le
+            // efect à la fin de l'animation.
             if (sceneOpts->foreground->sprites.count(sprtId) > 0) {
                 uint8_t optsprtId = sceneOpts->foreground->sprites[sprtId]->sprite.SHP_ID;
-                animatedSprites* sprt = new animatedSprites();
-                
+                animatedSprites *sprt = new animatedSprites();
+
                 if (sceneOpts->foreground->sprites[sprtId]->zone != nullptr) {
                     sprt->rect = new sprtRect();
                     sprt->rect->x1 = sceneOpts->foreground->sprites[sprtId]->zone->X1;
                     sprt->rect->y1 = sceneOpts->foreground->sprites[sprtId]->zone->Y1;
                     sprt->rect->x2 = sceneOpts->foreground->sprites[sprtId]->zone->X2;
                     sprt->rect->y2 = sceneOpts->foreground->sprites[sprtId]->zone->Y2;
-                    SCZone* z = new SCZone();
+                    SCZone *z = new SCZone();
                     z->id = sprtId;
                     z->position.x = sprt->rect->x1;
                     z->position.y = sprt->rect->y1;
@@ -291,9 +286,9 @@ void SCGameFlow::createMiss() {
                     this->zones.push_back(z);
                 }
                 if (sceneOpts->foreground->sprites[sprtId]->quad != nullptr) {
-                    sprt->quad = new std::vector<Point2D*>();
+                    sprt->quad = new std::vector<Point2D *>();
 
-                    Point2D* p;
+                    Point2D *p;
 
                     p = new Point2D();
                     p->x = sceneOpts->foreground->sprites[sprtId]->quad->xa1;
@@ -315,14 +310,17 @@ void SCGameFlow::createMiss() {
                     p->y = sceneOpts->foreground->sprites[sprtId]->quad->yb2;
                     sprt->quad->push_back(p);
 
-                    SCZone* z = new SCZone();
+                    SCZone *z = new SCZone();
                     z->id = sprtId;
                     z->quad = sprt->quad;
                     z->label = sceneOpts->foreground->sprites[sprtId]->label;
                     z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1);
                     this->zones.push_back(z);
                 }
-                
+
+                sprt->id = sprite->info.ID;
+                sprt->shapid = optsprtId;
+                sprt->unkown = sprite->info.UNKOWN;
                 sprt->efect = sprite->efct;
                 sprt->img = this->getShape(optsprtId);
                 sprt->frameCounter = 0;
@@ -334,12 +332,12 @@ void SCGameFlow::createMiss() {
                     sprt->frames = sceneOpts->foreground->sprites[sprtId]->SEQU;
                     sprt->frameCounter = 0;
                 }
-                this->sprites[sprtId]=sprt;
+                this->sprites[sprtId] = sprt;
             } else {
                 printf("%d, ID Sprite not found !!\n", sprtId);
             }
         }
-        
+
         this->rawPalette = this->optPals.GetEntry(paltID)->data;
         this->forPalette = this->optPals.GetEntry(forPalTID)->data;
     }
@@ -353,12 +351,12 @@ void SCGameFlow::createMiss() {
  *
  * @throws None.
  */
-RSImageSet* SCGameFlow::getShape(uint8_t shpid) {
-    PakEntry* shapeEntry = this->optShps.GetEntry(shpid);
+RSImageSet *SCGameFlow::getShape(uint8_t shpid) {
+    PakEntry *shapeEntry = this->optShps.GetEntry(shpid);
     PakArchive subPAK;
 
     subPAK.InitFromRAM("", shapeEntry->data, shapeEntry->size);
-    RSImageSet* img = new RSImageSet();
+    RSImageSet *img = new RSImageSet();
     if (!subPAK.IsReady()) {
         img->InitFromPakEntry(this->optShps.GetEntry(shpid));
     } else {
@@ -377,11 +375,11 @@ RSImageSet* SCGameFlow::getShape(uint8_t shpid) {
  * @throws None
  */
 void SCGameFlow::RunFrame(void) {
-    this->runEffect();   
+    this->runEffect();
     int fpsupdate = 0;
-    fpsupdate = (SDL_GetTicks() /10) - this->fps > 12;
+    fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
     if (fpsupdate) {
-        this->fps = (SDL_GetTicks()/10);
+        this->fps = (SDL_GetTicks() / 10);
     }
     CheckKeyboard();
     VGA.Activate();
@@ -390,32 +388,34 @@ void SCGameFlow::RunFrame(void) {
     paletteReader.Set((this->rawPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
-    for (auto layer: this->layers) {
+    for (auto layer : this->layers) {
         VGA.DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
-        if (layer->img->sequence.size()>1) {
-            layer->frameCounter = (uint8_t) (layer->frameCounter + fpsupdate) % layer->img->sequence.size() ;
+        if (layer->img->sequence.size() > 1) {
+            layer->frameCounter = (uint8_t)(layer->frameCounter + fpsupdate) % layer->img->sequence.size();
         }
     }
-    
+
     paletteReader.Set((this->forPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
-    
 
     for (const auto &sprit : this->sprites) {
         VGA.DrawShape(sprit.second->img->GetShape(sprit.second->img->sequence[0]));
         if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames != nullptr) {
             VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frames->at(sprit.second->frameCounter)));
-            sprit.second->frameCounter = (sprit.second->frameCounter + fpsupdate) % static_cast<uint8_t>(sprit.second->frames->size());
+            sprit.second->frameCounter =
+                (sprit.second->frameCounter + fpsupdate) % static_cast<uint8_t>(sprit.second->frames->size());
 
-        } else if (sprit.second->img->sequence.size() > 1 && sprit.second->frames == nullptr && sprit.second->cliked == false) {
-           
+        } else if (sprit.second->img->sequence.size() > 1 && sprit.second->frames == nullptr &&
+                   sprit.second->cliked == false) {
+
             if (sprit.second->frameCounter >= sprit.second->img->sequence.size()) {
                 sprit.second->frameCounter = 1;
             }
             VGA.DrawShape(sprit.second->img->GetShape(sprit.second->img->sequence[sprit.second->frameCounter]));
             sprit.second->frameCounter += fpsupdate;
-        } else if  (sprit.second->img->sequence.size() > 1 && sprit.second->frames == nullptr && sprit.second->cliked == true) {
+        } else if (sprit.second->img->sequence.size() > 1 && sprit.second->frames == nullptr &&
+                   sprit.second->cliked == true) {
             VGA.DrawShape(sprit.second->img->GetShape(sprit.second->img->sequence[sprit.second->frameCounter]));
         }
     }
@@ -424,8 +424,6 @@ void SCGameFlow::RunFrame(void) {
     for (int f = 0; f < this->zones.size(); f++) {
         this->zones.at(f)->Draw();
     }
-
-    
 
     VGA.VSync();
 
@@ -444,27 +442,105 @@ void SCGameFlow::RenderMenu() {
     ImGui::NewFrame();
     static bool show_scene_window = false;
     static bool quit_gameflow = false;
+    static bool show_load_miss = false;
+    static int miss_selected = 0;
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("GameFlow")) {
+            ImGui::MenuItem("Load Miss", NULL, &show_load_miss);
             ImGui::MenuItem("Info", NULL, &show_scene_window);
             ImGui::MenuItem("Quit", NULL, &quit_gameflow);
             ImGui::EndMenu();
         }
-        ImGui::Text("Current Miss %d, Current Scen", this->current_miss, this->current_scen);
+        ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, this->current_scen);
         ImGui::EndMainMenuBar();
+    }
+    
+    if (show_load_miss) {
+        ImGui::Begin("Load Miss");
+            static ImGuiComboFlags flags = 0;
+            static char ** miss = new char * [this->gameFlowParser.game.game.size()];
+            for (int i = 0; i < this->gameFlowParser.game.game.size(); i++) {
+                miss[i] = new char[10];
+                sprintf(miss[i], "%d", i);
+            }
+            if (ImGui::BeginCombo("List des miss", miss[miss_selected], flags)) {
+                for (int i = 0; i < this->gameFlowParser.game.game.size(); i++) {
+                    const bool is_selected = (miss_selected == i);
+                    if (ImGui::Selectable(std::to_string(i).c_str(), is_selected))
+                        miss_selected = i;
+
+                    // Set the initial focus when opening the combo (scrolling +
+                    // keyboard navigation focus)
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            if (ImGui::Button("Load Mission")) {
+                this->current_miss = miss_selected;
+                this->current_scen = 0;
+                this->currentSpriteId = 0;
+                this->efect = nullptr;
+                this->createMiss();
+            }
+        ImGui::End();
     }
     if (show_scene_window) {
         ImGui::Begin("Infos");
-        ImGui::Text("Nb Actor %d", this->sprites.size());
-        ImGui::Text("Nb Zones %d", this->zones.size());
-        for (auto sprite : this->sprites) {
-            ImGui::Text("Sprite %d", sprite.first);
-            ImGui::Text("Frame %d", sprite.second->frameCounter);
-            if (sprite.second->frames != nullptr) {
-                ImGui::Text("Frames %d", sprite.second->frames->size());
+        ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, this->current_scen);
+        ImGui::Text("Nb Miss %d", this->gameFlowParser.game.game.size());
+        ImGui::Text("Nb Layers %d", this->layers.size());
+        ImGui::Text("Nb Scenes %d", this->gameFlowParser.game.game[this->current_miss]->scen.size());
+        if (this->gameFlowParser.game.game[this->current_miss]->efct != nullptr) {
+            ImGui::Text("Miss has efct");
+            if (ImGui::TreeNode("Miss Efect")) {
+                for (auto effect : *this->gameFlowParser.game.game[this->current_miss]->efct) {
+                    ImGui::Text("OPC: %03d\tVAL: %03d", effect->opcode, effect->value);
+                }
+                ImGui::TreePop();
             }
-            if (sprite.second->quad != nullptr) {
-                ImGui::Text("Quad %d", sprite.second->quad->size());
+        }
+        ImGui::Text("Nb Actor %d", this->sprites.size());
+        if (ImGui::TreeNode("Actors")) {
+            int i = 0;
+            for (auto sprite : this->sprites) {
+                if (ImGui::TreeNode((void *)(intptr_t)i, "Actor %d, Frame %d, %d %d", sprite.first,
+                                    sprite.second->frameCounter, sprite.second->shapid, sprite.second->unkown)) {
+                    if (sprite.second->frames != nullptr) {
+                        ImGui::Text("Frames %d", sprite.second->frames->size());
+                    }
+                    if (sprite.second->quad != nullptr) {
+                        ImGui::Text("Quad selection area");
+                    }
+                    if (sprite.second->rect != nullptr) {
+                        ImGui::Text("Rect selection area");
+                    }
+                    if (sprite.second->efect->size() > 0) {
+                        if (ImGui::TreeNode("Efect")) {
+                            for (auto efct: *sprite.second->efect) {
+                                ImGui::Text("OPC: %03d\tVAL: %03d", efct->opcode,
+                                            efct->value);
+                            }
+                            ImGui::TreePop();
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+                i++;
+            }
+            ImGui::TreePop();
+        }
+
+        ImGui::Text("Nb Zones %d", this->zones.size());
+        if (this->zones.size() > 1) {
+            if (ImGui::TreeNode("Zones")) {
+                for (auto zone : this->zones) {
+                    if (ImGui::TreeNode((void *)(intptr_t)zone->id, "Zone %d", zone->id)) {
+                        ImGui::Text(zone->label->c_str());
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::TreePop();
             }
         }
         ImGui::End();

@@ -26,7 +26,10 @@ struct animatedSprites {
     sprtRect* rect {nullptr};
     bool cliked {false};
     std::vector<Point2D*> *quad {nullptr};
-    std::vector<EFCT *>* efect {nullptr}; 
+    std::vector<EFCT *>* efect {nullptr};
+    uint8_t id;
+    uint8_t shapid;
+    uint8_t unkown;
 };
 
 struct background {
@@ -61,18 +64,19 @@ private:
     std::map<uint8_t, animatedSprites*> sprites;
     uint8_t current_miss;
     uint8_t current_scen;
-    void clicked(uint8_t id);
-    void runEffect();
-    void CheckKeyboard(void);
-    RSImageSet* getShape(uint8_t shpid);
     int fps;
     uint8_t currentSpriteId {0};
     uint8_t currentOptCode;
     uint8_t requ;
     char *missionToFly;
     std::vector<EFCT *> *efect;
-    void RenderMenu();
     SCStrikeMenu strike_menu;
+
+    void RenderMenu();
+    void clicked(uint8_t id);
+    void runEffect();
+    void CheckKeyboard(void);
+    RSImageSet* getShape(uint8_t shpid);
 };
 
 #endif
