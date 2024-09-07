@@ -16,6 +16,7 @@ SCZone::SCZone():
         this->dimension = {0,0};
         this->position  = {0,0};
         this->id = 0;
+        this->fps = SDL_GetTicks() / 10;
 }
 
 SCZone::~SCZone(){
@@ -23,11 +24,40 @@ SCZone::~SCZone(){
 }
 
 void SCZone::OnAction(void){
-    if (this->onclick != nullptr) {
+    if (this->sprite->cliked) {
+        this->sprite->active = true;
+    } else if (this->onclick != nullptr) {
         this->onclick(this->sprite->efect, this->id);
     }
 }
 
+bool  SCZone::IsActive(std::map<uint8_t, bool> *requierd_flags) {
+    bool active = true;
+    if (this->sprite->requ == nullptr) {
+        return true;
+    }
+    for (auto requ_flag: *this->sprite->requ) {
+        switch (requ_flag->op) {
+            case 0:
+                if (requierd_flags->find(requ_flag->value) != requierd_flags->end()) {
+                    active = !requierd_flags->at(requ_flag->value);
+                } else if (active) {
+                    active = true;
+                }
+                break;
+            case 1:
+                if (requierd_flags->find(requ_flag->value) != requierd_flags->end()) {
+                    active = requierd_flags->at(requ_flag->value);
+                } else if (active) {
+                    active = false;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    return active;
+}
 void SCZone::Draw(void) {
     int fpsupdate = 0;
     fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
@@ -51,6 +81,14 @@ void SCZone::Draw(void) {
     } else if (this->sprite->img->sequence.size() > 1 && this->sprite->frames == nullptr &&
                 this->sprite->cliked == true) {
         VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
+        if (this->sprite->active == true) {
+            this->sprite->frameCounter += fpsupdate;
+            if (this->sprite->frameCounter >= this->sprite->img->sequence.size()-1) {
+                if (this->onclick != nullptr) {
+                    this->onclick(this->sprite->efect, this->id);
+                }
+            }
+        }
     }
 
     if (this->quad != nullptr) {

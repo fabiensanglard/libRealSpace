@@ -48,9 +48,11 @@ struct animatedSprites {
     bool cliked{false};
     std::vector<Point2D *> *quad{nullptr};
     std::vector<EFCT *> *efect{nullptr};
-    uint8_t id;
-    uint8_t shapid;
-    uint8_t unkown;
+    std::vector<REQU *> *requ{nullptr};
+    uint8_t id{0};
+    uint8_t shapid{0};
+    uint8_t unkown{0};
+    bool active{false};
 };
 
 class SCZone{
@@ -72,6 +74,7 @@ public:
     
     inline bool IsEnabled(void){ return this->enabled; }
     inline void SetEnable(bool enabled){ this->enabled = enabled;}
+    bool IsActive(std::map<uint8_t, bool> *requierd_flags);
     animatedSprites *sprite;
     
 private:

@@ -73,6 +73,17 @@ SCGameFlow::~SCGameFlow() {}
  */
 void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
     printf("clicked on %d\n", id);
+    if (this->zones[id]->sprite->requ != nullptr) {
+        for (auto req_flag: *this->zones[id]->sprite->requ) {
+            switch (req_flag->op) {
+                case 0:
+                    this->requierd_flags[req_flag->value] = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
     this->efect = script;
     this->currentSpriteId = id;
     this->currentOptCode = 0;
@@ -80,39 +91,39 @@ void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
 }
 SCZone *SCGameFlow::CheckZones(void) {
     for (size_t i = 0; i < zones.size(); i++) {
-
         SCZone *zone = zones[i];
-        if (zone->quad != nullptr) {
-            if (isPointInQuad(Mouse.GetPosition(), zone->quad)) {
+        if (zone->IsActive(&this->requierd_flags)) {
+            if (zone->quad != nullptr) {
+                if (isPointInQuad(Mouse.GetPosition(), zone->quad)) {
+                    Mouse.SetMode(SCMouse::VISOR);
+
+                    // If the mouse button has just been released: trigger action.
+                    if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                        zone->OnAction();
+                    Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
+                    VGA.DrawText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                                static_cast<uint32_t>(zone->label->length()), 3, 5);
+                    return zone;
+                }
+            }
+            if (Mouse.GetPosition().x > zone->position.x && Mouse.GetPosition().x < zone->position.x + zone->dimension.x &&
+                Mouse.GetPosition().y > zone->position.y && Mouse.GetPosition().y < zone->position.y + zone->dimension.y) {
+                // HIT !
                 Mouse.SetMode(SCMouse::VISOR);
 
                 // If the mouse button has just been released: trigger action.
                 if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                     zone->OnAction();
-                Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
+                Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
                 VGA.DrawText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
-                              static_cast<uint32_t>(zone->label->length()), 3, 5);
+                            static_cast<uint32_t>(zone->label->length()), 3, 5);
+
                 return zone;
             }
-        }
-        if (Mouse.GetPosition().x > zone->position.x && Mouse.GetPosition().x < zone->position.x + zone->dimension.x &&
-            Mouse.GetPosition().y > zone->position.y && Mouse.GetPosition().y < zone->position.y + zone->dimension.y) {
-            // HIT !
-            Mouse.SetMode(SCMouse::VISOR);
-
-            // If the mouse button has just been released: trigger action.
-            if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
-                zone->OnAction();
-            Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
-            VGA.DrawText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
-                          static_cast<uint32_t>(zone->label->length()), 3, 5);
-
-            return zone;
-        }
+        }      
     }
 
     Mouse.SetMode(SCMouse::CURSOR);
-    return NULL;
     return nullptr;
 }
 /**
@@ -299,6 +310,7 @@ void SCGameFlow::createMiss() {
  * @throws None
  */
 void SCGameFlow::createScen() {
+    this->zones.clear();
     if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
         uint8_t optionScenID = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
         // note pour plus tard, une scene peu être composé de plusieur background
@@ -312,8 +324,7 @@ void SCGameFlow::createScen() {
         }
         uint8_t paltID = sceneOpts->background->palette->ID;
         uint8_t forPalTID = sceneOpts->foreground->palette->ID;
-
-        this->zones.clear();
+        uint8_t zone_id = 0;
         for (auto sprite : this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt) {
             uint8_t sprtId = sprite->info.ID;
             // le clck dans sprite semble indiquer qu'il faut jouer l'animation après avoir cliquer et donc executer le
@@ -337,7 +348,6 @@ void SCGameFlow::createScen() {
                     z->label = sceneOpts->foreground->sprites[sprtId]->label;
                     z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1, std::placeholders::_2);
                     z->quad = nullptr;
-                    
                 }
                 if (sceneOpts->foreground->sprites[sprtId]->quad != nullptr) {
                     sprt->quad = new std::vector<Point2D *>();
@@ -369,7 +379,6 @@ void SCGameFlow::createScen() {
                     z->quad = sprt->quad;
                     z->label = sceneOpts->foreground->sprites[sprtId]->label;
                     z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1, std::placeholders::_2);
-                    this->zones.push_back(z);
                 }
 
                 sprt->id = sprite->info.ID;
@@ -386,7 +395,10 @@ void SCGameFlow::createScen() {
                     sprt->frames = sceneOpts->foreground->sprites[sprtId]->SEQU;
                     sprt->frameCounter = 0;
                 }
+                sprt->requ = sprite->requ;
                 z->sprite = sprt;
+                z->id = zone_id;
+                zone_id++;
                 this->zones.push_back(z);
             } else {
                 printf("%d, ID Sprite not found !!\n", sprtId);
@@ -464,7 +476,7 @@ void SCGameFlow::RunFrame(void) {
     }
     CheckKeyboard();
     VGA.Activate();
-    VGA.Clear();
+    VGA.FillWithColor(0);
     ByteStream paletteReader;
     paletteReader.Set((this->rawPalette));
     this->palette.ReadPatch(&paletteReader);
@@ -482,8 +494,11 @@ void SCGameFlow::RunFrame(void) {
     
     this->CheckZones();
 
-    for (auto zone : this->zones) {
-        zone->Draw();
+
+    for (int zi=0;zi<this->zones.size();zi++) {
+        if (this->zones.at(zi)->IsActive(&this->requierd_flags)) {
+            this->zones.at(zi)->Draw();
+        } 
     }
     
     VGA.VSync();
@@ -496,34 +511,19 @@ void SCGameFlow::RunFrame(void) {
     VGA.VSync();
     VGA.SwithBuffers();
 }
+
 /**
- * Draw the menu for the game flow.
+ * This method renders the game flow menu using ImGui.
  *
- * The menu is drawn using ImGui.
+ * It draws a menu bar with the following menu items:
+ *   - Load Miss: Opens a modal window to select a mission to load.
+ *   - Info: Opens a modal window with information about the current mission and scene.
+ *   - Quit: Quits the game flow.
  *
- * The menu contains the following elements:
- * - A menu with the following items:
- *   - "Load Miss" which will open a window to select a mission to load.
- *   - "Info" which will open a window with informations about the current miss.
- *   - "Quit" which will stop the current activity.
- * - A text with the current miss number and the current scene number.
- *
- * If the "Load Miss" menu is selected, a window will open with a combo box
- * containing the list of all the missions in the game. When a mission is selected,
- * the current miss number will be updated and the createMiss function will be
- * called.
- *
- * If the "Info" menu is selected, a window will open with informations about the
- * current miss, including the number of scenes, the number of layers, and the
- * number of actors. If the miss has an efect, it will be displayed in a tree view.
- * For each actor, the frame number, the shape id, and the unknown value will be
- * displayed. If the actor has an efect, it will be displayed in a tree view.
- * If the actor has a quad selection area or a rect selection area, it will be
- * displayed.
- *
- * If the "Quit" menu is selected, the current activity will be stopped.
- *
- * The menu is rendered using ImGui::Render and ImGui_ImplOpenGL2_RenderDrawData.
+ * It also renders a window with information about the current mission and scene.
+ * If the current mission has an efect, it renders a subtree with the efects.
+ * If the current mission has zones, it renders a subtree with the zones.
+ * If a zone has a sprite, it renders a subtree with the sprite information.
  */
 void SCGameFlow::RenderMenu() {
     ImGui::SetMouseCursor(ImGuiMouseCursor_None);
@@ -541,7 +541,14 @@ void SCGameFlow::RenderMenu() {
             ImGui::MenuItem("Quit", NULL, &quit_gameflow);
             ImGui::EndMenu();
         }
-        ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, this->current_scen);
+        int sceneid = -1;
+        if (this->gameFlowParser.game.game[this->current_miss]->scen.size()>0) {
+            sceneid = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
+        }
+        ImGui::Text("Current Miss %d, Current Scen %d", 
+            this->current_miss, 
+            sceneid
+        );
         ImGui::EndMainMenuBar();
     }
     
@@ -590,6 +597,12 @@ void SCGameFlow::RenderMenu() {
                 ImGui::TreePop();
             }
         }
+        if (ImGui::TreeNode("Required Flags")) {
+            for (auto req_flag: this->requierd_flags) {
+                ImGui::Text("FLAG %03d\tVALUE %03d", req_flag.first, req_flag.second);
+            }
+            ImGui::TreePop();
+        }
         ImGui::Text("Nb Zones %d", this->zones.size());
         if (this->zones.size() > 1) {
             if (ImGui::TreeNode("Zones")) {
@@ -597,6 +610,9 @@ void SCGameFlow::RenderMenu() {
                     if (ImGui::TreeNode((void *)(intptr_t)zone->id, "Zone %d", zone->id)) {
                         ImGui::Text(zone->label->c_str());
                         animatedSprites *sprite = zone->sprite;
+                        if (zone->IsActive(&this->requierd_flags)) {
+                            ImGui::Text("Active");
+                        }
                         if (ImGui::TreeNode((void *)(intptr_t)sprite->shapid, "Sprite, Frame %d, %d %d",
                                     sprite->frameCounter, sprite->shapid, sprite->unkown)) {
                             if (sprite->frames != nullptr) {
@@ -608,11 +624,21 @@ void SCGameFlow::RenderMenu() {
                             if (sprite->rect != nullptr) {
                                 ImGui::Text("Rect selection area");
                             }
+                            
                             if (sprite->efect->size() > 0) {
                                 if (ImGui::TreeNode("Efect")) {
                                     for (auto efct: *sprite->efect) {
                                         ImGui::Text("OPC: %03d\tVAL: %03d", efct->opcode,
                                                     efct->value);
+                                    }
+                                    ImGui::TreePop();
+                                }
+                            }
+                            if (sprite->requ != nullptr && sprite->requ->size() > 0) {
+                                if (ImGui::TreeNode("Required Flags")) {
+                                    for (auto requ: *sprite->requ) {
+                                        ImGui::Text("OPC: %03d\tVAL: %03d", requ->op,
+                                                    requ->value);
                                     }
                                     ImGui::TreePop();
                                 }
