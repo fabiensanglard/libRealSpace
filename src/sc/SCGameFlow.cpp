@@ -71,14 +71,12 @@ SCGameFlow::~SCGameFlow() {}
  *
  * @return None
  */
-void SCGameFlow::clicked(uint8_t id) {
-    if (this->sprites[id]->efect != nullptr) {
-        printf("clicked on %d\n", id);
-        this->efect = this->sprites[id]->efect;
-        this->currentSpriteId = id;
-        this->currentOptCode = 0;
-        this->runEffect();
-    }
+void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
+    printf("clicked on %d\n", id);
+    this->efect = script;
+    this->currentSpriteId = id;
+    this->currentOptCode = 0;
+    this->runEffect();
 }
 SCZone *SCGameFlow::CheckZones(void) {
     for (size_t i = 0; i < zones.size(); i++) {
@@ -126,10 +124,6 @@ SCZone *SCGameFlow::CheckZones(void) {
  * @return None
  */
 void SCGameFlow::runEffect() {
-    if (this->currentSpriteId > 0 && this->sprites.size() > 0 && this->sprites[this->currentSpriteId]->cliked) {
-        // play the animation first
-        return;
-    }
     if (this->efect == nullptr) {
         return;
     }
@@ -280,7 +274,6 @@ void SCGameFlow::Init() {
 void SCGameFlow::createMiss() {
     this->missionToFly = nullptr;
     this->next_miss = 0;
-    this->sprites.clear();
     this->zones.clear();
     this->layers.clear();
     this->convs = std::queue<SCConvPlayer *>();
@@ -320,7 +313,6 @@ void SCGameFlow::createScen() {
         uint8_t paltID = sceneOpts->background->palette->ID;
         uint8_t forPalTID = sceneOpts->foreground->palette->ID;
 
-        this->sprites.clear();
         this->zones.clear();
         for (auto sprite : this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt) {
             uint8_t sprtId = sprite->info.ID;
@@ -329,23 +321,23 @@ void SCGameFlow::createScen() {
             if (sceneOpts->foreground->sprites.count(sprtId) > 0) {
                 uint8_t optsprtId = sceneOpts->foreground->sprites[sprtId]->sprite.SHP_ID;
                 animatedSprites *sprt = new animatedSprites();
-
+                SCZone *z = new SCZone();
                 if (sceneOpts->foreground->sprites[sprtId]->zone != nullptr) {
                     sprt->rect = new sprtRect();
                     sprt->rect->x1 = sceneOpts->foreground->sprites[sprtId]->zone->X1;
                     sprt->rect->y1 = sceneOpts->foreground->sprites[sprtId]->zone->Y1;
                     sprt->rect->x2 = sceneOpts->foreground->sprites[sprtId]->zone->X2;
                     sprt->rect->y2 = sceneOpts->foreground->sprites[sprtId]->zone->Y2;
-                    SCZone *z = new SCZone();
+                   
                     z->id = sprtId;
                     z->position.x = sprt->rect->x1;
                     z->position.y = sprt->rect->y1;
                     z->dimension.x = sprt->rect->x2 - sprt->rect->x1;
                     z->dimension.y = sprt->rect->y2 - sprt->rect->y1;
                     z->label = sceneOpts->foreground->sprites[sprtId]->label;
-                    z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1);
+                    z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1, std::placeholders::_2);
                     z->quad = nullptr;
-                    this->zones.push_back(z);
+                    
                 }
                 if (sceneOpts->foreground->sprites[sprtId]->quad != nullptr) {
                     sprt->quad = new std::vector<Point2D *>();
@@ -372,11 +364,11 @@ void SCGameFlow::createScen() {
                     p->y = sceneOpts->foreground->sprites[sprtId]->quad->yb2;
                     sprt->quad->push_back(p);
 
-                    SCZone *z = new SCZone();
+                    
                     z->id = sprtId;
                     z->quad = sprt->quad;
                     z->label = sceneOpts->foreground->sprites[sprtId]->label;
-                    z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1);
+                    z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1, std::placeholders::_2);
                     this->zones.push_back(z);
                 }
 
@@ -394,7 +386,8 @@ void SCGameFlow::createScen() {
                     sprt->frames = sceneOpts->foreground->sprites[sprtId]->SEQU;
                     sprt->frameCounter = 0;
                 }
-                this->sprites[sprtId] = sprt;
+                z->sprite = sprt;
+                this->zones.push_back(z);
             } else {
                 printf("%d, ID Sprite not found !!\n", sprtId);
             }
@@ -486,44 +479,13 @@ void SCGameFlow::RunFrame(void) {
     paletteReader.Set((this->forPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
-    if (this->currentSpriteId > 0 && this->sprites.size() > 0 && this->sprites[this->currentSpriteId]->cliked) {
-        if (this->sprites[this->currentSpriteId]->frameCounter <
-            this->sprites[this->currentSpriteId]->img->sequence.size() - 1) {
-            if (fpsupdate) {
-                this->sprites[this->currentSpriteId]->frameCounter++;
-            }
-        } else {
-            this->sprites[this->currentSpriteId]->cliked = false;
-            this->currentSpriteId = 0;
-            this->runEffect();
-        }
-    }
-    for (const auto &sprit : this->sprites) {
-        VGA.DrawShape(sprit.second->img->GetShape(sprit.second->img->sequence[0]));
-        if (sprit.second->img->GetNumImages() > 1 && sprit.second->frames != nullptr) {
-            VGA.DrawShape(sprit.second->img->GetShape(sprit.second->frames->at(sprit.second->frameCounter)));
-            sprit.second->frameCounter =
-                (sprit.second->frameCounter + fpsupdate) % static_cast<uint8_t>(sprit.second->frames->size());
-
-        } else if (sprit.second->img->sequence.size() > 1 && sprit.second->frames == nullptr &&
-                   sprit.second->cliked == false) {
-
-            if (sprit.second->frameCounter >= sprit.second->img->sequence.size()) {
-                sprit.second->frameCounter = 1;
-            }
-            VGA.DrawShape(sprit.second->img->GetShape(sprit.second->img->sequence[sprit.second->frameCounter]));
-            sprit.second->frameCounter += fpsupdate;
-        } else if (sprit.second->img->sequence.size() > 1 && sprit.second->frames == nullptr &&
-                   sprit.second->cliked == true) {
-            VGA.DrawShape(sprit.second->img->GetShape(sprit.second->img->sequence[sprit.second->frameCounter]));
-        }
-    }
+    
     this->CheckZones();
 
-    for (int f = 0; f < this->zones.size(); f++) {
-        this->zones.at(f)->Draw();
+    for (auto zone : this->zones) {
+        zone->Draw();
     }
-
+    
     VGA.VSync();
 
     this->RenderMenu();
@@ -628,43 +590,35 @@ void SCGameFlow::RenderMenu() {
                 ImGui::TreePop();
             }
         }
-        ImGui::Text("Nb Actor %d", this->sprites.size());
-        if (ImGui::TreeNode("Actors")) {
-            int i = 0;
-            for (auto sprite : this->sprites) {
-                if (ImGui::TreeNode((void *)(intptr_t)i, "Actor %d, Frame %d, %d %d", sprite.first,
-                                    sprite.second->frameCounter, sprite.second->shapid, sprite.second->unkown)) {
-                    if (sprite.second->frames != nullptr) {
-                        ImGui::Text("Frames %d", sprite.second->frames->size());
-                    }
-                    if (sprite.second->quad != nullptr) {
-                        ImGui::Text("Quad selection area");
-                    }
-                    if (sprite.second->rect != nullptr) {
-                        ImGui::Text("Rect selection area");
-                    }
-                    if (sprite.second->efect->size() > 0) {
-                        if (ImGui::TreeNode("Efect")) {
-                            for (auto efct: *sprite.second->efect) {
-                                ImGui::Text("OPC: %03d\tVAL: %03d", efct->opcode,
-                                            efct->value);
-                            }
-                            ImGui::TreePop();
-                        }
-                    }
-                    ImGui::TreePop();
-                }
-                i++;
-            }
-            ImGui::TreePop();
-        }
-
         ImGui::Text("Nb Zones %d", this->zones.size());
         if (this->zones.size() > 1) {
             if (ImGui::TreeNode("Zones")) {
                 for (auto zone : this->zones) {
                     if (ImGui::TreeNode((void *)(intptr_t)zone->id, "Zone %d", zone->id)) {
                         ImGui::Text(zone->label->c_str());
+                        animatedSprites *sprite = zone->sprite;
+                        if (ImGui::TreeNode((void *)(intptr_t)sprite->shapid, "Sprite, Frame %d, %d %d",
+                                    sprite->frameCounter, sprite->shapid, sprite->unkown)) {
+                            if (sprite->frames != nullptr) {
+                                ImGui::Text("Frames %d", sprite->frames->size());
+                            }
+                            if (sprite->quad != nullptr) {
+                                ImGui::Text("Quad selection area");
+                            }
+                            if (sprite->rect != nullptr) {
+                                ImGui::Text("Rect selection area");
+                            }
+                            if (sprite->efect->size() > 0) {
+                                if (ImGui::TreeNode("Efect")) {
+                                    for (auto efct: *sprite->efect) {
+                                        ImGui::Text("OPC: %03d\tVAL: %03d", efct->opcode,
+                                                    efct->value);
+                                    }
+                                    ImGui::TreePop();
+                                }
+                            }
+                            ImGui::TreePop();
+                        }
                         ImGui::TreePop();
                     }
                 }

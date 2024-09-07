@@ -112,7 +112,7 @@ RSImageSet* SCShot::getShape(uint8_t shpid) {
 void SCShot::RunFrame(void) {
     CheckKeyboard();
     VGA.Activate();
-    VGA.Clear();
+    VGA.FillWithColor(0);
     ByteStream paletteReader;
     int fpsupdate = 0;
     fpsupdate = (SDL_GetTicks() /10) - this->fps > 12;

@@ -16,7 +16,8 @@ RSVGA::RSVGA() {}
 
 RSVGA::~RSVGA() {}
 
-void RSVGA::Clear(void) { memset(frameBuffer, 255, 320 * 200); }
+void RSVGA::Clear(void) { this->FillWithColor(255); }
+void RSVGA::FillWithColor(uint8_t color) { memset(frameBuffer, color, 320 * 200); }
 void RSVGA::SwithBuffers() {
     if (this->frameBuffer == this->frameBufferA) {
         this->frameBuffer = this->frameBufferB;

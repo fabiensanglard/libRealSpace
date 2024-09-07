@@ -41,7 +41,7 @@ public:
     void VSync(void);
     
     void Clear(void);
-    
+    void FillWithColor(uint8_t color);
     inline uint8_t* GetFrameBuffer(void){ return frameBuffer;}
     
     void FillLineColor(size_t lineIndex, uint8_t color);

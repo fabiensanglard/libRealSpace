@@ -24,11 +24,35 @@ SCZone::~SCZone(){
 
 void SCZone::OnAction(void){
     if (this->onclick != nullptr) {
-        this->onclick(this->id);
+        this->onclick(this->sprite->efect, this->id);
     }
 }
 
 void SCZone::Draw(void) {
+    int fpsupdate = 0;
+    fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
+    if (fpsupdate) {
+        this->fps = (SDL_GetTicks() / 10);
+    }
+    VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[0]));
+    if (this->sprite->img->GetNumImages() > 1 && this->sprite->frames != nullptr) {
+        VGA.DrawShape(this->sprite->img->GetShape(this->sprite->frames->at(this->sprite->frameCounter)));
+        this->sprite->frameCounter =
+            (this->sprite->frameCounter + fpsupdate) % static_cast<uint8_t>(this->sprite->frames->size());
+
+    } else if (this->sprite->img->sequence.size() > 1 && this->sprite->frames == nullptr &&
+                this->sprite->cliked == false) {
+
+        if (this->sprite->frameCounter >= this->sprite->img->sequence.size()) {
+            this->sprite->frameCounter = 1;
+        }
+        VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
+        this->sprite->frameCounter += fpsupdate;
+    } else if (this->sprite->img->sequence.size() > 1 && this->sprite->frames == nullptr &&
+                this->sprite->cliked == true) {
+        VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
+    }
+
     if (this->quad != nullptr) {
         VGA.line(
             this->quad->at(0)->x,
