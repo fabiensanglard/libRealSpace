@@ -316,7 +316,11 @@ void SCGameFlow::createScen() {
         // note pour plus tard, une scene peu être composé de plusieur background
         // donc il faut boucler.
         SCEN *sceneOpts = this->optionParser.opts[optionScenID];
-
+        if (sceneOpts->tune != nullptr) {
+            Mixer.SwitchBank(1);
+            Mixer.StopMusic();
+            Mixer.PlayMusic(sceneOpts->tune->ID);
+        }
         for (auto bg : sceneOpts->background->images) {
             background *tmpbg = new background();
             tmpbg->img = this->getShape(bg->ID);

@@ -19,6 +19,7 @@ void SCTrainingMenu::OnDogFight() {}
 void SCTrainingMenu::Focus(void) {
     this->focused = true;
     if (!this->music_playing) {
+        Mixer.SwitchBank(0);
         Mixer.PlayMusic(28);
         this->music_playing = true;
     }

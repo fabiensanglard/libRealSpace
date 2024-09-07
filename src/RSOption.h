@@ -61,7 +61,7 @@ struct SPRT {
 	SPRT_SHAP sprite;
 	std::string *label;
 	OPTION_RECT *zone;
-	TUNE tune;
+	TUNE *tune{nullptr};
 	uint8_t CLCK;
 	QUAD* quad;
 	SPRT_INFO* info;
@@ -73,15 +73,15 @@ struct BACK {
 	std::vector<BACK_SHAP*> images;
 };
 struct FORE {
-	PALT *palette;
+	PALT *palette{nullptr};
 	std::map<uint8_t, SPRT*> sprites;
 };
 struct SCEN {
 	OPTS_INFO infos;
 	COLR colr;
-	TUNE tune;
-	BACK *background;
-	FORE *foreground;
+	TUNE *tune{nullptr};
+	BACK *background{nullptr};
+	FORE *foreground{nullptr};
 
 };
 struct SHPS {

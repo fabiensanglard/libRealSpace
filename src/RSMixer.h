@@ -19,5 +19,6 @@ public:
     ~RSMixer();
     
     void PlayMusic(uint32_t index);
+    void SwitchBank(uint8_t bank);
     void StopMusic();
 };

@@ -46,6 +46,7 @@ SCMainMenu::~SCMainMenu() {}
 void SCMainMenu::Focus(void) {
     this->focused = true;
     if (!this->music_playing) {
+        Mixer.SwitchBank(0);
         Mixer.PlayMusic(23);
         this->music_playing = true;
     }

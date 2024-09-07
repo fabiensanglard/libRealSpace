@@ -75,9 +75,11 @@ void RSOption::parseOPTS_SCEN_COLR(uint8_t *data, size_t size) {
 }
 
 void RSOption::parseOPTS_SCEN_TUNE(uint8_t *data, size_t size) {
+    TUNE *tmptune = new TUNE();
     printf("Parsing TUNE %llu\n", size);
-    this->tmpscen->tune.ID = *data++;
-    this->tmpscen->tune.UNKOWN = *data;
+    tmptune->ID = *data++;
+    tmptune->UNKOWN = *data;
+    this->tmpscen->tune = tmptune;
 }
 
 void RSOption::parseOPTS_SCEN_BACK(uint8_t *data, size_t size) {
@@ -164,8 +166,10 @@ void RSOption::parseOPTS_SCEN_FORE_SPRT(uint8_t *data, size_t size) {
 
 void RSOption::parseOPTS_SCEN_FORE_SPRT_TUNE(uint8_t *data, size_t size) {
     printf("Parsing TUNE %llu\n", size);
-    this->tmpscen->tune.ID = *data++;
-    this->tmpscen->tune.UNKOWN = *data;
+    TUNE *tune = new TUNE();
+    tune->ID = *data++; 
+    tune->UNKOWN = *data;
+    this->tmpsprt->tune = tune;
 }
 
 void RSOption::parseOPTS_SCEN_FORE_SPRT_SHAP(uint8_t *data, size_t size) {

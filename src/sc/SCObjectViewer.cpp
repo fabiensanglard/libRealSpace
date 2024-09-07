@@ -144,6 +144,7 @@ void SCObjectViewer::NextObject(void){
 void SCObjectViewer::Focus(void) {
     this->focused = true;
     if (!this->music_playing) {
+        Mixer.SwitchBank(0);
         Mixer.PlayMusic(25);
         this->music_playing = true;
     }
