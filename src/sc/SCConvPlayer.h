@@ -18,8 +18,8 @@ class ConvFrame{
     
     public:
     
-        RSFont* font;
-        char* text;
+        RSFont* font{nullptr};
+        char* text{nullptr};
         uint8_t textColor;
     
         enum ConvMode{ CONV_WIDE, CONV_CLOSEUP, CONV_WINGMAN_CHOICE, CONV_CONTRACT_CHOICE};
@@ -32,11 +32,11 @@ class ConvFrame{
     std::vector<CharFigure*> participants;
     
     //If we are in close up mode
-    CharFace* face;
+    CharFace* face{nullptr};
     int8_t facePaletteID;
     
-    std::vector<RLEShape*>* bgLayers;
-    std::vector<uint8_t*> * bgPalettes;
+    std::vector<RLEShape*>* bgLayers{nullptr};
+    std::vector<uint8_t*> * bgPalettes{nullptr};
     
 
     

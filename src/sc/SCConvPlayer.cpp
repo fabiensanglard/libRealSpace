@@ -28,6 +28,15 @@ void SCConvPlayer::Focus(void) {
     Screen.SetTitle("CONVersation Player");
 }
 
+/**
+ * @brief Read the next frame of the conversation from the data stream.
+ *
+ * If the end of the conversation is reached, stop the activity.
+ *
+ * The function reads the next byte from the stream and uses it to determine the type of frame to read.
+ * Depending on the type of frame, it reads the appropriate data from the stream and stores it in currentFrame.
+ * If the type of frame is unknown, it stops the activity and prints an error message.
+ */
 void SCConvPlayer::ReadNextFrame(void) {
 
     if (conv.GetPosition() == end) {
@@ -38,7 +47,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     currentFrame.creationTime = SDL_GetTicks();
     currentFrame.text = nullptr;
     currentFrame.facePaletteID = 0;
-    currentFrame.face = nullptr;
+    //currentFrame.face = nullptr;
 
     uint8_t type = conv.ReadByte();
 
@@ -54,12 +63,13 @@ void SCConvPlayer::ReadNextFrame(void) {
         currentFrame.bgLayers = &bg->layers;
         currentFrame.bgPalettes = &bg->palettes;
 
-        // printf("ConvID: %d WIDEPLAN : LOCATION: '%s'\n",this->conversationID, location);
-        conv.MoveForward(8 + 1);
-
-        while (conv.PeekByte() == GROUP_SHOT_ADD_CHARCTER)
+        printf("ConvID: %d WIDEPLAN : LOCATION: '%s'\n",this->conversationID, location);
+        conv.MoveForward(8);
+        if (conv.PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
+            conv.MoveForward(1);
             ReadNextFrame();
-
+        }
+            
         break;
     }
     case CLOSEUP: // Person talking
@@ -126,10 +136,16 @@ void SCConvPlayer::ReadNextFrame(void) {
 
         char *participantName = (char *)conv.GetPosition();
         CharFigure *participant = ConvAssets.GetFigure(participantName);
-        // currentFrame.participants.push_back(participant);
+        currentFrame.participants.push_back(participant);
 
         printf("ConvID: %d WIDEPLAN ADD PARTICIPANT: '%s'\n", this->conversationID, conv.GetPosition());
-        conv.MoveForward(0xD);
+        conv.MoveForward(12);
+        if (conv.PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
+            conv.MoveForward(1);
+            ReadNextFrame();
+        } else {
+            conv.MoveForward(1);
+        }
         break;
     }
     case GROUP_SHOT_CHARCTR_TALK: // Make group character talk
@@ -140,7 +156,8 @@ void SCConvPlayer::ReadNextFrame(void) {
         char *sentence = (char *)conv.GetPosition();
         conv.MoveForward(strlen(sentence) + 1);
         printf("ConvID: %d WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n", this->conversationID, who, sentence);
-
+        CharFigure *participant = ConvAssets.GetFigure(who);
+        currentFrame.participants.push_back(participant);
         break;
     }
     case SHOW_TEXT: // Show text
@@ -168,6 +185,19 @@ void SCConvPlayer::ReadNextFrame(void) {
     {
         currentFrame.mode = ConvFrame::CONV_WINGMAN_CHOICE;
         printf("ConvID: %d Open pilot selection screen with current BG.\n", this->conversationID);
+        std::vector<std::string> airwing = {
+            "red1",
+            "billy2",
+            "gwen2",
+            "lyle2",
+            "miguel2",
+            "tex3"
+        };
+        for (auto pilot : airwing) {
+            CharFigure *participant = ConvAssets.GetFigure((char *)pilot.c_str());
+            currentFrame.participants.push_back(participant);
+        }
+        
         break;
     }
     default:
@@ -226,6 +256,14 @@ void SCConvPlayer::Init() {
     currentFrame.font = FontManager.GetFont("");
 }
 
+/**
+ * @brief Check if the current frame has expired, either because of user input or
+ *        because a certain amount of time has passed.
+ *
+ * If the user has pressed a key or clicked, the current frame is marked as
+ * expired. If the frame has been displayed for longer than 5 seconds, the
+ * current frame is also marked as expired.
+ */
 void SCConvPlayer::CheckFrameExpired(void) {
 
     // A frame expires either after a player press a key, click or 6 seconds elapse.
@@ -267,6 +305,20 @@ void SCConvPlayer::CheckFrameExpired(void) {
         this->currentFrame.SetExpired(true);
 }
 
+/**
+ * @brief Draw a block of text within a conv window.
+ *
+ * @details
+ * This function is used by the conversation engine to draw a block of text
+ * within a conversation window. The text is split into lines. The width of
+ * each line is determined by the number of characters that can fit between
+ * the left and right border of the conversation window. If a word does not fit
+ * in a line, it is moved to the next line. The text is centered.
+ *
+ * @param[in]   text        The text to draw.
+ * @param[in]   textColor   The color of the text.
+ * @param[in]   font        The font use to draw the text.
+ */
 void SCConvPlayer::DrawText(void) {
 
     if (currentFrame.text == NULL)
@@ -325,6 +377,19 @@ void SCConvPlayer::DrawText(void) {
     }
 }
 
+/**
+ * Runs a single frame of the conversation player, updating the game state and rendering the graphics.
+ *
+ * This function is called by the game engine to update the state of the conversation player and to
+ * render the graphics. It checks if the current frame needs to be updated and if so, reads the next
+ * frame from the conversation data. It also checks if the buttons need to be drawn and if so, draws
+ * them.
+ *
+ * @param None
+ *
+ * @return None
+ *
+ */
 void SCConvPlayer::RunFrame(void) {
 
     if (!initialized) {
@@ -342,6 +407,10 @@ void SCConvPlayer::RunFrame(void) {
 
     VGA.Activate();
     VGA.FillWithColor(255);
+    TreEntry *convPalettesEntry =
+            Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
+    PakArchive convPals;
+    convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
 
     // Update the palette for the current background
     for (size_t i = 0; i < currentFrame.bgLayers->size(); i++) {
@@ -369,10 +438,7 @@ void SCConvPlayer::RunFrame(void) {
     //
     if (currentFrame.mode == ConvFrame::CONV_CLOSEUP || currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
 
-        TreEntry *convPalettesEntry =
-            Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
-        PakArchive convPals;
-        convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
+        
 
         ByteStream paletteReader;
         paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data); // mountains Good but not sky
@@ -498,11 +564,36 @@ void SCConvPlayer::RunFrame(void) {
     }
 
 afterFace:
-    if (currentFrame.mode == ConvFrame::CONV_WIDE || currentFrame.mode == ConvFrame::CONV_WINGMAN_CHOICE) {
-
+    if (currentFrame.mode == ConvFrame::CONV_WIDE) {
+        Point2D position = {0, CONV_TOP_BAR_HEIGHT+1};
         for (size_t i = 0; i < currentFrame.participants.size(); i++) {
-            // CharFace* participant = currentFrame.participants[i];
-            //       VGA.DrawShape(participant->appearance);
+            CharFigure* participant = currentFrame.participants[i];
+            ByteStream paletteReader;
+            paletteReader.Set(convPals.GetEntry(participant->paletteID)->data); // mountains Good but not sky
+            this->palette.ReadPatch(&paletteReader);
+            RLEShape *s = participant->appearances->GetShape(0);
+            s->SetPosition(&position);
+            VGA.DrawShape(participant->appearances->GetShape(0));
+            position.x += s->GetWidth();
+        }
+
+        for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT; i++)
+            VGA.FillLineColor(i, 0x00);
+
+        for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
+            VGA.FillLineColor(199 - i, 0x00);
+    }
+    if (currentFrame.mode == ConvFrame::CONV_WINGMAN_CHOICE) {
+        Point2D position = {0, 0};
+        for (size_t i = 0; i < currentFrame.participants.size(); i++) {
+            CharFigure* participant = currentFrame.participants[i];
+            ByteStream paletteReader;
+            paletteReader.Set(convPals.GetEntry(participant->paletteID)->data); // mountains Good but not sky
+            this->palette.ReadPatch(&paletteReader);
+            RLEShape *s = participant->appearances->GetShape(0);
+            s->SetPosition(&position);
+            VGA.DrawShape(participant->appearances->GetShape(0));
+            position.x += s->GetWidth();
         }
     }
 
