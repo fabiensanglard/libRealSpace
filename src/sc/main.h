@@ -19,5 +19,6 @@ extern SCRenderer Renderer;
 extern ConvAssetManager ConvAssets;
 extern RSFontManager FontManager;
 extern RSMixer Mixer;
+extern SCState GameState;
 
 #endif

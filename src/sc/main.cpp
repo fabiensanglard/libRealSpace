@@ -9,6 +9,7 @@
 #include "precomp.h"
 
 //Here are all the mean subsystems interacting together
+SCState         GameState;
 GameEngine      Game;
 RSScreen        Screen;
 RSVGA           VGA;

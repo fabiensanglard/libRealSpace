@@ -94,8 +94,7 @@ private:
     std::queue<SCConvPlayer *> convs;
     std::queue<SCShot *> cutsenes;
     std::queue<SCStrike *> fly_mission;
-
-    std::map<uint8_t, bool> requierd_flags;
+    
     void RenderMenu();
     void clicked(std::vector<EFCT *> *script, uint8_t id);
     void runEffect();

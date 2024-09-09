@@ -84,7 +84,7 @@ void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
 SCZone *SCGameFlow::CheckZones(void) {
     for (size_t i = 0; i < zones.size(); i++) {
         SCZone *zone = zones[i];
-        if (zone->IsActive(&this->requierd_flags)) {
+        if (zone->IsActive(&GameState.requierd_flags)) {
             if (zone->quad != nullptr) {
                 if (isPointInQuad(Mouse.GetPosition(), zone->quad)) {
                     Mouse.SetMode(SCMouse::VISOR);
@@ -182,10 +182,10 @@ void SCGameFlow::runEffect() {
             fly_mission.push(fly);
         } break;
         case EFECT_OPT_SETFLAG_TRUE:
-            this->requierd_flags[this->efect->at(i)->value] = true;
+            GameState.requierd_flags[this->efect->at(i)->value] = true;
             break;
         case EFECT_OPT_SETFLAG_FALSE:
-            this->requierd_flags[this->efect->at(i)->value] = false;
+            GameState.requierd_flags[this->efect->at(i)->value] = false;
             break;
         default:
             printf("Unkown opcode :%d, %d\n", this->efect->at(i)->opcode, this->efect->at(i)->value);
@@ -495,7 +495,7 @@ void SCGameFlow::RunFrame(void) {
     this->CheckZones();
 
     for (int zi = 0; zi < this->zones.size(); zi++) {
-        if (this->zones.at(zi)->IsActive(&this->requierd_flags)) {
+        if (this->zones.at(zi)->IsActive(&GameState.requierd_flags)) {
             this->zones.at(zi)->Draw();
         }
     }
@@ -594,7 +594,7 @@ void SCGameFlow::RenderMenu() {
             }
         }
         if (ImGui::TreeNode("Required Flags")) {
-            for (auto req_flag : this->requierd_flags) {
+            for (auto req_flag : GameState.requierd_flags) {
                 ImGui::Text("FLAG %03d\tVALUE %03d", req_flag.first, req_flag.second);
             }
             ImGui::TreePop();
@@ -606,7 +606,7 @@ void SCGameFlow::RenderMenu() {
                     if (ImGui::TreeNode((void *)(intptr_t)zone->id, "Zone %d", zone->id)) {
                         ImGui::Text(zone->label->c_str());
                         animatedSprites *sprite = zone->sprite;
-                        if (zone->IsActive(&this->requierd_flags)) {
+                        if (zone->IsActive(&GameState.requierd_flags)) {
                             ImGui::Text("Active");
                         }
                         if (ImGui::TreeNode((void *)(intptr_t)sprite->shapid, "Sprite, Frame %d, %d %d",

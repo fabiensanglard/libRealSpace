@@ -19,6 +19,7 @@
 
 
 // Core of the game
+#include "SCState.h"
 #include "SCMouse.h"
 #include "SCButton.h"
 #include "SCZone.h"
@@ -26,12 +27,11 @@
 #include "GameEngine.h"
 #include "ConvAssetManager.h"
 #include "AssetManager.h"
-#include "SCPlane.h"
-#include "SCCockpit.h"
 #include "main.h"
 
-
-
+// Simulation
+#include "SCPlane.h"
+#include "SCCockpit.h"
 
 //Activities
 #include "SCConvPlayer.h"
