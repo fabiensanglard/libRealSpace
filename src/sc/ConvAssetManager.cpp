@@ -81,9 +81,10 @@ ConvBackGround *ConvAssetManager::GetBackGround(char *name) {
  * @return A CharFigure object.
  */
 CharFigure *ConvAssetManager::GetFigure(char *name) {
-    CharFigure *npc = this->figures[name];
-
-    if (npc == NULL) {
+    if (this->figures.count(name) > 0) {
+        return this->figures[name];
+    } else {
+        CharFigure *npc = NULL;
         static CharFigure dummy;
         RSImageSet *set = new RSImageSet();
         set->Add(RLEShape::GetEmptyShape());
@@ -91,9 +92,10 @@ CharFigure *ConvAssetManager::GetFigure(char *name) {
         npc = &dummy;
         Game.Log("ConvAssetManager: Cannot find npc '%s', returning dummy npc instead.\n", name);
         this->figures[name] = npc;
+        return npc;
     }
 
-    return npc;
+
 }
 
 /**
@@ -292,8 +294,12 @@ void ConvAssetManager::ReadFigures(const IffChunk *root) {
         PakEntry *entry = convShps.GetEntry(pakID);
         PakArchive *pak = new PakArchive();
         pak->InitFromRAM("FIGR", entry->data, entry->size);
-        shape->InitFromSubPakEntry(pak);
-        // shape->InitFromPakEntry(entry);
+        if (pak->GetNumEntries()>0) {
+            shape->InitFromSubPakEntry(pak);
+        } else {
+            shape->InitFromPakEntry(entry);
+        }
+
         Point2D pos = {0, CONV_TOP_BAR_HEIGHT + 1}; //  to allow the black band on top of the screen
         figr->appearances = shape;
         this->figures[figr->name] = figr;

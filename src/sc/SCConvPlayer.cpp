@@ -68,6 +68,8 @@ void SCConvPlayer::ReadNextFrame(void) {
         if (conv.PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
             conv.MoveForward(1);
             ReadNextFrame();
+        } else {
+            conv.MoveForward(1);
         }
             
         break;
@@ -183,10 +185,10 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
     case CHOOSE_WINGMAN: // Wingman selection trigger
     {
+        currentFrame.participants.clear();
         currentFrame.mode = ConvFrame::CONV_WINGMAN_CHOICE;
         printf("ConvID: %d Open pilot selection screen with current BG.\n", this->conversationID);
         std::vector<std::string> airwing = {
-            "red1",
             "billy2",
             "gwen2",
             "lyle2",
@@ -300,9 +302,11 @@ void SCConvPlayer::CheckFrameExpired(void) {
         }
     }
 
-    int32_t currentTime = SDL_GetTicks();
-    if (currentTime - currentFrame.creationTime > 5000)
-        this->currentFrame.SetExpired(true);
+    if (currentFrame.mode != ConvFrame::CONV_CONTRACT_CHOICE && currentFrame.mode != ConvFrame::CONV_WINGMAN_CHOICE) {
+        int32_t currentTime = SDL_GetTicks();
+        if (currentTime - currentFrame.creationTime > 5000)
+            this->currentFrame.SetExpired(true);
+    }
 }
 
 /**
@@ -573,7 +577,7 @@ afterFace:
             this->palette.ReadPatch(&paletteReader);
             RLEShape *s = participant->appearances->GetShape(0);
             s->SetPosition(&position);
-            VGA.DrawShape(participant->appearances->GetShape(0));
+            VGA.DrawShape(s);
             position.x += s->GetWidth();
         }
 
@@ -592,7 +596,10 @@ afterFace:
             this->palette.ReadPatch(&paletteReader);
             RLEShape *s = participant->appearances->GetShape(0);
             s->SetPosition(&position);
-            VGA.DrawShape(participant->appearances->GetShape(0));
+            VGA.DrawShape(s);
+            s = participant->appearances->GetShape(1);
+            s->SetPosition(&position);
+            VGA.DrawShape(s);
             position.x += s->GetWidth();
         }
     }
