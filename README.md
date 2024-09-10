@@ -40,6 +40,17 @@ SDL 2 Mixer ext
 Eye Candies :
 =============
 
+## News :)
+
+![Alt text](pics/gameflow.png)
+![Alt text](pics/flying.png)
+![Alt text](pics/conversation.png)
+![Alt text](pics/external.png)
+![Alt text](pics/transistion.png)
+![Alt text](pics/virtualcp.png)
+![Alt text](pics/object_viewer.png)
+
+
 ![Alt text](pics/nice_sc_scene.png)
 ![Alt text](/pics/F-22.png)
 ![Alt text](/pics/face.png)
