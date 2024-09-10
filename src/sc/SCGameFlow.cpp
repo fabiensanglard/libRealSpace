@@ -586,12 +586,13 @@ void SCGameFlow::RenderMenu() {
     static bool show_scene_window = false;
     static bool quit_gameflow = false;
     static bool show_load_miss = false;
+    static bool show_gamestate = false;
     static int miss_selected = 0;
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("GameFlow")) {
             ImGui::MenuItem("Load Miss", NULL, &show_load_miss);
             ImGui::MenuItem("Info", NULL, &show_scene_window);
-            ImGui::MenuItem("Quit", NULL, &quit_gameflow);
+            ImGui::MenuItem("GameState", NULL, &show_gamestate);
             ImGui::EndMenu();
         }
         int sceneid = -1;
@@ -629,6 +630,13 @@ void SCGameFlow::RenderMenu() {
             this->currentSpriteId = 0;
             this->efect = nullptr;
             this->createMiss();
+        }
+        ImGui::End();
+    }
+    if (show_gamestate) {
+        ImGui::Begin("GameState");
+        for (auto flag : GameState.requierd_flags) {
+            ImGui::Text("Flag %d, Value %d", flag.first, flag.second);
         }
         ImGui::End();
     }
