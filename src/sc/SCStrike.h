@@ -38,6 +38,7 @@ public:
     void RenderMenu();
 
 private:
+    char missFileName[33];
     uint8_t camera_mode;
     bool mouse_control;
     Point3D *position;

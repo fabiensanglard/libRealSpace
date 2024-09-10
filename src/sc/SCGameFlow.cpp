@@ -20,17 +20,24 @@
 #define EFECT_OPT_FLYM 12
 #define EFECT_OPT_SETFLAG_TRUE 6
 #define EFECT_OPT_SETFLAG_FALSE 7
+#define EFECT_OPT_IF_FLAG 10
 #define EFECT_OPT_MISS_ACCEPTED 20
-#define EFECT_OPT_MISS_REJECTED 30
+#define EFECT_OPT_MISS_REJECTED 21
+#define EFECT_OPT_MISS_ELSE 30
+#define EFECT_OPT_MISS_ENDIF 31
+#define EFECT_OPT_GO 15
+#define EFECT_OPT_TEST_U1 29
+#define EFECT_OPT_TEST_U2 32
+
 /**
- * \brief Test if a 2D point is inside a quad.
+ * @brief Test if a 2D point is inside a quad.
  *
  * This is the "Ray Casting Algorithm" also known as the "Even-Odd Rule Algorithm"
  * (https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm).
  *
- * \param p The point to test.
- * \param quad The quad to test against.
- * \return true if the point is inside the quad, false otherwise.
+ * @param p The point to test.
+ * @param quad The quad to test against.
+ * @return true if the point is inside the quad, false otherwise.
  */
 bool isPointInQuad(const Point2D &p, const std::vector<Point2D *> *quad) {
     int intersections = 0;
@@ -132,8 +139,32 @@ void SCGameFlow::runEffect() {
     if (this->efect == nullptr) {
         return;
     }
+    std::stack<uint8_t> ifStack;
+
     for (int i = 0; i < this->efect->size(); i++) {
-        this->currentOptCode++;
+        if (ifStack.size() > 0) {
+            if (ifStack.top() == false) {
+                switch (this->efect->at(i)->opcode) {
+                    case EFECT_OPT_MISS_ELSE:
+                        if (ifStack.size() > 0) {
+                            uint8_t ifval = 0;
+                            ifval = ifStack.top();
+                            ifStack.pop();
+                            ifStack.push(!ifval);
+                        }
+                        break;
+                    case EFECT_OPT_MISS_ENDIF:
+                        if (ifStack.size() > 0) {
+                            ifStack.pop();
+                        }
+                        break;
+                    default:
+                        printf("Opcode %d ignored cause flag is false\n", this->efect->at(i)->opcode);
+                        break;
+                }
+                continue;
+            }
+        }
         switch (this->efect->at(i)->opcode) {
         case EFECT_OPT_CONV: {
             printf("PLAYING CONV %d\n", this->efect->at(i)->value);
@@ -153,12 +184,11 @@ void SCGameFlow::runEffect() {
                 }
             }
             break;
-        case EFECT_OPT_MISS: {
+        case EFECT_OPT_MISS: 
             this->next_miss = this->efect->at(i)->value;
-            printf("NEXT MISS %d\n", this->next_miss);
-        } break;
+        break;
         case EFECT_OPT_MIS2:
-            // this->next_miss = this->efect->at(i)->value;
+            GameState.mission_id = this->efect->at(i)->value;
             printf("PLAYING MIS2 %d\n", this->efect->at(i)->value);
             break;
         case EFECT_OPT_SHOT: {
@@ -182,10 +212,34 @@ void SCGameFlow::runEffect() {
             fly_mission.push(fly);
         } break;
         case EFECT_OPT_SETFLAG_TRUE:
+
             GameState.requierd_flags[this->efect->at(i)->value] = true;
             break;
         case EFECT_OPT_SETFLAG_FALSE:
             GameState.requierd_flags[this->efect->at(i)->value] = false;
+            break;
+        case EFECT_OPT_MISS_ACCEPTED:
+            if (GameState.mission_accepted == true) {
+                ifStack.push(true);
+            } else {
+                ifStack.push(false);
+            }
+        case EFECT_OPT_MISS_REJECTED:
+            if (GameState.mission_accepted == false) {
+                ifStack.push(true);
+            } else {
+                ifStack.push(false);
+            }
+            break;
+        case EFECT_OPT_IF_FLAG:
+            if (GameState.requierd_flags[this->efect->at(i)->value] == true) {
+                ifStack.push(true);
+            } else {
+                ifStack.push(false);
+            }
+            break;
+        case EFECT_OPT_GO:
+            this->next_miss = GameState.mission_id;
             break;
         default:
             printf("Unkown opcode :%d, %d\n", this->efect->at(i)->opcode, this->efect->at(i)->value);

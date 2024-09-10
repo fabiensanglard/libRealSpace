@@ -202,7 +202,6 @@ void SCStrike::Init(void) {
 }
 
 void SCStrike::SetMission(char const *missionName) {
-    char missFileName[33];
     sprintf(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
 
     TreEntry *mission = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(missFileName);
@@ -344,79 +343,107 @@ void SCStrike::RenderMenu() {
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
-    ImGui::Begin("Simulation");
-    ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", this->player_plane->airspeed, this->newPosition.y,
-                this->player_plane->azimuthf);
-    ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
-    ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
-    ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf, this->player_plane->twist,
-                this->player_plane->roll_speed);
-    ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
-    ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", this->player_plane->rollers,
-                this->player_plane->elevator, this->player_plane->rudder);
-    ImGui::Text("Acceleration (vx,vy,vz) [%.3f ,%.3f ,%.3f ]", this->player_plane->vx, this->player_plane->vy,
-                this->player_plane->vz);
-    ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]", this->player_plane->ax, this->player_plane->ay,
-                this->player_plane->az);
-    ImGui::Text("Lift %.3f", this->player_plane->lift);
-    ImGui::Text("%.3f %.3f %.3f %.3f %.3f %.3f", this->player_plane->uCl, this->player_plane->Cl,
-                this->player_plane->Cd, this->player_plane->Cdc, this->player_plane->kl, this->player_plane->qs);
-    ImGui::Text("Gravity %.3f", this->player_plane->gravity);
-    ImGui::Text("ptw");
-    for (int o = 0; o < 4; o++) {
-        ImGui::Text("PTW[%d]=[%f,%f,%f,%f]", o, this->player_plane->ptw.v[o][0], this->player_plane->ptw.v[o][1],
-                    this->player_plane->ptw.v[o][2], this->player_plane->ptw.v[o][3]);
-    }
-    ImGui::Text("incremental");
-    for (int o = 0; o < 4; o++) {
-        ImGui::Text("INC[%d]=[%f,%f,%f,%f]", o, this->player_plane->incremental.v[o][0],
-                    this->player_plane->incremental.v[o][1], this->player_plane->incremental.v[o][2],
-                    this->player_plane->incremental.v[o][3]);
-    }
-    ImGui::End();
-    ImGui::Begin("Camera");
-    ImGui::Text("Tps %d", this->player_plane->tps);
-    ImGui::Text("Camera mode %d", this->camera_mode);
-    ImGui::Text("Position [%.3f,%.3f,%.3f]", this->camera_pos.x, this->camera_pos.y, this->camera_pos.z);
-    ImGui::Text("Pilot lookat [%d,%d]", this->pilote_lookat.x, this->pilote_lookat.y);
-    ImGui::End();
-    ImGui::Begin("Cockpit");
-    if (this->player_plane->GetWheel()) {
-        ImGui::Text("Wheel down");
-    } else {
-        ImGui::Text("Wheel up");
-    }
-    if (this->player_plane->GetFlaps()) {
-        ImGui::Text("Flaps");
-    }
-    if (this->player_plane->GetSpoilers()) {
-        ImGui::Text("Breaks");
-    }
-    ImGui::End();
-    ImGui::Begin("Mission");
-    ImGui::Text("Mission %s", missionObj->getMissionName());
-    ImGui::Text("Area %s", missionObj->getMissionAreaFile());
-    ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->XAxisRelative,
-                missionObj->getPlayerCoord()->YAxisRelative);
-    static ImGuiComboFlags flags = 0;
-    if (ImGui::BeginCombo("List des missions", mission_list[mission_idx], flags)) {
-        for (int n = 0; n < SCSTRIKE_MAX_MISSIONS; n++) {
-            const bool is_selected = (mission_idx == n);
-            if (ImGui::Selectable(mission_list[n], is_selected))
-                mission_idx = n;
-
-            // Set the initial focus when opening the combo (scrolling +
-            // keyboard navigation focus)
-            if (is_selected)
-                ImGui::SetItemDefaultFocus();
+    static bool show_simulation = false;
+    static bool show_camera = false;
+    static bool show_cockpit = false;
+    static bool show_mission = false;
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("SCStrike")) {
+            ImGui::MenuItem("Simulation", NULL, &show_simulation);
+            ImGui::MenuItem("Camera", NULL, &show_camera);
+            ImGui::MenuItem("Cockpit", NULL, &show_cockpit);
+            ImGui::MenuItem("Mission", NULL, &show_mission);
+            ImGui::EndMenu();
         }
-        ImGui::EndCombo();
+        int sceneid = -1;
+        ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s", 
+            this->player_plane->airspeed,
+            this->newPosition.y*3.6,
+            this->player_plane->azimuthf/10.0f,
+            this->player_plane->tps,
+            missionObj->getMissionName(),
+            missFileName
+        );
+        ImGui::EndMainMenuBar();
     }
-    if (ImGui::Button("Load Mission")) {
-        this->SetMission((char *)mission_list[mission_idx]);
+    if (show_simulation) {
+        ImGui::Begin("Simulation");
+        ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", this->player_plane->airspeed, this->newPosition.y,
+                    this->player_plane->azimuthf);
+        ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
+        ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
+        ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf, this->player_plane->twist,
+                    this->player_plane->roll_speed);
+        ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
+        ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", this->player_plane->rollers,
+                    this->player_plane->elevator, this->player_plane->rudder);
+        ImGui::Text("Acceleration (vx,vy,vz) [%.3f ,%.3f ,%.3f ]", this->player_plane->vx, this->player_plane->vy,
+                    this->player_plane->vz);
+        ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]", this->player_plane->ax, this->player_plane->ay,
+                    this->player_plane->az);
+        ImGui::Text("Lift %.3f", this->player_plane->lift);
+        ImGui::Text("%.3f %.3f %.3f %.3f %.3f %.3f", this->player_plane->uCl, this->player_plane->Cl,
+                    this->player_plane->Cd, this->player_plane->Cdc, this->player_plane->kl, this->player_plane->qs);
+        ImGui::Text("Gravity %.3f", this->player_plane->gravity);
+        ImGui::Text("ptw");
+        for (int o = 0; o < 4; o++) {
+            ImGui::Text("PTW[%d]=[%f,%f,%f,%f]", o, this->player_plane->ptw.v[o][0], this->player_plane->ptw.v[o][1],
+                        this->player_plane->ptw.v[o][2], this->player_plane->ptw.v[o][3]);
+        }
+        ImGui::Text("incremental");
+        for (int o = 0; o < 4; o++) {
+            ImGui::Text("INC[%d]=[%f,%f,%f,%f]", o, this->player_plane->incremental.v[o][0],
+                        this->player_plane->incremental.v[o][1], this->player_plane->incremental.v[o][2],
+                        this->player_plane->incremental.v[o][3]);
+        }
+        ImGui::End();
     }
+    if (show_camera) {
+        ImGui::Begin("Camera");
+        ImGui::Text("Tps %d", this->player_plane->tps);
+        ImGui::Text("Camera mode %d", this->camera_mode);
+        ImGui::Text("Position [%.3f,%.3f,%.3f]", this->camera_pos.x, this->camera_pos.y, this->camera_pos.z);
+        ImGui::Text("Pilot lookat [%d,%d]", this->pilote_lookat.x, this->pilote_lookat.y);
+        ImGui::End();
+    }
+    if (show_cockpit) {
+        ImGui::Begin("Cockpit");
+        if (this->player_plane->GetWheel()) {
+            ImGui::Text("Wheel down");
+        } else {
+            ImGui::Text("Wheel up");
+        }
+        if (this->player_plane->GetFlaps()) {
+            ImGui::Text("Flaps");
+        }
+        if (this->player_plane->GetSpoilers()) {
+            ImGui::Text("Breaks");
+        }
+        ImGui::End();
+    }
+    if (show_mission) {
+        ImGui::Begin("Mission");
+        ImGui::Text("Mission %s", missionObj->getMissionName());
+        ImGui::Text("Area %s", missionObj->getMissionAreaFile());
+        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->XAxisRelative,
+                    missionObj->getPlayerCoord()->YAxisRelative);
+        static ImGuiComboFlags flags = 0;
+        if (ImGui::BeginCombo("List des missions", mission_list[mission_idx], flags)) {
+            for (int n = 0; n < SCSTRIKE_MAX_MISSIONS; n++) {
+                const bool is_selected = (mission_idx == n);
+                if (ImGui::Selectable(mission_list[n], is_selected))
+                    mission_idx = n;
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+        if (ImGui::Button("Load Mission")) {
+            this->SetMission((char *)mission_list[mission_idx]);
+        }
 
-    ImGui::End();
+        ImGui::End();
+    }
     ImGui::Render();
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }
