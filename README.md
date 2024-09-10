@@ -11,8 +11,8 @@ Tools to parse and render Origin Systems RealSpace engine assets.
 - Render animation layers (individually).
 - Render Map Textures.
 - Render ingame screen (conversation, transition animation, scenes)
-- Fly in mission
-
+- Flying
+- GameFlow logic
 - Guess PAK contents:
      - VOC sound effects.
      - XMidi music
