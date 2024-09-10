@@ -184,8 +184,28 @@ void SCGameFlow::runEffect() {
                 }
             }
             break;
-        case EFECT_OPT_MISS: 
-            GameState.mission_id = this->efect->at(i)->value;
+        case EFECT_OPT_MISS:{
+            bool direct = false;
+            for (auto z: this->zones) {
+                if (z->id == this->currentSpriteId) {
+                    direct = z->sprite->requ == nullptr;
+                    if (!direct) {
+                        for (auto r: *z->sprite->requ) {
+                            if (r->op == 1) {
+                                direct = true;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            if (direct) {
+                this->next_miss = this->efect->at(i)->value;
+            } else {
+                /* we have a requ flag so an other sprite will launch the next mission */
+                GameState.mission_id = this->efect->at(i)->value;    
+            }
+        }            
         break;
         case EFECT_OPT_MIS2:
             GameState.mission_id = this->efect->at(i)->value;
