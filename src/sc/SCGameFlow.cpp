@@ -185,7 +185,7 @@ void SCGameFlow::runEffect() {
             }
             break;
         case EFECT_OPT_MISS: 
-            this->next_miss = this->efect->at(i)->value;
+            GameState.mission_id = this->efect->at(i)->value;
         break;
         case EFECT_OPT_MIS2:
             GameState.mission_id = this->efect->at(i)->value;
