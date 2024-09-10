@@ -33,9 +33,10 @@ The long term goal is to be able to play Strike Commander with a Virtual Reality
 Dependencies :
 ==============
 
-SDL 2
-Dear IM Gui
-SDL 2 Mixer ext
+- SDL 2: https://www.libsdl.org/
+- Dear IMGui: https://github.com/ocornut/imgui
+- SDL-Mixer-ext: https://wohlsoft.github.io/SDL-Mixer-X/
+- Legacy OpenGL
 
 Eye Candies :
 =============
@@ -50,6 +51,7 @@ Eye Candies :
 ![Alt text](pics/virtualcp.png)
 ![Alt text](pics/object_viewer.png)
 
+## Originals Eye Candies :)
 
 ![Alt text](pics/nice_sc_scene.png)
 ![Alt text](/pics/F-22.png)
