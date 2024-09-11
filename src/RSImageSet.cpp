@@ -30,17 +30,29 @@ void RSImageSet::InitFromPakEntry(PakEntry *entry) {
 
         size_t size = 0;
 
-        if (currImage[0] != 'F') {
+        if (*currImage != 'F') {
             RLEShape *shape = new RLEShape();
             shape->Init(currImage, size);
             this->shapes.push_back(shape);
             this->sequence.push_back((uint8_t)i);
         } else {
-            printf("PALT not supported yet\n");
-            RLEShape *shape = new RLEShape();
-            ;
-            *shape = *RLEShape::GetEmptyShape();
-            this->shapes.push_back(shape);
+            RSPalette *palette = new RSPalette();
+            IffLexer paliff;
+            uint32_t pal_size = 0;
+            pal_size |= *(currImage+4) << 24;
+            pal_size |= *(currImage+5) << 16;
+            pal_size |= *(currImage+6) << 8;
+            pal_size |= *(currImage+7) << 0;
+            if (*(currImage+8)=='P') {
+                paliff.InitFromRAM(currImage, pal_size+8);
+                palette->InitFromIFF(&paliff);
+                
+                this->palettes.push_back(palette);
+                
+                RLEShape *shape = new RLEShape();
+                *shape = *RLEShape::GetEmptyShape();
+                this->shapes.push_back(shape);
+            }
         }
     }
 }

@@ -34,7 +34,7 @@ public:
     VGAPalette* GetBWPalette(void);
     void SetBWFlag(uint32_t flag);
     
-    
+    void copyFrom(VGAPalette* other);
 private:
     
     void ParsePALT(IffChunk* chunk);

@@ -26,8 +26,9 @@
 #define EFECT_OPT_MISS_ELSE 30
 #define EFECT_OPT_MISS_ENDIF 31
 #define EFECT_OPT_GO 15
-#define EFECT_OPT_TEST_U1 29
-#define EFECT_OPT_TEST_U2 32
+#define EFECT_OPT_U1 29
+#define EFECT_OPT_TEST_UNKNW_FLAG 37
+#define EFECT_OPT_TEST_CURRENT_MISS 32
 
 /**
  * @brief Test if a 2D point is inside a quad.
@@ -258,6 +259,12 @@ void SCGameFlow::runEffect() {
                 ifStack.push(false);
             }
             break;
+        case EFECT_OPT_TEST_CURRENT_MISS:
+            if (GameState.mission_id == this->efect->at(i)->value) {
+                ifStack.push(true);
+            } else {
+                ifStack.push(false);
+            }
         case EFECT_OPT_GO:
             this->next_miss = GameState.mission_id;
             break;

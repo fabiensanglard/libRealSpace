@@ -70,21 +70,18 @@ To build the project using CMake and Vcpkg, follow these instructions:
      - Download and install Vcpkg from the official GitHub repository: https://github.com/microsoft/vcpkg
      - Follow the installation instructions for your operating system.
 
-3. Install dependencies:
-     - Open a terminal or command prompt.
-     - Navigate to the Vcpkg directory.
-     - Run the following command to install the SDL2 library:
-       ```
-       vcpkg install sdl2
-       ```
-
-4. Configure the project:
+3. Configure the project:
      - Open a terminal or command prompt.
      - Navigate to the project directory.
      - Run the following command to configure the project using CMake:
+       ```bash
+       cmake --preset=windows
        ```
-       cmake -B build -S .
-       ```
+     - current preset are :
+          - windows, to build for windows with Visual Studio 17 2022
+          - linux, to build for linux with GCC 13.2.0 x86_64-linux-gnu
+          - linux_clang to build for linux with Clang 18.1.3 x86_64-pc-linux-gnu
+
 
 5. Build the project:
      - Run the following command to build the project using CMake:

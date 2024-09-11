@@ -32,11 +32,11 @@ IffChunk::IffChunk() :
 
 
 IffChunk::~IffChunk() {
-	while (!childs.empty()) {
+	/*while (!childs.empty()) {
 		IffChunk* chunk = childs.back();
 		childs.pop_back();
 		delete chunk;
-	}
+	}*/
 }
 
 //A CHUNK_HEADER_SIZE features a 4 bytes ID and a 4 bytes size;
@@ -149,8 +149,13 @@ size_t IffLexer::ParseFORM(IffChunk* chunk) {
 
 		chunk->childs.push_back(child);
 		chunksHashTable[child->id] = child;
+		if (byteParsed > bytesToParse) {
 
-		bytesToParse -= byteParsed;
+			bytesToParse = 0;	
+		} else {
+			bytesToParse -= byteParsed;
+		}
+		
 	}
 
 

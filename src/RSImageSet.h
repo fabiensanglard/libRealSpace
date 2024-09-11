@@ -12,6 +12,7 @@
 #include "RLEShape.h"
 #include <stdint.h>
 #include <vector>
+#include "RSPalette.h"
 
 class RSImageSet {
 
@@ -26,6 +27,7 @@ public:
     size_t GetNumImages(void);
     std::vector<uint8_t> sequence;
     void Add(RLEShape *shape);
+    std::vector<RSPalette *> palettes;
 
 private:
     std::vector<RLEShape *> shapes;

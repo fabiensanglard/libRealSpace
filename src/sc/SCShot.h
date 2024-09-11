@@ -35,6 +35,7 @@ private:
     PakArchive optPals;
     std::vector<shotBackground *>layers;
     uint8_t* rawPalette;
+    std::vector<uint8_t*> palettes;
     uint8_t* forPalette;
     
     RSImageSet* getShape(uint8_t shpid);

@@ -106,9 +106,14 @@ void RSPalette::ParseCMAP(IffChunk* chunk){
         texel.a = 255;
         colors.SetColor(i, &texel);
     }
-    
 }
-
+void RSPalette::copyFrom(VGAPalette* other){
+    for (int i=0; i< 256; i++) {
+        if (this->colors.colors[i].r == 0 && this->colors.colors[i].g == 252 && this->colors.colors[i].b == 0) {
+            this->colors.colors[i] = other->colors[i];
+        }
+    }
+}
 
 void RSPalette::InitFromIFF(IffLexer* lexer){
     

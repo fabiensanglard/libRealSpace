@@ -75,6 +75,9 @@ void SCShot::SetShotId(uint8_t shotid) {
     }
     uint8_t paltID = this->optionParser.estb[shotid]->palettes[0]->ID;
     this->rawPalette = this->optPals.GetEntry(paltID)->data;
+    for (auto p: this->optionParser.estb[shotid]->palettes) {
+        this->palettes.push_back(this->optPals.GetEntry(p->ID)->data);
+    }
 }
 
 /**
@@ -119,11 +122,22 @@ void SCShot::RunFrame(void) {
     if (fpsupdate) {
         this->fps = (SDL_GetTicks()/10);
     }
-    paletteReader.Set((this->rawPalette));
-    this->palette.ReadPatch(&paletteReader);
-    VGA.SetPalette(&this->palette);
+    
     bool ended = false;
+    int cpt=0;
     for (auto layer: this->layers) {
+        if (cpt<this->palettes.size()) {
+            paletteReader.Set((this->palettes[cpt]));
+            this->palette.ReadPatch(&paletteReader);
+            VGA.SetPalette(&this->palette);
+        }
+        
+        if (layer->img->palettes.size()>=1) {
+            layer->img->palettes[0]->copyFrom(&this->palette);
+            VGA.SetPalette(layer->img->palettes[0]->GetColorPalette());
+        } else {
+            VGA.SetPalette(&this->palette);
+        }
         VGA.DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
         if (layer->img->sequence.size()>1) {
             layer->frameCounter = layer->frameCounter + fpsupdate;
@@ -131,8 +145,13 @@ void SCShot::RunFrame(void) {
                 ended = true;
             }
         }
+        cpt++;
     }
+    for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT; i++)
+            VGA.FillLineColor(i, 0x00);
 
+        for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
+            VGA.FillLineColor(199 - i, 0x00);
     Mouse.Draw();
 
     VGA.VSync();
