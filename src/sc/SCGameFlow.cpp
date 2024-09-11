@@ -221,6 +221,7 @@ void SCGameFlow::runEffect() {
         } break;
         case EFECT_OPT_FLYM: {
             uint8_t flymID = this->efect->at(i)->value;
+            GameState.mission_flyed = flymID;
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             this->missionToFly = (char *)malloc(13);
@@ -260,7 +261,7 @@ void SCGameFlow::runEffect() {
             }
             break;
         case EFECT_OPT_TEST_CURRENT_MISS:
-            if (GameState.mission_id == this->efect->at(i)->value) {
+            if (GameState.mission_flyed == this->efect->at(i)->value) {
                 ifStack.push(true);
             } else {
                 ifStack.push(false);
