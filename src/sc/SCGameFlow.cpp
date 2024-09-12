@@ -21,6 +21,7 @@
 #define EFECT_OPT_SETFLAG_TRUE 6
 #define EFECT_OPT_SETFLAG_FALSE 7
 #define EFECT_OPT_IF_FLAG 10
+#define EFECT_OPT_IF_NOT_FLAG 9
 #define EFECT_OPT_MISS_ACCEPTED 20
 #define EFECT_OPT_MISS_REJECTED 21
 #define EFECT_OPT_MISS_ELSE 30
@@ -209,8 +210,10 @@ void SCGameFlow::runEffect() {
         }            
         break;
         case EFECT_OPT_MIS2:
-            GameState.mission_id = this->efect->at(i)->value;
-            printf("PLAYING MIS2 %d\n", this->efect->at(i)->value);
+            if (this->efect->at(i)->value != this->current_miss) {
+                GameState.mission_id = this->efect->at(i)->value;
+                printf("PLAYING MIS2 %d\n", this->efect->at(i)->value);
+            }
             break;
         case EFECT_OPT_SHOT: {
             printf("PLAYING SHOT %d\n", this->efect->at(i)->value);
@@ -260,6 +263,13 @@ void SCGameFlow::runEffect() {
                 ifStack.push(false);
             }
             break;
+        case EFECT_OPT_IF_NOT_FLAG:
+            if (GameState.requierd_flags[this->efect->at(i)->value] == false) {
+                ifStack.push(true);
+            } else {
+                ifStack.push(false);
+            }
+            break;
         case EFECT_OPT_TEST_CURRENT_MISS:
             if (GameState.mission_flyed == this->efect->at(i)->value) {
                 ifStack.push(true);
@@ -268,6 +278,11 @@ void SCGameFlow::runEffect() {
             }
         case EFECT_OPT_GO:
             this->next_miss = GameState.mission_id;
+            break;
+        case EFECT_OPT_MISS_ENDIF:
+            if (ifStack.size() > 0) {
+                ifStack.pop();
+            }
             break;
         default:
             printf("Unkown opcode :%d, %d\n", this->efect->at(i)->opcode, this->efect->at(i)->value);
