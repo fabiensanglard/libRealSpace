@@ -47,7 +47,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     currentFrame.creationTime = SDL_GetTicks();
     currentFrame.text = nullptr;
     currentFrame.facePaletteID = 0;
-    //currentFrame.face = nullptr;
+    // currentFrame.face = nullptr;
 
     uint8_t type = conv.ReadByte();
 
@@ -63,7 +63,7 @@ void SCConvPlayer::ReadNextFrame(void) {
         currentFrame.bgLayers = &bg->layers;
         currentFrame.bgPalettes = &bg->palettes;
 
-        printf("ConvID: %d WIDEPLAN : LOCATION: '%s'\n",this->conversationID, location);
+        printf("ConvID: %d WIDEPLAN : LOCATION: '%s'\n", this->conversationID, location);
         conv.MoveForward(8);
         if (conv.PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
             conv.MoveForward(1);
@@ -71,7 +71,7 @@ void SCConvPlayer::ReadNextFrame(void) {
         } else {
             conv.MoveForward(1);
         }
-            
+
         break;
     }
     case CLOSEUP: // Person talking
@@ -117,20 +117,22 @@ void SCConvPlayer::ReadNextFrame(void) {
     case YESNOCHOICE_BRANCH1: // Choice Offsets are question
     {
         currentFrame.mode = ConvFrame::CONV_CONTRACT_CHOICE;
-        printf("ConvID: %d CHOICE YES/NO : %X.\n", this->conversationID, type);
+        printf("ConvID: %d CHOICE YES/NO : %d\n", this->conversationID, type);
         // Looks like first byte is the offset to skip if the answer is no.
-        /*uint8_t noOffset  =*/conv.ReadByte();
-        /*uint8_t yesOffset  =*/conv.ReadByte();
+        this->noOffset = conv.ReadByte();
+        this->yesOffset = conv.ReadByte();
+        printf("Offsets: %d %d\n", this->noOffset, this->yesOffset);
         break;
     }
     case YESNOCHOICE_BRANCH2: // Choice offset after first branch
     {
 
         // currentFrame.mode = ConvFrame::CONV_CONTRACT_CHOICE;
-        printf("ConvID: %d CHOICE YES/NO : %X.\n", this->conversationID, type);
+        printf("ConvID: %d CHOICE YES/NO : %d\n", this->conversationID, type);
         // Looks like first byte is the offset to skip if the answer is no.
-        /*uint8_t yesOffset  =*/conv.ReadByte();
-        /*uint8_t noOffset  =*/conv.ReadByte();
+        uint8_t t  = conv.ReadByte();
+        uint8_t b  = conv.ReadByte();
+        printf("Offsets: %d %d\n", t, b);
         break;
     }
     case GROUP_SHOT_ADD_CHARCTER: // Add person to GROUP
@@ -188,18 +190,12 @@ void SCConvPlayer::ReadNextFrame(void) {
         currentFrame.participants.clear();
         currentFrame.mode = ConvFrame::CONV_WINGMAN_CHOICE;
         printf("ConvID: %d Open pilot selection screen with current BG.\n", this->conversationID);
-        std::vector<std::string> airwing = {
-            "billy2",
-            "gwen2",
-            "lyle2",
-            "miguel2",
-            "tex3"
-        };
+        std::vector<std::string> airwing = {"billy2", "gwen2", "lyle2", "miguel2", "tex3"};
         for (auto pilot : airwing) {
             CharFigure *participant = ConvAssets.GetFigure((char *)pilot.c_str());
             currentFrame.participants.push_back(participant);
         }
-        
+
         break;
     }
     default:
@@ -404,15 +400,20 @@ void SCConvPlayer::RunFrame(void) {
 
     // If frame needs to be update
     CheckFrameExpired();
-    if (currentFrame.IsExpired())
+    if (currentFrame.IsExpired()) {
+        if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
+            GameState.mission_accepted = false;
+            conv.MoveForward(noOffset);
+        }
         ReadNextFrame();
+    }
 
     CheckButtons();
 
     VGA.Activate();
     VGA.FillWithColor(255);
     TreEntry *convPalettesEntry =
-            Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
+        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
     PakArchive convPals;
     convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
 
@@ -442,8 +443,6 @@ void SCConvPlayer::RunFrame(void) {
     //
     if (currentFrame.mode == ConvFrame::CONV_CLOSEUP || currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
 
-        
-
         ByteStream paletteReader;
         paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data); // mountains Good but not sky
         this->palette.ReadPatch(&paletteReader);
@@ -458,120 +457,118 @@ void SCConvPlayer::RunFrame(void) {
                 pos = 30;
         }
 
-        if (currentFrame.face == NULL)
-            goto afterFace;
+        if (currentFrame.face != NULL) {
+            // Face wiht of without hair
+            // 00 nothing
+            // 01 rest face
+            // 02 hair
+            for (size_t i = 1; i < 3; i++) {
+                RLEShape *s = currentFrame.face->appearances->GetShape(i);
+                s->SetPositionX(pos);
+                VGA.DrawShape(s);
+            }
 
-        // Face wiht of without hair
-        // 00 nothing
-        // 01 rest face
-        // 02 hair
-        for (size_t i = 1; i < 3; i++) {
-            RLEShape *s = currentFrame.face->appearances->GetShape(i);
+            // Taking animation
+            // 03 mouth anim
+            // 04 mouth anim
+            // 06 mouth anim
+            // 07 mouth anim
+            // 08 mouth anim
+            // 09 mouth pinched
+            // 10 mouth opened
+            // 11 mouth something
+            // 12 mouth something
+
+            for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP; i++) {
+
+                RLEShape *s = currentFrame.face->appearances->GetShape(3 + (SDL_GetTicks() / 100) % 10);
+                s->SetPositionX(pos);
+                VGA.DrawShape(s);
+            }
+
+            // Eyes animation
+            // 13 eyes closed
+            // 14 eyes closed
+            // 15 eyes wide open
+            // 16 eagle eyes
+            // 16 left wink
+            // 17 upper left eyes
+            // 18 look right
+            // 19 look left
+            // 20 eyes straight
+            // 21 eyes blink closed
+            // 22 eyes blink mid-open
+
+            // 23 eye brows semi-raised
+            // 24 left eye brows semi-raised
+            // 25 right eye brows semi-raised
+            // 26 eye brows something
+            for (size_t i = 13; i < 14; i++) {
+                RLEShape *s = currentFrame.face->appearances->GetShape(i);
+                s->SetPositionX(pos);
+                // VGA.DrawShape();
+            }
+
+            // General face expression
+            // 27 mouth heart
+            // 28 face tensed
+            // 29 face smile
+            // 30 right face tensed
+            // 31 right crooked
+            // 32 pinched lips
+            // 33 surprise
+            // 34 seducing face
+            // 35 look of desaproval face
+            for (size_t i = 29; i < 30; i++) {
+                RLEShape *s = currentFrame.face->appearances->GetShape(i);
+                s->SetPositionX(pos);
+                // VGA.DrawShape();
+            }
+
+            // Cloth
+            // 35 civil clothes
+            // 36 pilot clothes
+            // 37 pilot clothes 2
+            // for (size_t i=36; i< 37; i++) {
+            RLEShape *s = currentFrame.face->appearances->GetShape(35);
             s->SetPositionX(pos);
             VGA.DrawShape(s);
-        }
+            //}
 
-        // Taking animation
-        // 03 mouth anim
-        // 04 mouth anim
-        // 06 mouth anim
-        // 07 mouth anim
-        // 08 mouth anim
-        // 09 mouth pinched
-        // 10 mouth opened
-        // 11 mouth something
-        // 12 mouth something
+            // 38 sunglasses
+            // 39 pilot helmet (if drawing this, don't draw hairs
+            // 40 pilot helmet visor (if drawing this draw 39 too
+            for (size_t i = 41; i < 40; i++) {
+                RLEShape *s = currentFrame.face->appearances->GetShape(i);
+                s->SetPositionX(pos);
+                VGA.DrawShape(s);
+            }
 
-        for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP; i++) {
+            // 40 to 54 ????
 
-            RLEShape *s = currentFrame.face->appearances->GetShape(3 + (SDL_GetTicks() / 100) % 10);
-            s->SetPositionX(pos);
-            VGA.DrawShape(s);
-        }
+            // 54 hand extension
+            if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
+                RLEShape *s = currentFrame.face->appearances->GetShape(54);
+                s->SetPositionX(pos);
+                VGA.DrawShape(s);
+            }
 
-        // Eyes animation
-        // 13 eyes closed
-        // 14 eyes closed
-        // 15 eyes wide open
-        // 16 eagle eyes
-        // 16 left wink
-        // 17 upper left eyes
-        // 18 look right
-        // 19 look left
-        // 20 eyes straight
-        // 21 eyes blink closed
-        // 22 eyes blink mid-open
-
-        // 23 eye brows semi-raised
-        // 24 left eye brows semi-raised
-        // 25 right eye brows semi-raised
-        // 26 eye brows something
-        for (size_t i = 13; i < 14; i++) {
-            RLEShape *s = currentFrame.face->appearances->GetShape(i);
-            s->SetPositionX(pos);
-            // VGA.DrawShape();
-        }
-
-        // General face expression
-        // 27 mouth heart
-        // 28 face tensed
-        // 29 face smile
-        // 30 right face tensed
-        // 31 right crooked
-        // 32 pinched lips
-        // 33 surprise
-        // 34 seducing face
-        // 35 look of desaproval face
-        for (size_t i = 29; i < 30; i++) {
-            RLEShape *s = currentFrame.face->appearances->GetShape(i);
-            s->SetPositionX(pos);
-            // VGA.DrawShape();
-        }
-
-        // Cloth
-        // 35 civil clothes
-        // 36 pilot clothes
-        // 37 pilot clothes 2
-        // for (size_t i=36; i< 37; i++) {
-        RLEShape *s = currentFrame.face->appearances->GetShape(35);
-        s->SetPositionX(pos);
-        VGA.DrawShape(s);
-        //}
-
-        // 38 sunglasses
-        // 39 pilot helmet (if drawing this, don't draw hairs
-        // 40 pilot helmet visor (if drawing this draw 39 too
-        for (size_t i = 41; i < 40; i++) {
-            RLEShape *s = currentFrame.face->appearances->GetShape(i);
-            s->SetPositionX(pos);
-            VGA.DrawShape(s);
-        }
-
-        // 40 to 54 ????
-
-        // 54 hand extension
-        if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
-            RLEShape *s = currentFrame.face->appearances->GetShape(54);
-            s->SetPositionX(pos);
-            // VGA.DrawShape();
-        }
-
-        // 60 scary smile
-        // 61 look right
-        // 62 look left
-        for (size_t i = 55; i < 63; i++) {
-            // What is there ?
-            RLEShape *s = currentFrame.face->appearances->GetShape(i);
-            s->SetPositionX(pos);
-            // VGA.DrawShape();
+            // 60 scary smile
+            // 61 look right
+            // 62 look left
+            for (size_t i = 55; i < 63; i++) {
+                // What is there ?
+                RLEShape *s = currentFrame.face->appearances->GetShape(i);
+                s->SetPositionX(pos);
+                // VGA.DrawShape();
+            }
         }
     }
 
-afterFace:
     if (currentFrame.mode == ConvFrame::CONV_WIDE) {
-        Point2D position = {0, CONV_TOP_BAR_HEIGHT+1};
+        Point2D position = {0, CONV_TOP_BAR_HEIGHT + 1};
         for (size_t i = 0; i < currentFrame.participants.size(); i++) {
-            CharFigure* participant = currentFrame.participants[i];
+            CharFigure *participant = currentFrame.participants[i];
             ByteStream paletteReader;
             paletteReader.Set(convPals.GetEntry(participant->paletteID)->data); // mountains Good but not sky
             this->palette.ReadPatch(&paletteReader);
@@ -590,7 +587,7 @@ afterFace:
     if (currentFrame.mode == ConvFrame::CONV_WINGMAN_CHOICE) {
         Point2D position = {0, 0};
         for (size_t i = 0; i < currentFrame.participants.size(); i++) {
-            CharFigure* participant = currentFrame.participants[i];
+            CharFigure *participant = currentFrame.participants[i];
             ByteStream paletteReader;
             paletteReader.Set(convPals.GetEntry(participant->paletteID)->data); // mountains Good but not sky
             this->palette.ReadPatch(&paletteReader);
@@ -603,6 +600,7 @@ afterFace:
             position.x += s->GetWidth();
         }
     }
+    
 
     // Draw text
     DrawText();

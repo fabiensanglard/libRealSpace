@@ -187,8 +187,8 @@ void ConvAssetManager::ParseBGLayer(uint8_t *data, size_t layerID, ConvBackGroun
 }
 
 /**
- * \brief ReadBackGrounds
- * \param chunkRoot The IffChunk that represent the root of the FORM to parse.
+ * @brief ReadBackGrounds
+ * @param chunkRoot The IffChunk that represent the root of the FORM to parse.
  *
  * This function is used to parse a FORM ILBM and extract the background
  * information. In particular, it reads the name of the background and the

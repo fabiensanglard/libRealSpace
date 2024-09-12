@@ -263,6 +263,14 @@ void SCGameFlow::runEffect() {
                 ifStack.push(false);
             }
             break;
+        case EFECT_OPT_MISS_ELSE:
+            if (ifStack.size() > 0) {
+                uint8_t ifval = 0;
+                ifval = ifStack.top();
+                ifStack.pop();
+                ifStack.push(!ifval);
+            }
+            break;
         case EFECT_OPT_IF_NOT_FLAG:
             if (GameState.requierd_flags[this->efect->at(i)->value] == false) {
                 ifStack.push(true);
@@ -681,6 +689,9 @@ void SCGameFlow::RenderMenu() {
         for (auto flag : GameState.requierd_flags) {
             ImGui::Text("Flag %d, Value %d", flag.first, flag.second);
         }
+        ImGui::Text("Mission ID %d", GameState.mission_id);
+        ImGui::Text("Mission Flyed %d", GameState.mission_flyed);
+        ImGui::Text("Mission Accepted %d", GameState.mission_accepted);
         ImGui::End();
     }
     if (show_scene_window) {

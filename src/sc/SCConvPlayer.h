@@ -16,17 +16,17 @@
 
 class ConvFrame{
     
-    public:
+public:
     
-        RSFont* font{nullptr};
-        char* text{nullptr};
-        uint8_t textColor;
-    
-        enum ConvMode{ CONV_WIDE, CONV_CLOSEUP, CONV_WINGMAN_CHOICE, CONV_CONTRACT_CHOICE};
-        ConvMode mode;
-    
-        enum FacePos{ FACE_DEF=0x0, FACE_LEFT=0x82, FACE_RIGHT=0xBE, FACE_CENTER=0xA0};
-        FacePos facePosition;
+    RSFont* font{nullptr};
+    char* text{nullptr};
+    uint8_t textColor;
+
+    enum ConvMode{ CONV_WIDE, CONV_CLOSEUP, CONV_WINGMAN_CHOICE, CONV_CONTRACT_CHOICE};
+    ConvMode mode;
+
+    enum FacePos{ FACE_DEF=0x0, FACE_LEFT=0x82, FACE_RIGHT=0xBE, FACE_CENTER=0xA0};
+    FacePos facePosition;
     
     //If we are in a wide of chose wingman mode
     std::vector<CharFigure*> participants;
@@ -45,9 +45,9 @@ class ConvFrame{
     
     inline void SetExpired(bool exp){ this->expired = exp;}
     inline bool IsExpired(void){ return this->expired;}
-        
-    private:
-        bool expired;
+
+private:
+    bool expired;
 };
 
 
@@ -65,7 +65,8 @@ public :
     
     
     virtual void Focus(void)  ;
-   
+    uint8_t noOffset{0};
+    uint8_t yesOffset{0};
     
 private:
     
