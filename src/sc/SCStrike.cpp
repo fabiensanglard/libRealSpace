@@ -249,13 +249,15 @@ void SCStrike::RunFrame(void) {
 
     switch (this->camera_mode) {
 
-    case View::FRONT:
-        camera->SetPosition(&this->newPosition);
+    case View::FRONT:{
+        Vector3D pos = {this->newPosition.x, this->newPosition.y + 3,
+                        this->newPosition.z-2};
+        camera->SetPosition(&pos);
         camera->ResetRotate();
-        camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
+        camera->Rotate((-0.1f * this->player_plane->elevationf + 10) * ((float)M_PI / 180.0f),
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
-        break;
+    }break;
     case View::FOLLOW: {
         Vector3D pos = {this->newPosition.x + this->camera_pos.x, this->newPosition.y + this->camera_pos.y,
                         this->newPosition.z + this->camera_pos.z};
@@ -273,17 +275,19 @@ void SCStrike::RunFrame(void) {
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
     case View::REAL:
-    default:
-        camera->SetPosition(&this->newPosition);
+    default: {
+        Vector3D pos = {this->newPosition.x, this->newPosition.y + 1,
+                        this->newPosition.z+1};
+        camera->SetPosition(&pos);
         camera->ResetRotate();
 
         camera->Rotate(-this->pilote_lookat.y * ((float)M_PI / 180.0f), 0.0f, 0.0f);
         camera->Rotate(0.0f, this->pilote_lookat.x * ((float)M_PI / 180.0f), 0.0f);
 
-        camera->Rotate((-this->player_plane->elevationf / 10.0f) * ((float)M_PI / 180.0f),
+        camera->Rotate(((-this->player_plane->elevationf / 10.0f) ) * ((float)M_PI / 180.0f),
                        (-this->player_plane->azimuthf / 10.0f) * ((float)M_PI / 180.0f),
                        (-(float)this->player_plane->twist / 10.0f) * ((float)M_PI / 180.0f));
-        break;
+    }break;
     }
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
