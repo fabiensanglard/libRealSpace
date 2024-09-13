@@ -137,8 +137,8 @@ void SCConvPlayer::ReadNextFrame(void) {
         zone->label = new std::string("yes");
         zone->quad = new std::vector<Point2D *>();
         Point2D *p1 = new Point2D{0, 100};
-        Point2D *p2 = new Point2D{160, 100};
-        Point2D *p3 = new Point2D{160, 199};
+        Point2D *p2 = new Point2D{120, 100};
+        Point2D *p3 = new Point2D{120, 199};
         Point2D *p4 = new Point2D{0, 199};
 
         zone->id = 1;
@@ -154,10 +154,10 @@ void SCConvPlayer::ReadNextFrame(void) {
         zone->label = new std::string("no");
         zone->quad = new std::vector<Point2D *>();
 
-        Point2D *np1 = new Point2D{160, 100};
+        Point2D *np1 = new Point2D{200, 100};
         Point2D *np2 = new Point2D{320, 100};
         Point2D *np3 = new Point2D{320, 199};
-        Point2D *np4 = new Point2D{160, 199};
+        Point2D *np4 = new Point2D{200, 199};
 
         zone->quad->push_back(np1);
         zone->quad->push_back(np2);
@@ -683,9 +683,6 @@ void SCConvPlayer::RunFrame(void) {
     
     if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE)  {
         CheckZones();
-        for (auto z: this->zones) {
-            z->Draw();
-        }
         Mouse.Draw();
     }
     // Draw text
