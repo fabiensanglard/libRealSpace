@@ -119,7 +119,7 @@ void SCGameFlow::runEffect() {
     }
     std::stack<uint8_t> ifStack;
 
-    for (int i = 0; i < this->efect->size(); i++) {
+    for (int i = this->currentOptCode; i < this->efect->size(); i++) {
         if (ifStack.size() > 0) {
             if (ifStack.top() == false) {
                 switch (this->efect->at(i)->opcode) {
@@ -145,11 +145,12 @@ void SCGameFlow::runEffect() {
         }
         switch (this->efect->at(i)->opcode) {
         case EFECT_OPT_CONV: {
+            this->currentOptCode = i + 1;
             printf("PLAYING CONV %d\n", this->efect->at(i)->value);
             SCConvPlayer *conv = new SCConvPlayer();
             conv->Init();
             conv->SetID(this->efect->at(i)->value);
-            this->convs.push(conv);
+            Game.AddActivity(conv);
         } break;
         case EFECT_OPT_SCEN:
             for (int j = 0; j < this->gameFlowParser.game.game[this->current_miss]->scen.size(); j++) {
@@ -530,12 +531,12 @@ void SCGameFlow::RunFrame(void) {
         Game.AddActivity(c);
         return;
     }
-    if (this->convs.size() > 0) {
+    /*if (this->convs.size() > 0) {
         SCConvPlayer *c = this->convs.front();
         this->convs.pop();
         Game.AddActivity(c);
         return;
-    }
+    }*/
     if (this->fly_mission.size() > 0) {
         SCStrike *c = this->fly_mission.front();
         this->fly_mission.pop();

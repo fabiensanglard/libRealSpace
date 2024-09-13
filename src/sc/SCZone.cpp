@@ -84,7 +84,7 @@ void SCZone::Draw(void) {
             VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
             this->sprite->frameCounter += fpsupdate;
         } else if (this->sprite->img->sequence.size() > 1 && this->sprite->frames == nullptr &&
-                    this->sprite->cliked == true) {
+                    this->sprite->cliked == true && this->sprite->frameCounter < this->sprite->img->sequence.size()) {
             VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
             if (this->sprite->active == true) {
                 this->sprite->frameCounter += fpsupdate;
