@@ -24,16 +24,20 @@ SCZone::~SCZone(){
 }
 
 void SCZone::OnAction(void){
-    if (this->sprite->cliked) {
+    if (this->sprite != nullptr && this->sprite->cliked) {
         this->sprite->active = true;
     } else if (this->onclick != nullptr) {
-        this->onclick(this->sprite->efect, this->id);
+        if (this->sprite != nullptr) {
+            this->onclick(this->sprite->efect, this->id);
+        } else {
+            this->onclick(nullptr, this->id);
+        }
     }
 }
 
 bool  SCZone::IsActive(std::map<uint8_t, bool> *requierd_flags) {
     bool active = true;
-    if (this->sprite->requ == nullptr) {
+    if (this->sprite == nullptr || this->sprite->requ == nullptr) {
         return true;
     }
     for (auto requ_flag: *this->sprite->requ) {
@@ -64,28 +68,30 @@ void SCZone::Draw(void) {
     if (fpsupdate) {
         this->fps = (SDL_GetTicks() / 10);
     }
-    VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[0]));
-    if (this->sprite->img->GetNumImages() > 1 && this->sprite->frames != nullptr) {
-        VGA.DrawShape(this->sprite->img->GetShape(this->sprite->frames->at(this->sprite->frameCounter)));
-        this->sprite->frameCounter =
-            (this->sprite->frameCounter + fpsupdate) % static_cast<uint8_t>(this->sprite->frames->size());
+    if (this->sprite != nullptr) {
+        VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[0]));
+        if (this->sprite->img->GetNumImages() > 1 && this->sprite->frames != nullptr) {
+            VGA.DrawShape(this->sprite->img->GetShape(this->sprite->frames->at(this->sprite->frameCounter)));
+            this->sprite->frameCounter =
+                (this->sprite->frameCounter + fpsupdate) % static_cast<uint8_t>(this->sprite->frames->size());
 
-    } else if (this->sprite->img->sequence.size() > 1 && this->sprite->frames == nullptr &&
-                this->sprite->cliked == false) {
+        } else if (this->sprite->img->sequence.size() > 1 && this->sprite->frames == nullptr &&
+                    this->sprite->cliked == false) {
 
-        if (this->sprite->frameCounter >= this->sprite->img->sequence.size()) {
-            this->sprite->frameCounter = 1;
-        }
-        VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
-        this->sprite->frameCounter += fpsupdate;
-    } else if (this->sprite->img->sequence.size() > 1 && this->sprite->frames == nullptr &&
-                this->sprite->cliked == true) {
-        VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
-        if (this->sprite->active == true) {
+            if (this->sprite->frameCounter >= this->sprite->img->sequence.size()) {
+                this->sprite->frameCounter = 1;
+            }
+            VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
             this->sprite->frameCounter += fpsupdate;
-            if (this->sprite->frameCounter >= this->sprite->img->sequence.size()-1) {
-                if (this->onclick != nullptr) {
-                    this->onclick(this->sprite->efect, this->id);
+        } else if (this->sprite->img->sequence.size() > 1 && this->sprite->frames == nullptr &&
+                    this->sprite->cliked == true) {
+            VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
+            if (this->sprite->active == true) {
+                this->sprite->frameCounter += fpsupdate;
+                if (this->sprite->frameCounter >= this->sprite->img->sequence.size()-1) {
+                    if (this->onclick != nullptr) {
+                        this->onclick(this->sprite->efect, this->id);
+                    }
                 }
             }
         }

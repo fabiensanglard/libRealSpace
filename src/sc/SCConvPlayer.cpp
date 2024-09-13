@@ -28,6 +28,17 @@ void SCConvPlayer::Focus(void) {
     Screen.SetTitle("CONVersation Player");
 }
 
+void SCConvPlayer::clicked(void *none, uint8_t id) {
+    printf("clicked on %d\n", id);
+    if (id == 1) {
+        GameState.mission_accepted = true;
+        conv.MoveForward(yesOffset);
+    } else if (id == 2) {
+        GameState.mission_accepted = false;
+        conv.MoveForward(noOffset);
+    }
+    currentFrame.SetExpired(true);
+}
 /**
  * @brief Read the next frame of the conversation from the data stream.
  *
@@ -122,6 +133,38 @@ void SCConvPlayer::ReadNextFrame(void) {
         this->noOffset = conv.ReadByte();
         this->yesOffset = conv.ReadByte();
         printf("Offsets: %d %d\n", this->noOffset, this->yesOffset);
+        SCZone *zone = new SCZone();
+        zone->label = new std::string("yes");
+        zone->quad = new std::vector<Point2D *>();
+        Point2D *p1 = new Point2D{0, 100};
+        Point2D *p2 = new Point2D{160, 100};
+        Point2D *p3 = new Point2D{160, 199};
+        Point2D *p4 = new Point2D{0, 199};
+
+        zone->id = 1;
+        zone->quad->push_back(p1);
+        zone->quad->push_back(p2);
+        zone->quad->push_back(p3);
+        zone->quad->push_back(p4);
+        zone->onclick = std::bind(&SCConvPlayer::clicked, this, std::placeholders::_1, std::placeholders::_2);
+        this->zones.push_back(zone);
+
+        zone = new SCZone();
+        zone->id = 2;
+        zone->label = new std::string("no");
+        zone->quad = new std::vector<Point2D *>();
+
+        Point2D *np1 = new Point2D{160, 100};
+        Point2D *np2 = new Point2D{320, 100};
+        Point2D *np3 = new Point2D{320, 199};
+        Point2D *np4 = new Point2D{160, 199};
+
+        zone->quad->push_back(np1);
+        zone->quad->push_back(np2);
+        zone->quad->push_back(np3);
+        zone->quad->push_back(np4);
+        zone->onclick = std::bind(&SCConvPlayer::clicked, this, std::placeholders::_1, std::placeholders::_2);
+        this->zones.push_back(zone);
         break;
     }
     case YESNOCHOICE_BRANCH2: // Choice offset after first branch
@@ -132,7 +175,9 @@ void SCConvPlayer::ReadNextFrame(void) {
         // Looks like first byte is the offset to skip if the answer is no.
         uint8_t t  = conv.ReadByte();
         uint8_t b  = conv.ReadByte();
-        printf("Offsets: %d %d\n", t, b);
+        if (GameState.mission_accepted) {
+            conv.MoveForward(t);
+        }
         break;
     }
     case GROUP_SHOT_ADD_CHARCTER: // Add person to GROUP
@@ -376,7 +421,41 @@ void SCConvPlayer::DrawText(void) {
         lineNumber++;
     }
 }
+void SCConvPlayer::CheckZones() {
+    for (auto zone : zones) {
+        if (zone->IsActive(&GameState.requierd_flags)) {
+            if (zone->quad != nullptr) {
+                if (isPointInQuad(Mouse.GetPosition(), zone->quad)) {
+                    Mouse.SetMode(SCMouse::VISOR);
 
+                    // If the mouse button has just been released: trigger action.
+                    if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                        zone->OnAction();
+                    Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
+                    VGA.DrawText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                                 static_cast<uint32_t>(zone->label->length()), 3, 5);
+                    return ;
+                }
+            }
+            if (Mouse.GetPosition().x > zone->position.x &&
+                Mouse.GetPosition().x < zone->position.x + zone->dimension.x &&
+                Mouse.GetPosition().y > zone->position.y &&
+                Mouse.GetPosition().y < zone->position.y + zone->dimension.y) {
+                // HIT !
+                Mouse.SetMode(SCMouse::VISOR);
+
+                // If the mouse button has just been released: trigger action.
+                if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                    zone->OnAction();
+                Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
+                VGA.DrawText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                             static_cast<uint32_t>(zone->label->length()), 3, 5);
+
+                return ;
+            }
+        }
+    }
+}
 /**
  * Runs a single frame of the conversation player, updating the game state and rendering the graphics.
  *
@@ -399,12 +478,12 @@ void SCConvPlayer::RunFrame(void) {
     }
 
     // If frame needs to be update
-    CheckFrameExpired();
+    if (currentFrame.mode != ConvFrame::CONV_CONTRACT_CHOICE) {
+        CheckFrameExpired();
+    }
+    
     if (currentFrame.IsExpired()) {
-        if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
-            GameState.mission_accepted = false;
-            conv.MoveForward(noOffset);
-        }
+        
         ReadNextFrame();
     }
 
@@ -601,7 +680,14 @@ void SCConvPlayer::RunFrame(void) {
         }
     }
     
-
+    
+    if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE)  {
+        CheckZones();
+        for (auto z: this->zones) {
+            z->Draw();
+        }
+        Mouse.Draw();
+    }
     // Draw text
     DrawText();
 

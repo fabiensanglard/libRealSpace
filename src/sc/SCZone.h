@@ -64,8 +64,8 @@ public:
      
     Point2D position;
     Point2D dimension;
-    std::vector<Point2D*> *quad;
-    std::string *label;
+    std::vector<Point2D*> *quad{nullptr};
+    std::string *label{nullptr};
     std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick;
 
     void OnAction(void);
@@ -75,7 +75,7 @@ public:
     inline bool IsEnabled(void){ return this->enabled; }
     inline void SetEnable(bool enabled){ this->enabled = enabled;}
     bool IsActive(std::map<uint8_t, bool> *requierd_flags);
-    animatedSprites *sprite;
+    animatedSprites *sprite{nullptr};
     
 private:
     

@@ -14,7 +14,31 @@ char *strtoupper(char *dest, const char *src) {
         ;
     return result;
 }
+/**
+ * @brief Test if a 2D point is inside a quad.
+ *
+ * This is the "Ray Casting Algorithm" also known as the "Even-Odd Rule Algorithm"
+ * (https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm).
+ *
+ * @param p The point to test.
+ * @param quad The quad to test against.
+ * @return true if the point is inside the quad, false otherwise.
+ */
+bool isPointInQuad(const Point2D &p, const std::vector<Point2D *> *quad) {
+    int intersections = 0;
+    for (size_t i = 0; i < quad->size(); ++i) {
+        Point2D a = *quad->at(i);
+        Point2D b = *quad->at((i + 1) % quad->size());
 
+        if ((a.y > p.y) != (b.y > p.y)) {
+            double atX = (double)(b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x;
+            if (p.x < atX) {
+                intersections++;
+            }
+        }
+    }
+    return (intersections % 2) != 0;
+}
 IActivity::IActivity() {}
 
 IActivity::~IActivity() {}
