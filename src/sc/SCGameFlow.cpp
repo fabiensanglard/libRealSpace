@@ -25,7 +25,7 @@
 #define EFECT_OPT_GO 15
 #define EFECT_OPT_MISS_ACCEPTED 20
 #define EFECT_OPT_MISS_REJECTED 21
-#define EFECT_OPT_MISS 22
+#define EFECT_OPT_END_MISS 22
 #define EFECT_OPT_MISS_ELSE 30
 #define EFECT_OPT_MISS_ENDIF 31
 #define EFECT_OPT_TEST_CURRENT_MISS 32
@@ -177,7 +177,7 @@ void SCGameFlow::runEffect() {
                 }
             }
             break;
-        case EFECT_OPT_MISS:{
+        case EFECT_OPT_END_MISS:{
             bool direct = false;
             for (auto z: this->zones) {
                 if (z->id == this->currentSpriteId) {
@@ -193,10 +193,7 @@ void SCGameFlow::runEffect() {
                 }
             }
             if (direct) {
-                this->next_miss = this->efect->at(i)->value;
-            } else {
-                /* we have a requ flag so an other sprite will launch the next mission */
-                GameState.mission_id = this->efect->at(i)->value;    
+                this->next_miss = GameState.mission_id;
             }
         }            
         break;
