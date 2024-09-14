@@ -14,24 +14,39 @@
 
 #define EFECT_OPT_CONV 0
 #define EFECT_OPT_SCEN 1
-#define EFECT_OPT_MISS 22
-#define EFECT_OPT_MIS2 13
-#define EFECT_OPT_SHOT 8
-#define EFECT_OPT_FLYM 12
+#define EFECT_OPT_FLYM2 3
 #define EFECT_OPT_SETFLAG_TRUE 6
 #define EFECT_OPT_SETFLAG_FALSE 7
-#define EFECT_OPT_IF_FLAG 10
+#define EFECT_OPT_SHOT 8
 #define EFECT_OPT_IF_NOT_FLAG 9
+#define EFECT_OPT_IF_FLAG 10
+#define EFECT_OPT_FLYM 12
+#define EFECT_OPT_MIS2 13
+#define EFECT_OPT_GO 15
 #define EFECT_OPT_MISS_ACCEPTED 20
 #define EFECT_OPT_MISS_REJECTED 21
+#define EFECT_OPT_MISS 22
 #define EFECT_OPT_MISS_ELSE 30
 #define EFECT_OPT_MISS_ENDIF 31
-#define EFECT_OPT_GO 15
-#define EFECT_OPT_U1 29
-#define EFECT_OPT_TEST_UNKNW_FLAG 37
 #define EFECT_OPT_TEST_CURRENT_MISS 32
 
-
+// identified but unknown effect optcodes
+#define EFECT_OPT_U1 2
+#define EFECT_OPT_U2 4
+#define EFECT_OPT_U3 16
+#define EFECT_OPT_U4 17
+#define EFECT_OPT_U5 18
+#define EFECT_OPT_U6 19
+#define EFECT_OPT_U7 23
+#define EFECT_OPT_U8 24
+#define EFECT_OPT_U9 25
+#define EFECT_OPT_U10 26
+#define EFECT_OPT_U11 27
+#define EFECT_OPT_U12 29
+#define EFECT_OPT_U13 34
+#define EFECT_OPT_U14 36
+#define EFECT_OPT_U15 37
+#define EFECT_OPT_U16 38
 
 /**
  * SCGameFlow constructor.
@@ -145,12 +160,11 @@ void SCGameFlow::runEffect() {
         }
         switch (this->efect->at(i)->opcode) {
         case EFECT_OPT_CONV: {
-            this->currentOptCode = i + 1;
             printf("PLAYING CONV %d\n", this->efect->at(i)->value);
             SCConvPlayer *conv = new SCConvPlayer();
             conv->Init();
             conv->SetID(this->efect->at(i)->value);
-            Game.AddActivity(conv);
+            this->convs.push(conv);
         } break;
         case EFECT_OPT_SCEN:
             for (int j = 0; j < this->gameFlowParser.game.game[this->current_miss]->scen.size(); j++) {
@@ -213,20 +227,49 @@ void SCGameFlow::runEffect() {
             this->missionToFly = nullptr;
             fly_mission.push(fly);
         } break;
+        case EFECT_OPT_FLYM2: {
+            uint8_t flymID = this->efect->at(i)->value;
+            GameState.mission_flyed = flymID;
+            printf("PLAYING FLYM %d\n", flymID);
+            printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
+            this->missionToFly = (char *)malloc(13);
+            sprintf(this->missionToFly, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
+            strtoupper(this->missionToFly, this->missionToFly);
+            SCStrike *fly = new SCStrike();
+            fly->Init();
+            fly->SetMission(this->missionToFly);
+            this->missionToFly = nullptr;
+            fly_mission.push(fly);
+            this->next_miss = GameState.mission_id;
+        } break;
         case EFECT_OPT_SETFLAG_TRUE:
-
             GameState.requierd_flags[this->efect->at(i)->value] = true;
             break;
         case EFECT_OPT_SETFLAG_FALSE:
             GameState.requierd_flags[this->efect->at(i)->value] = false;
             break;
         case EFECT_OPT_MISS_ACCEPTED:
+            if (this->convs.size() > 0) {
+                SCConvPlayer *conv = this->convs.front();
+                this->convs.pop();
+                Game.AddActivity(conv);
+                this->currentOptCode = i;
+                return;
+            }
             if (GameState.mission_accepted == true) {
                 ifStack.push(true);
             } else {
                 ifStack.push(false);
             }
+            break;
         case EFECT_OPT_MISS_REJECTED:
+            if (this->convs.size() > 0) {
+                SCConvPlayer *conv = this->convs.front();
+                this->convs.pop();
+                Game.AddActivity(conv);
+                this->currentOptCode = i;
+                return;
+            }
             if (GameState.mission_accepted == false) {
                 ifStack.push(true);
             } else {
@@ -261,6 +304,7 @@ void SCGameFlow::runEffect() {
             } else {
                 ifStack.push(false);
             }
+            break;
         case EFECT_OPT_GO:
             this->next_miss = GameState.mission_id;
             break;
@@ -275,6 +319,7 @@ void SCGameFlow::runEffect() {
         };
     }
     this->efect = nullptr;
+    this->currentOptCode = 0;
 }
 /**
  * Checks for keyboard events and updates the game state accordingly.
@@ -531,12 +576,12 @@ void SCGameFlow::RunFrame(void) {
         Game.AddActivity(c);
         return;
     }
-    /*if (this->convs.size() > 0) {
+    if (this->convs.size() > 0) {
         SCConvPlayer *c = this->convs.front();
         this->convs.pop();
         Game.AddActivity(c);
         return;
-    }*/
+    }
     if (this->fly_mission.size() > 0) {
         SCStrike *c = this->fly_mission.front();
         this->fly_mission.pop();
@@ -548,6 +593,10 @@ void SCGameFlow::RunFrame(void) {
         this->next_miss = 0;
         this->current_scen = 0;
         this->createMiss();
+        return;
+    }
+    if (this->currentOptCode > 0 && this->efect != nullptr) {
+        this->runEffect();
         return;
     }
 
