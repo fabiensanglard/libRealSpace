@@ -193,10 +193,11 @@ void RSGameFlow::parseMLST(uint8_t* data, size_t size) {
 void RSGameFlow::parseMLST_DATA(uint8_t* data, size_t size) {
 	size_t read = 0;
 	while (read < size) {
-		char* tmpstring =  (char *)malloc(sizeof(char)*8);
+		char* tmpstring =  (char *)malloc(sizeof(char)*9);
 #pragma warning( push )
 #pragma warning( disable : 6387)
-		memcpy(tmpstring, data, 8);
+		memcpy(tmpstring, data, 9);
+		tmpstring[8] = '\0';
 		std::string* misname = new std::string(tmpstring);
 #pragma warning( pop )
 		data += 8;
