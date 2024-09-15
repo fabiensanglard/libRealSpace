@@ -833,6 +833,7 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
 
         glTranslatef(static_cast<GLfloat>(object->XAxisRelative), static_cast<GLfloat>(object->ZAxisRelative),
                      static_cast<GLfloat>(-object->YAxisRelative));
+        glRotatef((object->azymuth+90) * 180 / M_PI, 0, 1, 0);
         if (object->entity != NULL) {
             DrawModel(object->entity, BLOCK_LOD_MAX);
         } else {
@@ -849,7 +850,7 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
 void SCRenderer::RenderMapOverlay(RSArea *area) {
 
     // glDepthFunc(GL_LESS);
-
+    glDisable(GL_DEPTH_TEST);
     for (int i = 0; i < area->objectOverlay.size(); i++) {
         AoVPoints *v = area->objectOverlay[i].vertices;
         for (int j = 0; j < area->objectOverlay[i].nbTriangles; j++) {
@@ -866,6 +867,7 @@ void SCRenderer::RenderMapOverlay(RSArea *area) {
             glEnd();
         }
     }
+    glEnable(GL_DEPTH_TEST);
 }
 void SCRenderer::RenderWorldByID(RSArea *area, int LOD, int verticesPerBlock, int blockId) {
     textureSortedVertex.clear();
