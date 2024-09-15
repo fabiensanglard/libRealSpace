@@ -71,7 +71,7 @@ public:
     void OnAction(void);
 
     void Draw(void);
-    
+    void drawQuad();
     inline bool IsEnabled(void){ return this->enabled; }
     inline void SetEnable(bool enabled){ this->enabled = enabled;}
     bool IsActive(std::map<uint8_t, bool> *requierd_flags);

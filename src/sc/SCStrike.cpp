@@ -230,7 +230,7 @@ void SCStrike::SetMission(char const *missionName) {
     this->player_plane =
         new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
                     9.0f, 18.0f, &this->area, newPosition.x, newPosition.y, newPosition.z);
-    this->player_plane->azimuthf = 1800.0f;
+    this->player_plane->azimuthf = (playerCoord->azymuth) * 10.0f;
     for (auto obj : missionObj->missionObjects) {
         if (strcmp(obj->MemberName, "F-16DES") == 0) {
             this->player_plane->object = obj;

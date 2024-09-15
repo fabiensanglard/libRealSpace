@@ -397,6 +397,7 @@ void RSMission::parsePART(IffChunk* chunk) {
 
 				prt->XAxisRelative = stream.ReadInt24LE();
 				prt->YAxisRelative = stream.ReadInt24LE();
+				
 				prt->ZAxisRelative = 0;
 				prt->ZAxisRelative |= stream.ReadByte() << 0;
 				prt->ZAxisRelative |= stream.ReadByte() << 8;
@@ -404,7 +405,9 @@ void RSMission::parsePART(IffChunk* chunk) {
 				for (int k = 0; k < 22; k++) {
 					prt->Controls[k] = stream.ReadByte();
 				}
-
+				prt->azymuth = 0;
+				prt->azymuth |= prt->Controls[1] << 0;
+				prt->azymuth |= prt->Controls[2] << 8;
 				if (prt->Unknown0 != 65535) {
 					for (int k = 0; k < missionAreas.size(); k++) {
 						if (missionAreas[k]->id-1 == prt->Unknown0) {

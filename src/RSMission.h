@@ -74,7 +74,7 @@ struct PART
 	long YAxisRelative; // 34-37, Y pos rel to AREA
 	unsigned int ZAxisRelative; // 38-39, Z pos rel to AREA
 	unsigned char Controls[22]; // 40-61, various control bytes
-
+	uint16_t azymuth;
 	RSEntity* entity;
 
 };

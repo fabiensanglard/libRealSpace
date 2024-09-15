@@ -96,7 +96,8 @@ void SCZone::Draw(void) {
             }
         }
     }
-
+}
+void SCZone::drawQuad() {
     if (this->quad != nullptr) {
         VGA.line(
             this->quad->at(0)->x,
