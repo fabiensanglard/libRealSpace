@@ -82,9 +82,9 @@ struct MISN_PART {
 	
 	uint8_t unknown0;      // 26-27
     uint8_t unknown1;      // 28-29
-    int32_t XAxisRelative;         // 30-33, X pos rel to AREA
-    int32_t YAxisRelative;         // 34-37, Y pos rel to AREA
-    uint16_t ZAxisRelative; // 38-39, Z pos rel to AREA
+    int32_t x;         // 30-33, X pos rel to AREA
+    int32_t y;         // 34-37, Y pos rel to AREA
+    uint16_t z; // 38-39, Z pos rel to AREA
     std::vector<uint8_t> controls; // 40-61, various control bytes
     uint16_t azymuth;
     RSEntity *entity;
