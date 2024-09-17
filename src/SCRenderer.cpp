@@ -801,13 +801,12 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
 
     float y = 0;
     for (auto object : mission->mission_data.parts) {
-
         glPushMatrix();
-
+        
         glTranslatef(static_cast<GLfloat>(object->x), static_cast<GLfloat>(object->z),
                      static_cast<GLfloat>(-object->y));
-        float rad = (1.0f * (float)object->azymuth + 90.0f) * ((float)M_PI / 180.0f);
-        glRotatef(rad, 0, 1, 0);
+
+        glRotatef(((float)object->azymuth + 90.0f), 0, 1, 0);
         if (object->entity != NULL) {
             DrawModel(object->entity, BLOCK_LOD_MAX);
         } else {
@@ -817,7 +816,6 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
             glVertex3d(0, 0, 0);
             glEnd();
         }
-
         glPopMatrix();
     }
 }
