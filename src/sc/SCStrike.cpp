@@ -417,10 +417,6 @@ void SCStrike::RenderMenu() {
     }
     if (show_mission) {
         ImGui::Begin("Mission");
-        ImGui::Text("Mission %s", missionObj->mission_data.name.c_str());
-        ImGui::Text("Area %s", missionObj->mission_data.world_filename.c_str());
-        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->x,
-                    missionObj->getPlayerCoord()->z);
         static ImGuiComboFlags flags = 0;
         if (ImGui::BeginCombo("List des missions", mission_list[mission_idx], flags)) {
             for (int n = 0; n < SCSTRIKE_MAX_MISSIONS; n++) {
@@ -443,8 +439,8 @@ void SCStrike::RenderMenu() {
         ImGui::Begin("Mission Parts and Areas");
         ImGui::Text("Mission %s", missionObj->mission_data.name.c_str());
         ImGui::Text("Area %s", missionObj->mission_data.world_filename.c_str());
-        
-        ImGui::Text("Mission Parts %d", missionObj->mission_data.parts.size());
+        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->x,
+                    missionObj->getPlayerCoord()->y);
         if (ImGui::TreeNode("Areas")) {
             for (auto area: missionObj->mission_data.areas) {
                 if (ImGui::TreeNode((void *)(intptr_t)area->id, "Area id %d", area->id)) {
@@ -456,6 +452,18 @@ void SCStrike::RenderMenu() {
             }
             ImGui::TreePop();
         }
+        if (ImGui::TreeNode("Area Objects")) {
+            for (int g=0; g<area.objects.size(); g++) {
+                auto obj = &area.objects.at(g);
+                if (ImGui::TreeNode((void *)(intptr_t)g, "Object id %d", g)) {
+                    ImGui::Text("Object name %s", obj->name);
+                    ImGui::Text("Object x %d y %d z %d", obj->position[0], obj->position[1], obj->position[2]);
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+        ImGui::Text("Mission Parts %d", missionObj->mission_data.parts.size());
         if (ImGui::TreeNode("Parts")) {
             for (auto part: missionObj->mission_data.parts) {
                 if (ImGui::TreeNode((void *)(intptr_t)part->id, "Parts id %d, area id %d", part->id, part->area_id)) {
@@ -477,6 +485,7 @@ void SCStrike::RenderMenu() {
             }
             ImGui::TreePop();
         }
+        
         ImGui::End();
     }
     ImGui::Render();

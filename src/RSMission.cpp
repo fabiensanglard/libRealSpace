@@ -113,6 +113,7 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
 
         tmparea->id = ++cpt;
         tmparea->AreaType = '\0';
+        uint8_t Blank0;
         switch (buffer) {
         case 'S':
             tmparea->AreaType = 'S';
@@ -123,7 +124,7 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             tmparea->YAxis = stream.ReadInt24LE();
             tmparea->ZAxis = stream.ReadInt24LE();
             tmparea->AreaWidth = stream.ReadUShort();
-            stream.ReadByte();
+            Blank0 = stream.ReadByte();
             read += 49;
             break;
         case 'C':
@@ -342,7 +343,7 @@ void RSMission::fixMissionObjectsCoords(void) {
     for (auto obj : this->mission_data.parts) {
         if (obj->area_id != 255) {
             for (auto area : this->mission_data.areas) {
-                if (area->id == obj->area_id-1) {
+                if (area->id-1 == obj->area_id) {
                     obj->x += area->XAxis;
                     obj->y += area->YAxis;
                     obj->z += area->ZAxis;

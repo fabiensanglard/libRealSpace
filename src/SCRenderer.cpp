@@ -787,20 +787,17 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glDisable(GL_TEXTURE_2D);
 
     RenderMapOverlay(area);
-    for (int i = 0; i < BLOCKS_PER_MAP; i++)
-        RenderObjects(area, i);
+    
+    RenderObjects(area, 0);
 
     glDisable(GL_FOG);
 }
 
 void SCRenderer::RenderObjects(RSArea *area, size_t blockID) {
 
-    std::vector<MapObject> *objects = &area->objects[blockID];
-
     float y = 0;
-    for (size_t i = 0; i < objects->size(); i++) {
-        MapObject object = objects->at(i);
-
+    for (auto object: area->objects) {
+        
         glPushMatrix();
 
         glTranslatef(static_cast<GLfloat>(object.position[0]), static_cast<GLfloat>(object.position[1]),
@@ -824,25 +821,25 @@ void SCRenderer::RenderObjects(RSArea *area, size_t blockID) {
 
 void SCRenderer::RenderMissionObjects(RSMission *mission) {
 
-    std::vector<PART *> *objects = &mission->missionObjects;
-
     float y = 0;
-    for (auto object : *objects) {
+    for (auto object : mission->mission_data.parts) {
 
         glPushMatrix();
 
-        glTranslatef(static_cast<GLfloat>(object->XAxisRelative), static_cast<GLfloat>(object->ZAxisRelative),
-                     static_cast<GLfloat>(-object->YAxisRelative));
-        glRotatef((object->azymuth+90) * 180 / M_PI, 0, 1, 0);
+        glTranslatef(static_cast<GLfloat>(object->x), static_cast<GLfloat>(object->z),
+                     static_cast<GLfloat>(-object->y));
+        float rad = (1.0f*(float)object->azymuth+90.0f) * ((float) M_PI / 180.0f);
+        glRotatef(rad, 0, 1, 0);
         if (object->entity != NULL) {
             DrawModel(object->entity, BLOCK_LOD_MAX);
         } else {
-            printf("OBJECT [%s] NOT FOUND\n", object->MemberName);
+            printf("OBJECT [%s] NOT FOUND\n", object->member_name.c_str());
             glBegin(GL_POINTS);
             glColor3f(0, 1, 0);
             glVertex3d(0, 0, 0);
             glEnd();
         }
+        
         glPopMatrix();
     }
 }

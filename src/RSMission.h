@@ -131,8 +131,7 @@ class RSMission {
 public:
     std::map<std::string, RSEntity *> *objCache;
     TreArchive *tre;
-    std::vector<PART *> missionObjects;
-    std::vector<AREA *> missionAreas;
+    
     MISN mission_data;
     RSMission();
     ~RSMission();

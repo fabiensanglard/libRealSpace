@@ -109,12 +109,10 @@ public:
     RSImage* GetImageByID(size_t ID);
     
     //Per block objects list
-    std::vector<MapObject> objects[BLOCKS_PER_MAP];
+    std::vector<MapObject> objects;
     std::vector<AreaOverlay> objectOverlay;
     float elevation[BLOCKS_PER_MAP];
 
-    size_t GetNumJets(void);
-    RSEntity* GetJet(size_t jetID);
 	std::map<std::string, RSEntity *> *objCache;
 	TreArchive *tre;
     float getGroundLevel(int BLOC, float x, float y);
@@ -146,7 +144,4 @@ private:
     
     char name[16];
     
-    void AddJet(TreArchive* tre, const char* name, Quaternion* orientation, Point3D* position);
-    void AddJets(void);
-    std::vector<RSEntity*> jets;
 };
