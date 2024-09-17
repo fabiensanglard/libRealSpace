@@ -68,6 +68,7 @@ void SCNavMap::Init(){
  */
 void SCNavMap::SetName(char *name) {
     this->name = new std::string(name);
+    std::transform(this->name->begin(), this->name->end(), this->name->begin(), ::toupper);
 }
 /**
  * SCNavMap::RunFrame

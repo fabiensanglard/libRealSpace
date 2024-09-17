@@ -416,9 +416,7 @@ void RSArea::ParseBlocks(size_t lod, PakEntry *entry, size_t blockDim) {
 
             int16_t height;
             height = vertStream.ReadShort();
-            // height = height * 50000;
-            // height /= HEIGHT_DIVIDER;
-
+            
             vertex->flag = vertStream.ReadByte();
             vertex->type = vertStream.ReadByte();
 
@@ -466,16 +464,6 @@ void RSArea::ParseBlocks(size_t lod, PakEntry *entry, size_t blockDim) {
             vertex->upperImageID = vertStream.ReadByte();
             vertex->lowerImageID = vertStream.ReadByte();
 
-            /*
-            //City block
-            if (blockDim == 20 && i==97){
-                printf("0x%X (0x%X) ",vertex->lowerImageID,vertex->upperImageID );
-
-                if (vertexID % 20 == 19)
-                    printf("\n");
-            }
-            */
-
             Texel *t = Renderer.GetPalette()->GetRGBColor(paletteColor * 16 + shade);
 
             // Texel* t = renderer.GetDefaultPalette()->GetRGBColor(vertex->text);
@@ -522,26 +510,17 @@ void RSArea::ParseHeightMap(void) {
     entry = archive->GetEntry(1);
     PakArchive fullPak;
     fullPak.InitFromRAM("FULLSIZE", entry->data, entry->size);
-    // fullPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MAX, entry, 20);
-
-    // renderer.RenderWorldPoints(this,BLOCK_LOD_MAX,400);
 
     entry = archive->GetEntry(2);
     PakArchive medPak;
     medPak.InitFromRAM("MED SIZE", entry->data, entry->size);
-    //  medPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MED, entry, 10);
-
-    // renderer.RenderWorldSolid(this,BLOCK_LOD_MED,100);
 
     entry = archive->GetEntry(3);
     PakArchive smallPak;
     smallPak.InitFromRAM("SMALSIZE", entry->data, entry->size);
-    //   smallPak.List(stdout);
     ParseBlocks(BLOCK_LOD_MIN, entry, 5);
-
-    // renderer.RenderWorldSolid(this,BLOCK_LOD_MIN,25);
 }
 
 RSImage *RSArea::GetImageByID(size_t ID) { return textures[0]->GetImageById(ID); }
@@ -613,7 +592,6 @@ void RSArea::InitFromPAKFileName(const char *pakFilename) {
     ParseTrigo();
 
     ParseHeightMap();
-
 }
 
 float RSArea::getGroundLevel(int BLOC, float x, float y) {
@@ -629,7 +607,6 @@ float RSArea::getGroundLevel(int BLOC, float x, float y) {
 
     vX = vX * 1000;
     vY = vY * 1000;
-    
 
     for (int i = 0; i < 400; i++) {
         if ((blocks[0][BLOC].vertice[i].v.x >= vX) && (blocks[0][BLOC].vertice[i].v.z >= vY)) {
