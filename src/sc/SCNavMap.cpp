@@ -95,8 +95,8 @@ void SCNavMap::RunFrame(void) {
         int w = this->navMap->maps[*this->name]->GetWidth();
         int h = this->navMap->maps[*this->name]->GetHeight();
         for (auto ob: this->missionObj->mission_data.parts) {
-        int newx = ((ob->x/(20000.0f*18.0f))*w)+(w/2)+pos.x;
-        int newy = ((ob->y/(20000.0f*18.0f))*w)+(h/2)+pos.y;
+        int newx = (int) ((ob->x/(20000.0f*18.0f))*w)+(w/2)+pos.x;
+        int newy = (int) ((ob->y/(20000.0f*18.0f))*w)+(h/2)+pos.y;
         if (newx>0 && newx<320 && newy>0 && newy<200) {
             VGA.plot_pixel(newx, newy, 128);
             VGA.line(newx-5, newy, newx+5, newy, 128);
