@@ -18,6 +18,7 @@ public:
     void Init();
     void SetName(char *name);
     void RunFrame(void);
+    RSMission *missionObj;
     
 private:
     std::string *name;

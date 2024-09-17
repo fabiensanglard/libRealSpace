@@ -180,6 +180,7 @@ void SCStrike::CheckKeyboard(void) {
             SCNavMap *nav_screen = new SCNavMap();
             nav_screen->Init();
             nav_screen->SetName((char *)this->missionObj->mission_data.world_filename.c_str());
+            nav_screen->missionObj = this->missionObj;
             Game.AddActivity(nav_screen);
         } break;
         default:
