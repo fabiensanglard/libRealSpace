@@ -114,7 +114,7 @@ void RSCockpit::parseREAL_INFO(uint8_t* data, size_t size) {
  */
 void RSCockpit::parseREAL_OBJS(uint8_t* data, size_t size) {
     ByteStream* reader = new ByteStream(data);
-    std::string name = reader->ReadString(size+1);
+    std::string name = reader->ReadString(size);
     char modelPath[512];
     sprintf(modelPath, "..\\..\\DATA\\OBJECTS\\%s.IFF", name.c_str());
     TreArchive tre ;

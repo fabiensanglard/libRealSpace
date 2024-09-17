@@ -15,6 +15,7 @@ extern "C" {
 #include "TreArchive.h"
 #include <stdint.h>
 #include <string>
+#include <algorithm>
 
 struct AREA {
     int id;
@@ -76,17 +77,18 @@ struct PART {
 };
 
 struct MISN_PART {
-    uint8_t id;  // off 0-1, Cast Member Number
+    uint8_t id;
     std::string member_name;
 	std::string member_name_destroyed;
-	
-	uint8_t unknown0;      // 26-27
-    uint8_t unknown1;      // 28-29
-    int32_t x;         // 30-33, X pos rel to AREA
-    int32_t y;         // 34-37, Y pos rel to AREA
-    uint16_t z; // 38-39, Z pos rel to AREA
-    std::vector<uint8_t> controls; // 40-61, various control bytes
+	std::string weapon_load;
+	uint8_t area_id;      
+    uint8_t unknown1;
+    uint16_t unknown2;
+    int32_t x;
+    int32_t y;
+    uint16_t z;
     uint16_t azymuth;
+    std::vector<uint8_t> unknown_bytes;
     RSEntity *entity;
 };
 
@@ -115,11 +117,12 @@ struct MISN {
     std::string world_filename;
     std::vector<AREA *> areas;
     std::vector<SPOT *> spots;
-    std::vector<std::string> messages;
+    std::vector<std::string *> messages;
     std::vector<uint8_t> flags;
     std::vector<std::string> casting;
     std::vector<uint8_t> prog;
-    std::vector<PART *> parts;
+    std::vector<uint8_t> nums;
+    std::vector<MISN_PART *> parts;
     std::vector<uint8_t> team;
     std::vector<std::vector<uint8_t>> scenes;
     std::vector<uint8_t> load;
@@ -130,52 +133,16 @@ public:
     TreArchive *tre;
     std::vector<PART *> missionObjects;
     std::vector<AREA *> missionAreas;
-
+    MISN mission_data;
     RSMission();
     ~RSMission();
 
-    inline char *getMissionName() { return (missionName); }
-    inline char *getMissionAreaFile() { return (missionAreaFile); }
-
-    PART *getPlayerCoord();
-    PART *getObject(const char *name);
-    void InitFromIFF(IffLexer *lexer);
+    MISN_PART *getPlayerCoord();
+    MISN_PART *getObject(const char *name);
     void InitFromRAM(uint8_t *data, size_t size);
 
-    void PrintMissionInfos();
-
 private:
-    char missionInfo[255];
-    char missionName[255];
-    char missionAreaFile[9];
-
-    std::vector<MSGS *> missionMessages;
-    std::vector<SPOT *> missionSpots;
-    std::vector<CAST *> missionCasting;
-
-    void printArea(AREA *a);
-    void printPart(PART *p);
-
-    void parseLOAD(IffChunk *chunk);
-    void parseCAST(IffChunk *chunk);
-    void parseMSGS(IffChunk *chunk);
-    void parseFILE(IffChunk *chunk);
-    void parseNAME(IffChunk *chunk);
-    void parseWORLD(IffChunk *chunk);
-    void parseINFO(IffChunk *chunk);
-    void parsePALT(IffChunk *chunk);
-    void parseTERA(IffChunk *chunk);
-    void parseSKYS(IffChunk *chunk);
-    void parseGLNT(IffChunk *chunk);
-    void parseSMOK(IffChunk *chunk);
-    void parseLGHT(IffChunk *chunk);
-    void parseAREA(IffChunk *chunk);
-    void parsePART(IffChunk *chunk);
-    void parseSPOT(IffChunk *chunk);
-    void parsePROG(IffChunk *chunk);
-
     void parseMISN(uint8_t *data, size_t size);
-
     void parseMISN_VERS(uint8_t *data, size_t size);
     void parseMISN_INFO(uint8_t *data, size_t size);
     void parseMISN_TUNE(uint8_t *data, size_t size);
@@ -195,4 +162,6 @@ private:
 
     void parseMISN_PLAY_SCEN(uint8_t *data, size_t size);
     void parseMISN_WRLD_FILE(uint8_t *data, size_t size);
+
+    void fixMissionObjectsCoords(void);
 };
