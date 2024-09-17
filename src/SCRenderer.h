@@ -35,7 +35,6 @@ typedef struct VertexCache {
 typedef std::vector<VertexCache> VertexVector;
 typedef std::map<int, VertexVector> TextureVertexMap;
 
-
 class SCRenderer {
 
 public:
@@ -70,8 +69,6 @@ public:
     void RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock);
     void RenderWorldByID(RSArea *area, int LOD, int verticesPerBlock, int blockId);
     void RenderObjects(RSArea *area, size_t blockID);
-
-    void RenderJets(RSArea *area);
 
     Camera *GetCamera(void);
 

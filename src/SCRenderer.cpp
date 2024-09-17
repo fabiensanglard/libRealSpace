@@ -649,28 +649,6 @@ void SCRenderer::RenderBlock(RSArea *area, int LOD, int i, bool renderTexture) {
     }
 }
 
-void SCRenderer::RenderJets(RSArea *area) {
-
-    glMatrixMode(GL_MODELVIEW);
-
-    for (size_t i = 0; i < area->GetNumJets(); i++) {
-        RSEntity *entity = area->GetJet(i);
-
-        glPushMatrix();
-
-        Matrix objMatrix = entity->orientation.ToMatrix();
-        Point3D pos = entity->position;
-        objMatrix.v[3][0] = pos.x;
-        objMatrix.v[3][1] = pos.y;
-        objMatrix.v[3][2] = pos.z;
-
-        glMultMatrixf(objMatrix.ToGL());
-
-        DrawModel(entity, LOD_LEVEL_MAX);
-
-        glPopMatrix();
-    }
-}
 void SCRenderer::RenderWorldSkyAndGround() {
     static const int max_int = MAP_SIZE;
 
@@ -737,10 +715,10 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     GLfloat fogColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
     glFogi(GL_FOG_MODE, fogMode[fogfilter]); // Fog Mode
     glFogfv(GL_FOG_COLOR, fogColor);         // Set Fog Color
-    glFogf(GL_FOG_DENSITY, 0.000009f);        // How Dense Will The Fog Be
+    glFogf(GL_FOG_DENSITY, 0.000009f);       // How Dense Will The Fog Be
     glHint(GL_FOG_HINT, GL_DONT_CARE);       // Fog Hint Value
-    glFogf(GL_FOG_START, 8000.0f);         // Fog Start Depth
-    glFogf(GL_FOG_END, MAP_SIZE);          // Fog End Depth
+    glFogf(GL_FOG_START, 8000.0f);           // Fog Start Depth
+    glFogf(GL_FOG_END, MAP_SIZE);            // Fog End Depth
     glEnable(GL_FOG);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -787,7 +765,7 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glDisable(GL_TEXTURE_2D);
 
     RenderMapOverlay(area);
-    
+
     RenderObjects(area, 0);
 
     glDisable(GL_FOG);
@@ -796,8 +774,8 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
 void SCRenderer::RenderObjects(RSArea *area, size_t blockID) {
 
     float y = 0;
-    for (auto object: area->objects) {
-        
+    for (auto object : area->objects) {
+
         glPushMatrix();
 
         glTranslatef(static_cast<GLfloat>(object.position[0]), static_cast<GLfloat>(object.position[1]),
@@ -828,7 +806,7 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
 
         glTranslatef(static_cast<GLfloat>(object->x), static_cast<GLfloat>(object->z),
                      static_cast<GLfloat>(-object->y));
-        float rad = (1.0f*(float)object->azymuth+90.0f) * ((float) M_PI / 180.0f);
+        float rad = (1.0f * (float)object->azymuth + 90.0f) * ((float)M_PI / 180.0f);
         glRotatef(rad, 0, 1, 0);
         if (object->entity != NULL) {
             DrawModel(object->entity, BLOCK_LOD_MAX);
@@ -839,7 +817,7 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
             glVertex3d(0, 0, 0);
             glEnd();
         }
-        
+
         glPopMatrix();
     }
 }
