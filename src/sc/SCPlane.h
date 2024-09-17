@@ -235,7 +235,7 @@ public:
 
     float lift;
 
-    PART *object;
+    MISN_PART *object;
 
     /* my ptw matrix, temp matrix	*/
     Matrix ptw;

@@ -178,14 +178,8 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_n: {
             SCNavMap *nav_screen = new SCNavMap();
-            char *arena_name = new char[8];
-            char *arena_file_name = this->missionObj->getMissionAreaFile();
-            for (int i = 0; i < 8; i++) {
-                arena_name[i] = toupper(arena_file_name[i]);
-            }
-
             nav_screen->Init();
-            nav_screen->SetName(arena_name);
+            nav_screen->SetName((char *)this->missionObj->mission_data.world_filename.c_str());
             Game.AddActivity(nav_screen);
         } break;
         default:
@@ -205,22 +199,20 @@ void SCStrike::SetMission(char const *missionName) {
     sprintf(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
 
     TreEntry *mission = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(missFileName);
-    IffLexer missionIFF;
-    missionIFF.InitFromRAM(mission->data, mission->size);
 
     missionObj = new RSMission();
     missionObj->tre = Assets.tres[AssetManager::TRE_OBJECTS];
     missionObj->objCache = &objectCache;
-    missionObj->InitFromIFF(&missionIFF);
+    missionObj->InitFromRAM(mission->data, mission->size);
 
     char filename[13];
-    sprintf(filename, "%s.PAK", missionObj->getMissionAreaFile());
+    sprintf(filename, "%s.PAK", missionObj->mission_data.world_filename.c_str());
     area.InitFromPAKFileName(filename);
 
-    PART *playerCoord = missionObj->getPlayerCoord();
+    MISN_PART *playerCoord = missionObj->getPlayerCoord();
 
-    newPosition.x = (float)playerCoord->XAxisRelative;
-    newPosition.z = (float)-playerCoord->YAxisRelative;
+    newPosition.x = (float)playerCoord->x;
+    newPosition.z = (float)-playerCoord->y;
     newPosition.y = this->area.getY(newPosition.x, newPosition.z);
 
     camera = Renderer.GetCamera();
@@ -231,20 +223,16 @@ void SCStrike::SetMission(char const *missionName) {
         new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
                     9.0f, 18.0f, &this->area, newPosition.x, newPosition.y, newPosition.z);
     this->player_plane->azimuthf = (playerCoord->azymuth) * 10.0f;
-    for (auto obj : missionObj->missionObjects) {
-        if (strcmp(obj->MemberName, "F-16DES") == 0) {
-            this->player_plane->object = obj;
-        }
-    }
+    this->player_plane->object = playerCoord;
 }
 void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
     this->player_plane->Simulate();
     this->player_plane->getPosition(&newPosition);
     if (this->player_plane->object != nullptr) {
-        this->player_plane->object->XAxisRelative = (long)newPosition.x;
-        this->player_plane->object->YAxisRelative = (long)newPosition.y;
-        this->player_plane->object->ZAxisRelative = (long)newPosition.z;
+        this->player_plane->object->x = (long)newPosition.x;
+        this->player_plane->object->z = (long)newPosition.y;
+        this->player_plane->object->y = (long)newPosition.z;
     }
 
     switch (this->camera_mode) {
@@ -351,12 +339,14 @@ void SCStrike::RenderMenu() {
     static bool show_camera = false;
     static bool show_cockpit = false;
     static bool show_mission = false;
+    static bool show_mission_parts_and_areas = false;
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("SCStrike")) {
             ImGui::MenuItem("Simulation", NULL, &show_simulation);
             ImGui::MenuItem("Camera", NULL, &show_camera);
             ImGui::MenuItem("Cockpit", NULL, &show_cockpit);
             ImGui::MenuItem("Mission", NULL, &show_mission);
+            ImGui::MenuItem("Mission part and Area", NULL, &show_mission_parts_and_areas);
             ImGui::EndMenu();
         }
         int sceneid = -1;
@@ -365,7 +355,7 @@ void SCStrike::RenderMenu() {
             this->newPosition.y*3.6,
             this->player_plane->azimuthf/10.0f,
             this->player_plane->tps,
-            missionObj->getMissionName(),
+            missionObj->mission_data.name.c_str(),
             missFileName
         );
         ImGui::EndMainMenuBar();
@@ -427,10 +417,6 @@ void SCStrike::RenderMenu() {
     }
     if (show_mission) {
         ImGui::Begin("Mission");
-        ImGui::Text("Mission %s", missionObj->getMissionName());
-        ImGui::Text("Area %s", missionObj->getMissionAreaFile());
-        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->XAxisRelative,
-                    missionObj->getPlayerCoord()->YAxisRelative);
         static ImGuiComboFlags flags = 0;
         if (ImGui::BeginCombo("List des missions", mission_list[mission_idx], flags)) {
             for (int n = 0; n < SCSTRIKE_MAX_MISSIONS; n++) {
@@ -446,6 +432,60 @@ void SCStrike::RenderMenu() {
             this->SetMission((char *)mission_list[mission_idx]);
         }
 
+        ImGui::End();
+    }
+    
+    if (show_mission_parts_and_areas) {
+        ImGui::Begin("Mission Parts and Areas");
+        ImGui::Text("Mission %s", missionObj->mission_data.name.c_str());
+        ImGui::Text("Area %s", missionObj->mission_data.world_filename.c_str());
+        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->x,
+                    missionObj->getPlayerCoord()->y);
+        if (ImGui::TreeNode("Areas")) {
+            for (auto area: missionObj->mission_data.areas) {
+                if (ImGui::TreeNode((void *)(intptr_t)area->id, "Area id %d", area->id)) {
+                    ImGui::Text("Area name %s", area->AreaName);
+                    ImGui::Text("Area x %d y %d z %d", area->XAxis, area->YAxis, area->ZAxis);
+                    ImGui::Text("Area width %d height %d", area->AreaWidth, area->AreaHeight);
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Area Objects")) {
+            for (int g=0; g<area.objects.size(); g++) {
+                auto obj = &area.objects.at(g);
+                if (ImGui::TreeNode((void *)(intptr_t)g, "Object id %d", g)) {
+                    ImGui::Text("Object name %s", obj->name);
+                    ImGui::Text("Object x %d y %d z %d", obj->position[0], obj->position[1], obj->position[2]);
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+        ImGui::Text("Mission Parts %d", missionObj->mission_data.parts.size());
+        if (ImGui::TreeNode("Parts")) {
+            for (auto part: missionObj->mission_data.parts) {
+                if (ImGui::TreeNode((void *)(intptr_t)part->id, "Parts id %d, area id %d", part->id, part->area_id)) {
+                    ImGui::Text("u1 %d", part->unknown1);
+                    ImGui::Text("u2 %d", part->unknown2);
+                    ImGui::Text("x %d y %d z %d", part->x, part->y, part->z);
+                    ImGui::Text("azymuth %d", part->azymuth);
+                    ImGui::Text("Name %s", part->member_name.c_str());
+                    ImGui::Text("Destroyed %s", part->member_name_destroyed.c_str());
+                    ImGui::Text("Weapon load %s", part->weapon_load.c_str());
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Casting")) {
+            for (auto cast: missionObj->mission_data.casting) {
+                ImGui::Text("Actor %s", cast.c_str());
+            }
+            ImGui::TreePop();
+        }
+        
         ImGui::End();
     }
     ImGui::Render();
