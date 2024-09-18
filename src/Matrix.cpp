@@ -44,20 +44,7 @@ void Matrix::Identity(void){
 
 void Matrix::Multiply(Matrix* other){
     
-    /*                                         other
-     
-                                    [0][0] [1][0] [2][0] [3][0]
-                                    [0][1] [1][1] [2][1] [3][1]
-                                    [0][2] [1][2] [2][2] [3][2]
-                                    [0][3] [1][3] [2][3] [3][3]
-                this
-     
-     [0][0] [1][0] [2][0] [3][0]
-     [0][1] [1][1] [2][1] [3][1]
-     [0][2] [1][2] [2][2] [3][2]
-     [0][3] [1][3] [2][3] [3][3]                   i  j
-     */
-    
+    /*
     Matrix result;
     
     for(size_t i=0 ; i < 4 ; i ++){
@@ -71,6 +58,34 @@ void Matrix::Multiply(Matrix* other){
     }
                         
     *this = result;
+    */
+    float result[4][4] = {
+        {0,0,0,0},
+        {0,0,0,0},
+        {0,0,0,0},
+        {0,0,0,0}
+    };
+
+    /*
+    *	matrix 4x4
+        c00 = a00xb00+a01xb10+a02xb20+a03xb30
+        c01 = a00xb10+a01xb11+a02xb12+a03xb13
+        c02 = a00xb20+a01xb21+a02xb22+a03xb23
+        c03 = a00xb30+a01xb31+a02xb32+a03xb33
+    */
+
+    for (int i = 0; i < 4; i++) {
+        result[i][0] = other->v[i][0] * this->v[0][0] + other->v[i][1] * this->v[1][0] + other->v[i][2] * this->v[2][0] + other->v[i][3] * this->v[3][0];
+        result[i][1] = other->v[i][0] * this->v[0][1] + other->v[i][1] * this->v[1][1] + other->v[i][2] * this->v[2][1] + other->v[i][3] * this->v[3][1];
+        result[i][2] = other->v[i][0] * this->v[0][2] + other->v[i][1] * this->v[1][2] + other->v[i][2] * this->v[2][2] + other->v[i][3] * this->v[3][2];
+        result[i][3] = other->v[i][0] * this->v[0][3] + other->v[i][1] * this->v[1][3] + other->v[i][2] * this->v[2][3] + other->v[i][3] * this->v[3][3];
+    }
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            this->v[i][j] = result[i][j];
+        }
+    }
+
 }
 
 void Matrix::Transpose(void){

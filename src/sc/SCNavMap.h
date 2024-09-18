@@ -24,5 +24,6 @@ private:
     std::string *name;
     RSNavMap* navMap;
     VGAPalette palette;
+    VGAPalette objpal;
     void CheckKeyboard(void);
 };

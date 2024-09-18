@@ -418,7 +418,7 @@ void SCPlane::Simulate() {
             } else if (sincosas < -1) {
                 sincosas = -1;
             }
-            this->azimuthf = (asinf(sincosas) * 180.0f / (float)M_PI) * 10.0f;
+            this->azimuthf = asinf(sincosas) / (float)M_PI * 1800.0f;
             if (this->ptw.v[2][2] < 0.0) {
                 /* if heading into z	*/
 
@@ -429,7 +429,7 @@ void SCPlane::Simulate() {
                 this->azimuthf += 3600;
             }
 
-            this->twist = (asinf(this->ptw.v[0][1] / temp) * 180.0f / (float)M_PI) * 10.0f;
+            this->twist = (asinf(this->ptw.v[0][1] / temp) / (float)M_PI) * 1800.0f;
             if (this->ptw.v[1][1] < 0.0) {
                 /* if upside down	*/
                 this->twist = 1800.0f - this->twist;

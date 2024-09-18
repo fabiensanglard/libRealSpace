@@ -223,7 +223,7 @@ void SCStrike::SetMission(char const *missionName) {
     this->player_plane =
         new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
                     9.0f, 18.0f, &this->area, newPosition.x, newPosition.y, newPosition.z);
-    this->player_plane->azimuthf = (playerCoord->azymuth) * 10.0f;
+    this->player_plane->azimuthf = (360-playerCoord->azymuth) * 10.0f;
     this->player_plane->object = playerCoord;
 }
 void SCStrike::RunFrame(void) {
@@ -278,9 +278,11 @@ void SCStrike::RunFrame(void) {
                        (-(float)this->player_plane->twist / 10.0f) * ((float)M_PI / 180.0f));
     }break;
     }
+    
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     Renderer.RenderMissionObjects(missionObj);
+    
     switch (this->camera_mode) {
     case View::FRONT:
         this->cockpit->Render(0);
@@ -354,7 +356,7 @@ void SCStrike::RenderMenu() {
         ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s", 
             this->player_plane->airspeed,
             this->newPosition.y*3.6,
-            this->player_plane->azimuthf/10.0f,
+            360-(this->player_plane->azimuthf/10.0f),
             this->player_plane->tps,
             missionObj->mission_data.name.c_str(),
             missFileName
