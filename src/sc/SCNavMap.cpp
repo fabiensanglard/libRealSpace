@@ -97,11 +97,11 @@ void SCNavMap::RunFrame(void) {
     if (this->navMap->maps.count(*this->name)>0) {
         VGA.DrawShape(this->navMap->maps[*this->name]);
         Point2D pos = this->navMap->maps[*this->name]->position;
-        int w = this->navMap->maps[*this->name]->GetWidth();
-        int h = this->navMap->maps[*this->name]->GetHeight();
+        int w = 260;
+        int h = 190;
         for (auto ob: this->missionObj->mission_data.parts) {
-            int newx = (int) (((ob->x+180000)/(20000.0f*18.0f))*w)+pos.x;
-            int newy = (int) (((ob->y+180000)/(20000.0f*18.0f))*h)+20;
+            int newx = (int) (((ob->x+180000)/(20000.0f*18.0f))*w)+33;
+            int newy = (int) (((ob->y+180000)/(20000.0f*18.0f))*h)+27;
             if (ob->member_name != "F-16DES" || ob->weapon_load != "") {
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
                     VGA.plot_pixel(newx, newy, ob->id);
@@ -118,8 +118,18 @@ void SCNavMap::RunFrame(void) {
                     VGA.line(newx-5, newy-5, newx-5, newy+5, ob->id);
                     VGA.line(newx+5, newy-5, newx+5, newy+5, ob->id);
                 }
-            }        
+            }
         }
+        for (auto area: this->missionObj->mission_data.areas) {
+            int newx = (int) (((area->XAxis+180000)/(20000.0f*18.0f))*w)+33;
+            int newy = (int) (((-area->YAxis+180000)/(20000.0f*18.0f))*h)+27;
+            int neww = (int) (area->AreaWidth / 20000.0f);
+            VGA.line(newx-10, newy-10, newx+10, newy-10, 128);
+            VGA.line(newx-10, newy+10, newx+10, newy+10, 128);
+            VGA.line(newx-10, newy-10, newx-10, newy+10, 128);
+            VGA.line(newx+10, newy-10, newx+10, newy+10, 128);
+        }      
+
     }
     
     Mouse.Draw();

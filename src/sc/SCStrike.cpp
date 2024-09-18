@@ -207,13 +207,13 @@ void SCStrike::SetMission(char const *missionName) {
     missionObj->InitFromRAM(mission->data, mission->size);
 
     char filename[13];
-    if (missionObj->mission_data.name.size() > 0) {
-        sprintf(filename, "%s.PAK", missionObj->mission_data.name.c_str());
-    } else {
-        sprintf(filename, "%s.PAK", missionObj->mission_data.world_filename.c_str());
-    }
+    sprintf(filename, "%s.PAK", missionObj->mission_data.world_filename.c_str());
     area.InitFromPAKFileName(filename);
 
+    if (area.objects.size() == 0) {
+        sprintf(filename, "%s.PAK", missionObj->mission_data.name.c_str());
+        area.InitFromPAKFileName(filename);
+    }
     MISN_PART *playerCoord = missionObj->getPlayerCoord();
 
     newPosition.x = (float)playerCoord->x;
