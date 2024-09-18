@@ -207,7 +207,11 @@ void SCStrike::SetMission(char const *missionName) {
     missionObj->InitFromRAM(mission->data, mission->size);
 
     char filename[13];
-    sprintf(filename, "%s.PAK", missionObj->mission_data.world_filename.c_str());
+    if (missionObj->mission_data.name.size() > 0) {
+        sprintf(filename, "%s.PAK", missionObj->mission_data.name.c_str());
+    } else {
+        sprintf(filename, "%s.PAK", missionObj->mission_data.world_filename.c_str());
+    }
     area.InitFromPAKFileName(filename);
 
     MISN_PART *playerCoord = missionObj->getPlayerCoord();
@@ -223,7 +227,7 @@ void SCStrike::SetMission(char const *missionName) {
     this->player_plane =
         new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
                     9.0f, 18.0f, &this->area, newPosition.x, newPosition.y, newPosition.z);
-    this->player_plane->azimuthf = (360-playerCoord->azymuth) * 10.0f;
+    this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
     this->player_plane->object = playerCoord;
 }
 void SCStrike::RunFrame(void) {
@@ -238,15 +242,14 @@ void SCStrike::RunFrame(void) {
 
     switch (this->camera_mode) {
 
-    case View::FRONT:{
-        Vector3D pos = {this->newPosition.x, this->newPosition.y + 3,
-                        this->newPosition.z-2};
+    case View::FRONT: {
+        Vector3D pos = {this->newPosition.x, this->newPosition.y + 3, this->newPosition.z - 2};
         camera->SetPosition(&pos);
         camera->ResetRotate();
         camera->Rotate((-0.1f * this->player_plane->elevationf + 10) * ((float)M_PI / 180.0f),
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
-    }break;
+    } break;
     case View::FOLLOW: {
         Vector3D pos = {this->newPosition.x + this->camera_pos.x, this->newPosition.y + this->camera_pos.y,
                         this->newPosition.z + this->camera_pos.z};
@@ -265,24 +268,22 @@ void SCStrike::RunFrame(void) {
         break;
     case View::REAL:
     default: {
-        Vector3D pos = {this->newPosition.x, this->newPosition.y + 1,
-                        this->newPosition.z+1};
+        Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
         camera->SetPosition(&pos);
         camera->ResetRotate();
 
         camera->Rotate(-this->pilote_lookat.y * ((float)M_PI / 180.0f), 0.0f, 0.0f);
         camera->Rotate(0.0f, this->pilote_lookat.x * ((float)M_PI / 180.0f), 0.0f);
 
-        camera->Rotate(((-this->player_plane->elevationf / 10.0f) ) * ((float)M_PI / 180.0f),
+        camera->Rotate(((-this->player_plane->elevationf / 10.0f)) * ((float)M_PI / 180.0f),
                        (-this->player_plane->azimuthf / 10.0f) * ((float)M_PI / 180.0f),
                        (-(float)this->player_plane->twist / 10.0f) * ((float)M_PI / 180.0f));
-    }break;
+    } break;
     }
-    
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     Renderer.RenderMissionObjects(missionObj);
-    
+
     switch (this->camera_mode) {
     case View::FRONT:
         this->cockpit->Render(0);
@@ -353,14 +354,10 @@ void SCStrike::RenderMenu() {
             ImGui::EndMenu();
         }
         int sceneid = -1;
-        ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s", 
-            this->player_plane->airspeed,
-            this->newPosition.y*3.6,
-            360-(this->player_plane->azimuthf/10.0f),
-            this->player_plane->tps,
-            missionObj->mission_data.name.c_str(),
-            missFileName
-        );
+        ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s",
+                    this->player_plane->airspeed, this->newPosition.y * 3.6,
+                    360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
+                    missionObj->mission_data.name.c_str(), missFileName);
         ImGui::EndMainMenuBar();
     }
     if (show_simulation) {
@@ -369,8 +366,8 @@ void SCStrike::RenderMenu() {
                     this->player_plane->azimuthf);
         ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
         ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
-        ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf, this->player_plane->twist,
-                    this->player_plane->roll_speed);
+        ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf,
+                    this->player_plane->twist, this->player_plane->roll_speed);
         ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
         ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", this->player_plane->rollers,
                     this->player_plane->elevator, this->player_plane->rudder);
@@ -437,15 +434,14 @@ void SCStrike::RenderMenu() {
 
         ImGui::End();
     }
-    
+
     if (show_mission_parts_and_areas) {
         ImGui::Begin("Mission Parts and Areas");
         ImGui::Text("Mission %s", missionObj->mission_data.name.c_str());
         ImGui::Text("Area %s", missionObj->mission_data.world_filename.c_str());
-        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->x,
-                    missionObj->getPlayerCoord()->y);
+        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->x, missionObj->getPlayerCoord()->y);
         if (ImGui::TreeNode("Areas")) {
-            for (auto area: missionObj->mission_data.areas) {
+            for (auto area : missionObj->mission_data.areas) {
                 if (ImGui::TreeNode((void *)(intptr_t)area->id, "Area id %d", area->id)) {
                     ImGui::Text("Area name %s", area->AreaName);
                     ImGui::Text("Area x %d y %d z %d", area->XAxis, area->YAxis, area->ZAxis);
@@ -456,7 +452,7 @@ void SCStrike::RenderMenu() {
             ImGui::TreePop();
         }
         if (ImGui::TreeNode("Area Objects")) {
-            for (int g=0; g<area.objects.size(); g++) {
+            for (int g = 0; g < area.objects.size(); g++) {
                 auto obj = &area.objects.at(g);
                 if (ImGui::TreeNode((void *)(intptr_t)g, "Object id %d", g)) {
                     ImGui::Text("Object name %s", obj->name);
@@ -468,7 +464,7 @@ void SCStrike::RenderMenu() {
         }
         ImGui::Text("Mission Parts %d", missionObj->mission_data.parts.size());
         if (ImGui::TreeNode("Parts")) {
-            for (auto part: missionObj->mission_data.parts) {
+            for (auto part : missionObj->mission_data.parts) {
                 if (ImGui::TreeNode((void *)(intptr_t)part->id, "Parts id %d, area id %d", part->id, part->area_id)) {
                     ImGui::Text("u1 %d", part->unknown1);
                     ImGui::Text("u2 %d", part->unknown2);
@@ -483,12 +479,12 @@ void SCStrike::RenderMenu() {
             ImGui::TreePop();
         }
         if (ImGui::TreeNode("Casting")) {
-            for (auto cast: missionObj->mission_data.casting) {
+            for (auto cast : missionObj->mission_data.casting) {
                 ImGui::Text("Actor %s", cast.c_str());
             }
             ImGui::TreePop();
         }
-        
+
         ImGui::End();
     }
     ImGui::Render();

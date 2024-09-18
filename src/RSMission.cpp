@@ -87,6 +87,7 @@ void RSMission::parseMISN_NAME(uint8_t *data, size_t size) {
     for (int i = 0; i < size; i++) {
         this->mission_data.name.push_back(stream.ReadByte());
     }
+    std::transform(this->mission_data.name.begin(), this->mission_data.name.end(), this->mission_data.name.begin(), ::toupper);
 }
 void RSMission::parseMISN_WRLD(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;

@@ -265,7 +265,7 @@ void SCPlane::Simulate() {
     if (elapsed_time > 1) {
         uint32_t ticks = this->tick_counter - this->last_tick;
         this->tps = ticks / elapsed_time;
-        if (tps != 0) {
+        if (tps > 10) {
             this->last_time = current_time;
             this->last_tick = this->tick_counter;
         } else {
