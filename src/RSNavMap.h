@@ -7,11 +7,10 @@
 #include "IFFSaxLexer.h"
 #include "RLEShape.h"
 #include "ByteStream.h"
+#include "RSFont.h"
+#include "PakArchive.h"
 
 class RSNavMap {
-    
-    RLEShape *font;
-    
     std::vector<uint8_t> texts;
 
     void parseNMAP(uint8_t* data, size_t size);
@@ -23,6 +22,7 @@ class RSNavMap {
 public:
     std::map<std::string, RLEShape*> maps;
     RLEShape *background;
+    RSFont *font;
     RSNavMap();
 	~RSNavMap();
 	void InitFromRam(uint8_t* data, size_t size);

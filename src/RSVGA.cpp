@@ -187,6 +187,33 @@ void RSVGA::rect_slow(int left, int top, int right, int bottom, uint8_t color) {
     line(left, bottom, right, bottom, color);
 }
 
+/**************************************************************************
+ *  circle_slow                                                           *
+ *    Draws a circle by using floating point numbers and math fuctions.   *
+ **************************************************************************/
+
+void RSVGA::circle_slow(int x,int y, int radius, byte color) {
+  float n=0,invradius=1/(float)radius;
+  int dx=0,dy=radius-1;
+  uint16_t dxoffset,dyoffset,offset=(y<<8)+(y<<6)+x;
+
+  while (dx<=dy)
+  {
+    dxoffset = (dx<<8) + (dx<<6);
+    dyoffset = (dy<<8) + (dy<<6);
+    frameBuffer[offset+dy-dxoffset] = color;  /* octant 0 */
+    frameBuffer[offset+dx-dyoffset] = color;  /* octant 1 */
+    frameBuffer[offset-dx-dyoffset] = color;  /* octant 2 */
+    frameBuffer[offset-dy-dxoffset] = color;  /* octant 3 */
+    frameBuffer[offset-dy+dxoffset] = color;  /* octant 4 */
+    frameBuffer[offset-dx+dyoffset] = color;  /* octant 5 */
+    frameBuffer[offset+dx+dyoffset] = color;  /* octant 6 */
+    frameBuffer[offset+dy+dxoffset] = color;  /* octant 7 */
+    dx++;
+    n+=invradius;
+    dy=radius * sin(acos(n));
+  }
+}
 void RSVGA::DrawText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
                      size_t interLetterSpace, size_t spaceSize) {
 
@@ -195,7 +222,7 @@ void RSVGA::DrawText(RSFont *font, Point2D *coo, char *text, uint8_t color, size
 
     if (size <= 0)
         return;
-
+    int startx=coo->x;
     for (size_t i = 0; i < size; i++) {
 
         char chartoDraw = text[start + i];
@@ -209,7 +236,12 @@ void RSVGA::DrawText(RSFont *font, Point2D *coo, char *text, uint8_t color, size
 
         if (chartoDraw == 'p' || chartoDraw == 'y' || chartoDraw == 'g')
             coo->y += 1;
-
+        if (chartoDraw == '\n') {
+            RLEShape *sp = font->GetShapeForChar('A');
+            coo->y += sp->GetHeight()+2;
+            lineHeight = coo->y;
+            coo->x = startx;
+        }
         shape->SetPosition(coo);
         DrawShape(shape);
         coo->y = lineHeight;

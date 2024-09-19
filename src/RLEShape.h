@@ -40,6 +40,7 @@ public:
     int32_t GetWidth(void){ return leftDist + this->rightDist;}
     int32_t GetHeight(void){ return topDist+botDist;}
     int32_t GetTop(void){ return topDist;}
+    int32_t GetLeft(void) { return leftDist;}
     int32_t GetBottom(void){ return botDist;}
     
     

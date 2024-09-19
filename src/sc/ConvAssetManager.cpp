@@ -262,7 +262,6 @@ void ConvAssetManager::ReadFaces(const IffChunk *root) {
                 Point2D pos = {0, CONV_TOP_BAR_HEIGHT + 1}; //  to allow the black band on top of the screen
                 s->SetPosition(&pos);
             }
-            printf("%d ", height);
         }
 
         // printf("Face '%s' features %lu images.\n",face->name,imageSet->GetNumImages());

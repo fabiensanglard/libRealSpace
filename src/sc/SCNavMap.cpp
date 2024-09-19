@@ -97,12 +97,15 @@ void SCNavMap::RunFrame(void) {
     if (this->navMap->maps.count(*this->name)>0) {
         VGA.DrawShape(this->navMap->maps[*this->name]);
         Point2D pos = this->navMap->maps[*this->name]->position;
-        int w = 260;
-        int h = 190;
+        int w = 238;
+        int h = 155;
+        int t = 18;
+        int l = 6;
         for (auto ob: this->missionObj->mission_data.parts) {
-            int newx = (int) (((ob->x+180000)/(20000.0f*18.0f))*w)+33;
-            int newy = (int) (((ob->y+180000)/(20000.0f*18.0f))*h)+27;
+            int newx = (int) (((ob->x+180000.0f)/360000.0f)*w)+l;
+            int newy = (int) (((-ob->y+180000.0f)/360000.0f)*h)+t;
             if (ob->member_name != "F-16DES" || ob->weapon_load != "") {
+                
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
                     VGA.plot_pixel(newx, newy, ob->id);
                     VGA.line(newx-5, newy, newx+5, newy, ob->id);
@@ -111,6 +114,7 @@ void SCNavMap::RunFrame(void) {
                     VGA.line(newx+5, newy-5, newx-5, newy+5, ob->id);
                 }
             } else {
+                newy = (int) (((ob->y+180000.0f)/360000.0f)*h)+t;
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
                     VGA.plot_pixel(newx, newy, ob->id);
                     VGA.line(newx-5, newy-5, newx+5, newy-5, ob->id);
@@ -121,15 +125,68 @@ void SCNavMap::RunFrame(void) {
             }
         }
         for (auto area: this->missionObj->mission_data.areas) {
-            int newx = (int) (((area->XAxis+180000)/(20000.0f*18.0f))*w)+33;
-            int newy = (int) (((-area->YAxis+180000)/(20000.0f*18.0f))*h)+27;
-            int neww = (int) (area->AreaWidth / 20000.0f);
-            VGA.line(newx-10, newy-10, newx+10, newy-10, 128);
-            VGA.line(newx-10, newy+10, newx+10, newy+10, 128);
-            VGA.line(newx-10, newy-10, newx-10, newy+10, 128);
-            VGA.line(newx+10, newy-10, newx+10, newy+10, 128);
-        }      
-
+            int newx = (int) (((area->XAxis+180000.0f)/360000.0f)*w)+l;
+            int newy = (int) (((-area->YAxis+180000.0f)/(360000.0f))*h)+t;
+            int neww = (int) ((area->AreaWidth / 360000.0f) * w);
+            int newh = neww;
+            if (area->AreaHeight != 0) {
+                newh = (int) ((area->AreaHeight / 360000.0f) * h);
+            }
+            if (newx>0 && newx<320 && newy>0 && newy<200) {
+                int txtw = (int) strlen(area->AreaName) * (this->navMap->font->GetShapeForChar('A')->GetWidth()+1);
+                int txtl = (int) strlen(area->AreaName);
+                Point2D *p1 = new Point2D({newx-(txtw/2)<0?newx:newx-(txtw/2), newy});
+                switch (area->AreaType) {
+                    case 'S':
+                        VGA.line(newx-neww, newy-neww, newx+neww, newy-neww, 1);
+                        VGA.line(newx-neww, newy+neww, newx+neww, newy+neww, 1);
+                        VGA.line(newx-neww, newy-neww, newx-neww, newy+neww, 1);
+                        VGA.line(newx+neww, newy-neww, newx+neww, newy+neww, 1);
+                        VGA.DrawTextA(
+                            this->navMap->font,
+                            p1,
+                            area->AreaName,
+                            0,
+                            0,
+                            txtl,1,this->navMap->font->GetShapeForChar('A')->GetWidth());
+                        break;
+                    case 'C':
+                        VGA.circle_slow(newx, newy, neww, 128);
+                        VGA.DrawTextA(
+                            this->navMap->font,
+                            p1,
+                            area->AreaName,
+                            0,
+                            0,
+                            txtl,1,this->navMap->font->GetShapeForChar('A')->GetWidth());
+                        break;
+                    default:
+                        VGA.plot_pixel(newx, newy, 128);
+                        VGA.DrawTextA(
+                            this->navMap->font,
+                            p1,
+                            area->AreaName,
+                            0,
+                            0,
+                            txtl,1,this->navMap->font->GetShapeForChar('A')->GetWidth());
+                        break;
+                }
+            }
+            int cpt=0;
+            for (auto text: this->missionObj->mission_data.messages) {
+                int newx = 246+(cpt*2);
+                int newy = 30+(cpt*30);
+                Point2D *p1 = new Point2D({newx, newy});
+                VGA.DrawTextA(
+                    this->navMap->font,
+                    p1,
+                    (char *)text->c_str(),
+                    0,
+                    0,
+                    text->size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth());
+                cpt++;
+            }
+        }
     }
     
     Mouse.Draw();

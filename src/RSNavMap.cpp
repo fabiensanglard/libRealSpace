@@ -28,7 +28,14 @@ void RSNavMap::parseNMAP_MAPS(uint8_t *data, size_t size) {
         read += (shape_size - 4);
     }
 }
-void RSNavMap::parseNMAP_FONT(uint8_t *data, size_t size) {}
+void RSNavMap::parseNMAP_FONT(uint8_t *data, size_t size) {
+    PakArchive fontArchive;
+    uint8_t *archive_data = (uint8_t *)malloc(size);
+    memcpy(archive_data, data, size);
+    fontArchive.InitFromRAM("nav_font", archive_data, size);
+    font = new RSFont();
+    font->InitFromPAK(&fontArchive);
+}
 void RSNavMap::parseNMAP_TEXT(uint8_t *data, size_t size) {}
 void RSNavMap::parseNMAP_SHAP(uint8_t *data, size_t size) {
     ByteStream stream(data);

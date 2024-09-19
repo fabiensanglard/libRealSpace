@@ -1,12 +1,14 @@
 #include "precomp.h"
 
 RSMixer::RSMixer() {
+    
+}
+void RSMixer::Init() {
     this->initted = Mix_Init(MIX_INIT_MID);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024);
     this->music = new RSMusic();
     this->music->Init();
 }
-
 RSMixer::~RSMixer() { Mix_Quit(); }
 
 void RSMixer::PlayMusic(uint32_t index) {

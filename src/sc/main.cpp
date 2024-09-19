@@ -23,7 +23,9 @@ RSMixer Mixer;
 int main(int argc, char* argv[]) {
 
     
-    Assets.SetBase("./");
+    Assets.SetBase("./assets");
+    
+    Mixer.Init();
     
     Game.Init();
     

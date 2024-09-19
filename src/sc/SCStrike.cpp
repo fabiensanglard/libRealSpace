@@ -439,7 +439,11 @@ void SCStrike::RenderMenu() {
         ImGui::Begin("Mission Parts and Areas");
         ImGui::Text("Mission %s", missionObj->mission_data.name.c_str());
         ImGui::Text("Area %s", missionObj->mission_data.world_filename.c_str());
-        ImGui::Text("Player Coord %d %d", missionObj->getPlayerCoord()->x, missionObj->getPlayerCoord()->y);
+        ImGui::Text("Player Coord %d %d %d", missionObj->getPlayerCoord()->x, missionObj->getPlayerCoord()->y, missionObj->getPlayerCoord()->z);
+        ImGui::Text("Messages %d", missionObj->mission_data.messages.size());
+        for (auto msg: missionObj->mission_data.messages) {
+            ImGui::Text("- %s", msg->c_str());
+        }
         if (ImGui::TreeNode("Areas")) {
             for (auto area : missionObj->mission_data.areas) {
                 if (ImGui::TreeNode((void *)(intptr_t)area->id, "Area id %d", area->id)) {

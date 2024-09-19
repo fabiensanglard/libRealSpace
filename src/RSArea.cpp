@@ -164,8 +164,6 @@ void RSArea::ParseMetadata() {
 #define OBJ_ENTRY_SIZE 0x46
 #define OBJ_ENTRY_NUM_OBJECTS_FIELD 0x2
 void RSArea::ParseObjects() {
-
-    printf("Parsing file[5] (Objects)\n");
     /*
          The OBJ file seems to have a pattern:
 
@@ -185,32 +183,22 @@ void RSArea::ParseObjects() {
 
     */
     PakEntry *objectsFilesLocation = archive->GetEntry(5);
-    printf("DUMP OBJECT FILES\n");
-    // dumpfbyte(objectsFilesLocation->data, objectsFilesLocation->size);
     objectsFilesLocation = archive->GetEntry(5);
 
     PakArchive objectFiles;
     objectFiles.InitFromRAM("PAK Objects from RAM", objectsFilesLocation->data, objectsFilesLocation->size);
-    // objectFiles.List(stdout);
-    printf("This .OBJ features %llu entries.\n", objectFiles.GetNumEntries());
 
     for (size_t i = 0; i < objectFiles.GetNumEntries(); i++) {
         PakEntry *entry = objectFiles.GetEntry(i);
         if (entry->size == 0)
             continue;
-        // dumpfbyte(entry->data, entry->size);
         entry = objectFiles.GetEntry(i);
         ByteStream sizeGetter(entry->data);
         uint16_t numObjs = sizeGetter.ReadUShort();
-        printf("OBJ files %llu features %d objects.\n", i, numObjs);
-
-        // if (i != 97)
-        //     continue;
 
         for (int j = 0; j < numObjs; j++) {
 
             ByteStream reader(entry->data + OBJ_ENTRY_NUM_OBJECTS_FIELD + OBJ_ENTRY_SIZE * j);
-
             MapObject mapObject;
 
             for (int k = 0; k < 8; k++)
@@ -238,10 +226,6 @@ void RSArea::ParseObjects() {
             for (int k = 0; k < 0x31 - 10; k++)
                 unknowns[k] = reader.ReadByte();
 
-            printf("object set [%3llu] obj [%2d] - '%-8s' 0x%X 0x%X 0x%X 0x%X 0x%X '%-8s' At {%d,%d,%d}\n", i, j,
-                   mapObject.name, unknown09, unknown10, unknown11, unknown12, unknown13, mapObject.destroyedName,
-                   mapObject.position[0], mapObject.position[2], mapObject.position[1]);
-            printf("------\n");
             std::string hash = mapObject.name;
             std::map<std::string, RSEntity *>::iterator it;
             it = objCache->find(hash);
@@ -357,25 +341,15 @@ void RSArea::ParseTriFile(PakEntry *entry) {
 void RSArea::ParseTrigo() {
 
     PakEntry *entry;
-
     Renderer.Init(2);
-
     entry = archive->GetEntry(4);
 
-    printf(".TRI file is %llu bytes.\n", entry->size);
-    // .TRI is a PAK
     PakArchive triFiles;
     triFiles.InitFromRAM(".TRI", entry->data, entry->size);
-    // triFiles.List(stdout);
-    // triFiles.Decompress("/Users/fabiensanglard/Desktop/MAURITAN.TRIS/","TRI");
-
-    printf("Found %zu .TRI files.\n", triFiles.GetNumEntries());
 
     for (size_t i = 0; i < triFiles.GetNumEntries(); i++) {
 
         PakEntry *entry = triFiles.GetEntry(i);
-        if (entry->size > 0)
-            printf("TRI FOR BLOCK %llu\n", i);
         ParseTriFile(entry);
     }
 }

@@ -121,6 +121,7 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             for (int k = 0; k < 33; k++) {
                 tmparea->AreaName[k] = stream.ReadByte();
             }
+            missionstrtoupper(tmparea->AreaName);
             tmparea->XAxis = stream.ReadInt24LE();
             tmparea->YAxis = stream.ReadInt24LE();
             tmparea->ZAxis = stream.ReadInt24LE();
@@ -133,6 +134,7 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             for (int k = 0; k < 33; k++) {
                 tmparea->AreaName[k] = stream.ReadByte();
             }
+            missionstrtoupper(tmparea->AreaName);
             tmparea->XAxis = stream.ReadInt24LE();
             tmparea->YAxis = stream.ReadInt24LE();
             tmparea->ZAxis = stream.ReadInt24LE();
@@ -151,6 +153,7 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             for (int k = 0; k < 33; k++) {
                 tmparea->AreaName[k] = stream.ReadByte();
             }
+            missionstrtoupper(tmparea->AreaName);
             tmparea->XAxis = stream.ReadInt24LE();
             tmparea->YAxis = stream.ReadInt24LE();
             tmparea->ZAxis = stream.ReadInt24LE();
