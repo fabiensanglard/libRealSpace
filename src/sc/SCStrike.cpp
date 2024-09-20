@@ -179,6 +179,9 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_b:
             this->player_plane->SetSpoilers();
             break;
+        case SDLK_y:
+            this->camera_mode = View::EYE_ON_TARGET;
+            break;
         case SDLK_n: {
             SCNavMap *nav_screen = new SCNavMap();
             nav_screen->Init();
@@ -287,6 +290,13 @@ void SCStrike::RunFrame(void) {
     }
         
         break;
+    case View::EYE_ON_TARGET: {
+        MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
+        Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
+        Vector3D targetPos = {target->x, target->z, -target->y};
+        camera->SetPosition(&pos);
+        camera->LookAt(&targetPos);
+    }break;
     case View::REAL:
     default: {
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
@@ -322,6 +332,7 @@ void SCStrike::RunFrame(void) {
     case View::REAR:
         this->cockpit->Render(3);
         break;
+    case View::EYE_ON_TARGET:
     case View::REAL:
         glPushMatrix();
         Matrix cockpit_rotation;

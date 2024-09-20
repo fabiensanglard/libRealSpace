@@ -23,7 +23,7 @@ static const char *mission_list[] = {
 };
 static int mission_idx = 0;
 
-enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET };
+enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET };
 
 class SCStrike : public IActivity {
 
