@@ -93,6 +93,9 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_F6:
             this->camera_mode = View::REAL;
             break;
+        case SDLK_F7:
+            this->camera_mode = View::TARGET;
+            break;
         case SDLK_KP_8:
             this->camera_pos.z += 1;
             break;
@@ -181,8 +184,17 @@ void SCStrike::CheckKeyboard(void) {
             nav_screen->Init();
             nav_screen->SetName((char *)this->missionObj->mission_data.world_filename.c_str());
             nav_screen->missionObj = this->missionObj;
+            nav_screen->current_nav_point = &this->nav_point_id;
             Game.AddActivity(nav_screen);
         } break;
+        case SDLK_a:
+            this->player_plane->x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis / COORD_SCALE;
+            this->player_plane->z = -this->missionObj->mission_data.areas[this->nav_point_id]->YAxis / COORD_SCALE;
+            this->player_plane->ptw.Identity();
+            this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
+        break;
+        case SDLK_t:
+            this->current_target = (this->current_target + 1) % this->missionObj->mission_data.parts.size();
         default:
             break;
         }
@@ -266,6 +278,15 @@ void SCStrike::RunFrame(void) {
                        (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
+    case View::TARGET: {
+        MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
+        Vector3D pos = {target->x+ this->camera_pos.x, target->z+ this->camera_pos.y, -target->y+ this->camera_pos.z};
+        Vector3D targetPos = {target->x, target->z, -target->y};
+        camera->SetPosition(&pos);
+        camera->LookAt(&targetPos);
+    }
+        
+        break;
     case View::REAL:
     default: {
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
@@ -288,6 +309,7 @@ void SCStrike::RunFrame(void) {
     case View::FRONT:
         this->cockpit->Render(0);
         break;
+    case View::TARGET:
     case View::FOLLOW:
         this->player_plane->Render();
         break;
@@ -402,6 +424,7 @@ void SCStrike::RenderMenu() {
     }
     if (show_cockpit) {
         ImGui::Begin("Cockpit");
+        ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
         if (this->player_plane->GetWheel()) {
             ImGui::Text("Wheel down");
         } else {
@@ -413,6 +436,8 @@ void SCStrike::RenderMenu() {
         if (this->player_plane->GetSpoilers()) {
             ImGui::Text("Breaks");
         }
+        ImGui::Text("Target %s", this->missionObj->mission_data.parts[this->current_target]->member_name.c_str());
+
         ImGui::End();
     }
     if (show_mission) {

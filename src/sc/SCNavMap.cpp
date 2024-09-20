@@ -34,6 +34,21 @@ void SCNavMap::CheckKeyboard(void) {
             Game.StopTopActivity();
             break;
         }
+        case SDLK_c: 
+            this->color = (this->color + 1) % 255;
+        break;
+        case SDLK_LEFT:
+            *this->current_nav_point = *this->current_nav_point-1;
+            if (*this->current_nav_point == 255) {
+                *this->current_nav_point = 0;
+            }
+        break;
+        case SDLK_RIGHT:
+            *this->current_nav_point = *this->current_nav_point+1;
+            if (*this->current_nav_point > this->missionObj->mission_data.areas.size()-1) {
+                *this->current_nav_point = this->missionObj->mission_data.areas.size()-1;
+            }
+        break;
         default:
             break;
         }
@@ -124,7 +139,25 @@ void SCNavMap::RunFrame(void) {
                 }
             }
         }
+        
         for (auto area: this->missionObj->mission_data.areas) {
+            int c = this->color;
+            if (area->id - 1 == *this->current_nav_point) {
+                c=0;
+                int msg_newx = 246+(3*2);
+                int msg_newy = 30+(3*30);
+                Point2D *msg_p1 = new Point2D({msg_newx, msg_newy});
+                VGA.DrawTextA(
+                    this->navMap->font,
+                    msg_p1,
+                    (char *)this->missionObj->mission_data.messages[area->id-1]->c_str(),
+                    0,
+                    0,
+                    this->missionObj->mission_data.messages[area->id-1]->size(),
+                    1,
+                    this->navMap->font->GetShapeForChar('A')->GetWidth()
+                );
+            }
             int newx = (int) (((area->XAxis+180000.0f)/360000.0f)*w)+l;
             int newy = (int) (((-area->YAxis+180000.0f)/(360000.0f))*h)+t;
             int neww = (int) ((area->AreaWidth / 360000.0f) * w);
@@ -146,7 +179,7 @@ void SCNavMap::RunFrame(void) {
                             this->navMap->font,
                             p1,
                             area->AreaName,
-                            0,
+                            c,
                             0,
                             txtl,1,this->navMap->font->GetShapeForChar('A')->GetWidth());
                         break;
@@ -156,7 +189,7 @@ void SCNavMap::RunFrame(void) {
                             this->navMap->font,
                             p1,
                             area->AreaName,
-                            0,
+                            c,
                             0,
                             txtl,1,this->navMap->font->GetShapeForChar('A')->GetWidth());
                         break;
@@ -166,25 +199,11 @@ void SCNavMap::RunFrame(void) {
                             this->navMap->font,
                             p1,
                             area->AreaName,
-                            0,
+                            c,
                             0,
                             txtl,1,this->navMap->font->GetShapeForChar('A')->GetWidth());
                         break;
                 }
-            }
-            int cpt=0;
-            for (auto text: this->missionObj->mission_data.messages) {
-                int newx = 246+(cpt*2);
-                int newy = 30+(cpt*30);
-                Point2D *p1 = new Point2D({newx, newy});
-                VGA.DrawTextA(
-                    this->navMap->font,
-                    p1,
-                    (char *)text->c_str(),
-                    0,
-                    0,
-                    text->size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth());
-                cpt++;
             }
         }
     }

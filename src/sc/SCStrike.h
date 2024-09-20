@@ -23,7 +23,7 @@ static const char *mission_list[] = {
 };
 static int mission_idx = 0;
 
-enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL };
+enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET };
 
 class SCStrike : public IActivity {
 
@@ -44,6 +44,7 @@ private:
     Point3D *position;
     Camera *camera;
     Point3D camera_pos;
+    Point3D target_camera_pos;
     float yaw;
     Point3D newPosition;
     Point2D pilote_lookat;
@@ -54,6 +55,8 @@ private:
     SCPlane *player_plane;
     SCCockpit *cockpit;
     float counter;
+    uint8_t nav_point_id{0};
+    uint8_t current_target{0};
     std::map<std::string, RSEntity *> objectCache;
 };
 
