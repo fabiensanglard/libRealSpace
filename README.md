@@ -84,9 +84,9 @@ To build the project using CMake and Vcpkg, follow these instructions:
 
 
 5. Build the project:
-     - Run the following command to build the project using CMake:
+     - Run the following command to build the project using CMake (if you have selected the windows profile):
        ```
-       cmake --build build
+       cmake --build .\out\build\windows\ 
        ```
 
 6. Run the project:
