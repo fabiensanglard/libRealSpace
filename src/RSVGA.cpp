@@ -192,7 +192,7 @@ void RSVGA::rect_slow(int left, int top, int right, int bottom, uint8_t color) {
  *    Draws a circle by using floating point numbers and math fuctions.   *
  **************************************************************************/
 
-void RSVGA::circle_slow(int x,int y, int radius, byte color) {
+void RSVGA::circle_slow(int x,int y, int radius, uint8_t color) {
   float n=0,invradius=1/(float)radius;
   int dx=0,dy=radius-1;
   uint16_t dxoffset,dyoffset,offset=(y<<8)+(y<<6)+x;
