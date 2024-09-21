@@ -30,7 +30,8 @@ class Quaternion{
     Quaternion Slerp(Quaternion* other, float alpha);
     
     void Normalize(void);
-                     
+    void GetAngles(float& pitch, float& yaw, float& roll);
+            
     private:
     
         float w;

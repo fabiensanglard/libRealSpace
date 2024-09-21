@@ -123,6 +123,31 @@ float Quaternion::DotProduct(Quaternion* other){
            this->z * other->z);
 }
 
+void Quaternion::GetAngles(float& pitch, float& yaw, float& roll){
+    // Calcul des angles à partir des composantes du quaternion
+    float sqw = w * w;
+    float sqx = x * x;
+    float sqy = y * y;
+    float sqz = z * z;
+
+    float unit = sqx + sqy + sqz + sqw; // unité du quaternion
+
+    float test = x * y + z * w;
+
+    if (test > 0.499 * unit) { // singularity at north pole
+        yaw = 2.0f * atan2f(x, w);
+        pitch = (float) M_PI / 2.0f;
+        roll = 0.0f;
+    } else if (test < -0.499 * unit) { // singularity at south pole
+        yaw = -2.0f * atan2f(x, w);
+        pitch = - (float) M_PI / 2.0f;
+        roll = 0;
+    } else {
+        yaw = atan2f(2.0f * (y * z + x * w), sqx - sqy - sqz + sqw);
+        pitch = asinf(-2.0f * test / unit);
+        roll = atan2f(2.0f * (x * z - y * w), sqx + sqy - sqz - sqw);
+    }
+}
 
 Quaternion Quaternion::Slerp(Quaternion* other, float alpha ){
     float beta;			// complementary interp parameter

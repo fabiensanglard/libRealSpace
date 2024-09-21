@@ -65,7 +65,16 @@ void SCStrike::CheckKeyboard(void) {
     }
     for (int i = 0; i < numKeybEvents; i++) {
         SDL_Event *event = &keybEvents[i];
-
+        switch (event->key.keysym.scancode) {
+            case SDL_SCANCODE_MINUS:
+                this->player_plane->SetThrottle(this->player_plane->GetThrottle() - 1);
+                break;
+            case SDL_SCANCODE_EQUALS:
+                this->player_plane->SetThrottle(this->player_plane->GetThrottle() + 1);
+                break;
+            default:
+                break;
+        }
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
             Game.StopTopActivity();
@@ -134,8 +143,7 @@ void SCStrike::CheckKeyboard(void) {
                 this->player_plane->control_stick_x = 50;
             break;
         case SDLK_1:
-            if (!this->mouse_control)
-                this->player_plane->SetThrottle(10);
+            this->player_plane->SetThrottle(10);
             break;
         case SDLK_2:
             this->player_plane->SetThrottle(20);
@@ -251,7 +259,7 @@ void SCStrike::RunFrame(void) {
     this->player_plane->getPosition(&newPosition);
     if (this->player_plane->object != nullptr) {
         this->player_plane->object->x = (long)newPosition.x;
-        this->player_plane->object->z = (long)newPosition.y;
+        this->player_plane->object->z = (uint16_t)newPosition.y;
         this->player_plane->object->y = (long)newPosition.z;
     }
 
@@ -284,7 +292,7 @@ void SCStrike::RunFrame(void) {
     case View::TARGET: {
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
         Vector3D pos = {target->x+ this->camera_pos.x, target->z+ this->camera_pos.y, -target->y+ this->camera_pos.z};
-        Vector3D targetPos = {target->x, target->z, -target->y};
+        Vector3D targetPos = {(float)target->x, (float)target->z, -(float)target->y};
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
     }
@@ -293,7 +301,7 @@ void SCStrike::RunFrame(void) {
     case View::EYE_ON_TARGET: {
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
-        Vector3D targetPos = {target->x, target->z, -target->y};
+        Vector3D targetPos = {(float)target->x, (float)target->z, (float)-target->y};
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
     }break;
@@ -448,7 +456,35 @@ void SCStrike::RenderMenu() {
             ImGui::Text("Breaks");
         }
         ImGui::Text("Target %s", this->missionObj->mission_data.parts[this->current_target]->member_name.c_str());
+        MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
+        Vector3D targetPos = {(float)target->x+180000.0f, (float)target->z, -(float)target->y+180000.0f};
+        Vector3D playerPos = {this->newPosition.x+180000.0f, this->newPosition.y, this->newPosition.z+180000.0f};
 
+        Camera totarget;
+        totarget.SetPosition(&playerPos);
+        totarget.LookAt(&targetPos);
+        float raw;
+        float yawn;
+        float pitch;
+        raw = 0.0f;
+        yawn = 0.0f;
+        pitch = 0.0f;
+
+        totarget.GetOrientation().GetAngles(pitch, yawn, raw);
+
+
+        Vector3D directionVector = {targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z};
+
+        ImGui::Text("Target position [%.3f,%.3f,%.3f]", targetPos.x, targetPos.y, targetPos.z);
+        ImGui::Text("Player position [%.3f,%.3f,%.3f]", playerPos.x, playerPos.y, playerPos.z);
+        ImGui::Text("Azimuth to target %.3f", 
+            (360 - (this->player_plane->azimuthf / 10.0f)) - (atan2(targetPos.z - playerPos.z, targetPos.x - playerPos.x) * (180.0 / M_PI) + 90.0f)
+        );
+        ImGui::Text("Q angles [%.3f,%.3f,%.3f] rel %.3f", 
+            pitch * 180.0 / M_PI, 
+            yawn * 180.0 / M_PI, 
+            180.0f - (raw * 180.0 / M_PI), 
+            (180.0f - (raw * 180.0 / M_PI))-(360 - (this->player_plane->azimuthf / 10.0f)));
         ImGui::End();
     }
     if (show_mission) {

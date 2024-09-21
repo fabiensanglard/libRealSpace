@@ -94,7 +94,57 @@ public:
         return acc;
     }
 
+    float Norm() {
+        return sqrtf(this->x * this->x + this->y * this->y + this->z * this->z);
+    };
+
+    inline float AngleBetweenVectors(Vector3D b) {
+        float dot = this->DotProduct(&b);
+        float normA = this->Norm();
+        float normB = b.Norm();
+        return acosf(dot / (normA * normB));
+    };
+
+        // Fonction pour calculer l'angle projeté sur le plan xy
+    inline float AngleOnXYPlane(Vector3D b) {
+        Vector3D a_xy = {this->x, this->y, 0};
+        Vector3D b_xy = {b.x, b.y, 0};
+        return a_xy.AngleBetweenVectors(b_xy);
+    };
+
+    // Fonction pour calculer l'angle projeté sur le plan xz
+    inline float AngleOnXZPlane(Vector3D b) {
+        Vector3D a_xz = {this->x, 0, this->z};
+        Vector3D b_xz = {b.x, 0, b.z};
+        return a_xz.AngleBetweenVectors(b_xz);
+    };
+
+    inline float AngleOnZYPlane(Vector3D b) {
+        Vector3D a_xz = {0, this->y, this->z};
+        Vector3D b_xz = {0, b.y, b.z};
+        return a_xz.AngleBetweenVectors(b_xz);
+    };
     
+
+    // Fonction pour calculer l'angle avec l'axe x
+    inline float angleWithXAxis() {
+        return atan2f(this->y, this->x);
+    };
+
+    // Fonction pour calculer l'angle avec l'axe y
+    inline float angleWithYAxis() {
+        return atan2f(this->x, this->z);
+    };
+
+    // Fonction pour calculer l'angle avec l'axe z
+    inline float angleWithZAxis() {
+        float normD = this->Norm();
+        if (normD == 0.0) {
+            return 0.0; // Retourner 0 radians par convention
+        }
+        return acosf(this->z / normD);
+    };
+
     float x;
     float y;
     float z;
