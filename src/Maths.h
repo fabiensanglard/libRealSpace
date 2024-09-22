@@ -7,6 +7,8 @@
 //
 
 #pragma once
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <math.h>
 #include <stdint.h>
 
@@ -20,4 +22,4 @@ typedef Point2D Vector2D;
 
 // Long life to however came up with this. You rule man.
 float InvSqrt(float x);
-
+float tenthOfDegreeToRad(float angle);

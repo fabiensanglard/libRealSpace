@@ -41,6 +41,7 @@ private:
     char missFileName[33];
     uint8_t camera_mode;
     bool mouse_control;
+    bool pause_simu{false};
     Camera *camera;
     Point3D camera_pos;
     Point3D target_camera_pos;

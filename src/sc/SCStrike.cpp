@@ -100,6 +100,7 @@ void SCStrike::CheckKeyboard(void) {
             this->pilote_lookat.x = 180;
             break;
         case SDLK_F6:
+            this->mouse_control = false;
             this->camera_mode = View::REAL;
             break;
         case SDLK_F7:
@@ -125,6 +126,9 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_m:
             this->mouse_control = !this->mouse_control;
+            break;
+        case SDLK_p:
+            this->pause_simu = !this->pause_simu;
             break;
         case SDLK_UP:
             if (!this->mouse_control)
@@ -188,7 +192,12 @@ void SCStrike::CheckKeyboard(void) {
             this->player_plane->SetSpoilers();
             break;
         case SDLK_y:
-            this->camera_mode = View::EYE_ON_TARGET;
+            if (this->camera_mode != View::EYE_ON_TARGET) {
+                this->camera_mode = View::EYE_ON_TARGET;
+            } else {
+                this->camera_mode = View::FRONT;
+            }
+            
             break;
         case SDLK_n: {
             SCNavMap *nav_screen = new SCNavMap();
@@ -255,7 +264,9 @@ void SCStrike::SetMission(char const *missionName) {
 }
 void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
-    this->player_plane->Simulate();
+    if (!this->pause_simu) {
+        this->player_plane->Simulate();
+    }
     this->player_plane->getPosition(&newPosition);
     if (this->player_plane->object != nullptr) {
         this->player_plane->object->x = (long)newPosition.x;
@@ -385,9 +396,17 @@ void SCStrike::RenderMenu() {
     static bool show_cockpit = false;
     static bool show_mission = false;
     static bool show_mission_parts_and_areas = false;
+    static bool show_simulation_config = false;
+
+    static int altitude = 0;
+    static int azimuth = 0;
+    static int throttle = 0;
+    static int speed = 0;
+
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("SCStrike")) {
             ImGui::MenuItem("Simulation", NULL, &show_simulation);
+            ImGui::MenuItem("Simulation config", NULL, &show_simulation_config);
             ImGui::MenuItem("Camera", NULL, &show_camera);
             ImGui::MenuItem("Cockpit", NULL, &show_cockpit);
             ImGui::MenuItem("Mission", NULL, &show_mission);
@@ -400,6 +419,33 @@ void SCStrike::RenderMenu() {
                     360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
                     missionObj->mission_data.name.c_str(), missFileName);
         ImGui::EndMainMenuBar();
+    }
+    if (show_simulation_config) {
+        ImGui::Begin("Simulation Config");
+        ImGui::DragInt("set altitude", &altitude,100,0,30000);
+        ImGui::DragInt("set throttle", &throttle,10,0,100);
+        ImGui::DragInt("set azimuth", &azimuth,1,0,360);
+        ImGui::DragInt("set speed", &speed,2,0,30);
+        if (ImGui::Button("set")) {
+            this->player_plane->vz = -speed;
+            this->player_plane->y = altitude;
+            this->player_plane->last_py = this->player_plane->y;
+            this->player_plane->rollers = 0;
+            this->player_plane->roll_speed = 0;
+            this->player_plane->elevation_speedf = 0;
+            this->player_plane->elevator = 0;
+            this->player_plane->SetThrottle(throttle);
+            this->player_plane->ptw.Identity();
+            this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
+
+            this->player_plane->ptw.rotateM(tenthOfDegreeToRad(azimuth*10.0f), 0, 1, 0);
+            this->player_plane->ptw.rotateM(tenthOfDegreeToRad(this->player_plane->elevationf), 1, 0, 0);
+            this->player_plane->ptw.rotateM(tenthOfDegreeToRad(this->player_plane->twist), 0, 0, 1);
+            this->player_plane->Simulate();
+            
+            this->pause_simu = true;
+        }
+        ImGui::End();
     }
     if (show_simulation) {
         ImGui::Begin("Simulation");
@@ -444,16 +490,60 @@ void SCStrike::RenderMenu() {
     if (show_cockpit) {
         ImGui::Begin("Cockpit");
         ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
+
+        ImGui::SameLine();
+        ImGui::PushID(1);
         if (this->player_plane->GetWheel()) {
-            ImGui::Text("Wheel down");
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
         } else {
-            ImGui::Text("Wheel up");
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
         }
+        if (ImGui::Button("Gears")) {
+            this->player_plane->SetWheel();
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
+
+        ImGui::SameLine();
+        ImGui::PushID(1);
         if (this->player_plane->GetFlaps()) {
-            ImGui::Text("Flaps");
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
         }
+        if (ImGui::Button("Flaps")) {
+            this->player_plane->SetFlaps();
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
+
+        ImGui::SameLine();
+        ImGui::PushID(1);
         if (this->player_plane->GetSpoilers()) {
-            ImGui::Text("Breaks");
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
+        }
+        if (ImGui::Button("Breaks")) {
+            this->player_plane->SetSpoilers();
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
+        if (this->mouse_control) {
+            ImGui::SameLine();
+            ImGui::Text("Mouse control enabled");
         }
         ImGui::Text("Target %s", this->missionObj->mission_data.parts[this->current_target]->member_name.c_str());
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];

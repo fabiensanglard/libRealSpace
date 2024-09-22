@@ -7,7 +7,7 @@
 //
 #include "precomp.h"
 
-float tenthOfDegreeToRad(float angle) { return (angle / 10) * (float(M_PI) / 180.0f); }
+
 
 /**
  * \brief Computes sine and cosine of angle a, given in 10th of degree.
@@ -160,7 +160,7 @@ SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELE
     this->pilot_z = pilot_z;
     this->object = nullptr;
     this->area = area;
-    this->tps = 60;
+    this->tps = 30;
     this->last_time = SDL_GetTicks();
     this->tick_counter = 0;
     this->last_tick = 0;
@@ -262,14 +262,14 @@ void SCPlane::Simulate() {
 
     uint32_t current_time = SDL_GetTicks();
     uint32_t elapsed_time = (current_time - this->last_time) / 1000;
+    int newtps = 0;
     if (elapsed_time > 1) {
         uint32_t ticks = this->tick_counter - this->last_tick;
-        this->tps = ticks / elapsed_time;
-        if (tps > 10) {
-            this->last_time = current_time;
-            this->last_tick = this->tick_counter;
-        } else {
-            tps = 60;
+        newtps = ticks / elapsed_time;
+        this->last_time = current_time;
+        this->last_tick = this->tick_counter;
+        if (newtps > this->tps / 2) {    
+            this->tps = newtps;
         }
     }
 

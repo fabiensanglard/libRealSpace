@@ -8,7 +8,7 @@
 
 #include "Maths.h"
 
-
+float tenthOfDegreeToRad(float angle) { return (angle / 10) * (float(M_PI) / 180.0f); };
 // Long life to however came up with this. You rule man.
 float InvSqrt(float x)
 {

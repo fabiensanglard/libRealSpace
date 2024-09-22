@@ -75,10 +75,6 @@ void GameEngine::PumpEvents(void) {
         }
     }
 
-    // Keyboard
-    SDL_Event keybEvents[5];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 5, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_TEXTINPUT);
-    ImGui_ImplSDL2_ProcessEvent(keybEvents);
 
     // System events
     SDL_Event sysEvents[5];

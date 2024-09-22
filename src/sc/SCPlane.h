@@ -63,15 +63,7 @@ private:
     /* hold the plane id	*/
     unsigned short lost;
 
-    /* plane position	*/
 
-    /*roll, elevation, azimuth speeds	* /
-    /* in 10'ths degrees per tick	*/
-
-    /* roll, elevation, azimuth speeds	*/
-    /* in 10'ths degrees per tick	*/
-    float elevation_speedf;
-    float azimuth_speedf;
 
     int thrust;
 
@@ -85,11 +77,7 @@ private:
     float Fmax;
     float Smax;
 
-    /* last plane position	*/
-    float last_px;
-    float last_py;
-    float last_pz;
-
+    
     /* drag force in y and z	*/
     float ydrag;
     float zdrag;
@@ -188,11 +176,20 @@ private:
     int spoilers;
 
 public:
+
+    float elevation_speedf;
+    float azimuth_speedf;
+
     int tps;
     /* plane velocity */
     float vx;
     float vy;
     float vz;
+
+    /* last plane position	*/
+    float last_px;
+    float last_py;
+    float last_pz;
 
     float x;
     float y;
