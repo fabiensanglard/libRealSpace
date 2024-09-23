@@ -38,6 +38,7 @@ public:
     void RenderMenu();
 
 private:
+    
     char missFileName[33];
     uint8_t camera_mode;
     bool mouse_control;
@@ -54,6 +55,10 @@ private:
     SCNavMap *nav_screen;
     SCPlane *player_plane;
     SCCockpit *cockpit;
+
+    bool autopilot{false};
+    SCPilot pilot;
+
     float counter;
     uint8_t nav_point_id{0};
     uint8_t current_target{0};

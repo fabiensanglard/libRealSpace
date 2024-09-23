@@ -32,6 +32,7 @@
 // Simulation
 #include "SCPlane.h"
 #include "SCCockpit.h"
+#include "SCPilot.h"
 
 //Activities
 #include "SCConvPlayer.h"

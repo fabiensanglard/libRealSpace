@@ -397,7 +397,7 @@ void SCStrike::RenderMenu() {
     static bool show_mission = false;
     static bool show_mission_parts_and_areas = false;
     static bool show_simulation_config = false;
-
+    static bool azymuth_control = false;
     static int altitude = 0;
     static int azimuth = 0;
     static int throttle = 0;
@@ -445,6 +445,124 @@ void SCStrike::RenderMenu() {
             
             this->pause_simu = true;
         }
+        ImGui::SameLine();
+        ImGui::PushID(1);
+        if (this->autopilot) {
+            this->pilot.target_speed = -speed;
+            this->pilot.target_climb = altitude;
+            this->pilot.target_azimut = azimuth;
+            this->pilot.AutoPilot();
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
+        }
+        if (ImGui::Button("Autopilot")) {
+            this->pilot.plane = this->player_plane;
+            this->autopilot = !this->autopilot;
+            
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
+        
+        float azimut_diff = azimuth - (360 - (this->player_plane->azimuthf / 10.0f));
+
+        if (azimut_diff > 180.0f) {
+            azimut_diff -= 360.0f;
+        } else if (azimut_diff < -180.0f) {
+            azimut_diff += 360.0f;
+        }
+
+        const float max_twist_angle = 80.0f;
+        const float Kp = 3.0f;
+
+        float target_twist_angle = Kp * azimut_diff;
+        float current_twist = 360 - this->player_plane->twist / 10.0f;
+
+        if (current_twist > 180.0f) {
+            current_twist -= 360.0f;
+        } else if (current_twist < -180.0f) {
+            current_twist += 360.0f;
+        }
+
+        if (target_twist_angle > 180.0f) {
+            target_twist_angle -= 360.0f;
+        } else if (target_twist_angle < -180.0f) {
+            target_twist_angle += 360.0f;
+        }
+
+        if (target_twist_angle > max_twist_angle) {
+            target_twist_angle = max_twist_angle;
+        } else if (target_twist_angle < -max_twist_angle) {
+            target_twist_angle = -max_twist_angle;
+        }
+
+        ImGui::Text("Current diff %f ", current_twist);
+        ImGui::Text("azymuth diff %f", azimut_diff);
+        ImGui::Text("target twist %f", target_twist_angle);
+        ImGui::Text("Twist to go %f", current_twist - target_twist_angle);
+
+        if (azimut_diff > 0) {
+            ImGui::Text("Go right");
+            
+            if (current_twist - target_twist_angle<0) {
+                ImGui::SameLine();
+                ImGui::Text("Push RIGHT");
+            } else {
+                ImGui::SameLine();
+                ImGui::Text("Let go the stick");
+            }
+            if (azymuth_control) {
+                if (current_twist - target_twist_angle<0) {
+                    this->player_plane->control_stick_x = 50;
+                } else {
+                    this->player_plane->control_stick_x = 0;
+                }
+            }
+        } else {
+            
+            ImGui::Text("Go left");
+            if (current_twist - target_twist_angle>0) {
+                ImGui::SameLine();
+                ImGui::Text("Push LEFT");
+            } else {
+                ImGui::SameLine();
+                ImGui::Text("Let go the stick");
+            }
+            if (azymuth_control) {
+                if (current_twist - target_twist_angle>0) {
+                    this->player_plane->control_stick_x = -50;
+                } else {
+                    this->player_plane->control_stick_x = 0;
+                }
+            }
+        }
+        
+        ImGui::PushID(1);
+        if (azymuth_control) {
+            if (azimut_diff > 0) {
+                
+            } else {
+                
+            }
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
+        }
+        if (ImGui::Button("Azymuth control")) {
+            azymuth_control = !azymuth_control;
+            
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
+
         ImGui::End();
     }
     if (show_simulation) {
@@ -453,8 +571,15 @@ void SCStrike::RenderMenu() {
                     this->player_plane->azimuthf);
         ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
         ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
+        float twist_diff = 360 - this->player_plane->twist / 10.0f;
+        if (twist_diff > 180.0f) {
+            twist_diff -= 360.0f;
+        } else if (twist_diff < -180.0f) {
+            twist_diff += 360.0f;
+        }
+        
         ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf,
-                    this->player_plane->twist, this->player_plane->roll_speed);
+                    twist_diff, this->player_plane->roll_speed);
         ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
         ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", this->player_plane->rollers,
                     this->player_plane->elevator, this->player_plane->rudder);
