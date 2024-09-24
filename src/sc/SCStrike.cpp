@@ -563,6 +563,26 @@ void SCStrike::RenderMenu() {
         ImGui::PopStyleColor(3);
         ImGui::PopID();
 
+        Vector3D target = {this->player_plane->x, altitude, (this->player_plane->z+60*this->player_plane->vz)};
+        Vector3D current_position = {this->player_plane->x, this->player_plane->y, this->player_plane->z};
+
+        float target_elevation = atan2(
+            this->player_plane->z - (this->player_plane->z + (60*this->player_plane->vz)),
+            this->player_plane->y - altitude
+        );
+        target_elevation = target_elevation * 180.0f / (float) M_PI;
+
+        if (target_elevation > 180.0f) {
+            target_elevation -= 360.0f;
+        } else if (target_elevation < -180.0f) {
+            target_elevation += 360.0f;
+        }
+        target_elevation = target_elevation - 90.0f;
+
+        ImGui::Text("Current elevation %.3f, target elevation %.3f", 
+            this->player_plane->elevationf/10.0f,
+            target_elevation
+        );
         ImGui::End();
     }
     if (show_simulation) {

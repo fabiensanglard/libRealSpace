@@ -102,7 +102,10 @@ public:
         float dot = this->DotProduct(&b);
         float normA = this->Norm();
         float normB = b.Norm();
-        return acosf(dot / (normA * normB));
+        if (normA == 0.0f || normB == 0.0f) {
+            return 0.0f; // Return 0 degrees if either vector has zero length
+        }
+        return acosf(dot / (normA * normB)) * 180.0f / (float) M_PI;
     };
 
         // Fonction pour calculer l'angle projeté sur le plan xy

@@ -7,7 +7,9 @@
 //
 
 #pragma once
+
 #include "precomp.h"
+
 
 class SCPilot {
 
@@ -22,5 +24,4 @@ public:
     ~SCPilot();
 
     void AutoPilot();
-
 };

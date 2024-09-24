@@ -5,7 +5,7 @@
 //  Created by Rémi LEONARD on 23/09/2024.
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
-
+#include <algorithm>
 #include "precomp.h"
 
 SCPilot::SCPilot() {
@@ -16,6 +16,7 @@ SCPilot::SCPilot() {
 
 SCPilot::~SCPilot() {}
 
+
 void SCPilot::AutoPilot() {
     if (this->plane == nullptr) {
         return;
@@ -25,25 +26,39 @@ void SCPilot::AutoPilot() {
     } else {
         this->plane->SetThrottle(this->plane->GetThrottle() - 10);
     }
+
+
+    float target_elevation = atan2(
+        this->plane->z - (this->plane->z + (60*this->plane->vz)),
+        this->plane->y - this->target_climb
+    );
+
+    target_elevation = target_elevation * 180.0f / (float) M_PI;
+
+    if (target_elevation > 180.0f) {
+        target_elevation -= 360.0f;
+    } else if (target_elevation < -180.0f) {
+        target_elevation += 360.0f;
+    }
+    target_elevation = target_elevation - 90.0f;
+    
+    target_elevation = std::clamp(target_elevation, -75.0f, 75.0f);
+    
     if (this->plane->y < this->target_climb) {
-        if (this->plane->elevationf < 45) {
+        if ((this->plane->elevationf/10.0f) < target_elevation) {
             this->plane->control_stick_y = this->plane->control_stick_y + 1;
         } else {
             this->plane->control_stick_y = 0;
         }
     } else {
-        if (this->plane->elevationf > -45) {
+        if ((this->plane->elevationf/10.0f) > target_elevation) {
             this->plane->control_stick_y = this->plane->control_stick_y - 1;
         } else {
             this->plane->control_stick_y = 0;
         }
     }
 
-    if (this->plane->control_stick_y > 100) {
-        this->plane->control_stick_y = 100;
-    } else if (this->plane->control_stick_y < -100) {
-        this->plane->control_stick_y = -100;
-    }
+    this->plane->control_stick_y = std::clamp(this->plane->control_stick_y, -100, 100);
 
     float azimut_diff = this->target_azimut - (360 - (this->plane->azimuthf / 10.0f));
 
