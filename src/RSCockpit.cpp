@@ -155,7 +155,8 @@ void RSCockpit::parseMONI_SHAP(uint8_t* data, size_t size) {
 	uint8_t *shape_data;
 	shape_data = (uint8_t*) malloc(size);
 	memcpy(shape_data, data, size);
-    this->MONI.SHAP.Init(shape_data, 0);
+    // shape 20 byte offset, don't know why
+    this->MONI.SHAP.Init(shape_data+20, 0);
 }
 void RSCockpit::parseMONI_DAMG(uint8_t* data, size_t size) {
 	uint8_t *data2;

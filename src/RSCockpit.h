@@ -123,7 +123,7 @@ private:
     struct Chud {
         std::string FILE;
     } CHUD;
-    Moni MONI;
+    
     std::vector<uint8_t> FADE;
 
     void parseCKPT(uint8_t* data, size_t size);
@@ -182,6 +182,7 @@ public:
 
     RSImageSet ARTP;
     RealObjs REAL;
+    Moni MONI;
     
     RSCockpit();
     ~RSCockpit();
