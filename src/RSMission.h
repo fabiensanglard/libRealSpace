@@ -13,6 +13,7 @@ extern "C" {
 #include "IffLexer.h"
 #include "RSEntity.h"
 #include "TreArchive.h"
+#include "RSProf.h"
 #include <stdint.h>
 #include <string>
 #include <algorithm>
@@ -105,8 +106,8 @@ struct MSGS {
     int id;
 };
 struct CAST {
-    char actor[9];
-    int id;
+    std::string actor;
+    RSProf *profile;
 };
 
 struct MISN {
@@ -119,7 +120,7 @@ struct MISN {
     std::vector<SPOT *> spots;
     std::vector<std::string *> messages;
     std::vector<uint8_t> flags;
-    std::vector<std::string> casting;
+    std::vector<CAST *> casting;
     std::vector<uint8_t> prog;
     std::vector<uint8_t> nums;
     std::vector<MISN_PART *> parts;

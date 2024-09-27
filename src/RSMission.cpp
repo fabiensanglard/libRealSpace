@@ -15,7 +15,7 @@ RSMission::~RSMission() {}
 MISN_PART *RSMission::getPlayerCoord() { 
     int search_id = 0;
     for (auto cast : this->mission_data.casting) {
-        if (cast == "PLAYER") {
+        if (cast->actor == "PLAYER") {
             for (auto part : this->mission_data.parts) {
                 if (part->id == search_id) {
                     return part;
@@ -238,10 +238,23 @@ void RSMission::parseMISN_FLAG(uint8_t *data, size_t size) {
 void RSMission::parseMISN_CAST(uint8_t *data, size_t size) {
     size_t nbactor = size / 9;
     ByteStream stream(data);
+    
     for (int i = 0; i < nbactor; i++) {
+        CAST *tmpcast = new CAST();
+        
         std::string actor = stream.ReadString(8);
         stream.ReadByte();
-        this->mission_data.casting.push_back(actor);
+        tmpcast->actor = actor;
+        TreArchive *tre = new TreArchive();	
+        tre->InitFromFile("MISSIONS.TRE");
+        TreEntry *treEntry = NULL;
+        char *prof_intel_filename = new char[512];
+        sprintf(prof_intel_filename, "..\\..\\DATA\\\INTEL\\%s.IFF", actor.c_str());
+        treEntry = tre->GetEntryByName(prof_intel_filename);
+        RSProf * rsprof = new RSProf();
+        rsprof->InitFromRAM(treEntry->data, treEntry->size);
+        tmpcast->profile = rsprof;
+        this->mission_data.casting.push_back(tmpcast);
     }
 }
 void RSMission::parseMISN_PROG(uint8_t *data, size_t size) {

@@ -52,7 +52,6 @@ void SCCockpit::Render(int face) {
         VGA.Clear();
         VGA.SetPalette(&this->palette);
         VGA.DrawShape(this->cockpit->ARTP.GetShape(face));
-        VGA.DrawShape(&this->cockpit->MONI.SHAP);
         VGA.VSync();
         VGA.SwithBuffers(); 
     } else {

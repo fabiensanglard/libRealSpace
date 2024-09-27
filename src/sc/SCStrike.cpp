@@ -791,7 +791,7 @@ void SCStrike::RenderMenu() {
         }
         if (ImGui::TreeNode("Casting")) {
             for (auto cast : missionObj->mission_data.casting) {
-                ImGui::Text("Actor %s", cast.c_str());
+                ImGui::Text("Actor %s", cast->actor.c_str());
             }
             ImGui::TreePop();
         }

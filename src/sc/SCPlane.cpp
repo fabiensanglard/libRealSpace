@@ -36,7 +36,7 @@ void gl_sincos(float a, float *b, float *c) {
  */
 int mrandom(int maxr) {
     static unsigned long randx = 1;
-    register int n, retval;
+    int n, retval;
 
     for (n = 1; n < 32 && (1 << n) < maxr; n++)
         ;

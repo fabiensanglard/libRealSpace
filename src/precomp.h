@@ -65,7 +65,6 @@ extern "C" {
     #include "RSImageSet.h"
     
     #include "SCRenderer.h"
-    extern SCRenderer Renderer;
 
     #include "IffLexer.h"
 
@@ -81,7 +80,7 @@ extern "C" {
     #include "RSCockpit.h"
     #include "RSMission.h"
     #include "RSNavMap.h"
-
+    #include "RSProf.h"
     
 
     // Music Stuff
@@ -91,7 +90,7 @@ extern "C" {
     //VGA and Glide
     #include "RSScreen.h"
     #include "RSVGA.h"
-
+    extern SCRenderer Renderer;
 #endif
 
 #endif
