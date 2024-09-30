@@ -569,6 +569,9 @@ void RSArea::InitFromPAKFileName(const char *pakFilename) {
 }
 
 float RSArea::getGroundLevel(int BLOC, float x, float y) {
+    if (BLOC < 0 || BLOC >= BLOCKS_PER_MAP)
+        return 0;
+
     int verticeIndex = 0;
     // 180000
     int centerX = 0;

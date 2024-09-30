@@ -78,17 +78,19 @@ struct PART {
 };
 
 struct MISN_PART {
-    uint8_t id;
+    uint8_t id{0};
     std::string member_name;
 	std::string member_name_destroyed;
 	std::string weapon_load;
-	uint8_t area_id;      
-    uint8_t unknown1;
-    uint16_t unknown2;
-    int32_t x;
-    int32_t y;
-    uint16_t z;
-    uint16_t azymuth;
+	uint8_t area_id{0};      
+    uint8_t unknown1{0};
+    uint16_t unknown2{0};
+    int32_t x{0};
+    int32_t y{0};
+    uint16_t z{0};
+    uint16_t azymuth{0};
+    uint16_t roll{0};
+    uint16_t pitch{0};
     std::vector<uint8_t> unknown_bytes;
     RSEntity *entity;
 };

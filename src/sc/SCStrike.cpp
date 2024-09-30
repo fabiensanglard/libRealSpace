@@ -261,11 +261,56 @@ void SCStrike::SetMission(char const *missionName) {
                     9.0f, 18.0f, &this->area, newPosition.x, newPosition.y, newPosition.z);
     this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
     this->player_plane->object = playerCoord;
+
+    
+    for (auto part : missionObj->mission_data.parts) {
+        int search_id = 0;
+        for (auto cast : missionObj->mission_data.casting) {
+            if (part->id == search_id) {
+                if (cast->profile->ai.isAI && cast->profile->ai.goal.size() > 0) {
+                    SCAiPlane *aiPlane = new SCAiPlane();
+                    aiPlane->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
+                                                23000.0f, 32.0f, .93f, 120, 9.0f, 18.0f, &this->area, part->x, part->z, -part->y );
+                    aiPlane->plane->azimuthf = (360 - part->azymuth) * 10.0f;
+                    aiPlane->pilot = new SCPilot();
+                    if (!aiPlane->plane->on_ground) {
+                        aiPlane->plane->SetThrottle(100);
+                        aiPlane->pilot->target_climb = part->y;
+                        aiPlane->plane->vz = 20;
+                    } else {
+                        aiPlane->pilot->target_climb = 15000;
+                    }
+                    
+                    aiPlane->pilot->plane = aiPlane->plane;
+                    aiPlane->pilot->target_azimut = aiPlane->plane->azimuthf/10.0f;
+                    
+                    aiPlane->pilot->target_speed = -20;
+                    aiPlane->plane->object = part;
+                    aiPlane->object = part;
+                    ai_planes.push_back(aiPlane);
+                }
+                break;
+            }
+            search_id++;
+        }
+    }
 }
 void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
     if (!this->pause_simu) {
         this->player_plane->Simulate();
+        for (auto aiPlane : ai_planes) {
+            aiPlane->plane->Simulate();
+            aiPlane->pilot->AutoPilot();
+            Vector3D npos;
+            aiPlane->plane->getPosition(&npos);
+            aiPlane->object->x = (long)npos.x;
+            aiPlane->object->z = (uint16_t)npos.y;
+            aiPlane->object->y = -(long)npos.z;
+            aiPlane->object->azymuth =  360 - (uint16_t) (aiPlane->plane->azimuthf / 10.0f);
+            aiPlane->object->roll = (uint16_t) (aiPlane->plane->twist / 10.0f);
+            aiPlane->object->pitch = (uint16_t) (aiPlane->plane->elevationf / 10.0f);
+        }
     }
     this->player_plane->getPosition(&newPosition);
     if (this->player_plane->object != nullptr) {
@@ -398,6 +443,7 @@ void SCStrike::RenderMenu() {
     static bool show_mission_parts_and_areas = false;
     static bool show_simulation_config = false;
     static bool azymuth_control = false;
+    static bool show_ai = false;
     static int altitude = 0;
     static int azimuth = 0;
     static int throttle = 0;
@@ -411,6 +457,7 @@ void SCStrike::RenderMenu() {
             ImGui::MenuItem("Cockpit", NULL, &show_cockpit);
             ImGui::MenuItem("Mission", NULL, &show_mission);
             ImGui::MenuItem("Mission part and Area", NULL, &show_mission_parts_and_areas);
+            ImGui::MenuItem("Ai pilot", NULL, &show_ai);
             ImGui::EndMenu();
         }
         int sceneid = -1;
@@ -419,6 +466,19 @@ void SCStrike::RenderMenu() {
                     360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
                     missionObj->mission_data.name.c_str(), missFileName);
         ImGui::EndMainMenuBar();
+    }
+    if (show_ai) {
+        ImGui::Begin("AI");
+        for (auto aiPlane : ai_planes) {
+            ImGui::Text("Plane %s", aiPlane->object->member_name.c_str());
+            ImGui::SameLine();
+            ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f",
+                        aiPlane->plane->airspeed, aiPlane->plane->y * 3.6,
+                        360 - (aiPlane->plane->azimuthf / 10.0f), aiPlane->plane->tps);
+            ImGui::SameLine();
+            ImGui::Text("X %d Y %d Z %d", aiPlane->object->x, aiPlane->object->y, aiPlane->object->z);
+        }
+        ImGui::End();
     }
     if (show_simulation_config) {
         ImGui::Begin("Simulation Config");
@@ -748,8 +808,11 @@ void SCStrike::RenderMenu() {
         ImGui::Text("Area %s", missionObj->mission_data.world_filename.c_str());
         ImGui::Text("Player Coord %d %d %d", missionObj->getPlayerCoord()->x, missionObj->getPlayerCoord()->y, missionObj->getPlayerCoord()->z);
         ImGui::Text("Messages %d", missionObj->mission_data.messages.size());
-        for (auto msg: missionObj->mission_data.messages) {
-            ImGui::Text("- %s", msg->c_str());
+        if (ImGui::TreeNode("Messages")) {
+            for (auto msg: missionObj->mission_data.messages) {
+                ImGui::Text("- %s", msg->c_str());
+            }
+            ImGui::TreePop();
         }
         if (ImGui::TreeNode("Areas")) {
             for (auto area : missionObj->mission_data.areas) {
@@ -791,7 +854,18 @@ void SCStrike::RenderMenu() {
         }
         if (ImGui::TreeNode("Casting")) {
             for (auto cast : missionObj->mission_data.casting) {
-                ImGui::Text("Actor %s", cast->actor.c_str());
+                if (ImGui::TreeNode((void *)(intptr_t)cast, "Actor %s", cast->actor.c_str())) {
+                    ImGui::Text("Name %s", cast->profile->radi.info.name.c_str());
+                    ImGui::Text("CallSign %s", cast->profile->radi.info.callsign.c_str());
+                    ImGui::Text("Is AI %d", cast->profile->ai.isAI);
+                    if (ImGui::TreeNode("MSGS")) {
+                        for (auto msg : cast->profile->radi.msgs) {
+                            ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+                        }
+                        ImGui::TreePop();
+                    }
+                    ImGui::TreePop();
+                }
             }
             ImGui::TreePop();
         }

@@ -30,8 +30,6 @@ RSEntity::~RSEntity() {
 
 
 void RSEntity::ParseTXMP(IffChunk* chunk) {
-
-
 	ByteStream stream(chunk->data);
 
 	RSImage* image = new RSImage();
@@ -47,7 +45,6 @@ void RSEntity::ParseTXMP(IffChunk* chunk) {
 	image->Create(name, width, height, 0);
 	image->UpdateContent(stream.GetPosition());
 	AddImage(image);
-
 }
 
 void RSEntity::ParseTXMS(IffChunk* chunk) {

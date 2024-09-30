@@ -807,6 +807,8 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
                      static_cast<GLfloat>(-object->y));
 
         glRotatef((360.0f-(float)object->azymuth + 90.0f), 0, 1, 0);
+        glRotatef((float)object->pitch, 0, 0, 1);
+        glRotatef(-(float)object->roll, 1, 0, 0);
         if (object->entity != NULL) {
             DrawModel(object->entity, BLOCK_LOD_MAX);
         } else {

@@ -25,6 +25,12 @@ static int mission_idx = 0;
 
 enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET };
 
+struct SCAiPlane {
+    SCPlane *plane;
+    SCPilot *pilot;
+    MISN_PART *object;
+};
+
 class SCStrike : public IActivity {
 
 public:
@@ -63,6 +69,7 @@ private:
     uint8_t nav_point_id{0};
     uint8_t current_target{0};
     std::map<std::string, RSEntity *> objectCache;
+    std::vector<SCAiPlane *> ai_planes;
 };
 
 #endif /* defined(__libRealSpace__SCStrike__) */

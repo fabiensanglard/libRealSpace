@@ -47,6 +47,15 @@ public:
         }
         return str;
     }
+    inline std::string ReadStringNoSize(size_t maxLenght) {
+        std::string str;
+        uint8_t c = ReadByte();
+        for (size_t i = 1; i < maxLenght && c != 0; i++) {
+            str += c;
+            c = ReadByte();
+        }
+        return str;
+    }
     inline void MoveForward(size_t bytes) { this->cursor += bytes; }
 
     inline uint8_t ReadByte(void) { return *this->cursor++; }

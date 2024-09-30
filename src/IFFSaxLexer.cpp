@@ -77,8 +77,13 @@ void IFFSaxLexer::Parse(std::map<std::string, std::function<void(uint8_t* data, 
 			size_t chunk_size = this->stream->ReadUInt32BE();
 			chunk_size += chunk_size % 2;
 			read += 4;
-			if (events.count(chunk_stype) > 0) {
-				events.at(chunk_stype)(this->stream->ReadBytes(chunk_size).data(), chunk_size);
+			if (events.count(chunk_stype.c_str()) > 0) {
+				if (chunk_size > 0) {
+					events.at(chunk_stype.c_str())(this->stream->ReadBytes(chunk_size).data(), chunk_size);
+				} else {
+					events.at(chunk_stype.c_str())(NULL, 0);
+				}
+				
 				read += chunk_size;
 			} else {
 				printf("%s not handled\n", chunk_stype.c_str());
