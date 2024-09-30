@@ -229,6 +229,8 @@ void SCStrike::Init(void) {
 }
 
 void SCStrike::SetMission(char const *missionName) {
+    ai_planes.clear();
+    ai_planes.shrink_to_fit();
     sprintf(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
 
     TreEntry *mission = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(missFileName);
@@ -273,12 +275,21 @@ void SCStrike::SetMission(char const *missionName) {
                                                 23000.0f, 32.0f, .93f, 120, 9.0f, 18.0f, &this->area, part->x, part->z, -part->y );
                     aiPlane->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                     aiPlane->pilot = new SCPilot();
+                    
+                    if (this->area.getY(part->x, -part->y) == part->z) {
+                        aiPlane->plane->on_ground = true;
+                    } else {
+                        aiPlane->plane->on_ground = false;
+                    }
+                    if (part->z < this->area.getY(part->x, -part->y)) {
+                        aiPlane->plane->on_ground = true;
+                    }
                     if (!aiPlane->plane->on_ground) {
                         aiPlane->plane->SetThrottle(100);
-                        aiPlane->pilot->target_climb = part->y;
-                        aiPlane->plane->vz = 20;
+                        aiPlane->pilot->target_climb = part->z*3.6;
+                        aiPlane->plane->vz = -20;
                     } else {
-                        aiPlane->pilot->target_climb = 15000;
+                        aiPlane->pilot->target_climb = 25000;
                     }
                     
                     aiPlane->pilot->plane = aiPlane->plane;

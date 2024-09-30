@@ -162,7 +162,7 @@ private:
     int nocrash;
     int IN_BOX(int llx, int urx, int llz, int urz);
     int report_card(int descent, float roll, int vx, int vz, int wheels);
-    int isOnRunWay();
+    
     float fuel_consump(float f, float b);
 
     uint32_t last_time;
@@ -244,6 +244,7 @@ public:
             RSArea *area, float x, float y, float z);
     ~SCPlane();
     void Init();
+    int isOnRunWay();
     void SetThrottle(int throttle);
     int GetThrottle();
     void SetFlaps();
