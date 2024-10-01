@@ -349,6 +349,15 @@ void SCStrike::RunFrame(void) {
         this->player_plane->object->z = (uint16_t)newPosition.y;
         this->player_plane->object->y = (long)newPosition.z;
     }
+    this->cockpit->pitch = this->player_plane->elevationf/10.0f;
+    this->cockpit->roll = this->player_plane->twist/10.0f;
+    this->cockpit->yaw = this->player_plane->azimuthf/10.0f;
+    this->cockpit->speed = this->player_plane->airspeed;
+    this->cockpit->altitude = this->player_plane->y;
+    this->cockpit->heading = this->player_plane->azimuthf/10.0f;
+    this->cockpit->gear = this->player_plane->GetWheel();
+    this->cockpit->flaps = this->player_plane->GetFlaps()>0;
+    this->cockpit->airbrake = this->player_plane->GetSpoilers()>0;
 
     switch (this->camera_mode) {
 

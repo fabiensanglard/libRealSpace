@@ -38,6 +38,20 @@ void SCCockpit::Init( ) {
     TreEntry *hud_def = Assets.tres[AssetManager::TRE_OBJECTS]->GetEntryByName("..\\..\\DATA\\OBJECTS\\HUD.IFF");
     hud = new RSHud();
     hud->InitFromRam(hud_def->data, hud_def->size);
+    for (int i=0; i<18; i++) {
+        HudLine line;
+        line.start.x = 0;
+        line.start.y = 0+i*10;
+        line.end.x = 70;
+        line.end.y = 0+i*10;
+        horizon.push_back(line);
+    }
+    TreEntry *fontdef = Assets.tres[AssetManager::TRE_MISC]->GetEntryByName("..\\..\\DATA\\FONTS\\HUDFONT.SHP");
+    PakArchive *pak = new PakArchive();
+    pak->InitFromRAM("HUDFONT", fontdef->data, fontdef->size);
+    this->font = new RSFont();
+    this->font->InitFromPAK(pak);
+
 }
 /**
  * Render the cockpit in its current state.
@@ -56,6 +70,21 @@ void SCCockpit::Render(int face) {
         VGA.Clear();
         VGA.SetPalette(&this->palette);
         VGA.DrawShape(this->cockpit->ARTP.GetShape(face));
+        if (face == 0) {
+            for (int i=0; i<18; i++) {
+                int top = 10;
+                int bottom = 90;
+                int left = 125;
+                int dec = 0;
+                if (horizon[i].start.y-(dec+this->pitch) <bottom && horizon[i].end.y-(dec+this->pitch) <bottom && horizon[i].start.y-(dec+this->pitch) >top && horizon[i].end.y-(dec+this->pitch) >top) {
+                    Point2D start;
+                    start.x = horizon[i].start.x+left-5;
+                    start.y = horizon[i].start.y-(dec+this->pitch);
+                    VGA.DrawText(this->font, &start, (char *)std::to_string(i).c_str(), 0, 0, 2,2,2);
+                    VGA.line(horizon[i].start.x+left, horizon[i].start.y-(dec+this->pitch), horizon[i].end.x+left, horizon[i].end.y-(dec+this->pitch), 0);
+                }
+            }
+        }
         VGA.VSync();
         VGA.SwithBuffers(); 
     } else {

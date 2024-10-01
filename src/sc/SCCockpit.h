@@ -11,12 +11,33 @@
 
 #include "precomp.h"
 
-class SCCockpit {
-    VGAPalette palette;
+struct HudLine {
+    Point2D start;
+    Point2D end;
+};
 
-public :
+class SCCockpit {
+private:
+    VGAPalette palette;
+    std::vector<HudLine> horizon;
+    RSFont *font;
+    
+public:
     RSCockpit* cockpit;
     RSHud* hud;
+    
+    float pitch{0.0f};
+    float roll{0.0f};
+    float yaw{0.0f};
+
+    float speed{0.0f};
+    float altitude{0.0f};
+    float heading{0.0f};
+
+    bool gear{false};
+    bool flaps{false};
+    bool airbrake{false};
+
     SCCockpit();
     ~SCCockpit();
     void Init( );
