@@ -34,6 +34,10 @@ void SCCockpit::Init( ) {
     cockpit = new RSCockpit();
     TreEntry *cockpit_def = Assets.tres[AssetManager::TRE_OBJECTS]->GetEntryByName("..\\..\\DATA\\OBJECTS\\F16-CKPT.IFF");
     cockpit->InitFromRam(cockpit_def->data, cockpit_def->size);
+
+    TreEntry *hud_def = Assets.tres[AssetManager::TRE_OBJECTS]->GetEntryByName("..\\..\\DATA\\OBJECTS\\HUD.IFF");
+    hud = new RSHud();
+    hud->InitFromRam(hud_def->data, hud_def->size);
 }
 /**
  * Render the cockpit in its current state.

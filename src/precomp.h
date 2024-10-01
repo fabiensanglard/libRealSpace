@@ -77,6 +77,7 @@ extern "C" {
     #include "RLEShape.h"
     #include "RSOption.h"
     #include "RSGameflow.h"
+    #include "RSHud.h"
     #include "RSCockpit.h"
     #include "RSMission.h"
     #include "RSNavMap.h"

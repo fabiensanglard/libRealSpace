@@ -66,14 +66,14 @@ void SCStrike::CheckKeyboard(void) {
     for (int i = 0; i < numKeybEvents; i++) {
         SDL_Event *event = &keybEvents[i];
         switch (event->key.keysym.scancode) {
-            case SDL_SCANCODE_MINUS:
-                this->player_plane->SetThrottle(this->player_plane->GetThrottle() - 1);
-                break;
-            case SDL_SCANCODE_EQUALS:
-                this->player_plane->SetThrottle(this->player_plane->GetThrottle() + 1);
-                break;
-            default:
-                break;
+        case SDL_SCANCODE_MINUS:
+            this->player_plane->SetThrottle(this->player_plane->GetThrottle() - 1);
+            break;
+        case SDL_SCANCODE_EQUALS:
+            this->player_plane->SetThrottle(this->player_plane->GetThrottle() + 1);
+            break;
+        default:
+            break;
         }
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
@@ -197,7 +197,7 @@ void SCStrike::CheckKeyboard(void) {
             } else {
                 this->camera_mode = View::FRONT;
             }
-            
+
             break;
         case SDLK_n: {
             SCNavMap *nav_screen = new SCNavMap();
@@ -212,7 +212,7 @@ void SCStrike::CheckKeyboard(void) {
             this->player_plane->z = -this->missionObj->mission_data.areas[this->nav_point_id]->YAxis / COORD_SCALE;
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
-        break;
+            break;
         case SDLK_t:
             this->current_target = (this->current_target + 1) % this->missionObj->mission_data.parts.size();
         default:
@@ -252,7 +252,7 @@ void SCStrike::SetMission(char const *missionName) {
 
     newPosition.x = (float)playerCoord->x;
     newPosition.z = (float)-playerCoord->y;
-    newPosition.y = this->area.getY(newPosition.x, newPosition.z);
+    newPosition.y = (float)playerCoord->z;
 
     camera = Renderer.GetCamera();
     camera->SetPosition(&newPosition);
@@ -263,8 +263,12 @@ void SCStrike::SetMission(char const *missionName) {
                     9.0f, 18.0f, &this->area, newPosition.x, newPosition.y, newPosition.z);
     this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
     this->player_plane->object = playerCoord;
+    if (this->area.getY(newPosition.x, newPosition.z) < newPosition.y) {
+        this->player_plane->SetThrottle(100);
+        this->player_plane->vz = -20;
+        this->player_plane->Simulate();
+    }
 
-    
     for (auto part : missionObj->mission_data.parts) {
         int search_id = 0;
         for (auto cast : missionObj->mission_data.casting) {
@@ -272,29 +276,30 @@ void SCStrike::SetMission(char const *missionName) {
                 if (cast->profile->ai.isAI && cast->profile->ai.goal.size() > 0) {
                     SCAiPlane *aiPlane = new SCAiPlane();
                     aiPlane->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
-                                                23000.0f, 32.0f, .93f, 120, 9.0f, 18.0f, &this->area, part->x, part->z, -part->y );
+                                                 23000.0f, 32.0f, .93f, 120, 9.0f, 18.0f, &this->area, (float)part->x,
+                                                 (float)part->z, (float)-part->y);
                     aiPlane->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                     aiPlane->pilot = new SCPilot();
-                    
-                    if (this->area.getY(part->x, -part->y) == part->z) {
+
+                    if (this->area.getY((float)part->x, (float)-part->y) == part->z) {
                         aiPlane->plane->on_ground = true;
                     } else {
                         aiPlane->plane->on_ground = false;
                     }
-                    if (part->z < this->area.getY(part->x, -part->y)) {
+                    if (part->z < this->area.getY((float)part->x, (float)-part->y)) {
                         aiPlane->plane->on_ground = true;
                     }
                     if (!aiPlane->plane->on_ground) {
                         aiPlane->plane->SetThrottle(100);
-                        aiPlane->pilot->target_climb = part->z*3.6;
+                        aiPlane->pilot->target_climb = (int) ((float) part->z * 3.6f);
                         aiPlane->plane->vz = -20;
                     } else {
                         aiPlane->pilot->target_climb = 25000;
                     }
-                    
+
                     aiPlane->pilot->plane = aiPlane->plane;
-                    aiPlane->pilot->target_azimut = aiPlane->plane->azimuthf/10.0f;
-                    
+                    aiPlane->pilot->target_azimut = (int) (aiPlane->plane->azimuthf / 10.0f);
+
                     aiPlane->pilot->target_speed = -20;
                     aiPlane->plane->object = part;
                     aiPlane->object = part;
@@ -315,12 +320,27 @@ void SCStrike::RunFrame(void) {
             aiPlane->pilot->AutoPilot();
             Vector3D npos;
             aiPlane->plane->getPosition(&npos);
+            if (aiPlane->object->area_id != 255) {
+                AREA *ar = this->missionObj->mission_data.areas[aiPlane->object->area_id];
+
+                float minX = ar->XAxis-(ar->AreaWidth/2);
+                float minY = ar->YAxis-(ar->AreaWidth/2);
+                float maxX = ar->XAxis+(ar->AreaWidth/2);
+                float maxY = ar->YAxis+(ar->AreaWidth/2);
+
+                if (npos.x < minX || npos.x > maxX || npos.z < minY || npos.z > maxY) {
+                    aiPlane->pilot->target_azimut = aiPlane->pilot->target_azimut + 180;
+                    if (aiPlane->pilot->target_azimut > 360) {
+                        aiPlane->pilot->target_azimut = aiPlane->pilot->target_azimut - 360;
+                    }
+                }
+            }
             aiPlane->object->x = (long)npos.x;
             aiPlane->object->z = (uint16_t)npos.y;
             aiPlane->object->y = -(long)npos.z;
-            aiPlane->object->azymuth =  360 - (uint16_t) (aiPlane->plane->azimuthf / 10.0f);
-            aiPlane->object->roll = (uint16_t) (aiPlane->plane->twist / 10.0f);
-            aiPlane->object->pitch = (uint16_t) (aiPlane->plane->elevationf / 10.0f);
+            aiPlane->object->azymuth = 360 - (uint16_t)(aiPlane->plane->azimuthf / 10.0f);
+            aiPlane->object->roll = (uint16_t)(aiPlane->plane->twist / 10.0f);
+            aiPlane->object->pitch = (uint16_t)(aiPlane->plane->elevationf / 10.0f);
         }
     }
     this->player_plane->getPosition(&newPosition);
@@ -358,20 +378,21 @@ void SCStrike::RunFrame(void) {
         break;
     case View::TARGET: {
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
-        Vector3D pos = {target->x+ this->camera_pos.x, target->z+ this->camera_pos.y, -target->y+ this->camera_pos.z};
+        Vector3D pos = {target->x + this->camera_pos.x, target->z + this->camera_pos.y,
+                        -target->y + this->camera_pos.z};
         Vector3D targetPos = {(float)target->x, (float)target->z, -(float)target->y};
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
     }
-        
-        break;
+
+    break;
     case View::EYE_ON_TARGET: {
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
         Vector3D targetPos = {(float)target->x, (float)target->z, (float)-target->y};
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
-    }break;
+    } break;
     case View::REAL:
     default: {
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
@@ -483,8 +504,7 @@ void SCStrike::RenderMenu() {
         for (auto aiPlane : ai_planes) {
             ImGui::Text("Plane %s", aiPlane->object->member_name.c_str());
             ImGui::SameLine();
-            ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f",
-                        aiPlane->plane->airspeed, aiPlane->plane->y * 3.6,
+            ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f", aiPlane->plane->airspeed, aiPlane->plane->y * 3.6,
                         360 - (aiPlane->plane->azimuthf / 10.0f), aiPlane->plane->tps);
             ImGui::SameLine();
             ImGui::Text("X %d Y %d Z %d", aiPlane->object->x, aiPlane->object->y, aiPlane->object->z);
@@ -493,13 +513,13 @@ void SCStrike::RenderMenu() {
     }
     if (show_simulation_config) {
         ImGui::Begin("Simulation Config");
-        ImGui::DragInt("set altitude", &altitude,100,0,30000);
-        ImGui::DragInt("set throttle", &throttle,10,0,100);
-        ImGui::DragInt("set azimuth", &azimuth,1,0,360);
-        ImGui::DragInt("set speed", &speed,2,0,30);
+        ImGui::DragInt("set altitude", &altitude, 100, 0, 30000);
+        ImGui::DragInt("set throttle", &throttle, 10, 0, 100);
+        ImGui::DragInt("set azimuth", &azimuth, 1, 0, 360);
+        ImGui::DragInt("set speed", &speed, 2, 0, 30);
         if (ImGui::Button("set")) {
-            this->player_plane->vz = -speed;
-            this->player_plane->y = altitude;
+            this->player_plane->vz = (float) -speed;
+            this->player_plane->y = (float) altitude;
             this->player_plane->last_py = this->player_plane->y;
             this->player_plane->rollers = 0;
             this->player_plane->roll_speed = 0;
@@ -509,11 +529,11 @@ void SCStrike::RenderMenu() {
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
 
-            this->player_plane->ptw.rotateM(tenthOfDegreeToRad(azimuth*10.0f), 0, 1, 0);
+            this->player_plane->ptw.rotateM(tenthOfDegreeToRad(azimuth * 10.0f), 0, 1, 0);
             this->player_plane->ptw.rotateM(tenthOfDegreeToRad(this->player_plane->elevationf), 1, 0, 0);
             this->player_plane->ptw.rotateM(tenthOfDegreeToRad(this->player_plane->twist), 0, 0, 1);
             this->player_plane->Simulate();
-            
+
             this->pause_simu = true;
         }
         ImGui::SameLine();
@@ -523,7 +543,8 @@ void SCStrike::RenderMenu() {
             this->pilot.target_climb = altitude;
             this->pilot.target_azimut = azimuth;
             this->pilot.AutoPilot();
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button,
+                                  (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
         } else {
@@ -534,11 +555,10 @@ void SCStrike::RenderMenu() {
         if (ImGui::Button("Autopilot")) {
             this->pilot.plane = this->player_plane;
             this->autopilot = !this->autopilot;
-            
         }
         ImGui::PopStyleColor(3);
         ImGui::PopID();
-        
+
         float azimut_diff = azimuth - (360 - (this->player_plane->azimuthf / 10.0f));
 
         if (azimut_diff > 180.0f) {
@@ -578,8 +598,8 @@ void SCStrike::RenderMenu() {
 
         if (azimut_diff > 0) {
             ImGui::Text("Go right");
-            
-            if (current_twist - target_twist_angle<0) {
+
+            if (current_twist - target_twist_angle < 0) {
                 ImGui::SameLine();
                 ImGui::Text("Push RIGHT");
             } else {
@@ -587,16 +607,16 @@ void SCStrike::RenderMenu() {
                 ImGui::Text("Let go the stick");
             }
             if (azymuth_control) {
-                if (current_twist - target_twist_angle<0) {
+                if (current_twist - target_twist_angle < 0) {
                     this->player_plane->control_stick_x = 50;
                 } else {
                     this->player_plane->control_stick_x = 0;
                 }
             }
         } else {
-            
+
             ImGui::Text("Go left");
-            if (current_twist - target_twist_angle>0) {
+            if (current_twist - target_twist_angle > 0) {
                 ImGui::SameLine();
                 ImGui::Text("Push LEFT");
             } else {
@@ -604,22 +624,22 @@ void SCStrike::RenderMenu() {
                 ImGui::Text("Let go the stick");
             }
             if (azymuth_control) {
-                if (current_twist - target_twist_angle>0) {
+                if (current_twist - target_twist_angle > 0) {
                     this->player_plane->control_stick_x = -50;
                 } else {
                     this->player_plane->control_stick_x = 0;
                 }
             }
         }
-        
+
         ImGui::PushID(1);
         if (azymuth_control) {
             if (azimut_diff > 0) {
-                
+
             } else {
-                
             }
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button,
+                                  (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
         } else {
@@ -629,19 +649,16 @@ void SCStrike::RenderMenu() {
         }
         if (ImGui::Button("Azymuth control")) {
             azymuth_control = !azymuth_control;
-            
         }
         ImGui::PopStyleColor(3);
         ImGui::PopID();
 
-        Vector3D target = {this->player_plane->x, altitude, (this->player_plane->z+60*this->player_plane->vz)};
+        Vector3D target = {this->player_plane->x, (float) altitude, (this->player_plane->z + 60 * this->player_plane->vz)};
         Vector3D current_position = {this->player_plane->x, this->player_plane->y, this->player_plane->z};
 
-        float target_elevation = atan2(
-            this->player_plane->z - (this->player_plane->z + (60*this->player_plane->vz)),
-            this->player_plane->y - altitude
-        );
-        target_elevation = target_elevation * 180.0f / (float) M_PI;
+        float target_elevation = atan2(this->player_plane->z - (this->player_plane->z + (60 * this->player_plane->vz)),
+                                       this->player_plane->y - altitude);
+        target_elevation = target_elevation * 180.0f / (float)M_PI;
 
         if (target_elevation > 180.0f) {
             target_elevation -= 360.0f;
@@ -650,10 +667,8 @@ void SCStrike::RenderMenu() {
         }
         target_elevation = target_elevation - 90.0f;
 
-        ImGui::Text("Current elevation %.3f, target elevation %.3f", 
-            this->player_plane->elevationf/10.0f,
-            target_elevation
-        );
+        ImGui::Text("Current elevation %.3f, target elevation %.3f", this->player_plane->elevationf / 10.0f,
+                    target_elevation);
         ImGui::End();
     }
     if (show_simulation) {
@@ -668,9 +683,9 @@ void SCStrike::RenderMenu() {
         } else if (twist_diff < -180.0f) {
             twist_diff += 360.0f;
         }
-        
-        ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf,
-                    twist_diff, this->player_plane->roll_speed);
+
+        ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf, twist_diff,
+                    this->player_plane->roll_speed);
         ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
         ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", this->player_plane->rollers,
                     this->player_plane->elevator, this->player_plane->rudder);
@@ -710,7 +725,8 @@ void SCStrike::RenderMenu() {
         ImGui::SameLine();
         ImGui::PushID(1);
         if (this->player_plane->GetWheel()) {
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button,
+                                  (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
         } else {
@@ -727,7 +743,8 @@ void SCStrike::RenderMenu() {
         ImGui::SameLine();
         ImGui::PushID(1);
         if (this->player_plane->GetFlaps()) {
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button,
+                                  (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
         } else {
@@ -744,7 +761,8 @@ void SCStrike::RenderMenu() {
         ImGui::SameLine();
         ImGui::PushID(1);
         if (this->player_plane->GetSpoilers()) {
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(120.0f/355.0f, 100.0f/100.0f, 60.0f/100.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button,
+                                  (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
         } else {
@@ -763,8 +781,8 @@ void SCStrike::RenderMenu() {
         }
         ImGui::Text("Target %s", this->missionObj->mission_data.parts[this->current_target]->member_name.c_str());
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
-        Vector3D targetPos = {(float)target->x+180000.0f, (float)target->z, -(float)target->y+180000.0f};
-        Vector3D playerPos = {this->newPosition.x+180000.0f, this->newPosition.y, this->newPosition.z+180000.0f};
+        Vector3D targetPos = {(float)target->x + 180000.0f, (float)target->z, -(float)target->y + 180000.0f};
+        Vector3D playerPos = {this->newPosition.x + 180000.0f, this->newPosition.y, this->newPosition.z + 180000.0f};
 
         Camera totarget;
         totarget.SetPosition(&playerPos);
@@ -778,19 +796,16 @@ void SCStrike::RenderMenu() {
 
         totarget.GetOrientation().GetAngles(pitch, yawn, raw);
 
-
         Vector3D directionVector = {targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z};
 
         ImGui::Text("Target position [%.3f,%.3f,%.3f]", targetPos.x, targetPos.y, targetPos.z);
         ImGui::Text("Player position [%.3f,%.3f,%.3f]", playerPos.x, playerPos.y, playerPos.z);
-        ImGui::Text("Azimuth to target %.3f", 
-            (360 - (this->player_plane->azimuthf / 10.0f)) - (atan2(targetPos.z - playerPos.z, targetPos.x - playerPos.x) * (180.0 / M_PI) + 90.0f)
-        );
-        ImGui::Text("Q angles [%.3f,%.3f,%.3f] rel %.3f", 
-            pitch * 180.0 / M_PI, 
-            yawn * 180.0 / M_PI, 
-            180.0f - (raw * 180.0 / M_PI), 
-            (180.0f - (raw * 180.0 / M_PI))-(360 - (this->player_plane->azimuthf / 10.0f)));
+        ImGui::Text("Azimuth to target %.3f",
+                    (360 - (this->player_plane->azimuthf / 10.0f)) -
+                        (atan2(targetPos.z - playerPos.z, targetPos.x - playerPos.x) * (180.0 / M_PI) + 90.0f));
+        ImGui::Text("Q angles [%.3f,%.3f,%.3f] rel %.3f", pitch * 180.0 / M_PI, yawn * 180.0 / M_PI,
+                    180.0f - (raw * 180.0 / M_PI),
+                    (180.0f - (raw * 180.0 / M_PI)) - (360 - (this->player_plane->azimuthf / 10.0f)));
         ImGui::End();
     }
     if (show_mission) {
@@ -817,10 +832,11 @@ void SCStrike::RenderMenu() {
         ImGui::Begin("Mission Parts and Areas");
         ImGui::Text("Mission %s", missionObj->mission_data.name.c_str());
         ImGui::Text("Area %s", missionObj->mission_data.world_filename.c_str());
-        ImGui::Text("Player Coord %d %d %d", missionObj->getPlayerCoord()->x, missionObj->getPlayerCoord()->y, missionObj->getPlayerCoord()->z);
+        ImGui::Text("Player Coord %d %d %d", missionObj->getPlayerCoord()->x, missionObj->getPlayerCoord()->y,
+                    missionObj->getPlayerCoord()->z);
         ImGui::Text("Messages %d", missionObj->mission_data.messages.size());
         if (ImGui::TreeNode("Messages")) {
-            for (auto msg: missionObj->mission_data.messages) {
+            for (auto msg : missionObj->mission_data.messages) {
                 ImGui::Text("- %s", msg->c_str());
             }
             ImGui::TreePop();

@@ -24,6 +24,7 @@ MISN_PART *RSMission::getPlayerCoord() {
         }
         search_id++;
     }
+    return nullptr;
 }
 MISN_PART *RSMission::getObject(const char *name) { 
     for (auto obj : this->mission_data.parts) {
@@ -31,8 +32,8 @@ MISN_PART *RSMission::getObject(const char *name) {
             return obj;
         }
     }
-    return NULL;
- }
+    return nullptr;
+}
 
 void RSMission::InitFromRAM(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
@@ -249,7 +250,7 @@ void RSMission::parseMISN_CAST(uint8_t *data, size_t size) {
         tre->InitFromFile("MISSIONS.TRE");
         TreEntry *treEntry = NULL;
         char *prof_intel_filename = new char[512];
-        sprintf(prof_intel_filename, "..\\..\\DATA\\\INTEL\\%s.IFF", actor.c_str());
+        sprintf(prof_intel_filename, "..\\..\\DATA\\INTEL\\%s.IFF", actor.c_str());
         treEntry = tre->GetEntryByName(prof_intel_filename);
         RSProf * rsprof = new RSProf();
         rsprof->InitFromRAM(treEntry->data, treEntry->size);
@@ -363,7 +364,7 @@ void RSMission::fixMissionObjectsCoords(void) {
                 if (area->id-1 == obj->area_id) {
                     obj->x += area->XAxis;
                     obj->y += area->YAxis;
-                    obj->z += area->ZAxis;
+                    obj->z += (uint16_t) area->ZAxis;
                     break;
                 }
             }

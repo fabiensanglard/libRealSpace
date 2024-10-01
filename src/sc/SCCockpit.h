@@ -16,6 +16,7 @@ class SCCockpit {
 
 public :
     RSCockpit* cockpit;
+    RSHud* hud;
     SCCockpit();
     ~SCCockpit();
     void Init( );
