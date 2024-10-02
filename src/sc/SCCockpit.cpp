@@ -56,6 +56,82 @@ void SCCockpit::Init() {
     this->font = new RSFont();
     this->font->InitFromPAK(pak);
 }
+void SCCockpit::RenderHudHorizonLinesSmall() {
+    Point2D center;
+    center.x = 161;
+    center.y = 50;
+
+    std::vector<HudLine> *hline = new std::vector<HudLine>();
+    hline->resize(36);
+    for (int i = 0; i < 36; i++) {
+        hline->at(i).start.x = horizon[i].start.x;
+        hline->at(i).start.y = (int) (horizon[i].start.y-(270-this->pitch*4)) % 720;
+        if (hline->at(i).start.y < 0) {
+            hline->at(i).start.y += 720; 
+        }
+        hline->at(i).end.x = horizon[i].end.x;
+        hline->at(i).end.y = hline->at(i).start.y;
+    }
+    int ladder=90;
+    for (auto h: *hline) {
+        int top = 10;
+        int bottom = 90;
+        int left = 130;
+        int dec = 40;
+        
+
+        HudLine l = h;
+        HudLine l2 = h;
+        l.start. x = l.start.x + left;
+        l.start. y = l.start.y - dec;
+        l.end.y = l.end.y - dec;
+        l.end.x = l.start.x + 15;
+        
+        l2.start. x = l.end.x + 30;
+        l2.start. y = l2.start.y - dec;
+        l2.end.y = l2.end.y - dec;
+        l2.end.x = l2.start.x + 15;
+
+        l.start = rotateAroundPoint(l.start, center, this->roll * M_PI / 180.0f);
+        l.end = rotateAroundPoint(l.end, center, this->roll * M_PI / 180.0f);
+
+        l2.start = rotateAroundPoint(l2.start, center, this->roll * M_PI / 180.0f);
+        l2.end = rotateAroundPoint(l2.end, center, this->roll * M_PI / 180.0f);
+        
+        int bx1, bx2, by1, by2;
+        bx1 = 125;
+        bx2 = 125 + 80;
+        by1 = 10;
+        by2 = 90;
+        if (l.start.x > bx1 && l.start.x < bx2 && l.start.y > by1 && l.start.y < by2) {
+            Point2D p = l.start;
+            p.y -=2;
+            VGA.DrawText(this->font, &p, (char *)std::to_string(ladder).c_str(), 0, 0, 3, 2, 2);
+        }
+        if (l2.end.x > bx1 && l2.end.x < bx2 && l2.end.y > by1 && l2.end.y < by2) {
+            Point2D p = l2.end;
+            p.x = p.x - 8;
+            p.y -=2;
+            VGA.DrawText(this->font, &p, (char *)std::to_string(ladder).c_str(), 0, 0, 3, 2, 2);
+        }
+        int color = 223;
+        if (ladder == 0) {
+            HudLine l3 = h;
+            l3.start. x = l3.start.x + left-5;
+            l3.start. y = l3.start.y - dec;
+            l3.end.y = l3.end.y - dec;
+            l3.end.x = l3.start.x +65;
+            l3.start = rotateAroundPoint(l3.start, center, this->roll * M_PI / 180.0f);
+            l3.end = rotateAroundPoint(l3.end, center, this->roll * M_PI / 180.0f);
+            VGA.lineWithBox(l3.start.x, l3.start.y, l3.end.x, l3.end.y, color, bx1, bx2, by1, by2);
+        } else {
+            VGA.lineWithBox(l.start.x, l.start.y, l.end.x, l.end.y, color, bx1, bx2, by1, by2);
+            VGA.lineWithBox(l2.start.x, l2.start.y, l2.end.x, l2.end.y, color, bx1, bx2, by1, by2);
+        }
+        
+        ladder=ladder-5;
+    }
+}
 /**
  * Render the cockpit in its current state.
  *
@@ -73,80 +149,8 @@ void SCCockpit::Render(int face) {
         VGA.Clear();
         VGA.SetPalette(&this->palette);
         VGA.DrawShape(this->cockpit->ARTP.GetShape(face));
-        Point2D center;
-        center.x = 161;
-        center.y = 50;
         if (face == 0) {
-            std::vector<HudLine> *hline = new std::vector<HudLine>();
-            hline->resize(36);
-            for (int i = 0; i < 36; i++) {
-                hline->at(i).start.x = horizon[i].start.x;
-                hline->at(i).start.y = (int) (horizon[i].start.y-(270-this->pitch*4)) % 720;
-                if (hline->at(i).start.y < 0) {
-                    hline->at(i).start.y += 720; 
-                }
-                hline->at(i).end.x = horizon[i].end.x;
-                hline->at(i).end.y = hline->at(i).start.y;
-            }
-            int ladder=90;
-            for (auto h: *hline) {
-                int top = 10;
-                int bottom = 90;
-                int left = 130;
-                int dec = 40;
-                
-
-                HudLine l = h;
-                HudLine l2 = h;
-                l.start. x = l.start.x + left;
-                l.start. y = l.start.y - dec;
-                l.end.y = l.end.y - dec;
-                l.end.x = l.start.x + 15;
-                
-                l2.start. x = l.end.x + 30;
-                l2.start. y = l2.start.y - dec;
-                l2.end.y = l2.end.y - dec;
-                l2.end.x = l2.start.x + 15;
-
-                l.start = rotateAroundPoint(l.start, center, this->roll * M_PI / 180.0f);
-                l.end = rotateAroundPoint(l.end, center, this->roll * M_PI / 180.0f);
-
-                l2.start = rotateAroundPoint(l2.start, center, this->roll * M_PI / 180.0f);
-                l2.end = rotateAroundPoint(l2.end, center, this->roll * M_PI / 180.0f);
-                
-                int bx1, bx2, by1, by2;
-                bx1 = 125;
-                bx2 = 125 + 80;
-                by1 = 10;
-                by2 = 90;
-                if (l.start.x > bx1 && l.start.x < bx2 && l.start.y > by1 && l.start.y < by2) {
-                    Point2D p = l.start;
-                    p.y -=2;
-                    VGA.DrawText(this->font, &p, (char *)std::to_string(ladder).c_str(), 0, 0, 3, 2, 2);
-                }
-                if (l2.end.x > bx1 && l2.end.x < bx2 && l2.end.y > by1 && l2.end.y < by2) {
-                    Point2D p = l2.end;
-                    p.x = p.x - 8;
-                    p.y -=2;
-                    VGA.DrawText(this->font, &p, (char *)std::to_string(ladder).c_str(), 0, 0, 3, 2, 2);
-                }
-                int color = 223;
-                if (ladder == 0) {
-                    HudLine l3 = h;
-                    l3.start. x = l3.start.x + left-5;
-                    l3.start. y = l3.start.y - dec;
-                    l3.end.y = l3.end.y - dec;
-                    l3.end.x = l3.start.x +65;
-                    l3.start = rotateAroundPoint(l3.start, center, this->roll * M_PI / 180.0f);
-                    l3.end = rotateAroundPoint(l3.end, center, this->roll * M_PI / 180.0f);
-                    VGA.lineWithBox(l3.start.x, l3.start.y, l3.end.x, l3.end.y, color, bx1, bx2, by1, by2);
-                } else {
-                    VGA.lineWithBox(l.start.x, l.start.y, l.end.x, l.end.y, color, bx1, bx2, by1, by2);
-                    VGA.lineWithBox(l2.start.x, l2.start.y, l2.end.x, l2.end.y, color, bx1, bx2, by1, by2);
-                }
-                
-                ladder=ladder-5;
-            }
+            this->RenderHudHorizonLinesSmall();
         }
         VGA.plot_pixel(161, 50, 223);
         VGA.VSync();

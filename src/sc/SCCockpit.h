@@ -20,6 +20,7 @@ class SCCockpit {
 private:
     VGAPalette palette;
     std::vector<HudLine> horizon;
+    void RenderHudHorizonLinesSmall();
     RSFont *font;
     
 public:
