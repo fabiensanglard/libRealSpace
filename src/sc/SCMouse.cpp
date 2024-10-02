@@ -45,6 +45,7 @@ void SCMouse::Draw(void){
     // We need to draw the cursor a little bit higher left than the mouse
     // position so it is centered.
     Point2D cursorPos = this->position;
+    //printf("Cursor pos: %d, %d\n", cursorPos.x, cursorPos.y);
     cursorPos.x -= 4;
     cursorPos.y -= 4;
     
