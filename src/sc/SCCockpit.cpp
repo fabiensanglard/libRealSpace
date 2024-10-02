@@ -56,6 +56,19 @@ void SCCockpit::Init() {
     this->font = new RSFont();
     this->font->InitFromPAK(pak);
 }
+/**
+ * SCCockpit::RenderHudHorizonLinesSmall
+ *
+ * Renders the horizon lines of the Heads-Up Display (HUD) in the lower
+ * left corner of the screen. The horizon lines are used to indicate the
+ * orientation of the aircraft with respect to the horizon.
+ *
+ * The horizon lines are drawn with a set of HudLine objects, which are
+ * transformed by the roll angle of the aircraft. The lines are also
+ * clipped to the bounds of the HUD display area.
+ *
+ * This function is called by the SCCockpit::Render method.
+ */
 void SCCockpit::RenderHudHorizonLinesSmall() {
     Point2D center;
     center.x = 161;
