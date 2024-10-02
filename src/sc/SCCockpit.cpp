@@ -70,9 +70,16 @@ void SCCockpit::Init() {
  * This function is called by the SCCockpit::Render method.
  */
 void SCCockpit::RenderHudHorizonLinesSmall() {
-    Point2D center;
-    center.x = 161;
-    center.y = 50;
+    const int top = 10;
+    const int bottom = 90;
+    const int left = 130;
+    const int dec = 40;
+    
+    const int bx1 = 125;
+    const int bx2 = 125 + 80;
+    const int by1 = 10;
+    const int by2 = 90;
+    const Point2D center{160,50};
 
     std::vector<HudLine> *hline = new std::vector<HudLine>();
     hline->resize(36);
@@ -87,12 +94,7 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
     }
     int ladder=90;
     for (auto h: *hline) {
-        int top = 10;
-        int bottom = 90;
-        int left = 130;
-        int dec = 40;
         
-
         HudLine l = h;
         HudLine l2 = h;
         l.start. x = l.start.x + left;
@@ -111,11 +113,7 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
         l2.start = rotateAroundPoint(l2.start, center, this->roll * M_PI / 180.0f);
         l2.end = rotateAroundPoint(l2.end, center, this->roll * M_PI / 180.0f);
         
-        int bx1, bx2, by1, by2;
-        bx1 = 125;
-        bx2 = 125 + 80;
-        by1 = 10;
-        by2 = 90;
+        
         if (l.start.x > bx1 && l.start.x < bx2 && l.start.y > by1 && l.start.y < by2) {
             Point2D p = l.start;
             p.y -=2;
@@ -138,10 +136,13 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
             l3.end = rotateAroundPoint(l3.end, center, this->roll * M_PI / 180.0f);
             VGA.lineWithBox(l3.start.x, l3.start.y, l3.end.x, l3.end.y, color, bx1, bx2, by1, by2);
         } else {
-            VGA.lineWithBox(l.start.x, l.start.y, l.end.x, l.end.y, color, bx1, bx2, by1, by2);
-            VGA.lineWithBox(l2.start.x, l2.start.y, l2.end.x, l2.end.y, color, bx1, bx2, by1, by2);
+            int skip = 1;
+            if (ladder < 0) {
+                skip = 2;
+            }
+            VGA.lineWithBoxWithSkip(l.start.x, l.start.y, l.end.x, l.end.y, color, bx1, bx2, by1, by2, skip);
+            VGA.lineWithBoxWithSkip(l2.start.x, l2.start.y, l2.end.x, l2.end.y, color, bx1, bx2, by1, by2, skip);
         }
-        
         ladder=ladder-5;
     }
 }
