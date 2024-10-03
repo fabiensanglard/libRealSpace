@@ -136,7 +136,7 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
             l3.start.x = l3.start.x + left - 5;
             l3.start.y = l3.start.y - dec;
             l3.end.y = l3.end.y - dec;
-            l3.end.x = l3.start.x + ligne_width + 5;
+            l3.end.x = l3.start.x + ligne_width + 10;
             l3.start = rotateAroundPoint(l3.start, center, this->roll * (float)M_PI / 180.0f);
             l3.end = rotateAroundPoint(l3.end, center, this->roll * (float)M_PI / 180.0f);
             VGA.lineWithBox(l3.start.x, l3.start.y, l3.end.x, l3.end.y, color, bx1, bx2, by1, by2);
@@ -233,20 +233,21 @@ void SCCockpit::Render(int face) {
 
             Point2D speed_text = {125, 35 + this->hud->small_hud->ASPD->SHAP->GetHeight()};
             VGA.DrawText(this->font, &speed_text, (char *)std::to_string(this->speed).c_str(), 0, 0, 3, 2, 2);
-
-            Point2D flaps = {125, speed_text.y + 5};
+            Point2D throttle_text = {125, speed_text.y + 5};
+            VGA.DrawText(this->font, &throttle_text, (char *)std::to_string(this->throttle).c_str(), 0, 0, 3, 2, 2);
+            Point2D flaps = {125, throttle_text.y + 5};
             if (this->flaps) {
                 VGA.DrawText(this->font, &flaps, "FLAPS", 0, 0, 5, 2, 2);
             }
-            Point2D break_text = {125, flaps.y + 5};
-            if (this->airbrake) {
-                VGA.DrawText(this->font, &break_text, "BREAKS", 0, 0, 6, 2, 2);
-            }
+            
             Point2D gear = {160 + 25, alti_text.y + 5};
             if (this->gear) {
                 VGA.DrawText(this->font, &gear, "GEARS", 0, 0, 5, 2, 2);
             }
-
+            Point2D break_text = {160 + 25, gear.y + 5};
+            if (this->airbrake) {
+                VGA.DrawText(this->font, &break_text, "BREAKS", 0, 0, 6, 2, 2);
+            }
             this->hud->small_hud->HEAD->SHAP->SetPosition(&heading);
             VGA.DrawShape(this->hud->small_hud->HEAD->SHAP);
         }

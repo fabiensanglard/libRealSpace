@@ -39,6 +39,8 @@ public:
     bool flaps{false};
     bool airbrake{false};
 
+    int throttle{0};
+    
     SCCockpit();
     ~SCCockpit();
     void Init( );
