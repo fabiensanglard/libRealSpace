@@ -323,10 +323,10 @@ void SCStrike::RunFrame(void) {
             if (aiPlane->object->area_id != 255) {
                 AREA *ar = this->missionObj->mission_data.areas[aiPlane->object->area_id];
 
-                float minX = ar->XAxis-(ar->AreaWidth/2);
-                float minY = ar->YAxis-(ar->AreaWidth/2);
-                float maxX = ar->XAxis+(ar->AreaWidth/2);
-                float maxY = ar->YAxis+(ar->AreaWidth/2);
+                float minX = (float) ar->XAxis-(ar->AreaWidth/2);
+                float minY = (float) ar->YAxis-(ar->AreaWidth/2);
+                float maxX = (float) ar->XAxis+(ar->AreaWidth/2);
+                float maxY = (float) ar->YAxis+(ar->AreaWidth/2);
 
                 if (npos.x < minX || npos.x > maxX || npos.z < minY || npos.z > maxY) {
                     aiPlane->pilot->target_azimut = aiPlane->pilot->target_azimut + 180;

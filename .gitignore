@@ -31,3 +31,5 @@ libRealSpace/x64/*
 /SC/x64/Debug
 out/
 .vscode
+CMakeFiles
+.clang-uml

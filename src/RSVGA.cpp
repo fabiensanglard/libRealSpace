@@ -32,7 +32,13 @@ bool RSVGA::DrawShape(RLEShape *shape) {
     }
     return (false);
 }
-
+bool RSVGA::DrawShapeWithBox(RLEShape *shape, int bx1, int bx2, int by1, int by2) {
+    if (shape != nullptr) {
+        size_t byteRead = 0;
+        return shape->ExpandWithBox(GetFrameBuffer(), &byteRead, bx1, bx2, by1, by2);
+    }
+    return (false);
+}
 void RSVGA::Init(void) {
 
     // Load the default palette

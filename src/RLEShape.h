@@ -25,7 +25,7 @@ public:
     void InitWithPosition(uint8_t* data, size_t size,Point2D* position );
     
     bool Expand(uint8_t* dst, size_t* byteRead);
-    
+    bool ExpandWithBox(uint8_t* dst, size_t* byteRead, int bx1, int bx2, int by1, int by2);
     inline void SetPosition(Point2D* position){
         this->position = *position;
     }
@@ -70,7 +70,8 @@ private:
     
     void ReadFragment  (RLEFragment* frag);
     bool ExpandFragment(RLEFragment* frag, uint8_t* dst );
-    
+    bool ExpandFragmentWithBox(RLEFragment* frag, uint8_t* dst, int bx1, int bx2, int by1, int by2 );
+
     int16_t leftDist;
     int16_t topDist;
     int16_t rightDist;
@@ -78,5 +79,6 @@ private:
     
     uint8_t colorOffset;
     bool WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color);
+    bool WriteColorWithBox(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color, int bx1, int bx2, int by1, int by2);
 };
 

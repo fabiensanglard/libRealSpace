@@ -34,6 +34,7 @@ public:
     VGAPalette* GetPalette(void);
     
     bool DrawShape(RLEShape* shape);
+    bool DrawShapeWithBox(RLEShape *shape, int bx1, int bx2, int by1, int by2);
     void line(int x1, int y1, int x2, int y2, uint8_t color);
     void lineWithSkip(int x1, int y1, int x2, int y2, uint8_t color, int skip);
     void lineWithBox(int x1, int y1, int x2, int y2, uint8_t color, int bx1, int bx2, int by1, int by2);

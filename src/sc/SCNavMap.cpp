@@ -46,7 +46,7 @@ void SCNavMap::CheckKeyboard(void) {
         case SDLK_RIGHT:
             *this->current_nav_point = *this->current_nav_point+1;
             if (*this->current_nav_point > this->missionObj->mission_data.areas.size()-1) {
-                *this->current_nav_point = this->missionObj->mission_data.areas.size()-1;
+                *this->current_nav_point = (uint8_t) this->missionObj->mission_data.areas.size()-1;
             }
         break;
         default:
@@ -153,7 +153,7 @@ void SCNavMap::RunFrame(void) {
                     (char *)this->missionObj->mission_data.messages[area->id-1]->c_str(),
                     0,
                     0,
-                    this->missionObj->mission_data.messages[area->id-1]->size(),
+                    (uint32_t) this->missionObj->mission_data.messages[area->id-1]->size(),
                     1,
                     this->navMap->font->GetShapeForChar('A')->GetWidth()
                 );

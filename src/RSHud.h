@@ -133,8 +133,10 @@ class RSHud {
     void parseREAL_CHUD_LARG_TTAG_THRO(uint8_t* data, size_t size);
     void parseREAL_CHUD_LARG_TTAG_CALA(uint8_t* data, size_t size);
 
+    CHUD *tmp_hud;
 public:
-    CHUD *hud;
+    CHUD *small_hud;
+    CHUD *large_hud;
     RSHud();
     ~RSHud();
     void InitFromRam(uint8_t* data, size_t size);
