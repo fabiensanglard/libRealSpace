@@ -273,7 +273,7 @@ void SCStrike::SetMission(char const *missionName) {
         int search_id = 0;
         for (auto cast : missionObj->mission_data.casting) {
             if (part->id == search_id) {
-                if (cast->profile->ai.isAI && cast->profile->ai.goal.size() > 0) {
+                if (cast->profile != nullptr && cast->profile->ai.isAI && cast->profile->ai.goal.size() > 0) {
                     SCAiPlane *aiPlane = new SCAiPlane();
                     aiPlane->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
                                                  23000.0f, 32.0f, .93f, 120, 9.0f, 18.0f, &this->area, (float)part->x,

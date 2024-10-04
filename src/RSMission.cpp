@@ -253,8 +253,10 @@ void RSMission::parseMISN_CAST(uint8_t *data, size_t size) {
         sprintf(prof_intel_filename, "..\\..\\DATA\\INTEL\\%s.IFF", actor.c_str());
         treEntry = tre->GetEntryByName(prof_intel_filename);
         RSProf * rsprof = new RSProf();
-        rsprof->InitFromRAM(treEntry->data, treEntry->size);
-        tmpcast->profile = rsprof;
+        if (treEntry != NULL) {
+            rsprof->InitFromRAM(treEntry->data, treEntry->size);
+            tmpcast->profile = rsprof;
+        }
         this->mission_data.casting.push_back(tmpcast);
     }
 }
