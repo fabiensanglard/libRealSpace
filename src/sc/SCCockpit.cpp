@@ -100,7 +100,6 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
     }
     int ladder = 90;
     for (auto h : *hline) {
-
         HudLine l = h;
         HudLine l2 = h;
         l.start.x = l.start.x + left;
@@ -172,8 +171,6 @@ void SCCockpit::Render(int face) {
             this->RenderHudHorizonLinesSmall();
             
             Point2D alti_arrow = {160 + 25, 50 - 20};
-
-            Point2D heading = {160 - 20, 50 + 40};
 
             std::vector<Point2D> alti_band_roll;
             alti_band_roll.reserve(100);
@@ -248,8 +245,50 @@ void SCCockpit::Render(int face) {
             if (this->airbrake) {
                 VGA.DrawText(this->font, &break_text, "BREAKS", 0, 0, 6, 2, 2);
             }
-            this->hud->small_hud->HEAD->SHAP->SetPosition(&heading);
-            VGA.DrawShape(this->hud->small_hud->HEAD->SHAP);
+
+            Point2D heading_pos = {140, 86};
+            this->hud->small_hud->HEAD->SHAP->SetPosition(&heading_pos);
+            //VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHAP, 120, 200,80, 90+this->hud->small_hud->HEAD->SHAP->GetHeight());
+                
+            std::vector<Point2D> heading_points;
+            heading_points.reserve(36);
+            for (int i = 0; i < 36; i++) {
+                Point2D p;
+                p.x = 432-i*12;
+                p.y = heading_pos.y + 7;
+                heading_points.push_back(p);
+            }
+            int headcpt = 0;
+            int pixelcpt = 0;
+            int headleft = 160-24;
+            int headright = 160+24;
+            for (auto p : heading_points) {
+                Point2D hp = p;
+                hp.x = hp.x - (int) (this->heading*1.2)+160;
+
+                if (hp.x < 0) {
+                    hp.x += 432;
+                } if (hp.x > 432) {
+                    hp.x -= 432;
+                }
+                if (hp.x > headleft && hp.x < headright) {
+                    Point2D txt_pos = hp;
+                    int toprint = headcpt;
+                    if (toprint == 36) {
+                        toprint = 0;
+                    }
+                    VGA.DrawText(this->font, &txt_pos, (char *)std::to_string(toprint).c_str(), 0, 0, 3, 2, 2);
+                    
+                }
+                if (headcpt%3 == 0) {
+                    Point2D headspeed;
+                    headspeed.x = hp.x-6;
+                    headspeed.y = heading_pos.y;
+                    this->hud->small_hud->HEAD->SHAP->SetPosition(&headspeed);
+                    VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHAP, headleft, headright,80, 120);
+                }
+                headcpt += 1;               
+            }   
         }
         VGA.plot_pixel(161, 50, 223);
         VGA.VSync();
