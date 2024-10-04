@@ -169,7 +169,7 @@ void SCCockpit::Render(int face) {
         VGA.DrawShape(this->cockpit->ARTP.GetShape(face));
         if (face == 0) {
             this->RenderHudHorizonLinesSmall();
-            
+
             Point2D alti_arrow = {160 + 25, 50 - 20};
 
             std::vector<Point2D> alti_band_roll;
@@ -184,9 +184,9 @@ void SCCockpit::Render(int face) {
             for (auto p : alti_band_roll) {
                 Point2D p2 = p;
                 p2.x = 194;
-                p2.y = (29 + this->hud->small_hud->ALTI->SHAP->GetHeight() / 2) + p.y - (this->altitude/100);
+                p2.y = (29 + this->hud->small_hud->ALTI->SHAP->GetHeight() / 2) + p.y - (this->altitude / 100);
                 if (p2.y > 30 && p2.y < 29 + this->hud->small_hud->ALTI->SHAP->GetHeight()) {
-                    VGA.DrawText(this->font, &p2, (char *)std::to_string(cpt/10.0f).c_str(), 0, 0, 3, 2, 2);
+                    VGA.DrawText(this->font, &p2, (char *)std::to_string(cpt / 10.0f).c_str(), 0, 0, 3, 2, 2);
                 }
                 cpt += 10;
                 Point2D alti = {160 + 30, 50 - 20};
@@ -216,13 +216,12 @@ void SCCockpit::Render(int face) {
                     VGA.DrawText(this->font, &p, (char *)std::to_string(cpt_speed).c_str(), 0, 0, 3, 2, 2);
                 }
                 if (cpt_speed % 5 == 0) {
-                    if (p.y > 10  &&
-                        p.y < 29 + this->hud->small_hud->ASPD->SHAP->GetHeight()) {
+                    if (p.y > 10 && p.y < 29 + this->hud->small_hud->ASPD->SHAP->GetHeight()) {
                         Point2D speed = {160 - 30, 50 - 20};
                         speed.y = p.y;
                         this->hud->small_hud->ASPD->SHAP->SetPosition(&speed);
                         VGA.DrawShapeWithBox(this->hud->small_hud->ASPD->SHAP, 160 - 30, 160 + 30, 20,
-                                             15+this->hud->small_hud->ASPD->SHAP->GetHeight());
+                                             15 + this->hud->small_hud->ASPD->SHAP->GetHeight());
                     }
                 }
                 cpt_speed += 10;
@@ -236,7 +235,7 @@ void SCCockpit::Render(int face) {
             if (this->flaps) {
                 VGA.DrawText(this->font, &flaps, "FLAPS", 0, 0, 5, 2, 2);
             }
-            
+
             Point2D gear = {160 + 25, alti_text.y + 5};
             if (this->gear) {
                 VGA.DrawText(this->font, &gear, "GEARS", 0, 0, 5, 2, 2);
@@ -248,27 +247,29 @@ void SCCockpit::Render(int face) {
 
             Point2D heading_pos = {140, 86};
             this->hud->small_hud->HEAD->SHAP->SetPosition(&heading_pos);
-            //VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHAP, 120, 200,80, 90+this->hud->small_hud->HEAD->SHAP->GetHeight());
-                
+            // VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHAP, 120, 200,80,
+            // 90+this->hud->small_hud->HEAD->SHAP->GetHeight());
+
             std::vector<Point2D> heading_points;
             heading_points.reserve(36);
             for (int i = 0; i < 36; i++) {
                 Point2D p;
-                p.x = 432-i*12;
+                p.x = 432 - i * 12;
                 p.y = heading_pos.y + 7;
                 heading_points.push_back(p);
             }
             int headcpt = 0;
             int pixelcpt = 0;
-            int headleft = 160-24;
-            int headright = 160+24;
+            int headleft = 160 - 24;
+            int headright = 160 + 24;
             for (auto p : heading_points) {
                 Point2D hp = p;
-                hp.x = hp.x - (int) (this->heading*1.2)+160;
+                hp.x = hp.x - (int)(this->heading * 1.2) + 160;
 
                 if (hp.x < 0) {
                     hp.x += 432;
-                } if (hp.x > 432) {
+                }
+                if (hp.x > 432) {
                     hp.x -= 432;
                 }
                 if (hp.x > headleft && hp.x < headright) {
@@ -278,17 +279,16 @@ void SCCockpit::Render(int face) {
                         toprint = 0;
                     }
                     VGA.DrawText(this->font, &txt_pos, (char *)std::to_string(toprint).c_str(), 0, 0, 3, 2, 2);
-                    
                 }
-                if (headcpt%3 == 0) {
+                if (headcpt % 3 == 0) {
                     Point2D headspeed;
-                    headspeed.x = hp.x-6;
+                    headspeed.x = hp.x - 6;
                     headspeed.y = heading_pos.y;
                     this->hud->small_hud->HEAD->SHAP->SetPosition(&headspeed);
-                    VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHAP, headleft, headright,80, 120);
+                    VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHAP, headleft, headright, 80, 120);
                 }
-                headcpt += 1;               
-            }   
+                headcpt += 1;
+            }
         }
         VGA.plot_pixel(161, 50, 223);
         VGA.VSync();
