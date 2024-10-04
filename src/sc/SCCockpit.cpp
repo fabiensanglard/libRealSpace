@@ -184,7 +184,7 @@ void SCCockpit::Render(int face) {
             for (auto p : alti_band_roll) {
                 Point2D p2 = p;
                 p2.x = 194;
-                p2.y = (29 + this->hud->small_hud->ALTI->SHAP->GetHeight() / 2) + p.y - (this->altitude / 100);
+                p2.y = (29 + this->hud->small_hud->ALTI->SHAP->GetHeight() / 2) + p.y - (int) (this->altitude / 100);
                 if (p2.y > 30 && p2.y < 29 + this->hud->small_hud->ALTI->SHAP->GetHeight()) {
                     VGA.DrawText(this->font, &p2, (char *)std::to_string(cpt / 10.0f).c_str(), 0, 0, 3, 2, 2);
                 }
@@ -211,7 +211,7 @@ void SCCockpit::Render(int face) {
             for (auto sp : speed_band_roll) {
                 Point2D p = sp;
                 p.x = 118;
-                p.y = (29 + this->hud->small_hud->ASPD->SHAP->GetHeight() / 2) + p.y - this->speed;
+                p.y = (29 + this->hud->small_hud->ASPD->SHAP->GetHeight() / 2) + p.y - (int)this->speed;
                 if (p.y > 30 && p.y < 29 + this->hud->small_hud->ASPD->SHAP->GetHeight()) {
                     VGA.DrawText(this->font, &p, (char *)std::to_string(cpt_speed).c_str(), 0, 0, 3, 2, 2);
                 }
