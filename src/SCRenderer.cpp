@@ -713,6 +713,15 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     GLuint fogMode[] = {GL_EXP, GL_EXP2, GL_LINEAR}; // Storage For Three Types Of Fog
     GLuint fogfilter = 0;                            // Which Fog To Use
     GLfloat fogColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_MODELVIEW);
+
+    Matrix *modelViewMatrix = camera.GetViewMatrix();
+    glLoadMatrixf(modelViewMatrix->ToGL());
+    float model_view_mat[4][4];
+    glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
     glFogi(GL_FOG_MODE, fogMode[fogfilter]); // Fog Mode
     glFogfv(GL_FOG_COLOR, fogColor);         // Set Fog Color
     glFogf(GL_FOG_DENSITY, 0.000009f);       // How Dense Will The Fog Be
@@ -720,12 +729,7 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glFogf(GL_FOG_START, 8000.0f);           // Fog Start Depth
     glFogf(GL_FOG_END, MAP_SIZE);            // Fog End Depth
     glEnable(GL_FOG);
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glMatrixMode(GL_MODELVIEW);
-    Matrix *modelViewMatrix = camera.GetViewMatrix();
-    glLoadMatrixf(modelViewMatrix->ToGL());
+    
     this->RenderWorldSkyAndGround();
     textureSortedVertex.clear();
     glEnable(GL_DEPTH_TEST);
@@ -768,6 +772,7 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
 
     RenderObjects(area, 0);
 
+    
     glDisable(GL_FOG);
 }
 
@@ -806,6 +811,8 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
         glTranslatef(static_cast<GLfloat>(object->x), static_cast<GLfloat>(object->z),
                      static_cast<GLfloat>(-object->y));
 
+        float model_view_mat[4][4];
+        glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
         glRotatef((360.0f-(float)object->azymuth + 90.0f), 0, 1, 0);
         glRotatef((float)object->pitch, 0, 0, 1);
         glRotatef(-(float)object->roll, 1, 0, 0);

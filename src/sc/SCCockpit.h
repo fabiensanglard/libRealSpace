@@ -21,6 +21,8 @@ private:
     VGAPalette palette;
     std::vector<HudLine> horizon;
     void RenderHudHorizonLinesSmall();
+    void RenderTarget();
+    void RenderTargetWithCam();
     RSFont *font;
     
 public:
@@ -40,7 +42,11 @@ public:
     bool airbrake{false};
 
     int throttle{0};
-    
+
+    MISN_PART *target;
+    MISN_PART *player;
+    Camera *cam;
+
     SCCockpit();
     ~SCCockpit();
     void Init( );

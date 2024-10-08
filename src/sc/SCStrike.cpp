@@ -359,6 +359,9 @@ void SCStrike::RunFrame(void) {
     this->cockpit->gear = this->player_plane->GetWheel();
     this->cockpit->flaps = this->player_plane->GetFlaps()>0;
     this->cockpit->airbrake = this->player_plane->GetSpoilers()>0;
+    this->cockpit->target = this->missionObj->mission_data.parts[this->current_target];
+    this->cockpit->player = this->player_plane->object;
+
 
     switch (this->camera_mode) {
 
@@ -420,7 +423,7 @@ void SCStrike::RunFrame(void) {
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     Renderer.RenderMissionObjects(missionObj);
-
+    this->cockpit->cam = camera;
     switch (this->camera_mode) {
     case View::FRONT:
         this->cockpit->Render(0);

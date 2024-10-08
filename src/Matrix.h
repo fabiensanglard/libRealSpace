@@ -157,6 +157,13 @@ private:
 
 #define Point3D Vector3D
 
+class Vector3DHomogeneous {
+public:
+    float x;
+    float y;
+    float z;
+    float w;
+};
 
 class Matrix{
     
@@ -181,6 +188,7 @@ public:
     void SetRotationZ(float angle);
     void translateM(float x, float y, float z);
     void rotateM(float angle, float x, float y, float z);
+    Vector3DHomogeneous multiplyMatrixVector(Vector3DHomogeneous v);
 private:
 };
 

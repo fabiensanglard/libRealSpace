@@ -192,3 +192,19 @@ void Matrix::rotateM(float radangle, float x, float y, float z) {
         this->Multiply(&zrot);
 	}
 }
+Vector3DHomogeneous Matrix::multiplyMatrixVector(Vector3DHomogeneous v) {  
+    Vector3DHomogeneous result;
+    float V[4] = { v.x, v.y, v.z, v.w };
+    float R[4] = { 0, 0, 0, 0 };
+    
+    for (int i = 0; i < 4; i++) {  
+        for (int j=0; j<4; j++) {  
+            R[i] += this->v[i][j] * V[j];  
+        }
+    }
+    result.x = R[0];
+    result.y = R[1];
+    result.z = R[2];
+    result.w = R[3];
+    return result;
+}
