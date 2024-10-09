@@ -188,6 +188,7 @@ public:
     void SetRotationZ(float angle);
     void translateM(float x, float y, float z);
     void rotateM(float angle, float x, float y, float z);
+    void Multiply(Vector3DHomogeneous other);
     Vector3DHomogeneous multiplyMatrixVector(Vector3DHomogeneous v);
 private:
 };

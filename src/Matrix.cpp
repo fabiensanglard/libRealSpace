@@ -199,7 +199,7 @@ Vector3DHomogeneous Matrix::multiplyMatrixVector(Vector3DHomogeneous v) {
     
     for (int i = 0; i < 4; i++) {  
         for (int j=0; j<4; j++) {  
-            R[i] += this->v[i][j] * V[j];  
+            R[i] += this->v[j][i] * V[j];  
         }
     }
     result.x = R[0];
@@ -207,4 +207,12 @@ Vector3DHomogeneous Matrix::multiplyMatrixVector(Vector3DHomogeneous v) {
     result.z = R[2];
     result.w = R[3];
     return result;
+}
+void Matrix::Multiply(Vector3DHomogeneous other) {
+    for (int i=0; i<4; i++) {
+        this->v[i][0] = this->v[i][0] * other.x + this->v[i][0] * other.y + this->v[i][0] * other.z + this->v[i][0] * other.w;
+        this->v[i][1] = this->v[i][1] * other.x + this->v[i][1] * other.y + this->v[i][1] * other.z + this->v[i][1] * other.w;
+        this->v[i][2] = this->v[i][2] * other.x + this->v[i][2] * other.y + this->v[i][2] * other.z + this->v[i][2] * other.w;
+        this->v[i][3] = this->v[i][3] * other.x + this->v[i][3] * other.y + this->v[i][3] * other.z + this->v[i][3] * other.w;
+    }
 }

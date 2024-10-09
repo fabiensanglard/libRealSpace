@@ -150,52 +150,10 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
         ladder = ladder - 5;
     }
 }
-void SCCockpit::RenderTarget() {
-    if (this->target != nullptr) {
-        Vector3D targetPos = {(float)this->target->x + 180000.0f, (float)this->target->z, -(float)this->target->y + 180000.0f};
-        Vector3D playerPos = {(float)this->player->x + 180000.0f, (float)this->player->z+10, (float)this->player->y + 180000.0f};
 
-        Vector3D directionVector = {targetPos.x - playerPos.x, targetPos.y - playerPos.y, targetPos.z - playerPos.z};
-        Matrix m;
-        m.Clear();
-        m.Identity();
-        
-        
-        //
-        m.rotateM(-this->heading * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
-        m.rotateM(-this->roll * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);
-        m.rotateM((this->pitch+ 10) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
-        
-        
-
-        m.translateM(directionVector.x, directionVector.y, directionVector.z);
-
-        float Xhud = m.v[3][0];
-        float Yhud = m.v[3][1];
-        float Zhud = m.v[3][2];
-
-        const Point2D center{160, 50};
-        const float FOV = 50.0f;
-        float fovRad = (float)(1 / tan(FOV * DEG_TO_RAD / 2));
-        const float ASPECT_RATIO = 4.0f / 3.0f;
-
-        float xProjected = (Xhud * fovRad) / (Zhud * ASPECT_RATIO);
-        float yProjected = ((Yhud) * fovRad) / (Zhud * ASPECT_RATIO);
-
-        int x2d = (int) ((1-xProjected) * 0.5 * 320);
-        int y2d = (int) ((yProjected+1) * 0.5 * 200)-75;
-        Point2D p = {x2d, y2d};
-        //Point2D p = rotateAroundPoint(pc, center, this->roll * (float)M_PI / 180.0f);
-        if (p.x > 0 && p.x < 320 && p.y > 0 && p.y < 200) {
-            VGA.line((int)p.x-5,(int)p.y-5,(int)p.x+5,(int)p.y-5,223);
-            VGA.line((int)p.x+5,(int)p.y-5,(int)p.x+5,(int)p.y+5,223);
-            VGA.line((int)p.x+5,(int)p.y+5,(int)p.x-5,(int)p.y+5,223);
-            VGA.line((int)p.x-5,(int)p.y+5,(int)p.x-5,(int)p.y-5,223);
-        }
-    }
-}
 void SCCockpit::RenderTargetWithCam() {
     if (this->target != nullptr) {
+        Vector3D campos = this->cam->GetPosition();
         Vector3DHomogeneous v = {
             (float)this->target->x,
             (float)this->target->z,
@@ -204,19 +162,16 @@ void SCCockpit::RenderTargetWithCam() {
         };
         Matrix *mproj = this->cam->GetProjectionMatrix();
         Matrix *mview = this->cam->GetViewMatrix();
-
+        
         Vector3DHomogeneous mcombined = mview->multiplyMatrixVector(v);
         Vector3DHomogeneous result = mproj->multiplyMatrixVector(mcombined);
+        
         float x = result.x / result.w;
         float y = result.y / result.w;
 
         
         int Xhud = (int) ((x+1.0f) * 160.0f);
-        int Yhud = (int) ((1.0f-y) * 100.0f);
-
-        printf("Xhud: %d Yhud: %d\n", Xhud, Yhud);
-        printf("X: %f Y: %f\n", x, y);
-        printf("result.x: %f result.y: %f result.z: %f result.w: %f\n", result.x, result.y, result.z, result.w);
+        int Yhud = (int) ((1.0f-y) * 100.0f)-1;
 
         if (Xhud > 0 && Xhud < 320 && Yhud > 0 && Yhud < 200) {
             Point2D p = {Xhud, Yhud};
@@ -366,13 +321,10 @@ void SCCockpit::Render(int face) {
                 }
                 headcpt += 1;
             }
+            this->RenderTargetWithCam();
+            VGA.plot_pixel(161, 50, 223);
         }
-        this->RenderTargetWithCam();
-
-        VGA.plot_pixel(161, 50, 223);
         VGA.VSync();
         VGA.SwithBuffers();
-    } else {
-        Renderer.DrawModel(&this->cockpit->REAL.OBJS, 0);
     }
 }

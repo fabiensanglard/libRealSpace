@@ -352,7 +352,7 @@ void SCStrike::RunFrame(void) {
     this->cockpit->pitch = this->player_plane->elevationf/10.0f;
     this->cockpit->roll = this->player_plane->twist/10.0f;
     this->cockpit->yaw = this->player_plane->azimuthf/10.0f;
-    this->cockpit->speed = this->player_plane->airspeed;
+    this->cockpit->speed = (float) this->player_plane->airspeed;
     this->cockpit->throttle = this->player_plane->GetThrottle();
     this->cockpit->altitude = this->player_plane->y;
     this->cockpit->heading = this->player_plane->azimuthf/10.0f;
@@ -423,6 +423,7 @@ void SCStrike::RunFrame(void) {
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     Renderer.RenderMissionObjects(missionObj);
+
     this->cockpit->cam = camera;
     switch (this->camera_mode) {
     case View::FRONT:
