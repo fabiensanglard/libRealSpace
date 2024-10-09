@@ -152,7 +152,7 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
 }
 
 void SCCockpit::RenderTargetWithCam() {
-    if (this->target != nullptr) {
+    if (this->target != nullptr ) {
         Vector3D campos = this->cam->GetPosition();
         Vector3DHomogeneous v = {
             (float)this->target->x,
@@ -160,25 +160,27 @@ void SCCockpit::RenderTargetWithCam() {
             -(float)this->target->y,
             1.0f
         };
+        
         Matrix *mproj = this->cam->GetProjectionMatrix();
         Matrix *mview = this->cam->GetViewMatrix();
         
         Vector3DHomogeneous mcombined = mview->multiplyMatrixVector(v);
         Vector3DHomogeneous result = mproj->multiplyMatrixVector(mcombined);
-        
-        float x = result.x / result.w;
-        float y = result.y / result.w;
+        if (result.z > 0.0f) {
+            float x = result.x / result.w;
+            float y = result.y / result.w;
 
-        
-        int Xhud = (int) ((x+1.0f) * 160.0f);
-        int Yhud = (int) ((1.0f-y) * 100.0f)-1;
+            
+            int Xhud = (int) ((x+1.0f) * 160.0f);
+            int Yhud = (int) ((1.0f-y) * 100.0f)-1;
 
-        if (Xhud > 0 && Xhud < 320 && Yhud > 0 && Yhud < 200) {
-            Point2D p = {Xhud, Yhud};
-            VGA.line((int)p.x-5,(int)p.y-5,(int)p.x+5,(int)p.y-5,223);
-            VGA.line((int)p.x+5,(int)p.y-5,(int)p.x+5,(int)p.y+5,223);
-            VGA.line((int)p.x+5,(int)p.y+5,(int)p.x-5,(int)p.y+5,223);
-            VGA.line((int)p.x-5,(int)p.y+5,(int)p.x-5,(int)p.y-5,223);
+            if (Xhud > 0 && Xhud < 320 && Yhud > 0 && Yhud < 200) {
+                Point2D p = {Xhud, Yhud};
+                VGA.lineWithBox((int)p.x-5,(int)p.y-5,(int)p.x+5,(int)p.y-5,223, 160-34, 160+34, 5, 90);
+                VGA.lineWithBox((int)p.x+5,(int)p.y-5,(int)p.x+5,(int)p.y+5,223, 160-34, 160+34, 5, 90);
+                VGA.lineWithBox((int)p.x+5,(int)p.y+5,(int)p.x-5,(int)p.y+5,223, 160-34, 160+34, 5, 90);
+                VGA.lineWithBox((int)p.x-5,(int)p.y+5,(int)p.x-5,(int)p.y-5,223, 160-34, 160+34, 5, 90);
+            }
         }
     }
 }
