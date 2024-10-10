@@ -322,12 +322,12 @@ void SCCockpit::Render(int face) {
                 headcpt += 1;
             }
             Vector2D weapoint_direction = {this->weapoint_coords.x-this->player->x, this->weapoint_coords.y-this->player->y};
-            float weapoint_azimut = (atan2f(weapoint_direction.y, weapoint_direction.x) * 180.0f / (float)M_PI);
+            float weapoint_azimut = (atan2f((float) weapoint_direction.y, (float) weapoint_direction.x) * 180.0f / (float)M_PI);
             Point2D weapoint = {432, heading_pos.y-3};
             if (this->weapoint_coords.y < this->player->y) {
                 weapoint_azimut += 180.0f;
             }
-            weapoint.x = weapoint.x+(int)((weapoint_azimut)*1.2) -((this->heading) * 1.2) + 160;
+            weapoint.x = weapoint.x+(int) ((weapoint_azimut*1.2f) -(this->heading * 1.2f)) + 160;
             if (weapoint.x < 0) {
                 weapoint.x += 432;
             }
