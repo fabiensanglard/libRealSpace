@@ -55,7 +55,7 @@ void SCRenderer::Init(int32_t zoomFactor) {
     glDisable(GL_DEPTH_TEST); // Disable Depth Testing
 
     // camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
-    camera.SetPersective(50.0f, this->width / (float)this->height, 1.0f, 40000 * 18);
+    camera.SetPersective(50.0f, this->width / (float)this->height, 1.0f, MAP_SIZE*3);
 
     light.SetWithCoo(300, 300, 300);
 
@@ -653,46 +653,66 @@ void SCRenderer::RenderWorldSkyAndGround() {
     static const int max_int = MAP_SIZE;
 
     GLfloat skycolor[2][3] = {
-        {80.0f / 255.0f, 160.0f / 255.0f, 240.0f / 255.0f},
+        {255.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f},
         {40.0f / 255.0f, 80.0f / 255.0f, 120.0f / 255.0f},
     };
 
     glBegin(GL_QUADS);
 
-    glColor3fv(skycolor[0]);
+    // sol
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(-max_int, -max_int, -max_int);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(max_int, -max_int, -max_int);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(max_int, -max_int, max_int);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(-max_int, -max_int, max_int);
 
-    glColor3fv(skycolor[1]);
+    //ciel
+    glColor3f(0,0,0.2f);
     glVertex3f(-max_int, max_int, -max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(max_int, max_int, -max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(max_int, max_int, max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(-max_int, max_int, max_int);
 
-    glColor3fv(skycolor[1]);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(-max_int, -max_int, max_int);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(max_int, -max_int, max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(max_int, max_int, max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(-max_int, max_int, max_int);
 
-    glColor3fv(skycolor[1]);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(-max_int, -max_int, -max_int);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(max_int, -max_int, -max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(max_int, max_int, -max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(-max_int, max_int, -max_int);
 
-    glColor3fv(skycolor[1]);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(-max_int, -max_int, -max_int);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(-max_int, -max_int, max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(-max_int, max_int, max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(-max_int, max_int, -max_int);
 
-    glColor3fv(skycolor[1]);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(max_int, -max_int, -max_int);
+    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
     glVertex3f(max_int, -max_int, max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(max_int, max_int, max_int);
+    glColor3f(0,0,0.2f);
     glVertex3f(max_int, max_int, -max_int);
 
     glEnd();
@@ -712,23 +732,24 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
 
     GLuint fogMode[] = {GL_EXP, GL_EXP2, GL_LINEAR}; // Storage For Three Types Of Fog
     GLuint fogfilter = 0;                            // Which Fog To Use
-    GLfloat fogColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-    
+    GLfloat fogColor[4] = {0.7f, 0.8f, 1.0f, 1.0f};
+    float model_view_mat[4][4];
+    glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
+    glFogi(GL_FOG_MODE, GL_LINEAR); // Fog Mode
+    glFogfv(GL_FOG_COLOR, fogColor);         // Set Fog Color
+    glFogf(GL_FOG_DENSITY, 0.000005f);       // How Dense Will The Fog Be
+    glHint(GL_FOG_HINT, GL_DONT_CARE);       // Fog Hint Value
+    glFogf(GL_FOG_START, 5000.0f);           // Fog Start Depth
+    glFogf(GL_FOG_END, 70000.0f);            // Fog End Depth
+    glEnable(GL_FOG);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_MODELVIEW);
 
     Matrix *modelViewMatrix = camera.GetViewMatrix();
     glLoadMatrixf(modelViewMatrix->ToGL());
-    float model_view_mat[4][4];
-    glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
-    glFogi(GL_FOG_MODE, fogMode[fogfilter]); // Fog Mode
-    glFogfv(GL_FOG_COLOR, fogColor);         // Set Fog Color
-    glFogf(GL_FOG_DENSITY, 0.000009f);       // How Dense Will The Fog Be
-    glHint(GL_FOG_HINT, GL_DONT_CARE);       // Fog Hint Value
-    glFogf(GL_FOG_START, 8000.0f);           // Fog Start Depth
-    glFogf(GL_FOG_END, MAP_SIZE);            // Fog End Depth
-    glEnable(GL_FOG);
+    
     
     this->RenderWorldSkyAndGround();
     textureSortedVertex.clear();

@@ -45,6 +45,7 @@ public:
     MISN_PART *target;
     MISN_PART *player;
     Camera *cam;
+    Vector2D weapoint_coords;
 
     SCCockpit();
     ~SCCockpit();

@@ -19,7 +19,6 @@ typedef struct Point2D{
 
 typedef Point2D Vector2D;
 
-
 // Long life to however came up with this. You rule man.
 float InvSqrt(float x);
 float tenthOfDegreeToRad(float angle);

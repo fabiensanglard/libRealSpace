@@ -281,8 +281,6 @@ void SCCockpit::Render(int face) {
 
             Point2D heading_pos = {140, 86};
             this->hud->small_hud->HEAD->SHAP->SetPosition(&heading_pos);
-            // VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHAP, 120, 200,80,
-            // 90+this->hud->small_hud->HEAD->SHAP->GetHeight());
 
             std::vector<Point2D> heading_points;
             heading_points.reserve(36);
@@ -323,6 +321,24 @@ void SCCockpit::Render(int face) {
                 }
                 headcpt += 1;
             }
+            Vector2D weapoint_direction = {this->weapoint_coords.x-this->player->x, this->weapoint_coords.y-this->player->y};
+            float weapoint_azimut = (atan2f(weapoint_direction.y, weapoint_direction.x) * 180.0f / (float)M_PI);
+            Point2D weapoint = {432, heading_pos.y-3};
+            if (this->weapoint_coords.y < this->player->y) {
+                weapoint_azimut += 180.0f;
+            }
+            weapoint.x = weapoint.x+(int)((weapoint_azimut)*1.2) -((this->heading) * 1.2) + 160;
+            if (weapoint.x < 0) {
+                weapoint.x += 432;
+            }
+            if (weapoint.x > 432) {
+                weapoint.x -= 432;
+            }
+            
+            
+            this->hud->small_hud->HEAD->SHP2->SetPosition(&weapoint);
+            VGA.line(160, weapoint.y, 160, weapoint.y+3, 223);
+            VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHP2, headleft, headright, 80, 120);
             this->RenderTargetWithCam();
             VGA.plot_pixel(161, 50, 223);
         }

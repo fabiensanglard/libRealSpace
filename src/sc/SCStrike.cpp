@@ -257,7 +257,8 @@ void SCStrike::SetMission(char const *missionName) {
     camera = Renderer.GetCamera();
     camera->SetPosition(&newPosition);
     yaw = 0.0f;
-
+    this->current_target = 0;
+    this->nav_point_id = 0;
     this->player_plane =
         new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
                     9.0f, 18.0f, &this->area, newPosition.x, newPosition.y, newPosition.z);
@@ -265,6 +266,7 @@ void SCStrike::SetMission(char const *missionName) {
     this->player_plane->object = playerCoord;
     if (this->area.getY(newPosition.x, newPosition.z) < newPosition.y) {
         this->player_plane->SetThrottle(100);
+        this->player_plane->SetWheel();
         this->player_plane->vz = -20;
         this->player_plane->Simulate();
     }
@@ -361,7 +363,8 @@ void SCStrike::RunFrame(void) {
     this->cockpit->airbrake = this->player_plane->GetSpoilers()>0;
     this->cockpit->target = this->missionObj->mission_data.parts[this->current_target];
     this->cockpit->player = this->player_plane->object;
-
+    this->cockpit->weapoint_coords.x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis;
+    this->cockpit->weapoint_coords.y = -this->missionObj->mission_data.areas[this->nav_point_id]->YAxis;
 
     switch (this->camera_mode) {
 
