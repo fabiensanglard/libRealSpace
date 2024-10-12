@@ -21,7 +21,11 @@ private:
     VGAPalette palette;
     std::vector<HudLine> horizon;
     void RenderHudHorizonLinesSmall();
+    void RenderAltitude();
     void RenderTargetWithCam();
+    void RenderHeading();
+    void RenderSpeed();
+    void RenderMFDS(Point2D mfds);
     RSFont *font;
     
 public:

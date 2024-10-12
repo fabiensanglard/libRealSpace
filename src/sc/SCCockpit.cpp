@@ -57,6 +57,176 @@ void SCCockpit::Init() {
     this->font->InitFromPAK(pak);
 }
 /**
+ * SCCockpit::RenderAltitude
+ *
+ * Render the current altitude in the cockpit view.
+ *
+ * This function renders the current altitude in the cockpit view by drawing
+ * a band of lines and numbers on the right side of the screen. The altitude
+ * is rendered in meters, with the 1000s place on the left side of the band
+ * and the 100s place on the right side of the band. The band is rendered
+ * from the top of the screen (0) to the bottom of the screen (512), with
+ * the 0 mark at the top of the screen and the 1000 mark at the bottom of
+ * the screen.
+ */
+
+void SCCockpit::RenderAltitude() {
+    Point2D alti_arrow = {160 + 25, 50 - 20};
+
+    std::vector<Point2D> alti_band_roll;
+    alti_band_roll.reserve(100);
+    for (int i = 0; i < 100; i++) {
+        Point2D p;
+        p.x = 0;
+        p.y = i * 10;
+        alti_band_roll.push_back(p);
+    }
+    int cpt = 0;
+    for (auto p : alti_band_roll) {
+        Point2D p2 = p;
+        p2.x = 194;
+        p2.y = (29 + this->hud->small_hud->ALTI->SHAP->GetHeight() / 2) + p.y - (int) (this->altitude / 100);
+        if (p2.y > 30 && p2.y < 29 + this->hud->small_hud->ALTI->SHAP->GetHeight()) {
+            VGA.DrawText(this->font, &p2, (char *)std::to_string(cpt / 10.0f).c_str(), 0, 0, 3, 2, 2);
+        }
+        cpt += 10;
+        Point2D alti = {160 + 30, 50 - 20};
+        alti.y = p2.y;
+        if (p2.y > 10 && p2.y < 29 + this->hud->small_hud->ALTI->SHAP->GetHeight()) {
+            this->hud->small_hud->ALTI->SHAP->SetPosition(&alti);
+            VGA.DrawShapeWithBox(this->hud->small_hud->ALTI->SHAP, 160 - 30, 160 + 40, 20,
+                                    15 + this->hud->small_hud->ALTI->SHAP->GetHeight());
+        }
+    }
+    Point2D alti_text = {160 + 25, 35 + this->hud->small_hud->ALTI->SHAP->GetHeight()};
+    VGA.DrawText(this->font, &alti_text, (char *)std::to_string(this->altitude).c_str(), 0, 0, 5, 2, 2);
+
+    Point2D gear = {160 + 25, alti_text.y + 5};
+    if (this->gear) {
+        VGA.DrawText(this->font, &gear, "GEARS", 0, 0, 5, 2, 2);
+    }
+    Point2D break_text = {160 + 25, gear.y + 5};
+    if (this->airbrake) {
+        VGA.DrawText(this->font, &break_text, "BREAKS", 0, 0, 6, 2, 2);
+    }
+}
+/**
+ * Renders the heading indicator in the cockpit view.
+ *
+ * This function renders the heading indicator in the cockpit view by drawing
+ * a band of lines and numbers on the top of the screen. The heading is rendered
+ * in degrees, with the 0 mark at the top of the screen and the 360 mark at the
+ * bottom of the screen. The band is rendered from the top of the screen (0) to
+ * the bottom of the screen (360), with the 0 mark at the top of the screen and
+ * the 360 mark at the bottom of the screen.
+ */
+void SCCockpit::RenderHeading() {
+    Point2D heading_pos = {140, 86};
+    this->hud->small_hud->HEAD->SHAP->SetPosition(&heading_pos);
+
+    std::vector<Point2D> heading_points;
+    heading_points.reserve(36);
+    for (int i = 0; i < 36; i++) {
+        Point2D p;
+        p.x = 432 - i * 12;
+        p.y = heading_pos.y + 7;
+        heading_points.push_back(p);
+    }
+    int headcpt = 0;
+    int pixelcpt = 0;
+    int headleft = 160 - 24;
+    int headright = 160 + 24;
+    for (auto p : heading_points) {
+        Point2D hp = p;
+        hp.x = hp.x - (int)(this->heading * 1.2) + 160;
+
+        if (hp.x < 0) {
+            hp.x += 432;
+        }
+        if (hp.x > 432) {
+            hp.x -= 432;
+        }
+        if (hp.x > headleft && hp.x < headright) {
+            Point2D txt_pos = hp;
+            int toprint = headcpt;
+            if (toprint == 36) {
+                toprint = 0;
+            }
+            VGA.DrawText(this->font, &txt_pos, (char *)std::to_string(toprint).c_str(), 0, 0, 3, 2, 2);
+        }
+        if (headcpt % 3 == 0) {
+            Point2D headspeed;
+            headspeed.x = hp.x - 6;
+            headspeed.y = heading_pos.y;
+            this->hud->small_hud->HEAD->SHAP->SetPosition(&headspeed);
+            VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHAP, headleft, headright, 80, 120);
+        }
+        headcpt += 1;
+    }
+    Vector2D weapoint_direction = {this->weapoint_coords.x-this->player->x, this->weapoint_coords.y-this->player->y};
+    float weapoint_azimut = (atan2f((float) weapoint_direction.y, (float) weapoint_direction.x) * 180.0f / (float)M_PI);
+    Point2D weapoint = {0, heading_pos.y-3};
+    
+    weapoint_azimut -= 360;
+    weapoint_azimut += 90;
+    if (weapoint_azimut > 360) {
+        weapoint_azimut -= 360;
+    }
+    while (weapoint_azimut < 0) {
+        weapoint_azimut += 360;
+    }
+    weapoint.x = weapoint.x+(int) (weapoint_azimut*1.2f) -(int) ((360-this->heading) * 1.2f) + 160;
+    if (weapoint.x < 0) {
+        weapoint.x += 432;
+    }
+    if (weapoint.x > 432) {
+        weapoint.x -= 432;
+    }
+    
+    
+    this->hud->small_hud->HEAD->SHP2->SetPosition(&weapoint);
+    VGA.line(160, weapoint.y, 160, weapoint.y+3, 223);
+    VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHP2, headleft, headright, 80, 120);
+}
+void SCCockpit::RenderSpeed() {
+    std::vector<Point2D> speed_band_roll;
+    speed_band_roll.reserve(30);
+    for (int i = 0; i < 150; i++) {
+        Point2D p;
+        p.x = 0;
+        p.y = i * 10;
+        speed_band_roll.push_back(p);
+    }
+    int cpt_speed = 0;
+    for (auto sp : speed_band_roll) {
+        Point2D p = sp;
+        p.x = 118;
+        p.y = (29 + this->hud->small_hud->ASPD->SHAP->GetHeight() / 2) + p.y - (int)this->speed;
+        if (p.y > 30 && p.y < 29 + this->hud->small_hud->ASPD->SHAP->GetHeight()) {
+            VGA.DrawText(this->font, &p, (char *)std::to_string(cpt_speed).c_str(), 0, 0, 3, 2, 2);
+        }
+        if (cpt_speed % 5 == 0) {
+            if (p.y > 10 && p.y < 29 + this->hud->small_hud->ASPD->SHAP->GetHeight()) {
+                Point2D speed = {160 - 30, 50 - 20};
+                speed.y = p.y;
+                this->hud->small_hud->ASPD->SHAP->SetPosition(&speed);
+                VGA.DrawShapeWithBox(this->hud->small_hud->ASPD->SHAP, 160 - 30, 160 + 30, 20,
+                                        15 + this->hud->small_hud->ASPD->SHAP->GetHeight());
+            }
+        }
+        cpt_speed += 10;
+    }
+
+    Point2D speed_text = {125, 35 + this->hud->small_hud->ASPD->SHAP->GetHeight()};
+    VGA.DrawText(this->font, &speed_text, (char *)std::to_string(this->speed).c_str(), 0, 0, 3, 2, 2);
+    Point2D throttle_text = {125, speed_text.y + 5};
+    VGA.DrawText(this->font, &throttle_text, (char *)std::to_string(this->throttle).c_str(), 0, 0, 3, 2, 2);
+    Point2D flaps = {125, throttle_text.y + 5};
+    if (this->flaps) {
+        VGA.DrawText(this->font, &flaps, "FLAPS", 0, 0, 5, 2, 2);
+    }
+}
+/**
  * SCCockpit::RenderHudHorizonLinesSmall
  *
  * Renders the horizon lines of the Heads-Up Display (HUD) in the lower
@@ -151,6 +321,14 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
     }
 }
 
+void SCCockpit::RenderMFDS(Point2D mfds) {
+    
+    this->cockpit->MONI.SHAP.SetPosition(&mfds);
+    for (int i = 0; i < this->cockpit->MONI.SHAP.GetHeight(); i++) {
+        VGA.line(mfds.x, mfds.y + i, mfds.x + this->cockpit->MONI.SHAP.GetWidth()-1, mfds.y + i, 0);
+    }
+    VGA.DrawShape(&this->cockpit->MONI.SHAP);
+}
 void SCCockpit::RenderTargetWithCam() {
     if (this->target != nullptr ) {
         Vector3D campos = this->cam->GetPosition();
@@ -203,150 +381,31 @@ void SCCockpit::Render(int face) {
         VGA.DrawShape(this->cockpit->ARTP.GetShape(face));
         if (face == 0) {
             this->RenderHudHorizonLinesSmall();
-
-            Point2D alti_arrow = {160 + 25, 50 - 20};
-
-            std::vector<Point2D> alti_band_roll;
-            alti_band_roll.reserve(100);
-            for (int i = 0; i < 100; i++) {
-                Point2D p;
-                p.x = 0;
-                p.y = i * 10;
-                alti_band_roll.push_back(p);
+            this->RenderAltitude();
+            this->RenderSpeed();
+            this->RenderHeading();
+            if (this->target != this->player) {
+                this->RenderTargetWithCam();
             }
-            int cpt = 0;
-            for (auto p : alti_band_roll) {
-                Point2D p2 = p;
-                p2.x = 194;
-                p2.y = (29 + this->hud->small_hud->ALTI->SHAP->GetHeight() / 2) + p.y - (int) (this->altitude / 100);
-                if (p2.y > 30 && p2.y < 29 + this->hud->small_hud->ALTI->SHAP->GetHeight()) {
-                    VGA.DrawText(this->font, &p2, (char *)std::to_string(cpt / 10.0f).c_str(), 0, 0, 3, 2, 2);
-                }
-                cpt += 10;
-                Point2D alti = {160 + 30, 50 - 20};
-                alti.y = p2.y;
-                if (p2.y > 10 && p2.y < 29 + this->hud->small_hud->ALTI->SHAP->GetHeight()) {
-                    this->hud->small_hud->ALTI->SHAP->SetPosition(&alti);
-                    VGA.DrawShapeWithBox(this->hud->small_hud->ALTI->SHAP, 160 - 30, 160 + 40, 20,
-                                         15 + this->hud->small_hud->ALTI->SHAP->GetHeight());
-                }
-            }
-            Point2D alti_text = {160 + 25, 35 + this->hud->small_hud->ALTI->SHAP->GetHeight()};
-            VGA.DrawText(this->font, &alti_text, (char *)std::to_string(this->altitude).c_str(), 0, 0, 5, 2, 2);
-            std::vector<Point2D> speed_band_roll;
-            speed_band_roll.reserve(30);
-            for (int i = 0; i < 150; i++) {
-                Point2D p;
-                p.x = 0;
-                p.y = i * 10;
-                speed_band_roll.push_back(p);
-            }
-            int cpt_speed = 0;
-            for (auto sp : speed_band_roll) {
-                Point2D p = sp;
-                p.x = 118;
-                p.y = (29 + this->hud->small_hud->ASPD->SHAP->GetHeight() / 2) + p.y - (int)this->speed;
-                if (p.y > 30 && p.y < 29 + this->hud->small_hud->ASPD->SHAP->GetHeight()) {
-                    VGA.DrawText(this->font, &p, (char *)std::to_string(cpt_speed).c_str(), 0, 0, 3, 2, 2);
-                }
-                if (cpt_speed % 5 == 0) {
-                    if (p.y > 10 && p.y < 29 + this->hud->small_hud->ASPD->SHAP->GetHeight()) {
-                        Point2D speed = {160 - 30, 50 - 20};
-                        speed.y = p.y;
-                        this->hud->small_hud->ASPD->SHAP->SetPosition(&speed);
-                        VGA.DrawShapeWithBox(this->hud->small_hud->ASPD->SHAP, 160 - 30, 160 + 30, 20,
-                                             15 + this->hud->small_hud->ASPD->SHAP->GetHeight());
-                    }
-                }
-                cpt_speed += 10;
-            }
-
-            Point2D speed_text = {125, 35 + this->hud->small_hud->ASPD->SHAP->GetHeight()};
-            VGA.DrawText(this->font, &speed_text, (char *)std::to_string(this->speed).c_str(), 0, 0, 3, 2, 2);
-            Point2D throttle_text = {125, speed_text.y + 5};
-            VGA.DrawText(this->font, &throttle_text, (char *)std::to_string(this->throttle).c_str(), 0, 0, 3, 2, 2);
-            Point2D flaps = {125, throttle_text.y + 5};
-            if (this->flaps) {
-                VGA.DrawText(this->font, &flaps, "FLAPS", 0, 0, 5, 2, 2);
-            }
-
-            Point2D gear = {160 + 25, alti_text.y + 5};
-            if (this->gear) {
-                VGA.DrawText(this->font, &gear, "GEARS", 0, 0, 5, 2, 2);
-            }
-            Point2D break_text = {160 + 25, gear.y + 5};
-            if (this->airbrake) {
-                VGA.DrawText(this->font, &break_text, "BREAKS", 0, 0, 6, 2, 2);
-            }
-
-            Point2D heading_pos = {140, 86};
-            this->hud->small_hud->HEAD->SHAP->SetPosition(&heading_pos);
-
-            std::vector<Point2D> heading_points;
-            heading_points.reserve(36);
-            for (int i = 0; i < 36; i++) {
-                Point2D p;
-                p.x = 432 - i * 12;
-                p.y = heading_pos.y + 7;
-                heading_points.push_back(p);
-            }
-            int headcpt = 0;
-            int pixelcpt = 0;
-            int headleft = 160 - 24;
-            int headright = 160 + 24;
-            for (auto p : heading_points) {
-                Point2D hp = p;
-                hp.x = hp.x - (int)(this->heading * 1.2) + 160;
-
-                if (hp.x < 0) {
-                    hp.x += 432;
-                }
-                if (hp.x > 432) {
-                    hp.x -= 432;
-                }
-                if (hp.x > headleft && hp.x < headright) {
-                    Point2D txt_pos = hp;
-                    int toprint = headcpt;
-                    if (toprint == 36) {
-                        toprint = 0;
-                    }
-                    VGA.DrawText(this->font, &txt_pos, (char *)std::to_string(toprint).c_str(), 0, 0, 3, 2, 2);
-                }
-                if (headcpt % 3 == 0) {
-                    Point2D headspeed;
-                    headspeed.x = hp.x - 6;
-                    headspeed.y = heading_pos.y;
-                    this->hud->small_hud->HEAD->SHAP->SetPosition(&headspeed);
-                    VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHAP, headleft, headright, 80, 120);
-                }
-                headcpt += 1;
-            }
-            Vector2D weapoint_direction = {this->weapoint_coords.x-this->player->x, this->weapoint_coords.y-this->player->y};
-            float weapoint_azimut = (atan2f((float) weapoint_direction.y, (float) weapoint_direction.x) * 180.0f / (float)M_PI);
-            Point2D weapoint = {0, heading_pos.y-3};
-            
-            weapoint_azimut -= 360;
-            weapoint_azimut += 90;
-            if (weapoint_azimut > 360) {
-                weapoint_azimut -= 360;
-            }
-            while (weapoint_azimut < 0) {
-                weapoint_azimut += 360;
-            }
-            weapoint.x = weapoint.x+(int) (weapoint_azimut*1.2f) -(int) ((360-this->heading) * 1.2f) + 160;
-            if (weapoint.x < 0) {
-                weapoint.x += 432;
-            }
-            if (weapoint.x > 432) {
-                weapoint.x -= 432;
-            }
-            
-            
-            this->hud->small_hud->HEAD->SHP2->SetPosition(&weapoint);
-            VGA.line(160, weapoint.y, 160, weapoint.y+3, 223);
-            VGA.DrawShapeWithBox(this->hud->small_hud->HEAD->SHP2, headleft, headright, 80, 120);
-            this->RenderTargetWithCam();
             VGA.plot_pixel(161, 50, 223);
+
+            
+            Point2D pmfd_right = {0, 200-this->cockpit->MONI.SHAP.GetHeight()};
+            this->RenderMFDS(pmfd_right);
+            pmfd_right.x += this->cockpit->MONI.SHAP.GetWidth()/2 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth()/2;   
+            pmfd_right.y += this->cockpit->MONI.SHAP.GetHeight()/2 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetHeight()/2;
+            this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->SetPosition(&pmfd_right);
+
+            if (VGA.DrawShape(this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0))) {
+                printf("error\n");
+            };
+            Point2D pmfd_left = {320-this->cockpit->MONI.SHAP.GetWidth(), 200-this->cockpit->MONI.SHAP.GetHeight()};
+            
+            this->RenderMFDS(pmfd_left);
+            pmfd_left.x += this->cockpit->MONI.SHAP.GetWidth()/2 - this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(3)->GetWidth()/2;   
+            pmfd_left.y += this->cockpit->MONI.SHAP.GetHeight()/2 - this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(3)->GetHeight()/2;
+            this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(3)->SetPosition(&pmfd_left);
+            VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(3));
         }
         VGA.VSync();
         VGA.SwithBuffers();

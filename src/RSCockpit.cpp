@@ -207,8 +207,10 @@ void RSCockpit::parseMONI_MFDS_AARD_INFO(uint8_t* data, size_t size) {
 void RSCockpit::parseMONI_MFDS_AARD_SHAP(uint8_t* data, size_t size) {
 	uint8_t *shape_data;
 	shape_data = (uint8_t*) malloc(size);
-	memcpy(shape_data, data+4, size-4);
-    this->MONI.MFDS.AARD.SHAP.Init(shape_data, size);
+	memcpy(shape_data, data, size);
+    PakArchive* pak = new PakArchive();
+    pak->InitFromRAM("AARD",shape_data, size-1);
+    this->MONI.MFDS.AARD.ARTS.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseMONI_MFDS_AGRD(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
@@ -223,8 +225,10 @@ void RSCockpit::parseMONI_MFDS_AGRD_INFO(uint8_t* data, size_t size) {
 void RSCockpit::parseMONI_MFDS_AGRD_SHAP(uint8_t* data, size_t size) {
 	uint8_t *shape_data;
 	shape_data = (uint8_t*) malloc(size);
-	memcpy(shape_data, data+4, size);
-    this->MONI.MFDS.AGRD.SHAP.Init(shape_data, size);
+	memcpy(shape_data, data, size);
+    PakArchive* pak = new PakArchive();
+    pak->InitFromRAM("AGRD",shape_data, size-1);
+    this->MONI.MFDS.AGRD.ARTS.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseMONI_MFDS_GCAM(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
@@ -239,8 +243,10 @@ void RSCockpit::parseMONI_MFDS_GCAM_INFO(uint8_t* data, size_t size) {
 void RSCockpit::parseMONI_MFDS_GCAM_SHAP(uint8_t* data, size_t size) {
 	uint8_t *shape_data;
 	shape_data = (uint8_t*) malloc(size);
-	memcpy(shape_data, data+4, size);
-    this->MONI.MFDS.GCAM.SHAP.Init(shape_data, size);
+	memcpy(shape_data, data, size);
+    PakArchive* pak = new PakArchive();
+    pak->InitFromRAM("GCAM",shape_data, size);
+    this->MONI.MFDS.GCAM.ARTS.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseMONI_MFDS_WEAP(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
@@ -255,8 +261,10 @@ void RSCockpit::parseMONI_MFDS_WEAP_INFO(uint8_t* data, size_t size) {
 void RSCockpit::parseMONI_MFDS_WEAP_SHAP(uint8_t* data, size_t size) {
 	uint8_t *shape_data;
 	shape_data = (uint8_t*) malloc(size);
-	memcpy(shape_data, data+4, size);
-    this->MONI.MFDS.WEAP.SHAP.Init(shape_data, size);
+	memcpy(shape_data, data, size);
+    PakArchive* pak = new PakArchive();
+    pak->InitFromRAM("WEAP",shape_data, size);
+    this->MONI.MFDS.WEAP.ARTS.InitFromSubPakEntry(pak);
 }
 
 void RSCockpit::parseMONI_MFDS_DAMG(uint8_t* data, size_t size) {
@@ -272,8 +280,10 @@ void RSCockpit::parseMONI_MFDS_DAMG_INFO(uint8_t* data, size_t size) {
 void RSCockpit::parseMONI_MFDS_DAMG_SHAP(uint8_t* data, size_t size) {
 	uint8_t *shape_data;
 	shape_data = (uint8_t*) malloc(size);
-	memcpy(shape_data, data+4, size);
-    this->MONI.MFDS.DAMG.SHAP.Init(shape_data, size);
+	memcpy(shape_data, data, size);
+    PakArchive* pak = new PakArchive();
+    pak->InitFromRAM("DAMG",shape_data, size);
+    this->MONI.MFDS.DAMG.ARTS.InitFromSubPakEntry(pak);
 }
 /**
  * @brief Parse an IFF MONI_INST chunk
