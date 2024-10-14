@@ -26,8 +26,10 @@ private:
     void RenderHeading();
     void RenderSpeed();
     void RenderMFDS(Point2D mfds);
+    void RenderMFDSWeapon(Point2D pmfd_right);
+    void RenderMFDSRadar(Point2D pmfd_left);
     RSFont *font;
-    
+    RSFont *big_font;
 public:
     RSCockpit* cockpit;
     RSHud* hud;

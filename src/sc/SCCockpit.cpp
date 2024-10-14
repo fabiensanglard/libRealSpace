@@ -55,6 +55,12 @@ void SCCockpit::Init() {
     pak->InitFromRAM("HUDFONT", fontdef->data, fontdef->size);
     this->font = new RSFont();
     this->font->InitFromPAK(pak);
+
+    TreEntry *bigfontdef = Assets.tres[AssetManager::TRE_MISC]->GetEntryByName("..\\..\\DATA\\FONTS\\HUDFONT.SHP");
+    PakArchive *bigpak = new PakArchive();
+    bigpak->InitFromRAM("HUDFONT", bigfontdef->data, bigfontdef->size);
+    this->big_font = new RSFont();
+    this->big_font->InitFromPAK(bigpak);
 }
 /**
  * SCCockpit::RenderAltitude
@@ -356,6 +362,69 @@ void SCCockpit::RenderTargetWithCam() {
         }
     }
 }
+void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
+    this->RenderMFDS(pmfd_right);
+    Point2D pmfd_right_center = {pmfd_right.x + this->cockpit->MONI.SHAP.GetWidth() / 2,
+                                 pmfd_right.y + this->cockpit->MONI.SHAP.GetHeight() / 2};
+    Point2D pmfd_right_weapon = {pmfd_right_center.x - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
+                                 pmfd_right_center.y - 10 -
+                                     this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetHeight() / 2};
+    this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->SetPosition(&pmfd_right_weapon);
+    VGA.DrawShape(this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0));
+    for (int i = 0; i < 4; i++) {
+        Point2D pmfd_right_weapon_hp = {
+            pmfd_right_center.x - 15 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetWidth() / 2 - i * 9,
+            pmfd_right_center.y - 18 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetHeight() / 2 + i * 9};
+        this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->SetPosition(&pmfd_right_weapon_hp);
+        VGA.DrawShape(this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1));
+        Point2D pmfd_right_weapon_hp_text = {
+            pmfd_right_weapon_hp.x + this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetWidth() / 2 + 1,
+            pmfd_right_weapon_hp.y + this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetHeight() + 6};
+        VGA.DrawText(this->big_font, &pmfd_right_weapon_hp_text, (char *)std::to_string(i).c_str(), 0, 0, 3, 2, 2);
+
+        Point2D pmfd_right_weapon_hp_left = {
+            pmfd_right_center.x + 13 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetWidth() / 2 + i * 9,
+            pmfd_right_center.y - 18 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetHeight() / 2 + i * 9};
+        this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->SetPosition(&pmfd_right_weapon_hp_left);
+        VGA.DrawShape(this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1));
+        Point2D pmfd_right_weapon_hp_text_left = {
+            pmfd_right_weapon_hp_left.x + this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetWidth() / 2 - 1,
+            pmfd_right_weapon_hp_left.y + this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetHeight() + 6};
+        VGA.DrawText(this->big_font, &pmfd_right_weapon_hp_text_left, (char *)std::to_string(i).c_str(), 0, 0, 3, 2, 2);
+    }
+
+    Point2D pmfd_right_weapon_gun{pmfd_right_weapon.x - 8 +
+                                      this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
+                                  pmfd_right_weapon.y + 6};
+    VGA.DrawText(this->big_font, &pmfd_right_weapon_gun, "1000", 0, 0, 4, 2, 2);
+
+    Point2D pmfd_right_weapon_radar{pmfd_right_weapon.x, pmfd_right_weapon.y + 5};
+    VGA.DrawText(this->big_font, &pmfd_right_weapon_radar, "NORM", 0, 0, 4, 2, 2);
+
+    Point2D pmfd_right_weapon_selected{pmfd_right_weapon.x + 12 +
+                                           this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
+                                       pmfd_right_weapon.y + 5};
+    VGA.DrawText(this->big_font, &pmfd_right_weapon_selected, "GUN", 0, 0, 4, 2, 2);
+
+    Point2D pmfd_right_weapon_chaff{pmfd_right_weapon.x - 7 +
+                                        this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
+                                    pmfd_right_weapon.y + 4 * 9};
+    VGA.DrawText(this->big_font, &pmfd_right_weapon_chaff, "C:30", 0, 0, 4, 2, 2);
+
+    Point2D pmfd_right_weapon_flare{pmfd_right_weapon.x - 7 +
+                                        this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
+                                    pmfd_right_weapon.y + 5 * 9};
+    VGA.DrawText(this->big_font, &pmfd_right_weapon_flare, "F:30", 0, 0, 4, 2, 2);
+}
+void SCCockpit::RenderMFDSRadar(Point2D pmfd_left) {
+    this->RenderMFDS(pmfd_left);
+    pmfd_left.x +=
+        -5 + this->cockpit->MONI.SHAP.GetWidth() / 2 - this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4)->GetWidth() / 2;
+    pmfd_left.y +=
+        this->cockpit->MONI.SHAP.GetHeight() / 2 - this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4)->GetHeight() / 2;
+    this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4)->SetPosition(&pmfd_left);
+    VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4));
+}
 /**
  * Render the cockpit in its current state.
  *
@@ -384,69 +453,10 @@ void SCCockpit::Render(int face) {
             VGA.plot_pixel(161, 50, 223);
 
             Point2D pmfd_right = {0, 200 - this->cockpit->MONI.SHAP.GetHeight()};
-            Point2D pmfd_right_center = {pmfd_right.x + this->cockpit->MONI.SHAP.GetWidth() / 2,
-                                         pmfd_right.y + this->cockpit->MONI.SHAP.GetHeight() / 2};
-            this->RenderMFDS(pmfd_right);
-
-            Point2D pmfd_right_weapon = {
-                pmfd_right_center.x - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
-                pmfd_right_center.y - 10 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetHeight() / 2};
-            this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->SetPosition(&pmfd_right_weapon);
-            VGA.DrawShape(this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0));
-            for (int i = 0; i < 4; i++) {
-                Point2D pmfd_right_weapon_hp = {
-                    pmfd_right_center.x - 15 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetWidth() / 2 - i * 9,
-                    pmfd_right_center.y - 18 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetHeight() / 2 + i * 9};
-                this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->SetPosition(&pmfd_right_weapon_hp);
-                VGA.DrawShape(this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1));
-                Point2D pmfd_right_weapon_hp_text = {
-                    pmfd_right_weapon_hp.x + this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetWidth() / 2 + 1,
-                    pmfd_right_weapon_hp.y + this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetHeight() + 6};
-                VGA.DrawText(this->font, &pmfd_right_weapon_hp_text, (char *)std::to_string(i).c_str(), 0, 0, 3, 2, 2);
-
-                Point2D pmfd_right_weapon_hp_left = {
-                    pmfd_right_center.x + 13 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetWidth() / 2 + i * 9,
-                    pmfd_right_center.y - 18 - this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetHeight() / 2 + i * 9};
-                this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->SetPosition(&pmfd_right_weapon_hp_left);
-                VGA.DrawShape(this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1));
-                Point2D pmfd_right_weapon_hp_text_left = {
-                    pmfd_right_weapon_hp_left.x + this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetWidth() / 2 - 1,
-                    pmfd_right_weapon_hp_left.y + this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(1)->GetHeight() + 6};
-                VGA.DrawText(this->font, &pmfd_right_weapon_hp_text_left, (char *)std::to_string(i).c_str(), 0, 0, 3, 2, 2);
-            }
-            
-            Point2D pmfd_right_weapon_gun{pmfd_right_weapon.x - 7 +
-                                              this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
-                                          pmfd_right_weapon.y + 5};
-            VGA.DrawText(this->font, &pmfd_right_weapon_gun, "1000", 0, 0, 4, 2, 2);
-
-            Point2D pmfd_right_weapon_radar{pmfd_right_weapon.x, pmfd_right_weapon.y + 5};
-            VGA.DrawText(this->font, &pmfd_right_weapon_radar, "NORM", 0, 0, 4, 2, 2);
-
-            Point2D pmfd_right_weapon_selected{pmfd_right_weapon.x + 12 +
-                                                   this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
-                                               pmfd_right_weapon.y + 5};
-            VGA.DrawText(this->font, &pmfd_right_weapon_selected, "GUN", 0, 0, 4, 2, 2);
-
-            Point2D pmfd_right_weapon_chaff{pmfd_right_weapon.x - 7 +
-                                                this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
-                                            pmfd_right_weapon.y + 4 * 9};
-            VGA.DrawText(this->font, &pmfd_right_weapon_chaff, "C:30", 0, 0, 4, 2, 2);
-
-            Point2D pmfd_right_weapon_flare{pmfd_right_weapon.x - 7 +
-                                                this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
-                                            pmfd_right_weapon.y + 5 * 9};
-            VGA.DrawText(this->font, &pmfd_right_weapon_flare, "F:30", 0, 0, 4, 2, 2);
 
             Point2D pmfd_left = {320 - this->cockpit->MONI.SHAP.GetWidth(), 200 - this->cockpit->MONI.SHAP.GetHeight()};
-
-            this->RenderMFDS(pmfd_left);
-            pmfd_left.x += this->cockpit->MONI.SHAP.GetWidth() / 2 -
-                           this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(3)->GetWidth() / 2;
-            pmfd_left.y += this->cockpit->MONI.SHAP.GetHeight() / 2 -
-                           this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(3)->GetHeight() / 2;
-            this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(3)->SetPosition(&pmfd_left);
-            VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(3));
+            this->RenderMFDSWeapon(pmfd_left);
+            this->RenderMFDSRadar(pmfd_right);
         }
         VGA.VSync();
         VGA.SwithBuffers();
