@@ -50,6 +50,9 @@ public:
 
     MISN_PART *target;
     MISN_PART *player;
+
+    std::vector<MISN_PART *> parts;
+
     Camera *cam;
     Vector2D weapoint_coords;
 

@@ -417,13 +417,36 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
     VGA.DrawText(this->big_font, &pmfd_right_weapon_flare, "F:30", 0, 0, 4, 2, 2);
 }
 void SCCockpit::RenderMFDSRadar(Point2D pmfd_left) {
+    Point2D pmfd_center = {
+        pmfd_left.x + this->cockpit->MONI.SHAP.GetWidth() / 2,
+        pmfd_left.y + this->cockpit->MONI.SHAP.GetHeight() / 2,
+    };
     this->RenderMFDS(pmfd_left);
     pmfd_left.x +=
         -5 + this->cockpit->MONI.SHAP.GetWidth() / 2 - this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4)->GetWidth() / 2;
     pmfd_left.y +=
         this->cockpit->MONI.SHAP.GetHeight() / 2 - this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4)->GetHeight() / 2;
     this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4)->SetPosition(&pmfd_left);
-    VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4));
+    //VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4));
+
+    Vector2D center = {this->player->x, -this->player->y};
+    for (auto parts : this->parts) {
+        if (parts == this->player) {
+            continue;
+        }
+        Vector2D part = {parts->x, parts->y};
+        Vector2D direction = {center.x-part.x, center.y-part.y};
+
+        float distance = sqrtf(direction.x * direction.x + direction.y * direction.y);
+        if (distance < 10000) {
+            float scale = 30.0f / (10000.0f);
+            Point2D p = {pmfd_center.x + direction.x * scale, pmfd_center.y + direction.y * scale};
+            if (p.x > pmfd_left.x && p.x < pmfd_left.x + this->cockpit->MONI.SHAP.GetWidth() &&
+                p.y > pmfd_left.y && p.y < pmfd_left.y + this->cockpit->MONI.SHAP.GetHeight()) {
+                    VGA.plot_pixel(p.x, p.y, 223);
+                }
+        }
+    }
 }
 /**
  * Render the cockpit in its current state.

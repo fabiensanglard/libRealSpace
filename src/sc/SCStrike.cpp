@@ -365,7 +365,7 @@ void SCStrike::RunFrame(void) {
     this->cockpit->player = this->player_plane->object;
     this->cockpit->weapoint_coords.x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis;
     this->cockpit->weapoint_coords.y = -this->missionObj->mission_data.areas[this->nav_point_id]->YAxis;
-
+    this->cockpit->parts = this->missionObj->mission_data.parts;
     switch (this->camera_mode) {
 
     case View::FRONT: {
