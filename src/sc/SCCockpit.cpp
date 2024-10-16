@@ -14,6 +14,11 @@ Point2D rotateAroundPoint(Point2D point, Point2D center, float angle) {
     float newy = x * sin(angle) + y * cos(angle) + center.y;
     return {(int)newx, (int)newy};
 }
+Point2D rotate(Point2D point, float angle) {
+    float newx = point.x * cos(angle) - point.y * sin(angle);
+    float newy = point.x * sin(angle) + point.y * cos(angle);
+    return {(int)newx, (int)newy};
+}
 SCCockpit::SCCockpit() {}
 SCCockpit::~SCCockpit() {}
 /**
@@ -430,21 +435,38 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left) {
     //VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4));
 
     Vector2D center = {this->player->x, -this->player->y};
+    VGA.line(pmfd_center.x-30, pmfd_center.y-30, pmfd_center.x+30, pmfd_center.y-30, 223);
+    VGA.line(pmfd_center.x-30, pmfd_center.y+30, pmfd_center.x+30, pmfd_center.y+30, 223);
+    VGA.line(pmfd_center.x-30, pmfd_center.y-30, pmfd_center.x-30, pmfd_center.y+30, 223);
+    VGA.line(pmfd_center.x+30, pmfd_center.y-30, pmfd_center.x+30, pmfd_center.y+30, 223);
+    
     for (auto parts : this->parts) {
         if (parts == this->player) {
             continue;
         }
         Vector2D part = {parts->x, parts->y};
-        Vector2D direction = {center.x-part.x, center.y-part.y};
+
+        Vector2D transposed = {part.x-center.x, part.y-center.y};
+        // rotate part according to player heading
+        int heading = 360-this->heading;
+        if (heading < 0) {
+            heading += 360;
+        }
+        if (heading > 360) {
+            heading -= 360;
+        }
+        Vector2D partr = rotate(transposed, -heading/180.0f*M_PI);
+        Vector2D direction = transposed;
 
         float distance = sqrtf(direction.x * direction.x + direction.y * direction.y);
         if (distance < 10000) {
-            float scale = 30.0f / (10000.0f);
+            float scale = 60.0f/10000.0f;
+            
             Point2D p = {pmfd_center.x + direction.x * scale, pmfd_center.y + direction.y * scale};
             if (p.x > pmfd_left.x && p.x < pmfd_left.x + this->cockpit->MONI.SHAP.GetWidth() &&
                 p.y > pmfd_left.y && p.y < pmfd_left.y + this->cockpit->MONI.SHAP.GetHeight()) {
                     VGA.plot_pixel(p.x, p.y, 223);
-                }
+            }
         }
     }
 }
