@@ -432,13 +432,9 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left) {
     pmfd_left.y +=
         this->cockpit->MONI.SHAP.GetHeight() / 2 - this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4)->GetHeight() / 2;
     this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4)->SetPosition(&pmfd_left);
-    //VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4));
+    VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4));
 
     Vector2D center = {this->player->x, -this->player->y};
-    VGA.line(pmfd_center.x-30, pmfd_center.y-30, pmfd_center.x+30, pmfd_center.y-30, 223);
-    VGA.line(pmfd_center.x-30, pmfd_center.y+30, pmfd_center.x+30, pmfd_center.y+30, 223);
-    VGA.line(pmfd_center.x-30, pmfd_center.y-30, pmfd_center.x-30, pmfd_center.y+30, 223);
-    VGA.line(pmfd_center.x+30, pmfd_center.y-30, pmfd_center.x+30, pmfd_center.y+30, 223);
     
     for (auto parts : this->parts) {
         if (parts == this->player) {
@@ -446,26 +442,27 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left) {
         }
         Vector2D part = {parts->x, parts->y};
 
-        Vector2D transposed = {part.x-center.x, part.y-center.y};
         // rotate part according to player heading
-        int heading = 360-this->heading;
+        int heading = 180-this->heading;
         if (heading < 0) {
             heading += 360;
         }
         if (heading > 360) {
             heading -= 360;
         }
-        Vector2D partr = rotate(transposed, -heading/180.0f*M_PI);
-        Vector2D direction = transposed;
+        Vector2D roa = rotateAroundPoint(part, center, heading/180.0f*(float)M_PI);
+        Vector2D roa_dir = {roa.x-center.x, roa.y-center.y};
 
-        float distance = sqrtf(direction.x * direction.x + direction.y * direction.y);
+        float distance = sqrtf((float) (roa_dir.x * roa_dir.x) + (float) (roa_dir.y * roa_dir.y));
         if (distance < 10000) {
             float scale = 60.0f/10000.0f;
             
-            Point2D p = {pmfd_center.x + direction.x * scale, pmfd_center.y + direction.y * scale};
-            if (p.x > pmfd_left.x && p.x < pmfd_left.x + this->cockpit->MONI.SHAP.GetWidth() &&
-                p.y > pmfd_left.y && p.y < pmfd_left.y + this->cockpit->MONI.SHAP.GetHeight()) {
-                    VGA.plot_pixel(p.x, p.y, 223);
+            Point2D p2 = {pmfd_center.x + roa_dir.x * scale, pmfd_center.y + roa_dir.y * scale};
+            if (p2.x > pmfd_left.x && p2.x < pmfd_left.x + this->cockpit->MONI.SHAP.GetWidth() &&
+                p2.y > pmfd_left.y && p2.y < pmfd_left.y + this->cockpit->MONI.SHAP.GetHeight()) {
+                    //VGA.plot_pixel(p2.x, p2.y, 223);
+                    this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(0)->SetPosition(&p2);
+                    VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(0));
             }
         }
     }
