@@ -460,9 +460,13 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left) {
             Point2D p2 = {pmfd_center.x + roa_dir.x * scale, pmfd_center.y + roa_dir.y * scale};
             if (p2.x > pmfd_left.x && p2.x < pmfd_left.x + this->cockpit->MONI.SHAP.GetWidth() &&
                 p2.y > pmfd_left.y && p2.y < pmfd_left.y + this->cockpit->MONI.SHAP.GetHeight()) {
-                    //VGA.plot_pixel(p2.x, p2.y, 223);
                     this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(0)->SetPosition(&p2);
                     VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(0));
+                    if (parts == this->target) {
+                        Point2D p3 = {p2.x - 2, p2.y - 1};
+                        this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(2)->SetPosition(&p3);
+                        VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(2));
+                    }
             }
         }
     }
