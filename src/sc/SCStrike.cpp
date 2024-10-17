@@ -191,6 +191,12 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_b:
             this->player_plane->SetSpoilers();
             break;
+        case SDLK_w:
+            this->cockpit->show_weapons = !this->cockpit->show_weapons;
+            break;
+        case SDLK_r:
+            this->cockpit->show_radars = !this->cockpit->show_radars;
+            break;
         case SDLK_y:
             if (this->camera_mode != View::EYE_ON_TARGET) {
                 this->camera_mode = View::EYE_ON_TARGET;

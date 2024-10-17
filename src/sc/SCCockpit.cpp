@@ -421,7 +421,7 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
                                     pmfd_right_weapon.y + 5 * 9};
     VGA.DrawText(this->big_font, &pmfd_right_weapon_flare, "F:30", 0, 0, 4, 2, 2);
 }
-void SCCockpit::RenderMFDSRadar(Point2D pmfd_left) {
+void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode) {
     Point2D pmfd_center = {
         pmfd_left.x + this->cockpit->MONI.SHAP.GetWidth() / 2,
         pmfd_left.y + this->cockpit->MONI.SHAP.GetHeight() / 2,
@@ -454,10 +454,10 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left) {
         Vector2D roa_dir = {roa.x-center.x, roa.y-center.y};
 
         float distance = sqrtf((float) (roa_dir.x * roa_dir.x) + (float) (roa_dir.y * roa_dir.y));
-        if (distance < 10000) {
-            float scale = 60.0f/10000.0f;
+        if (distance < range) {
+            float scale = 60.0f/range;
             
-            Point2D p2 = {pmfd_center.x + roa_dir.x * scale, pmfd_center.y + roa_dir.y * scale};
+            Point2D p2 = {pmfd_center.x + (int) (roa_dir.x * scale), pmfd_center.y + (int) (roa_dir.y * scale)};
             if (p2.x > pmfd_left.x && p2.x < pmfd_left.x + this->cockpit->MONI.SHAP.GetWidth() &&
                 p2.y > pmfd_left.y && p2.y < pmfd_left.y + this->cockpit->MONI.SHAP.GetHeight()) {
                     this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(0)->SetPosition(&p2);
@@ -499,10 +499,27 @@ void SCCockpit::Render(int face) {
             VGA.plot_pixel(161, 50, 223);
 
             Point2D pmfd_right = {0, 200 - this->cockpit->MONI.SHAP.GetHeight()};
-
             Point2D pmfd_left = {320 - this->cockpit->MONI.SHAP.GetWidth(), 200 - this->cockpit->MONI.SHAP.GetHeight()};
-            this->RenderMFDSWeapon(pmfd_left);
-            this->RenderMFDSRadar(pmfd_right);
+            Point2D pmfd;
+            bool mfds = false;
+            if (this->show_radars) {
+                if (!mfds) {
+                    pmfd = pmfd_left;    
+                    mfds = true;
+                } else {
+                    pmfd = pmfd_right;
+                }
+                this->RenderMFDSRadar(pmfd, this->radar_zoom*20000.0f, 0);
+            }
+            if (this->show_weapons) {
+                if (!mfds) {
+                    pmfd = pmfd_left;    
+                    mfds = true;
+                } else {
+                    pmfd = pmfd_right;
+                }
+                this->RenderMFDSWeapon(pmfd);
+            }
         }
         VGA.VSync();
         VGA.SwithBuffers();

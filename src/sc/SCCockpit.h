@@ -27,7 +27,7 @@ private:
     void RenderSpeed();
     void RenderMFDS(Point2D mfds);
     void RenderMFDSWeapon(Point2D pmfd_right);
-    void RenderMFDSRadar(Point2D pmfd_left);
+    void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode);
     RSFont *font;
     RSFont *big_font;
 public:
@@ -46,6 +46,13 @@ public:
     bool flaps{false};
     bool airbrake{false};
 
+    bool show_radars{false};
+    bool show_weapons{false};
+    bool show_damage{false};
+    bool show_comm{false};
+    bool show_cam{false};
+
+    int radar_zoom{1};
     int throttle{0};
 
     MISN_PART *target;
