@@ -434,6 +434,13 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode) {
     this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4)->SetPosition(&pmfd_left);
     VGA.DrawShape(this->cockpit->MONI.MFDS.AARD.ARTS.GetShape(4));
 
+    Point2D pmfd_text = {
+        pmfd_left.x + 10,
+        pmfd_left.y+2,
+    };
+    VGA.PrintText(this->big_font, &pmfd_text, (char *)std::to_string(80*((float)this->radar_zoom/4.0f)).c_str(), 0, 0, 2, 2, 2);
+    VGA.PrintText(this->big_font, &pmfd_text, " AIR ", 0, 0, 5, 2, 2);
+    VGA.PrintText(this->big_font, &pmfd_text, "360", 0, 0, 3, 2, 2);
     Vector2D center = {this->player->x, -this->player->y};
     
     for (auto parts : this->parts) {
@@ -479,6 +486,12 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode) {
         pmfd_left.x + 20,
         pmfd_left.y + 20
     };
+    Point2D pfmd_title = {pmfd_text.x+12, pmfd_text.y};
+    VGA.PrintText(this->big_font, &pfmd_title, "Comm mode:", 120, 0, 10, 2, 2);
+    pfmd_title.y += 10;
+    pfmd_title.x = pmfd_left.x + 20;
+    VGA.PrintText(this->big_font, &pfmd_title, "Select frequency", 0, 0, 16, 2, 2);
+    pmfd_text.y += 20;
     if (mode == 0) {
         int cpt=1;
         for (auto ai : this->ai_planes) {
@@ -489,17 +502,22 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode) {
             if (distance < 30000) {
                 std::string name_str = std::to_string(cpt) + ". " + ai->name;
                 Point2D pfmd_entry = {pmfd_text.x, pmfd_text.y};
-                VGA.PrintText(this->big_font, &pfmd_entry, (char*) name_str.c_str(), 0, 0, (uint32_t) name_str.length(), 2, 2);
+                VGA.PrintText(this->big_font, &pfmd_entry, (char*) name_str.c_str(), 120, 0, (uint32_t) name_str.length(), 2, 2);
                 pmfd_text.y += 10;
                 cpt++;
             }
+        }
+        if (cpt==1) {
+            pfmd_title.y += 25;
+            pfmd_title.x = pmfd_left.x + 32;
+            VGA.PrintText(this->big_font, &pfmd_title, "NO RECIVER", 120, 0, 10, 2, 2);
         }
     } else if (mode > 0) {
         int cpt=1;
         for (auto asks: this->player_prof->radi.asks_vector) {
             Point2D pfmd_entry = {pmfd_text.x, pmfd_text.y};
             std::string asks_str = std::to_string(cpt) + ". " + asks;
-            VGA.PrintText(this->big_font, &pfmd_entry, (char*) asks_str.c_str(), 0, 0, (uint32_t) asks_str.length(), 2, 2);
+            VGA.PrintText(this->big_font, &pfmd_entry, (char*) asks_str.c_str(), 124, 0, (uint32_t) asks_str.length(), 2, 2);
             pmfd_text.y += 6;
             cpt++;
         }
@@ -534,7 +552,7 @@ void SCCockpit::Render(int face) {
             VGA.plot_pixel(161, 50, 223);
 
             Point2D pmfd_right = {0, 200 - this->cockpit->MONI.SHAP.GetHeight()};
-            Point2D pmfd_left = {320 - this->cockpit->MONI.SHAP.GetWidth(), 200 - this->cockpit->MONI.SHAP.GetHeight()};
+            Point2D pmfd_left = {320 - this->cockpit->MONI.SHAP.GetWidth()-1, 200 - this->cockpit->MONI.SHAP.GetHeight()};
             Point2D pmfd;
             bool mfds = false;
             if (this->show_radars) {

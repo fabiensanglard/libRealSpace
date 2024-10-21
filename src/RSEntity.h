@@ -15,6 +15,7 @@
 #include "Quaternion.h"
 #include "IffLexer.h"
 #include "RSImage.h"
+#include "IFFSaxLexer.h"
 
 #define LOD_LEVEL_MAX 0
 #define LOD_LEVEL_MED 1
@@ -140,6 +141,50 @@ private:
 	void ParseTXMP(IffChunk* chunk);
 
 
+	void parseREAL(uint8_t *data, size_t size);
+	void parseREAL_OBJT(uint8_t *data, size_t size);
+	void parseREAL_OBJT_INFO(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_SMOK(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_JINF(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_EJEC(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_SIGN(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_TRGT(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_CTRL(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_TOFF(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_LAND(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DYNM(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DYNM_DYNM(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DYNM_ORDY(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DYNM_STBL(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DYNM_ATMO(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DYNM_GRAV(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DYNM_JDYN(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_WEAP_INFO(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_WEAP_DCOY(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_WEAP_WPNS(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_WEAP_HPTS(uint8_t *data, size_t size);
+	void parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size);
+	void parseREAL_OBJT_EXTE(uint8_t *data, size_t size);
+	void parseREAL_APPR(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_INFO(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_VERT(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_DETA(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_TRIS(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_TRIS_VTRI(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_TRIS_TXMS(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_TRIS_TXMS_INFO(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size);
+	void parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size);
 
 };
 
