@@ -31,7 +31,6 @@
 
 // Simulation
 #include "SCPlane.h"
-#include "SCCockpit.h"
 #include "SCPilot.h"
 
 //Activities
@@ -40,6 +39,7 @@
 #include "SCRegister.h"
 #include "SCWildCatBase.h"
 #include "SCNavMap.h"
+#include "SCCockpit.h"
 #include "SCStrike.h"
 #include "SCObjectViewer.h"
 #include "SCDogFightMenu.h"

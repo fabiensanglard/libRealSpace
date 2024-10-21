@@ -18,7 +18,8 @@ struct RADI {
     uint16_t spch;
     RADI_INFO info;
     std::map<std::uint8_t, std::string> msgs;
-    std::map<std::uint8_t, std::string> asks;
+    std::map<std::string, std::string> asks;
+    std::vector<std::string> asks_vector;
     std::string opts;
 };
 
@@ -37,6 +38,7 @@ private:
     void parsePROF_RADI_INFO(uint8_t *data, size_t size);
     void parsePROF_RADI_OPTS(uint8_t *data, size_t size);
     void parsePROF_RADI_MSGS(uint8_t *data, size_t size);
+    void parsePROF_RADI_ASKS(uint8_t *data, size_t size);
     void parsePROF_RADI_SPCH(uint8_t *data, size_t size);
     void parsePROF__AI_(uint8_t *data, size_t size);
     void parsePROF__AI_AI(uint8_t *data, size_t size);

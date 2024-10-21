@@ -242,7 +242,7 @@ void RSVGA::circle_slow(int x,int y, int radius, uint8_t color) {
     dy=radius * sin(acos(n));
   }
 }
-void RSVGA::DrawText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
+void RSVGA::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
                      size_t interLetterSpace, size_t spaceSize) {
 
     if (text == NULL)

@@ -412,7 +412,7 @@ void SCConvPlayer::DrawText(void) {
         // Don't forget to center the text
         coo.x += pixelAvailable / 2;
 
-        VGA.DrawText(currentFrame.font, &coo, currentFrame.text, static_cast<uint32_t>(currentFrame.textColor),
+        VGA.PrintText(currentFrame.font, &coo, currentFrame.text, static_cast<uint32_t>(currentFrame.textColor),
                      static_cast<uint32_t>(cursor - currentFrame.text), static_cast<uint32_t>(lastGoodPos - cursor),
                      CONV_INTERLETTER_SPACE, CONV_SPACE_SIZE);
 
@@ -432,7 +432,7 @@ void SCConvPlayer::CheckZones() {
                     if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                         zone->OnAction();
                     Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
-                    VGA.DrawText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                    VGA.PrintText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
                                  static_cast<uint32_t>(zone->label->length()), 3, 5);
                     return ;
                 }
@@ -448,7 +448,7 @@ void SCConvPlayer::CheckZones() {
                 if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                     zone->OnAction();
                 Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
-                VGA.DrawText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                VGA.PrintText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
                              static_cast<uint32_t>(zone->label->length()), 3, 5);
 
                 return ;

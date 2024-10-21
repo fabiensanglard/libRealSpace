@@ -16,6 +16,14 @@ struct HudLine {
     Point2D end;
 };
 
+struct SCAiPlane {
+    SCPlane *plane;
+    SCPilot *pilot;
+    MISN_PART *object;
+    RSProf *ai;
+    std::string name;
+};
+
 class SCCockpit {
 private:
     VGAPalette palette;
@@ -27,7 +35,8 @@ private:
     void RenderSpeed();
     void RenderMFDS(Point2D mfds);
     void RenderMFDSWeapon(Point2D pmfd_right);
-    void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode);
+    void RenderMFDSRadar(Point2D pmfd_left, float range, int mode);
+    void RenderMFDSComm(Point2D pmfd_left, int mode);
     RSFont *font;
     RSFont *big_font;
 public:
@@ -57,9 +66,9 @@ public:
 
     MISN_PART *target;
     MISN_PART *player;
-
+    RSProf *player_prof;
     std::vector<MISN_PART *> parts;
-
+    std::vector<SCAiPlane *> ai_planes;
     Camera *cam;
     Vector2D weapoint_coords;
 

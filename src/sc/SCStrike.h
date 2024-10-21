@@ -25,12 +25,6 @@ static int mission_idx = 0;
 
 enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET };
 
-struct SCAiPlane {
-    SCPlane *plane;
-    SCPilot *pilot;
-    MISN_PART *object;
-};
-
 class SCStrike : public IActivity {
 
 public:
@@ -64,7 +58,7 @@ private:
 
     bool autopilot{false};
     SCPilot pilot;
-
+    RSProf *player_prof;
     float counter;
     uint8_t nav_point_id{0};
     uint8_t current_target{0};

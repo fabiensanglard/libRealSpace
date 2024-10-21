@@ -191,6 +191,9 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_b:
             this->player_plane->SetSpoilers();
             break;
+        case SDLK_c:
+            this->cockpit->show_comm = !this->cockpit->show_comm;
+            break;
         case SDLK_w:
             this->cockpit->show_weapons = !this->cockpit->show_weapons;
             break;
@@ -288,6 +291,8 @@ void SCStrike::SetMission(char const *missionName) {
                                                  (float)part->z, (float)-part->y);
                     aiPlane->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                     aiPlane->pilot = new SCPilot();
+                    aiPlane->ai = cast->profile;
+                    aiPlane->name = cast->actor;
 
                     if (this->area.getY((float)part->x, (float)-part->y) == part->z) {
                         aiPlane->plane->on_ground = true;
@@ -311,7 +316,9 @@ void SCStrike::SetMission(char const *missionName) {
                     aiPlane->pilot->target_speed = -20;
                     aiPlane->plane->object = part;
                     aiPlane->object = part;
-                    ai_planes.push_back(aiPlane);
+                    this->ai_planes.push_back(aiPlane);
+                } else if (cast->profile != nullptr && cast->actor == "PLAYER") {
+                    this->player_prof = cast->profile;
                 }
                 break;
             }
@@ -323,7 +330,7 @@ void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
     if (!this->pause_simu) {
         this->player_plane->Simulate();
-        for (auto aiPlane : ai_planes) {
+        for (auto aiPlane : this->ai_planes) {
             aiPlane->plane->Simulate();
             aiPlane->pilot->AutoPilot();
             Vector3D npos;
@@ -372,6 +379,8 @@ void SCStrike::RunFrame(void) {
     this->cockpit->weapoint_coords.x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis;
     this->cockpit->weapoint_coords.y = -this->missionObj->mission_data.areas[this->nav_point_id]->YAxis;
     this->cockpit->parts = this->missionObj->mission_data.parts;
+    this->cockpit->ai_planes = this->ai_planes;
+    this->cockpit->player_prof = this->player_prof;
     switch (this->camera_mode) {
 
     case View::FRONT: {
@@ -911,6 +920,18 @@ void SCStrike::RenderMenu() {
                     if (ImGui::TreeNode("MSGS")) {
                         for (auto msg : cast->profile->radi.msgs) {
                             ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("ASKS")) {
+                        for (auto msg : cast->profile->radi.asks) {
+                            ImGui::Text("- [%s]: %s", msg.first.c_str(), msg.second.c_str());
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("ASKS_VECTOR")) {
+                        for (auto msg : cast->profile->radi.asks_vector) {
+                            ImGui::Text("- %s", msg.c_str());
                         }
                         ImGui::TreePop();
                     }
