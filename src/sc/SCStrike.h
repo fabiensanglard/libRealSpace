@@ -64,6 +64,7 @@ private:
     uint8_t current_target{0};
     std::map<std::string, RSEntity *> objectCache;
     std::vector<SCAiPlane *> ai_planes;
+    int32_t mfd_timeout{0};
 };
 
 #endif /* defined(__libRealSpace__SCStrike__) */

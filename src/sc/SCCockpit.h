@@ -63,6 +63,7 @@ public:
 
     int radar_zoom{1};
     int throttle{0};
+    int comm_target{0};
 
     MISN_PART *target;
     MISN_PART *player;

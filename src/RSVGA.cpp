@@ -262,7 +262,7 @@ void RSVGA::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, siz
         int32_t lineHeight = coo->y;
         coo->y -= shape->GetHeight();
 
-        if (chartoDraw == 'p' || chartoDraw == 'y' || chartoDraw == 'g')
+        if (chartoDraw == 'p' || chartoDraw == 'y' || chartoDraw == 'g' || chartoDraw == 'q' || chartoDraw == 'j')
             coo->y += 1;
         if (chartoDraw == '\n') {
             RLEShape *sp = font->GetShapeForChar('A');

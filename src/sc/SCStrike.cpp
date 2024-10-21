@@ -72,6 +72,18 @@ void SCStrike::CheckKeyboard(void) {
         case SDL_SCANCODE_EQUALS:
             this->player_plane->SetThrottle(this->player_plane->GetThrottle() + 1);
             break;
+        case SDL_SCANCODE_LEFTBRACKET:
+            this->cockpit->radar_zoom -= 1;
+            if (this->cockpit->radar_zoom < 1) {
+                this->cockpit->radar_zoom = 1;
+            }
+            break;
+        case SDL_SCANCODE_RIGHTBRACKET:
+            this->cockpit->radar_zoom += 1;
+            if (this->cockpit->radar_zoom > 4) {
+                this->cockpit->radar_zoom = 4;
+            }
+            break;
         default:
             break;
         }
@@ -147,34 +159,134 @@ void SCStrike::CheckKeyboard(void) {
                 this->player_plane->control_stick_x = 50;
             break;
         case SDLK_1:
-            this->player_plane->SetThrottle(10);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(10);    
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 1;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_2:
-            this->player_plane->SetThrottle(20);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(20);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 2;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_3:
-            this->player_plane->SetThrottle(30);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(30);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 3;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_4:
-            this->player_plane->SetThrottle(40);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(40);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 4;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_5:
-            this->player_plane->SetThrottle(50);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(50);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 5;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_6:
-            this->player_plane->SetThrottle(60);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(60);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 6;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_7:
-            this->player_plane->SetThrottle(70);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(70);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 7;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_8:
-            this->player_plane->SetThrottle(80);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(80);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 8;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_9:
-            this->player_plane->SetThrottle(90);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(90);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 9;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_0:
-            this->player_plane->SetThrottle(100);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(100);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 10;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_MINUS:
             this->player_plane->SetThrottle(this->player_plane->GetThrottle() - 1);
@@ -193,9 +305,12 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_c:
             this->cockpit->show_comm = !this->cockpit->show_comm;
+            this->cockpit->comm_target = 0;
+            this->mfd_timeout = 400;
             break;
         case SDLK_w:
             this->cockpit->show_weapons = !this->cockpit->show_weapons;
+            this->mfd_timeout = 400;
             break;
         case SDLK_r:
             this->cockpit->show_radars = !this->cockpit->show_radars;
@@ -329,6 +444,7 @@ void SCStrike::SetMission(char const *missionName) {
 void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
     if (!this->pause_simu) {
+        this->mfd_timeout--;
         this->player_plane->Simulate();
         for (auto aiPlane : this->ai_planes) {
             aiPlane->plane->Simulate();
@@ -381,6 +497,15 @@ void SCStrike::RunFrame(void) {
     this->cockpit->parts = this->missionObj->mission_data.parts;
     this->cockpit->ai_planes = this->ai_planes;
     this->cockpit->player_prof = this->player_prof;
+
+    if (this->mfd_timeout <= 0) {
+        if (this->cockpit->show_comm) {
+            this->cockpit->show_comm = false;
+        }
+        if (this->cockpit->show_weapons) {
+            this->cockpit->show_weapons = false;
+        }
+    }
     switch (this->camera_mode) {
 
     case View::FRONT: {

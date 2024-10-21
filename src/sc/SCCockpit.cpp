@@ -480,22 +480,28 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode) {
         pmfd_left.y + 20
     };
     if (mode == 0) {
+        int cpt=1;
         for (auto ai : this->ai_planes) {
             Vector2D ai_position = {ai->object->x, ai->object->y};
             Vector2D roa_dir = {ai_position.x-center.x, ai_position.y-center.y};
 
             float distance = sqrtf((float) (roa_dir.x * roa_dir.x) + (float) (roa_dir.y * roa_dir.y));
             if (distance < 30000) {
+                std::string name_str = std::to_string(cpt) + ". " + ai->name;
                 Point2D pfmd_entry = {pmfd_text.x, pmfd_text.y};
-                VGA.PrintText(this->big_font, &pfmd_entry, (char*) ai->name.c_str(), 0, 0, ai->name.length(), 2, 2);
+                VGA.PrintText(this->big_font, &pfmd_entry, (char*) name_str.c_str(), 0, 0, (uint32_t) name_str.length(), 2, 2);
                 pmfd_text.y += 10;
+                cpt++;
             }
         }
-    } else if (mode == 1) {
+    } else if (mode > 0) {
+        int cpt=1;
         for (auto asks: this->player_prof->radi.asks_vector) {
             Point2D pfmd_entry = {pmfd_text.x, pmfd_text.y};
-            VGA.PrintText(this->font, &pfmd_entry, (char*) asks.c_str(), 0, 0, asks.length(), 2, 2);
+            std::string asks_str = std::to_string(cpt) + ". " + asks;
+            VGA.PrintText(this->big_font, &pfmd_entry, (char*) asks_str.c_str(), 0, 0, (uint32_t) asks_str.length(), 2, 2);
             pmfd_text.y += 6;
+            cpt++;
         }
     }
 }
@@ -556,7 +562,7 @@ void SCCockpit::Render(int face) {
                 } else {
                     pmfd = pmfd_right;
                 }
-                this->RenderMFDSComm(pmfd, 1);
+                this->RenderMFDSComm(pmfd, this->comm_target);
             }
         }
         VGA.VSync();
