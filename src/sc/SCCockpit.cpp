@@ -447,10 +447,13 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode) {
         if (parts == this->player) {
             continue;
         }
+        if (parts->entity->entity_type != EntityType::jet) {
+            continue;
+        }
         Vector2D part = {parts->x, parts->y};
 
         // rotate part according to player heading
-        int heading = 180-this->heading;
+        int heading = 180-(int)this->heading;
         if (heading < 0) {
             heading += 360;
         }

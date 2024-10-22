@@ -7,71 +7,70 @@
 //
 
 #pragma once
-#include <vector>
 #include <stdint.h>
+#include <vector>
 
+#include "IFFSaxLexer.h"
+#include "IffLexer.h"
 #include "Maths.h"
 #include "Matrix.h"
 #include "Quaternion.h"
-#include "IffLexer.h"
 #include "RSImage.h"
-#include "IFFSaxLexer.h"
 
 #define LOD_LEVEL_MAX 0
 #define LOD_LEVEL_MED 1
 #define LOD_LEVEL_MIN 2
 
-
-
 typedef struct MapVertex {
-	Point3D v;
+    Point3D v;
 
-	uint8_t flag;
-	uint8_t type;
-	uint8_t lowerImageID;
-	uint8_t upperImageID;
+    uint8_t flag;
+    uint8_t type;
+    uint8_t lowerImageID;
+    uint8_t upperImageID;
 
-	float color[4];
+    float color[4];
 
 } MapVertex;
 
-
-
-
 typedef struct BoudingBox {
-	Point3D min;
-	Point3D max;
+    Point3D min;
+    Point3D max;
 } BoudingBox;
 
 typedef struct UV {
-	uint8_t u;
-	uint8_t v;
+    uint8_t u;
+    uint8_t v;
 } UV;
 
 typedef struct uvxyEntry {
 
-	uint8_t triangleID;
-	uint8_t textureID;
-	UV uvs[3];
+    uint8_t triangleID;
+    uint8_t textureID;
+    UV uvs[3];
 } uvxyEntry;
 
 typedef struct Triangle {
 
-	uint8_t property;
-	uint8_t ids[3];
+    uint8_t property;
+    uint8_t ids[3];
 
-	uint8_t color;
-	uint8_t flags[3];
+    uint8_t color;
+    uint8_t flags[3];
 
 } Triangle;
 
 typedef struct Lod {
 
-	uint32_t dist;
-	uint16_t numTriangles;
-	uint16_t triangleIDs[256];
+    uint32_t dist;
+    uint16_t numTriangles;
+    uint16_t triangleIDs[256];
 } Lod;
-
+enum EntityType {
+    ground = 1,
+    jet = 2,
+    ornt = 3,
+};
 class RSImage;
 
 struct VGAPalette;
@@ -79,112 +78,88 @@ struct VGAPalette;
 class RSEntity {
 
 public:
+    std::vector<RSImage *> images;
+    std::vector<Point3D> vertices;
+    std::vector<uvxyEntry> uvs;
+    std::vector<Lod> lods;
+    std::vector<Triangle> triangles;
 
-	RSEntity();
-	~RSEntity();
+    enum Property { SC_TRANSPARENT = 0x02 };
 
-	void InitFromRAM(uint8_t* data, size_t size);
-	void InitFromIFF(IffLexer* lexer);
+    // For rendering
+    Point3D position;
+    Quaternion orientation;
 
-	void AddImage(RSImage* image);
-	size_t NumImages(void);
+    // Has the entity been sent to te GPU and is ready to be renderer.
 
-	void AddVertex(Point3D* vertex);
-	size_t NumVertice(void);
+    bool prepared{false};
 
-	void AddUV(uvxyEntry* uv);
-	size_t NumUVs(void);
+    RSEntity();
+    ~RSEntity();
 
-	void AddLod(Lod* lod);
-	size_t NumLods(void);
-
-	void AddTriangle(Triangle* triangle);
-	size_t NumTriangles(void);
-
-
-
-	std::vector<RSImage*> images;
-	std::vector<Point3D> vertices;
-	std::vector<uvxyEntry> uvs;
-	std::vector<Lod> lods;
-	std::vector<Triangle> triangles;
-
-
-	enum Property { SC_TRANSPARENT = 0x02 };
-
-	BoudingBox* GetBoudingBpx(void);
-
-
-	//For rendering
-	Point3D position;
-	Quaternion orientation;
-
-	inline bool IsPrepared(void) {
-		return this->prepared;
-	}
-
-	bool prepared;
-
+    void InitFromRAM(uint8_t *data, size_t size);
+    size_t NumImages(void);
+    size_t NumVertice(void);
+    size_t NumUVs(void);
+    size_t NumLods(void);
+    size_t NumTriangles(void);
+    inline bool IsPrepared(void) { return this->prepared; }
+    BoudingBox *GetBoudingBpx(void);
+    EntityType entity_type;
 private:
+    BoudingBox bb;
+    void CalcBoundingBox(void);
 
-	BoudingBox bb;
-	void CalcBoundingBox(void);
+    void AddImage(RSImage *image);
+    void AddVertex(Point3D *vertex);
+    void AddUV(uvxyEntry *uv);
+    void AddLod(Lod *lod);
+    void AddTriangle(Triangle *triangle);
 
-	//Has the entity been sent to te GPU and is ready to be renderer.
-
-
-	void ParseVERT(IffChunk* chunk);
-	void ParseLVL(IffChunk* chunk);
-	void ParseVTRI(IffChunk* chunk);
-	void ParseTXMS(IffChunk* chunk);
-	void ParseUVXY(IffChunk* chunk);
-	void ParseTXMP(IffChunk* chunk);
-
-
-	void parseREAL(uint8_t *data, size_t size);
-	void parseREAL_OBJT(uint8_t *data, size_t size);
-	void parseREAL_OBJT_INFO(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_SMOK(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_JINF(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_EJEC(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_SIGN(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_TRGT(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_CTRL(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_TOFF(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_LAND(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DYNM(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DYNM_DYNM(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DYNM_ORDY(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DYNM_STBL(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DYNM_ATMO(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DYNM_GRAV(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DYNM_JDYN(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_WEAP_INFO(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_WEAP_DCOY(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_WEAP_WPNS(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_WEAP_HPTS(uint8_t *data, size_t size);
-	void parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size);
-	void parseREAL_OBJT_EXTE(uint8_t *data, size_t size);
-	void parseREAL_APPR(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_INFO(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_VERT(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_DETA(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_TRIS(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_TRIS_VTRI(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_TRIS_TXMS(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_TRIS_TXMS_INFO(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size);
-	void parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size);
-
+    void parseREAL(uint8_t *data, size_t size);
+    void parseREAL_OBJT(uint8_t *data, size_t size);
+    void parseREAL_OBJT_INFO(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP(uint8_t *data, size_t size);
+    void parseREAL_OBJT_GRND(uint8_t *data, size_t size);
+    void parseREAL_OBJT_ORNT(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_SMOK(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_JINF(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_EJEC(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_SIGN(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_TRGT(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_CTRL(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_TOFF(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_LAND(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DYNM(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DYNM_DYNM(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DYNM_ORDY(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DYNM_STBL(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DYNM_ATMO(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DYNM_GRAV(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_DYNM_JDYN(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_WEAP_INFO(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_WEAP_DCOY(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_WEAP_WPNS(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_WEAP_HPTS(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_WEAP_DAMG(uint8_t *data, size_t size);
+    void parseREAL_OBJT_EXTE(uint8_t *data, size_t size);
+    void parseREAL_APPR(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_INFO(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_VERT(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_DETA(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_DETA_LVLX(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_TRIS(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_TRIS_VTRI(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_TRIS_TXMS(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_TRIS_TXMS_INFO(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size);
 };
-

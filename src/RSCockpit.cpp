@@ -65,9 +65,7 @@ void RSCockpit::parseARTP(uint8_t* data, size_t size) {
 void RSCockpit::parseVTMP(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
-    PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("VTMP", data2, size);
-    this->VTMP.InitFromSubPakEntry(pak);
+    this->VTMP.Init(data2, size);
 }
 void RSCockpit::parseEJEC(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
@@ -80,7 +78,7 @@ void RSCockpit::parseGUNF(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("GUNF", data2, size);
+    pak->InitFromRAM("GUNF", data2, size-1);
     this->GUNF.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseGHUD(uint8_t* data, size_t size) {
@@ -245,7 +243,7 @@ void RSCockpit::parseMONI_MFDS_GCAM_SHAP(uint8_t* data, size_t size) {
 	shape_data = (uint8_t*) malloc(size);
 	memcpy(shape_data, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("GCAM",shape_data, size);
+    pak->InitFromRAM("GCAM",shape_data, size-1);
     this->MONI.MFDS.GCAM.ARTS.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseMONI_MFDS_WEAP(uint8_t* data, size_t size) {
@@ -282,7 +280,7 @@ void RSCockpit::parseMONI_MFDS_DAMG_SHAP(uint8_t* data, size_t size) {
 	shape_data = (uint8_t*) malloc(size);
 	memcpy(shape_data, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("DAMG",shape_data, size);
+    pak->InitFromRAM("DAMG",shape_data, size-1);
     this->MONI.MFDS.DAMG.ARTS.InitFromSubPakEntry(pak);
 }
 /**
