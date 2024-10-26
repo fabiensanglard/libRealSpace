@@ -16,6 +16,7 @@
 #include "Matrix.h"
 #include "Quaternion.h"
 #include "RSImage.h"
+#include "TreArchive.h"
 
 #define LOD_LEVEL_MAX 0
 #define LOD_LEVEL_MED 1
@@ -75,17 +76,47 @@ class RSImage;
 
 struct VGAPalette;
 
-class RSEntity {
+struct WEAPS {
+    int nb_weap;
+    std::string name;
+};
+struct HPTS {
+    uint8_t id;
+    int32_t x;
+    int32_t y;
+    int32_t z;
+};
 
+
+class RSEntity {
+    struct CHLD {
+        std::string name;
+        int32_t x;
+        int32_t y;
+        int32_t z;
+        std::vector<uint8_t> data;
+        RSEntity *objct;
+    };
+    struct EXPL {
+        std::string name;
+        int16_t x;
+        int16_t y;
+        RSEntity *objct;
+    };
 public:
     std::vector<RSImage *> images;
     std::vector<Point3D> vertices;
     std::vector<uvxyEntry> uvs;
     std::vector<Lod> lods;
     std::vector<Triangle> triangles;
-
+    std::vector<WEAPS *> weaps;
+    std::vector<HPTS *> hpts;
+    std::vector<CHLD *> chld;
     enum Property { SC_TRANSPARENT = 0x02 };
-
+    EXPL *explos;
+    int32_t thrust_in_newton{0};
+    int32_t weight_in_pounds{0};
+    bool gravity{false};
     // For rendering
     Point3D position;
     Quaternion orientation;

@@ -1031,6 +1031,31 @@ void SCStrike::RenderMenu() {
                     ImGui::Text("Name %s", part->member_name.c_str());
                     ImGui::Text("Destroyed %s", part->member_name_destroyed.c_str());
                     ImGui::Text("Weapon load %s", part->weapon_load.c_str());
+                    if (ImGui::TreeNode("RS ENTITY")) {
+                        ImGui::Text("weight %d", part->entity->weight_in_pounds);
+                        ImGui::Text("Thrust %d", part->entity->thrust_in_newton);
+                        if (ImGui::TreeNode("childs")) {
+                            for (auto child : part->entity->chld) {
+                                ImGui::Text("- %s", child->name.c_str());
+                                ImGui::Text("- %d %d %d", child->x, child->y, child->z);
+                            }
+                            ImGui::TreePop();
+                        }
+                        if (ImGui::TreeNode("weapons")) {
+                            for (auto weapon : part->entity->weaps) {
+                                ImGui::Text("- %s", weapon->name.c_str());
+                            }
+                            ImGui::TreePop();
+                        }
+                        if (ImGui::TreeNode("hpts")) {
+                            for (auto hpt : part->entity->hpts) {
+                                ImGui::Text("- %d", hpt->id);
+                                ImGui::Text("- %d %d %d", hpt->x, hpt->y, hpt->z);
+                            }
+                            ImGui::TreePop();
+                        }
+                        ImGui::TreePop();
+                    }
                     ImGui::TreePop();
                 }
             }

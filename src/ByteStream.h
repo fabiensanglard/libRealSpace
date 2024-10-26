@@ -68,6 +68,7 @@ public:
         return *ushortP;
     }
 
+
     inline int16_t ReadShort(void) {
         int16_t *shortP = (int16_t *)this->cursor;
         this->cursor += 2;

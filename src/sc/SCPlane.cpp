@@ -822,6 +822,9 @@ void SCPlane::Render() {
         glMultMatrixf((float *)rotation.v);
 
         Renderer.DrawModel(this->object->entity, LOD_LEVEL_MAX);
+        if (this->wheels) {
+            Renderer.DrawModel(this->object->entity->chld[5]->objct, LOD_LEVEL_MAX);
+        }
         glPopMatrix();
     }
 }

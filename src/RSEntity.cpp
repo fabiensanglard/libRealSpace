@@ -229,11 +229,47 @@ void RSEntity::parseREAL_OBJT_GRND(uint8_t *data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 
-void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
+    EXPL *expl = new EXPL();
+    
+    std::string tmpname;
+    ByteStream bs(data);
+    expl->name = bs.ReadString(8);
+    tmpname = "..\\..\\DATA\\OBJECTS\\" + expl->name + ".IFF";
+    expl->x = bs.ReadShort();
+    expl->y = bs.ReadShort();
+    expl->objct = new RSEntity();
+    TreArchive *tre = new TreArchive();
+    tre->InitFromFile("OBJECTS.TRE");
+    TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
+    expl->objct->InitFromRAM(entry->data, entry->size);
+}
 void RSEntity::parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_SMOK(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {
+    size_t nb_child = size /32;
+    ByteStream bs(data);
+    for (size_t i = 0; i < nb_child; i++) {
+        CHLD *chld = new CHLD();
+        
+        std::string tmpname = bs.ReadString(8);
+        chld->name ="..\\..\\DATA\\OBJECTS\\"+tmpname+".IFF";
+        chld->x = bs.ReadInt32LE();
+        chld->y = bs.ReadInt32LE();
+        chld->z = bs.ReadInt32LE();
+        for (size_t j = 0; j < 12; j++) {
+            chld->data.push_back(bs.ReadByte());
+        }
+        RSEntity *objct = new RSEntity();
+        TreArchive *tre = new TreArchive();
+        tre->InitFromFile("OBJECTS.TRE");
+        TreEntry *entry = tre->GetEntryByName((char *)chld->name.c_str());
+        objct->InitFromRAM(entry->data, entry->size);
+        chld->objct = objct;
+        this->chld.push_back(chld);
+    }
+}
 void RSEntity::parseREAL_OBJT_JETP_JINF(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_EJEC(uint8_t *data, size_t size) {}
@@ -263,12 +299,26 @@ void RSEntity::parseREAL_OBJT_JETP_DYNM(uint8_t *data, size_t size) {
 
     lexer.InitFromRAM(data, size, handlers);
 }
-void RSEntity::parseREAL_OBJT_JETP_DYNM_DYNM(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_DYNM_DYNM(uint8_t *data, size_t size) {
+    ByteStream bs(data);
+    if (size == 4) {
+        bs.ReadByte();
+        bs.ReadByte();
+        this->weight_in_pounds = bs.ReadByte()*600;
+    }
+}
 void RSEntity::parseREAL_OBJT_JETP_DYNM_ORDY(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_DYNM_STBL(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_DYNM_ATMO(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_DYNM_GRAV(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_DYNM_GRAV(uint8_t *data, size_t size) {
+    this->gravity = true;
+}
+void RSEntity::parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size) {
+    ByteStream bs(data);
+    bs.ReadByte();
+    this->thrust_in_newton = bs.ReadInt24LEByte3();
+    /* il reste 2 ou 3 octets (en fonction de la taille du chunk 6 ou 7) en suite dont je ne sais rien*/
+}
 void RSEntity::parseREAL_OBJT_JETP_DYNM_JDYN(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
@@ -287,8 +337,30 @@ void RSEntity::parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size) {
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP_INFO(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_WEAP_DCOY(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_WEAP_WPNS(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_WEAP_HPTS(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_WEAP_WPNS(uint8_t *data, size_t size) {
+    size_t nb_weap = 0;
+    nb_weap = size / 10;
+    ByteStream bs(data);  
+
+    for (size_t i = 0; i < nb_weap; i++) {
+        WEAPS *htps = new WEAPS();
+        htps->nb_weap = bs.ReadShort();
+        htps->name = bs.ReadString(8);
+        this->weaps.push_back(htps);
+    }
+}
+void RSEntity::parseREAL_OBJT_JETP_WEAP_HPTS(uint8_t *data, size_t size) {
+    size_t nb_hpts = size / 13;
+    ByteStream bs(data);
+    for (size_t i = 0; i < nb_hpts; i++) {
+        HPTS *hpts = new HPTS();
+        hpts->id = bs.ReadByte();
+        hpts->x = bs.ReadInt32LE();
+        hpts->y = bs.ReadInt32LE();
+        hpts->z = bs.ReadInt32LE();
+        this->hpts.push_back(hpts);
+    }
+}
 void RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
 
