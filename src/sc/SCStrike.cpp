@@ -1036,21 +1036,19 @@ void SCStrike::RenderMenu() {
                         ImGui::Text("Thrust %d", part->entity->thrust_in_newton);
                         if (ImGui::TreeNode("childs")) {
                             for (auto child : part->entity->chld) {
-                                ImGui::Text("- %s", child->name.c_str());
-                                ImGui::Text("- %d %d %d", child->x, child->y, child->z);
+                                ImGui::Text("%s - %d %d %d",child->name.c_str(), child->x, child->y, child->z);
                             }
                             ImGui::TreePop();
                         }
                         if (ImGui::TreeNode("weapons")) {
                             for (auto weapon : part->entity->weaps) {
-                                ImGui::Text("- %s", weapon->name.c_str());
+                                ImGui::Text("%s - %d", weapon->name.c_str(), weapon->nb_weap);
                             }
                             ImGui::TreePop();
                         }
                         if (ImGui::TreeNode("hpts")) {
                             for (auto hpt : part->entity->hpts) {
-                                ImGui::Text("- %d", hpt->id);
-                                ImGui::Text("- %d %d %d", hpt->x, hpt->y, hpt->z);
+                                ImGui::Text("%d - %d %d %d",hpt->id,  hpt->x, hpt->y, hpt->z);
                             }
                             ImGui::TreePop();
                         }

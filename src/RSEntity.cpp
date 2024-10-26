@@ -8,6 +8,7 @@
 
 #include "RSEntity.h"
 #include <cfloat>
+#include <algorithm>
 
 RSEntity::RSEntity() {}
 
@@ -254,6 +255,7 @@ void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {
         CHLD *chld = new CHLD();
         
         std::string tmpname = bs.ReadString(8);
+        std::transform(tmpname.begin(), tmpname.end(), tmpname.begin(), ::toupper);
         chld->name ="..\\..\\DATA\\OBJECTS\\"+tmpname+".IFF";
         chld->x = bs.ReadInt32LE();
         chld->y = bs.ReadInt32LE();
@@ -265,9 +267,11 @@ void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {
         TreArchive *tre = new TreArchive();
         tre->InitFromFile("OBJECTS.TRE");
         TreEntry *entry = tre->GetEntryByName((char *)chld->name.c_str());
-        objct->InitFromRAM(entry->data, entry->size);
-        chld->objct = objct;
-        this->chld.push_back(chld);
+        if (entry != nullptr) {
+            objct->InitFromRAM(entry->data, entry->size);
+            chld->objct = objct;
+            this->chld.push_back(chld);
+        }
     }
 }
 void RSEntity::parseREAL_OBJT_JETP_JINF(uint8_t *data, size_t size) {}
