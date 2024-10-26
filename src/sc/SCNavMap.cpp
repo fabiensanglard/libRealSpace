@@ -144,7 +144,7 @@ void SCNavMap::RunFrame(void) {
             int c = this->color;
             if (area->id - 1 == *this->current_nav_point) {
                 c=0;
-                int msg_newx = 246+(3*2);
+                /*int msg_newx = 246+(3*2);
                 int msg_newy = 30+(3*30);
                 Point2D *msg_p1 = new Point2D({msg_newx, msg_newy});
                 VGA.PrintText(
@@ -156,7 +156,7 @@ void SCNavMap::RunFrame(void) {
                     (uint32_t) this->missionObj->mission_data.messages[area->id-1]->size(),
                     1,
                     this->navMap->font->GetShapeForChar('A')->GetWidth()
-                );
+                );*/
             }
             int newx = (int) (((area->XAxis+180000.0f)/360000.0f)*w)+l;
             int newy = (int) (((-area->YAxis+180000.0f)/(360000.0f))*h)+t;
