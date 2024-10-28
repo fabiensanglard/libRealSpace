@@ -61,6 +61,7 @@ reason.
 
 Possible Approach for Modern Versions
 -------------------------------------
+Prerendered Audio:
 Render both FM synth and MIDI XMI music+SFX on a Sound Blaster Pro 1 (to gain
 stereo) and a Roland MT-32 recording them on pro sound hardware in digital
 format. Digital SFX and speech could be extracted and converted to the same
@@ -76,9 +77,6 @@ sfx options:
 - "Music Sound Blaster Pro 1 + Digital SFX/Speech"
 - "All New Remake Music and SFX" (all modernized music done either from scratch
   or carefully utilizing the MT-32 XMIs)
- 
-Examples for MT-32 intro, end credits music and cannon SFX are provided along
-this text file.
 
 AIL and XMI Listing
 -------------------
