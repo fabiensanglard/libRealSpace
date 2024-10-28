@@ -1032,7 +1032,7 @@ void SCStrike::RenderMenu() {
                     ImGui::Text("Destroyed %s", part->member_name_destroyed.c_str());
                     ImGui::Text("Weapon load %s", part->weapon_load.c_str());
                     if (ImGui::TreeNode("RS ENTITY")) {
-                        ImGui::Text("weight %d", part->entity->weight_in_pounds);
+                        ImGui::Text("weight %d", part->entity->weight_in_kg);
                         ImGui::Text("Thrust %d", part->entity->thrust_in_newton);
                         if (ImGui::TreeNode("childs")) {
                             for (auto child : part->entity->chld) {
@@ -1043,6 +1043,28 @@ void SCStrike::RenderMenu() {
                         if (ImGui::TreeNode("weapons")) {
                             for (auto weapon : part->entity->weaps) {
                                 ImGui::Text("%s - %d", weapon->name.c_str(), weapon->nb_weap);
+                                if (weapon->objct != nullptr) {
+                                    if (ImGui::TreeNode("weapons")) {
+                                        if (weapon->objct->wdat != nullptr) {
+                                            ImGui::Text("Weapon DATA %d, %d, %d, %d, %d", 
+                                                weapon->objct->wdat->damage,
+                                                weapon->objct->wdat->effective_range,
+                                                weapon->objct->wdat->target_range,
+                                                weapon->objct->wdat->tracking_cone,
+                                                weapon->objct->wdat->radius
+                                            );
+                                        }
+                                        if (weapon->objct->dynn_miss != nullptr) {
+                                            ImGui::Text("Dynamics: %d, %d, %d, %d",
+                                                weapon->objct->dynn_miss->velovity_m_per_sec,
+                                                weapon->objct->dynn_miss->turn_degre_per_sec,
+                                                weapon->objct->dynn_miss->proximity_cm,
+                                                weapon->objct->weight_in_kg
+                                            ); 
+                                        }
+                                        ImGui::TreePop();
+                                    }
+                                }
                             }
                             ImGui::TreePop();
                         }

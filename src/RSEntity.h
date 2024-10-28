@@ -76,10 +76,7 @@ class RSImage;
 
 struct VGAPalette;
 
-struct WEAPS {
-    int nb_weap;
-    std::string name;
-};
+
 struct HPTS {
     uint8_t id;
     int32_t x;
@@ -103,6 +100,31 @@ class RSEntity {
         int16_t y;
         RSEntity *objct;
     };
+    struct WDAT {
+        uint16_t damage{0};
+        uint16_t radius{0};
+        uint8_t unknown1{0};
+        uint8_t unknown2{0};
+        uint8_t unknown3{0};
+        uint8_t unknown4{0};
+        uint8_t unknown5{0};
+        uint32_t target_range{0};
+        uint8_t tracking_cone{0};
+        uint32_t effective_range{0};  
+        uint8_t unknown6{0};
+        uint8_t unknown7{0};
+        uint8_t unknown8{0};
+    };
+    struct DYNN_MISS {
+        uint32_t turn_degre_per_sec{0};
+        uint32_t velovity_m_per_sec{0};
+        uint32_t proximity_cm{0};
+    };
+    struct WEAPS {
+        int nb_weap;
+        std::string name;
+        RSEntity *objct;
+    };
 public:
     std::vector<RSImage *> images;
     std::vector<Point3D> vertices;
@@ -113,10 +135,15 @@ public:
     std::vector<HPTS *> hpts;
     std::vector<CHLD *> chld;
     enum Property { SC_TRANSPARENT = 0x02 };
-    EXPL *explos;
+    EXPL *explos{nullptr};
     int32_t thrust_in_newton{0};
-    int32_t weight_in_pounds{0};
+    int32_t weight_in_kg{0};
+    WDAT *wdat{nullptr};
+    DYNN_MISS *dynn_miss{nullptr};
     bool gravity{false};
+
+    uint16_t life{0};
+    std::map<std::string, std::map<std::string, uint16_t>> sysm;
     // For rendering
     Point3D position;
     Quaternion orientation;
@@ -153,6 +180,18 @@ private:
     void parseREAL_OBJT_JETP(uint8_t *data, size_t size);
     void parseREAL_OBJT_GRND(uint8_t *data, size_t size);
     void parseREAL_OBJT_ORNT(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS(uint8_t *data, size_t size);
+
+    void parseREAL_OBJT_MISS_EXPL(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS_SIGN(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS_TRGT(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS_SMOK(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS_DAMG(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS_WDAT(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS_DATA(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS_DYNM(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS_DYNM_MISS(uint8_t *data, size_t size);
+
     void parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size);
@@ -160,6 +199,7 @@ private:
     void parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_JINF(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_WEAP_DAMG_SYSM(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_EJEC(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_SIGN(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_TRGT(uint8_t *data, size_t size);

@@ -99,8 +99,68 @@ void RSEntity::parseREAL_OBJT(uint8_t *data, size_t size) {
     handlers["GRND"] = std::bind(&RSEntity::parseREAL_OBJT_GRND, this, std::placeholders::_1, std::placeholders::_2);
     handlers["ORNT"] = std::bind(&RSEntity::parseREAL_OBJT_ORNT, this, std::placeholders::_1, std::placeholders::_2);
     handlers["EXTE"] = std::bind(&RSEntity::parseREAL_OBJT_EXTE, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["MISS"] = std::bind(&RSEntity::parseREAL_OBJT_MISS, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["BOMB"] = std::bind(&RSEntity::parseREAL_OBJT_MISS, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["TRCR"] = std::bind(&RSEntity::parseREAL_OBJT_MISS, this, std::placeholders::_1, std::placeholders::_2);
 
     lexer.InitFromRAM(data, size, handlers);
+}
+void RSEntity::parseREAL_OBJT_MISS(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["EXPL"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_EXPL, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SIGN"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_SIGN, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["TRGT"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_TRGT, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SMOK"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_SMOK, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DAMG"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_DAMG, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["WDAT"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_WDAT, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DATA"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_DATA, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DYNM"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_DYNM, this, std::placeholders::_1, std::placeholders::_2);
+
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSEntity::parseREAL_OBJT_MISS_EXPL(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_SIGN(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_TRGT(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_SMOK(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_DAMG(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_WDAT(uint8_t *data, size_t size){
+    WDAT *wdat = new WDAT();
+    ByteStream bs(data);
+    wdat->damage = bs.ReadShort();
+    wdat->radius = bs.ReadShort();
+    wdat->unknown1 = bs.ReadByte();
+    wdat->unknown2 = bs.ReadByte();
+    wdat->unknown3 = bs.ReadByte();
+    wdat->unknown4 = bs.ReadByte();
+    wdat->unknown5 = bs.ReadByte();
+    wdat->target_range = bs.ReadInt32LE();
+    wdat->tracking_cone = bs.ReadByte();
+    wdat->effective_range = bs.ReadInt32LE();
+    wdat->unknown6 = bs.ReadByte();
+    wdat->unknown7 = bs.ReadByte();
+    wdat->unknown8 = bs.ReadByte();
+    this->wdat = wdat;
+}
+void RSEntity::parseREAL_OBJT_MISS_DATA(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_DYNM(uint8_t *data, size_t size){
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["DYNM"] = std::bind(&RSEntity::parseREAL_OBJT_JETP_DYNM_DYNM, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["MISS"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_DYNM_MISS, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSEntity::parseREAL_OBJT_MISS_DYNM_MISS(uint8_t *data, size_t size){
+    ByteStream bs(data);
+    DYNN_MISS *dynn_miss = new DYNN_MISS();
+    bs.ReadByte();
+    dynn_miss->turn_degre_per_sec = bs.ReadInt24LE();
+    dynn_miss->velovity_m_per_sec = bs.ReadInt24LE();
+    this->dynn_miss = dynn_miss;
 }
 void RSEntity::parseREAL_OBJT_INFO(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP(uint8_t *data, size_t size) {
@@ -275,7 +335,16 @@ void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {
     }
 }
 void RSEntity::parseREAL_OBJT_JETP_JINF(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size) {
+    if (size > 2) {
+        IFFSaxLexer lexer;
+
+        std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+        handlers["SYSM"] = std::bind(&RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG_SYSM, this, std::placeholders::_1, std::placeholders::_2);
+
+        lexer.InitFromRAM(data, size, handlers);
+    }
+}
 void RSEntity::parseREAL_OBJT_JETP_EJEC(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_SIGN(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_TRGT(uint8_t *data, size_t size) {}
@@ -307,8 +376,7 @@ void RSEntity::parseREAL_OBJT_JETP_DYNM_DYNM(uint8_t *data, size_t size) {
     ByteStream bs(data);
     if (size == 4) {
         bs.ReadByte();
-        bs.ReadByte();
-        this->weight_in_pounds = bs.ReadByte()*600;
+        this->weight_in_kg = bs.ReadInt24LEByte3();
     }
 }
 void RSEntity::parseREAL_OBJT_JETP_DYNM_ORDY(uint8_t *data, size_t size) {}
@@ -336,7 +404,8 @@ void RSEntity::parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size) {
         std::bind(&RSEntity::parseREAL_OBJT_JETP_WEAP_WPNS, this, std::placeholders::_1, std::placeholders::_2);
     handlers["HPTS"] =
         std::bind(&RSEntity::parseREAL_OBJT_JETP_WEAP_HPTS, this, std::placeholders::_1, std::placeholders::_2);
-
+    handlers["DAMG"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP_INFO(uint8_t *data, size_t size) {}
@@ -350,6 +419,16 @@ void RSEntity::parseREAL_OBJT_JETP_WEAP_WPNS(uint8_t *data, size_t size) {
         WEAPS *htps = new WEAPS();
         htps->nb_weap = bs.ReadShort();
         htps->name = bs.ReadString(8);
+        std::transform(htps->name.begin(), htps->name.end(), htps->name.begin(), ::toupper);
+        std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + htps->name + ".IFF";
+        RSEntity *objct = new RSEntity();
+        TreArchive *tre = new TreArchive();
+        tre->InitFromFile("OBJECTS.TRE");
+        TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
+        if (entry != nullptr) {
+            objct->InitFromRAM(entry->data, entry->size);
+            htps->objct = objct;
+        }
         this->weaps.push_back(htps);
     }
 }
@@ -366,11 +445,20 @@ void RSEntity::parseREAL_OBJT_JETP_WEAP_HPTS(uint8_t *data, size_t size) {
     }
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG(uint8_t *data, size_t size) {
-    IFFSaxLexer lexer;
+    
+}
+void RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG_SYSM(uint8_t *data, size_t size) {
+    ByteStream bs(data);
 
-    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
-
-    lexer.InitFromRAM(data, size, handlers);
+    this->life = bs.ReadShort();
+    size_t nb_sysm = (size - 2) / 18;
+    
+    for (size_t i=0; i<nb_sysm;i++) {
+        uint16_t pv = bs.ReadShort();
+        std::string sub_system = bs.ReadString(8);
+        std::string main_system = bs.ReadString(8);
+        this->sysm[main_system][sub_system] = pv;
+    }
 }
 void RSEntity::parseREAL_OBJT_EXTE(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_APPR(uint8_t *data, size_t size) {
