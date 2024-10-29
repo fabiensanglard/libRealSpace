@@ -22,11 +22,21 @@ struct RADI {
     std::vector<std::string> asks_vector;
     std::string opts;
 };
-
+struct AI_ATTR {
+    uint8_t TH{0};
+    uint8_t CN{0};
+    uint8_t VB{0};
+    uint8_t LY{0};
+    uint8_t FL{0};
+    uint8_t AG{0};
+    uint8_t AA{0};
+    uint8_t SM{0};
+    uint8_t AG{0};
+};
 struct AI {
     std::vector <uint8_t> mvrs;
     std::vector <uint8_t> goal;
-    std::vector <uint8_t> atrb;
+    AI_ATTR atrb;
     bool isAI{false};
 };
 

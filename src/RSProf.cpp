@@ -127,7 +127,13 @@ void RSProf::parsePROF__AI_ATRB(uint8_t *data, size_t size) {
         return;
     }
     stream.Set(data);
-    while (stream.GetPosition() < data + size) {
-        this->ai.atrb.push_back(stream.ReadByte());
-    }
+    this->ai.atrb.TH = stream.ReadByte();
+    this->ai.atrb.CN = stream.ReadByte();
+    this->ai.atrb.VB = stream.ReadByte();
+    this->ai.atrb.LY = stream.ReadByte();
+    this->ai.atrb.FL = stream.ReadByte();
+    this->ai.atrb.AG = stream.ReadByte();
+    this->ai.atrb.AA = stream.ReadByte();
+    this->ai.atrb.SM = stream.ReadByte();
+    this->ai.atrb.AG = stream.ReadByte();
 }

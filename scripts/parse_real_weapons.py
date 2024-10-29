@@ -36,31 +36,33 @@ def parse_wdata(f, dec):
     
     s1_value = struct.unpack('<h', f[0:2])
     s2_value = struct.unpack('<h', f[2:4])
-    s3_value = struct.unpack('<h', f[4:6])  
+    f1 = f[4] 
+    f2 = f[5]
     
-    f1 = f[6]
-    f2 = f[7]
-    f3 = f[8]
+    f3 = f[6]
+    f4 = f[7]
+    f5 = f[8]
     
     i1_value = struct.unpack('<i', f[9:13])
-    f4 = f[13]
+    f6 = f[13]
     i2_value = struct.unpack('<i', f[14:18])
-    f5 = f[18]
-    f6 = f[19]
-    f7 = f[20]
+    f7 = f[18]
+    f8 = f[19]
+    f9 = f[20]
 
     print(' ' * dec, f"Damage: {s1_value[0]}")
     print(' ' * dec, f"Radius of effect: {s2_value[0]}")
-    print(' ' * dec, f"Short 3: {s3_value[0]}")
     print(' ' * dec, f"flag 1: {f1}")
-    print(' ' * dec, f"flag 2: {f2}")
-    print(' ' * dec, f"flag 3: {f3}")
-    print(' ' * dec, f"target lock: {i1_value[0]}")
-    print(' ' * dec, f"tracking cone: {f4}")
-    print(' ' * dec, f"effective range: {i2_value[0]}")
+    print(' ' * dec, f"weapon id: {f2}")
+    print(' ' * dec, f"weapon family: {f3}")
+    print(' ' * dec, f"air_or_ground: {f4}")
     print(' ' * dec, f"flag 5: {f5}")
-    print(' ' * dec, f"flag 6: {f6}")
+    print(' ' * dec, f"target lock: {i1_value[0]}")
+    print(' ' * dec, f"tracking cone: {f6}")
+    print(' ' * dec, f"effective range: {i2_value[0]}")
     print(' ' * dec, f"flag 7: {f7}")
+    print(' ' * dec, f"flag 8: {f8}")
+    print(' ' * dec, f"flag 9: {f9}")
 
 
 def parse_iff_filereader(f, file_path, dec=0, subType=[

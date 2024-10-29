@@ -104,9 +104,9 @@ class RSEntity {
         uint16_t damage{0};
         uint16_t radius{0};
         uint8_t unknown1{0};
-        uint8_t unknown2{0};
-        uint8_t unknown3{0};
-        uint8_t unknown4{0};
+        uint8_t weapon_id{0};
+        uint8_t weapon_category{0};
+        uint8_t radar_type{0};
         uint8_t unknown5{0};
         uint32_t target_range{0};
         uint8_t tracking_cone{0};
