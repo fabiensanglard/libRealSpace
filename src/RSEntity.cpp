@@ -135,7 +135,7 @@ void RSEntity::parseREAL_OBJT_MISS_WDAT(uint8_t *data, size_t size){
     wdat->weapon_id = bs.ReadByte();
     wdat->weapon_category = bs.ReadByte();
     wdat->radar_type = bs.ReadByte();
-    wdat->unknown5 = bs.ReadByte();
+    wdat->weapon_aspec = bs.ReadByte();
     wdat->target_range = bs.ReadInt32LE();
     wdat->tracking_cone = bs.ReadByte();
     wdat->effective_range = bs.ReadInt32LE();
