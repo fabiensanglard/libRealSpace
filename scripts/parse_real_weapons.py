@@ -56,7 +56,7 @@ def parse_wdata(f, dec):
     print(' ' * dec, f"weapon id: {f2}")
     print(' ' * dec, f"weapon family: {f3}")
     print(' ' * dec, f"air_or_ground: {f4}")
-    print(' ' * dec, f"flag 5: {f5}")
+    print(' ' * dec, f"aspect: {f5}")
     print(' ' * dec, f"target lock: {i1_value[0]}")
     print(' ' * dec, f"tracking cone: {f6}")
     print(' ' * dec, f"effective range: {i2_value[0]}")
