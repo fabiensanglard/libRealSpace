@@ -394,7 +394,19 @@ void SCStrike::SetMission(char const *missionName) {
         this->player_plane->vz = -20;
         this->player_plane->Simulate();
     }
-
+    /*[
+        4: {1,2},
+        1: {1,2,9},
+        2: {3,4,5,6,7,8,9},
+        3: {3,4,5,6,7,8}
+        0: {12}
+    ]*/
+    for (auto weap: playerCoord->entity->hpts) {
+        for (auto loadout: playerCoord->entity->weaps) {
+            loadout->objct->wdat->weapon_id;
+            loadout->nb_weap;
+        }
+    }
     for (auto part : missionObj->mission_data.parts) {
         int search_id = 0;
         for (auto cast : missionObj->mission_data.casting) {

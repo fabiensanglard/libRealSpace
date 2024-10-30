@@ -31,7 +31,7 @@ struct AI_ATTR {
     uint8_t AG{0};
     uint8_t AA{0};
     uint8_t SM{0};
-    uint8_t AG{0};
+    uint8_t AR{0};
 };
 struct AI {
     std::vector <uint8_t> mvrs;

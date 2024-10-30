@@ -135,5 +135,5 @@ void RSProf::parsePROF__AI_ATRB(uint8_t *data, size_t size) {
     this->ai.atrb.AG = stream.ReadByte();
     this->ai.atrb.AA = stream.ReadByte();
     this->ai.atrb.SM = stream.ReadByte();
-    this->ai.atrb.AG = stream.ReadByte();
+    this->ai.atrb.AR = stream.ReadByte();
 }
