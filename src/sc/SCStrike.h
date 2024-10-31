@@ -54,6 +54,7 @@ private:
     RSMission *missionObj;
     SCNavMap *nav_screen;
     SCPlane *player_plane;
+    
     SCCockpit *cockpit;
 
     bool autopilot{false};

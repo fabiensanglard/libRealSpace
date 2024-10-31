@@ -45,6 +45,16 @@ static float ro[75] = {
 #define G_ACC 32.17f
 
 #define COORD_SCALE 0.36f
+
+struct SCWeaponLoadoutHardPoint {
+    RSEntity *objct;
+    int nb_weap;
+    int hpts_type;
+    Point2D hud_pos;
+    Vector3D position;
+    std::string name;
+};
+
 class SCPlane {
 
 private:
@@ -231,7 +241,7 @@ public:
     float elevator;
 
     float lift;
-
+    std::vector <SCWeaponLoadoutHardPoint *> weaps_load;
     MISN_PART *object;
 
     /* my ptw matrix, temp matrix	*/

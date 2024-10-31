@@ -394,17 +394,50 @@ void SCStrike::SetMission(char const *missionName) {
         this->player_plane->vz = -20;
         this->player_plane->Simulate();
     }
-    /*[
-        4: {1,2},
-        1: {1,2,9},
-        2: {3,4,5,6,7,8,9},
-        3: {3,4,5,6,7,8}
-        0: {12}
-    ]*/
-    for (auto weap: playerCoord->entity->hpts) {
-        for (auto loadout: playerCoord->entity->weaps) {
-            loadout->objct->wdat->weapon_id;
-            loadout->nb_weap;
+    std::map<int, std::map<std::string, int>> weap_map = {
+        {12, {{"0", 1000}}},
+        {1, {{"4", 1}, {"1", 1}, {"2", 1}}},
+        {2, {{"4", 1}, {"1", 1}, {"2", 1}}},
+        {3, {{"2", 3}, {"3", 3}}},
+        {4, {{"2", 3}, {"3", 3}}},
+        {5, {{"2", 3}, {"3", 3}}},
+        {6, {{"2", 3}, {"3", 3}}},
+        {7, {{"2", 3}, {"3", 3}}},
+        {8, {{"2", 3}, {"3", 3}}},
+        {9, {{"1", 1}, {"2", 2}}}
+    };
+    
+    for (auto loadout: playerCoord->entity->weaps) {
+        for (auto &hpts: weap_map.at(loadout->objct->wdat->weapon_id)) {
+            hpts.first;
+            int cpt=0;
+            int next_hp = 0;
+            if (loadout->nb_weap < 0) {
+                break;
+            }
+            for (auto plane_hpts: player_plane->object->entity->hpts) {
+                if ((plane_hpts->id == std::stoi(hpts.first)) && (next_hp == 0 || next_hp == plane_hpts->id)) {
+                    
+                    int nb_weap = hpts.second - ((loadout->nb_weap /2) - hpts.second);
+                    loadout->nb_weap = loadout->nb_weap - nb_weap;
+                    SCWeaponLoadoutHardPoint *weap = new SCWeaponLoadoutHardPoint();
+                    weap->objct = loadout->objct;
+                    weap->nb_weap = hpts.second;
+                    weap->hpts_type = std::stoi(hpts.first);
+                    weap->name = loadout->name;
+                    weap->position = {(float) plane_hpts->x, (float) plane_hpts->z, (float) plane_hpts->y};
+                    weap->hud_pos = {0, 0};
+                    if (this->player_plane->weaps_load[cpt] == nullptr) {
+                        this->player_plane->weaps_load[cpt] = weap;
+                    }
+                    if (next_hp == 0) {
+                        next_hp = std::stoi(hpts.first);
+                    } else {
+                        next_hp = 0;
+                    }
+                }
+                cpt++;
+            }
         }
     }
     for (auto part : missionObj->mission_data.parts) {

@@ -113,7 +113,8 @@ SCPlane::SCPlane() {
 SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELEVF_CSTE, float ROLLFF_CSTE, float s,
                  float W, float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED, float pilot_y,
                  float pilot_z, RSArea *area, float x, float y, float z) {
-
+    this->weaps_load.reserve(9);
+    this->weaps_load.resize(9);
     this->planeid = 0;
     this->version = 0;
     this->cmd = 0;
