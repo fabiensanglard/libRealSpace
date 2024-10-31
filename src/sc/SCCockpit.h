@@ -72,7 +72,8 @@ public:
     std::vector<SCAiPlane *> ai_planes;
     Camera *cam;
     Vector2D weapoint_coords;
-
+    SCPlane *player_plane;
+    
     SCCockpit();
     ~SCCockpit();
     void Init( );

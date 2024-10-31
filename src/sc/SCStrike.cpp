@@ -11,7 +11,7 @@
 #include <imgui.h>
 #include <imgui_impl_opengl2.h>
 #include <imgui_impl_sdl2.h>
-
+#include <tuple>
 #define SC_WORLD 1100
 
 SCStrike::SCStrike() {
@@ -309,8 +309,15 @@ void SCStrike::CheckKeyboard(void) {
             this->mfd_timeout = 400;
             break;
         case SDLK_w:
-            this->cockpit->show_weapons = !this->cockpit->show_weapons;
-            this->mfd_timeout = 400;
+            if (this->cockpit->show_weapons) {
+                this->player_plane->selected_weapon = (this->player_plane->selected_weapon+1) % 9;
+                this->mfd_timeout = 400;
+            } else {
+                this->cockpit->show_weapons = !this->cockpit->show_weapons;
+                this->mfd_timeout = 400;
+            }
+            
+            
             break;
         case SDLK_r:
             this->cockpit->show_radars = !this->cockpit->show_radars;
@@ -394,7 +401,7 @@ void SCStrike::SetMission(char const *missionName) {
         this->player_plane->vz = -20;
         this->player_plane->Simulate();
     }
-    std::map<int, std::map<std::string, int>> weap_map = {
+    std::map<int, std::vector<std::tuple<std::string, int>>> weap_map = {
         {12, {{"0", 1000}}},
         {1, {{"4", 1}, {"1", 1}, {"2", 1}}},
         {2, {{"4", 1}, {"1", 1}, {"2", 1}}},
@@ -408,22 +415,22 @@ void SCStrike::SetMission(char const *missionName) {
     };
     
     for (auto loadout: playerCoord->entity->weaps) {
-        for (auto &hpts: weap_map.at(loadout->objct->wdat->weapon_id)) {
-            hpts.first;
+        int plane_wp_loadout = loadout->nb_weap;
+        for (auto hpts: weap_map.at(loadout->objct->wdat->weapon_id)) {
             int cpt=0;
             int next_hp = 0;
-            if (loadout->nb_weap < 0) {
+            if (plane_wp_loadout < 0) {
                 break;
             }
             for (auto plane_hpts: player_plane->object->entity->hpts) {
-                if ((plane_hpts->id == std::stoi(hpts.first)) && (next_hp == 0 || next_hp == plane_hpts->id)) {
+                if ((plane_hpts->id == std::stoi(std::get<0>(hpts))) && (next_hp == 0 || next_hp == plane_hpts->id)) {
                     
-                    int nb_weap = hpts.second - ((loadout->nb_weap /2) - hpts.second);
-                    loadout->nb_weap = loadout->nb_weap - nb_weap;
+                    int nb_weap = std::get<1>(hpts) - ((loadout->nb_weap /2) - std::get<1>(hpts));
+                    plane_wp_loadout = plane_wp_loadout - nb_weap;
                     SCWeaponLoadoutHardPoint *weap = new SCWeaponLoadoutHardPoint();
                     weap->objct = loadout->objct;
-                    weap->nb_weap = hpts.second;
-                    weap->hpts_type = std::stoi(hpts.first);
+                    weap->nb_weap = std::get<1>(hpts);
+                    weap->hpts_type = std::stoi(std::get<0>(hpts));
                     weap->name = loadout->name;
                     weap->position = {(float) plane_hpts->x, (float) plane_hpts->z, (float) plane_hpts->y};
                     weap->hud_pos = {0, 0};
@@ -431,7 +438,7 @@ void SCStrike::SetMission(char const *missionName) {
                         this->player_plane->weaps_load[cpt] = weap;
                     }
                     if (next_hp == 0) {
-                        next_hp = std::stoi(hpts.first);
+                        next_hp = std::stoi(std::get<0>(hpts));
                     } else {
                         next_hp = 0;
                     }
@@ -542,6 +549,7 @@ void SCStrike::RunFrame(void) {
     this->cockpit->parts = this->missionObj->mission_data.parts;
     this->cockpit->ai_planes = this->ai_planes;
     this->cockpit->player_prof = this->player_prof;
+    this->cockpit->player_plane = this->player_plane;
 
     if (this->mfd_timeout <= 0) {
         if (this->cockpit->show_comm) {

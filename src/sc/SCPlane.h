@@ -242,6 +242,7 @@ public:
 
     float lift;
     std::vector <SCWeaponLoadoutHardPoint *> weaps_load;
+    int selected_weapon{0};
     MISN_PART *object;
 
     /* my ptw matrix, temp matrix	*/
