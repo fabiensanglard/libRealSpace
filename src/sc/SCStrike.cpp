@@ -310,7 +310,7 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_w:
             if (this->cockpit->show_weapons) {
-                this->player_plane->selected_weapon = (this->player_plane->selected_weapon+1) % 9;
+                this->player_plane->selected_weapon = (this->player_plane->selected_weapon+1) % 5;
                 this->mfd_timeout = 400;
             } else {
                 this->cockpit->show_weapons = !this->cockpit->show_weapons;
@@ -419,7 +419,7 @@ void SCStrike::SetMission(char const *missionName) {
         for (auto hpts: weap_map.at(loadout->objct->wdat->weapon_id)) {
             int cpt=0;
             int next_hp = 0;
-            if (plane_wp_loadout < 0) {
+            if (plane_wp_loadout == 0) {
                 break;
             }
             for (auto plane_hpts: player_plane->object->entity->hpts) {

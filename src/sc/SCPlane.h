@@ -184,7 +184,8 @@ private:
     /* flap and spoiler settings	*/
     int flaps;
     int spoilers;
-
+    int wheel_index{0};
+    int wheel_anim{10};
 public:
 
     float elevation_speedf;

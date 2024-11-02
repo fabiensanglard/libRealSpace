@@ -821,10 +821,69 @@ void SCPlane::Render() {
         rotation.rotateM(-(this->twist / 10.0f) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
 
         glMultMatrixf((float *)rotation.v);
-
+        
         Renderer.DrawModel(this->object->entity, LOD_LEVEL_MAX);
         if (this->wheels) {
-            Renderer.DrawModel(this->object->entity->chld[5]->objct, LOD_LEVEL_MAX);
+            Renderer.DrawModel(this->object->entity->chld[wheel_index]->objct, LOD_LEVEL_MAX);
+            this->wheel_anim --;
+            if (this->wheel_anim == 0) {
+                this->wheel_index ++;
+                if (this->wheel_index > 5) {
+                    this->wheel_index = 5;
+                }
+                this->wheel_anim = 10;
+            }
+        } else {
+            if (this->wheel_index>=1) {
+                Renderer.DrawModel(this->object->entity->chld[wheel_index]->objct, LOD_LEVEL_MAX);
+                this->wheel_anim --;
+                if (this->wheel_anim == 0) {
+                    this->wheel_index --;
+                    if (this->wheel_index < 1) {
+                        this->wheel_index = 0;
+                    }
+                    this->wheel_anim = 10;
+                }
+            } else {
+                this->wheel_index = 0;
+            }
+            
+        }
+        if (this->thrust > 50) {
+            glPushMatrix();
+            Vector3D pos = {
+                this->object->entity->chld[0]->x,
+                this->object->entity->chld[0]->y,
+                this->object->entity->chld[0]->z
+            };
+            glTranslatef(pos.y/250 , pos.z /250 , pos.x /250);
+            glScalef(1+this->thrust/100.0f,1,1);
+            Renderer.DrawModel(this->object->entity->chld[0]->objct, LOD_LEVEL_MAX);
+            glPopMatrix();
+        }
+        for (auto weaps:this->weaps_load) {
+            float decy=0.5f;
+            if (weaps->hpts_type == 0) {
+                continue;
+            }
+            if (weaps->hpts_type == 4) {
+                decy = 0.0f;
+            }
+            Vector3D position = weaps->position;
+            std::vector<Vector3D> path = {
+                {0, -2*decy, 0},
+                {decy, -decy, 0},
+                {-decy,-decy,0}
+            };
+
+            for (int i = 0; i < weaps->nb_weap; i++) {
+                glPushMatrix();
+                glTranslatef(position.z/250+path[i].z, position.y/250 + path[i].y, -position.x/250+path[i].x);
+                Renderer.DrawModel(weaps->objct, LOD_LEVEL_MAX);
+                glPopMatrix();
+                position.y -= 0.5f;
+
+            }
         }
         glPopMatrix();
     }

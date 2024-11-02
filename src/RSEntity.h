@@ -181,7 +181,8 @@ private:
     void parseREAL_OBJT_GRND(uint8_t *data, size_t size);
     void parseREAL_OBJT_ORNT(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS(uint8_t *data, size_t size);
-
+    void parseREAL_OBJT_AFTB(uint8_t *data, size_t size);
+    void parseREAL_OBJT_AFTB_APPR(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_EXPL(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_SIGN(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_TRGT(uint8_t *data, size_t size);

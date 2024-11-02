@@ -25,7 +25,12 @@ real_weap_map = {
     b"DYNM": [],
     b"APPR": [
         b"POLY",
-        b"TRCR"
+        b"TRCR",
+        b"AFTB"
+    ],
+    b"AFTB": [
+        b"DETA",
+        b"TRIS"
     ],
     b"POLY": [
         b"DETA",

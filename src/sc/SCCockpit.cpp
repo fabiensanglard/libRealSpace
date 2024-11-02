@@ -436,7 +436,8 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
     }
 
     int sel_weapon_id = this->player_plane->weaps_load[this->player_plane->selected_weapon]->objct->wdat->weapon_id;
-    int sel_nb_weap = this->player_plane->weaps_load[this->player_plane->selected_weapon]->nb_weap;
+    int sel_nb_weap = this->player_plane->weaps_load[0]->nb_weap;
+
     Point2D pmfd_right_weapon_gun{pmfd_right_weapon.x - 8 +
                                       this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
                                   pmfd_right_weapon.y + 6};
