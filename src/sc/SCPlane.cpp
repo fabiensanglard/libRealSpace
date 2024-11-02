@@ -700,6 +700,30 @@ void SCPlane::Simulate() {
             this->fuel -= (int)(itemp * this->fuel_rate);
             this->inverse_mass = G_ACC / (this->W + this->fuel / 12800.0f * this->fuel_weight);
         }
+        if (this->wheels) {
+            this->wheel_anim --;
+            if (this->wheel_anim == 0) {
+                this->wheel_index ++;
+                if (this->wheel_index > 5) {
+                    this->wheel_index = 5;
+                }
+                this->wheel_anim = 10;
+            }
+        } else {
+            if (this->wheel_index>=1) {
+                this->wheel_anim --;
+                if (this->wheel_anim == 0) {
+                    this->wheel_index --;
+                    if (this->wheel_index < 1) {
+                        this->wheel_index = 0;
+                    }
+                    this->wheel_anim = 10;
+                }
+            } else {
+                this->wheel_index = 0;
+            }
+            
+        }
     }
     this->tick_counter++;
 }
@@ -829,31 +853,8 @@ void SCPlane::Render() {
         glMultMatrixf((float *)rotation.v);
         
         Renderer.DrawModel(this->object->entity, LOD_LEVEL_MAX);
-        if (this->wheels) {
+        if (wheel_index) {
             Renderer.DrawModel(this->object->entity->chld[wheel_index]->objct, LOD_LEVEL_MAX);
-            this->wheel_anim --;
-            if (this->wheel_anim == 0) {
-                this->wheel_index ++;
-                if (this->wheel_index > 5) {
-                    this->wheel_index = 5;
-                }
-                this->wheel_anim = 10;
-            }
-        } else {
-            if (this->wheel_index>=1) {
-                Renderer.DrawModel(this->object->entity->chld[wheel_index]->objct, LOD_LEVEL_MAX);
-                this->wheel_anim --;
-                if (this->wheel_anim == 0) {
-                    this->wheel_index --;
-                    if (this->wheel_index < 1) {
-                        this->wheel_index = 0;
-                    }
-                    this->wheel_anim = 10;
-                }
-            } else {
-                this->wheel_index = 0;
-            }
-            
         }
         if (this->thrust > 50) {
             glPushMatrix();
@@ -869,6 +870,9 @@ void SCPlane::Render() {
         }
         for (auto weaps:this->weaps_load) {
             float decy=0.5f;
+            if (weaps == nullptr) {
+                continue;  
+            }
             if (weaps->hpts_type == 0) {
                 continue;
             }
@@ -879,7 +883,10 @@ void SCPlane::Render() {
             std::vector<Vector3D> path = {
                 {0, -2*decy, 0},
                 {decy, -decy, 0},
-                {-decy,-decy,0}
+                {-decy,-decy,0},
+                {0, -2*decy, -2*decy},
+                {decy, -decy, -2*decy},
+                {-decy,-decy,-2*decy}
             };
 
             for (int i = 0; i < weaps->nb_weap; i++) {

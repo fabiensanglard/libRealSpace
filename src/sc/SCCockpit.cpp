@@ -399,41 +399,44 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
         {8, "GBU-15"},
         {9, "AIM-120"}
     };
-    for (int indice = 1; indice < 5; indice++) {
-        int weapon_id = this->player_plane->weaps_load[indice]->objct->wdat->weapon_id;
-        int nb_weap = this->player_plane->weaps_load[indice]->nb_weap;
-        int i = 4-indice;
-        int selected = indice == this->player_plane->selected_weapon;
-        RLEShape *shape = this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(weapons_shape[weapon_id]+selected);
-        int32_t s_width = shape->GetWidth();
-        int32_t s_height = shape->GetHeight();
-        if (nb_weap > 0) {
-            Point2D pmfd_right_weapon_hp = {
-                pmfd_right_center.x - 15 - s_width / 2 - i * 9,
-                pmfd_right_center.y - 18 - s_height / 2 + i * 9};
-            shape->SetPosition(&pmfd_right_weapon_hp);
-            VGA.DrawShape(shape);
-            Point2D pmfd_right_weapon_hp_text = {
-                pmfd_right_weapon_hp.x + s_width / 2 + 1,
-                pmfd_right_weapon_hp.y + s_height + 6};
-            VGA.PrintText(this->big_font, &pmfd_right_weapon_hp_text, (char *)std::to_string(nb_weap).c_str(), 0, 0, 3, 2, 2);
-        }
-        
-        nb_weap = this->player_plane->weaps_load[9-indice]->nb_weap;
-        selected = 9-indice == this->player_plane->selected_weapon;
-        shape = this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(weapons_shape[weapon_id]+selected);
-        if (nb_weap>0) {
-            Point2D pmfd_right_weapon_hp_left = {
-                pmfd_right_center.x + 13 - s_width / 2 + i * 9,
-                pmfd_right_center.y - 18 - s_height / 2 + i * 9};
-            shape->SetPosition(&pmfd_right_weapon_hp_left);
-            VGA.DrawShape(shape);
-            Point2D pmfd_right_weapon_hp_text_left = {
-                pmfd_right_weapon_hp_left.x + s_width / 2 - 1,
-                pmfd_right_weapon_hp_left.y + s_height + 6};
-            VGA.PrintText(this->big_font, &pmfd_right_weapon_hp_text_left, (char *)std::to_string(nb_weap).c_str(), 0, 0, 3, 2, 2);
+    if (this->player_plane->object->entity->hpts.size() == 9) {
+        for (int indice = 1; indice < 5; indice++) {
+            int weapon_id = this->player_plane->weaps_load[indice]->objct->wdat->weapon_id;
+            int nb_weap = this->player_plane->weaps_load[indice]->nb_weap;
+            int i = 4-indice;
+            int selected = indice == this->player_plane->selected_weapon;
+            RLEShape *shape = this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(weapons_shape[weapon_id]+selected);
+            int32_t s_width = shape->GetWidth();
+            int32_t s_height = shape->GetHeight();
+            if (nb_weap > 0) {
+                Point2D pmfd_right_weapon_hp = {
+                    pmfd_right_center.x - 15 - s_width / 2 - i * 9,
+                    pmfd_right_center.y - 18 - s_height / 2 + i * 9};
+                shape->SetPosition(&pmfd_right_weapon_hp);
+                VGA.DrawShape(shape);
+                Point2D pmfd_right_weapon_hp_text = {
+                    pmfd_right_weapon_hp.x + s_width / 2 + 1,
+                    pmfd_right_weapon_hp.y + s_height + 6};
+                VGA.PrintText(this->big_font, &pmfd_right_weapon_hp_text, (char *)std::to_string(nb_weap).c_str(), 0, 0, 3, 2, 2);
+            }
+            
+            nb_weap = this->player_plane->weaps_load[9-indice]->nb_weap;
+            selected = 9-indice == this->player_plane->selected_weapon;
+            shape = this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(weapons_shape[weapon_id]+selected);
+            if (nb_weap>0) {
+                Point2D pmfd_right_weapon_hp_left = {
+                    pmfd_right_center.x + 13 - s_width / 2 + i * 9,
+                    pmfd_right_center.y - 18 - s_height / 2 + i * 9};
+                shape->SetPosition(&pmfd_right_weapon_hp_left);
+                VGA.DrawShape(shape);
+                Point2D pmfd_right_weapon_hp_text_left = {
+                    pmfd_right_weapon_hp_left.x + s_width / 2 - 1,
+                    pmfd_right_weapon_hp_left.y + s_height + 6};
+                VGA.PrintText(this->big_font, &pmfd_right_weapon_hp_text_left, (char *)std::to_string(nb_weap).c_str(), 0, 0, 3, 2, 2);
+            }
         }
     }
+    
 
     int sel_weapon_id = this->player_plane->weaps_load[this->player_plane->selected_weapon]->objct->wdat->weapon_id;
     int sel_nb_weap = this->player_plane->weaps_load[0]->nb_weap;
