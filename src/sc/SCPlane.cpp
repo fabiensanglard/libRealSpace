@@ -852,9 +852,9 @@ void SCPlane::Render() {
         if (this->thrust > 50) {
             glPushMatrix();
             Vector3D pos = {
-                this->object->entity->chld[0]->x,
-                this->object->entity->chld[0]->y,
-                this->object->entity->chld[0]->z
+                (float) this->object->entity->chld[0]->x,
+                (float) this->object->entity->chld[0]->y,
+                (float) this->object->entity->chld[0]->z
             };
             glTranslatef(pos.y/250 , pos.z /250 , pos.x /250);
             glScalef(1+this->thrust/100.0f,1,1);
