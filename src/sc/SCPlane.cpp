@@ -804,10 +804,16 @@ void SCPlane::getPosition(Point3D *position) {
     position->y = this->y * COORD_SCALE;
     position->z = this->z * COORD_SCALE;
 }
+
 /**
- * Renders the plane object in 3D space. The plane is positioned using the
- * plane's x, y and z coordinates, and rotated using the plane's azimuth and
- * elevation angles. The plane is drawn using the highest level of detail.
+ * Renders the plane object at its current position and orientation.
+ *
+ * If the wheels are down, renders the wheels at the correct position and
+ * animates them. If the thrust is greater than 50, renders the jet engine
+ * at the correct position and scales it according to the thrust level.
+ *
+ * If the plane is carrying any weapons, renders them at the correct position
+ * 
  */
 void SCPlane::Render() {
     if (this->object != nullptr) {
