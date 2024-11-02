@@ -34,6 +34,7 @@ void RSProf::parsePROF_RADI(uint8_t *data, size_t size){
     handlers["SPCH"] = std::bind(&RSProf::parsePROF_RADI_SPCH, this, std::placeholders::_1, std::placeholders::_2);
     handlers["OPTS"] = std::bind(&RSProf::parsePROF_RADI_OPTS, this, std::placeholders::_1, std::placeholders::_2);
     handlers["MSGS"] = std::bind(&RSProf::parsePROF_RADI_MSGS, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["ASKS"] = std::bind(&RSProf::parsePROF_RADI_ASKS, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSProf::parsePROF_RADI_INFO(uint8_t *data, size_t size){
@@ -64,6 +65,19 @@ void RSProf::parsePROF_RADI_MSGS(uint8_t *data, size_t size){
         uint8_t key = stream.ReadByte();
         std::string value = stream.ReadStringNoSize(size);
         this->radi.msgs[key] = value;
+    }
+}
+void RSProf::parsePROF_RADI_ASKS(uint8_t *data, size_t size){
+    ByteStream stream;
+    if (data == nullptr) {
+        return;
+    }
+    stream.Set(data);
+    while (stream.GetPosition() < data + size) {
+        std::string cat = stream.ReadStringNoSize(size);
+        std::string value = stream.ReadStringNoSize(size);
+        this->radi.asks[cat] = value;
+        this->radi.asks_vector.push_back(value);
     }
 }
 void RSProf::parsePROF_RADI_SPCH(uint8_t *data, size_t size){
@@ -113,7 +127,13 @@ void RSProf::parsePROF__AI_ATRB(uint8_t *data, size_t size) {
         return;
     }
     stream.Set(data);
-    while (stream.GetPosition() < data + size) {
-        this->ai.atrb.push_back(stream.ReadByte());
-    }
+    this->ai.atrb.TH = stream.ReadByte();
+    this->ai.atrb.CN = stream.ReadByte();
+    this->ai.atrb.VB = stream.ReadByte();
+    this->ai.atrb.LY = stream.ReadByte();
+    this->ai.atrb.FL = stream.ReadByte();
+    this->ai.atrb.AG = stream.ReadByte();
+    this->ai.atrb.AA = stream.ReadByte();
+    this->ai.atrb.SM = stream.ReadByte();
+    this->ai.atrb.AR = stream.ReadByte();
 }

@@ -115,7 +115,7 @@ class RSCockpit {
 private:
     std::vector<uint8_t> INFO;
     
-    RSImageSet VTMP;
+    RLEShape VTMP;
     RSImageSet EJEC;
     RSImageSet GUNF;
     RSImageSet GHUD;

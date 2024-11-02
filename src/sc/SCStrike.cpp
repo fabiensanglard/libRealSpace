@@ -11,7 +11,7 @@
 #include <imgui.h>
 #include <imgui_impl_opengl2.h>
 #include <imgui_impl_sdl2.h>
-
+#include <tuple>
 #define SC_WORLD 1100
 
 SCStrike::SCStrike() {
@@ -71,6 +71,18 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDL_SCANCODE_EQUALS:
             this->player_plane->SetThrottle(this->player_plane->GetThrottle() + 1);
+            break;
+        case SDL_SCANCODE_LEFTBRACKET:
+            this->cockpit->radar_zoom -= 1;
+            if (this->cockpit->radar_zoom < 1) {
+                this->cockpit->radar_zoom = 1;
+            }
+            break;
+        case SDL_SCANCODE_RIGHTBRACKET:
+            this->cockpit->radar_zoom += 1;
+            if (this->cockpit->radar_zoom > 4) {
+                this->cockpit->radar_zoom = 4;
+            }
             break;
         default:
             break;
@@ -147,34 +159,134 @@ void SCStrike::CheckKeyboard(void) {
                 this->player_plane->control_stick_x = 50;
             break;
         case SDLK_1:
-            this->player_plane->SetThrottle(10);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(10);    
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 1;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_2:
-            this->player_plane->SetThrottle(20);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(20);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 2;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_3:
-            this->player_plane->SetThrottle(30);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(30);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 3;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_4:
-            this->player_plane->SetThrottle(40);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(40);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 4;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_5:
-            this->player_plane->SetThrottle(50);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(50);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 5;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_6:
-            this->player_plane->SetThrottle(60);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(60);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 6;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_7:
-            this->player_plane->SetThrottle(70);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(70);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 7;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_8:
-            this->player_plane->SetThrottle(80);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(80);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 8;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_9:
-            this->player_plane->SetThrottle(90);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(90);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 9;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_0:
-            this->player_plane->SetThrottle(100);
+            if (!this->cockpit->show_comm) {
+                this->player_plane->SetThrottle(100);
+            } else {
+                if (this->cockpit->comm_target == 0) {
+                    this->cockpit->comm_target = 10;
+                } else {
+                    // send message 1 to ai comm_target
+                    this->cockpit->comm_target = 0;
+                    this->cockpit->show_comm = false;
+                }
+            }
             break;
         case SDLK_MINUS:
             this->player_plane->SetThrottle(this->player_plane->GetThrottle() - 1);
@@ -191,8 +303,21 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_b:
             this->player_plane->SetSpoilers();
             break;
+        case SDLK_c:
+            this->cockpit->show_comm = !this->cockpit->show_comm;
+            this->cockpit->comm_target = 0;
+            this->mfd_timeout = 400;
+            break;
         case SDLK_w:
-            this->cockpit->show_weapons = !this->cockpit->show_weapons;
+            if (this->cockpit->show_weapons) {
+                this->player_plane->selected_weapon = (this->player_plane->selected_weapon+1) % 5;
+                this->mfd_timeout = 400;
+            } else {
+                this->cockpit->show_weapons = !this->cockpit->show_weapons;
+                this->mfd_timeout = 400;
+            }
+            
+            
             break;
         case SDLK_r:
             this->cockpit->show_radars = !this->cockpit->show_radars;
@@ -276,7 +401,52 @@ void SCStrike::SetMission(char const *missionName) {
         this->player_plane->vz = -20;
         this->player_plane->Simulate();
     }
-
+    std::map<int, std::vector<std::tuple<std::string, int>>> weap_map = {
+        {12, {{"0", 1000}}},
+        {1, {{"4", 1}, {"1", 1}, {"2", 1}}},
+        {2, {{"4", 1}, {"1", 1}, {"2", 1}}},
+        {3, {{"2", 3}, {"3", 3}}},
+        {4, {{"2", 3}, {"3", 3}}},
+        {5, {{"2", 3}, {"3", 3}}},
+        {6, {{"2", 3}, {"3", 3}}},
+        {7, {{"2", 3}, {"3", 3}}},
+        {8, {{"2", 3}, {"3", 3}}},
+        {9, {{"1", 1}, {"2", 2}}}
+    };
+    
+    for (auto loadout: playerCoord->entity->weaps) {
+        int plane_wp_loadout = loadout->nb_weap;
+        for (auto hpts: weap_map.at(loadout->objct->wdat->weapon_id)) {
+            int cpt=0;
+            int next_hp = 0;
+            if (plane_wp_loadout == 0) {
+                break;
+            }
+            for (auto plane_hpts: player_plane->object->entity->hpts) {
+                if ((plane_hpts->id == std::stoi(std::get<0>(hpts))) && (next_hp == 0 || next_hp == plane_hpts->id)) {
+                    
+                    int nb_weap = std::get<1>(hpts) - ((loadout->nb_weap /2) - std::get<1>(hpts));
+                    plane_wp_loadout = plane_wp_loadout - nb_weap;
+                    SCWeaponLoadoutHardPoint *weap = new SCWeaponLoadoutHardPoint();
+                    weap->objct = loadout->objct;
+                    weap->nb_weap = std::get<1>(hpts);
+                    weap->hpts_type = std::stoi(std::get<0>(hpts));
+                    weap->name = loadout->name;
+                    weap->position = {(float) plane_hpts->x, (float) plane_hpts->z, (float) plane_hpts->y};
+                    weap->hud_pos = {0, 0};
+                    if (this->player_plane->weaps_load[cpt] == nullptr) {
+                        this->player_plane->weaps_load[cpt] = weap;
+                    }
+                    if (next_hp == 0) {
+                        next_hp = std::stoi(std::get<0>(hpts));
+                    } else {
+                        next_hp = 0;
+                    }
+                }
+                cpt++;
+            }
+        }
+    }
     for (auto part : missionObj->mission_data.parts) {
         int search_id = 0;
         for (auto cast : missionObj->mission_data.casting) {
@@ -288,6 +458,8 @@ void SCStrike::SetMission(char const *missionName) {
                                                  (float)part->z, (float)-part->y);
                     aiPlane->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                     aiPlane->pilot = new SCPilot();
+                    aiPlane->ai = cast->profile;
+                    aiPlane->name = cast->actor;
 
                     if (this->area.getY((float)part->x, (float)-part->y) == part->z) {
                         aiPlane->plane->on_ground = true;
@@ -311,7 +483,9 @@ void SCStrike::SetMission(char const *missionName) {
                     aiPlane->pilot->target_speed = -20;
                     aiPlane->plane->object = part;
                     aiPlane->object = part;
-                    ai_planes.push_back(aiPlane);
+                    this->ai_planes.push_back(aiPlane);
+                } else if (cast->profile != nullptr && cast->actor == "PLAYER") {
+                    this->player_prof = cast->profile;
                 }
                 break;
             }
@@ -322,8 +496,9 @@ void SCStrike::SetMission(char const *missionName) {
 void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
     if (!this->pause_simu) {
+        this->mfd_timeout--;
         this->player_plane->Simulate();
-        for (auto aiPlane : ai_planes) {
+        for (auto aiPlane : this->ai_planes) {
             aiPlane->plane->Simulate();
             aiPlane->pilot->AutoPilot();
             Vector3D npos;
@@ -372,6 +547,18 @@ void SCStrike::RunFrame(void) {
     this->cockpit->weapoint_coords.x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis;
     this->cockpit->weapoint_coords.y = -this->missionObj->mission_data.areas[this->nav_point_id]->YAxis;
     this->cockpit->parts = this->missionObj->mission_data.parts;
+    this->cockpit->ai_planes = this->ai_planes;
+    this->cockpit->player_prof = this->player_prof;
+    this->cockpit->player_plane = this->player_plane;
+
+    if (this->mfd_timeout <= 0) {
+        if (this->cockpit->show_comm) {
+            this->cockpit->show_comm = false;
+        }
+        if (this->cockpit->show_weapons) {
+            this->cockpit->show_weapons = false;
+        }
+    }
     switch (this->camera_mode) {
 
     case View::FRONT: {
@@ -897,6 +1084,51 @@ void SCStrike::RenderMenu() {
                     ImGui::Text("Name %s", part->member_name.c_str());
                     ImGui::Text("Destroyed %s", part->member_name_destroyed.c_str());
                     ImGui::Text("Weapon load %s", part->weapon_load.c_str());
+                    if (ImGui::TreeNode("RS ENTITY")) {
+                        ImGui::Text("weight %d", part->entity->weight_in_kg);
+                        ImGui::Text("Thrust %d", part->entity->thrust_in_newton);
+                        if (ImGui::TreeNode("childs")) {
+                            for (auto child : part->entity->chld) {
+                                ImGui::Text("%s - %d %d %d",child->name.c_str(), child->x, child->y, child->z);
+                            }
+                            ImGui::TreePop();
+                        }
+                        if (ImGui::TreeNode("weapons")) {
+                            for (auto weapon : part->entity->weaps) {
+                                ImGui::Text("%s - %d", weapon->name.c_str(), weapon->nb_weap);
+                                if (weapon->objct != nullptr) {
+                                    if (ImGui::TreeNode("weapons")) {
+                                        if (weapon->objct->wdat != nullptr) {
+                                            ImGui::Text("Weapon DATA %d, %d, %d, %d, %d", 
+                                                weapon->objct->wdat->damage,
+                                                weapon->objct->wdat->effective_range,
+                                                weapon->objct->wdat->target_range,
+                                                weapon->objct->wdat->tracking_cone,
+                                                weapon->objct->wdat->radius
+                                            );
+                                        }
+                                        if (weapon->objct->dynn_miss != nullptr) {
+                                            ImGui::Text("Dynamics: %d, %d, %d, %d",
+                                                weapon->objct->dynn_miss->velovity_m_per_sec,
+                                                weapon->objct->dynn_miss->turn_degre_per_sec,
+                                                weapon->objct->dynn_miss->proximity_cm,
+                                                weapon->objct->weight_in_kg
+                                            ); 
+                                        }
+                                        ImGui::TreePop();
+                                    }
+                                }
+                            }
+                            ImGui::TreePop();
+                        }
+                        if (ImGui::TreeNode("hpts")) {
+                            for (auto hpt : part->entity->hpts) {
+                                ImGui::Text("%d - %d %d %d",hpt->id,  hpt->x, hpt->y, hpt->z);
+                            }
+                            ImGui::TreePop();
+                        }
+                        ImGui::TreePop();
+                    }
                     ImGui::TreePop();
                 }
             }
@@ -911,6 +1143,18 @@ void SCStrike::RenderMenu() {
                     if (ImGui::TreeNode("MSGS")) {
                         for (auto msg : cast->profile->radi.msgs) {
                             ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("ASKS")) {
+                        for (auto msg : cast->profile->radi.asks) {
+                            ImGui::Text("- [%s]: %s", msg.first.c_str(), msg.second.c_str());
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("ASKS_VECTOR")) {
+                        for (auto msg : cast->profile->radi.asks_vector) {
+                            ImGui::Text("- %s", msg.c_str());
                         }
                         ImGui::TreePop();
                     }

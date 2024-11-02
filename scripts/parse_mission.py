@@ -131,10 +131,13 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             ZAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
             offset += 4
             AreaWidth = chunk_data[offset]
+            ubyte = chunk_data[offset+1:offset+4]
             offset += 3
             print(' ' * dec, f"ID {id}, {area_name}, Area type: {chr(area_type)})")
             print(' ' * (dec+2), f"X: {XAxis}, Y: {YAxis}, Z: {ZAxis}, Width: {AreaWidth}")
             print(' ' * (dec+2), "remaining data", chunk_size-offset, offset, offset - check)
+            for c in ubyte:
+                print(' ' * (dec+4), '0x{:02X}\t'.format(c), c)
             id = id + 1
         elif area_type == ord('C'):
             area_name = chunk_data[offset:offset+32].decode().strip('\0')

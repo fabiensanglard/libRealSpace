@@ -41,7 +41,7 @@ public:
     void lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t color, int bx1, int bx2, int by1, int by2, int skip);
     void rect_slow(int left, int top, int right, int bottom, uint8_t color);
     void circle_slow(int x,int y, int radius, uint8_t color);
-    void DrawText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, uint32_t size,size_t interLetterSpace, size_t spaceSize);
+    void PrintText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, uint32_t size,size_t interLetterSpace, size_t spaceSize);
     void SwithBuffers();
     void VSync(void);
     

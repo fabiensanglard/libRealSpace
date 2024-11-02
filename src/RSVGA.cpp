@@ -242,7 +242,7 @@ void RSVGA::circle_slow(int x,int y, int radius, uint8_t color) {
     dy=radius * sin(acos(n));
   }
 }
-void RSVGA::DrawText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
+void RSVGA::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
                      size_t interLetterSpace, size_t spaceSize) {
 
     if (text == NULL)
@@ -262,7 +262,7 @@ void RSVGA::DrawText(RSFont *font, Point2D *coo, char *text, uint8_t color, size
         int32_t lineHeight = coo->y;
         coo->y -= shape->GetHeight();
 
-        if (chartoDraw == 'p' || chartoDraw == 'y' || chartoDraw == 'g')
+        if (chartoDraw == 'p' || chartoDraw == 'y' || chartoDraw == 'g' || chartoDraw == 'q' || chartoDraw == 'j')
             coo->y += 1;
         if (chartoDraw == '\n') {
             RLEShape *sp = font->GetShapeForChar('A');

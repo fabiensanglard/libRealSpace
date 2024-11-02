@@ -55,7 +55,7 @@ void SCRenderer::Init(int32_t zoomFactor) {
     glDisable(GL_DEPTH_TEST); // Disable Depth Testing
 
     // camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
-    camera.SetPersective(50.0f, this->width / (float)this->height, 1.0f, MAP_SIZE*3);
+    camera.SetPersective(50.0f, this->width / (float)this->height, 1.0f, MAP_SIZE*6);
 
     light.SetWithCoo(300, 300, 300);
 
@@ -648,77 +648,127 @@ void SCRenderer::RenderBlock(RSArea *area, int LOD, int i, bool renderTexture) {
         RenderQuad(currentVertex, rightVertex, bottomRightVertex, bottomVertex, area, renderTexture);
     }
 }
-
 void SCRenderer::RenderWorldSkyAndGround() {
     static const int max_int = MAP_SIZE;
-
+    int skyblue = 0;
+    int nightblue = 1;
     GLfloat skycolor[2][3] = {
-        {255.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f},
+        {255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f},
         {40.0f / 255.0f, 80.0f / 255.0f, 120.0f / 255.0f},
     };
+
+    /*static GLuint sky1[][4] = {
+        {-max_int*2,		0,			-max_int *2,skyblue},
+        {-max_int*2,		0,			max_int*2 ,	skyblue},
+        {0,					max_int ,	0,			nightblue},
+    };
+    static GLuint sky2[][4] = {
+        {max_int*2 ,		0,			-max_int*2,	skyblue},
+        {max_int*2 ,		0,			max_int*2 ,	skyblue},
+        {0,					max_int,	0,			nightblue},
+    };
+    static GLuint sky3[][4] = {
+        {-max_int*2,		0,			-max_int*2,	skyblue},
+        {max_int*2,			0,			-max_int*2,	skyblue},
+        {0,					max_int,	0,			nightblue},
+    };
+    static GLuint sky4[][4] = {
+        {-max_int*2,		0,			max_int*2 ,	skyblue},
+        {max_int*2,			0,			max_int*2 ,	skyblue},
+        {0,					max_int ,	0,			nightblue},
+    };
+
+    glBegin(GL_POLYGON);
+	for (int i = 0; i < 3; i++) {
+		glColor3f(skycolor[sky1[i][3]][0], skycolor[sky1[i][3]][1], skycolor[sky1[i][3]][2]);
+		glVertex3iv((const GLint *)sky1[i]);
+	}
+	glEnd();
+
+    glBegin(GL_POLYGON);
+	for (int i = 0; i < 3; i++) {
+		glColor3f(skycolor[sky2[i][3]][0], skycolor[sky2[i][3]][1], skycolor[sky2[i][3]][2]);
+		glVertex3iv((const GLint *)sky2[i]);
+	}
+	glEnd();
+
+    glBegin(GL_POLYGON);
+	for (int i = 0; i < 3; i++) {
+		glColor3f(skycolor[sky3[i][3]][0], skycolor[sky3[i][3]][1], skycolor[sky3[i][3]][2]);
+		glVertex3iv((const GLint *)sky3[i]);
+	}
+	glEnd();
+
+    glBegin(GL_POLYGON);
+	for (int i = 0; i < 3; i++) {
+		glColor3f(skycolor[sky4[i][3]][0], skycolor[sky4[i][3]][1], skycolor[sky4[i][3]][2]);
+		glVertex3iv((const GLint *)sky4[i]);
+	}
+	glEnd();*/
 
     glBegin(GL_QUADS);
 
     // sol
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(-max_int, -max_int, -max_int);
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(max_int, -max_int, -max_int);
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(max_int, -max_int, max_int);
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(-max_int, -max_int, max_int);
 
     //ciel
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(-max_int, max_int, -max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(max_int, max_int, -max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(max_int, max_int, max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(-max_int, max_int, max_int);
 
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(-max_int, -max_int, max_int);
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(max_int, -max_int, max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(max_int, max_int, max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(-max_int, max_int, max_int);
 
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(-max_int, -max_int, -max_int);
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(max_int, -max_int, -max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(max_int, max_int, -max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(-max_int, max_int, -max_int);
 
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(-max_int, -max_int, -max_int);
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(-max_int, -max_int, max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(-max_int, max_int, max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(-max_int, max_int, -max_int);
 
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(max_int, -max_int, -max_int);
-    glColor3f(235.0f/255.0f, 253.0f/255.0f, 1.0f);
+    glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(max_int, -max_int, max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(max_int, max_int, max_int);
-    glColor3f(0,0,0.2f);
+    glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
     glVertex3f(max_int, max_int, -max_int);
 
     glEnd();
-
-    glEnable(GL_DEPTH_TEST);
 }
+
+
+
 void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
 
     glMatrixMode(GL_PROJECTION);
@@ -735,12 +785,12 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     GLfloat fogColor[4] = {0.7f, 0.8f, 1.0f, 1.0f};
     float model_view_mat[4][4];
     glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
-    glFogi(GL_FOG_MODE, GL_LINEAR); // Fog Mode
+    glFogi(GL_FOG_MODE, GL_EXP2); // Fog Mode
     glFogfv(GL_FOG_COLOR, fogColor);         // Set Fog Color
-    glFogf(GL_FOG_DENSITY, 0.000005f);       // How Dense Will The Fog Be
+    glFogf(GL_FOG_DENSITY, 0.000009f);       // How Dense Will The Fog Be
     glHint(GL_FOG_HINT, GL_DONT_CARE);       // Fog Hint Value
     glFogf(GL_FOG_START, 5000.0f);           // Fog Start Depth
-    glFogf(GL_FOG_END, 70000.0f);            // Fog End Depth
+    glFogf(GL_FOG_END, 16000.0f);            // Fog End Depth
     glEnable(GL_FOG);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -10,7 +10,6 @@
 
 #include "precomp.h"
 
-
 class SCPilot {
 
 public:
