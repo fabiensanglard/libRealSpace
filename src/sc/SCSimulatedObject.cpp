@@ -1,13 +1,33 @@
 #include "precomp.h"
 
+
+int smmrandom(int maxr) {
+    static unsigned long randx = 1;
+    int n, retval;
+
+    for (n = 1; n < 32 && (1 << n) < maxr; n++)
+        ;
+
+    retval = maxr << 1;
+    while (retval > maxr) {
+        randx = randx * 1103515245 + 12345;
+        retval = (randx & 0x7fffffff) >> (31 - n);
+    }
+    randx = randx * 1103515245 + 12345;
+    if (randx & 0x40000000)
+        return (retval);
+    else
+        return (-retval);
+}
+
 SCSimulatedObject::SCSimulatedObject() {             
     this->LmaxDEF=10.0f;
     this->LminDEF=-7.0f;
 
-    this->s=390.0f;
+    this->s=10.0f;
 
 
-    this->Mthrust=23000.0f;
+    this->Mthrust=0.0f;
     this->b=32.0f;
     this->ie_pi_AR=.93f;
 
@@ -65,11 +85,18 @@ SCSimulatedObject::~SCSimulatedObject() {
 }
 void SCSimulatedObject::Simulate(int tps) {
     float temp{0.0f};
+    int itemp{0};
+    float elevtemp{0.0f};
+
     this->gravity = G_ACC / tps / tps;
     float inverse_mass = G_ACC / this->weight;
+    this->Lmax = this->LmaxDEF * this->gravity;
+    this->Lmin = this->LminDEF * this->gravity;
 
-    /* compute elevation angle*/
-    int itemp = (int)(this->vy - this->elevation_speedf);
+    
+    
+    /* delta */
+    itemp = (int)(this->roll_speed);
     if (itemp != 0) {
         if (itemp >= DELAY || itemp <= -DELAY) {
             itemp /= DELAY;
@@ -77,7 +104,48 @@ void SCSimulatedObject::Simulate(int tps) {
             itemp = itemp > 0 ? 1 : -1;
         }
     }
+    if (this->wing_stall > 0) {
+        itemp >>= this->wing_stall;
+        itemp += smmrandom(this->wing_stall << 3);
+    }
+    this->roll_speed += itemp;
+    
+    itemp = (int)(this->vy - this->elevation_speedf);
+    elevtemp = this->vy - this->elevation_speedf;
+    if (itemp != 0) {
+        if (itemp >= DELAY || itemp <= -DELAY) {
+            itemp /= DELAY;
+        } else {
+            itemp = itemp > 0 ? 1 : -1;
+        }
+    }
+    if (this->wing_stall > 0) {
+        itemp >>= this->wing_stall;
+        elevtemp = elevtemp / powf(2, this->wing_stall);
+        itemp += smmrandom(this->wing_stall * 2);
+        elevtemp += smmrandom(this->wing_stall * 2);
+    }
     this->elevation_speedf += itemp;
+    float aztemp;
+    temp = (2.0f * tps / 20.0f) * this->vx;
+    
+    /* itemp is desired azimuth speed	*/
+    itemp = (int)temp;
+    
+
+    aztemp = temp;
+    /* itemp is now desired-actual		*/
+    itemp -= (int)this->azimuth_speedf;
+    aztemp -= this->azimuth_speedf;
+    if (itemp != 0) {
+        if (itemp >= DELAY || itemp <= -DELAY) {
+            itemp /= DELAY;
+        } else {
+            itemp = itemp > 0 ? 1 : -1;
+        }
+    }
+    this->azimuth_speedf += itemp;
+
 
     if (this->tick_counter % 100 == 0) {
         this->ptw.Identity();

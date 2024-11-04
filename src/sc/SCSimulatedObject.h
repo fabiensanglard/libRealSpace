@@ -42,10 +42,10 @@ class SCSimulatedObject {
     float zdrag{0.0f};
 
      /* max and min coefficient of lift	*/
-    float max_cl{0.0f};
-    float min_cl{0.0f};
+    float max_cl{1.5f};
+    float min_cl{-1.5f};
     /* wing angle tilt due to flaps		*/
-    float tilt_factor{0.0f};
+    float tilt_factor{.017f};
 
     float LminDEF{0.0f};
     float LmaxDEF{0.0f};
@@ -66,7 +66,7 @@ class SCSimulatedObject {
     float mach{0.0f};
     float mratio{0.0f};
     float mcc{0.0f};
-    float wing_stall{0.0f};
+    int wing_stall{0};
     short on_ground{0};
     float lift{0.0f};
 
