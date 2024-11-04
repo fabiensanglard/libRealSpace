@@ -111,8 +111,8 @@ SCPlane::SCPlane() {
  * @param z the initial z position.
  */
 SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELEVF_CSTE, float ROLLFF_CSTE, float s,
-                 float W, float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED, float pilot_y,
-                 float pilot_z, RSArea *area, float x, float y, float z) {
+                 float W, float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED, 
+                 RSArea *area, float x, float y, float z) {
     this->weaps_load.reserve(9);
     this->weaps_load.resize(9);
     this->planeid = 0;
@@ -154,11 +154,7 @@ SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELE
     this->Mthrust = Mthrust;
     this->b = b;
     this->ie_pi_AR = ie_pi_AR;
-    this->MAX_RK = MAX_RK;
-    this->MAX_SW = MAX_SW;
     this->MIN_LIFT_SPEED = MIN_LIFT_SPEED;
-    this->pilot_y = pilot_y;
-    this->pilot_z = pilot_z;
     this->object = nullptr;
     this->area = area;
     this->tps = 30;
@@ -725,6 +721,9 @@ void SCPlane::Simulate() {
             
         }
     }
+    for (auto sim_obj: this->weaps_object) {
+        sim_obj->Simulate(this->tps);
+    }
     this->tick_counter++;
 }
 
@@ -900,4 +899,34 @@ void SCPlane::Render() {
         }
         glPopMatrix();
     }
+}
+void SCPlane::RenderSimulatedObject() {
+    for (auto sim_obj: this->weaps_object) {
+        sim_obj->Render();
+    }
+}
+void SCPlane::Shoot(int weapon_hard_point_id) {
+    SCSimulatedObject *weap = new SCSimulatedObject();
+    if (this->weaps_load[weapon_hard_point_id] == nullptr) {
+        return;
+    }
+    if (this->weaps_load[weapon_hard_point_id]->nb_weap == 0) {
+        weapon_hard_point_id = this->object->entity->hpts.size()-weapon_hard_point_id;
+        if (this->weaps_load[weapon_hard_point_id]->nb_weap == 0) {
+            return;
+        }
+    }
+    this->weaps_load[weapon_hard_point_id]->nb_weap--;
+    weap->obj = this->weaps_load[weapon_hard_point_id]->objct;
+    weap->x = this->x - (this->weaps_load[weapon_hard_point_id]->position.z/250)/COORD_SCALE;
+    weap->y = this->y + (this->weaps_load[weapon_hard_point_id]->position.y/250)/COORD_SCALE;
+    weap->z = this->z + (this->weaps_load[weapon_hard_point_id]->position.x/250)/COORD_SCALE;
+    weap->vx = this->vx;
+    weap->vy = this->vy;
+    weap->vz = this->vz;
+    weap->weight = this->weaps_load[weapon_hard_point_id]->objct->weight_in_kg*2.205f;
+    weap->azimuthf = this->azimuthf;
+    weap->elevationf = this->elevationf;
+    weap->twist = this->twist;
+    this->weaps_object.push_back(weap);
 }

@@ -16,7 +16,7 @@
 
 SCStrike::SCStrike() {
     this->camera_mode = 0;
-    this->camera_pos = {0, 0, 0};
+    this->camera_pos = {16, 2, -29};
     this->counter = 0;
 }
 
@@ -117,6 +117,9 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_F7:
             this->camera_mode = View::TARGET;
+            break;
+        case SDLK_F8:
+            this->camera_mode = View::MISSILE_CAM;
             break;
         case SDLK_KP_8:
             this->camera_pos.z += 1;
@@ -344,6 +347,9 @@ void SCStrike::CheckKeyboard(void) {
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             break;
+        case SDLK_SPACE:
+            this->player_plane->Shoot(this->player_plane->selected_weapon);
+            break;
         case SDLK_t:
             this->current_target = (this->current_target + 1) % this->missionObj->mission_data.parts.size();
         default:
@@ -392,7 +398,7 @@ void SCStrike::SetMission(char const *missionName) {
     this->nav_point_id = 0;
     this->player_plane =
         new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
-                    9.0f, 18.0f, &this->area, newPosition.x, newPosition.y, newPosition.z);
+                    &this->area, newPosition.x, newPosition.y, newPosition.z);
     this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
     this->player_plane->object = playerCoord;
     if (this->area.getY(newPosition.x, newPosition.z) < newPosition.y) {
@@ -454,7 +460,7 @@ void SCStrike::SetMission(char const *missionName) {
                 if (cast->profile != nullptr && cast->profile->ai.isAI && cast->profile->ai.goal.size() > 0) {
                     SCAiPlane *aiPlane = new SCAiPlane();
                     aiPlane->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
-                                                 23000.0f, 32.0f, .93f, 120, 9.0f, 18.0f, &this->area, (float)part->x,
+                                                 23000.0f, 32.0f, .93f, 120, &this->area, (float)part->x,
                                                  (float)part->z, (float)-part->y);
                     aiPlane->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                     aiPlane->pilot = new SCPilot();
@@ -593,7 +599,27 @@ void SCStrike::RunFrame(void) {
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
     }
-
+    break;
+    case View::MISSILE_CAM: {
+        if (this->player_plane->weaps_object.size() == 0) {
+            this->camera_mode = View::FRONT;
+            break;
+        }
+        SCSimulatedObject *missile = this->player_plane->weaps_object.back();
+        if (missile == nullptr) {
+            this->camera_mode = View::FRONT;
+            break;
+        }
+        Vector3D missil_pos{0,0,0};
+        missile->GetPosition(&missil_pos);
+        Vector3D mpos = {
+            missil_pos.x+this->camera_pos.x,
+            missil_pos.y+this->camera_pos.y,
+            missil_pos.z+this->camera_pos.z
+        };
+        camera->SetPosition(&mpos);
+        camera->LookAt(&missil_pos);
+    }
     break;
     case View::EYE_ON_TARGET: {
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
@@ -625,6 +651,7 @@ void SCStrike::RunFrame(void) {
     case View::FRONT:
         this->cockpit->Render(0);
         break;
+    case View::MISSILE_CAM:
     case View::TARGET:
     case View::FOLLOW:
         this->player_plane->Render();
@@ -671,6 +698,7 @@ void SCStrike::RunFrame(void) {
         glPopMatrix();
         break;
     }
+    this->player_plane->RenderSimulatedObject();
     this->RenderMenu();
 }
 
@@ -1016,6 +1044,12 @@ void SCStrike::RenderMenu() {
         ImGui::Text("Q angles [%.3f,%.3f,%.3f] rel %.3f", pitch * 180.0 / M_PI, yawn * 180.0 / M_PI,
                     180.0f - (raw * 180.0 / M_PI),
                     (180.0f - (raw * 180.0 / M_PI)) - (360 - (this->player_plane->azimuthf / 10.0f)));
+        if (ImGui::TreeNode("missiles")) {
+            for (auto missils: this->player_plane->weaps_object) {
+                ImGui::Text("X:%.3f\tY:%.3f\tZ:%.3f\tELEV:%.3f", missils->x, missils->y, missils->z, missils->elevationf);
+            }
+            ImGui::TreePop();
+        }
         ImGui::End();
     }
     if (show_mission) {

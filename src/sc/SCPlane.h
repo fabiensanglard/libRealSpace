@@ -127,19 +127,10 @@ private:
     float Lmin;
     float ELEVF;
     float ROLLF;
-    float pilot_y;
-    float pilot_z;
     float last_zdrag;
 
     short val;
 
-    /* wheel position 	*/
-    /* used only by F16W		*/
-    short wheels_retracting;
-    /* >= 0 if the gear is stuck	*/
-    short landing_gear_stuck;
-    /* TRUE in autopilot mode	*/
-    short autopilot;
     /* TRUE if wing g-limit is hit	*/
     short g_limit;
     /* fuel (0 - 12800)		*/
@@ -148,9 +139,7 @@ private:
     short max_throttle;
     /* lower limit on engines	*/
     short min_throttle;
-    /* max rockets and sidewinders	*/
-    short MAX_RK;
-    short MAX_SW;
+
     /* minimum lift-up speed fps	*/
     short MIN_LIFT_SPEED;
     short last_airspeed;
@@ -243,6 +232,7 @@ public:
 
     float lift;
     std::vector <SCWeaponLoadoutHardPoint *> weaps_load;
+    std::vector <SCSimulatedObject *> weaps_object;
     int selected_weapon{0};
     MISN_PART *object;
 
@@ -252,7 +242,7 @@ public:
 
     SCPlane();
     SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELEVF_CSTE, float ROLLFF_CSTE, float s, float W,
-            float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED, float pilot_y, float pilot_z,
+            float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED,
             RSArea *area, float x, float y, float z);
     ~SCPlane();
     void Init();
@@ -270,6 +260,8 @@ public:
     void Simulate();
     void getPosition(Point3D *position);
     void Render();
+    void RenderSimulatedObject();
+    void Shoot(int weapon_id);
 };
 
 #endif
