@@ -1046,7 +1046,15 @@ void SCStrike::RenderMenu() {
                     (180.0f - (raw * 180.0 / M_PI)) - (360 - (this->player_plane->azimuthf / 10.0f)));
         if (ImGui::TreeNode("missiles")) {
             for (auto missils: this->player_plane->weaps_object) {
-                ImGui::Text("X:%.3f\tY:%.3f\tZ:%.3f\tELEV:%.3f", missils->x, missils->y, missils->z, missils->elevationf);
+                ImGui::Text("VX:%.3f\tVY:%.3f\tVZ:%.3f\ttheta:%.3f\tphi:%.3f\tDrag:%.3f;%.3f", 
+                    missils->vx,
+                    missils->vy,
+                    missils->vz,
+                    missils->elevationf,
+                    missils->azimuthf,
+                    missils->zdrag,
+                    missils->ydrag
+                );
             }
             ImGui::TreePop();
         }

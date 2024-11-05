@@ -24,17 +24,16 @@ SCSimulatedObject::SCSimulatedObject() {
     this->LmaxDEF=10.0f;
     this->LminDEF=-7.0f;
 
-    this->s=10.0f;
+    this->s=1.0f;
 
 
     this->Mthrust=0.0f;
-    this->b=32.0f;
-    this->ie_pi_AR=.93f;
+    this->b=1.0f;
+    this->ie_pi_AR=0.83f;
 
     this->ro2 = .5f * ro[0];
 
     this->twist = 0;
-
 
     /* elevator rate in degrees/sec	*/
     this->ELEVF = 0;
@@ -49,7 +48,6 @@ SCSimulatedObject::SCSimulatedObject() {
     this->ipi_AR = 1.0f / ((float)M_PI * this->b * this->b / this->s);
     /* 1.0 / pi * AR * efficiency	*/
     this->ie_pi_AR = this->ipi_AR / this->ie_pi_AR;
-
 
     this->Lmax = this->LmaxDEF * this->gravity;
     this->Lmin = this->LminDEF * this->gravity;
@@ -95,73 +93,40 @@ void SCSimulatedObject::Simulate(int tps) {
 
     
     
-    /* delta */
-    itemp = (int)(this->roll_speed);
-    if (itemp != 0) {
-        if (itemp >= DELAY || itemp <= -DELAY) {
-            itemp /= DELAY;
-        } else {
-            itemp = itemp > 0 ? 1 : -1;
-        }
-    }
-    if (this->wing_stall > 0) {
-        itemp >>= this->wing_stall;
-        itemp += smmrandom(this->wing_stall << 3);
-    }
-    this->roll_speed += itemp;
-    
-    itemp = (int)(this->vy - this->elevation_speedf);
-    elevtemp = this->vy - this->elevation_speedf;
-    if (itemp != 0) {
-        if (itemp >= DELAY || itemp <= -DELAY) {
-            itemp /= DELAY;
-        } else {
-            itemp = itemp > 0 ? 1 : -1;
-        }
-    }
-    if (this->wing_stall > 0) {
-        itemp >>= this->wing_stall;
-        elevtemp = elevtemp / powf(2, this->wing_stall);
-        itemp += smmrandom(this->wing_stall * 2);
-        elevtemp += smmrandom(this->wing_stall * 2);
-    }
-    this->elevation_speedf += itemp;
-    float aztemp;
-    temp = (2.0f * tps / 20.0f) * this->vx;
-    
-    /* itemp is desired azimuth speed	*/
-    itemp = (int)temp;
-    
+    /* compute polar angle from (vx, vy, vz) vector */
+    float v{0.0f};
+    v = sqrtf(this->vx * this->vx + this->vy * this->vy + this->vz * this->vz);
+    float theta{0.0f};
+    float phi{0.0f};
 
-    aztemp = temp;
-    /* itemp is now desired-actual		*/
-    itemp -= (int)this->azimuth_speedf;
-    aztemp -= this->azimuth_speedf;
-    if (itemp != 0) {
-        if (itemp >= DELAY || itemp <= -DELAY) {
-            itemp /= DELAY;
-        } else {
-            itemp = itemp > 0 ? 1 : -1;
-        }
+    if (v != 0.0) {
+        theta = acosf(-this->vy / v);
+        phi = atan2f(-this->vz, -this->vx);
+    } else {
+        theta = 0.0;
+        phi = 0.0;
     }
-    this->azimuth_speedf += itemp;
-
-
+    this->elevationf = (theta * 180.0f / (float)M_PI) * 10;
+    this->azimuthf = (phi * 180.0f / (float)M_PI) * 10;
+    if (this->azimuthf < 0) {
+        this->azimuthf += 3600;
+    } else if (this->azimuthf >= 3600) {
+        this->azimuthf -= 3600;
+    }
     if (this->tick_counter % 100 == 0) {
         this->ptw.Identity();
         this->ptw.translateM(this->x, this->y, this->z);
-
         this->ptw.rotateM(tenthOfDegreeToRad(this->azimuthf), 0, 1, 0);
         this->ptw.rotateM(tenthOfDegreeToRad(this->elevationf), 1, 0, 0);
         this->ptw.rotateM(tenthOfDegreeToRad(this->twist), 0, 0, 1);
     }
     this->ptw.translateM(this->vx, this->vy, this->vz);
-    if (round(this->azimuth_speedf) != 0)
+    /*if (round(this->azimuth_speedf) != 0)
         this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->azimuth_speedf)), 0, 1, 0);
     if (round(this->elevation_speedf) != 0)
         this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->elevation_speedf)), 1, 0, 0);
     if (round(this->roll_speed) != 0)
-        this->ptw.rotateM(tenthOfDegreeToRad((float)this->roll_speed), 0, 0, 1);
+        this->ptw.rotateM(tenthOfDegreeToRad((float)this->roll_speed), 0, 0, 1);*/
     temp = 0.0f;
     
     this->elevationf = (-asinf(this->ptw.v[2][1]) * 180.0f / (float)M_PI) * 10;
@@ -203,8 +168,8 @@ void SCSimulatedObject::Simulate(int tps) {
     this->y = this->ptw.v[3][1];
     this->z = this->ptw.v[3][2];
 
-    /****************************************************************
-    /*	perform incremental rotations on velocities
+    /****************************************************************/
+    /*	perform incremental rotations on velocities                 */
     /****************************************************************/
 
     this->incremental.Identity();
@@ -278,7 +243,7 @@ void SCSimulatedObject::Simulate(int tps) {
         } else {
             this->mcc = .7833333f - .1666667f * this->Cl;
         }
-        /* and current mach number	*/
+        /* and current mach number */
         this->mach = this->vz / this->sos;
         this->mratio = this->mach / this->mcc;
         if (this->mratio < 1.034f) {
@@ -330,6 +295,7 @@ void SCSimulatedObject::Simulate(int tps) {
     /**/
     this->vx += this->ax;
     this->vz += this->az;
+    this->vy += this->ay;
 
     this->tick_counter++;
 }

@@ -37,9 +37,6 @@ class SCSimulatedObject {
     /* angle of attack for wing		*/
     float ae{0.0f};
 
-    /* drag force in y and z	*/
-    float ydrag{0.0f};
-    float zdrag{0.0f};
 
      /* max and min coefficient of lift	*/
     float max_cl{1.5f};
@@ -83,6 +80,8 @@ public:
     float twist{0.0f};
 
     float weight{1.0f};
+    float ydrag{0.0f};
+    float zdrag{0.0f};
 
     RSEntity *obj;
 
