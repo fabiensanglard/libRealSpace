@@ -129,7 +129,7 @@ void SCSimulatedObject::Simulate(int tps) {
         this->ptw.rotateM(tenthOfDegreeToRad((float)this->roll_speed), 0, 0, 1);*/
     temp = 0.0f;
     
-    /*this->elevationf = (-asinf(this->ptw.v[2][1]) * 180.0f / (float)M_PI) * 10;
+    /*this->elevationf = (-asinf(this->ptw.v[2][1]) * 180.0f / (float)M_PI) * 10;*/
 
     float ascos = 0.0f;
 
@@ -159,7 +159,7 @@ void SCSimulatedObject::Simulate(int tps) {
         if (this->twist < 0) {
             this->twist += 3600.0f;
         }
-    }*/
+    }
     /* save last position	*/
     this->last_px = this->x;
     this->last_py = this->y;

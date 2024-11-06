@@ -924,11 +924,11 @@ void SCPlane::Shoot(int weapon_hard_point_id) {
     weap->vx = this->vx;
     weap->vy = this->vy;
     weap->vz = this->vz;
-    if (weap->vz>1) {
+    /*if (weap->vz>1) {
         weap->vz = 1;
     } else if (weap->vz < -1) {
         weap->vz = -1;
-    }
+    }*/
     weap->weight = this->weaps_load[weapon_hard_point_id]->objct->weight_in_kg*2.205f;
     weap->azimuthf = this->azimuthf;
     weap->elevationf = this->elevationf;
