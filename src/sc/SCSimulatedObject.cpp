@@ -1,5 +1,5 @@
 #include "precomp.h"
-
+#define GRAVITY 32.174 // Accélération due à la gravité en m/s^2
 
 int smmrandom(int maxr) {
     static unsigned long randx = 1;
@@ -81,7 +81,7 @@ SCSimulatedObject::SCSimulatedObject() {
 SCSimulatedObject::~SCSimulatedObject() {
 
 }
-void SCSimulatedObject::Simulate(int tps) {
+void SCSimulatedObject::SimulateWithSameEngineAsPlane(int tps) {
     float temp{0.0f};
     int itemp{0};
     float elevtemp{0.0f};
@@ -91,7 +91,96 @@ void SCSimulatedObject::Simulate(int tps) {
     this->Lmax = this->LmaxDEF * this->gravity;
     this->Lmin = this->LminDEF * this->gravity;
 
-    
+    /* tenths of degrees per tick	*/
+    //this->rollers = (this->ROLLF * ((this->control_stick_x + 8) >> 4));
+    /* delta */
+    itemp = (int)(/*this->rollers * this->vz*/ - this->roll_speed);
+    if (itemp != 0) {
+        if (itemp >= DELAY || itemp <= -DELAY) {
+            itemp /= DELAY;
+        } else {
+            itemp = itemp > 0 ? 1 : -1;
+        }
+    }
+    if (this->wing_stall > 0) {
+        itemp >>= this->wing_stall;
+        itemp += smmrandom(this->wing_stall << 3);
+    }
+    this->roll_speed += itemp;
+    //this->elevator = -1.0f * (this->ELEVF * ((this->control_stick_y + 8) >> 4));
+    itemp = (int)(/*this->elevator * this->vz*/ + this->vy - this->elevation_speedf);
+    elevtemp = /*this->elevator * this->vz*/ + this->vy - this->elevation_speedf;
+    if (itemp != 0) {
+        if (itemp >= DELAY || itemp <= -DELAY) {
+            itemp /= DELAY;
+        } else {
+            itemp = itemp > 0 ? 1 : -1;
+        }
+    }
+    if (this->wing_stall > 0) {
+        itemp >>= this->wing_stall;
+        elevtemp = elevtemp / powf(2, this->wing_stall);
+        itemp += smmrandom(this->wing_stall * 2);
+        elevtemp += smmrandom(this->wing_stall * 2);
+    }
+    this->elevation_speedf += itemp;
+    float aztemp;
+    temp = /*this->rudder * this->vz*/ - (2.0f * tps / 20.0f) * this->vx;
+    if (this->on_ground) {
+        itemp = (int)(16.0f * temp);
+        if (itemp < -MAX_TURNRATE || itemp > MAX_TURNRATE) {
+            /* clip turn rate	*/
+            if (itemp < 0) {
+                itemp = -MAX_TURNRATE;
+            } else {
+                itemp = MAX_TURNRATE;
+            }
+            /* decrease with velocity */
+            if (fabs(this->vz) > 10.0f / tps) {
+                /* skid effect */
+                temp = 0.4f * tps * (/*this->rudder * this->vz*/ - .75f);
+                if (temp < -MAX_TURNRATE || temp > MAX_TURNRATE) {
+                    temp = (float)itemp;
+                }
+                itemp -= (int)temp;
+            }
+        }
+        temp = (float)itemp;
+    } else {
+        /* itemp is desired azimuth speed	*/
+        itemp = (int)temp;
+    }
+
+    aztemp = temp;
+    /* itemp is now desired-actual		*/
+    itemp -= (int)this->azimuth_speedf;
+    aztemp -= this->azimuth_speedf;
+    if (itemp != 0) {
+        if (itemp >= DELAY || itemp <= -DELAY) {
+            itemp /= DELAY;
+        } else {
+            itemp = itemp > 0 ? 1 : -1;
+        }
+    }
+    this->azimuth_speedf += itemp;
+    if (this->on_ground) {
+        /* dont allow negative pitch unless positive elevation	*/
+        if (this->elevation_speedf < 0) {
+            if (this->elevationf <= 0) {
+                this->elevation_speedf = 0;
+            }
+        } else {
+            /* mimic gravitational torque	*/
+            elevtemp = -(this->vz * tps + 1) / 4.0f;
+            if (elevtemp < 0 && this->elevationf <= 0) {
+                elevtemp = 0.0f;
+            }
+            if (this->elevation_speedf > elevtemp) {
+                this->elevation_speedf = elevtemp;
+            }
+        }
+        this->roll_speed = 0;
+    }
     
     /* compute polar angle from (vx, vy, vz) vector */
     float v{0.0f};
@@ -106,13 +195,13 @@ void SCSimulatedObject::Simulate(int tps) {
         theta = 0.0;
         phi = 0.0;
     }
-    this->elevationf = ((1-theta) * 180.0f / (float)M_PI) * 10;
-    this->azimuthf = ((1-phi) * 180.0f / (float)M_PI) * 10;
-    if (this->azimuthf < 0) {
+    //this->elevationf = ((1-theta) * 180.0f / (float)M_PI) * 10;
+    //this->azimuthf = ((1-phi) * 180.0f / (float)M_PI) * 10;
+    /*if (this->azimuthf < 0) {
         this->azimuthf += 3600;
     } else if (this->azimuthf >= 3600) {
         this->azimuthf -= 3600;
-    }
+    }*/
     if (this->tick_counter % 100 == 0) {
         this->ptw.Identity();
         this->ptw.translateM(this->x, this->y, this->z);
@@ -121,15 +210,15 @@ void SCSimulatedObject::Simulate(int tps) {
         this->ptw.rotateM(tenthOfDegreeToRad(this->twist), 0, 0, 1);
     }
     this->ptw.translateM(this->vx, this->vy, this->vz);
-    /*if (round(this->azimuth_speedf) != 0)
+    if (round(this->azimuth_speedf) != 0)
         this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->azimuth_speedf)), 0, 1, 0);
     if (round(this->elevation_speedf) != 0)
         this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->elevation_speedf)), 1, 0, 0);
     if (round(this->roll_speed) != 0)
-        this->ptw.rotateM(tenthOfDegreeToRad((float)this->roll_speed), 0, 0, 1);*/
+        this->ptw.rotateM(tenthOfDegreeToRad((float)this->roll_speed), 0, 0, 1);
     temp = 0.0f;
     
-    /*this->elevationf = (-asinf(this->ptw.v[2][1]) * 180.0f / (float)M_PI) * 10;*/
+    this->elevationf = (-asinf(this->ptw.v[2][1]) * 180.0f / (float)M_PI) * 10;
 
     float ascos = 0.0f;
 
@@ -318,4 +407,64 @@ void SCSimulatedObject::GetPosition(Vector3D *position) {
     position->x = this->x * COORD_SCALE;
     position->y = this->y * COORD_SCALE;
     position->z = this->z * COORD_SCALE;
+}
+// Fonction pour convertir les coordonnées polaires en coordonnées cartésiennes
+Vector3D polarToCartesian(float speed, float phi, float theta) {
+    Vector3D v;
+    v.x = speed * sinf(theta) * cosf(phi);
+    v.y = speed * sinf(theta) * sinf(phi);
+    v.z = speed * cosf(theta);
+    return v;
+}
+
+// Fonction pour convertir les coordonnées cartésiennes en coordonnées polaires
+void cartesianToPolar(Vector3D v, float *phi, float *theta) {
+    *theta = acosf(v.y / sqrtf(v.x * v.x + v.y * v.y + v.z * v.z));
+    *phi = atan2f(v.z, v.x);
+}
+
+// Fonction pour calculer la nouvelle vitesse en tenant compte de la gravité et de la résistance de l'air
+Vector3D calculateNewVelocity(Vector3D velocity, float mass, float dragCoefficient, float deltaTime) {
+    Vector3D newVelocity;
+    float speed = sqrtf((velocity.x*velocity.x) + (velocity.y*velocity.y) + (velocity.z*velocity.z));
+
+    float dragForceX = -dragCoefficient * velocity.x * speed/mass;
+    float dragForceY = -dragCoefficient * velocity.y * speed/mass;
+    float dragForceZ = -dragCoefficient * velocity.z * speed/mass;
+
+    newVelocity.x = velocity.x + dragForceX * deltaTime;
+    newVelocity.y = velocity.y + (-1.0f * GRAVITY + dragForceY) * deltaTime;
+    newVelocity.z = velocity.z + dragForceZ * deltaTime;
+
+    return newVelocity;
+}
+// Fonction pour calculer la magnitude de la vitesse
+float calculateSpeed(Vector3D velocity) {
+    return sqrtf(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+}
+void SCSimulatedObject::Simulate(int tps) {
+    float deltaTime = 1.0f / (float) tps; // Intervalle de temps entre chaque calcul
+
+    Vector3D planeVelocity = {
+        this->vx,
+        this->vy,
+        this->vz
+    };
+    Vector3D newVelocity = calculateNewVelocity(planeVelocity, this->weight, 0.5f, deltaTime);
+    
+    this->x = this->x+newVelocity.x;
+    this->y = this->y+newVelocity.y;
+    this->z = this->z+newVelocity.z;
+
+    this->vx = newVelocity.x;
+    this->vy = newVelocity.y;
+    this->vz = newVelocity.z;
+    float phi, theta;
+    cartesianToPolar(newVelocity, &phi, &theta);
+    speed = calculateSpeed(newVelocity);
+    this->azimuthf = ((M_PI / 2.0f + phi) * 180.0f / (float) M_PI * 10.0f);
+    this->elevationf = (M_PI / 2.0f - theta) * 180.0f / (float) M_PI * 10.0f;
+    if (this->y<0) {
+        this->alive = false;
+    }
 }

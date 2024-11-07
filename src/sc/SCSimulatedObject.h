@@ -82,12 +82,14 @@ public:
     float weight{1.0f};
     float ydrag{0.0f};
     float zdrag{0.0f};
-
+    float speed{0.0f};
+    bool alive{true};
     RSEntity *obj;
 
     SCSimulatedObject();
     ~SCSimulatedObject();
     void Simulate(int tps);
+    void SimulateWithSameEngineAsPlane(int tps);
     void GetPosition(Vector3D *position);
     void Render();
 };

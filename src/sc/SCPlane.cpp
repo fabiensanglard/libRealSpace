@@ -724,6 +724,10 @@ void SCPlane::Simulate() {
     for (auto sim_obj: this->weaps_object) {
         sim_obj->Simulate(this->tps);
     }
+    // remove dead objects
+    this->weaps_object.erase(std::remove_if(this->weaps_object.begin(), this->weaps_object.end(), [](SCSimulatedObject *obj) {
+        return obj->alive == false;
+    }), this->weaps_object.end());
     this->tick_counter++;
 }
 
@@ -921,6 +925,8 @@ void SCPlane::Shoot(int weapon_hard_point_id) {
     weap->x = this->x - (this->weaps_load[weapon_hard_point_id]->position.z/250)/COORD_SCALE;
     weap->y = this->y + (this->weaps_load[weapon_hard_point_id]->position.y/250)/COORD_SCALE;
     weap->z = this->z + (this->weaps_load[weapon_hard_point_id]->position.x/250)/COORD_SCALE;
+    weap->azimuthf = this->azimuthf;
+    weap->elevationf = this->elevationf;
     weap->vx = this->vx;
     weap->vy = this->vy;
     weap->vz = this->vz;
@@ -933,5 +939,6 @@ void SCPlane::Shoot(int weapon_hard_point_id) {
     weap->azimuthf = this->azimuthf;
     weap->elevationf = this->elevationf;
     weap->twist = this->twist;
+    weap->speed = (this->airspeed / this->fps_knots);
     this->weaps_object.push_back(weap);
 }
