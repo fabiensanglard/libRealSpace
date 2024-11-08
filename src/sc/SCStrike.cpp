@@ -347,7 +347,7 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_SPACE:
             {
-                RSEntity *target = this->missionObj->mission_data.parts[this->current_target]->entity;
+                MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
                 this->player_plane->Shoot(this->player_plane->selected_weapon, target);
             }
             break;
@@ -1057,6 +1057,11 @@ void SCStrike::RenderMenu() {
                     missils->zdrag,
                     missils->ydrag
                 );
+                ImGui::Text("X:%.3f\tY:%.3f\tZ:%.3f", missils->x, missils->y, missils->z);
+                if (missils->target != nullptr) {
+                    ImGui::Text("Target X:%.3f\tY:%.3f\tZ:%.3f", missils->target->x/COORD_SCALE, missils->target->z/COORD_SCALE, -missils->target->y/COORD_SCALE);    
+                }
+                
             }
             ImGui::TreePop();
         }

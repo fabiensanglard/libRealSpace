@@ -261,7 +261,7 @@ public:
     void getPosition(Point3D *position);
     void Render();
     void RenderSimulatedObject();
-    void Shoot(int weapon_id, RSEntity *target);
+    void Shoot(int weapon_id, MISN_PART *target);
 };
 
 #endif

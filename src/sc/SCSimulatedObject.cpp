@@ -340,7 +340,7 @@ void SCSimulatedObject::Render() {
     rotation.Clear();
     rotation.Identity();
     rotation.translateM(this->x * COORD_SCALE, this->y * COORD_SCALE, this->z * COORD_SCALE);
-    rotation.rotateM(((this->azimuthf + 900) / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
+    rotation.rotateM(((this->azimuthf) / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
     rotation.rotateM((this->elevationf / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);
     rotation.rotateM(-(this->twist / 10.0f) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
 
@@ -412,36 +412,51 @@ void SCSimulatedObject::SimulateWithNewEngine(int tps) {
         0.0f
     };
     if (this->target != nullptr) {
-        to_target.x = this->target->position.x - this->x;
-        to_target.y = this->target->position.y - this->y;
-        to_target.z = this->target->position.z - this->z;
+        to_target.x = (this->target->x/COORD_SCALE - this->x)*deltaTime;
+        to_target.y = (this->target->z/COORD_SCALE - this->y)*deltaTime;
+        to_target.z = (-this->target->y/COORD_SCALE - this->z)*deltaTime;
     }
-    cartesianToPolar(planeVelocity, &phi, &theta);
+    float target_distance = sqrt(to_target.x * to_target.x + to_target.y * to_target.y + to_target.z * to_target.z);
+
+    if (target_distance > 0.0f) {
+        to_target.x = to_target.x / target_distance;
+        to_target.y = to_target.y / target_distance;
+        to_target.z = to_target.z / target_distance;
+    }
+
+    /*cartesianToPolar(planeVelocity, &phi, &theta);
     float target_phi, target_theta;
     cartesianToPolar(to_target, &target_phi, &target_theta);
-    float to_add_phi = target_phi - phi;
-    to_add_phi = std::clamp(to_add_phi, -0.1f, 0.1f);
-    float to_add_theta = target_theta - theta;
-    to_add_theta = std::clamp(to_add_theta, -0.1f, 0.1f);
-    phi = phi + to_add_phi;
-    theta = theta + to_add_theta;
+
     float radaz, radel;
     radaz = (((this->azimuthf / 10.0f) * M_PI / 180.0f)) - M_PI;
     radel = (this->elevationf / 10.0f) * M_PI / 180.0f;
+    */
     float thrust = 0.0f;
     if (this->obj->dynn_miss != nullptr) {
-        thrust = (float)this->obj->dynn_miss->velovity_m_per_sec*100.0f;
+        thrust = (float)this->obj->dynn_miss->velovity_m_per_sec*20;
     }
-    Vector3D thrust_v = decompose_thrust(thrust, phi, (M_PI/2.0f)-theta);
-    Vector3D newVelocity = calculateNewVelocity(planeVelocity, this->weight, 0.4f, 0.00005f, deltaTime, thrust_v);
     
+    Vector3D thrust_v {
+        thrust * deltaTime * to_target.x,
+        thrust * deltaTime * to_target.y,
+        thrust * deltaTime * to_target.z
+    };
+    //Vector3D newVelocity = calculateNewVelocity(planeVelocity, this->weight, 0.4f, 0.00005f, deltaTime, thrust_v);
+    Vector3D newVelocity {
+        thrust_v.x,
+        thrust_v.y,
+        thrust_v.z
+    };
     this->x = this->x+newVelocity.x;
     this->y = this->y+newVelocity.y;
     this->z = this->z+newVelocity.z;
-
+    this->vx = newVelocity.x;
+    this->vy = newVelocity.y;
+    this->vz = newVelocity.z;
     cartesianToPolar(newVelocity, &phi, &theta);
     speed = calculateSpeed(newVelocity);
-    float new_az = ((M_PI-(float) phi) * 180.0f / (float) M_PI * 10.0f);
+    float new_az = 3600-((M_PI-(float) phi) * 180.0f / (float) M_PI * 10.0f);
     this->azimuthf = new_az;
     this->elevationf = (M_PI/2.0 - (float) theta) * 180.0f / (float) M_PI * 10.0f;
     if (this->y<0) {

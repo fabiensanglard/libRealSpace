@@ -912,7 +912,7 @@ void SCPlane::RenderSimulatedObject() {
         sim_obj->Render();
     }
 }
-void SCPlane::Shoot(int weapon_hard_point_id, RSEntity *target) {
+void SCPlane::Shoot(int weapon_hard_point_id, MISN_PART *target) {
     SCSimulatedObject *weap = new SCSimulatedObject();
     if (this->weaps_load[weapon_hard_point_id] == nullptr) {
         return;
