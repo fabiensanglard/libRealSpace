@@ -84,6 +84,15 @@ void SCStrike::CheckKeyboard(void) {
                 this->cockpit->radar_zoom = 4;
             }
             break;
+        case SDL_SCANCODE_W:
+            if (this->cockpit->show_weapons) {
+                this->player_plane->selected_weapon = (this->player_plane->selected_weapon+1) % 5;
+                this->mfd_timeout = 400;
+            } else {
+                this->cockpit->show_weapons = !this->cockpit->show_weapons;
+                this->mfd_timeout = 400;
+            }
+            break;
         default:
             break;
         }
@@ -311,17 +320,6 @@ void SCStrike::CheckKeyboard(void) {
             this->cockpit->comm_target = 0;
             this->mfd_timeout = 400;
             break;
-        case SDLK_w:
-            if (this->cockpit->show_weapons) {
-                this->player_plane->selected_weapon = (this->player_plane->selected_weapon+1) % 5;
-                this->mfd_timeout = 400;
-            } else {
-                this->cockpit->show_weapons = !this->cockpit->show_weapons;
-                this->mfd_timeout = 400;
-            }
-            
-            
-            break;
         case SDLK_r:
             this->cockpit->show_radars = !this->cockpit->show_radars;
             break;
@@ -348,10 +346,14 @@ void SCStrike::CheckKeyboard(void) {
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             break;
         case SDLK_SPACE:
-            this->player_plane->Shoot(this->player_plane->selected_weapon);
+            {
+                RSEntity *target = this->missionObj->mission_data.parts[this->current_target]->entity;
+                this->player_plane->Shoot(this->player_plane->selected_weapon, target);
+            }
             break;
         case SDLK_t:
             this->current_target = (this->current_target + 1) % this->missionObj->mission_data.parts.size();
+            break;
         default:
             break;
         }

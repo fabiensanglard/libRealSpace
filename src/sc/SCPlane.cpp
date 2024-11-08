@@ -728,6 +728,9 @@ void SCPlane::Simulate() {
     this->weaps_object.erase(std::remove_if(this->weaps_object.begin(), this->weaps_object.end(), [](SCSimulatedObject *obj) {
         return obj->alive == false;
     }), this->weaps_object.end());
+    this->object->entity->position.x = this->x;
+    this->object->entity->position.y = this->y;
+    this->object->entity->position.z = this->z;
     this->tick_counter++;
 }
 
@@ -909,7 +912,7 @@ void SCPlane::RenderSimulatedObject() {
         sim_obj->Render();
     }
 }
-void SCPlane::Shoot(int weapon_hard_point_id) {
+void SCPlane::Shoot(int weapon_hard_point_id, RSEntity *target) {
     SCSimulatedObject *weap = new SCSimulatedObject();
     if (this->weaps_load[weapon_hard_point_id] == nullptr) {
         return;
@@ -927,9 +930,9 @@ void SCPlane::Shoot(int weapon_hard_point_id) {
     weap->z = this->z + (this->weaps_load[weapon_hard_point_id]->position.x/250)/COORD_SCALE;
     weap->azimuthf = this->azimuthf;
     weap->elevationf = this->elevationf;
-    weap->vx = this->vx;
-    weap->vy = this->vy;
-    weap->vz = this->vz;
+    weap->vx = this->x - this->last_px;
+    weap->vy = this->y - this->last_py;
+    weap->vz = this->z - this->last_pz;
     /*if (weap->vz>1) {
         weap->vz = 1;
     } else if (weap->vz < -1) {
@@ -939,6 +942,7 @@ void SCPlane::Shoot(int weapon_hard_point_id) {
     weap->azimuthf = this->azimuthf;
     weap->elevationf = this->elevationf;
     weap->twist = this->twist;
+    weap->target = target;
     weap->speed = (this->airspeed / this->fps_knots);
     this->weaps_object.push_back(weap);
 }

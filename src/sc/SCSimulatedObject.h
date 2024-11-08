@@ -85,11 +85,12 @@ public:
     float speed{0.0f};
     bool alive{true};
     RSEntity *obj;
-
+    RSEntity *target{nullptr};
     SCSimulatedObject();
     ~SCSimulatedObject();
     void Simulate(int tps);
     void SimulateWithSameEngineAsPlane(int tps);
+    void SimulateWithNewEngine(int tps);
     void GetPosition(Vector3D *position);
     void Render();
 };

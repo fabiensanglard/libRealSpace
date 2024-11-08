@@ -1,6 +1,5 @@
 #include "precomp.h"
-#define GRAVITY 32.174 // Accélération due à la gravité en m/s^2
-
+#define GRAVITY 32.174f
 int smmrandom(int maxr) {
     static unsigned long randx = 1;
     int n, retval;
@@ -24,12 +23,12 @@ SCSimulatedObject::SCSimulatedObject() {
     this->LmaxDEF=10.0f;
     this->LminDEF=-7.0f;
 
-    this->s=1.0f;
+    this->s=0.0f;
 
 
     this->Mthrust=0.0f;
-    this->b=1.0f;
-    this->ie_pi_AR=0.83f;
+    this->b=0.0f;
+    
 
     this->ro2 = .5f * ro[0];
 
@@ -92,22 +91,7 @@ void SCSimulatedObject::SimulateWithSameEngineAsPlane(int tps) {
     this->Lmin = this->LminDEF * this->gravity;
 
     /* tenths of degrees per tick	*/
-    //this->rollers = (this->ROLLF * ((this->control_stick_x + 8) >> 4));
-    /* delta */
-    itemp = (int)(/*this->rollers * this->vz*/ - this->roll_speed);
-    if (itemp != 0) {
-        if (itemp >= DELAY || itemp <= -DELAY) {
-            itemp /= DELAY;
-        } else {
-            itemp = itemp > 0 ? 1 : -1;
-        }
-    }
-    if (this->wing_stall > 0) {
-        itemp >>= this->wing_stall;
-        itemp += smmrandom(this->wing_stall << 3);
-    }
-    this->roll_speed += itemp;
-    //this->elevator = -1.0f * (this->ELEVF * ((this->control_stick_y + 8) >> 4));
+    
     itemp = (int)(/*this->elevator * this->vz*/ + this->vy - this->elevation_speedf);
     elevtemp = /*this->elevator * this->vz*/ + this->vy - this->elevation_speedf;
     if (itemp != 0) {
@@ -119,7 +103,7 @@ void SCSimulatedObject::SimulateWithSameEngineAsPlane(int tps) {
     }
     if (this->wing_stall > 0) {
         itemp >>= this->wing_stall;
-        elevtemp = elevtemp / powf(2, this->wing_stall);
+        elevtemp = elevtemp / powf(2, (float) this->wing_stall);
         itemp += smmrandom(this->wing_stall * 2);
         elevtemp += smmrandom(this->wing_stall * 2);
     }
@@ -163,45 +147,7 @@ void SCSimulatedObject::SimulateWithSameEngineAsPlane(int tps) {
         }
     }
     this->azimuth_speedf += itemp;
-    if (this->on_ground) {
-        /* dont allow negative pitch unless positive elevation	*/
-        if (this->elevation_speedf < 0) {
-            if (this->elevationf <= 0) {
-                this->elevation_speedf = 0;
-            }
-        } else {
-            /* mimic gravitational torque	*/
-            elevtemp = -(this->vz * tps + 1) / 4.0f;
-            if (elevtemp < 0 && this->elevationf <= 0) {
-                elevtemp = 0.0f;
-            }
-            if (this->elevation_speedf > elevtemp) {
-                this->elevation_speedf = elevtemp;
-            }
-        }
-        this->roll_speed = 0;
-    }
     
-    /* compute polar angle from (vx, vy, vz) vector */
-    float v{0.0f};
-    v = sqrtf(this->vx * this->vx + this->vy * this->vy + this->vz * this->vz);
-    float theta{0.0f};
-    float phi{0.0f};
-
-    if (v != 0.0) {
-        theta = acosf(-this->vy / v);
-        phi = atan2f(-this->vz, -this->vx);
-    } else {
-        theta = 0.0;
-        phi = 0.0;
-    }
-    //this->elevationf = ((1-theta) * 180.0f / (float)M_PI) * 10;
-    //this->azimuthf = ((1-phi) * 180.0f / (float)M_PI) * 10;
-    /*if (this->azimuthf < 0) {
-        this->azimuthf += 3600;
-    } else if (this->azimuthf >= 3600) {
-        this->azimuthf -= 3600;
-    }*/
     if (this->tick_counter % 100 == 0) {
         this->ptw.Identity();
         this->ptw.translateM(this->x, this->y, this->z);
@@ -416,55 +362,92 @@ Vector3D polarToCartesian(float speed, float phi, float theta) {
     v.z = speed * cosf(theta);
     return v;
 }
-
+#define EPSILON 1e-10 // Tolérance pour les très petits nombres
 // Fonction pour convertir les coordonnées cartésiennes en coordonnées polaires
 void cartesianToPolar(Vector3D v, float *phi, float *theta) {
     *theta = acosf(v.y / sqrtf(v.x * v.x + v.y * v.y + v.z * v.z));
-    *phi = atan2f(v.z, v.x);
+    *phi = atan2f(v.z, v.x) * 2.0f;
+    
 }
 
 // Fonction pour calculer la nouvelle vitesse en tenant compte de la gravité et de la résistance de l'air
-Vector3D calculateNewVelocity(Vector3D velocity, float mass, float dragCoefficient, float deltaTime) {
+Vector3D calculateNewVelocity(Vector3D velocity, float mass, float dragCoefficient, float lift_coefficient , float deltaTime, Vector3D thrust_v) {
     Vector3D newVelocity;
-    float speed = sqrtf((velocity.x*velocity.x) + (velocity.y*velocity.y) + (velocity.z*velocity.z));
+    
+    float lift = lift_coefficient * velocity.y;
+    float dragForceX = -dragCoefficient * velocity.x;
+    float dragForceY = -dragCoefficient * velocity.y;
+    float dragForceZ = -dragCoefficient * velocity.z;
 
-    float dragForceX = -dragCoefficient * velocity.x * speed/mass;
-    float dragForceY = -dragCoefficient * velocity.y * speed/mass;
-    float dragForceZ = -dragCoefficient * velocity.z * speed/mass;
-
-    newVelocity.x = velocity.x + dragForceX * deltaTime;
-    newVelocity.y = velocity.y + (-1.0f * GRAVITY + dragForceY) * deltaTime;
-    newVelocity.z = velocity.z + dragForceZ * deltaTime;
+    newVelocity.x = velocity.x + (dragForceX+thrust_v.x/mass) * deltaTime;
+    newVelocity.y = velocity.y + (-1.0f * GRAVITY + lift + dragForceY + thrust_v.y/mass) * deltaTime;
+    newVelocity.z = velocity.z + (dragForceZ + thrust_v.z/mass) * deltaTime;
 
     return newVelocity;
+}
+Vector3D decompose_thrust(double thrust, double azimuth_rad, double elevation_rad) {
+    // Conversion des angles en radians
+    Vector3D thrust_vector;
+    // Décomposition de la force de poussée
+    thrust_vector.x = (float) (thrust * cos(elevation_rad) * sin(azimuth_rad));
+    thrust_vector.y = (float) (thrust * sin(elevation_rad));
+    thrust_vector.z = (float) (thrust * cos(elevation_rad) * cos(azimuth_rad));
+    return thrust_vector;
 }
 // Fonction pour calculer la magnitude de la vitesse
 float calculateSpeed(Vector3D velocity) {
     return sqrtf(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
 }
-void SCSimulatedObject::Simulate(int tps) {
+void SCSimulatedObject::SimulateWithNewEngine(int tps) {
     float deltaTime = 1.0f / (float) tps; // Intervalle de temps entre chaque calcul
-
+    float phi, theta;
     Vector3D planeVelocity = {
         this->vx,
         this->vy,
         this->vz
     };
-    Vector3D newVelocity = calculateNewVelocity(planeVelocity, this->weight, 0.5f, deltaTime);
+    Vector3D to_target = {
+        0.0f,
+        0.0f,
+        0.0f
+    };
+    if (this->target != nullptr) {
+        to_target.x = this->target->position.x - this->x;
+        to_target.y = this->target->position.y - this->y;
+        to_target.z = this->target->position.z - this->z;
+    }
+    cartesianToPolar(planeVelocity, &phi, &theta);
+    float target_phi, target_theta;
+    cartesianToPolar(to_target, &target_phi, &target_theta);
+    float to_add_phi = target_phi - phi;
+    to_add_phi = std::clamp(to_add_phi, -0.1f, 0.1f);
+    float to_add_theta = target_theta - theta;
+    to_add_theta = std::clamp(to_add_theta, -0.1f, 0.1f);
+    phi = phi + to_add_phi;
+    theta = theta + to_add_theta;
+    float radaz, radel;
+    radaz = (((this->azimuthf / 10.0f) * M_PI / 180.0f)) - M_PI;
+    radel = (this->elevationf / 10.0f) * M_PI / 180.0f;
+    float thrust = 0.0f;
+    if (this->obj->dynn_miss != nullptr) {
+        thrust = (float)this->obj->dynn_miss->velovity_m_per_sec*100.0f;
+    }
+    Vector3D thrust_v = decompose_thrust(thrust, phi, (M_PI/2.0f)-theta);
+    Vector3D newVelocity = calculateNewVelocity(planeVelocity, this->weight, 0.4f, 0.00005f, deltaTime, thrust_v);
     
     this->x = this->x+newVelocity.x;
     this->y = this->y+newVelocity.y;
     this->z = this->z+newVelocity.z;
 
-    this->vx = newVelocity.x;
-    this->vy = newVelocity.y;
-    this->vz = newVelocity.z;
-    float phi, theta;
     cartesianToPolar(newVelocity, &phi, &theta);
     speed = calculateSpeed(newVelocity);
-    this->azimuthf = ((M_PI / 2.0f + phi) * 180.0f / (float) M_PI * 10.0f);
-    this->elevationf = (M_PI / 2.0f - theta) * 180.0f / (float) M_PI * 10.0f;
+    float new_az = ((M_PI-(float) phi) * 180.0f / (float) M_PI * 10.0f);
+    this->azimuthf = new_az;
+    this->elevationf = (M_PI/2.0 - (float) theta) * 180.0f / (float) M_PI * 10.0f;
     if (this->y<0) {
         this->alive = false;
     }
+}
+void SCSimulatedObject::Simulate(int tps) {
+    this->SimulateWithNewEngine(tps);
 }
