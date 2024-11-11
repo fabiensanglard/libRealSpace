@@ -1048,18 +1048,17 @@ void SCStrike::RenderMenu() {
                     (180.0f - (raw * 180.0 / M_PI)) - (360 - (this->player_plane->azimuthf / 10.0f)));
         if (ImGui::TreeNode("missiles")) {
             for (auto missils: this->player_plane->weaps_object) {
-                ImGui::Text("VX:%.3f\tVY:%.3f\tVZ:%.3f\ttheta:%.3f\tphi:%.3f\tDrag:%.3f;%.3f", 
+                ImGui::Text("VX:%.3f\tVY:%.3f\tVZ:%.3f\televation:%.3f\tazimut:%.3f\tspeed%.3f", 
                     missils->vx,
                     missils->vy,
                     missils->vz,
                     missils->elevationf,
                     missils->azimuthf,
-                    missils->zdrag,
-                    missils->ydrag
+                    Vector3D(missils->vx, missils->vy, missils->vz).Norm()
                 );
-                ImGui::Text("X:%.3f\tY:%.3f\tZ:%.3f", missils->x, missils->y, missils->z);
+                ImGui::Text("X:%.3f\tY:%.3f\tZ:%.3f", missils->x+ 180000.0f, missils->y, missils->z+ 180000.0f);
                 if (missils->target != nullptr) {
-                    ImGui::Text("Target X:%.3f\tY:%.3f\tZ:%.3f", missils->target->x/COORD_SCALE, missils->target->z/COORD_SCALE, -missils->target->y/COORD_SCALE);    
+                    ImGui::Text("Target X:%d\tY:%d\tZ:%d", missils->target->x+ 180000, missils->target->z, -(missils->target->y)+ 180000);    
                 }
                 
             }

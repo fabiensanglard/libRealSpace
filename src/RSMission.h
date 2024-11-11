@@ -46,6 +46,7 @@ struct MISN_PART {
     uint16_t pitch{0};
     std::vector<uint8_t> unknown_bytes;
     RSEntity *entity;
+    bool alive{true};
 };
 
 struct SPOT {

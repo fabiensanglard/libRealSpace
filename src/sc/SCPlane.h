@@ -116,10 +116,8 @@ private:
     /* 1.0 / mass of plane			*/
     float inverse_mass;
     /* plane design parameters	*/
-    float s;
-    float W;
-    float Mthrust;
-    float b;
+    
+    
     float Cdp;
     float ipi_AR;
     float ie_pi_AR;
@@ -177,6 +175,11 @@ private:
     int wheel_anim{10};
 public:
 
+    float s;
+    float b;
+    float W;
+    float Mthrust;
+    
     float elevation_speedf;
     float azimuth_speedf;
 

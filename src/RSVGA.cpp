@@ -239,7 +239,7 @@ void RSVGA::circle_slow(int x,int y, int radius, uint8_t color) {
     frameBuffer[offset+dy+dxoffset] = color;  /* octant 7 */
     dx++;
     n+=invradius;
-    dy=radius * sin(acos(n));
+    dy=radius * (int) sinf(acosf(n));
   }
 }
 void RSVGA::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,

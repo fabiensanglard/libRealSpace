@@ -161,8 +161,6 @@ void Matrix::translateM(float x, float y, float z) {
 }
 
 void Matrix::rotateM(float radangle, float x, float y, float z) {
-    Matrix mxrot;
-
 	Matrix xrot = { { 
 		{1					,0				,0					,0},
 		{0					,cosf(radangle)	,sinf(radangle)		,0},

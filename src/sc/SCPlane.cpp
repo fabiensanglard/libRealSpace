@@ -918,31 +918,29 @@ void SCPlane::Shoot(int weapon_hard_point_id, MISN_PART *target) {
         return;
     }
     if (this->weaps_load[weapon_hard_point_id]->nb_weap == 0) {
-        weapon_hard_point_id = this->object->entity->hpts.size()-weapon_hard_point_id;
+        weapon_hard_point_id = (int) this->object->entity->hpts.size()-weapon_hard_point_id;
         if (this->weaps_load[weapon_hard_point_id]->nb_weap == 0) {
             return;
         }
     }
     this->weaps_load[weapon_hard_point_id]->nb_weap--;
     weap->obj = this->weaps_load[weapon_hard_point_id]->objct;
-    weap->x = this->x - (this->weaps_load[weapon_hard_point_id]->position.z/250)/COORD_SCALE;
+    /*weap->x = this->x - (this->weaps_load[weapon_hard_point_id]->position.z/250)/COORD_SCALE;
     weap->y = this->y + (this->weaps_load[weapon_hard_point_id]->position.y/250)/COORD_SCALE;
-    weap->z = this->z + (this->weaps_load[weapon_hard_point_id]->position.x/250)/COORD_SCALE;
+    weap->z = this->z + (this->weaps_load[weapon_hard_point_id]->position.x/250)/COORD_SCALE;*/
+
+    weap->x = this->x* COORD_SCALE;
+    weap->y = this->y* COORD_SCALE;
+    weap->z = this->z* COORD_SCALE;
     weap->azimuthf = this->azimuthf;
     weap->elevationf = this->elevationf;
-    weap->vx = this->x - this->last_px;
-    weap->vy = this->y - this->last_py;
-    weap->vz = this->z - this->last_pz;
-    /*if (weap->vz>1) {
-        weap->vz = 1;
-    } else if (weap->vz < -1) {
-        weap->vz = -1;
-    }*/
+    weap->vx = (this->x - this->last_px)* COORD_SCALE;
+    weap->vy = (this->y - this->last_py)* COORD_SCALE;
+    weap->vz = (this->z - this->last_pz)* COORD_SCALE;
+
     weap->weight = this->weaps_load[weapon_hard_point_id]->objct->weight_in_kg*2.205f;
     weap->azimuthf = this->azimuthf;
     weap->elevationf = this->elevationf;
-    weap->twist = this->twist;
     weap->target = target;
-    weap->speed = (this->airspeed / this->fps_knots);
     this->weaps_object.push_back(weap);
 }
