@@ -51,9 +51,8 @@ Vector3D polarToCartesian(float speed, float phi, float theta) {
 #define EPSILON 1e-10 // Tolérance pour les très petits nombres
 // Fonction pour convertir les coordonnées cartésiennes en coordonnées polaires
 void cartesianToPolar(Vector3D v, float *phi, float *theta) {
+    *phi = atan2f(v.x, v.z);
     *theta = acosf(v.y / sqrtf(v.x * v.x + v.y * v.y + v.z * v.z));
-    *phi = atan2f(v.z, v.x) * 2.0f;
-    
 }
 
 // Calcul de la norme d'un vecteur
@@ -141,12 +140,7 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
     float azimut = 0.0f;
     float elevation = 0.0f;
     cartesianToPolar(velocity, &azimut, &elevation);
-    this->azimuthf = (float)(azimut-M_PI_2);
-    if (this->azimuthf > M_PI * 2.0f) {
-        this->azimuthf -= M_PI * 2.0f;
-    } else if (this->azimuthf < 0.0f) {
-        this->azimuthf += M_PI * 2.0f;
-    }
+    this->azimuthf = (float)(azimut);
     this->elevationf = (float)(M_PI_2-elevation);
     this->vx = velocity.x;
     this->vy = velocity.y;
