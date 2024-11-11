@@ -140,7 +140,7 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
     float azimut = 0.0f;
     float elevation = 0.0f;
     cartesianToPolar(velocity, &azimut, &elevation);
-    this->azimuthf = (float)(azimut);
+    this->azimuthf = (float)(azimut - M_PI_2);
     this->elevationf = (float)(M_PI_2-elevation);
     this->vx = velocity.x;
     this->vy = velocity.y;
