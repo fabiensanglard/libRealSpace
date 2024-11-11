@@ -9,6 +9,7 @@ class SCSimulatedObject {
 
     Vector3D SCSimulatedObject::calculate_drag(Vector3D velocity);
     Vector3D SCSimulatedObject::calculate_lift(Vector3D velocity);
+    int tps{30};
 public:
     float x{0.0f};
     float y{0.0f};

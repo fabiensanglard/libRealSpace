@@ -71,7 +71,7 @@ Vector3D SCSimulatedObject::calculate_drag(Vector3D velocity) {
     return velocity * (-drag_magnitude / speed);
 }
 Vector3D SCSimulatedObject::calculate_lift(Vector3D velocity) {
-    float speed = velocity.Norm();
+    float speed = velocity.Norm()*tps*3.2808399f;
     int itemp;
     itemp = ((int)this->y) >> 10;
     if (itemp > 74) {
@@ -79,8 +79,8 @@ Vector3D SCSimulatedObject::calculate_lift(Vector3D velocity) {
     } else if (itemp < 0) {
         itemp = 0;
     }
-    float lift_magnitude = 0.5f * ro[itemp] * powf(speed,2) * LIFT_COEFFICIENT * CROSS_SECTIONAL_AREA;
-    if (lift_magnitude< this->weight * GRAVITY) {
+    float lift_magnitude = 0.5f * (ro[itemp]*tps) * powf(speed,2) * LIFT_COEFFICIENT * CROSS_SECTIONAL_AREA;
+    if (lift_magnitude> this->weight * GRAVITY) {
         lift_magnitude = this->weight * GRAVITY;
     }
     Vector3D lift_direction = {
@@ -89,8 +89,9 @@ Vector3D SCSimulatedObject::calculate_lift(Vector3D velocity) {
     return lift_direction;
 }
 void SCSimulatedObject::SimulateWithVector(int tps) {
+    this->tps = tps;
     float deltaTime = 1.0f / (float) tps;
-    float thrust = 0.0f;
+    float thrust = 1.0f;
     if (this->obj->dynn_miss != nullptr) {
         thrust = (float)this->obj->dynn_miss->velovity_m_per_sec*3.2808399f;
     }
@@ -129,12 +130,12 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
     }
     // Force de poussée ajustée en fonction de la direction de l'erreur
     Vector3D thrust_force = error * (thrust / error.Norm());
-
+    Vector3D other_way;
+    error.Normalize();
+    other_way = (error * thrust);
     Vector3D total_force = gravity_force + drag_force + lift_force + thrust_force;
     Vector3D acceleration = total_force * (1.0f/ this->weight);
-    velocity = (velocity+(acceleration*deltaTime)).limit(MAX_VELOCITY);
-    error.Normalize();
-    velocity = (error * thrust)*deltaTime;
+    velocity = (velocity+(acceleration*deltaTime)).limit(acceleration.Norm());
     position = position+velocity;
     
     float azimut = 0.0f;
@@ -148,7 +149,9 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
     this->x = position.x;
     this->y = position.y;
     this->z = position.z;
-    
+    if (this->y < 0) {
+        this->alive = false;
+    }
 
 }
 void SCSimulatedObject::Simulate(int tps) {
