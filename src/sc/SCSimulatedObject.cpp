@@ -1,9 +1,9 @@
 #include "precomp.h"
 #define GRAVITY 32.174f
-#define DRAG_COEFFICIENT 0.47f  // Coefficient de traînée
+#define DRAG_COEFFICIENT 0.10f  // Coefficient de traînée
 #define CROSS_SECTIONAL_AREA 0.1f  // Section transversale (m^2)
-#define LIFT_COEFFICIENT  0.5f
-#define MAX_VELOCITY 15.0  // Vitesse maximale autorisée en m/s
+#define LIFT_COEFFICIENT  5.0f
+#define MAX_VELOCITY 2000.0f  // Vitesse maximale autorisée en m/s
 
 SCSimulatedObject::SCSimulatedObject() {             
 
@@ -14,6 +14,15 @@ SCSimulatedObject::SCSimulatedObject() {
 
     this->azimuthf = 0.0f;
     this->elevationf = 0.0f;
+    char *smoke = "..\\..\\DATA\\OBJECTS\\SMOKEGEN.IFF";
+    TreArchive tre;
+    tre.InitFromFile("OBJECTS.TRE");
+    TreEntry *smoke_entry = tre.GetEntryByName(smoke);
+    
+    this->smoke = new RSEntity();
+    this->smoke->InitFromRAM(smoke_entry->data, smoke_entry->size);
+    this->smoke_positions.clear();
+    this->smoke_positions.reserve(20);
 
 }
 SCSimulatedObject::~SCSimulatedObject() {
@@ -31,9 +40,20 @@ void SCSimulatedObject::Render() {
     rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
     
     glMultMatrixf((float *)rotation.v);
-    
     Renderer.DrawModel(this->obj, LOD_LEVEL_MAX);
     glPopMatrix();
+
+    for (auto pos: this->smoke_positions) {
+        glPushMatrix();
+        Matrix smoke_rotation;
+        smoke_rotation.Clear();
+        smoke_rotation.Identity();
+        smoke_rotation.translateM(pos.x, pos.y, pos.z);
+        smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
+        glMultMatrixf((float *)smoke_rotation.v);
+        Renderer.DrawModel(this->smoke, LOD_LEVEL_MAX);
+        glPopMatrix();
+    }
 }
 void SCSimulatedObject::GetPosition(Vector3D *position) {
     position->x = this->x;
@@ -93,7 +113,7 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
     float deltaTime = 1.0f / (float) tps;
     float thrust = 1.0f;
     if (this->obj->dynn_miss != nullptr) {
-        thrust = (float)this->obj->dynn_miss->velovity_m_per_sec*3.2808399f;
+        thrust = (float)this->obj->dynn_miss->velovity_m_per_sec*1000.0f;
     }
     Vector3D position = {
         this->x,
@@ -135,7 +155,11 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
     other_way = (error * thrust);
     Vector3D total_force = gravity_force + drag_force + lift_force + thrust_force;
     Vector3D acceleration = total_force * (1.0f/ this->weight);
-    velocity = (velocity+(acceleration*deltaTime)).limit(acceleration.Norm());
+    velocity = (velocity+(acceleration*deltaTime)).limit(MAX_VELOCITY*deltaTime);
+    this->smoke_positions.push_back(position);
+    if (this->smoke_positions.size() > 20) {
+        this->smoke_positions.erase(this->smoke_positions.begin());
+    }
     position = position+velocity;
     
     float azimut = 0.0f;
@@ -152,7 +176,6 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
     if (this->y < 0) {
         this->alive = false;
     }
-
 }
 void SCSimulatedObject::Simulate(int tps) {
     this->SimulateWithVector(tps);

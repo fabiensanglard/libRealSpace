@@ -6,12 +6,12 @@ from mpl_toolkits.mplot3d import Axes3D
 GRAVITY = 9.81  # Accélération due à la gravité (m/s^2)
 AIR_DENSITY = 1.225  # Densité de l'air (kg/m^3)
 DRAG_COEFFICIENT = 0.47  # Coefficient de traînée
-CROSS_SECTIONAL_AREA = 0.1  # Section transversale (m^2)
+CROSS_SECTIONAL_AREA = 0.38  # Section transversale (m^2)
 TIME_STEP = 0.01  # Pas de temps pour l'intégration (s)
 PROXIMITY_THRESHOLD = 10.0  # Distance en dessous de laquelle la vitesse est réduite
-LIFT_COEFFICIENT = 0.5  # Coefficient de portance
+LIFT_COEFFICIENT = 800  # Coefficient de portance
 MAX_DISTANCE = 1e6  # Distance maximale pour éviter les valeurs trop grandes
-MAX_VELOCITY = 80.0  # Vitesse maximale autorisée en m/s
+MAX_VELOCITY = 200  
 
 # PID constants
 Kp = 0.5  # Gain proportionnel
@@ -19,8 +19,8 @@ Ki = 0.1  # Gain intégral
 Kd = 0.1  # Gain dérivé
 
 # Initialisation
-mass = 10.0  # Masse du missile en kg
-thrust = 90.0  # Poussée du missile en Newtons
+mass = 85.0  # Masse du missile en kg
+thrust = 17000  # Poussée du missile en Newtons
 
 # Classes et fonctions
 class Vector3D:
@@ -55,18 +55,19 @@ def calculate_drag(velocity):
 def calculate_lift(velocity):
     speed = velocity.norm()
     lift_magnitude = 0.5 * AIR_DENSITY * speed**2 * LIFT_COEFFICIENT * CROSS_SECTIONAL_AREA
-    # lift_magnitude = mass * GRAVITY
+    if lift_magnitude > mass * GRAVITY:
+        lift_magnitude = mass * GRAVITY
     return Vector3D(0.0, lift_magnitude, 0.0)  # Supposons que la portance compense la gravité sur l'axe Y
 
 def update_target_position(target, time):
-    target.x += 10 * math.sin(0.001 * time)
-    target.y += -10 * math.cos(0.001 * time)
+    target.x += 10 * math.sin(0.01 * time)* TIME_STEP
+    target.y += 10 * math.cos(0.01 * time)* TIME_STEP
     target.z -= 10 * TIME_STEP  # Déplacement constant vers l'avant
-    return target.limit(MAX_VELOCITY*20.0)
+    return target
 
-position = Vector3D(500.0, 1000.0, 1000.0)  # Position initiale
+position = Vector3D(18000.0, 4000.0, 1000.0)  # Position initiale
 velocity = Vector3D(0.0, 0.0, -22.0)  # Vitesse initiale
-target = Vector3D(1000.0, 0.0, -1000.0)  # Position initiale de la cible
+target = Vector3D(-18000.0, 4000, -1000.0)  # Position initiale de la cible
 
 # Initialisation du PID
 previous_error = Vector3D(0.0, 0.0, 0.0)
@@ -77,36 +78,32 @@ positions = []
 target_positions = []
 
 time = 0.0  # Temps initial
-time_max = 15000
+time_max = 30000
 while position.sub(target).norm() > 1.0 and time_max > 0 and position.y > 0:  # Tolérance pour atteindre la cible
     positions.append((position.x, position.y, position.z))
     target_positions.append((target.x, target.y, target.z))
     
-    # target = update_target_position(target, time)  # Mettre à jour la position de la cible
+    target = update_target_position(target, time)  # Mettre à jour la position de la cible
     
     gravity_force = Vector3D(0.0, -mass * GRAVITY, 0.0)  # Gravité sur l'axe Y
     drag_force = calculate_drag(velocity)
     lift_force = calculate_lift(velocity)  # Portance pour compenser la gravité
     
     # Calcul de l'erreur de guidage
-    error = target.sub(position).limit(MAX_DISTANCE)
-    integral = integral.add(error.scale(TIME_STEP))
-    derivative = error.sub(previous_error).scale(1 / TIME_STEP)
+    error = target.sub(position)
     previous_error = error
     
     # Calcul de l'accélération de guidage PID
     guidance_acceleration = error #.scale(Kp).add(integral.scale(Ki)).add(derivative.scale(Kd))
     
-    
-    
     # Force de poussée ajustée en fonction de la direction de l'erreur
     thrust_force = guidance_acceleration.scale(thrust / guidance_acceleration.norm())
     
     total_force = gravity_force.add(drag_force).add(thrust_force).add(lift_force)
-    acceleration = total_force.scale(1.0 / mass).limit(MAX_DISTANCE)
+    acceleration = total_force.scale(1.0 / mass)
     
-    velocity = velocity.add(acceleration.scale(TIME_STEP)).limit(MAX_VELOCITY)  # Limiter la vitesse maximale
-    position = position.add(velocity.scale(TIME_STEP)).limit(MAX_DISTANCE)
+    velocity = velocity.add(acceleration.scale(TIME_STEP)).limit(MAX_VELOCITY*TIME_STEP)  # Limiter la vitesse maximale
+    position = position.add(velocity)
 
     time += TIME_STEP
     print(f"Position: ({position.x}, {position.y}, {position.z})")

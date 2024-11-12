@@ -10,6 +10,8 @@ class SCSimulatedObject {
     Vector3D SCSimulatedObject::calculate_drag(Vector3D velocity);
     Vector3D SCSimulatedObject::calculate_lift(Vector3D velocity);
     int tps{30};
+    RSEntity *smoke{nullptr};
+    std::vector<Vector3D> smoke_positions;
 public:
     float x{0.0f};
     float y{0.0f};

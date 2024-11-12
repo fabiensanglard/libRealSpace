@@ -647,7 +647,7 @@ void SCStrike::RunFrame(void) {
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     Renderer.RenderMissionObjects(missionObj);
-
+    this->player_plane->RenderSimulatedObject();
     this->cockpit->cam = camera;
     switch (this->camera_mode) {
     case View::FRONT:
@@ -700,7 +700,7 @@ void SCStrike::RunFrame(void) {
         glPopMatrix();
         break;
     }
-    this->player_plane->RenderSimulatedObject();
+    
     this->RenderMenu();
 }
 
