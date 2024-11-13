@@ -927,18 +927,18 @@ void SCPlane::RenderSmoke() {
         smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
         glMultMatrixf((float *)smoke_rotation.v);
         glBegin(GL_QUADS);
-        glColor4f(0.5f,0.5f,0.5f, alpha);
-        glVertex3f(1.0f,-1.0f,-1.0f);
-        glVertex3f(1.0f,1.0f,-1.0f);
-        glVertex3f(-1.0f,1.0f,-1.0f);
-        glVertex3f(-1.0f,-1.0f,1.0f);
+        glColor4f(0.4f,0.4f,0.4f, alpha);
+        glVertex3f(2.0f,-2.0f,-2.0f);
+        glVertex3f(2.0f,2.0f,-2.0f);
+        glVertex3f(-2.0f,2.0f,-2.0f);
+        glVertex3f(-2.0f,-2.0f,2.0f);
         glEnd();
         glBegin(GL_QUADS);
-        glColor4f(0.5f,0.5f,0.5f, alpha);
-        glVertex3f(-1.0f,-1.0f,-1.0f);
-        glVertex3f(-1.0f,1.0f,-1.0f);
-        glVertex3f(1.0f,1.0f,1.0f);
-        glVertex3f(1.0f,-1.0f,1.0f);
+        glColor4f(0.4f,0.4f,0.4f, alpha);
+        glVertex3f(-2.0f,-2.0f,-2.0f);
+        glVertex3f(-2.0f,2.0f,-2.0f);
+        glVertex3f(2.0f,2.0f,2.0f);
+        glVertex3f(2.0f,-2.0f,2.0f);
         glEnd();
         glPopMatrix();
     }

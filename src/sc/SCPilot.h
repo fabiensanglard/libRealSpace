@@ -11,7 +11,8 @@
 #include "precomp.h"
 
 class SCPilot {
-
+private:
+    bool alive{true};
 public:
 
     int target_speed;

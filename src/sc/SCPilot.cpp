@@ -18,13 +18,21 @@ SCPilot::~SCPilot() {}
 
 
 void SCPilot::AutoPilot() {
-
+    if (!this->alive) {
+        return;
+    }
     if (!this->plane->object->alive) {
         this->plane->Mthrust = 0;
-        this->plane->s = 0.001;
-        this->plane->b = 0.001;
-        this->plane->SetThrottle(0);
+        this->plane->s = 0.001f;
+        this->plane->b = 0.001f;
+        this->target_speed = 0;
+        this->target_climb = 0;
+        this->target_azimut = 0;
         this->plane->SetSpoilers();
+        this->plane->vz /= 1.5f;
+        this->plane->vy *=1.05f;
+        this->plane->SetThrottle(0);
+        this->alive = false;
     }
     if (this->plane == nullptr) {
         return;
