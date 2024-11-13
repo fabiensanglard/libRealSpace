@@ -42,8 +42,11 @@ void SCSimulatedObject::Render() {
     glMultMatrixf((float *)rotation.v);
     Renderer.DrawModel(this->obj, LOD_LEVEL_MAX);
     glPopMatrix();
-
+    size_t cpt=this->smoke_positions.size();
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
     for (auto pos: this->smoke_positions) {
+        float alpha = 0.6f * ((float) cpt / (1.0f*(float)this->smoke_positions.size()));
         glPushMatrix();
         Matrix smoke_rotation;
         smoke_rotation.Clear();
@@ -52,14 +55,14 @@ void SCSimulatedObject::Render() {
         smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
         glMultMatrixf((float *)smoke_rotation.v);
         glBegin(GL_QUADS);
-        glColor3f(1.0f,1.0f,1.0f);
+        glColor4f(1.0f,1.0f,1.0f, alpha);
         glVertex3f(1.0f,-1.0f,-1.0f);
         glVertex3f(1.0f,1.0f,-1.0f);
         glVertex3f(-1.0f,1.0f,-1.0f);
         glVertex3f(-1.0f,-1.0f,1.0f);
         glEnd();
         glBegin(GL_QUADS);
-        glColor3f(1.0f,1.0f,1.0f);
+        glColor4f(1.0f,1.0f,1.0f, alpha);
         glVertex3f(-1.0f,-1.0f,-1.0f);
         glVertex3f(-1.0f,1.0f,-1.0f);
         glVertex3f(1.0f,1.0f,1.0f);
@@ -67,6 +70,7 @@ void SCSimulatedObject::Render() {
         glEnd();
         glPopMatrix();
     }
+    glDisable( GL_BLEND );
 }
 void SCSimulatedObject::GetPosition(Vector3D *position) {
     position->x = this->x;
