@@ -14,13 +14,7 @@ SCSimulatedObject::SCSimulatedObject() {
 
     this->azimuthf = 0.0f;
     this->elevationf = 0.0f;
-    char *smoke = "..\\..\\DATA\\OBJECTS\\SMOKEGEN.IFF";
-    TreArchive tre;
-    tre.InitFromFile("OBJECTS.TRE");
-    TreEntry *smoke_entry = tre.GetEntryByName(smoke);
     
-    this->smoke = new RSEntity();
-    this->smoke->InitFromRAM(smoke_entry->data, smoke_entry->size);
     this->smoke_positions.clear();
     this->smoke_positions.reserve(20);
 

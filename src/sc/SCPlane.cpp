@@ -731,6 +731,12 @@ void SCPlane::Simulate() {
     this->object->entity->position.x = this->x;
     this->object->entity->position.y = this->y;
     this->object->entity->position.z = this->z;
+    if (this->object->alive == false) {
+        this->smoke_positions.push_back({this->x, this->y, this->z});
+        if (this->smoke_positions.size() > 100) {
+            this->smoke_positions.erase(this->smoke_positions.begin());
+        }
+    }
     this->tick_counter++;
 }
 
@@ -906,6 +912,37 @@ void SCPlane::Render() {
         }
         glPopMatrix();
     }
+}
+void SCPlane::RenderSmoke() {
+    size_t cpt=this->smoke_positions.size();
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    for (auto pos: this->smoke_positions) {
+        float alpha = 0.6f * ((float) cpt / (1.0f*(float)this->smoke_positions.size()));
+        glPushMatrix();
+        Matrix smoke_rotation;
+        smoke_rotation.Clear();
+        smoke_rotation.Identity();
+        smoke_rotation.translateM(pos.x*COORD_SCALE, pos.y*COORD_SCALE, pos.z*COORD_SCALE);
+        smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
+        glMultMatrixf((float *)smoke_rotation.v);
+        glBegin(GL_QUADS);
+        glColor4f(0.5f,0.5f,0.5f, alpha);
+        glVertex3f(1.0f,-1.0f,-1.0f);
+        glVertex3f(1.0f,1.0f,-1.0f);
+        glVertex3f(-1.0f,1.0f,-1.0f);
+        glVertex3f(-1.0f,-1.0f,1.0f);
+        glEnd();
+        glBegin(GL_QUADS);
+        glColor4f(0.5f,0.5f,0.5f, alpha);
+        glVertex3f(-1.0f,-1.0f,-1.0f);
+        glVertex3f(-1.0f,1.0f,-1.0f);
+        glVertex3f(1.0f,1.0f,1.0f);
+        glVertex3f(1.0f,-1.0f,1.0f);
+        glEnd();
+        glPopMatrix();
+    }
+    glDisable( GL_BLEND );
 }
 void SCPlane::RenderSimulatedObject() {
     for (auto sim_obj: this->weaps_object) {

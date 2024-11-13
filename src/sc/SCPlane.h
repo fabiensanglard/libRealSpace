@@ -173,6 +173,8 @@ private:
     int spoilers;
     int wheel_index{0};
     int wheel_anim{10};
+
+    std::vector<Vector3D> smoke_positions;
 public:
 
     float s;
@@ -264,6 +266,7 @@ public:
     void getPosition(Point3D *position);
     void Render();
     void RenderSimulatedObject();
+    void RenderSmoke(); 
     void Shoot(int weapon_id, MISN_PART *target);
 };
 
