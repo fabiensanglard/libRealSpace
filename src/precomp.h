@@ -69,6 +69,7 @@ extern "C" {
     #include "IffLexer.h"
 
     #include "RSPalette.h"
+    #include "RSSmokeSet.h"
     #include "RSEntity.h"
     #include "RSMusic.h"
     #include "RSSound.h"

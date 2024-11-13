@@ -16,7 +16,8 @@ files = [
     "PLAQUES.IFF",
     "NAVMAP.IFF",
     "PALETTE.IFF",
-    "F16-CKPT.IFF"
+    "F16-CKPT.IFF",
+    "SMOKESET.IFF"
 ]
 
 
@@ -153,7 +154,11 @@ def parse_iff_filereader(f, file_path, dec=0):
                         b"CHUD",
                         b"REAL",
                         b"MWRN",
-                    ]
+                    ],
+                "SMOKESET.IFF":
+                    [
+
+                    ],
             }
 
             if chunk_type in subType[file_path]:
@@ -260,4 +265,4 @@ def extract_bin_to_file(chunk_data):
         f.write(chunk_data)
 
 
-parse_iff_file(files[15])
+parse_iff_file(files[16])
