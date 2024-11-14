@@ -174,7 +174,9 @@ private:
     int wheel_index{0};
     int wheel_anim{10};
 
+    SCSmokeSet *smoke_set{nullptr};
     std::vector<Vector3D> smoke_positions;
+    
 public:
 
     float s;

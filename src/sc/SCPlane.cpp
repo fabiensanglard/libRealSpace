@@ -231,6 +231,8 @@ void SCPlane::Init() {
     this->control_stick_y = 0;
     this->ptw.Clear();
     this->incremental.Clear();
+    this->smoke_set = new SCSmokeSet();
+    this->smoke_set->Init();
 }
 /**
  * Simulate the plane's motion.

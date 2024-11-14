@@ -30,7 +30,7 @@
 #include "main.h"
 
 // Simulation
-
+#include "SCSmokeSet.h"
 #include "SCSimulatedObject.h"
 #include "SCPlane.h"
 #include "SCPilot.h"

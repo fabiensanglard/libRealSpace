@@ -2,7 +2,7 @@
 #include "precomp.h"
 
 class RSSmokeSet {
-    std::vector<RSImageSet*> images;
+    
     void parseSMOK(uint8_t* data, size_t size);
     void parseSMOK_INFO(uint8_t* data, size_t size);
     void parseSMOK_TYPE(uint8_t* data, size_t size);
@@ -16,4 +16,5 @@ public:
     RSSmokeSet();
     ~RSSmokeSet();
     void InitFromRam(uint8_t* data, size_t size);
+    std::vector<RSImageSet*> images;
 };

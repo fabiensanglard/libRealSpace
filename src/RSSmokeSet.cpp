@@ -34,7 +34,13 @@ void RSSmokeSet::parseSMOK_TYPE_SHAP(uint8_t* data, size_t size){
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSSmokeSet::parseSMOK_TYPE_SHAP_SHAP(uint8_t* data, size_t size){
-    
+    RSImageSet *img_set = new RSImageSet();
+    PakArchive pak;
+    uint8_t* data2 = (uint8_t*) malloc(size);
+    memcpy(data2, data, size);
+    pak.InitFromRAM("SHAPE", data2, size-1);
+    img_set->InitFromSubPakEntry(&pak);
+    this->images.push_back(img_set);
 }
 void RSSmokeSet::parseSMOK_INFO(uint8_t* data, size_t size){
     
