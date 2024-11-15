@@ -3,14 +3,15 @@
 
 struct texture {
     GLuint texture_id{0};
-    Texel *data{nullptr};
+    uint8_t *data{nullptr};
+    bool initialized{false};
 };
 
 class SCSmokeSet {
     RSSmokeSet *smoke_set;
-    std::vector<texture *> textures;
     VGAPalette palette;
 public: 
+    std::vector<texture *> textures;
     SCSmokeSet();
     ~SCSmokeSet();
     void Init();

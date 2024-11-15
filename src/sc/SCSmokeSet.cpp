@@ -23,33 +23,37 @@ void SCSmokeSet::Init(){
     RSSmokeSet *smoke_set = new RSSmokeSet();
     smoke_set->InitFromRam(smk->data, smk->size);
     this->smoke_set = smoke_set;
-    
-    /*for (auto img_set: this->smoke_set->images) {
-        for (int i=0; i<img_set->GetNumImages(); i++) {
+    int qsdf = 0;
+    RSImageSet *img_set = this->smoke_set->images[0];
+    //for (auto img_set: this->smoke_set->images) {
+        size_t numimages = img_set->GetNumImages();
+        for (size_t i=0; i<numimages; i++) {
             RLEShape *img = img_set->GetShape(i);
-            size_t imgsize = img->GetWidth()*img->GetHeight();
-            byte *imgdata = new byte[imgsize];
+            size_t imgsize = 320*200;
+            byte *imgdata = (byte *)malloc(imgsize);
             size_t byteRead = 0;
             img->Expand(imgdata, &byteRead);
+            if (byteRead > imgsize) {
+                printf("RLEShape::Expand failed\n");
+            }
             texture *tex = new texture();
-            glGenTextures(1, &tex->texture_id);
-            tex->data = new Texel[imgsize];
+            tex->data = (uint8_t *)malloc(imgsize*4);
 
-            Texel *dst = tex->data;
-            for (size_t i = 0; i < imgsize; i++) {
-                Texel *rgba = this->palette.GetRGBColor(imgdata[i]);
-                if (imgdata[i] == 255) {
+            byte *dst = tex->data;
+            long checksum = 0;
+            for (size_t j = 0; j < imgsize; j++) {
+                Texel *rgba = this->palette.GetRGBColor(imgdata[j]);
+                if (imgdata[j] == 255) {
                     rgba->a = 0;
                 }
-                *dst = *rgba;
-                dst++;
+                dst[0] = rgba->r;
+                dst[1] = rgba->g;
+                dst[2] = rgba->b;
+                dst[3] = rgba->a;
+                dst += 4;
             }
-
-            glBindTexture(GL_TEXTURE_2D, tex->texture_id);
-            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-            
+            tex->initialized = false;
             this->textures.push_back(tex);
         }
-    }*/
+    //}
 }
