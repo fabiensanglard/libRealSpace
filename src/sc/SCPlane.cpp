@@ -937,8 +937,8 @@ void SCPlane::RenderSmoke() {
         smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
 
         glMultMatrixf((float *)smoke_rotation.v);
-        if (this->smoke_set->textures[cpt]->initialized == false) {
-            glGenTextures(1, &smoke_set->textures[cpt]->texture_id);
+        if (this->smoke_set->textures[0]->initialized == false) {
+            glGenTextures(1, &smoke_set->textures[0]->texture_id);
             glBindTexture(GL_TEXTURE_2D, smoke_set->textures[cpt]->texture_id);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -947,40 +947,38 @@ void SCPlane::RenderSmoke() {
 
             // Upload pixels into texture
             glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->smoke_set->textures[cpt]->width, this->smoke_set->textures[cpt]->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                    smoke_set->textures[cpt]->data);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->smoke_set->textures[0]->width, this->smoke_set->textures[cpt]->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                    smoke_set->textures[0]->data);
             
-            this->smoke_set->textures[cpt]->initialized = true;
+            this->smoke_set->textures[0]->initialized = true;
         } else {
-            glBindTexture(GL_TEXTURE_2D, smoke_set->textures[cpt]->texture_id);
+            glBindTexture(GL_TEXTURE_2D, smoke_set->textures[0]->texture_id);
         }
-        
+        float smoke_size = 4.0f * ((this->smoke_positions.size()-cpt)/(1.0f*this->smoke_positions.size())) + 1.0f;
         glBegin(GL_QUADS);
         glColor4f(1.0f,1.0f,1.0f,0.0f);
         glTexCoord2f (0.0, 0.0);
-        glVertex3f(4.0f,-4.0f,-4.0f);
+        glVertex3f(smoke_size,-smoke_size,-smoke_size);
         glTexCoord2f (1.0, 0.0);
-        glVertex3f(4.0f,4.0f,-4.0f);
+        glVertex3f(smoke_size,smoke_size,-smoke_size);
         glTexCoord2f (1.0, 1.0);
-        glVertex3f(-4.0f,4.0f,-4.0f);
+        glVertex3f(-smoke_size,smoke_size,-smoke_size);
         glTexCoord2f (0.0, 1.0);
-        glVertex3f(-4.0f,-4.0f,4.0f);
+        glVertex3f(-smoke_size,-smoke_size,smoke_size);
         glEnd();
         glBegin(GL_QUADS);
         glColor4f(1.0f,1.0f,1.0f,0.0f);
         glTexCoord2f (0.0, 0.0);
-        glVertex3f(-4.0f,-4.0f,-4.0f);
+        glVertex3f(-smoke_size,-smoke_size,-smoke_size);
         glTexCoord2f (1.0, 0.0);
-        glVertex3f(-4.0f,4.0f,-4.0f);
+        glVertex3f(-smoke_size,smoke_size,-smoke_size);
         glTexCoord2f (1.0, 1.0);
-        glVertex3f(4.0f,4.0f,4.0f);
+        glVertex3f(smoke_size,smoke_size,smoke_size);
         glTexCoord2f (0.0, 1.0);
-        glVertex3f(4.0f,-4.0f,4.0f);
+        glVertex3f(smoke_size,-smoke_size,smoke_size);
         glEnd();
         glPopMatrix();
-        if (cpt>=smoke_set->textures.size()) {
-            cpt = smoke_set->textures.size()-1;
-        }
+        cpt++;
     }
     glDisable( GL_BLEND );
     glDisable(GL_TEXTURE_2D);
