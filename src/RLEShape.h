@@ -14,10 +14,39 @@
 #include "Maths.h"
 
 class RLEShape{
+private:
+    enum FragmentType {FRAG_END,FRAG_COMPOSITE,FRAG_RAW} ;
+    enum FragmentSubType {SUB_FRAG_RAW =0x0, SUB_FRAG_COMPRESSED=0x1} ;
 
+    typedef struct RLEFragment{
+        FragmentType type;
+        bool isCompressed;
+        uint16_t numTexels;
+        
+        int16_t dx;
+        int16_t dy;
+    } RLEFragment;
+
+    ByteStream stream;
+    size_t size;
+    
+    int16_t leftDist;
+    int16_t topDist;
+    int16_t rightDist;
+    int16_t botDist;
+    uint8_t colorOffset;
+    
+    
+    void ReadFragment  (RLEFragment* frag);
+    bool ExpandFragment(RLEFragment* frag, uint8_t* dst );
+    bool ExpandFragmentWithBox(RLEFragment* frag, uint8_t* dst, int bx1, int bx2, int by1, int by2 );
+    bool WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color);
+    bool WriteColorWithBox(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color, int bx1, int bx2, int by1, int by2);
     
 public:
-    
+    Point2D position;
+    Point2D buffer_size{320,200};
+    uint8_t* data;
      RLEShape();
     ~RLEShape();
     
@@ -33,8 +62,6 @@ public:
     inline void SetPositionX(int32_t x){
         this->position.x = x;
     }
-
-    
     static RLEShape* GetEmptyShape(void);
     
     int32_t GetWidth(void){ return leftDist + this->rightDist;}
@@ -42,43 +69,7 @@ public:
     int32_t GetTop(void){ return topDist;}
     int32_t GetLeft(void) { return leftDist;}
     int32_t GetBottom(void){ return botDist;}
-    
-    
-    
     void SetColorOffset(uint8_t offset){ this->colorOffset = offset;}
-    Point2D position;
-private:
-    
-    ByteStream stream;
-    size_t size;
-    
-    
-    uint8_t* data;
-    
-    enum FragmentType {FRAG_END,FRAG_COMPOSITE,FRAG_RAW} ;
-    enum FragmentSubType {SUB_FRAG_RAW =0x0, SUB_FRAG_COMPRESSED=0x1} ;
-    
-    typedef struct RLEFragment{
-        FragmentType type;
-        bool isCompressed;
-        uint16_t numTexels;
-        
-        int16_t dx;
-        int16_t dy;
-    } RLEFragment;
-    
-    
-    void ReadFragment  (RLEFragment* frag);
-    bool ExpandFragment(RLEFragment* frag, uint8_t* dst );
-    bool ExpandFragmentWithBox(RLEFragment* frag, uint8_t* dst, int bx1, int bx2, int by1, int by2 );
 
-    int16_t leftDist;
-    int16_t topDist;
-    int16_t rightDist;
-    int16_t botDist;
-    
-    uint8_t colorOffset;
-    bool WriteColor(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color);
-    bool WriteColorWithBox(uint8_t* dst,int16_t dx, int16_t dy, uint8_t color, int bx1, int bx2, int by1, int by2);
 };
 

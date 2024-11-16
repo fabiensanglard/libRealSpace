@@ -646,6 +646,7 @@ void SCStrike::RunFrame(void) {
     }
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
+    
     Renderer.RenderMissionObjects(missionObj);
     for (auto aiPlane : this->ai_planes) {
         if (aiPlane->object->alive == false) {
@@ -708,6 +709,7 @@ void SCStrike::RunFrame(void) {
     
     this->RenderMenu();
 }
+
 
 void SCStrike::RenderMenu() {
     ImGui_ImplOpenGL2_NewFrame();

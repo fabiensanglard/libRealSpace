@@ -922,13 +922,11 @@ void SCPlane::Render() {
 }
 void SCPlane::RenderSmoke() {
     size_t cpt=0;
-    int error = glGetError();
-    if (error != GL_NO_ERROR) {
-        printf("error %d\n", error);
-    }
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    //glEnable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
     glEnable(GL_BLEND);
     for (auto pos: this->smoke_positions) {
         glPushMatrix();
@@ -939,47 +937,53 @@ void SCPlane::RenderSmoke() {
         smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
 
         glMultMatrixf((float *)smoke_rotation.v);
-        /*if (this->smoke_set->textures[cpt]->initialized == false) {
+        if (this->smoke_set->textures[cpt]->initialized == false) {
             glGenTextures(1, &smoke_set->textures[cpt]->texture_id);
             glBindTexture(GL_TEXTURE_2D, smoke_set->textures[cpt]->texture_id);
-            
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+            // Upload pixels into texture
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->smoke_set->textures[cpt]->width, this->smoke_set->textures[cpt]->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                     smoke_set->textures[cpt]->data);
             
             this->smoke_set->textures[cpt]->initialized = true;
         } else {
             glBindTexture(GL_TEXTURE_2D, smoke_set->textures[cpt]->texture_id);
-        }*/
+        }
         
         glBegin(GL_QUADS);
         glColor4f(1.0f,1.0f,1.0f,0.0f);
         glTexCoord2f (0.0, 0.0);
-        glVertex3f(2.0f,-2.0f,-2.0f);
+        glVertex3f(4.0f,-4.0f,-4.0f);
         glTexCoord2f (1.0, 0.0);
-        glVertex3f(2.0f,2.0f,-2.0f);
+        glVertex3f(4.0f,4.0f,-4.0f);
         glTexCoord2f (1.0, 1.0);
-        glVertex3f(-2.0f,2.0f,-2.0f);
+        glVertex3f(-4.0f,4.0f,-4.0f);
         glTexCoord2f (0.0, 1.0);
-        glVertex3f(-2.0f,-2.0f,2.0f);
+        glVertex3f(-4.0f,-4.0f,4.0f);
         glEnd();
         glBegin(GL_QUADS);
         glColor4f(1.0f,1.0f,1.0f,0.0f);
         glTexCoord2f (0.0, 0.0);
-        glVertex3f(-2.0f,-2.0f,-2.0f);
+        glVertex3f(-4.0f,-4.0f,-4.0f);
         glTexCoord2f (1.0, 0.0);
-        glVertex3f(-2.0f,2.0f,-2.0f);
+        glVertex3f(-4.0f,4.0f,-4.0f);
         glTexCoord2f (1.0, 1.0);
-        glVertex3f(2.0f,2.0f,2.0f);
+        glVertex3f(4.0f,4.0f,4.0f);
         glTexCoord2f (0.0, 1.0);
-        glVertex3f(2.0f,-2.0f,2.0f);
+        glVertex3f(4.0f,-4.0f,4.0f);
         glEnd();
         glPopMatrix();
-        cpt++;
         if (cpt>=smoke_set->textures.size()) {
             cpt = smoke_set->textures.size()-1;
         }
     }
     glDisable( GL_BLEND );
+    glDisable(GL_TEXTURE_2D);
 }
 void SCPlane::RenderSimulatedObject() {
     for (auto sim_obj: this->weaps_object) {

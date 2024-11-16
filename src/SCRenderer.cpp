@@ -147,7 +147,6 @@ void SCRenderer::GetNormal(RSEntity *object, Triangle *triangle, Vector3D *norma
 }
 
 void SCRenderer::DrawModel(RSEntity *object, size_t lodLevel) {
-
     if (!initialized)
         return;
 
@@ -261,10 +260,9 @@ void SCRenderer::DrawModel(RSEntity *object, size_t lodLevel) {
     typedef void(APIENTRY * PFNGLBLENDEQUATIONPROC)(GLenum mode);
     PFNGLBLENDEQUATIONPROC glBlendEquation = NULL;
     glBlendEquation = (PFNGLBLENDEQUATIONPROC)wglGetProcAddress("glBlendEquation");
-    glBlendEquation(GL_ADD);
+    glBlendEquation(GL_FUNC_ADD);
     // glDepthFunc(GL_LESS);
 #endif
-
     for (int i = 0; i < lod->numTriangles; i++) {
 
         uint16_t triangleID = lod->triangleIDs[i];
@@ -770,7 +768,6 @@ void SCRenderer::RenderWorldSkyAndGround() {
 
 
 void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
-
     glMatrixMode(GL_PROJECTION);
     Matrix *projectionMatrix = camera.GetProjectionMatrix();
     glLoadMatrixf(projectionMatrix->ToGL());
@@ -815,7 +812,6 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     for (int i = 0; i < BLOCKS_PER_MAP; i++) {
         RenderBlock(area, LOD, i, true);
     }
-
     for (auto const &x : textureSortedVertex) {
         RSImage *image = NULL;
         image = area->GetImageByID(x.first);
@@ -838,17 +834,13 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
         glEnd();
     }
     glDisable(GL_TEXTURE_2D);
-
     RenderMapOverlay(area);
-
     RenderObjects(area, 0);
-
     
     glDisable(GL_FOG);
 }
 
 void SCRenderer::RenderObjects(RSArea *area, size_t blockID) {
-
     float y = 0;
     for (auto object : area->objects) {
 
