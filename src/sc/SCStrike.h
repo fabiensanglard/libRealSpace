@@ -25,20 +25,55 @@ static int mission_idx = 0;
 
 enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET, MISSILE_CAM };
 
+/**
+ * @class SCStrike
+ * @brief Represents a strike activity in the simulation.
+ *
+ * The SCStrike class handles the initialization, mission setup, keyboard input checking,
+ * frame running, and menu rendering for a strike activity in the simulation.
+ */
+
 class SCStrike : public IActivity {
 
 public:
+    /**
+     * @brief Constructs a new SCStrike object.
+     */
     SCStrike();
+
+    /**
+     * @brief Destroys the SCStrike object.
+     */
     ~SCStrike();
 
+    /**
+     * @brief Initializes the strike activity.
+     */
     void Init();
+
+    /**
+     * @brief Sets the mission for the strike activity.
+     *
+     * @param missionName The name of the mission to set.
+     */
     void SetMission(char const *missionName);
+
+    /**
+     * @brief Checks the keyboard input.
+     */
     void CheckKeyboard(void);
+
+    /**
+     * @brief Runs a frame of the strike activity.
+     */
     void RunFrame(void);
+
+    /**
+     * @brief Renders the menu for the strike activity.
+     */
     void RenderMenu();
 
 private:
-    
     char missFileName[33];
     uint8_t camera_mode;
     bool mouse_control;
@@ -54,7 +89,7 @@ private:
     RSMission *missionObj;
     SCNavMap *nav_screen;
     SCPlane *player_plane;
-    
+
     SCCockpit *cockpit;
 
     bool autopilot{false};
