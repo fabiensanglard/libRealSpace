@@ -1,14 +1,19 @@
+---
+title: LibRealSpace Class Diagram
+---
+
 classDiagram
+    
     class MISN {
         uint16_t version;
         uint8_t info[];
         uint8_t tune;
         std::string name;
         std::string world_filename;
-        AREA * areas[];
-        SPOT * spots[];
-        string * messages[];
-        uint8_t flags[];
+        vector~AREA~ * areas;
+        vector~SPOT~ * spots;
+        vector ~string~* messages;
+        vector ~uint8_t~ flags;
         CAST * casting[];
         uint8_t prog[];
         uint8_t nums[];
@@ -62,11 +67,11 @@ classDiagram
         std::string actor;
         RSProf *profile;
     }
-    MISN --|> AREA
-    MISN --|> SPOT
-    MISN --|> CAST
-    MISN --|> MISN_PART
-    MISN --|> MSGS
+    MISN --> AREA
+    MISN --> SPOT
+    MISN --> CAST
+    MISN --> MISN_PART
+    MISN --> MSGS
 
 
     class CHLD {
@@ -173,22 +178,22 @@ classDiagram
         Quaternion orientation;
         bool prepared;
     }
-    RSEntity --|> WDAT
-    RSEntity --|> DYNN_MISS
-    RSEntity --|> WEAPS
-    RSEntity --|> HPTS
-    RSEntity --|> CHLD
-    RSEntity --|> EXPL
-    RSEntity --|> Triangle
-    RSEntity --|> Lod
-    RSEntity --|> uvxyEntry
-    RSEntity --|> MapVertex
-    RSEntity --|> BoudingBox
-    MISN_PART --|> RSEntity
-    CHLD --|> RSEntity
-    EXPL --|> RSEntity
-    WEAPS --|> RSEntity
-    uvxyEntry --|> UV
+    RSEntity --> WDAT
+    RSEntity --> DYNN_MISS
+    RSEntity --> WEAPS
+    RSEntity --> HPTS
+    RSEntity --> CHLD
+    RSEntity --> EXPL
+    RSEntity --> Triangle
+    RSEntity --> Lod
+    RSEntity --> uvxyEntry
+    RSEntity --> MapVertex
+    RSEntity --> BoudingBox
+    MISN_PART --> RSEntity
+    CHLD --> RSEntity
+    EXPL --> RSEntity
+    WEAPS --> RSEntity
+    uvxyEntry --> UV
 
-    MISN_PART --|> AREA
-    MISN_PART --|> CAST
+    MISN_PART --> AREA
+    MISN_PART --> CAST
