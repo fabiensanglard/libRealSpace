@@ -12,37 +12,30 @@ char* strtoupper(char* dest, const char* src);
 bool isPointInQuad(const Point2D &p, const std::vector<Point2D *> *quad);
 
 class IActivity{
-    
-public:
-    
-    virtual void Init(void) = 0;
-    virtual void Start(void) { this->running = true;}
-    void Stop(void) { this->running = false;}
-    
-    virtual void RunFrame (void) = 0;
-    
-    void SetTitle(const char* title);
-    
-    inline bool IsRunning(void){ return this->running; }
-    
-    VGAPalette palette;
-    
-    virtual ~IActivity();
-    
-    virtual void Focus(void)  { this->focused = true;}
-    virtual void UnFocus(void){ this->focused = false;}
-    
-    
+private:
+    bool running;
+
 protected:
     bool music_playing;
     bool focused;
+    
     IActivity();
     SCButton* CheckButtons(void);
     std::vector<SCButton*> buttons;
     void DrawButtons(void);
     
-private:
-    bool running;
+public:
+    VGAPalette palette;
+
+    virtual void Init(void) = 0;
+    virtual void Start(void) { this->running = true;}
+    void Stop(void) { this->running = false;}
+    virtual void RunFrame (void) = 0;
+    void SetTitle(const char* title);
+    inline bool IsRunning(void){ return this->running; }
+    virtual ~IActivity();
+    virtual void Focus(void)  { this->focused = true;}
+    virtual void UnFocus(void){ this->focused = false;}
 };
 
 

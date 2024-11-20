@@ -42,20 +42,6 @@ private:
 };
 
 class SCConvPlayer : public IActivity {
-
-public:
-    uint8_t noOffset{0};
-    uint8_t yesOffset{0};
-    std::vector<SCZone *> zones;
-
-    SCConvPlayer();
-    ~SCConvPlayer();
-
-    void Init();
-    void RunFrame(void);
-    void SetID(int32_t id);
-    virtual void Focus(void);
-
 private:
     int32_t conversationID;
     bool initialized;
@@ -71,6 +57,19 @@ private:
     void CheckZones(void);
     void clicked(void *none, uint8_t id);
     void DrawText(void);
+    
+public:
+    uint8_t noOffset{0};
+    uint8_t yesOffset{0};
+    std::vector<SCZone *> zones;
+
+    SCConvPlayer();
+    ~SCConvPlayer();
+
+    void Init();
+    void RunFrame(void);
+    void SetID(int32_t id);
+    virtual void Focus(void);
 };
 
 #endif /* defined(__libRealSpace__SCConvPlayer__) */
