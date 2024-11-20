@@ -14,12 +14,9 @@
 #include "RSVGA.h"
 #include "Texture.h"
 
-#ifdef BLOCK_WIDTH
-#undef BLOCK_WIDTH
-#endif
 #include <SDL_opengl.h>
 #include <SDL_opengl_glext.h>
-#define BLOCK_WIDTH (25000)
+
 
 extern SCRenderer Renderer;
 
@@ -55,7 +52,7 @@ void SCRenderer::Init(int32_t zoomFactor) {
     glDisable(GL_DEPTH_TEST); // Disable Depth Testing
 
     // camera.SetPersective(50.0f,this->width/(float)this->height,10.0f,12000.0f);
-    camera.SetPersective(50.0f, this->width / (float)this->height, 1.0f, MAP_SIZE*6);
+    camera.SetPersective(50.0f, this->width / (float)this->height, 1.0f, BLOCK_WIDTH * BLOCK_PER_MAP_SIDE * 2);
 
     light.SetWithCoo(300, 300, 300);
 
@@ -647,120 +644,72 @@ void SCRenderer::RenderBlock(RSArea *area, int LOD, int i, bool renderTexture) {
     }
 }
 void SCRenderer::RenderWorldSkyAndGround() {
-    static const int max_int = MAP_SIZE;
-    int skyblue = 0;
-    int nightblue = 1;
+    static const float max_int = (BLOCK_WIDTH * BLOCK_PER_MAP_SIDE)/2.0f;
+    static const float max_height = 70000.0f;
+    static const float min_height = -1000.0f;
+
     GLfloat skycolor[2][3] = {
-        {255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f},
+        {150.0f / 255.0f, 150.0f / 255.0f, 250.0f / 255.0f},
         {40.0f / 255.0f, 80.0f / 255.0f, 120.0f / 255.0f},
     };
-
-    /*static GLuint sky1[][4] = {
-        {-max_int*2,		0,			-max_int *2,skyblue},
-        {-max_int*2,		0,			max_int*2 ,	skyblue},
-        {0,					max_int ,	0,			nightblue},
-    };
-    static GLuint sky2[][4] = {
-        {max_int*2 ,		0,			-max_int*2,	skyblue},
-        {max_int*2 ,		0,			max_int*2 ,	skyblue},
-        {0,					max_int,	0,			nightblue},
-    };
-    static GLuint sky3[][4] = {
-        {-max_int*2,		0,			-max_int*2,	skyblue},
-        {max_int*2,			0,			-max_int*2,	skyblue},
-        {0,					max_int,	0,			nightblue},
-    };
-    static GLuint sky4[][4] = {
-        {-max_int*2,		0,			max_int*2 ,	skyblue},
-        {max_int*2,			0,			max_int*2 ,	skyblue},
-        {0,					max_int ,	0,			nightblue},
-    };
-
-    glBegin(GL_POLYGON);
-	for (int i = 0; i < 3; i++) {
-		glColor3f(skycolor[sky1[i][3]][0], skycolor[sky1[i][3]][1], skycolor[sky1[i][3]][2]);
-		glVertex3iv((const GLint *)sky1[i]);
-	}
-	glEnd();
-
-    glBegin(GL_POLYGON);
-	for (int i = 0; i < 3; i++) {
-		glColor3f(skycolor[sky2[i][3]][0], skycolor[sky2[i][3]][1], skycolor[sky2[i][3]][2]);
-		glVertex3iv((const GLint *)sky2[i]);
-	}
-	glEnd();
-
-    glBegin(GL_POLYGON);
-	for (int i = 0; i < 3; i++) {
-		glColor3f(skycolor[sky3[i][3]][0], skycolor[sky3[i][3]][1], skycolor[sky3[i][3]][2]);
-		glVertex3iv((const GLint *)sky3[i]);
-	}
-	glEnd();
-
-    glBegin(GL_POLYGON);
-	for (int i = 0; i < 3; i++) {
-		glColor3f(skycolor[sky4[i][3]][0], skycolor[sky4[i][3]][1], skycolor[sky4[i][3]][2]);
-		glVertex3iv((const GLint *)sky4[i]);
-	}
-	glEnd();*/
 
     glBegin(GL_QUADS);
 
     // sol
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(-max_int, -max_int, -max_int);
+    glVertex3f(-max_int, min_height, -max_int);
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(max_int, -max_int, -max_int);
+    glVertex3f(max_int, min_height, -max_int);
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(max_int, -max_int, max_int);
+    glVertex3f(max_int, min_height, max_int);
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(-max_int, -max_int, max_int);
+    glVertex3f(-max_int, min_height, max_int);
 
     //ciel
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(-max_int, max_int, -max_int);
+    glVertex3f(-max_int, max_height, -max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(max_int, max_int, -max_int);
+    glVertex3f(max_int, max_height, -max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(max_int, max_int, max_int);
+    glVertex3f(max_int, max_height, max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(-max_int, max_int, max_int);
+    glVertex3f(-max_int, max_height, max_int);
 
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(-max_int, -max_int, max_int);
+    glVertex3f(-max_int, min_height, max_int);
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(max_int, -max_int, max_int);
+    glVertex3f(max_int, min_height, max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(max_int, max_int, max_int);
+    glVertex3f(max_int, max_height, max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(-max_int, max_int, max_int);
+    glVertex3f(-max_int, max_height, max_int);
 
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(-max_int, -max_int, -max_int);
+    glVertex3f(-max_int, min_height, -max_int);
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(max_int, -max_int, -max_int);
+    glVertex3f(max_int, min_height, -max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(max_int, max_int, -max_int);
+    glVertex3f(max_int, max_height, -max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(-max_int, max_int, -max_int);
+    glVertex3f(-max_int, max_height, -max_int);
 
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(-max_int, -max_int, -max_int);
+    glVertex3f(-max_int, min_height, -max_int);
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(-max_int, -max_int, max_int);
+    glVertex3f(-max_int, min_height, max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(-max_int, max_int, max_int);
+    glVertex3f(-max_int, max_height, max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(-max_int, max_int, -max_int);
+    glVertex3f(-max_int, max_height, -max_int);
 
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(max_int, -max_int, -max_int);
+    glVertex3f(max_int, min_height, -max_int);
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
-    glVertex3f(max_int, -max_int, max_int);
+    glVertex3f(max_int, min_height, max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(max_int, max_int, max_int);
+    glVertex3f(max_int, max_height, max_int);
     glColor3f(skycolor[1][0], skycolor[1][1], skycolor[1][2]);
-    glVertex3f(max_int, max_int, -max_int);
+    glVertex3f(max_int, max_height, -max_int);
 
     glEnd();
 }
