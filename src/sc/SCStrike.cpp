@@ -14,6 +14,12 @@
 #include <tuple>
 #define SC_WORLD 1100
 
+/**
+ * @brief Constructor
+ *
+ * Initializes the SCStrike object with a default camera position and
+ * other variables.
+ */
 SCStrike::SCStrike() {
     this->camera_mode = 0;
     this->camera_pos = {16, 2, -29};
@@ -21,6 +27,15 @@ SCStrike::SCStrike() {
 }
 
 SCStrike::~SCStrike() {}
+/**
+ * @brief Handle keyboard events
+ *
+ * This function peeks at the SDL event queue to check for keyboard events.
+ * If a key is pressed, it updates the game state based on the key pressed.
+ * The supported keys are escape, space, and return.
+ *
+ * @return None
+ */
 void SCStrike::CheckKeyboard(void) {
     // Keyboard
     SDL_Event keybEvents[1];
@@ -359,6 +374,15 @@ void SCStrike::CheckKeyboard(void) {
         }
     }
 }
+/**
+ * SCStrike::Init
+ *
+ * Initialize the game state with default values and a starting mission.
+ *
+ * This function initializes the game state by setting the mouse control
+ * flag to false, setting the mission to "TEMPLATE.IFF", initializing the
+ * cockpit object, and setting the pilot's lookat position to the origin.
+ */
 void SCStrike::Init(void) {
     this->mouse_control = false;
     this->SetMission("TEMPLATE.IFF");
@@ -367,6 +391,19 @@ void SCStrike::Init(void) {
     this->pilote_lookat = {0, 0};
 }
 
+/**
+ * SetMission
+ *
+ * Sets the current mission to the one specified in the missionName argument.
+ *
+ * This function initializes the game state by setting the mission to the one
+ * specified in the missionName argument, clearing the list of AI planes,
+ * initializing the cockpit object, and setting the pilot's lookat position to
+ * the origin. It also loads the necessary data from the mission file, such as
+ * the player's coordinates and the objects in the mission.
+ *
+ * @param[in] missionName The name of the mission file to load.
+ */
 void SCStrike::SetMission(char const *missionName) {
     ai_planes.clear();
     ai_planes.shrink_to_fit();
@@ -501,6 +538,22 @@ void SCStrike::SetMission(char const *missionName) {
         }
     }
 }
+/**
+ * @brief Executes a single frame of the game simulation.
+ *
+ * This function performs the main loop operations for each frame of the game
+ * simulation. It handles keyboard input check, updates the states of the player
+ * plane and AI planes, adjusts the camera view based on the current mode, and
+ * renders the game world and cockpit.
+ *
+ * Key operations include:
+ * - Checking and processing keyboard inputs.
+ * - Simulating the player and AI planes' movements and autopilot systems.
+ * - Updating positions and orientations of planes and mission objects.
+ * - Configuring the camera based on the selected view mode.
+ * - Rendering the world, mission objects, and cockpit interface.
+ * - Managing the display of cockpit elements like communication and weapons.
+ */
 void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
     if (!this->pause_simu) {
@@ -711,6 +764,13 @@ void SCStrike::RunFrame(void) {
 }
 
 
+/**
+ * Renders the in-game menu using the ImGui library. This menu provides various 
+ * options and displays related to the simulation, such as controls for simulation 
+ * settings, camera views, cockpit information, mission details, and AI pilot 
+ * settings. It updates the menu states and handles user interactions with 
+ * different menu items dynamically based on the current game context.
+ */
 void SCStrike::RenderMenu() {
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
