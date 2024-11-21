@@ -118,7 +118,7 @@ void SCNavMap::RunFrame(void) {
         int l = 6;
         for (auto ob: this->missionObj->mission_data.parts) {
             int newx = (int) (((ob->x+180000.0f)/360000.0f)*w)+l;
-            int newy = (int) (((-ob->y+180000.0f)/360000.0f)*h)+t;
+            int newy = (int) (((-ob->z+180000.0f)/360000.0f)*h)+t;
             if (ob->member_name != "F-16DES" || ob->weapon_load != "") {
                 
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
@@ -129,7 +129,7 @@ void SCNavMap::RunFrame(void) {
                     VGA.line(newx+5, newy-5, newx-5, newy+5, ob->id);
                 }
             } else {
-                newy = (int) (((ob->y+180000.0f)/360000.0f)*h)+t;
+                newy = (int) (((ob->z+180000.0f)/360000.0f)*h)+t;
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
                     VGA.plot_pixel(newx, newy, ob->id);
                     VGA.line(newx-5, newy-5, newx+5, newy-5, ob->id);
@@ -159,7 +159,7 @@ void SCNavMap::RunFrame(void) {
                 );*/
             }
             int newx = (int) (((area->XAxis+180000.0f)/360000.0f)*w)+l;
-            int newy = (int) (((-area->YAxis+180000.0f)/(360000.0f))*h)+t;
+            int newy = (int) (((-area->ZAxis+180000.0f)/(360000.0f))*h)+t;
             int neww = (int) ((area->AreaWidth / 360000.0f) * w);
             int newh = neww;
             if (area->AreaHeight != 0) {

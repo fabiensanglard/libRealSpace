@@ -390,8 +390,8 @@ void SCStrike::SetMission(char const *missionName) {
     MISN_PART *playerCoord = missionObj->getPlayerCoord();
 
     newPosition.x = (float)playerCoord->x;
-    newPosition.z = (float)-playerCoord->y;
-    newPosition.y = (float)playerCoord->z;
+    newPosition.z = (float)-playerCoord->z;
+    newPosition.y = (float)playerCoord->y;
 
     camera = Renderer.GetCamera();
     camera->SetPosition(&newPosition);
@@ -440,7 +440,7 @@ void SCStrike::SetMission(char const *missionName) {
                     weap->nb_weap = std::get<1>(hpts);
                     weap->hpts_type = std::stoi(std::get<0>(hpts));
                     weap->name = loadout->name;
-                    weap->position = {(float) plane_hpts->x, (float) plane_hpts->z, (float) plane_hpts->y};
+                    weap->position = {(float) plane_hpts->x, (float) plane_hpts->y, (float) plane_hpts->z};
                     weap->hud_pos = {0, 0};
                     if (this->player_plane->weaps_load[cpt] == nullptr) {
                         this->player_plane->weaps_load[cpt] = weap;
@@ -463,23 +463,23 @@ void SCStrike::SetMission(char const *missionName) {
                     SCAiPlane *aiPlane = new SCAiPlane();
                     aiPlane->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
                                                  23000.0f, 32.0f, .93f, 120, &this->area, (float)part->x,
-                                                 (float)part->z, (float)-part->y);
+                                                 (float)part->y, (float)-part->z);
                     aiPlane->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                     aiPlane->pilot = new SCPilot();
                     aiPlane->ai = cast->profile;
                     aiPlane->name = cast->actor;
 
-                    if (this->area.getY((float)part->x, (float)-part->y) == part->z) {
+                    if (this->area.getY((float)part->x, (float)-part->z) == part->y) {
                         aiPlane->plane->on_ground = true;
                     } else {
                         aiPlane->plane->on_ground = false;
                     }
-                    if (part->z < this->area.getY((float)part->x, (float)-part->y)) {
+                    if (part->y < this->area.getY((float)part->x, (float)-part->z)) {
                         aiPlane->plane->on_ground = true;
                     }
                     if (!aiPlane->plane->on_ground) {
                         aiPlane->plane->SetThrottle(100);
-                        aiPlane->pilot->target_climb = (int) ((float) part->z * 3.6f);
+                        aiPlane->pilot->target_climb = (int) ((float) part->y * 3.6f);
                         aiPlane->plane->vz = -20;
                     } else {
                         aiPlane->pilot->target_climb = 25000;
@@ -515,11 +515,11 @@ void SCStrike::RunFrame(void) {
                 AREA *ar = this->missionObj->mission_data.areas[aiPlane->object->area_id];
 
                 float minX = (float) ar->XAxis-(ar->AreaWidth/2);
-                float minY = (float) ar->YAxis-(ar->AreaWidth/2);
+                float minZ = (float) ar->ZAxis-(ar->AreaWidth/2);
                 float maxX = (float) ar->XAxis+(ar->AreaWidth/2);
-                float maxY = (float) ar->YAxis+(ar->AreaWidth/2);
+                float maxZ = (float) ar->ZAxis+(ar->AreaWidth/2);
 
-                if (npos.x < minX || npos.x > maxX || npos.z < minY || npos.z > maxY) {
+                if (npos.x < minX || npos.x > maxX || npos.z < minZ || npos.z > maxZ) {
                     aiPlane->pilot->target_azimut = aiPlane->pilot->target_azimut + 180;
                     if (aiPlane->pilot->target_azimut > 360) {
                         aiPlane->pilot->target_azimut = aiPlane->pilot->target_azimut - 360;
@@ -527,8 +527,8 @@ void SCStrike::RunFrame(void) {
                 }
             }
             aiPlane->object->x = (long)npos.x;
-            aiPlane->object->z = (uint16_t)npos.y;
-            aiPlane->object->y = -(long)npos.z;
+            aiPlane->object->z = -(long)npos.z;
+            aiPlane->object->y = (uint16_t)npos.y;
             aiPlane->object->azymuth = 360 - (uint16_t)(aiPlane->plane->azimuthf / 10.0f);
             aiPlane->object->roll = (uint16_t)(aiPlane->plane->twist / 10.0f);
             aiPlane->object->pitch = (uint16_t)(aiPlane->plane->elevationf / 10.0f);
@@ -537,8 +537,8 @@ void SCStrike::RunFrame(void) {
     this->player_plane->getPosition(&newPosition);
     if (this->player_plane->object != nullptr) {
         this->player_plane->object->x = (long)newPosition.x;
-        this->player_plane->object->z = (uint16_t)newPosition.y;
-        this->player_plane->object->y = (long)newPosition.z;
+        this->player_plane->object->z = (long)newPosition.z;
+        this->player_plane->object->y = (uint16_t)newPosition.y;
     }
     this->cockpit->pitch = this->player_plane->elevationf/10.0f;
     this->cockpit->roll = this->player_plane->twist/10.0f;
@@ -553,7 +553,7 @@ void SCStrike::RunFrame(void) {
     this->cockpit->target = this->missionObj->mission_data.parts[this->current_target];
     this->cockpit->player = this->player_plane->object;
     this->cockpit->weapoint_coords.x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis;
-    this->cockpit->weapoint_coords.y = -this->missionObj->mission_data.areas[this->nav_point_id]->YAxis;
+    this->cockpit->weapoint_coords.y = -this->missionObj->mission_data.areas[this->nav_point_id]->ZAxis;
     this->cockpit->parts = this->missionObj->mission_data.parts;
     this->cockpit->ai_planes = this->ai_planes;
     this->cockpit->player_prof = this->player_prof;
@@ -595,9 +595,9 @@ void SCStrike::RunFrame(void) {
         break;
     case View::TARGET: {
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
-        Vector3D pos = {target->x + this->camera_pos.x, target->z + this->camera_pos.y,
-                        -target->y + this->camera_pos.z};
-        Vector3D targetPos = {(float)target->x, (float)target->z, -(float)target->y};
+        Vector3D pos = {target->x + this->camera_pos.x, target->y + this->camera_pos.y,
+                        -target->z + this->camera_pos.z};
+        Vector3D targetPos = {(float)target->x, (float)target->y, -(float)target->z};
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
     }
@@ -626,7 +626,7 @@ void SCStrike::RunFrame(void) {
     case View::EYE_ON_TARGET: {
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
-        Vector3D targetPos = {(float)target->x, (float)target->z, (float)-target->y};
+        Vector3D targetPos = {(float)target->x, (float)target->y,(float)-target->z };
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
     } break;

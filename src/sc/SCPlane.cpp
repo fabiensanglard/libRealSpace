@@ -882,7 +882,7 @@ void SCPlane::Render() {
                 (float) this->object->entity->chld[0]->y,
                 (float) this->object->entity->chld[0]->z
             };
-            glTranslatef(pos.y/250 , pos.z /250 , pos.x /250);
+            glTranslatef(pos.z/250 , pos.y /250 , pos.x /250);
             glScalef(1+this->thrust/100.0f,1,1);
             Renderer.DrawModel(this->object->entity->chld[0]->objct, LOD_LEVEL_MAX);
             glPopMatrix();

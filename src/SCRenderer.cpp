@@ -820,8 +820,8 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
     for (auto object : mission->mission_data.parts) {
         glPushMatrix();
         
-        glTranslatef(static_cast<GLfloat>(object->x), static_cast<GLfloat>(object->z),
-                     static_cast<GLfloat>(-object->y));
+        glTranslatef(static_cast<GLfloat>(object->x), static_cast<GLfloat>(object->y),
+                     static_cast<GLfloat>(-object->z));
 
         float model_view_mat[4][4];
         glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);

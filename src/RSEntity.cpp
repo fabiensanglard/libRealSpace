@@ -336,8 +336,9 @@ void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {
         std::transform(tmpname.begin(), tmpname.end(), tmpname.begin(), ::toupper);
         chld->name ="..\\..\\DATA\\OBJECTS\\"+tmpname+".IFF";
         chld->x = bs.ReadInt32LE();
-        chld->y = bs.ReadInt32LE();
         chld->z = bs.ReadInt32LE();
+        chld->y = bs.ReadInt32LE();
+        
         for (size_t j = 0; j < 12; j++) {
             chld->data.push_back(bs.ReadByte());
         }
@@ -457,8 +458,8 @@ void RSEntity::parseREAL_OBJT_JETP_WEAP_HPTS(uint8_t *data, size_t size) {
         HPTS *hpts = new HPTS();
         hpts->id = bs.ReadByte();
         hpts->x = bs.ReadInt32LE();
-        hpts->y = bs.ReadInt32LE();
         hpts->z = bs.ReadInt32LE();
+        hpts->y = bs.ReadInt32LE();
         this->hpts.push_back(hpts);
     }
 }

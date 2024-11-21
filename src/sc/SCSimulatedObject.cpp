@@ -143,8 +143,8 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
     };
     if (this->target != nullptr) {
         to_target.x = (float) this->target->x;
-        to_target.y = (float) this->target->z;
-        to_target.z = (float) -this->target->y;
+        to_target.y = (float) this->target->y;
+        to_target.z = (float) -this->target->z;
     }
     Vector3D gravity_force = {0.0, -this->weight * GRAVITY, 0.0};
     Vector3D drag_force = this->calculate_drag(velocity);

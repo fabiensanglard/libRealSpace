@@ -39,8 +39,8 @@ struct MISN_PART {
     uint8_t unknown1{0};
     uint16_t unknown2{0};
     int32_t x{0};
-    int32_t y{0};
-    uint16_t z{0};
+    uint16_t y{0};
+    int32_t z{0};
     uint16_t azymuth{0};
     uint16_t roll{0};
     uint16_t pitch{0};

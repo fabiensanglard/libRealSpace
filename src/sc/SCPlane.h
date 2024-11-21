@@ -44,7 +44,7 @@ static float ro[75] = {
 
 #define G_ACC 32.17f
 
-#define COORD_SCALE 0.36f
+#define COORD_SCALE 1.0f
 
 struct SCWeaponLoadoutHardPoint {
     RSEntity *objct;

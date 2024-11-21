@@ -124,8 +124,9 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             }
             missionstrtoupper(tmparea->AreaName);
             tmparea->XAxis = stream.ReadInt24LE();
-            tmparea->YAxis = stream.ReadInt24LE();
             tmparea->ZAxis = stream.ReadInt24LE();
+            tmparea->YAxis = stream.ReadInt24LE();
+
             tmparea->AreaWidth = stream.ReadUShort();
             Blank0 = stream.ReadByte();
             read += 49;
@@ -137,8 +138,9 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             }
             missionstrtoupper(tmparea->AreaName);
             tmparea->XAxis = stream.ReadInt24LE();
-            tmparea->YAxis = stream.ReadInt24LE();
             tmparea->ZAxis = stream.ReadInt24LE();
+            tmparea->YAxis = stream.ReadInt24LE();
+            
             tmparea->AreaWidth = stream.ReadUShort();
 
             // unsigned int Blank0; // off 48-49
@@ -156,8 +158,9 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             }
             missionstrtoupper(tmparea->AreaName);
             tmparea->XAxis = stream.ReadInt24LE();
-            tmparea->YAxis = stream.ReadInt24LE();
             tmparea->ZAxis = stream.ReadInt24LE();
+            tmparea->YAxis = stream.ReadInt24LE();
+            
             tmparea->AreaWidth = stream.ReadUShort();
 
             // unsigned char Blank0[10]; // off 48-59
@@ -199,8 +202,8 @@ void RSMission::parseMISN_SPOT(uint8_t *data, size_t size) {
 
             stream.ReadByte();
             spt->XAxis = stream.ReadInt24LE();
-            spt->YAxis = stream.ReadInt24LE();
-            spt->ZAxis = stream.ReadShort();
+            spt->ZAxis = stream.ReadInt24LE();
+            spt->YAxis = stream.ReadShort();
             stream.ReadByte();
             this->mission_data.spots.push_back(spt);
         }
@@ -289,11 +292,11 @@ void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
         prt->unknown2 |= stream.ReadByte() << 8;
 
         prt->x = stream.ReadInt24LE();
-        prt->y = stream.ReadInt24LE();
+        prt->z = stream.ReadInt24LE();
 
-        prt->z = 0;
-        prt->z |= stream.ReadByte() << 0;
-        prt->z |= stream.ReadByte() << 8;
+        prt->y = 0;
+        prt->y |= stream.ReadByte() << 0;
+        prt->y |= stream.ReadByte() << 8;
 
         for (int k = 0; k < 22; k++) {
             prt->unknown_bytes.push_back(stream.ReadByte());
@@ -365,8 +368,8 @@ void RSMission::fixMissionObjectsCoords(void) {
             for (auto area : this->mission_data.areas) {
                 if (area->id-1 == obj->area_id) {
                     obj->x += area->XAxis;
-                    obj->y += area->YAxis;
-                    obj->z += (uint16_t) area->ZAxis;
+                    obj->z += area->ZAxis;
+                    obj->y += (uint16_t) area->YAxis;
                     break;
                 }
             }
