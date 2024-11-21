@@ -25,82 +25,149 @@ static int mission_idx = 0;
 
 enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET, MISSILE_CAM };
 
+
 /**
  * @class SCStrike
- * @brief Represents a strike activity in the simulation.
+ * @brief Implements the main game logic for Strike Commander
  *
- * The SCStrike class handles the initialization, mission setup, keyboard input checking,
- * frame running, and menu rendering for a strike activity in the simulation.
+ * This class implements the main game logic for Strike Commander. It handles
+ * mission selection, keyboard input, game simulation, and rendering.
  */
-
 class SCStrike : public IActivity {
+private:
+    /**
+     * @brief Path to current mission file
+     */
+    char missFileName[33];
+    /**
+     * @brief Current camera mode
+     */
+    uint8_t camera_mode;
+    /**
+     * @brief Whether to control the plane with the mouse
+     */
+    bool mouse_control;
+    /**
+     * @brief Whether to pause the simulation
+     */
+    bool pause_simu{false};
+    /**
+     * @brief The main game camera
+     */
+    Camera *camera;
+    /**
+     * @brief The current position of the camera
+     */
+    Point3D camera_pos;
+    /**
+     * @brief The target position of the camera
+     */
+    Point3D target_camera_pos;
+    /**
+     * @brief The yaw of the camera
+     */
+    float yaw;
+    /**
+     * @brief The new position of the plane
+     */
+    Point3D newPosition;
+    /**
+     * @brief The current lookat position of the pilot
+     */
+    Point2D pilote_lookat;
+    /**
+     * @brief The new orientation of the plane
+     */
+    Quaternion newOrientation;
+    /**
+     * @brief The current area
+     */
+    RSArea area;
+    /**
+     * @brief The current mission
+     */
+    RSMission *missionObj;
+    /**
+     * @brief The navigation screen
+     */
+    SCNavMap *nav_screen;
+    /**
+     * @brief The player plane
+     */
+    SCPlane *player_plane;
+
+    /**
+     * @brief The cockpit
+     */
+    SCCockpit *cockpit;
+
+    /**
+     * @brief Whether to use autopilot
+     */
+    bool autopilot{false};
+    /**
+     * @brief The pilot AI
+     */
+    SCPilot pilot;
+    /**
+     * @brief The player profile
+     */
+    RSProf *player_prof;
+    /**
+     * @brief A counter
+     */
+    float counter;
+    /**
+     * @brief The current navigation point
+     */
+    uint8_t nav_point_id{0};
+    /**
+     * @brief The current target
+     */
+    uint8_t current_target{0};
+    /**
+     * @brief A cache of objects
+     */
+    std::map<std::string, RSEntity *> objectCache;
+    /**
+     * @brief The AI planes
+     */
+    std::vector<SCAiPlane *> ai_planes;
+    /**
+     * @brief The MFD timeout
+     */
+    int32_t mfd_timeout{0};
 
 public:
     /**
-     * @brief Constructs a new SCStrike object.
+     * @brief Constructor
      */
     SCStrike();
-
     /**
-     * @brief Destroys the SCStrike object.
+     * @brief Destructor
      */
     ~SCStrike();
-
     /**
-     * @brief Initializes the strike activity.
+     * @brief Initializes the game
      */
     void Init();
-
     /**
-     * @brief Sets the mission for the strike activity.
-     *
-     * @param missionName The name of the mission to set.
+     * @brief Sets the current mission
+     * @param missionName The name of the mission to load
      */
     void SetMission(char const *missionName);
-
     /**
-     * @brief Checks the keyboard input.
+     * @brief Checks for keyboard input
      */
     void CheckKeyboard(void);
-
     /**
-     * @brief Runs a frame of the strike activity.
+     * @brief Runs the game simulation
      */
     void RunFrame(void);
-
     /**
-     * @brief Renders the menu for the strike activity.
+     * @brief Renders the in-game menu
      */
     void RenderMenu();
-
-private:
-    char missFileName[33];
-    uint8_t camera_mode;
-    bool mouse_control;
-    bool pause_simu{false};
-    Camera *camera;
-    Point3D camera_pos;
-    Point3D target_camera_pos;
-    float yaw;
-    Point3D newPosition;
-    Point2D pilote_lookat;
-    Quaternion newOrientation;
-    RSArea area;
-    RSMission *missionObj;
-    SCNavMap *nav_screen;
-    SCPlane *player_plane;
-
-    SCCockpit *cockpit;
-
-    bool autopilot{false};
-    SCPilot pilot;
-    RSProf *player_prof;
-    float counter;
-    uint8_t nav_point_id{0};
-    uint8_t current_target{0};
-    std::map<std::string, RSEntity *> objectCache;
-    std::vector<SCAiPlane *> ai_planes;
-    int32_t mfd_timeout{0};
 };
 
 #endif /* defined(__libRealSpace__SCStrike__) */
