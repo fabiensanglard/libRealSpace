@@ -118,7 +118,7 @@ void SCNavMap::RunFrame(void) {
         int l = 6;
         for (auto ob: this->missionObj->mission_data.parts) {
             int newx = (int) (((ob->x+180000.0f)/360000.0f)*w)+l;
-            int newy = (int) (((-ob->z+180000.0f)/360000.0f)*h)+t;
+            int newy = (int) (((ob->z+180000.0f)/360000.0f)*h)+t;
             if (ob->member_name != "F-16DES" || ob->weapon_load != "") {
                 
                 if (newx>0 && newx<320 && newy>0 && newy<200) {

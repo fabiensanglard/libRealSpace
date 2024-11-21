@@ -218,7 +218,7 @@ void RSArea::ParseObjects() {
             uint8_t unknown14 = reader.ReadByte();
             uint8_t unknown15 = reader.ReadByte();
             mapObject.position[0] = reader.ReadInt24LE();
-            mapObject.position[2] = reader.ReadInt24LE();
+            mapObject.position[2] = -reader.ReadInt24LE();
             mapObject.position[1] = reader.ReadInt24LE();
 
             uint8_t unknowns[0x31 - 10];

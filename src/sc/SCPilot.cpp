@@ -45,7 +45,7 @@ void SCPilot::AutoPilot() {
 
 
     float target_elevation = atan2(
-        this->plane->z - (this->plane->z + (60*this->plane->vz)),
+        this->plane->y - (this->plane->y + (60*this->plane->vz)),
         this->plane->y - this->target_climb
     );
 

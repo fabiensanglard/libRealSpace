@@ -18,6 +18,8 @@ MISN_PART *RSMission::getPlayerCoord() {
         if (cast->actor == "PLAYER") {
             for (auto part : this->mission_data.parts) {
                 if (part->id == search_id) {
+                    // @todo: this should not be here, must removed it after scstrike refactors
+                    this->mission_data.parts.erase(std::remove(this->mission_data.parts.begin(), this->mission_data.parts.end(), part), this->mission_data.parts.end());
                     return part;
                 }
             }
@@ -202,7 +204,7 @@ void RSMission::parseMISN_SPOT(uint8_t *data, size_t size) {
 
             stream.ReadByte();
             spt->XAxis = stream.ReadInt24LE();
-            spt->ZAxis = stream.ReadInt24LE();
+            spt->ZAxis = -stream.ReadInt24LE();
             spt->YAxis = stream.ReadShort();
             stream.ReadByte();
             this->mission_data.spots.push_back(spt);
@@ -292,7 +294,7 @@ void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
         prt->unknown2 |= stream.ReadByte() << 8;
 
         prt->x = stream.ReadInt24LE();
-        prt->z = stream.ReadInt24LE();
+        prt->z = -stream.ReadInt24LE();
 
         prt->y = 0;
         prt->y |= stream.ReadByte() << 0;

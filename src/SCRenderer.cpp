@@ -745,8 +745,6 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
 
     Matrix *modelViewMatrix = camera.GetViewMatrix();
     glLoadMatrixf(modelViewMatrix->ToGL());
-    
-    
     this->RenderWorldSkyAndGround();
     textureSortedVertex.clear();
     glEnable(GL_DEPTH_TEST);
@@ -796,7 +794,7 @@ void SCRenderer::RenderObjects(RSArea *area, size_t blockID) {
         glPushMatrix();
 
         glTranslatef(static_cast<GLfloat>(object.position[0]), static_cast<GLfloat>(object.position[1]),
-                     -static_cast<GLfloat>(object.position[2]));
+                     static_cast<GLfloat>(object.position[2]));
 
         std::map<std::string, RSEntity *>::iterator it;
         it = area->objCache->find(object.name);
@@ -821,7 +819,7 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
         glPushMatrix();
         
         glTranslatef(static_cast<GLfloat>(object->x), static_cast<GLfloat>(object->y),
-                     static_cast<GLfloat>(-object->z));
+                     static_cast<GLfloat>(object->z));
 
         float model_view_mat[4][4];
         glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);

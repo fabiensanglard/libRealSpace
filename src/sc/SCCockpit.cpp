@@ -343,7 +343,7 @@ void SCCockpit::RenderMFDS(Point2D mfds) {
 void SCCockpit::RenderTargetWithCam() {
     if (this->target != nullptr) {
         Vector3D campos = this->cam->GetPosition();
-        Vector3DHomogeneous v = {(float)this->target->x, (float)this->target->y, -(float)this->target->z, 1.0f};
+        Vector3DHomogeneous v = {(float)this->target->x, (float)this->target->y, (float)this->target->z, 1.0f};
 
         Matrix *mproj = this->cam->GetProjectionMatrix();
         Matrix *mview = this->cam->GetViewMatrix();

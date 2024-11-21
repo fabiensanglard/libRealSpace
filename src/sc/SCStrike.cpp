@@ -356,7 +356,7 @@ void SCStrike::CheckKeyboard(void) {
         } break;
         case SDLK_a:
             this->player_plane->x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis / COORD_SCALE;
-            this->player_plane->z = -this->missionObj->mission_data.areas[this->nav_point_id]->YAxis / COORD_SCALE;
+            this->player_plane->z = this->missionObj->mission_data.areas[this->nav_point_id]->ZAxis / COORD_SCALE;
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             break;
@@ -427,7 +427,7 @@ void SCStrike::SetMission(char const *missionName) {
     MISN_PART *playerCoord = missionObj->getPlayerCoord();
 
     newPosition.x = (float)playerCoord->x;
-    newPosition.z = (float)-playerCoord->z;
+    newPosition.z = (float)playerCoord->z;
     newPosition.y = (float)playerCoord->y;
 
     camera = Renderer.GetCamera();
@@ -500,18 +500,18 @@ void SCStrike::SetMission(char const *missionName) {
                     SCAiPlane *aiPlane = new SCAiPlane();
                     aiPlane->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
                                                  23000.0f, 32.0f, .93f, 120, &this->area, (float)part->x,
-                                                 (float)part->y, (float)-part->z);
+                                                 (float)part->y, (float)part->z);
                     aiPlane->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                     aiPlane->pilot = new SCPilot();
                     aiPlane->ai = cast->profile;
                     aiPlane->name = cast->actor;
 
-                    if (this->area.getY((float)part->x, (float)-part->z) == part->y) {
+                    if (this->area.getY((float)part->x, (float)part->z) == part->y) {
                         aiPlane->plane->on_ground = true;
                     } else {
                         aiPlane->plane->on_ground = false;
                     }
-                    if (part->y < this->area.getY((float)part->x, (float)-part->z)) {
+                    if (part->y < this->area.getY((float)part->x, (float)part->z)) {
                         aiPlane->plane->on_ground = true;
                     }
                     if (!aiPlane->plane->on_ground) {
@@ -580,7 +580,7 @@ void SCStrike::RunFrame(void) {
                 }
             }
             aiPlane->object->x = (long)npos.x;
-            aiPlane->object->z = -(long)npos.z;
+            aiPlane->object->z = (long)npos.z;
             aiPlane->object->y = (uint16_t)npos.y;
             aiPlane->object->azymuth = 360 - (uint16_t)(aiPlane->plane->azimuthf / 10.0f);
             aiPlane->object->roll = (uint16_t)(aiPlane->plane->twist / 10.0f);
@@ -649,7 +649,7 @@ void SCStrike::RunFrame(void) {
     case View::TARGET: {
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
         Vector3D pos = {target->x + this->camera_pos.x, target->y + this->camera_pos.y,
-                        -target->z + this->camera_pos.z};
+                        target->z + this->camera_pos.z};
         Vector3D targetPos = {(float)target->x, (float)target->y, -(float)target->z};
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
@@ -679,7 +679,7 @@ void SCStrike::RunFrame(void) {
     case View::EYE_ON_TARGET: {
         MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
-        Vector3D targetPos = {(float)target->x, (float)target->y,(float)-target->z };
+        Vector3D targetPos = {(float)target->x, (float)target->y,(float)target->z };
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
     } break;
