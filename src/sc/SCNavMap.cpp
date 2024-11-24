@@ -159,7 +159,7 @@ void SCNavMap::RunFrame(void) {
                 );*/
             }
             int newx = (int) (((area->XAxis+180000.0f)/360000.0f)*w)+l;
-            int newy = (int) (((-area->ZAxis+180000.0f)/(360000.0f))*h)+t;
+            int newy = (int) (((area->ZAxis+180000.0f)/(360000.0f))*h)+t;
             int neww = (int) ((area->AreaWidth / 360000.0f) * w);
             int newh = neww;
             if (area->AreaHeight != 0) {
