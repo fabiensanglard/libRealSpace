@@ -355,8 +355,8 @@ void SCStrike::CheckKeyboard(void) {
             Game.AddActivity(nav_screen);
         } break;
         case SDLK_a:
-            this->player_plane->x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis / COORD_SCALE;
-            this->player_plane->z = this->missionObj->mission_data.areas[this->nav_point_id]->ZAxis / COORD_SCALE;
+            this->player_plane->x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis;
+            this->player_plane->z = this->missionObj->mission_data.areas[this->nav_point_id]->ZAxis;
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             break;
@@ -732,8 +732,8 @@ void SCStrike::RunFrame(void) {
         Matrix cockpit_rotation;
         cockpit_rotation.Clear();
         cockpit_rotation.Identity();
-        cockpit_rotation.translateM(this->player_plane->x * COORD_SCALE, (this->player_plane->y * COORD_SCALE) - 2.0f,
-                                    this->player_plane->z * COORD_SCALE);
+        cockpit_rotation.translateM(this->player_plane->x, (this->player_plane->y) - 2.0f,
+                                    this->player_plane->z);
         cockpit_rotation.rotateM(((this->player_plane->azimuthf + 900) / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f,
                                  0.0f);
         cockpit_rotation.rotateM((this->player_plane->elevationf / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);

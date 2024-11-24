@@ -161,9 +161,9 @@ SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELE
     this->last_time = SDL_GetTicks();
     this->tick_counter = 0;
     this->last_tick = 0;
-    this->x = x / COORD_SCALE;
-    this->y = y / COORD_SCALE;
-    this->z = z / COORD_SCALE;
+    this->x = x;
+    this->y = y;
+    this->z = z;
     this->ro2 = .5f * ro[0];
     Init();
 }
@@ -289,7 +289,7 @@ void SCPlane::Simulate() {
     this->Spdf = .0025f * this->spoilers;
     this->Splf = 1.0f - .005f * this->spoilers;
 
-    float groundlevel = this->area->getY(this->x * COORD_SCALE, this->z * COORD_SCALE) / COORD_SCALE;
+    float groundlevel = this->area->getY(this->x, this->z);
 
     if (this->status > MEXPLODE) {
         /* tenths of degrees per tick	*/
@@ -843,9 +843,9 @@ void SCPlane::SetControlStick(int x, int y) {
     this->control_stick_y = y;
 }
 void SCPlane::getPosition(Point3D *position) {
-    position->x = this->x * COORD_SCALE;
-    position->y = this->y * COORD_SCALE;
-    position->z = this->z * COORD_SCALE;
+    position->x = this->x;
+    position->y = this->y;
+    position->z = this->z;
 }
 
 /**
@@ -864,7 +864,7 @@ void SCPlane::Render() {
         Matrix rotation;
         rotation.Clear();
         rotation.Identity();
-        rotation.translateM(this->x * COORD_SCALE, this->y * COORD_SCALE, this->z * COORD_SCALE);
+        rotation.translateM(this->x, this->y, this->z);
         rotation.rotateM(((this->azimuthf + 900) / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
         rotation.rotateM((this->elevationf / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);
         rotation.rotateM(-(this->twist / 10.0f) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
@@ -933,7 +933,7 @@ void SCPlane::RenderSmoke() {
         Matrix smoke_rotation;
         smoke_rotation.Clear();
         smoke_rotation.Identity();
-        smoke_rotation.translateM(pos.x*COORD_SCALE, pos.y*COORD_SCALE, pos.z*COORD_SCALE);
+        smoke_rotation.translateM(pos.x, pos.y, pos.z);
         smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
 
         glMultMatrixf((float *)smoke_rotation.v);
@@ -1005,14 +1005,14 @@ void SCPlane::Shoot(int weapon_hard_point_id, MISN_PART *target) {
     weap->y = this->y + (this->weaps_load[weapon_hard_point_id]->position.y/250)/COORD_SCALE;
     weap->z = this->z + (this->weaps_load[weapon_hard_point_id]->position.x/250)/COORD_SCALE;*/
 
-    weap->x = this->x* COORD_SCALE;
-    weap->y = this->y* COORD_SCALE;
-    weap->z = this->z* COORD_SCALE;
+    weap->x = this->x;
+    weap->y = this->y;
+    weap->z = this->z;
     weap->azimuthf = this->azimuthf;
     weap->elevationf = this->elevationf;
-    weap->vx = (this->x - this->last_px)* COORD_SCALE;
-    weap->vy = (this->y - this->last_py)* COORD_SCALE;
-    weap->vz = (this->z - this->last_pz)* COORD_SCALE;
+    weap->vx = (this->x - this->last_px);
+    weap->vy = (this->y - this->last_py);
+    weap->vz = (this->z - this->last_pz);
 
     weap->weight = this->weaps_load[weapon_hard_point_id]->objct->weight_in_kg*2.205f;
     weap->azimuthf = this->azimuthf;

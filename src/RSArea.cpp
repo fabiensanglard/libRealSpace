@@ -217,9 +217,9 @@ void RSArea::ParseObjects() {
 
             uint8_t unknown14 = reader.ReadByte();
             uint8_t unknown15 = reader.ReadByte();
-            mapObject.position[0] = reader.ReadInt24LE();
-            mapObject.position[2] = -reader.ReadInt24LE();
-            mapObject.position[1] = reader.ReadInt24LE();
+            mapObject.position[0] = reader.ReadInt24LE() * BLOCK_COORD_SCALE;
+            mapObject.position[2] = -reader.ReadInt24LE() * BLOCK_COORD_SCALE;
+            mapObject.position[1] = reader.ReadInt24LE() * HEIGH_MAP_SCALE;
 
             uint8_t unknowns[0x31 - 10];
 
@@ -281,13 +281,13 @@ void RSArea::ParseTriFile(PakEntry *entry) {
             v->u2 = stream.ReadByte();
             coo = stream.ReadInt24LE();
             read += 4;
-            v->x = coo;
+            v->x = coo * BLOCK_COORD_SCALE;
             coo = stream.ReadInt24LE();
             read += 4;
-            v->z = coo;
+            v->z = coo * BLOCK_COORD_SCALE;
             coo = stream.ReadShort();
             read += 2;
-            v->y = coo;
+            v->y = coo * HEIGH_MAP_SCALE;
             overTheMapIsTheRunway.lx = ((overTheMapIsTheRunway.lx == 0) && (i == 0)) ? v->x : overTheMapIsTheRunway.lx;
             overTheMapIsTheRunway.hx = ((overTheMapIsTheRunway.hx == 0) && (i == 0)) ? v->x : overTheMapIsTheRunway.hx;
             overTheMapIsTheRunway.ly = ((overTheMapIsTheRunway.ly == 0) && (i == 0)) ? v->z : overTheMapIsTheRunway.ly;
@@ -449,12 +449,12 @@ void RSArea::ParseBlocks(size_t lod, PakEntry *entry, size_t blockDim) {
                     - text
             */
 
-            vertex->v.y = height;
+            vertex->v.y = height * HEIGH_MAP_SCALE;
 
-            vertex->v.x = i % 18 * BLOCK_WIDTH + (vertexID % blockDim) / (float)(blockDim)*BLOCK_WIDTH;
-            vertex->v.z = i / 18 * BLOCK_WIDTH + (vertexID / blockDim) / (float)(blockDim)*BLOCK_WIDTH;
-            vertex->v.x += -BLOCK_WIDTH * 9;
-            vertex->v.z += -BLOCK_WIDTH * 9;
+            vertex->v.x = i % BLOCK_PER_MAP_SIDE * BLOCK_WIDTH + (vertexID % blockDim) / (float)(blockDim)*BLOCK_WIDTH;
+            vertex->v.z = i / BLOCK_PER_MAP_SIDE * BLOCK_WIDTH + (vertexID / blockDim) / (float)(blockDim)*BLOCK_WIDTH;
+            vertex->v.x += -BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
+            vertex->v.z += -BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
 
             vertex->color[0] = t->r / 255.0f;
             vertex->color[1] = t->g / 255.0f;
@@ -573,7 +573,6 @@ float RSArea::getGroundLevel(int BLOC, float x, float y) {
         return 0;
 
     int verticeIndex = 0;
-    // 180000
     int centerX = 0;
     int centerY = 0;
     int vX = static_cast<int>((x) + centerX);
@@ -595,10 +594,10 @@ float RSArea::getGroundLevel(int BLOC, float x, float y) {
 
 float RSArea::getY(float x, float z) {
 
-    int centerX = 180000;
-    int centerY = 180000;
-    int blocX = (int)(x + centerX) / 20000;
-    int blocY = (int)(z + centerY) / 20000;
+    int centerX = BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
+    int centerY = BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
+    int blocX = (int)(x + centerX) / BLOCK_WIDTH;
+    int blocY = (int)(z + centerY) / BLOCK_WIDTH;
 
-    return (this->getGroundLevel(blocY * 18 + blocX, x, z));
+    return (this->getGroundLevel(blocY * BLOCK_PER_MAP_SIDE + blocX, x, z));
 }

@@ -597,7 +597,7 @@ void SCRenderer::RenderBlock(RSArea *area, int LOD, int i, bool renderTexture) {
     }
 
     // Inter-block right side
-    if (i % 18 != 17) {
+    if (i % BLOCK_PER_MAP_SIDE != 17) {
         AreaBlock *currentBlock = area->GetAreaBlockByID(LOD, static_cast<size_t>(i));
         AreaBlock *rightBlock = area->GetAreaBlockByID(LOD, static_cast<size_t>(i + 1));
 
@@ -612,7 +612,7 @@ void SCRenderer::RenderBlock(RSArea *area, int LOD, int i, bool renderTexture) {
     }
 
     // Inter-block bottom side
-    if (i / 18 != 17) {
+    if (i / BLOCK_PER_MAP_SIDE != 17) {
 
         AreaBlock *currentBlock = area->GetAreaBlockByID(LOD, i);
         AreaBlock *bottomBlock = area->GetAreaBlockByID(LOD, i + BLOCK_PER_MAP_SIDE);
@@ -628,7 +628,7 @@ void SCRenderer::RenderBlock(RSArea *area, int LOD, int i, bool renderTexture) {
     }
 
     // Inter bottom-right quad
-    if (i % 18 != 17 && i / 18 != 17) {
+    if (i % BLOCK_PER_MAP_SIDE != 17 && i / BLOCK_PER_MAP_SIDE != 17) {
 
         AreaBlock *currentBlock = area->GetAreaBlockByID(LOD, i);
         AreaBlock *rightBlock = area->GetAreaBlockByID(LOD, i + 1);
@@ -717,8 +717,11 @@ void SCRenderer::RenderWorldSkyAndGround() {
 
 
 void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
-    glMatrixMode(GL_PROJECTION);
+    GLfloat fogColor[4] = {0.7f, 0.8f, 1.0f, 1.0f};
+    float model_view_mat[4][4];
     Matrix *projectionMatrix = camera.GetProjectionMatrix();
+
+    glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(projectionMatrix->ToGL());
 
     glDisable(GL_CULL_FACE);
@@ -726,10 +729,6 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-    GLuint fogMode[] = {GL_EXP, GL_EXP2, GL_LINEAR}; // Storage For Three Types Of Fog
-    GLuint fogfilter = 0;                            // Which Fog To Use
-    GLfloat fogColor[4] = {0.7f, 0.8f, 1.0f, 1.0f};
-    float model_view_mat[4][4];
     glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
     glFogi(GL_FOG_MODE, GL_EXP2); // Fog Mode
     glFogfv(GL_FOG_COLOR, fogColor);         // Set Fog Color
@@ -816,6 +815,9 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
 
     float y = 0;
     for (auto object : mission->mission_data.parts) {
+        if (object == mission->getPlayerCoord()) {
+            continue;
+        }
         glPushMatrix();
         
         glTranslatef(static_cast<GLfloat>(object->x), static_cast<GLfloat>(object->y),

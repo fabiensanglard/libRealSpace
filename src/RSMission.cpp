@@ -1,5 +1,5 @@
 #include "RSMission.h"
-#include "PakArchive.h"
+#include "block_def.h"
 
 void missionstrtoupper(char *src) {
     int i = 0;
@@ -14,12 +14,14 @@ RSMission::~RSMission() {}
 
 MISN_PART *RSMission::getPlayerCoord() { 
     int search_id = 0;
+    if (this->player != nullptr) {
+        return this->player;
+    }
     for (auto cast : this->mission_data.casting) {
         if (cast->actor == "PLAYER") {
             for (auto part : this->mission_data.parts) {
                 if (part->id == search_id) {
-                    // @todo: this should not be here, must removed it after scstrike refactors
-                    this->mission_data.parts.erase(std::remove(this->mission_data.parts.begin(), this->mission_data.parts.end(), part), this->mission_data.parts.end());
+                    this->player = part;
                     return part;
                 }
             }
@@ -39,7 +41,7 @@ MISN_PART *RSMission::getObject(const char *name) {
 
 void RSMission::InitFromRAM(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
-
+    this->player = nullptr;
     std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
     handlers["MISN"] = std::bind(&RSMission::parseMISN, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
@@ -125,9 +127,9 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
                 tmparea->AreaName[k] = stream.ReadByte();
             }
             missionstrtoupper(tmparea->AreaName);
-            tmparea->XAxis = stream.ReadInt24LE();
-            tmparea->ZAxis = -stream.ReadInt24LE();
-            tmparea->YAxis = stream.ReadInt24LE();
+            tmparea->XAxis = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->ZAxis = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->YAxis = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
 
             tmparea->AreaWidth = stream.ReadUShort();
             Blank0 = stream.ReadByte();
@@ -139,9 +141,9 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
                 tmparea->AreaName[k] = stream.ReadByte();
             }
             missionstrtoupper(tmparea->AreaName);
-            tmparea->XAxis = stream.ReadInt24LE();
-            tmparea->ZAxis = -stream.ReadInt24LE();
-            tmparea->YAxis = stream.ReadInt24LE();
+            tmparea->XAxis = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->ZAxis = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->YAxis = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
             
             tmparea->AreaWidth = stream.ReadUShort();
 
@@ -159,9 +161,9 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
                 tmparea->AreaName[k] = stream.ReadByte();
             }
             missionstrtoupper(tmparea->AreaName);
-            tmparea->XAxis = stream.ReadInt24LE();
-            tmparea->ZAxis = -stream.ReadInt24LE();
-            tmparea->YAxis = stream.ReadInt24LE();
+            tmparea->XAxis = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->ZAxis = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->YAxis = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
             
             tmparea->AreaWidth = stream.ReadUShort();
 
@@ -203,9 +205,9 @@ void RSMission::parseMISN_SPOT(uint8_t *data, size_t size) {
             spt->unknown |= stream.ReadByte() << 8;
 
             stream.ReadByte();
-            spt->XAxis = stream.ReadInt24LE();
-            spt->ZAxis = -stream.ReadInt24LE();
-            spt->YAxis = stream.ReadShort();
+            spt->XAxis = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            spt->ZAxis = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            spt->YAxis = stream.ReadShort() * HEIGH_MAP_SCALE;
             stream.ReadByte();
             this->mission_data.spots.push_back(spt);
         }
@@ -293,12 +295,13 @@ void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
         prt->unknown2 |= stream.ReadByte() << 0;
         prt->unknown2 |= stream.ReadByte() << 8;
 
-        prt->x = stream.ReadInt24LE();
-        prt->z = -stream.ReadInt24LE();
+        prt->x = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+        prt->z = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
 
         prt->y = 0;
         prt->y |= stream.ReadByte() << 0;
         prt->y |= stream.ReadByte() << 8;
+        prt->y *= HEIGH_MAP_SCALE;
 
         for (int k = 0; k < 22; k++) {
             prt->unknown_bytes.push_back(stream.ReadByte());

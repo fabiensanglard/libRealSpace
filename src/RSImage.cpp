@@ -6,11 +6,7 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "RSImage.h"
-#include "SCRenderer.h"
-#include "Texture.h"
-#include "RSPalette.h"
-#include "RSVGA.h"
+#include "precomp.h"
 
 
 extern SCRenderer Renderer;

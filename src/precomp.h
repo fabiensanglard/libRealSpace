@@ -9,6 +9,8 @@
 #ifndef iff_precomp_h
 #define iff_precomp_h
 
+#include "block_def.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -71,6 +73,7 @@ extern "C" {
     #include "RSPalette.h"
     #include "RSSmokeSet.h"
     #include "RSEntity.h"
+    #include "RSProf.h"
     #include "RSMusic.h"
     #include "RSSound.h"
     #include "RSMapTextureSet.h"
@@ -80,11 +83,9 @@ extern "C" {
     #include "RSGameflow.h"
     #include "RSHud.h"
     #include "RSCockpit.h"
-    #include "RSMission.h"
     #include "RSNavMap.h"
-    #include "RSProf.h"
+    #include "RSMission.h"
     
-
     // Music Stuff
     #include "RSMusic.h"
     #include "RSMixer.h"

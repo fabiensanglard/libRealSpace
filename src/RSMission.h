@@ -98,6 +98,7 @@ public:
     void InitFromRAM(uint8_t *data, size_t size);
 
 private:
+    MISN_PART *player{nullptr};
     void parseMISN(uint8_t *data, size_t size);
     void parseMISN_VERS(uint8_t *data, size_t size);
     void parseMISN_INFO(uint8_t *data, size_t size);

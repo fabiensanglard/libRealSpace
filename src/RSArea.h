@@ -7,28 +7,8 @@
 //
 
 #pragma once
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include <stdlib.h>
-#include <stdio.h>
+#include "precomp.h"
 
-#ifdef __cplusplus
-}
-#endif
-
-#include <stdint.h>
-#include <vector>
-#include "Matrix.h"
-#include "Quaternion.h"
-#include "TreArchive.h"
-#include "PakArchive.h"
-#include "RSEntity.h"
-#include "RSMapTextureSet.h"
-#include "IffLexer.h"
-
-
-#define BLOCK_WIDTH 20000
 
 typedef struct MapObject{
     
@@ -83,8 +63,7 @@ struct AreaOverlay {
 
 #define NUM_LODS 3
 
-#define BLOCK_PER_MAP_SIDE 18
-#define BLOCKS_PER_MAP (BLOCK_PER_MAP_SIDE*BLOCK_PER_MAP_SIDE)
+
 
 class RSMapTextureSet;
 class RSImage;

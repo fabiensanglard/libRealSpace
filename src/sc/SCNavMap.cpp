@@ -108,7 +108,8 @@ void SCNavMap::RunFrame(void) {
     
     //Draw static
     VGA.DrawShape(this->navMap->background);
-    
+    float center = BLOCK_WIDTH * 9.0f;
+    float map_width = BLOCK_WIDTH * 18.0f;
     if (this->navMap->maps.count(*this->name)>0) {
         VGA.DrawShape(this->navMap->maps[*this->name]);
         Point2D pos = this->navMap->maps[*this->name]->position;
@@ -116,9 +117,10 @@ void SCNavMap::RunFrame(void) {
         int h = 155;
         int t = 18;
         int l = 6;
+        
         for (auto ob: this->missionObj->mission_data.parts) {
-            int newx = (int) (((ob->x+180000.0f)/360000.0f)*w)+l;
-            int newy = (int) (((ob->z+180000.0f)/360000.0f)*h)+t;
+            int newx = (int) (((ob->x+center)/map_width)*w)+l;
+            int newy = (int) (((ob->z+center)/map_width)*h)+t;
             if (ob->member_name != "F-16DES" || ob->weapon_load != "") {
                 
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
@@ -129,7 +131,7 @@ void SCNavMap::RunFrame(void) {
                     VGA.line(newx+5, newy-5, newx-5, newy+5, ob->id);
                 }
             } else {
-                newy = (int) (((ob->z+180000.0f)/360000.0f)*h)+t;
+                newy = (int) (((ob->z+center)/map_width)*h)+t;
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
                     VGA.plot_pixel(newx, newy, ob->id);
                     VGA.line(newx-5, newy-5, newx+5, newy-5, ob->id);
@@ -158,12 +160,12 @@ void SCNavMap::RunFrame(void) {
                     this->navMap->font->GetShapeForChar('A')->GetWidth()
                 );*/
             }
-            int newx = (int) (((area->XAxis+180000.0f)/360000.0f)*w)+l;
-            int newy = (int) (((area->ZAxis+180000.0f)/(360000.0f))*h)+t;
-            int neww = (int) ((area->AreaWidth / 360000.0f) * w);
+            int newx = (int) (((area->XAxis+center)/map_width)*w)+l;
+            int newy = (int) (((area->ZAxis+center)/map_width)*h)+t;
+            int neww = (int) ((area->AreaWidth / map_width) * w);
             int newh = neww;
             if (area->AreaHeight != 0) {
-                newh = (int) ((area->AreaHeight / 360000.0f) * h);
+                newh = (int) ((area->AreaHeight / map_width) * h);
             }
             if (newx>0 && newx<320 && newy>0 && newy<200) {
                 int txtw = (int) strlen(area->AreaName) * (this->navMap->font->GetShapeForChar('A')->GetWidth()+1);
