@@ -4,7 +4,7 @@ title: LibRealSpace Class Diagram
 
 classDiagram
     
-    class MISN:::RSFILE {
+    class MISN {
         uint16_t version;
         uint8_t info[];
         uint8_t tune;
@@ -130,10 +130,15 @@ classDiagram
         float color[4];
 
     }
+    MapVertex --> Point3D
+
     class BoudingBox {
         Point3D min;
         Point3D max;
     }
+
+    BoudingBox --> Point3D
+
     class UV {
         uint8_t u;
         uint8_t v;
@@ -155,7 +160,7 @@ classDiagram
         uint16_t numTriangles;
         uint16_t triangleIDs[256];
     }
-    class RSEntity {
+    class RSEntity:::RSFILE {
         RSImage * images[];
         Point3D vertices[];
         uvxyEntry uvs[];
@@ -178,6 +183,7 @@ classDiagram
         Quaternion orientation;
         bool prepared;
     }
+
     RSEntity --> WDAT
     RSEntity --> DYNN_MISS
     RSEntity --> WEAPS
@@ -189,6 +195,10 @@ classDiagram
     RSEntity --> uvxyEntry
     RSEntity --> MapVertex
     RSEntity --> BoudingBox
+    RSEntity --> Point3D
+    RSEntity --> Quaternion
+    RSEntity --> RSImage
+
     MISN_PART --> RSEntity
     CHLD --> RSEntity
     EXPL --> RSEntity
@@ -198,12 +208,13 @@ classDiagram
     MISN_PART --> AREA
     MISN_PART --> CAST
 
-    class RSArea {
+    class RSArea:::RSFILE {
         std::vector~MapObject~ objects;
         std::vector~AreaOverlay~ objectOverlay;
         float elevation[BLOCKS_PER_MAP];
         AreaBlock blocks[NUM_LODS][BLOCKS_PER_MAP];
     }
+
     class MapObject{
         char name[9];
         char destroyedName[9];
@@ -247,7 +258,7 @@ classDiagram
     AreaBlock --> MapVertex
     MISN --> RSArea
 
-    class RSCockpit {
+    class RSCockpit:::RSFILE {
         RSImageSet ARTP;
         RealObjs REAL;
         Moni MONI;
@@ -362,7 +373,7 @@ classDiagram
         CHUD_SHAPE *STRF;
         TTAG *TTAG;
     }
-    class RSHud {
+    class RSHud:::RSFILE {
         CHUD *small_hud;
         CHUD *large_hud;
     }
@@ -411,7 +422,7 @@ classDiagram
         bool isAI;
     }
     
-    class RSProf {
+    class RSProf:::RSFILE {
         uint16_t version;
         RADI radi;
         AI ai;
@@ -429,7 +440,7 @@ classDiagram
     RSSmokeSet --> RSImageSet
     RSEntity --> RSSmokeSet
 
-    class RLEShape {
+    class RLEShape:::RSFILE {
         Point2D position;
         Point2D buffer_size;
         uint8_t* data;
@@ -441,11 +452,14 @@ classDiagram
         int16_t botDist;
         uint8_t colorOffset;
     }
+
+    RLEShape --> Point2D
+    RLEShape --> ByteStream
+
     class RLEFragment{
         FragmentType type;
         bool isCompressed;
         uint16_t numTexels;
-        
         int16_t dx;
         int16_t dy;
     }
@@ -458,10 +472,20 @@ classDiagram
         std::vector~RSPalette~ palettes;
         std::vector~RLEShape~ shapes;
     }
+
     RSImageSet --> RLEShape
     RSImageSet --> RSPalette
 
-    class SCStrike {
+    class RSPalette:::RSFILE {
+         uint32_t colorFlag;
+        VGAPalette colors;
+        uint32_t bwFlag;
+        VGAPalette bwColors;
+    }
+
+    RSPalette --> VGAPalette
+
+    class SCStrike:::IActivity {
         char missFileName[33];
         uint8_t camera_mode;
         bool mouse_control;
@@ -477,9 +501,7 @@ classDiagram
         RSMission missionObj;
         SCNavMap nav_screen;
         SCPlane player_plane;
-
         SCCockpit cockpit;
-
         bool autopilot;
         SCPilot pilot;
         RSProf player_prof;
@@ -501,11 +523,14 @@ classDiagram
     SCStrike --> SCAiPlane
     SCStrike --> Camera
     SCStrike --> RSEntity
-    RSMission --> MISN
-    classDef RSFILE fill:#f96;
-    style SCStrike fill:#f9f,stroke:#333,stroke-width:4px;
+    SCStrike --> Point3D
+    SCStrike --> Point2D
+    SCStrike --> Quaternion
 
-    class IActivity {
+    RSMission --> MISN
+    
+
+    class IActivity:::IActivity {
         bool running;
         bool music_playing;
         bool focused;
@@ -518,3 +543,638 @@ classDiagram
     IActivity <|-- SCDogFightMenu
     IActivity <|-- SCGameFlow
     IActivity <|-- SCMainMenu
+    IActivity <|-- SCObjectViewer
+    IActivity <|-- SCTrainingMenu
+    IActivity <|-- SCShot
+
+    class SCMainMenu:::IActivity {
+        RLEShape board;
+        RLEShape sky;
+        RLEShape mountain;
+        RLEShape cloud;
+        PakArchive mainMenupak;
+        Point2D boardPosition;
+    }
+
+    SCMainMenu --> RLEShape
+    SCMainMenu --> PakArchive
+    SCMainMenu --> Point2D
+    SCMainMenu --> SCTrainingMenu
+    SCMainMenu --> SCObjectViewer
+    SCMainMenu --> SCGameFlow
+    SCMainMenu --> SCButton
+    SCMainMenu --> RSVGA
+
+    SCConvPlayer --> RSVGA
+    SCObjectViewer --> RSVGA
+    SCStrike --> RSVGA
+    SCTrainingMenu --> RSVGA
+
+    class RSMission:::RSFILE {
+        TreArchive *tre;
+        MISN mission_data;
+    }
+
+    class GameEngine {
+        std::stack~IActivity~ activities;
+    }
+
+    GameEngine --> IActivity
+    GameEngine --> RSScreen
+    GameEngine --> RSVGA
+    GameEngine --> AssetManager
+    GameEngine --> SCRenderer
+    GameEngine --> ConvAssetManager
+    GameEngine --> RSFontManager
+
+
+    class SCState {
+        std::map~uint8_t-bool~ requierd_flags;
+        bool mission_accepted;
+        uint8_t mission_id;
+        uint8_t mission_flyed;
+    }
+
+    SCConvPlayer --> SCState
+    SCGameFlow --> SCState
+
+    class RSScreen {
+        int32_t width;
+        int32_t height;
+        int32_t scale;
+    }
+    class RSVGA {
+        VGAPalette palette;
+        uint8_t* frameBuffer;
+        uint8_t frameBufferA[320*200];
+        uint8_t frameBufferB[320*200];
+        uint32_t textureID;
+    }
+
+    RSVGA --> VGAPalette
+
+    class SCMouse {
+        RLEShape appearances[4];
+        Mode mode;
+        Point2D position;
+        bool visible;
+    }
+
+    SCMouse --> RLEShape
+    SCMouse --> Mode
+    SCMouse --> Point2D
+
+    class AssetManager {
+        enum TreID;
+        std::vector~TreArchive~ tres;
+    }
+    AssetManager --> TreArchive
+
+    class SCRenderer {
+        int32_t width;
+        int32_t height;
+        int scale;
+
+        VGAPalette palette;
+        bool running;
+        bool paused;
+        uint32_t counter;
+        Camera camera;
+        Point3D light;
+        Point3D playerPosition;
+        TextureVertexMap textureSortedVertex;
+    }
+
+    class TextureVertexMap {
+        std::map~int-VertexVector~ vertexe_map;
+    }
+
+    class VertexVector {
+        std::vector<VertexCache> vertexe_cache;
+    }
+    
+    class VertexCache {
+        MapVertex lv1;
+        MapVertex lv2;
+        MapVertex lv3;
+        MapVertex uv1;
+        MapVertex uv2;
+        MapVertex uv3;
+    }
+
+    TextureVertexMap --> VertexVector
+    VertexVector --> VertexCache
+    SCRenderer --> VGAPalette
+    SCRenderer --> Camera
+    SCRenderer --> Point3D
+    SCRenderer --> TextureVertexMap
+    SCStrike --> SCRenderer
+
+    class CharFace {
+        char name[9];
+        RSImageSet *appearances;
+    }
+
+    class FacePalette {
+        char name[9];
+        uint8_t index;
+    }
+
+    class CharFigure {
+        char name[9];
+        RSImageSet appearances;
+        size_t paletteID;
+    }
+
+    class ConvBackGround {
+        std::vector~RLEShape~ layers;
+        std::vector~uint8_t~ palettes;
+        char name[9];
+    }
+
+    class ConvAssetManager {
+        std::map~char-CharFace-Char_String_Comparator~ faces;
+        std::map~char-FacePalette-Char_String_Comparator~ facePalettes;
+        std::map~char-ConvBackGround-Char_String_Comparator~ backgrounds;
+        std::map~char-CharFigure-Char_String_Comparator~ figures;
+
+        PakArchive convShps;
+        PakArchive convPals;
+        PakArchive optShps;
+        PakArchive optPals;
+    }
+
+    ConvAssetManager --> CharFace
+    ConvAssetManager --> FacePalette
+    ConvAssetManager --> CharFigure
+    ConvAssetManager --> ConvBackGround
+    ConvAssetManager --> PakArchive
+    ConvAssetManager --> Char_String_Comparator
+    SCConvPlayer --> ConvAssetManager
+
+    class RSFontManager {
+        RSFont font;
+        std::map~char-RSFont-Char_String_Comparator~ fonts;
+    }
+
+    class RSFont:::RSFILE {
+        std::vector<RLEShape> letters;
+    }
+
+    RSFont --> RLEShape
+
+    RSFontManager --> RSFont
+    RSFontManager --> Char_String_Comparator
+
+    class RSMixer {
+        int initted;
+        RSMusic *music;
+    }
+
+    RSMixer --> RSMusic
+
+    class TreEntry{
+        
+        uint8_t     unknownFlag;
+        char        name[65];
+        size_t      size;
+        uint8_t*    data;
+        
+    }
+
+    class TreArchive {
+        std::vector~TreEntry~ entries;
+        std::map~const char-TreEntry-Char_String_Comparator~ mappedEntries;
+        bool valid;
+        char path[512];
+        uint8_t* data;
+        size_t   size;
+    }
+
+    TreArchive --> TreEntry
+    TreArchive --> Char_String_Comparator
+    SCStrike --> TreArchive
+
+    class MemMusic {
+        uint8_t *data;
+        size_t size;
+    }
+
+    class RSMusic:::RSFILE {
+        uint8_t bank:
+        std::map~uint8_t-MemMusic[]~ musics;
+        std::vector~MemMusic~ gameflow_music;
+    }
+
+    RSMusic --> MemMusic
+    IActivity --> RSMixer
+
+    class PakEntry{
+        uint8_t data;
+        size_t size;
+        uint8_t type;
+    }
+
+    class PakArchive {
+        bool ready;
+        ByteStream stream;
+        uint8_t data;
+        size_t size;
+        char path[512] ;
+        bool initalizedFromFile ;
+        std::vector~PakEntry~ entries;
+    }
+
+    PakArchive --> PakEntry
+    PakArchive --> ByteStream
+    IActivity --> RSVGA
+    IActivity --> SCMouse
+    GameEngine --> SCMouse
+    ConvBackGround --> RLEShape
+
+    class ConvFrame {
+        RSFont font;
+        char text;
+        uint8_t textColor;
+        ConvMode mode;
+        FacePos facePosition;
+        std::vector~CharFigure~ participants;
+        CharFace face;
+        int8_t facePaletteID;
+        std::vector~RLEShape~ bgLayers;
+        std::vector~uint8_t~ bgPalettes;
+        uint32_t creationTime;
+        bool expired;
+    }
+
+    class SCConvPlayer:::IActivity {
+        int32_t conversationID;
+        bool initialized;
+        ByteStream conv;
+        size_t size;
+        uint8_t end;
+        ConvFrame currentFrame;
+        uint8_t noOffset;
+        uint8_t yesOffset;
+        std::vector~SCZone~ zones;
+    }
+
+    SCConvPlayer --> ConvFrame
+    SCConvPlayer --> SCZone
+    SCConvPlayer --> ConvMode
+    SCConvPlayer --> ByteStream
+
+    ConvFrame --> CharFigure
+    ConvFrame --> CharFace
+    ConvFrame --> RLEShape
+    ConvFrame --> FacePos
+    ConvFrame --> RSFont
+
+    class SCGameFlow:::IActivity {
+        RSGameFlow gameFlowParser;
+        RSOption optionParser;
+        PakArchive optShps;
+        PakArchive optPals;
+        std::vector~background~ layers;
+        uint8_t *rawPalette;
+        uint8_t *forPalette;
+        uint8_t current_miss;
+        uint8_t current_scen;
+        uint8_t next_miss;
+        int fps;
+        uint8_t currentSpriteId;
+        uint8_t currentOptCode;
+        uint8_t requ;
+        char *missionToFly;
+        std::vector~EFCT~ efect;
+        std::vector~SCZone~ zones;
+
+        std::queue~SCConvPlayer~ convs;
+        std::queue~SCShot~ cutsenes;
+        std::queue~SCStrike~ fly_mission;
+    }
+    class background {
+        RSImageSet *img;
+        uint8_t frameCounter;
+    }
+
+    SCGameFlow --> RSGameFlow
+    SCGameFlow --> RSOption
+    SCGameFlow --> PakArchive
+    SCGameFlow --> background
+    SCGameFlow --> SCConvPlayer
+    SCGameFlow --> SCShot
+    SCGameFlow --> SCStrike
+    SCGameFlow --> EFCT
+    SCGameFlow --> SCZone
+    SCGameFlow --> TreArchive
+    SCStrike --> TreArchive
+
+    class SCTrainingMenu:::IActivity {
+        RLEShape title;
+        RLEShape background;
+        RLEShape board;
+    }
+
+    SCTrainingMenu --> RLEShape
+    SCTrainingMenu --> TreArchive
+    SCTrainingMenu --> ByteStream
+    SCTrainingMenu --> PakArchive
+    SCTrainingMenu --> SCButton
+    SCTrainingMenu --> SCStrike
+
+    
+    class RSShowCase{
+        float cameraDist;
+        RSEntity* entity;
+        char displayName[20];
+    }
+
+    class SCObjectViewer:::IActivity {
+        float rotateUpDownAngle;
+        float rotateLeftRightAngle;
+        float zoomFactor;
+        std::vector~RSShowCase~ showCases;
+        RLEShape bluePrint;
+        RLEShape title;
+        RLEShape board;
+        uint32_t currentObject;
+        uint32_t startTime;
+    }
+
+    SCObjectViewer --> RSShowCase   
+    SCObjectViewer --> RLEShape
+    SCObjectViewer --> TreArchive
+    SCObjectViewer --> ByteStream
+    SCObjectViewer --> PakArchive
+    SCObjectViewer --> SCButton
+    SCObjectViewer --> SCRenderer
+
+    RSShowCase --> RSEntity
+
+    class shotBackground {
+        RSImageSet* img;
+        uint8_t frameCounter;
+    }
+    class SCShot:::IActivity {
+        RSOption optionParser;
+        PakArchive optShps;
+        PakArchive optPals;
+        std::vector~shotBackground~ layers;
+        uint8_t rawPalette;
+        std::vector~uint8_t~ palettes;
+        uint8_t forPalette;
+        int fps;
+    }
+
+    SCShot --> RSOption
+    SCShot --> PakArchive
+    SCShot --> shotBackground
+
+    class INFO {
+        uint8_t ID;
+        uint8_t UNKOWN;
+    }
+
+    class REQU {
+        uint8_t op;
+        uint8_t value;
+    }
+    class EFCT {
+        uint8_t opcode;
+        uint8_t value;
+    }
+    class GAMEFLOW_SPRT {
+        INFO info;
+        std::vector~EFCT~ efct;
+        std::vector~REQU~ requ;
+    }
+    class GAMEFLOW_SCEN {
+        INFO info;
+        std::vector~GAMEFLOW_SPRT~ sprt;
+        REQU *requ;
+        std::vector~uint8_t~ weap;
+    }
+    class MISS {
+        INFO info;
+        std::vector~EFCT~ efct;
+        std::vector~GAMEFLOW_SCEN~ scen;
+    }
+    class SPED {
+        std::vector~uint8_t~ unkown;
+    }
+    class MAP_DATA {
+        std::vector~uint8_t~ unkown;
+    }
+    class MAP {
+        INFO info;
+        SPED *sped;
+        MAP_DATA *data;
+    }
+    class LOAD {
+        std::vector~uint8_t~ load;
+    }
+    class MLST {
+        std::vector~std::string~ data;
+        std::vector~std::string~ prtl;
+    }
+    class WING {
+        INFO info;
+        std::vector~uint8_t~ pilt;
+    }
+    class CHNG {
+        INFO info;
+        std::vector~uint8_t~ pilt;
+        std::vector~uint8_t~ cash;
+        std::vector~uint8_t~ weap;
+        std::vector~uint8_t~ over;
+    }
+    class GAMEFLOW {
+        std::map~std::uint8_t, MISS~ game;
+        std::map~std::uint8_t, MAP~ wrld;
+        std::vector~LOAD~ load;
+        MLST* mlst;
+        std::vector~WING~ wngs;
+        std::map~std::uint8_t, CHNG~ stat;
+    }
+    class RSGameFlow:::RSFILE {
+        MISS* tmpmiss;
+        MAP* tmpmap;
+        MLST* tmpmisslt;
+        WING* tmpwings;
+        CHNG* tmpstat;
+        GAMEFLOW_SCEN* tmpgfsc;
+        GAMEFLOW_SPRT* tmpscsp;
+        GAMEFLOW game;
+    }
+
+    RSGameFlow --> MISS
+    RSGameFlow --> MAP
+    RSGameFlow --> MLST
+    RSGameFlow --> WING
+    RSGameFlow --> CHNG
+    RSGameFlow --> GAMEFLOW_SCEN
+    RSGameFlow --> GAMEFLOW_SPRT
+    RSGameFlow --> GAMEFLOW
+
+    GAMEFLOW --> MISS
+    GAMEFLOW --> MAP
+    GAMEFLOW --> LOAD
+    GAMEFLOW --> MLST
+    GAMEFLOW --> WING
+    GAMEFLOW --> CHNG
+
+    CHNG --> INFO
+    WING --> INFO
+    MAP --> INFO
+    MAP --> SPED
+    MAP --> MAP_DATA
+    
+    GAMEFLOW_SCEN --> INFO
+    GAMEFLOW_SCEN --> REQU
+
+    GAMEFLOW_SPRT --> REQU
+    GAMEFLOW_SPRT --> EFCT
+
+    MISS --> INFO
+    MISS --> EFCT
+    MISS --> GAMEFLOW_SCEN
+
+    class QUAD {
+        uint16_t xa1;
+        uint16_t ya1;
+        uint16_t xa2;
+        uint16_t ya2;
+        uint16_t xb1;
+        uint16_t yb1;
+        uint16_t xb2;
+        uint16_t yb2;
+    }
+    class OPTS_INFO {
+        uint8_t ID;
+        uint8_t UNKOWN;
+    }
+    class COLR {
+        uint8_t UNKOWN_1;
+        uint8_t UNKOWN_2;
+    }
+    class TUNE {
+        uint8_t ID;
+        uint8_t UNKOWN;
+    }
+    class PALT {
+        uint8_t ID;
+        uint8_t UNKOWN;
+    }
+    class BACK_SHAP {
+        uint8_t ID;
+        uint8_t UNKOWN_1;
+    }
+    class SPRT_SHAP {
+        uint8_t GID;
+        uint8_t SHP_ID;
+        uint8_t UNKOWN_1;
+        uint8_t UNKOWN_2;
+    }
+    class OPTION_RECT {
+        uint16_t X1;
+        uint16_t Y1;
+        uint16_t X2;
+        uint16_t Y2;
+    }
+    class SPRT_INFO {
+        uint8_t ID;
+        uint8_t UNKOWN_1;
+        uint8_t UNKOWN_2;
+        uint8_t UNKOWN_3;
+    }
+    class SPRT {
+        SPRT_SHAP sprite;
+        std::string label;
+        OPTION_RECT zone;
+        TUNE tune;
+        uint8_t CLCK;
+        QUAD quad;
+        SPRT_INFO info;
+        std::vector~uint8_t~ SEQU;
+    }
+    class BACK {
+        PALT *palette;
+        std::vector~BACK_SHAP~ images;
+    }
+    class FORE {
+        PALT *palette;
+        std::map~uint8_t-SPRT~ sprites;
+    }
+    class SCEN {
+        OPTS_INFO infos;
+        COLR colr;
+        TUNE *tune;
+        BACK *background;
+        FORE *foreground;
+
+    }
+    class SHPS {
+        uint8_t type;
+        uint8_t OptshapeID;
+        uint8_t UNKOWN;
+        uint8_t x1;
+        uint8_t y1;
+        uint8_t x2;
+        uint8_t y2;
+    }
+    class SHOT {
+        OPTS_INFO infos;
+        std::vector~SHPS~ images;
+        std::vector~PALT~ palettes;
+    }
+    class KILL {
+        uint8_t UNKOWN_1;
+        uint8_t UNKOWN_2;
+        uint8_t UNKOWN_3;
+        uint8_t UNKOWN_4;
+    }
+    class MARK {
+        KILL unkown_1;
+        uint8_t *DATA;
+    }
+
+    MARK --> KILL
+    SHOT --> OPTS_INFO
+    SHOT --> SHPS
+    SHOT --> PALT
+    SCEN --> OPTS_INFO
+    SCEN --> COLR
+    SCEN --> TUNE
+    SCEN --> BACK
+    SCEN --> FORE
+    SPRT --> SPRT_SHAP
+    SPRT --> OPTION_RECT
+    SPRT --> TUNE
+    SPRT --> QUAD
+    SPRT --> SPRT_INFO
+    FORE --> PALT
+    FORE --> SPRT
+    BACK --> PALT
+    BACK --> BACK_SHAP
+
+    class RSOption:::RSFILE {
+        SCEN* tmpscen;
+        FORE* tmpfore;
+        BACK* tmpback;
+        SPRT* tmpsprt;
+        SHOT* tmpshot;
+        MARK mark;
+        std::map~std::uint8_t-SCEN~ opts;
+        std::map~std::uint8_t-SHOT~ estb;
+    }
+
+    RSOption --> SCEN
+    RSOption --> FORE
+    RSOption --> BACK
+    RSOption --> SPRT
+    RSOption --> SHOT
+    RSOption --> MARK
+
+    classDef RSFILE fill:#f96;
+    classDef IActivity fill:#f9f,stroke:#333,stroke-width:4px;
