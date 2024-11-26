@@ -51,7 +51,7 @@ def parse_iff_filereader(f, file_path, dec=0):
             if chunk_type == b"SPOT":
                 parse_SPOT_chunk(chunk_data,chunk_size, dec+2)
             if chunk_type == b"PROG":
-                print_int_from_chunk(chunk_data, dec+2)
+                print_efect_from_chunk(chunk_data, dec+2)
             if chunk_type == b"VERS":
                 print_int_from_chunk(chunk_data, dec+2)
             if chunk_type == b"INFO":
@@ -272,6 +272,16 @@ def parse_iff_file(file_path):
 def print_int_from_chunk(chunk_data, dec):
     for c in chunk_data:
         print(' ' * dec, '0x{:02X}\t'.format(c), c)
+
+def print_efect_from_chunk(chunk_data, dec):
+    i = 0
+    for c in chunk_data:
+        if i == 0:
+            print(' ' * dec, 'OPCODE', '0x{:02X}\t'.format(c), c, end='')
+            i = 1
+        elif i == 1:
+            print(' ' * dec, 'VALUE','0x{:02X}\t'.format(c), c)
+            i = 0
 
 
 
