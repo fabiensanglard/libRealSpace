@@ -4,7 +4,7 @@ title: LibRealSpace Class Diagram
 
 classDiagram
     
-    class MISN {
+    class MISN:::DATATYPE {
         uint16_t version;
         uint8_t info[];
         uint8_t tune;
@@ -22,7 +22,7 @@ classDiagram
         uint8_t scenes[][];
         uint8_t load[];
     }
-    class AREA {
+    class AREA:::DATATYPE {
         int id;
         unsigned char AreaType;
         char AreaName[33];
@@ -33,7 +33,7 @@ classDiagram
         unsigned int AreaHeight;
         unsigned char Unknown[5];
     }
-    class MISN_PART {
+    class MISN_PART:::DATATYPE {
         uint8_t id;
         std::string member_name;
         std::string member_name_destroyed;
@@ -51,7 +51,7 @@ classDiagram
         RSEntity *entity;
         bool alive;
     }
-    class SPOT {
+    class SPOT:::DATATYPE {
         int id;
         short unknown;
 
@@ -59,11 +59,11 @@ classDiagram
         long YAxis;
         long ZAxis;
     }
-    class MSGS {
+    class MSGS:::DATATYPE {
         char message[255];
         int id;
     }
-    class CAST {
+    class CAST:::DATATYPE {
         std::string actor;
         RSProf *profile;
     }
@@ -74,7 +74,7 @@ classDiagram
     MISN --> MSGS
 
 
-    class CHLD {
+    class CHLD:::DATATYPE {
         std::string name;
         int32_t x;
         int32_t y;
@@ -82,13 +82,13 @@ classDiagram
         uint8_t data[];
         RSEntity *objct;
     }
-    class EXPL {
+    class EXPL:::DATATYPE {
         std::string name;
         int16_t x;
         int16_t y;
         RSEntity *objct;
     }
-    class WDAT {
+    class WDAT:::DATATYPE {
         uint16_t damage;
         uint16_t radius;
         uint8_t unknown1;
@@ -103,17 +103,17 @@ classDiagram
         uint8_t unknown7;
         uint8_t unknown8;
     }
-    class DYNN_MISS {
+    class DYNN_MISS:::DATATYPE {
         uint32_t turn_degre_per_sec;
         uint32_t velovity_m_per_sec;
         uint32_t proximity_cm;
     }
-    class WEAPS {
+    class WEAPS:::DATATYPE {
         int nb_weap;
         std::string name;
         RSEntity *objct;
     }
-    class HPTS {
+    class HPTS:::DATATYPE {
         uint8_t id;
         int32_t x;
         int32_t y;
@@ -280,7 +280,7 @@ classDiagram
     RSCockpit --> RLEShape
     RSCockpit --> Chud
 
-    class InfoShape {
+    class InfoShape:::DATATYPE {
         std::vector~uint8_t~ INFO;
         RLEShape SHAP;
         RSImageSet ARTS;
@@ -297,7 +297,7 @@ classDiagram
         Mfds MFDS;
         Inst INST;
     }
-    class Mfds {
+    class Mfds:::DATATYPE {
         InfoShape COMM;
         InfoShape AARD;
         InfoShape AGRD;
@@ -305,7 +305,7 @@ classDiagram
         InfoShape WEAP;
         InfoShape DAMG;
     }
-    class Inst {
+    class Inst:::DATATYPE {
         InfoShape RAWS;
         InfoShape ALTI;
         InfoShape AIRS;
@@ -319,24 +319,24 @@ classDiagram
     Inst --> InfoShape
     RealObjs --> RSEntity
 
-    class CHUD_SHAPE {
+    class CHUD_SHAPE:::DATATYPE {
         RLEShape *SHAP;
         RLEShape *SHP2;
         std::vector~uint8_t~ INFO;
     }
-    class HINF {
+    class HINF:::DATATYPE {
         std::vector~uint8_t~ INFO;
         std::string font;
     }
-    class LADD {
+    class LADD:::DATATYPE {
         std::vector~uint8_t~ INFO;
         CHUD_SHAPE *VECT;
     }
-    class HUD_POS {
+    class HUD_POS:::DATATYPE {
         uint16_t x;
         uint16_t y;
     }
-    class TTAG {
+    class TTAG:::DATATYPE {
         HUD_POS CLSR;
         HUD_POS TARG;
         HUD_POS NUMW;
@@ -353,7 +353,7 @@ classDiagram
         HUD_POS THRO;
         HUD_POS CALA;
     }
-    class CHUD {
+    class CHUD:::DATATYPE {
         uint8_t type;
         HINF *HINF;
         CHUD_SHAPE *ASPD;
@@ -388,13 +388,13 @@ classDiagram
     TTAG --> HUD_POS
     LADD --> CHUD_SHAPE
 
-    class RADI_INFO {
+    class RADI_INFO:::DATATYPE {
         uint16_t id;
         std::string name;
         std::string callsign;
     }
 
-    class RADI {
+    class RADI:::DATATYPE {
         uint16_t spch;
         RADI_INFO info;
         std::map~uint8_t-string~ msgs;
@@ -403,7 +403,7 @@ classDiagram
         std::string opts;
     }
 
-    class AI_ATTR {
+    class AI_ATTR:::DATATYPE {
         uint8_t TH;
         uint8_t CN;
         uint8_t VB;
@@ -415,7 +415,7 @@ classDiagram
         uint8_t AR;
     }
 
-    class AI {
+    class AI:::DATATYPE {
         std::vector ~uint8_t~ mvrs;
         std::vector ~uint8_t~ goal;
         AI_ATTR atrb;
@@ -455,6 +455,8 @@ classDiagram
 
     RLEShape --> Point2D
     RLEShape --> ByteStream
+    TreArchive --> ByteStream
+    PakArchive --> ByteStream
 
     class RLEFragment{
         FragmentType type;
@@ -546,6 +548,7 @@ classDiagram
     IActivity <|-- SCObjectViewer
     IActivity <|-- SCTrainingMenu
     IActivity <|-- SCShot
+    IActivity --> RSScreen
 
     class SCMainMenu:::IActivity {
         RLEShape board;
@@ -566,8 +569,11 @@ classDiagram
     SCMainMenu --> RSVGA
 
     SCConvPlayer --> RSVGA
+    SCConvPlayer --> RSScreen
+
     SCObjectViewer --> RSVGA
     SCStrike --> RSVGA
+    SCStrike --> RSScreen
     SCTrainingMenu --> RSVGA
 
     class RSMission:::RSFILE {
@@ -575,7 +581,7 @@ classDiagram
         MISN mission_data;
     }
 
-    class GameEngine {
+    class GameEngine:::LOGIC {
         std::stack~IActivity~ activities;
     }
 
@@ -598,12 +604,12 @@ classDiagram
     SCConvPlayer --> SCState
     SCGameFlow --> SCState
 
-    class RSScreen {
+    class RSScreen:::LOGIC {
         int32_t width;
         int32_t height;
         int32_t scale;
     }
-    class RSVGA {
+    class RSVGA:::LOGIC {
         VGAPalette palette;
         uint8_t* frameBuffer;
         uint8_t frameBufferA[320*200];
@@ -630,7 +636,7 @@ classDiagram
     }
     AssetManager --> TreArchive
 
-    class SCRenderer {
+    class SCRenderer:::LOGIC {
         int32_t width;
         int32_t height;
         int scale;
@@ -662,6 +668,7 @@ classDiagram
         MapVertex uv3;
     }
 
+    VertexCache --> MapVertex
     TextureVertexMap --> VertexVector
     VertexVector --> VertexCache
     SCRenderer --> VGAPalette
@@ -726,7 +733,7 @@ classDiagram
     RSFontManager --> RSFont
     RSFontManager --> Char_String_Comparator
 
-    class RSMixer {
+    class RSMixer:::LOGIC {
         int initted;
         RSMusic *music;
     }
@@ -742,7 +749,7 @@ classDiagram
         
     }
 
-    class TreArchive {
+    class TreArchive:::UTILS {
         std::vector~TreEntry~ entries;
         std::map~const char-TreEntry-Char_String_Comparator~ mappedEntries;
         bool valid;
@@ -775,7 +782,7 @@ classDiagram
         uint8_t type;
     }
 
-    class PakArchive {
+    class PakArchive:::UTILS {
         bool ready;
         ByteStream stream;
         uint8_t data;
@@ -931,65 +938,65 @@ classDiagram
     SCShot --> PakArchive
     SCShot --> shotBackground
 
-    class INFO {
+    class INFO:::DATATYPE {
         uint8_t ID;
         uint8_t UNKOWN;
     }
 
-    class REQU {
+    class REQU:::DATATYPE {
         uint8_t op;
         uint8_t value;
     }
-    class EFCT {
+    class EFCT:::DATATYPE {
         uint8_t opcode;
         uint8_t value;
     }
-    class GAMEFLOW_SPRT {
+    class GAMEFLOW_SPRT:::DATATYPE {
         INFO info;
         std::vector~EFCT~ efct;
         std::vector~REQU~ requ;
     }
-    class GAMEFLOW_SCEN {
+    class GAMEFLOW_SCEN:::DATATYPE {
         INFO info;
         std::vector~GAMEFLOW_SPRT~ sprt;
         REQU *requ;
         std::vector~uint8_t~ weap;
     }
-    class MISS {
+    class MISS:::DATATYPE {
         INFO info;
         std::vector~EFCT~ efct;
         std::vector~GAMEFLOW_SCEN~ scen;
     }
-    class SPED {
+    class SPED:::DATATYPE {
         std::vector~uint8_t~ unkown;
     }
-    class MAP_DATA {
+    class MAP_DATA:::DATATYPE {
         std::vector~uint8_t~ unkown;
     }
-    class MAP {
+    class MAP:::DATATYPE {
         INFO info;
         SPED *sped;
         MAP_DATA *data;
     }
-    class LOAD {
+    class LOAD:::DATATYPE {
         std::vector~uint8_t~ load;
     }
-    class MLST {
+    class MLST:::DATATYPE {
         std::vector~std::string~ data;
         std::vector~std::string~ prtl;
     }
-    class WING {
+    class WING:::DATATYPE {
         INFO info;
         std::vector~uint8_t~ pilt;
     }
-    class CHNG {
+    class CHNG:::DATATYPE {
         INFO info;
         std::vector~uint8_t~ pilt;
         std::vector~uint8_t~ cash;
         std::vector~uint8_t~ weap;
         std::vector~uint8_t~ over;
     }
-    class GAMEFLOW {
+    class GAMEFLOW:::DATATYPE {
         std::map~std::uint8_t, MISS~ game;
         std::map~std::uint8_t, MAP~ wrld;
         std::vector~LOAD~ load;
@@ -1040,7 +1047,7 @@ classDiagram
     MISS --> EFCT
     MISS --> GAMEFLOW_SCEN
 
-    class QUAD {
+    class QUAD:::DATATYPE {
         uint16_t xa1;
         uint16_t ya1;
         uint16_t xa2;
@@ -1050,45 +1057,45 @@ classDiagram
         uint16_t xb2;
         uint16_t yb2;
     }
-    class OPTS_INFO {
+    class OPTS_INFO:::DATATYPE {
         uint8_t ID;
         uint8_t UNKOWN;
     }
-    class COLR {
+    class COLR:::DATATYPE {
         uint8_t UNKOWN_1;
         uint8_t UNKOWN_2;
     }
-    class TUNE {
+    class TUNE:::DATATYPE {
         uint8_t ID;
         uint8_t UNKOWN;
     }
-    class PALT {
+    class PALT:::DATATYPE {
         uint8_t ID;
         uint8_t UNKOWN;
     }
-    class BACK_SHAP {
+    class BACK_SHAP:::DATATYPE {
         uint8_t ID;
         uint8_t UNKOWN_1;
     }
-    class SPRT_SHAP {
+    class SPRT_SHAP:::DATATYPE {
         uint8_t GID;
         uint8_t SHP_ID;
         uint8_t UNKOWN_1;
         uint8_t UNKOWN_2;
     }
-    class OPTION_RECT {
+    class OPTION_RECT:::DATATYPE {
         uint16_t X1;
         uint16_t Y1;
         uint16_t X2;
         uint16_t Y2;
     }
-    class SPRT_INFO {
+    class SPRT_INFO:::DATATYPE {
         uint8_t ID;
         uint8_t UNKOWN_1;
         uint8_t UNKOWN_2;
         uint8_t UNKOWN_3;
     }
-    class SPRT {
+    class SPRT:::DATATYPE {
         SPRT_SHAP sprite;
         std::string label;
         OPTION_RECT zone;
@@ -1098,15 +1105,15 @@ classDiagram
         SPRT_INFO info;
         std::vector~uint8_t~ SEQU;
     }
-    class BACK {
+    class BACK:::DATATYPE {
         PALT *palette;
         std::vector~BACK_SHAP~ images;
     }
-    class FORE {
+    class FORE:::DATATYPE {
         PALT *palette;
         std::map~uint8_t-SPRT~ sprites;
     }
-    class SCEN {
+    class SCEN:::DATATYPE {
         OPTS_INFO infos;
         COLR colr;
         TUNE *tune;
@@ -1114,7 +1121,7 @@ classDiagram
         FORE *foreground;
 
     }
-    class SHPS {
+    class SHPS:::DATATYPE {
         uint8_t type;
         uint8_t OptshapeID;
         uint8_t UNKOWN;
@@ -1123,18 +1130,18 @@ classDiagram
         uint8_t x2;
         uint8_t y2;
     }
-    class SHOT {
+    class SHOT:::DATATYPE {
         OPTS_INFO infos;
         std::vector~SHPS~ images;
         std::vector~PALT~ palettes;
     }
-    class KILL {
+    class KILL:::DATATYPE {
         uint8_t UNKOWN_1;
         uint8_t UNKOWN_2;
         uint8_t UNKOWN_3;
         uint8_t UNKOWN_4;
     }
-    class MARK {
+    class MARK:::DATATYPE {
         KILL unkown_1;
         uint8_t *DATA;
     }
@@ -1176,5 +1183,57 @@ classDiagram
     RSOption --> SHOT
     RSOption --> MARK
 
+    class IFFSaxLexer:::UTILS {
+        ByteStream *stream;
+        uint8_t* data;
+        size_t size;
+        char path[512];
+    }
+    IFFSaxLexer --> ByteStream
+    RSMission --> IFFSaxLexer
+    RSEntity --> IFFSaxLexer
+    RSCockpit --> IFFSaxLexer
+    RSProf --> IFFSaxLexer
+    RSGameFlow --> IFFSaxLexer
+    RSOption --> IFFSaxLexer
+    
+    class ByteStream:::UTILS {
+        uint8_t *cursor;
+    }
+
+    class IffLexer:::UTILS {
+        std::map~uint32_t-IffChunk~ chunksHashTable;
+        ByteStream stream;
+        uint8_t* data;
+        size_t size;
+        IffChunk topChunk;
+        char path[512];
+    }
+
+    class IffChunk:::UTILS {
+        uint32_t id;
+        uint8_t* data;
+        size_t size;
+        uint32_t subId;
+        std::vector~IffChunk~ childs;
+        char name[5];
+    }
+
+    RSArea --> IffLexer
+    RSImageSet --> IffLexer
+    RSPalette --> IffLexer
+    RSVGA --> IffLexer
+    ConvAssetManager --> IffLexer
+    SCCockpit --> IffLexer
+    SCNavMap --> IffLexer
+    SCObjectViewer --> IffLexer
+    SCSmokeSet --> IffLexer
+
+    IffLexer --> ByteStream
+    IffLexer --> IffChunk
+    
     classDef RSFILE fill:#f96;
     classDef IActivity fill:#f9f,stroke:#333,stroke-width:4px;
+    classDef UTILS fill:#0f6,stroke:#333,stroke-width:4px;
+    classDef DATATYPE fill:#f66,stroke:#333,stroke-width:4px;
+    classDef LOGIC fill:#ff0,stroke:#333,stroke-width:4px;
