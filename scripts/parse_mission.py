@@ -37,13 +37,16 @@ def parse_iff_filereader(f, file_path, dec=0):
             if chunk_type == b"CAST":
                 parse_CAST_chunk(chunk_data, chunk_size, dec+2)
             if chunk_type == b"AREA":
-                parse_AREA_chunk(chunk_data, chunk_size, dec+2)
+                try:
+                    parse_AREA_chunk(chunk_data, chunk_size, dec+2)
+                except:
+                    pass
             if chunk_type == b"PART":
                 parse_PART_chunk(chunk_data, chunk_size, dec+2)
             if chunk_type == b"TEAM":
                 print_int_from_chunk(chunk_data, dec+2)
             if chunk_type == b"LOAD":
-                print_int_from_chunk(chunk_data, dec+2)
+                parse_LOAD_chunk(chunk_data, chunk_size, dec+2)
             if chunk_type == b"SCNE":
                 print_int_from_chunk(chunk_data, dec+2)
             if chunk_type == b"FLAG":
@@ -122,7 +125,10 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
         area_type = chunk_data[offset]
         offset += 1
         if area_type == ord('S'):
-            area_name = chunk_data[offset:offset+33].decode().strip('\0')
+            try:
+                area_name = chunk_data[offset:offset+33].decode().strip('\0')
+            except UnicodeDecodeError:
+                area_name = "ERROR UTF8 DECODE"
             offset += 33
             XAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
             offset += 4
@@ -264,6 +270,22 @@ def parse_MSGS_chunk(chunk_data, chunk_size, dec):
         read += 1
     for m in msg:
         print(' ' * dec, f"Message: {m}")
+
+def parse_LOAD_chunk(chunk_data, chunk_size, dec):
+    read = 0
+    msg = []
+    string_msg = ""
+    while read < len(chunk_data):
+        byte = chunk_data[read]
+        if byte == 0:
+            if len(string_msg) > 0:
+                msg.append(string_msg.replace("\n","#"))
+            string_msg = ""
+        else:
+            string_msg += chr(byte)
+        read += 1
+    for m in msg:
+        print(' ' * dec, f"File: {m}")
 
 def parse_iff_file(file_path):
     with open(file_path, 'rb') as f:
