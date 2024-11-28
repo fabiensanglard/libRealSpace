@@ -1188,6 +1188,29 @@ void SCStrike::RenderMenu() {
             }
             ImGui::TreePop();
         }
+        if (ImGui::TreeNode("SPOT")) {
+            for (auto spot : missionObj->mission_data.spots) {
+                if (ImGui::TreeNode((void *)(intptr_t)spot, "Spot %d", spot->id)) {
+                    ImGui::Text("Spot area_id %d", spot->area_id);
+                    ImGui::Text("Spot x %d y %d z %d", spot->XAxis, spot->YAxis, spot->ZAxis);
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("PROG")) {
+            int id=1;
+            for (auto prog : missionObj->mission_data.prog) {
+                if (ImGui::TreeNode((void *)(intptr_t)prog, "Prog %d", id)) {
+                    for (auto op : *prog) {
+                        ImGui::Text("opcode:[%d]\t\targ:[%d]", op.opcode, op.arg);
+                    }
+                    ImGui::TreePop();
+                }
+                id++;
+            }
+            ImGui::TreePop();
+        }
         ImGui::Text("Mission Parts %d", missionObj->mission_data.parts.size());
         if (ImGui::TreeNode("Parts")) {
             for (auto part : missionObj->mission_data.parts) {

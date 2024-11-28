@@ -44,6 +44,7 @@ struct MISN_PART {
     uint16_t azymuth{0};
     uint16_t roll{0};
     uint16_t pitch{0};
+    std::vector<uint8_t> progs_id;
     std::vector<uint8_t> unknown_bytes;
     RSEntity *entity;
     bool alive{true};
@@ -51,7 +52,7 @@ struct MISN_PART {
 
 struct SPOT {
     int id;
-    short unknown;
+    short area_id;
 
     long XAxis;
     long YAxis;
@@ -65,7 +66,10 @@ struct CAST {
     std::string actor;
     RSProf *profile;
 };
-
+struct PROG {
+    uint8_t opcode;
+    uint8_t arg;
+};
 struct MISN {
     uint16_t version;
     std::vector<uint8_t> info;
@@ -77,7 +81,7 @@ struct MISN {
     std::vector<std::string *> messages;
     std::vector<uint8_t> flags;
     std::vector<CAST *> casting;
-    std::vector<uint8_t> prog;
+    std::vector<std::vector<PROG> *> prog;
     std::vector<uint8_t> nums;
     std::vector<MISN_PART *> parts;
     std::vector<uint8_t> team;

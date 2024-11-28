@@ -42,6 +42,7 @@
 #include "SCWildCatBase.h"
 #include "SCNavMap.h"
 #include "SCCockpit.h"
+#include "SCMission.h"
 #include "SCStrike.h"
 #include "SCObjectViewer.h"
 #include "SCDogFightMenu.h"

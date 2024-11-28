@@ -200,9 +200,9 @@ void RSMission::parseMISN_SPOT(uint8_t *data, size_t size) {
         spt = (SPOT *)malloc(sizeof(SPOT));
         if (spt != NULL) {
             spt->id = i;
-            spt->unknown = 0;
-            spt->unknown |= stream.ReadByte() << 0;
-            spt->unknown |= stream.ReadByte() << 8;
+            spt->area_id = 0;
+            spt->area_id |= stream.ReadByte() << 0;
+            spt->area_id |= stream.ReadByte() << 8;
 
             stream.ReadByte();
             spt->XAxis = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
@@ -268,8 +268,18 @@ void RSMission::parseMISN_CAST(uint8_t *data, size_t size) {
     }
 }
 void RSMission::parseMISN_PROG(uint8_t *data, size_t size) {
-    for (int i = 0; i < size; i++) {
-        this->mission_data.prog.push_back(data[i]);
+    std::vector<PROG> *prog;
+    prog = new std::vector<PROG>();
+    for (int i = 0; i < size; i=i+2) {
+        PROG tmp;
+        tmp.opcode = data[i];
+        tmp.arg = data[i+1];
+        if (tmp.opcode == 0x00 && tmp.arg == 0x00) {
+            this->mission_data.prog.push_back(prog);
+            prog = new std::vector<PROG>();
+        } else {
+            prog->push_back(tmp);
+        }
     }
 }
 void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
