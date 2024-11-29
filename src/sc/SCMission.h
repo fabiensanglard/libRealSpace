@@ -16,12 +16,12 @@ private:
     std::string mission_name;
     RSArea *area{nullptr};
     RSMission *mission{nullptr};
-    std::vector<std::vector<SCMissionActors *>> teams;
+    std::vector<SCMissionActors *> actors;
     std::map<std::string, RSEntity *> *obj_cache;
     SCMissionActors *player;
 public:    
     SCMission(std::string mission_name, std::map<std::string, RSEntity *> *objCache);
     ~SCMission();
     void LoadMission();
-    void SCMission::cleanup()
+    void SCMission::cleanup();
 };

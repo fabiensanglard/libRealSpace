@@ -174,8 +174,8 @@ void SCCockpit::RenderHeading() {
         }
         headcpt += 1;
     }
-    Vector2D weapoint_direction = {this->weapoint_coords.x - this->player->x,
-                                   this->weapoint_coords.y - this->player->y};
+    Vector2D weapoint_direction = {this->weapoint_coords.x - this->player->position.x,
+                                   this->weapoint_coords.y - this->player->position.z};
     float weapoint_azimut = (atan2f((float)weapoint_direction.y, (float)weapoint_direction.x) * 180.0f / (float)M_PI);
     Point2D weapoint = {0, heading_pos.y - 3};
 
@@ -343,7 +343,7 @@ void SCCockpit::RenderMFDS(Point2D mfds) {
 void SCCockpit::RenderTargetWithCam() {
     if (this->target != nullptr) {
         Vector3D campos = this->cam->GetPosition();
-        Vector3DHomogeneous v = {(float)this->target->x, (float)this->target->y, (float)this->target->z, 1.0f};
+        Vector3DHomogeneous v = {this->target->position.x, this->target->position.y, this->target->position.z, 1.0f};
 
         Matrix *mproj = this->cam->GetProjectionMatrix();
         Matrix *mview = this->cam->GetViewMatrix();
@@ -484,7 +484,7 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode) {
     VGA.PrintText(this->big_font, &pmfd_text, (char *)std::to_string(80*((float)this->radar_zoom/4.0f)).c_str(), 0, 0, 2, 2, 2);
     VGA.PrintText(this->big_font, &pmfd_text, " AIR ", 0, 0, 5, 2, 2);
     VGA.PrintText(this->big_font, &pmfd_text, "360", 0, 0, 3, 2, 2);
-    Vector2D center = {this->player->x, -this->player->y};
+    Vector2D center = {this->player->position.x, this->player->position.z};
     
     for (auto parts : this->parts) {
         if (parts == this->player) {
@@ -493,7 +493,7 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode) {
         if (parts->entity->entity_type != EntityType::jet) {
             continue;
         }
-        Vector2D part = {parts->x, parts->y};
+        Vector2D part = {parts->position.x, parts->position.z};
 
         // rotate part according to player heading
         int heading = 180-(int)this->heading;
@@ -527,7 +527,7 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode) {
 
 void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode) {
     this->RenderMFDS(pmfd_left);
-    Vector2D center = {this->player->x, -this->player->y};
+    Vector2D center = {this->player->position.x, this->player->position.y};
     Point2D pmfd_text = {
         pmfd_left.x + 20,
         pmfd_left.y + 20
@@ -541,7 +541,7 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode) {
     if (mode == 0) {
         int cpt=1;
         for (auto ai : this->ai_planes) {
-            Vector2D ai_position = {ai->object->x, ai->object->y};
+            Vector2D ai_position = {ai->object->position.x, ai->object->position.z};
             Vector2D roa_dir = {ai_position.x-center.x, ai_position.y-center.y};
 
             float distance = sqrtf((float) (roa_dir.x * roa_dir.x) + (float) (roa_dir.y * roa_dir.y));

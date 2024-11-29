@@ -79,9 +79,7 @@ void RSMission::parseMISN_VERS(uint8_t *data, size_t size) {
 }
 void RSMission::parseMISN_INFO(uint8_t *data, size_t size) {
     ByteStream stream(data);
-    for (int i = 0; i < size; i++) {
-        this->mission_data.info.push_back(stream.ReadByte());
-    }
+    this->mission_data.info = stream.ReadString(size);
 }
 void RSMission::parseMISN_TUNE(uint8_t *data, size_t size) {
     ByteStream stream(data);
@@ -304,17 +302,20 @@ void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
         prt->unknown2 = 0;
         prt->unknown2 |= stream.ReadByte() << 0;
         prt->unknown2 |= stream.ReadByte() << 8;
-
-        prt->x = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-        prt->z = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-
-        prt->y = 0;
-        prt->y |= stream.ReadByte() << 0;
-        prt->y |= stream.ReadByte() << 8;
-        prt->y *= HEIGH_MAP_SCALE;
+        int32_t x, z;
+        uint16_t y;
+        x = stream.ReadInt24LE();
+        z = stream.ReadInt24LE();
+        y = 0;
+        y |= stream.ReadByte() << 0;
+        y |= stream.ReadByte() << 8;
+        prt->position = Vector3D(x * BLOCK_COORD_SCALE, y * HEIGH_MAP_SCALE, -z * BLOCK_COORD_SCALE);
 
         for (int k = 0; k < 22; k++) {
             prt->unknown_bytes.push_back(stream.ReadByte());
+        }
+        for (int k = 0; k < 8; k=k+2) {
+            prt->progs_id.push_back(prt->unknown_bytes[14+k]);
         }
         prt->azymuth = 0;
         prt->azymuth |= prt->unknown_bytes[1] << 0;
@@ -382,9 +383,9 @@ void RSMission::fixMissionObjectsCoords(void) {
         if (obj->area_id != 255) {
             for (auto area : this->mission_data.areas) {
                 if (area->id-1 == obj->area_id) {
-                    obj->x += area->XAxis;
-                    obj->z += area->ZAxis;
-                    obj->y += (uint16_t) area->YAxis;
+                    obj->position.x += area->XAxis;
+                    obj->position.z += area->ZAxis;
+                    obj->position.y += (uint16_t) area->YAxis;
                     break;
                 }
             }

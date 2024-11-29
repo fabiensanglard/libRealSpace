@@ -37,10 +37,8 @@ struct MISN_PART {
 	std::string weapon_load;
 	uint8_t area_id{0};      
     uint8_t unknown1{0};
-    uint16_t unknown2{0};
-    int32_t x{0};
-    uint16_t y{0};
-    int32_t z{0};
+    int16_t unknown2{0};
+    Vector3D position{0, 0, 0};
     uint16_t azymuth{0};
     uint16_t roll{0};
     uint16_t pitch{0};
@@ -72,7 +70,7 @@ struct PROG {
 };
 struct MISN {
     uint16_t version;
-    std::vector<uint8_t> info;
+    std::string info;
     uint8_t tune;
     std::string name;
     std::string world_filename;
