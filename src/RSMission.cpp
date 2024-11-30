@@ -273,8 +273,10 @@ void RSMission::parseMISN_PROG(uint8_t *data, size_t size) {
         tmp.opcode = data[i];
         tmp.arg = data[i+1];
         if (tmp.opcode == 0x00 && tmp.arg == 0x00) {
-            this->mission_data.prog.push_back(prog);
-            prog = new std::vector<PROG>();
+            if (prog->size() > 0) {
+                this->mission_data.prog.push_back(prog);
+                prog = new std::vector<PROG>();
+            }
         } else {
             prog->push_back(tmp);
         }

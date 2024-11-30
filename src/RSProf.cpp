@@ -107,8 +107,9 @@ void RSProf::parsePROF__AI_MVRS(uint8_t *data, size_t size) {
         return;
     }
     stream.Set(data);
+
     while (stream.GetPosition() < data + size) {
-        this->ai.mvrs.push_back(stream.ReadByte());
+        this->ai.mvrs.push_back(AI_STATE{stream.ReadByte(), stream.ReadByte()});
     }
 }
 void RSProf::parsePROF__AI_GOAL(uint8_t *data, size_t size) {

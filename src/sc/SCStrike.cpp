@@ -405,7 +405,12 @@ void SCStrike::Init(void) {
  * @param[in] missionName The name of the mission file to load.
  */
 void SCStrike::SetMission(char const *missionName) {
-    SCMission *test = new SCMission(missionName, &objectCache);
+    if (this->current_mission != nullptr) {
+        this->current_mission->cleanup();
+        delete this->current_mission;
+        this->current_mission = nullptr;
+    }   
+    this->current_mission = new SCMission(missionName, &objectCache);
     ai_planes.clear();
     ai_planes.shrink_to_fit();
     sprintf(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
@@ -1265,6 +1270,66 @@ void SCStrike::RenderMenu() {
                                 ImGui::Text("%d - %d %d %d",hpt->id,  hpt->x, hpt->y, hpt->z);
                             }
                             ImGui::TreePop();
+                        }
+                        ImGui::TreePop();
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Mission Actors")) {
+            for (auto actor : current_mission->actors) {
+                if (ImGui::TreeNode((void *)(intptr_t)actor, "Actor %d", actor->actor_id)) {
+                    ImGui::Text("Name %s", actor->profile->radi.info.name.c_str());
+                    ImGui::Text("CallSign %s", actor->profile->radi.info.callsign.c_str());
+                    ImGui::Text("Is AI %d", actor->profile->ai.isAI);
+                    if (ImGui::TreeNode("MSGS")) {
+                        for (auto msg : actor->profile->radi.msgs) {
+                            ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("ASKS")) {
+                        for (auto msg : actor->profile->radi.asks) {
+                            ImGui::Text("- [%s]: %s", msg.first.c_str(), msg.second.c_str());
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("AI MVRS")) {
+                        for (auto ai : actor->profile->ai.mvrs) {
+                            ImGui::Text("NODE [%d] - [%d]", ai.node_id, ai.value);
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("AI GOAL")) {
+                        for (auto goal : actor->profile->ai.goal) {
+                            ImGui::Text("[%d]", goal);
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("AI ATRB")) {
+                        ImGui::Text("TH %d", actor->profile->ai.atrb.TH);
+                        ImGui::Text("CN %d", actor->profile->ai.atrb.CN);
+                        ImGui::Text("VB %d", actor->profile->ai.atrb.VB);
+                        ImGui::Text("LY %d", actor->profile->ai.atrb.LY);
+                        ImGui::Text("FL %d", actor->profile->ai.atrb.FL);
+                        ImGui::Text("AG %d", actor->profile->ai.atrb.AG);
+                        ImGui::Text("AA %d", actor->profile->ai.atrb.AA);
+                        ImGui::Text("SM %d", actor->profile->ai.atrb.SM);
+                        ImGui::Text("AR %d", actor->profile->ai.atrb.AR);
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("PROGS")) {
+                        int cpt=0;
+                        for (auto prog : actor->prog) {
+                            if (ImGui::TreeNode((void *)(intptr_t)prog, "Prog %d", cpt)) {
+                                for (auto opcodes: *prog) {
+                                    ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
+                                }
+                                ImGui::TreePop();
+                            }
+                            cpt++;
                         }
                         ImGui::TreePop();
                     }

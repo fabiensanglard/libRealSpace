@@ -33,8 +33,12 @@ struct AI_ATTR {
     uint8_t SM{0};
     uint8_t AR{0};
 };
+struct AI_STATE {
+    uint8_t node_id;
+    uint8_t value;
+};
 struct AI {
-    std::vector <uint8_t> mvrs;
+    std::vector <AI_STATE> mvrs;
     std::vector <uint8_t> goal;
     AI_ATTR atrb;
     bool isAI{false};

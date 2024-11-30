@@ -138,6 +138,8 @@ private:
      */
     int32_t mfd_timeout{0};
 
+    SCMission *current_mission{nullptr};
+
 public:
     /**
      * @brief Constructor

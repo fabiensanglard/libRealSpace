@@ -26,7 +26,6 @@ void SCMission::cleanup() {
     this->actors.shrink_to_fit();
 }
 void SCMission::LoadMission() {
-    this->cleanup();
     std::string miss_file_name = "..\\..\\DATA\\MISSIONS\\" + this->mission_name; 
     
     TreEntry *mission_tre = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(miss_file_name.c_str());
@@ -59,6 +58,12 @@ void SCMission::LoadMission() {
                                                  23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
                                                  part->position.y, part->position.z);
                 actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
+                for (auto prg_id: actor->object->progs_id) {
+                    if (prg_id != 255) {
+                        std::vector<PROG> *prog = this->mission->mission_data.prog[prg_id];
+                        actor->prog.push_back(prog);
+                    }
+                }
                 if (cast->profile != nullptr && cast->profile->ai.isAI && cast->profile->ai.goal.size() > 0) {
                     actor->pilot = new SCPilot();
                     if (this->area->getY(part->position.x, part->position.z) == part->position.y) {
