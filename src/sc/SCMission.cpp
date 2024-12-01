@@ -64,28 +64,30 @@ void SCMission::LoadMission() {
                         actor->prog.push_back(prog);
                     }
                 }
-                if (cast->profile != nullptr && cast->profile->ai.isAI && cast->profile->ai.goal.size() > 0) {
-                    actor->pilot = new SCPilot();
-                    if (this->area->getY(part->position.x, part->position.z) == part->position.y) {
-                        actor->plane->on_ground = true;
-                    } else {
-                        actor->plane->on_ground = false;
-                    }
-                    if (part->position.y < this->area->getY(part->position.x, part->position.z)) {
-                        actor->plane->on_ground = true;
-                    }
-                    if (!actor->plane->on_ground) {
-                        actor->plane->SetThrottle(100);
-                        actor->pilot->target_climb = (int) (part->position.y * 3.6f);
-                        actor->plane->vz = -20;
-                    } else {
-                        actor->pilot->target_climb = 25000;
-                    }
+                if (cast->profile != nullptr && cast->profile->ai.isAI) {
+                    if (cast->profile->ai.goal.size() > 0) {
+                        actor->pilot = new SCPilot();
+                        if (this->area->getY(part->position.x, part->position.z) == part->position.y) {
+                            actor->plane->on_ground = true;
+                        } else {
+                            actor->plane->on_ground = false;
+                        }
+                        if (part->position.y < this->area->getY(part->position.x, part->position.z)) {
+                            actor->plane->on_ground = true;
+                        }
+                        if (!actor->plane->on_ground) {
+                            actor->plane->SetThrottle(100);
+                            actor->pilot->target_climb = (int) (part->position.y * 3.6f);
+                            actor->plane->vz = -20;
+                        } else {
+                            actor->pilot->target_climb = 25000;
+                        }
 
-                    actor->pilot->plane = actor->plane;
-                    actor->pilot->target_azimut = (int) (actor->plane->azimuthf / 10.0f);
+                        actor->pilot->plane = actor->plane;
+                        actor->pilot->target_azimut = (int) (actor->plane->azimuthf / 10.0f);
 
-                    actor->pilot->target_speed = -20;
+                        actor->pilot->target_speed = -20;
+                    }
                     this->actors.push_back(actor);
                 } else if (cast->profile != nullptr && cast->actor == "PLAYER") {
                     this->player = actor;
