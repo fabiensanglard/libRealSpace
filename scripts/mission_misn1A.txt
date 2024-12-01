@@ -1,0 +1,812 @@
+ Chunk: FORM, Taille: 2054
+     TYPE: MISN
+     Chunk: VERS, Taille: 2
+       0x00	 0
+       0x05	 5
+     Chunk: INFO, Taille: 12
+       0x4D	 77
+       0x61	 97
+       0x75	 117
+       0x72	 114
+       0x69	 105
+       0x74	 116
+       0x61	 97
+       0x6E	 110
+       0x69	 105
+       0x61	 97
+       0x00	 0
+       0x00	 0
+     Chunk: TUNE, Taille: 2
+       0x01	 1
+       0x00	 0
+     Chunk: NAME, Taille: 12
+       Value: Mauritania
+     Chunk: FORM, Taille: 20
+         TYPE: WRLD
+         Chunk: FILE, Taille: 8
+           Value: MAURITAN
+     Chunk: AREA, Taille: 266
+       ID 0, Strike Base, Area type: S)
+         X: -70000, Y: 130000, Z: 2580, Width: 32
+         remaining data 217 49 49
+           0x4E	 78
+           0x00	 0
+           0x42	 66
+       ID: 1, BRestricted Airspace Area type: B)
+         X: -40000, Y: -57000, Z: 3395, Width: 80, Height: 80
+         Xrelativ (control): -40000, Yrelativ (control): -57000
+         unknown bytes 1 : 
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+         unknown bytes 2 : 
+           0x00	 0
+           0x00	 0
+           0xA0	 160
+           0x86	 134
+           0x01	 1
+         remaining data 152 114 65
+       ID: 2, Cargo Destination Area type: C)
+         X: 0, Y: -8054784, Z: 1049600, Width: 0, Height: 0
+         remaining data 103 163 49
+       Unknown byte: 0 0x00	
+       Unknown byte: 136 0x88	
+       Unknown byte: 19 0x13	
+       Unknown byte: 0 0x00	
+       ID 3, Nouakchott, Area type: S)
+         X: -127000, Y: -55000, Z: 245, Width: 168
+         remaining data 50 216 49
+           0x61	 97
+           0x00	 0
+           0x53	 83
+       ID 4, Rendezvous, Area type: S)
+         X: -45000, Y: 45000, Z: 4000, Width: 168
+         remaining data 1 265 49
+           0x61	 97
+           0x00	 0
+           0x00	 0
+       Unknown byte: 0 0x00	
+     Chunk: SPOT, Taille: 168
+       Nombre de spot: 12.0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       X: -562, Y: 2527, Z: 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       X: -562, Y: 393, Z: 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       X: -562, Y: -2607, Z: 1000
+       0x04	 4
+       0x00	 0
+       0x00	 0
+       X: 0, Y: 0, Z: 2000
+       0x02	 2
+       0x00	 0
+       0x00	 0
+       X: 0, Y: 0, Z: 2000
+       0x02	 2
+       0x00	 0
+       0x00	 0
+       X: -1645, Y: -1593, Z: 0
+       0x02	 2
+       0x00	 0
+       0x00	 0
+       X: -3624, Y: -1593, Z: 0
+       0x02	 2
+       0x00	 0
+       0x00	 0
+       X: -6624, Y: -1593, Z: 1000
+       0x03	 3
+       0x00	 0
+       0x00	 0
+       X: 0, Y: 0, Z: 1000
+       0xFF	 255
+       0xFF	 255
+       0x00	 0
+       X: 50000, Y: 0, Z: 4000
+       0xFF	 255
+       0xFF	 255
+       0x00	 0
+       X: 0, Y: -150, Z: 0
+       0xFF	 255
+       0xFF	 255
+       0x00	 0
+       X: 150, Y: 0, Z: 0
+     Chunk: NUMS, Taille: 0
+     Chunk: MSGS, Taille: 62
+       Message: Rendezvous#With Cargo
+       Message: Land Cargo
+       Message: Scenic#Nouakchott
+       Message: Head Home
+       Message: 
+     Chunk: FLAG, Taille: 30
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+     Chunk: CAST, Taille: 82
+       Nombre de cast: 9.11111111111111
+       ID: 0, Nom: PLAYER
+       ID: 1, Nom: STERN
+       ID: 2, Nom: STRIBASE
+       ID: 3, Nom: NULL
+       ID: 4, Nom: NULL
+       ID: 5, Nom: MIG-21R
+       ID: 6, Nom: MIG-21R
+       ID: 7, Nom: MIG-21R
+       ID: 8, Nom: C-130
+     Chunk: PROG, Taille: 300
+        OPCODE 0xA1	 161       VALUE 0x01	 1
+        OPCODE 0xA5	 165       VALUE 0x03	 3
+        OPCODE 0xAB	 171       VALUE 0x00	 0
+        OPCODE 0xA5	 165       VALUE 0x07	 7
+        OPCODE 0xAB	 171       VALUE 0x01	 1
+        OPCODE 0xA5	 165       VALUE 0x08	 8
+        OPCODE 0xAB	 171       VALUE 0x02	 2
+        OPCODE 0xA5	 165       VALUE 0x02	 2
+        OPCODE 0xAB	 171       VALUE 0x03	 3
+        OPCODE 0xA2	 162       VALUE 0x02	 2
+        OPCODE 0x09	 9       VALUE 0x01	 1
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0x11	 17       VALUE 0x0D	 13
+        OPCODE 0x14	 20       VALUE 0x07	 7
+        OPCODE 0x11	 17       VALUE 0x0C	 12
+        OPCODE 0x14	 20       VALUE 0x00	 0
+        OPCODE 0x2E	 46       VALUE 0x19	 25
+        OPCODE 0x2E	 46       VALUE 0x64	 100
+        OPCODE 0x14	 20       VALUE 0x01	 1
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0x10	 16       VALUE 0x41	 65
+        OPCODE 0x50	 80       VALUE 0x0B	 11
+        OPCODE 0xB6	 182       VALUE 0xFF	 255
+        OPCODE 0xB8	 184       VALUE 0xFF	 255
+        OPCODE 0xB5	 181       VALUE 0x00	 0
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0x11	 17       VALUE 0x0B	 11
+        OPCODE 0x4F	 79       VALUE 0x00	 0
+        OPCODE 0x01	 1       VALUE 0x00	 0
+        OPCODE 0x08	 8       VALUE 0x41	 65
+        OPCODE 0xA1	 161       VALUE 0x01	 1
+        OPCODE 0x46	 70       VALUE 0x59	 89
+        OPCODE 0x55	 85       VALUE 0x0B	 11
+        OPCODE 0x01	 1       VALUE 0x00	 0
+        OPCODE 0x08	 8       VALUE 0x42	 66
+        OPCODE 0xAA	 170       VALUE 0x00	 0
+        OPCODE 0x92	 146       VALUE 0x05	 5
+        OPCODE 0x48	 72       VALUE 0x5A	 90
+        OPCODE 0x92	 146       VALUE 0x06	 6
+        OPCODE 0x48	 72       VALUE 0x5A	 90
+        OPCODE 0x92	 146       VALUE 0x07	 7
+        OPCODE 0x48	 72       VALUE 0x5A	 90
+        OPCODE 0x10	 16       VALUE 0x59	 89
+        OPCODE 0x4F	 79       VALUE 0x00	 0
+        OPCODE 0x01	 1       VALUE 0x00	 0
+        OPCODE 0x08	 8       VALUE 0x5A	 90
+        OPCODE 0x92	 146       VALUE 0x08	 8
+        OPCODE 0x49	 73       VALUE 0x59	 89
+        OPCODE 0xA8	 168       VALUE 0x08	 8
+        OPCODE 0x01	 1       VALUE 0x00	 0
+        OPCODE 0x08	 8       VALUE 0x59	 89
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0xB8	 184       VALUE 0x08	 8
+        OPCODE 0xB6	 182       VALUE 0xFF	 255
+        OPCODE 0x10	 16       VALUE 0x31	 49
+        OPCODE 0x50	 80       VALUE 0x05	 5
+        OPCODE 0xAB	 171       VALUE 0x14	 20
+        OPCODE 0x52	 82       VALUE 0x09	 9
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0x45	 69       VALUE 0x06	 6
+        OPCODE 0x46	 70       VALUE 0x46	 70
+        OPCODE 0x97	 151       VALUE 0x07	 7
+        OPCODE 0x40	 64       VALUE 0x05	 5
+        OPCODE 0x4B	 75       VALUE 0x46	 70
+        OPCODE 0x52	 82       VALUE 0x06	 6
+        OPCODE 0x08	 8       VALUE 0x46	 70
+        OPCODE 0x11	 17       VALUE 0x05	 5
+        OPCODE 0x4F	 79       VALUE 0x00	 0
+        OPCODE 0x08	 8       VALUE 0x31	 49
+        OPCODE 0xA5	 165       VALUE 0x07	 7
+        OPCODE 0x09	 9       VALUE 0x0B	 11
+        OPCODE 0x46	 70       VALUE 0x47	 71
+        OPCODE 0x55	 85       VALUE 0x05	 5
+        OPCODE 0x10	 16       VALUE 0x47	 71
+        OPCODE 0x4F	 79       VALUE 0x00	 0
+        OPCODE 0x08	 8       VALUE 0x32	 50
+        OPCODE 0xA2	 162       VALUE 0x07	 7
+        OPCODE 0x09	 9       VALUE 0x06	 6
+        OPCODE 0x46	 70       VALUE 0x47	 71
+        OPCODE 0x10	 16       VALUE 0x34	 52
+        OPCODE 0x50	 80       VALUE 0x05	 5
+        OPCODE 0x10	 16       VALUE 0x47	 71
+        OPCODE 0x4F	 79       VALUE 0x00	 0
+        OPCODE 0x08	 8       VALUE 0x47	 71
+        OPCODE 0x45	 69       VALUE 0x08	 8
+        OPCODE 0x48	 72       VALUE 0x33	 51
+        OPCODE 0x45	 69       VALUE 0x06	 6
+        OPCODE 0x49	 73       VALUE 0x33	 51
+        OPCODE 0x92	 146       VALUE 0x05	 5
+        OPCODE 0x49	 73       VALUE 0x41	 65
+        OPCODE 0x95	 149       VALUE 0x05	 5
+        OPCODE 0x40	 64       VALUE 0x05	 5
+        OPCODE 0x4A	 74       VALUE 0x33	 51
+        OPCODE 0x08	 8       VALUE 0x41	 65
+        OPCODE 0x92	 146       VALUE 0x06	 6
+        OPCODE 0x49	 73       VALUE 0x42	 66
+        OPCODE 0x95	 149       VALUE 0x06	 6
+        OPCODE 0x40	 64       VALUE 0x05	 5
+        OPCODE 0x4A	 74       VALUE 0x33	 51
+        OPCODE 0x08	 8       VALUE 0x42	 66
+        OPCODE 0x92	 146       VALUE 0x07	 7
+        OPCODE 0x49	 73       VALUE 0x43	 67
+        OPCODE 0x95	 149       VALUE 0x07	 7
+        OPCODE 0x40	 64       VALUE 0x05	 5
+        OPCODE 0x4A	 74       VALUE 0x33	 51
+        OPCODE 0x08	 8       VALUE 0x43	 67
+        OPCODE 0xAB	 171       VALUE 0x15	 21
+        OPCODE 0xB9	 185       VALUE 0xFF	 255
+        OPCODE 0x52	 82       VALUE 0x08	 8
+        OPCODE 0x52	 82       VALUE 0x0C	 12
+        OPCODE 0x08	 8       VALUE 0x33	 51
+        OPCODE 0x01	 1       VALUE 0x00	 0
+        OPCODE 0x08	 8       VALUE 0x34	 52
+        OPCODE 0x91	 145       VALUE 0x08	 8
+        OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0x52	 82       VALUE 0x0D	 13
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0x45	 69       VALUE 0x0E	 14
+        OPCODE 0x48	 72       VALUE 0x4E	 78
+        OPCODE 0x45	 69       VALUE 0x0D	 13
+        OPCODE 0x49	 73       VALUE 0x41	 65
+        OPCODE 0xAB	 171       VALUE 0x15	 21
+        OPCODE 0x52	 82       VALUE 0x0E	 14
+        OPCODE 0x08	 8       VALUE 0x41	 65
+        OPCODE 0x45	 69       VALUE 0x0C	 12
+        OPCODE 0x49	 73       VALUE 0x4E	 78
+        OPCODE 0xAB	 171       VALUE 0x14	 20
+        OPCODE 0x52	 82       VALUE 0x0E	 14
+        OPCODE 0x08	 8       VALUE 0x4E	 78
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0x45	 69       VALUE 0x0C	 12
+        OPCODE 0x48	 72       VALUE 0x42	 66
+        OPCODE 0xA7	 167       VALUE 0x08	 8
+        OPCODE 0x46	 70       VALUE 0x4E	 78
+        OPCODE 0x08	 8       VALUE 0x42	 66
+        OPCODE 0xA7	 167       VALUE 0x00	 0
+        OPCODE 0x08	 8       VALUE 0x4E	 78
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0xA7	 167       VALUE 0x01	 1
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0xA7	 167       VALUE 0x00	 0
+       OPCODE 0x00	 0       VALUE 0x00	 0
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0x45	 69       VALUE 0x0C	 12
+        OPCODE 0x49	 73       VALUE 0x41	 65
+        OPCODE 0x91	 145       VALUE 0x08	 8
+        OPCODE 0x08	 8       VALUE 0x41	 65
+       OPCODE 0x00	 0       VALUE 0x00	 0
+        OPCODE 0x90	 144       VALUE 0x08	 8
+       OPCODE 0x00	 0       VALUE 0x00	 0
+     Chunk: PART, Taille: 558
+       Nombre de part: 9.0
+       ID: 0
+         Nom: F-16des
+         destroyed: 
+         Load: 
+         0xFF	 255
+         0xFF	 255
+         0x00	 0
+         0x00	 0
+         Unknown: 65535, 0, 65535
+         Relative: -70574, 132527, 2585
+         UB: 0
+         Azymuth: 180
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0x01	 1
+           0x00	 0
+           0x0C	 12
+           0xFE	 254
+           0x0C	 12
+           0xFE	 254
+           0xCE	 206
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+       ID: 1
+         Nom: F-16des
+         destroyed: 
+         Load: AIRLOADL
+         0xFF	 255
+         0xFF	 255
+         0x00	 0
+         0x00	 0
+         Unknown: 65535, 0, 65535
+         Relative: -70542, 132500, 2585
+         UB: 0
+         Azymuth: 180
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0x00	 0
+           0x00	 0
+           0x5E	 94
+           0x01	 1
+           0x5E	 94
+           0x01	 1
+           0x64	 100
+           0x00	 0
+           0x02	 2
+           0x00	 0
+           0x03	 3
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 8
+         Nom: C130des
+         destroyed: 
+         Load: 
+         0xFF	 255
+         0xFF	 255
+         0x01	 1
+         0x00	 0
+         Unknown: 65535, 1, 131071
+         Relative: 0, 2000, 500
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0xAA	 170
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0xC8	 200
+           0x00	 0
+           0x9C	 156
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x04	 4
+           0x00	 0
+           0x05	 5
+           0x00	 0
+           0x06	 6
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+       ID: 2
+         Nom: STRIBASE
+         destroyed: 
+         Load: 
+         0xFF	 255
+         0xFF	 255
+         0x00	 0
+         0x00	 0
+         Unknown: 65535, 0, 65535
+         Relative: -70000, 130400, 2580
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x07	 7
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 5
+         Nom: MIG21
+         destroyed: 
+         Load: GUNLOAD
+         0x01	 1
+         0x00	 0
+         0x01	 1
+         0x00	 0
+         Unknown: 1, 1, 65537
+         Relative: -700, 7800, 1000
+         UB: 0
+         Azymuth: 135
+         remaining data 20
+           0xB4	 180
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x08	 8
+           0x00	 0
+           0x0B	 11
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+       ID: 6
+         Nom: MIG21
+         destroyed: 
+         Load: GUNLOAD
+         0x01	 1
+         0x00	 0
+         0x01	 1
+         0x00	 0
+         Unknown: 1, 1, 65537
+         Relative: -8000, 8000, 1025
+         UB: 0
+         Azymuth: 270
+         remaining data 20
+           0xB4	 180
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x09	 9
+           0x00	 0
+           0x0B	 11
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+       ID: 7
+         Nom: MIG21
+         destroyed: 
+         Load: GUNLOAD
+         0x01	 1
+         0x00	 0
+         0x01	 1
+         0x00	 0
+         Unknown: 1, 1, 65537
+         Relative: -4000, 8200, 1050
+         UB: 0
+         Azymuth: 180
+         remaining data 20
+           0xB4	 180
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x0A	 10
+           0x00	 0
+           0x0B	 11
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+       ID: 3
+         Nom: RWYEXT18
+         destroyed: 
+         Load: 
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 0, 0, 0
+         Relative: -562, 1460, 0
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 4
+         Nom: RWYEXT18
+         destroyed: 
+         Load: 
+         0x02	 2
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 2, 0, 2
+         Relative: -2635, -1593, 0
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+     Chunk: TEAM, Taille: 6
+       0x01	 1
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x02	 2
+       0x00	 0
+     Chunk: FORM, Taille: 212
+         TYPE: PLAY
+         Chunk: SCNE, Taille: 30
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x01	 1
+           0x00	 0
+           0x00	 0
+           0xB4	 180
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x03	 3
+           0x00	 0
+           0x01	 1
+           0x00	 0
+         Chunk: SCNE, Taille: 26
+           0x01	 1
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x01	 1
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x96	 150
+           0xEB	 235
+           0xFE	 254
+           0x00	 0
+           0x87	 135
+           0xED	 237
+           0x01	 1
+           0x00	 0
+           0xFC	 252
+           0x0D	 13
+           0x00	 0
+           0x07	 7
+           0x00	 0
+         Chunk: SCNE, Taille: 30
+           0x01	 1
+           0x01	 1
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0xB4	 180
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x04	 4
+           0x00	 0
+           0x05	 5
+           0x00	 0
+           0x06	 6
+           0x00	 0
+         Chunk: SCNE, Taille: 24
+           0x01	 1
+           0x03	 3
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x01	 1
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x30	 48
+           0x04	 4
+           0xFE	 254
+           0x00	 0
+           0x4C	 76
+           0x23	 35
+           0xFF	 255
+           0x00	 0
+           0xE8	 232
+           0x03	 3
+           0x00	 0
+         Chunk: SCNE, Taille: 26
+           0x01	 1
+           0x02	 2
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0xB4	 180
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x08	 8
+           0x00	 0
+         Chunk: SCNE, Taille: 24
+           0x01	 1
+           0x04	 4
+           0x00	 0
+           0x0D	 13
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0xB4	 180
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+     Chunk: LOAD, Taille: 190
+       File: F-16des
+       File: FUELEXP1
+       File: FUELEXP2
+       File: EXPLODE1
+       File: EXPLODE2
+       File: GRNDEX4
+       File: GUNSPARK
+       File: GENDEB1
+       File: GENDEB2
+       File: GENDEB3
+       File: GENDEB4
+       File: GENDEB5
+       File: GENDEB6
+       File: GENDEB7
+       File: GENDEB8
+       File: GENDEB9
+       File: F16DDEB2
+       File: F16GDEB3
+       File: F16GDEB4
+       File: DEBHERC
+       File: DEBM21

@@ -1,0 +1,852 @@
+ Chunk: FORM, Taille: 2072
+     TYPE: MISN
+     Chunk: VERS, Taille: 2
+       0x00	 0
+       0x05	 5
+     Chunk: INFO, Taille: 0
+     Chunk: TUNE, Taille: 2
+       0x03	 3
+       0x00	 0
+     Chunk: NAME, Taille: 8
+       Value: Turkey
+     Chunk: FORM, Taille: 20
+         TYPE: WRLD
+         Chunk: FILE, Taille: 8
+           Value: turkey
+     Chunk: AREA, Taille: 164
+       ID 0, Wildcat Base, Area type: S)
+         X: 100000, Y: -144000, Z: 1845, Width: 32
+         remaining data 115 49 49
+           0x4E	 78
+           0x00	 0
+           0x42	 66
+       ID: 1, TWP Base Area type: B)
+         X: -102000, Y: 100000, Z: 580, Width: 16, Height: 136
+         Xrelativ (control): -102000, Yrelativ (control): 100000
+         unknown bytes 1 : 
+           0x00	 0
+           0x00	 0
+           0x10	 16
+           0x27	 39
+           0x00	 0
+           0x00	 0
+           0x98	 152
+           0x3A	 58
+           0x00	 0
+           0x00	 0
+         unknown bytes 2 : 
+           0x00	 0
+           0x00	 0
+           0xA0	 160
+           0x86	 134
+           0x01	 1
+         remaining data 50 114 65
+       ID 2, ., Area type: S)
+         X: 0, Y: 0, Z: 10000, Width: 80
+         remaining data 1 163 49
+           0xC3	 195
+           0x00	 0
+           0x00	 0
+       Unknown byte: 0 0x00	
+     Chunk: SPOT, Taille: 98
+       Nombre de spot: 7.0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       X: -460, Y: -2482, Z: 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       X: -460, Y: -400, Z: 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       X: -460, Y: 2600, Z: 1000
+       0x01	 1
+       0x00	 0
+       0x00	 0
+       X: 0, Y: 0, Z: 2000
+       0x01	 1
+       0x00	 0
+       0x00	 0
+       X: -2605, Y: -735, Z: 0
+       0x01	 1
+       0x00	 0
+       0x00	 0
+       X: 33, Y: -735, Z: 0
+       0x01	 1
+       0x00	 0
+       0x00	 0
+       X: 2033, Y: -735, Z: 1000
+     Chunk: NUMS, Taille: 0
+     Chunk: MSGS, Taille: 34
+       Message: Learjet#Intercept
+       Message: return#to base
+       Message: 
+     Chunk: FLAG, Taille: 18
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+       0x00	 0
+     Chunk: CAST, Taille: 144
+       Nombre de cast: 16.0
+       ID: 0, Nom: JANET
+       ID: 1, Nom: PLAYER
+       ID: 2, Nom: NULL
+       ID: 3, Nom: NULL
+       ID: 4, Nom: STRIBASE
+       ID: 5, Nom: NULL
+       ID: 6, Nom: NULL
+       ID: 7, Nom: NULL
+       ID: 8, Nom: NULL
+       ID: 9, Nom: NULL
+       ID: 10, Nom: NULL
+       ID: 11, Nom: LEARJET
+       ID: 12, Nom: TWPGOON
+       ID: 13, Nom: TWPGOONR
+       ID: 14, Nom: TWPGOON
+       ID: 15, Nom: TWPGOONR
+     Chunk: PROG, Taille: 110
+       OPCODE 0xA1	 161       VALUE 0x01	 1
+       OPCODE 0xA6	 166       VALUE 0x03	 3
+       OPCODE 0xAB	 171       VALUE 0x00	 0
+       OPCODE 0xA5	 165       VALUE 0x02	 2
+       OPCODE 0xAB	 171       VALUE 0x01	 1
+       OPCODE 0xA2	 162       VALUE 0x02	 2
+       OPCODE 0x09	 9       VALUE 0x01	 1
+       OPCODE 0x00	 0       VALUE 0x00	 0
+       OPCODE 0x45	 69       VALUE 0x03	 3
+       OPCODE 0x48	 72       VALUE 0x42	 66
+       OPCODE 0x45	 69       VALUE 0x02	 2
+       OPCODE 0x49	 73       VALUE 0x41	 65
+       OPCODE 0xAB	 171       VALUE 0x15	 21
+       OPCODE 0x55	 85       VALUE 0x03	 3
+       OPCODE 0x08	 8       VALUE 0x41	 65
+       OPCODE 0x45	 69       VALUE 0x01	 1
+       OPCODE 0x49	 73       VALUE 0x42	 66
+       OPCODE 0xAB	 171       VALUE 0x14	 20
+       OPCODE 0x55	 85       VALUE 0x03	 3
+       OPCODE 0x08	 8       VALUE 0x42	 66
+       OPCODE 0x00	 0       VALUE 0x00	 0
+       OPCODE 0x11	 17       VALUE 0x02	 2
+       OPCODE 0x14	 20       VALUE 0x07	 7
+       OPCODE 0x11	 17       VALUE 0x01	 1
+       OPCODE 0x14	 20       VALUE 0x00	 0
+       OPCODE 0x2E	 46       VALUE 0x1E	 30
+       OPCODE 0x2E	 46       VALUE 0x64	 100
+       OPCODE 0x14	 20       VALUE 0x01	 1
+       OPCODE 0x00	 0       VALUE 0x00	 0
+       OPCODE 0xB8	 184       VALUE 0xFF	 255
+       OPCODE 0xB6	 182       VALUE 0xFF	 255
+       OPCODE 0x00	 0       VALUE 0x00	 0
+       OPCODE 0x45	 69       VALUE 0x05	 5
+       OPCODE 0x48	 72       VALUE 0x41	 65
+       OPCODE 0xA7	 167       VALUE 0x0B	 11
+       OPCODE 0x01	 1       VALUE 0x00	 0
+       OPCODE 0x08	 8       VALUE 0x41	 65
+       OPCODE 0x45	 69       VALUE 0x04	 4
+       OPCODE 0x48	 72       VALUE 0x42	 66
+       OPCODE 0xAB	 171       VALUE 0x15	 21
+       OPCODE 0x52	 82       VALUE 0x04	 4
+       OPCODE 0x08	 8       VALUE 0x42	 66
+       OPCODE 0xAA	 170       VALUE 0x01	 1
+       OPCODE 0x00	 0       VALUE 0x00	 0
+       OPCODE 0xA0	 160       VALUE 0x03	 3
+       OPCODE 0x46	 70       VALUE 0x41	 65
+       OPCODE 0x94	 148       VALUE 0x0B	 11
+       OPCODE 0x08	 8       VALUE 0x41	 65
+       OPCODE 0x00	 0       VALUE 0x00	 0
+       OPCODE 0x80	 128       VALUE 0x02	 2
+       OPCODE 0x52	 82       VALUE 0x05	 5
+       OPCODE 0x52	 82       VALUE 0x01	 1
+       OPCODE 0x00	 0       VALUE 0x00	 0
+       OPCODE 0xA7	 167       VALUE 0x01	 1
+       OPCODE 0x00	 0       VALUE 0x00	 0
+     Chunk: PART, Taille: 992
+       Nombre de part: 16.0
+       ID: 3
+         Nom: RWYEXT27
+         destroyed: 
+         Load: 
+         0x01	 1
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 1, 0, 1
+         Relative: -1480, -735, 0
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 2
+         Nom: RWYEXT18
+         destroyed: 
+         Load: 
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 0, 0, 0
+         Relative: -460, -1440, 0
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 4
+         Nom: WCB78
+         destroyed: 
+         Load: 
+         0xFF	 255
+         0xFF	 255
+         0x00	 0
+         0x00	 0
+         Unknown: 65535, 0, 65535
+         Relative: 99750, -146000, 1845
+         UB: 0
+         Azymuth: 90
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x01	 1
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 5
+         Nom: HANGB22
+         destroyed: HANGB22D
+         Load: 
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 0, 0, 0
+         Relative: -250, -2350, 0
+         UB: 0
+         Azymuth: 270
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 6
+         Nom: HANGB22
+         destroyed: HANGB22D
+         Load: 
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 0, 0, 0
+         Relative: -250, -2500, 0
+         UB: 0
+         Azymuth: 270
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 7
+         Nom: HANGB22
+         destroyed: HANGB22D
+         Load: 
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 0, 0, 0
+         Relative: -470, -2750, 0
+         UB: 0
+         Azymuth: 180
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 8
+         Nom: HANGB22
+         destroyed: HANGB22D
+         Load: 
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 0, 0, 0
+         Relative: -700, -2750, 0
+         UB: 0
+         Azymuth: 180
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 9
+         Nom: TOWB24
+         destroyed: TOWB24D
+         Load: 
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 0, 0, 0
+         Relative: -600, -700, 0
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 10
+         Nom: RDRSTL2
+         destroyed: DRADARST
+         Load: 
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         0x00	 0
+         Unknown: 0, 0, 0
+         Relative: -600, -300, 0
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 1
+         Nom: F-16DES
+         destroyed: 
+         Load: 
+         0xFF	 255
+         0xFF	 255
+         0x00	 0
+         0x00	 0
+         Unknown: 65535, 0, 65535
+         Relative: 99520, -146510, 1850
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0x00	 0
+           0x00	 0
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+       ID: 11
+         Nom: LEARJET
+         destroyed: 
+         Load: 
+         0x01	 1
+         0x00	 0
+         0x01	 1
+         0x00	 0
+         Unknown: 1, 1, 65537
+         Relative: -500, 2000, 0
+         UB: 0
+         Azymuth: 90
+         remaining data 20
+           0x8C	 140
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x05	 5
+           0x00	 0
+           0x06	 6
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+       ID: 0
+         Nom: F-16DES
+         destroyed: 
+         Load: AIRLOADL
+         0x01	 1
+         0x00	 0
+         0x01	 1
+         0x00	 0
+         Unknown: 1, 1, 65537
+         Relative: -2000, 2000, 0
+         UB: 0
+         Azymuth: 90
+         remaining data 20
+           0xA0	 160
+           0x00	 0
+           0x01	 1
+           0x01	 1
+           0x00	 0
+           0x64	 100
+           0x00	 0
+           0x18	 24
+           0xFC	 252
+           0x32	 50
+           0x00	 0
+           0x03	 3
+           0x00	 0
+           0x04	 4
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 12
+         Nom: SU27
+         destroyed: 
+         Load: SUJLOAD
+         0x01	 1
+         0x00	 0
+         0x01	 1
+         0x00	 0
+         Unknown: 1, 1, 65537
+         Relative: 7000, 14000, 1000
+         UB: 0
+         Azymuth: 180
+         remaining data 20
+           0x8C	 140
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x07	 7
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 13
+         Nom: SU27
+         destroyed: 
+         Load: SUJLOAD
+         0x01	 1
+         0x00	 0
+         0x01	 1
+         0x00	 0
+         Unknown: 1, 1, 65537
+         Relative: 7000, 15000, 1000
+         UB: 0
+         Azymuth: 180
+         remaining data 20
+           0x8C	 140
+           0x00	 0
+           0xFF	 255
+           0x0C	 12
+           0x00	 0
+           0x38	 56
+           0xFF	 255
+           0x70	 112
+           0xFE	 254
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x07	 7
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 14
+         Nom: MIG29
+         destroyed: 
+         Load: M29LOADA
+         0x02	 2
+         0x00	 0
+         0x01	 1
+         0x00	 0
+         Unknown: 2, 1, 65538
+         Relative: 0, -9000, 1000
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0xC8	 200
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x07	 7
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+       ID: 15
+         Nom: MIG29
+         destroyed: 
+         Load: M29LOADA
+         0x02	 2
+         0x00	 0
+         0x01	 1
+         0x00	 0
+         Unknown: 2, 1, 65538
+         Relative: 0, -11000, 1000
+         UB: 0
+         Azymuth: 0
+         remaining data 20
+           0xC8	 200
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0x07	 7
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+     Chunk: TEAM, Taille: 4
+       0x09	 9
+       0x00	 0
+       0x0B	 11
+       0x00	 0
+     Chunk: FORM, Taille: 164
+         TYPE: PLAY
+         Chunk: SCNE, Taille: 28
+           0x01	 1
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x02	 2
+           0x00	 0
+           0x00	 0
+           0xB4	 180
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x09	 9
+           0x00	 0
+           0x02	 2
+           0x00	 0
+         Chunk: SCNE, Taille: 38
+           0x01	 1
+           0x00	 0
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x01	 1
+           0xB4	 180
+           0x00	 0
+           0x00	 0
+           0xD4	 212
+           0x84	 132
+           0x01	 1
+           0x00	 0
+           0x90	 144
+           0xDB	 219
+           0xFD	 253
+           0x00	 0
+           0x1D	 29
+           0x0B	 11
+           0x00	 0
+           0x01	 1
+           0x00	 0
+           0x03	 3
+           0x00	 0
+           0x04	 4
+           0x00	 0
+           0x05	 5
+           0x00	 0
+           0x06	 6
+           0x00	 0
+           0x07	 7
+           0x00	 0
+           0x08	 8
+           0x00	 0
+         Chunk: SCNE, Taille: 34
+           0x01	 1
+           0x01	 1
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0xB4	 180
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x0A	 10
+           0x00	 0
+           0x0B	 11
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x0C	 12
+           0x00	 0
+           0x0D	 13
+           0x00	 0
+         Chunk: SCNE, Taille: 28
+           0x00	 0
+           0x02	 2
+           0x00	 0
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0xFF	 255
+           0x00	 0
+           0xB4	 180
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x00	 0
+           0x0E	 14
+           0x00	 0
+           0x0F	 15
+           0x00	 0
+     Chunk: LOAD, Taille: 180
+       File: F-16des
+       File: FUELEXP1
+       File: FUELEXP2
+       File: EXPLODE1
+       File: EXPLODE2
+       File: GRNDEX4
+       File: GUNSPARK
+       File: GENDEB1
+       File: GENDEB2
+       File: GENDEB3
+       File: GENDEB4
+       File: GENDEB5
+       File: GENDEB6
+       File: GENDEB7
+       File: GENDEB8
+       File: GENDEB9
+       File: F16DDEB2
+       File: F16GDEB3
+       File: F16GDEB4
+       File: DEBSU27
