@@ -349,25 +349,25 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_n: {
             SCNavMap *nav_screen = new SCNavMap();
             nav_screen->Init();
-            nav_screen->SetName((char *)this->missionObj->mission_data.world_filename.c_str());
-            nav_screen->missionObj = this->missionObj;
+            nav_screen->SetName((char *)this->current_mission->mission->mission_data.info.c_str());
+            nav_screen->missionObj = this->current_mission->mission = this->current_mission->mission;
             nav_screen->current_nav_point = &this->nav_point_id;
             Game.AddActivity(nav_screen);
         } break;
         case SDLK_a:
-            this->player_plane->x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis;
-            this->player_plane->z = this->missionObj->mission_data.areas[this->nav_point_id]->ZAxis;
+            this->player_plane->x = this->current_mission->mission->mission_data.areas[this->nav_point_id]->XAxis;
+            this->player_plane->z = this->current_mission->mission->mission_data.areas[this->nav_point_id]->ZAxis;
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             break;
         case SDLK_SPACE:
             {
-                MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
+                MISN_PART *target = this->current_mission->enemies[this->current_target]->object;
                 this->player_plane->Shoot(this->player_plane->selected_weapon, target);
             }
             break;
         case SDLK_t:
-            this->current_target = (this->current_target + 1) % this->missionObj->mission_data.parts.size();
+            this->current_target = (this->current_target + 1) % this->current_mission->enemies.size();
             break;
         default:
             break;
@@ -413,25 +413,9 @@ void SCStrike::SetMission(char const *missionName) {
     this->current_mission = new SCMission(missionName, &objectCache);
     ai_planes.clear();
     ai_planes.shrink_to_fit();
-    sprintf(missFileName, "..\\..\\DATA\\MISSIONS\\%s", missionName);
-
-    TreEntry *mission = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(missFileName);
-
-    missionObj = new RSMission();
-    missionObj->tre = Assets.tres[AssetManager::TRE_OBJECTS];
-    missionObj->objCache = &objectCache;
-    missionObj->InitFromRAM(mission->data, mission->size);
-
-    char filename[13];
-    sprintf(filename, "%s.PAK", missionObj->mission_data.world_filename.c_str());
-    area.InitFromPAKFileName(filename);
-
-    if (area.objects.size() == 0) {
-        sprintf(filename, "%s.PAK", missionObj->mission_data.name.c_str());
-        area.InitFromPAKFileName(filename);
-    }
-    MISN_PART *playerCoord = missionObj->getPlayerCoord();
-
+    
+    MISN_PART *playerCoord = this->current_mission->player->object;
+    this->area = *this->current_mission->area;
     newPosition.x = playerCoord->position.x;
     newPosition.z = playerCoord->position.z;
     newPosition.y = playerCoord->position.y;
@@ -498,49 +482,14 @@ void SCStrike::SetMission(char const *missionName) {
             }
         }
     }
-    for (auto part : missionObj->mission_data.parts) {
-        int search_id = 0;
-        for (auto cast : missionObj->mission_data.casting) {
-            if (part->id == search_id) {
-                if (cast->profile != nullptr && cast->profile->ai.isAI && cast->profile->ai.goal.size() > 0) {
-                    SCAiPlane *aiPlane = new SCAiPlane();
-                    aiPlane->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
-                                                 23000.0f, 32.0f, .93f, 120, &this->area, part->position.x,
-                                                 part->position.y, part->position.z);
-                    aiPlane->plane->azimuthf = (360 - part->azymuth) * 10.0f;
-                    aiPlane->pilot = new SCPilot();
-                    aiPlane->ai = cast->profile;
-                    aiPlane->name = cast->actor;
-
-                    if (this->area.getY(part->position.x, part->position.z) == part->position.y) {
-                        aiPlane->plane->on_ground = true;
-                    } else {
-                        aiPlane->plane->on_ground = false;
-                    }
-                    if (part->position.y < this->area.getY(part->position.x, part->position.z)) {
-                        aiPlane->plane->on_ground = true;
-                    }
-                    if (!aiPlane->plane->on_ground) {
-                        aiPlane->plane->SetThrottle(100);
-                        aiPlane->pilot->target_climb = (int) (part->position.y * 3.6f);
-                        aiPlane->plane->vz = -20;
-                    } else {
-                        aiPlane->pilot->target_climb = 25000;
-                    }
-
-                    aiPlane->pilot->plane = aiPlane->plane;
-                    aiPlane->pilot->target_azimut = (int) (aiPlane->plane->azimuthf / 10.0f);
-
-                    aiPlane->pilot->target_speed = -20;
-                    aiPlane->plane->object = part;
-                    aiPlane->object = part;
-                    this->ai_planes.push_back(aiPlane);
-                } else if (cast->profile != nullptr && cast->actor == "PLAYER") {
-                    this->player_prof = cast->profile;
-                }
-                break;
-            }
-            search_id++;
+    this->player_prof = this->current_mission->player->profile;
+    for (auto actor: this->current_mission->actors) {
+        SCAiPlane *aiPlane = new SCAiPlane();
+        if (actor->plane != nullptr) {
+            aiPlane->plane = actor->plane;
+            aiPlane->pilot = actor->pilot;
+            aiPlane->object = actor->object;
+            this->ai_planes.push_back(aiPlane);
         }
     }
 }
@@ -571,7 +520,7 @@ void SCStrike::RunFrame(void) {
             Vector3D npos;
             aiPlane->plane->getPosition(&npos);
             if (aiPlane->object->area_id != 255) {
-                AREA *ar = this->missionObj->mission_data.areas[aiPlane->object->area_id];
+                AREA *ar = this->current_mission->mission->mission_data.areas[aiPlane->object->area_id];
 
                 float minX = (float) ar->XAxis-(ar->AreaWidth/2);
                 float minZ = (float) ar->ZAxis-(ar->AreaWidth/2);
@@ -609,11 +558,11 @@ void SCStrike::RunFrame(void) {
     this->cockpit->gear = this->player_plane->GetWheel();
     this->cockpit->flaps = this->player_plane->GetFlaps()>0;
     this->cockpit->airbrake = this->player_plane->GetSpoilers()>0;
-    this->cockpit->target = this->missionObj->mission_data.parts[this->current_target];
+    this->cockpit->target = this->current_mission->enemies[this->current_target]->object;
     this->cockpit->player = this->player_plane->object;
-    this->cockpit->weapoint_coords.x = this->missionObj->mission_data.areas[this->nav_point_id]->XAxis;
-    this->cockpit->weapoint_coords.y = -this->missionObj->mission_data.areas[this->nav_point_id]->ZAxis;
-    this->cockpit->parts = this->missionObj->mission_data.parts;
+    this->cockpit->weapoint_coords.x = this->current_mission->mission->mission_data.areas[this->nav_point_id]->XAxis;
+    this->cockpit->weapoint_coords.y = this->current_mission->mission->mission_data.areas[this->nav_point_id]->ZAxis;
+    this->cockpit->parts = this->current_mission->mission->mission_data.parts;
     this->cockpit->ai_planes = this->ai_planes;
     this->cockpit->player_prof = this->player_prof;
     this->cockpit->player_plane = this->player_plane;
@@ -653,7 +602,7 @@ void SCStrike::RunFrame(void) {
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
     case View::TARGET: {
-        MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
+        MISN_PART *target = this->current_mission->mission->mission_data.parts[this->current_target];
         Vector3D pos = {target->position.x + this->camera_pos.x, target->position.y + this->camera_pos.y,
                         target->position.z + this->camera_pos.z};
         Vector3D targetPos = {target->position.x, target->position.y, target->position.z};
@@ -683,7 +632,7 @@ void SCStrike::RunFrame(void) {
     }
     break;
     case View::EYE_ON_TARGET: {
-        MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
+        MISN_PART *target = this->current_mission->mission->mission_data.parts[this->current_target];
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
         Vector3D targetPos = {target->position.x, target->position.y,target->position.z };
         camera->SetPosition(&pos);
@@ -706,7 +655,7 @@ void SCStrike::RunFrame(void) {
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     
-    Renderer.RenderMissionObjects(missionObj);
+    Renderer.RenderMissionObjects(this->current_mission->mission);
     for (auto aiPlane : this->ai_planes) {
         if (aiPlane->object->alive == false) {
             aiPlane->plane->RenderSmoke();
@@ -809,7 +758,7 @@ void SCStrike::RenderMenu() {
         ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s",
                     this->player_plane->airspeed, this->newPosition.y * 3.6,
                     360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
-                    missionObj->mission_data.name.c_str(), missFileName);
+                    this->current_mission->mission->mission_data.name.c_str(), missFileName);
         ImGui::EndMainMenuBar();
     }
     if (show_ai) {
@@ -1092,8 +1041,8 @@ void SCStrike::RenderMenu() {
             ImGui::SameLine();
             ImGui::Text("Mouse control enabled");
         }
-        ImGui::Text("Target %s", this->missionObj->mission_data.parts[this->current_target]->member_name.c_str());
-        MISN_PART *target = this->missionObj->mission_data.parts[this->current_target];
+        ImGui::Text("Target %s", this->current_mission->mission->mission_data.parts[this->current_target]->member_name.c_str());
+        MISN_PART *target = this->current_mission->mission->mission_data.parts[this->current_target];
         Vector3D targetPos = {target->position.x, target->position.y, target->position.z};
         Vector3D playerPos = {this->newPosition.x, this->newPosition.y, this->newPosition.z};
 
@@ -1161,19 +1110,19 @@ void SCStrike::RenderMenu() {
 
     if (show_mission_parts_and_areas) {
         ImGui::Begin("Mission Parts and Areas");
-        ImGui::Text("Mission %s", missionObj->mission_data.name.c_str());
-        ImGui::Text("Area %s", missionObj->mission_data.world_filename.c_str());
-        ImGui::Text("Player Coord %d %d %d", missionObj->getPlayerCoord()->position.x, missionObj->getPlayerCoord()->position.y,
-                    missionObj->getPlayerCoord()->position.z);
-        ImGui::Text("Messages %d", missionObj->mission_data.messages.size());
+        ImGui::Text("Mission %s", this->current_mission->mission->mission_data.name.c_str());
+        ImGui::Text("Area %s", this->current_mission->mission->mission_data.world_filename.c_str());
+        ImGui::Text("Player Coord %d %d %d", this->current_mission->mission->getPlayerCoord()->position.x, this->current_mission->mission->getPlayerCoord()->position.y,
+                    this->current_mission->mission->getPlayerCoord()->position.z);
+        ImGui::Text("Messages %d", this->current_mission->mission->mission_data.messages.size());
         if (ImGui::TreeNode("Messages")) {
-            for (auto msg : missionObj->mission_data.messages) {
+            for (auto msg : this->current_mission->mission->mission_data.messages) {
                 ImGui::Text("- %s", msg->c_str());
             }
             ImGui::TreePop();
         }
         if (ImGui::TreeNode("Areas")) {
-            for (auto area : missionObj->mission_data.areas) {
+            for (auto area : this->current_mission->mission->mission_data.areas) {
                 if (ImGui::TreeNode((void *)(intptr_t)area->id, "Area id %d", area->id)) {
                     ImGui::Text("Area name %s", area->AreaName);
                     ImGui::Text("Area x %d y %d z %d", area->XAxis, area->YAxis, area->ZAxis);
@@ -1188,14 +1137,14 @@ void SCStrike::RenderMenu() {
                 auto obj = &area.objects.at(g);
                 if (ImGui::TreeNode((void *)(intptr_t)g, "Object id %d", g)) {
                     ImGui::Text("Object name %s", obj->name);
-                    ImGui::Text("Object x %d y %d z %d", obj->position[0], obj->position[1], obj->position[2]);
+                    ImGui::Text("Object x %.3f y %.3f z %.3f", obj->position.x, obj->position.y, obj->position.z);
                     ImGui::TreePop();
                 }
             }
             ImGui::TreePop();
         }
         if (ImGui::TreeNode("SPOT")) {
-            for (auto spot : missionObj->mission_data.spots) {
+            for (auto spot : this->current_mission->mission->mission_data.spots) {
                 if (ImGui::TreeNode((void *)(intptr_t)spot, "Spot %d", spot->id)) {
                     ImGui::Text("Spot area_id %d", spot->area_id);
                     ImGui::Text("Spot x %d y %d z %d", spot->XAxis, spot->YAxis, spot->ZAxis);
@@ -1206,7 +1155,7 @@ void SCStrike::RenderMenu() {
         }
         if (ImGui::TreeNode("PROG")) {
             int id=1;
-            for (auto prog : missionObj->mission_data.prog) {
+            for (auto prog : this->current_mission->mission->mission_data.prog) {
                 if (ImGui::TreeNode((void *)(intptr_t)prog, "Prog %d", id)) {
                     for (auto op : *prog) {
                         ImGui::Text("opcode:[%d]\t\targ:[%d]", op.opcode, op.arg);
@@ -1217,9 +1166,9 @@ void SCStrike::RenderMenu() {
             }
             ImGui::TreePop();
         }
-        ImGui::Text("Mission Parts %d", missionObj->mission_data.parts.size());
+        ImGui::Text("Mission Parts %d", this->current_mission->mission->mission_data.parts.size());
         if (ImGui::TreeNode("Parts")) {
-            for (auto part : missionObj->mission_data.parts) {
+            for (auto part : this->current_mission->mission->mission_data.parts) {
                 if (ImGui::TreeNode((void *)(intptr_t)part->id, "Parts id %d, area id %d", part->id, part->area_id)) {
                     ImGui::Text("u1 %d", part->unknown1);
                     ImGui::Text("u2 %d", part->unknown2);
@@ -1281,44 +1230,49 @@ void SCStrike::RenderMenu() {
         if (ImGui::TreeNode("Mission Actors")) {
             for (auto actor : current_mission->actors) {
                 if (ImGui::TreeNode((void *)(intptr_t)actor, "Actor %d", actor->actor_id)) {
-                    ImGui::Text("Name %s", actor->profile->radi.info.name.c_str());
-                    ImGui::Text("CallSign %s", actor->profile->radi.info.callsign.c_str());
-                    ImGui::Text("Is AI %d", actor->profile->ai.isAI);
-                    if (ImGui::TreeNode("MSGS")) {
-                        for (auto msg : actor->profile->radi.msgs) {
-                            ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+                    if (actor->profile != nullptr) {
+                        ImGui::Text("Name %s", actor->profile->radi.info.name.c_str());
+                        ImGui::Text("CallSign %s", actor->profile->radi.info.callsign.c_str());
+                        ImGui::Text("Is AI %d", actor->profile->ai.isAI);
+                        if (ImGui::TreeNode("MSGS")) {
+                            for (auto msg : actor->profile->radi.msgs) {
+                                ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+                            }
+                            ImGui::TreePop();
                         }
-                        ImGui::TreePop();
-                    }
-                    if (ImGui::TreeNode("ASKS")) {
-                        for (auto msg : actor->profile->radi.asks) {
-                            ImGui::Text("- [%s]: %s", msg.first.c_str(), msg.second.c_str());
+                        if (ImGui::TreeNode("ASKS")) {
+                            for (auto msg : actor->profile->radi.asks) {
+                                ImGui::Text("- [%s]: %s", msg.first.c_str(), msg.second.c_str());
+                            }
+                            ImGui::TreePop();
                         }
-                        ImGui::TreePop();
-                    }
-                    if (ImGui::TreeNode("AI MVRS")) {
-                        for (auto ai : actor->profile->ai.mvrs) {
-                            ImGui::Text("NODE [%d] - [%d]", ai.node_id, ai.value);
+                        if (ImGui::TreeNode("AI MVRS")) {
+                            for (auto ai : actor->profile->ai.mvrs) {
+                                ImGui::Text("NODE [%d] - [%d]", ai.node_id, ai.value);
+                            }
+                            ImGui::TreePop();
                         }
-                        ImGui::TreePop();
-                    }
-                    if (ImGui::TreeNode("AI GOAL")) {
-                        for (auto goal : actor->profile->ai.goal) {
-                            ImGui::Text("[%d]", goal);
+                        if (ImGui::TreeNode("AI GOAL")) {
+                            for (auto goal : actor->profile->ai.goal) {
+                                ImGui::Text("[%d]", goal);
+                            }
+                            ImGui::TreePop();
                         }
-                        ImGui::TreePop();
-                    }
-                    if (ImGui::TreeNode("AI ATRB")) {
-                        ImGui::Text("TH %d", actor->profile->ai.atrb.TH);
-                        ImGui::Text("CN %d", actor->profile->ai.atrb.CN);
-                        ImGui::Text("VB %d", actor->profile->ai.atrb.VB);
-                        ImGui::Text("LY %d", actor->profile->ai.atrb.LY);
-                        ImGui::Text("FL %d", actor->profile->ai.atrb.FL);
-                        ImGui::Text("AG %d", actor->profile->ai.atrb.AG);
-                        ImGui::Text("AA %d", actor->profile->ai.atrb.AA);
-                        ImGui::Text("SM %d", actor->profile->ai.atrb.SM);
-                        ImGui::Text("AR %d", actor->profile->ai.atrb.AR);
-                        ImGui::TreePop();
+                        if (ImGui::TreeNode("AI ATRB")) {
+                            ImGui::Text("TH %d", actor->profile->ai.atrb.TH);
+                            ImGui::Text("CN %d", actor->profile->ai.atrb.CN);
+                            ImGui::Text("VB %d", actor->profile->ai.atrb.VB);
+                            ImGui::Text("LY %d", actor->profile->ai.atrb.LY);
+                            ImGui::Text("FL %d", actor->profile->ai.atrb.FL);
+                            ImGui::Text("AG %d", actor->profile->ai.atrb.AG);
+                            ImGui::Text("AA %d", actor->profile->ai.atrb.AA);
+                            ImGui::Text("SM %d", actor->profile->ai.atrb.SM);
+                            ImGui::Text("AR %d", actor->profile->ai.atrb.AR);
+                            ImGui::TreePop();
+                        }
+                    } else {
+                        ImGui::Text("Name %s", actor->actor_name.c_str());
+                        ImGui::Text("No profile");
                     }
                     if (ImGui::TreeNode("PROGS")) {
                         int cpt=0;
@@ -1339,7 +1293,7 @@ void SCStrike::RenderMenu() {
             ImGui::TreePop();
         }
         if (ImGui::TreeNode("Casting")) {
-            for (auto cast : missionObj->mission_data.casting) {
+            for (auto cast : this->current_mission->mission->mission_data.casting) {
                 if (ImGui::TreeNode((void *)(intptr_t)cast, "Actor %s", cast->actor.c_str())) {
                     ImGui::Text("Name %s", cast->profile->radi.info.name.c_str());
                     ImGui::Text("CallSign %s", cast->profile->radi.info.callsign.c_str());

@@ -17,7 +17,8 @@ files = [
     "NAVMAP.IFF",
     "PALETTE.IFF",
     "F16-CKPT.IFF",
-    "SMOKESET.IFF"
+    "SMOKESET.IFF",
+    "ARENA.IFF",
 ]
 
 
@@ -159,6 +160,11 @@ def parse_iff_filereader(f, file_path, dec=0):
                     [
 
                     ],
+                "ARENA.IFF":
+                    [
+                        b"WRLD",
+                        b"CAMR",
+                    ],
             }
 
             if chunk_type in subType[file_path]:
@@ -199,7 +205,7 @@ def parse_iff_filereader(f, file_path, dec=0):
                 extract_bin_to_file(chunk_data)
             elif chunk_type == b"PALT":
                 print_int_from_chunk(chunk_data, dec+2)
-                extract_bin_to_file(chunk_data)
+                # extract_bin_to_file(chunk_data)
             elif chunk_type == b"SKYC":
                 print_int_from_chunk(chunk_data, dec+2)
                 extract_bin_to_file(chunk_data)
@@ -265,4 +271,4 @@ def extract_bin_to_file(chunk_data):
         f.write(chunk_data)
 
 
-parse_iff_file(files[16])
+parse_iff_file(files[17])

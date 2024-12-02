@@ -217,15 +217,20 @@ void RSArea::ParseObjects() {
 
             uint8_t unknown14 = reader.ReadByte();
             uint8_t unknown15 = reader.ReadByte();
-            mapObject.position[0] = reader.ReadInt24LE() * BLOCK_COORD_SCALE;
-            mapObject.position[2] = -reader.ReadInt24LE() * BLOCK_COORD_SCALE;
-            mapObject.position[1] = reader.ReadInt24LE() * HEIGH_MAP_SCALE;
+            mapObject.position.x = reader.ReadInt24LE() * BLOCK_COORD_SCALE;
+            mapObject.position.z = -reader.ReadInt24LE() * BLOCK_COORD_SCALE;
+            mapObject.position.y = reader.ReadInt24LE() * HEIGH_MAP_SCALE;
 
-            uint8_t unknowns[0x31 - 10];
+            uint8_t unknowns[3];
 
-            for (int k = 0; k < 0x31 - 10; k++)
+            for (int k = 0; k < 2; k++)
                 unknowns[k] = reader.ReadByte();
 
+            mapObject.progs_id.push_back(reader.ReadUShort());
+            mapObject.progs_id.push_back(reader.ReadUShort());
+            mapObject.progs_id.push_back(reader.ReadUShort());
+            mapObject.progs_id.push_back(reader.ReadUShort());
+            
             std::string hash = mapObject.name;
             std::map<std::string, RSEntity *>::iterator it;
             it = objCache->find(hash);
@@ -281,13 +286,13 @@ void RSArea::ParseTriFile(PakEntry *entry) {
             v->u2 = stream.ReadByte();
             coo = stream.ReadInt24LE();
             read += 4;
-            v->x = coo * BLOCK_COORD_SCALE;
+            v->x = (float) coo * BLOCK_COORD_SCALE;
             coo = stream.ReadInt24LE();
             read += 4;
-            v->z = coo * BLOCK_COORD_SCALE;
+            v->z = (float) coo * BLOCK_COORD_SCALE;
             coo = stream.ReadShort();
             read += 2;
-            v->y = coo * HEIGH_MAP_SCALE;
+            v->y = (float) coo * HEIGH_MAP_SCALE;
             overTheMapIsTheRunway.lx = ((overTheMapIsTheRunway.lx == 0) && (i == 0)) ? v->x : overTheMapIsTheRunway.lx;
             overTheMapIsTheRunway.hx = ((overTheMapIsTheRunway.hx == 0) && (i == 0)) ? v->x : overTheMapIsTheRunway.hx;
             overTheMapIsTheRunway.ly = ((overTheMapIsTheRunway.ly == 0) && (i == 0)) ? v->z : overTheMapIsTheRunway.ly;

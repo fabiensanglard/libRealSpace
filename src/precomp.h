@@ -54,8 +54,6 @@ extern "C" {
     #include "PakArchive.h"
     #include "TreArchive.h"
 
-
-
     #include "Camera.h"
     #include "Texture.h"
     #include "RSImage.h"
@@ -63,13 +61,9 @@ extern "C" {
 //Fonts stuff
     #include "RSFont.h"
     #include "RSFontManager.h"
-
     #include "RSImageSet.h"
-    
     #include "SCRenderer.h"
-
     #include "IffLexer.h"
-
     #include "RSPalette.h"
     #include "RSSmokeSet.h"
     #include "RSEntity.h"
@@ -84,6 +78,7 @@ extern "C" {
     #include "RSHud.h"
     #include "RSCockpit.h"
     #include "RSNavMap.h"
+    #include "RSWorld.h"
     #include "RSMission.h"
     
     // Music Stuff

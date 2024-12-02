@@ -84,10 +84,6 @@ private:
      */
     RSArea area;
     /**
-     * @brief The current mission
-     */
-    RSMission *missionObj;
-    /**
      * @brief The navigation screen
      */
     SCNavMap *nav_screen;

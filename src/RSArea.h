@@ -15,9 +15,10 @@ typedef struct MapObject{
     char name[9];
     char destroyedName[9];
     
-    int32_t position[3];
+    Vector3D position{0,0,0};
     
     RSEntity* entity;
+    std::vector<uint16_t> progs_id;
     
 } MapObject;
 

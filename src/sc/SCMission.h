@@ -15,12 +15,19 @@ struct SCMissionActors {
 class SCMission {
 private:
     std::string mission_name;
-    RSArea *area{nullptr};
-    RSMission *mission{nullptr};
+    
+    RSWorld *world{nullptr};
+    
     std::map<std::string, RSEntity *> *obj_cache;
-    SCMissionActors *player;
+
 public:    
     std::vector<SCMissionActors *> actors;
+    std::vector<SCMissionActors *> enemies;
+    std::vector<SCMissionActors *> friendlies;
+    SCMissionActors *player;
+    RSArea *area{nullptr};
+    RSMission *mission{nullptr};
+    
     SCMission(std::string mission_name, std::map<std::string, RSEntity *> *objCache);
     ~SCMission();
     void LoadMission();

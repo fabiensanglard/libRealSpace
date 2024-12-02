@@ -101,9 +101,7 @@ void RSMission::parseMISN_WRLD(uint8_t *data, size_t size) {
 }
 void RSMission::parseMISN_WRLD_FILE(uint8_t *data, size_t size) {
     ByteStream stream(data);
-    for (int i = 0; i < size; i++) {
-        this->mission_data.world_filename.push_back(stream.ReadByte());
-    }
+    this->mission_data.world_filename = stream.ReadStringNoSize(size);
 }
 void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
     ByteStream stream(data);
@@ -354,8 +352,12 @@ void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
     }
 }
 void RSMission::parseMISN_TEAM(uint8_t *data, size_t size) {
-    for (int i = 0; i < size; i++) {
-        this->mission_data.team.push_back(data[i]);
+    ByteStream stream(data);
+    size_t read = 0;
+    while (read < size) {
+        uint16_t buffer = stream.ReadShort();
+        read+=2;
+        this->mission_data.team.push_back(buffer);
     }
 }
 void RSMission::parseMISN_PLAY(uint8_t *data, size_t size) {
