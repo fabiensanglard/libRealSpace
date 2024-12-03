@@ -349,7 +349,7 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_n: {
             SCNavMap *nav_screen = new SCNavMap();
             nav_screen->Init();
-            nav_screen->SetName((char *)this->current_mission->mission->mission_data.info.c_str());
+            nav_screen->SetName((char *)this->current_mission->world->tera.c_str());
             nav_screen->missionObj = this->current_mission->mission = this->current_mission->mission;
             nav_screen->current_nav_point = &this->nav_point_id;
             Game.AddActivity(nav_screen);
@@ -409,7 +409,8 @@ void SCStrike::SetMission(char const *missionName) {
         this->current_mission->cleanup();
         delete this->current_mission;
         this->current_mission = nullptr;
-    }   
+    } 
+    this->miss_file_name = missionName;
     this->current_mission = new SCMission(missionName, &objectCache);
     ai_planes.clear();
     ai_planes.shrink_to_fit();
@@ -602,7 +603,7 @@ void SCStrike::RunFrame(void) {
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
     case View::TARGET: {
-        MISN_PART *target = this->current_mission->mission->mission_data.parts[this->current_target];
+        MISN_PART *target = this->current_mission->actors[this->current_target]->object;
         Vector3D pos = {target->position.x + this->camera_pos.x, target->position.y + this->camera_pos.y,
                         target->position.z + this->camera_pos.z};
         Vector3D targetPos = {target->position.x, target->position.y, target->position.z};
@@ -656,6 +657,7 @@ void SCStrike::RunFrame(void) {
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     
     Renderer.RenderMissionObjects(this->current_mission->mission);
+
     for (auto aiPlane : this->ai_planes) {
         if (aiPlane->object->alive == false) {
             aiPlane->plane->RenderSmoke();
@@ -758,7 +760,7 @@ void SCStrike::RenderMenu() {
         ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s",
                     this->player_plane->airspeed, this->newPosition.y * 3.6,
                     360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
-                    this->current_mission->mission->mission_data.name.c_str(), missFileName);
+                    this->current_mission->mission->mission_data.name.c_str(), this->miss_file_name.c_str());
         ImGui::EndMainMenuBar();
     }
     if (show_ai) {
@@ -1041,8 +1043,8 @@ void SCStrike::RenderMenu() {
             ImGui::SameLine();
             ImGui::Text("Mouse control enabled");
         }
-        ImGui::Text("Target %s", this->current_mission->mission->mission_data.parts[this->current_target]->member_name.c_str());
-        MISN_PART *target = this->current_mission->mission->mission_data.parts[this->current_target];
+        ImGui::Text("Target %s", this->current_mission->actors[this->current_target]->actor_name.c_str());
+        MISN_PART *target = this->current_mission->actors[this->current_target]->object;
         Vector3D targetPos = {target->position.x, target->position.y, target->position.z};
         Vector3D playerPos = {this->newPosition.x, this->newPosition.y, this->newPosition.z};
 

@@ -16,7 +16,7 @@ class SCMission {
 private:
     std::string mission_name;
     
-    RSWorld *world{nullptr};
+    
     
     std::map<std::string, RSEntity *> *obj_cache;
 
@@ -27,6 +27,7 @@ public:
     SCMissionActors *player;
     RSArea *area{nullptr};
     RSMission *mission{nullptr};
+    RSWorld *world{nullptr};
     
     SCMission(std::string mission_name, std::map<std::string, RSEntity *> *objCache);
     ~SCMission();

@@ -17,7 +17,6 @@ private:
     void parseWRLD_WTCH(uint8_t *data, size_t size);
     void parseWRLD_PALT(uint8_t *data, size_t size);
     void parseWRLD_TERA(uint8_t *data, size_t size);
-    void parseWRLD_TERA_FILE(uint8_t *data, size_t size);
     void parseWRLD_SKYS(uint8_t *data, size_t size);
     void parseWRLD_GLNT(uint8_t *data, size_t size);
     void parseWRLD_SMOK(uint8_t *data, size_t size);

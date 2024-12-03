@@ -75,6 +75,7 @@ void SCMission::LoadMission() {
                                                  23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
                                                  part->position.y, part->position.z);
                         actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
+                        actor->plane->object = part;
                         if (this->area->getY(part->position.x, part->position.z) == part->position.y) {
                             actor->plane->on_ground = true;
                         } else {
@@ -85,10 +86,10 @@ void SCMission::LoadMission() {
                         }
                         if (!actor->plane->on_ground) {
                             actor->plane->SetThrottle(100);
-                            actor->pilot->target_climb = (int) (part->position.y * 3.6f);
+                            actor->pilot->target_climb = (int) (part->position.y);
                             actor->plane->vz = -20;
                         } else {
-                            actor->pilot->target_climb = 25000;
+                            actor->pilot->target_climb = 10000;
                         }
                         actor->pilot->plane = actor->plane;
                         actor->pilot->target_azimut = (int) (actor->plane->azimuthf / 10.0f);
@@ -100,6 +101,7 @@ void SCMission::LoadMission() {
                                                  23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
                                                  part->position.y, part->position.z);
                     actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
+                    actor->plane->object = part;
                     this->player = actor;
                 }
                 cpt_actor++;
@@ -115,6 +117,7 @@ void SCMission::LoadMission() {
         part->member_name = area_actor.name;
         part->member_name_destroyed = area_actor.destroyedName;
         part->entity = area_actor.entity;
+        part->position = area_actor.position;
         actor->actor_name = area_actor.name;
         actor->plane = nullptr;
         actor->pilot = nullptr;

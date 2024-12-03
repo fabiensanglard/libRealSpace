@@ -38,7 +38,7 @@ private:
     /**
      * @brief Path to current mission file
      */
-    char missFileName[33];
+    std::string miss_file_name;
     /**
      * @brief Current camera mode
      */
