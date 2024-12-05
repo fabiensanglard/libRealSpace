@@ -254,6 +254,7 @@ void RSArea::ParseObjects() {
 
                 objCache->emplace(hash, entity);
             }
+            mapObject.entity = objCache->at(hash);
             objects.push_back(mapObject);
         }
     }

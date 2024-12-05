@@ -79,7 +79,9 @@ void RSMission::parseMISN_VERS(uint8_t *data, size_t size) {
 }
 void RSMission::parseMISN_INFO(uint8_t *data, size_t size) {
     ByteStream stream(data);
-    this->mission_data.info = stream.ReadString(size);
+    if (size > 0) {
+        this->mission_data.info = stream.ReadString(size);
+    }
 }
 void RSMission::parseMISN_TUNE(uint8_t *data, size_t size) {
     ByteStream stream(data);
@@ -303,7 +305,7 @@ void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
         prt->unknown2 |= stream.ReadByte() << 0;
         prt->unknown2 |= stream.ReadByte() << 8;
         int32_t x, z;
-        uint16_t y;
+        int16_t y;
         x = stream.ReadInt24LE();
         z = stream.ReadInt24LE();
         y = 0;

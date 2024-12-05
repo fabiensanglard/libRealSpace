@@ -270,6 +270,7 @@ public:
     void RenderSimulatedObject();
     void RenderSmoke(); 
     void Shoot(int weapon_id, MISN_PART *target);
+    void InitLoadout();
 };
 
 #endif

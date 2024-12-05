@@ -873,19 +873,23 @@ void SCPlane::Render() {
         
         Renderer.DrawModel(this->object->entity, LOD_LEVEL_MAX);
         if (wheel_index) {
-            Renderer.DrawModel(this->object->entity->chld[wheel_index]->objct, LOD_LEVEL_MAX);
+            if (this->object->entity->chld.size() > wheel_index) {
+                Renderer.DrawModel(this->object->entity->chld[wheel_index]->objct, LOD_LEVEL_MAX);
+            }
         }
         if (this->thrust > 50) {
-            glPushMatrix();
-            Vector3D pos = {
-                (float) this->object->entity->chld[0]->x,
-                (float) this->object->entity->chld[0]->y,
-                (float) this->object->entity->chld[0]->z
-            };
-            glTranslatef(pos.z/250 , pos.y /250 , pos.x /250);
-            glScalef(1+this->thrust/100.0f,1,1);
-            Renderer.DrawModel(this->object->entity->chld[0]->objct, LOD_LEVEL_MAX);
-            glPopMatrix();
+            if (this->object->entity->chld.size() > 0) {
+                glPushMatrix();
+                Vector3D pos = {
+                    (float) this->object->entity->chld[0]->x,
+                    (float) this->object->entity->chld[0]->y,
+                    (float) this->object->entity->chld[0]->z
+                };
+                glTranslatef(pos.z/250 , pos.y /250 , pos.x /250);
+                glScalef(1+this->thrust/100.0f,1,1);
+                Renderer.DrawModel(this->object->entity->chld[0]->objct, LOD_LEVEL_MAX);
+                glPopMatrix();
+            }
         }
         for (auto weaps:this->weaps_load) {
             float decy=0.5f;
@@ -1019,4 +1023,52 @@ void SCPlane::Shoot(int weapon_hard_point_id, MISN_PART *target) {
     weap->elevationf = this->elevationf;
     weap->target = target;
     this->weaps_object.push_back(weap);
+}
+void SCPlane::InitLoadout() {
+    std::map<int, std::vector<std::tuple<std::string, int>>> weap_map = {
+        {12, {{"0", 1000}}},
+        {1, {{"4", 1}, {"1", 1}, {"2", 1}}},
+        {2, {{"4", 1}, {"1", 1}, {"2", 1}}},
+        {3, {{"2", 3}, {"3", 3}}},
+        {4, {{"2", 2}, {"3", 2}}},
+        {5, {{"2", 6}, {"3", 6}}},
+        {6, {{"2", 3}, {"3", 6}}},
+        {7, {{"2", 3}, {"3", 3}}},
+        {8, {{"2", 1}, {"3", 1}}},
+        {9, {{"1", 1}, {"2", 2}}}
+    };
+    
+    for (auto loadout: this->object->entity->weaps) {
+        int plane_wp_loadout = loadout->nb_weap;
+        for (auto hpts: weap_map.at(loadout->objct->wdat->weapon_id)) {
+            int cpt=0;
+            int next_hp = 0;
+            if (plane_wp_loadout == 0) {
+                break;
+            }
+            for (auto plane_hpts: this->object->entity->hpts) {
+                if ((plane_hpts->id == std::stoi(std::get<0>(hpts))) && (next_hp == 0 || next_hp == plane_hpts->id)) {
+                    
+                    int nb_weap = std::get<1>(hpts) - ((loadout->nb_weap /2) - std::get<1>(hpts));
+                    plane_wp_loadout = plane_wp_loadout - nb_weap;
+                    SCWeaponLoadoutHardPoint *weap = new SCWeaponLoadoutHardPoint();
+                    weap->objct = loadout->objct;
+                    weap->nb_weap = std::get<1>(hpts);
+                    weap->hpts_type = std::stoi(std::get<0>(hpts));
+                    weap->name = loadout->name;
+                    weap->position = {(float) plane_hpts->x, (float) plane_hpts->y, (float) plane_hpts->z};
+                    weap->hud_pos = {0, 0};
+                    if (this->weaps_load[cpt] == nullptr) {
+                        this->weaps_load[cpt] = weap;
+                    }
+                    if (next_hp == 0) {
+                        next_hp = std::stoi(std::get<0>(hpts));
+                    } else {
+                        next_hp = 0;
+                    }
+                }
+                cpt++;
+            }
+        }
+    }
 }

@@ -362,12 +362,14 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_SPACE:
             {
-                MISN_PART *target = this->current_mission->enemies[this->current_target]->object;
-                this->player_plane->Shoot(this->player_plane->selected_weapon, target);
+                if (target != nullptr) {
+                    this->player_plane->Shoot(this->player_plane->selected_weapon, target);
+                }
             }
             break;
         case SDLK_t:
             this->current_target = (this->current_target + 1) % this->current_mission->enemies.size();
+            this->target = this->current_mission->enemies[this->current_target]->object;
             break;
         default:
             break;
@@ -425,6 +427,7 @@ void SCStrike::SetMission(char const *missionName) {
     camera->SetPosition(&newPosition);
     yaw = 0.0f;
     this->current_target = 0;
+    this->target = this->current_mission->enemies[this->current_target]->object;
     this->nav_point_id = 0;
     this->player_plane =
         new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
@@ -437,57 +440,13 @@ void SCStrike::SetMission(char const *missionName) {
         this->player_plane->vz = -20;
         this->player_plane->Simulate();
     }
-    std::map<int, std::vector<std::tuple<std::string, int>>> weap_map = {
-        {12, {{"0", 1000}}},
-        {1, {{"4", 1}, {"1", 1}, {"2", 1}}},
-        {2, {{"4", 1}, {"1", 1}, {"2", 1}}},
-        {3, {{"2", 3}, {"3", 3}}},
-        {4, {{"2", 2}, {"3", 2}}},
-        {5, {{"2", 6}, {"3", 6}}},
-        {6, {{"2", 3}, {"3", 6}}},
-        {7, {{"2", 3}, {"3", 3}}},
-        {8, {{"2", 1}, {"3", 1}}},
-        {9, {{"1", 1}, {"2", 2}}}
-    };
-    
-    for (auto loadout: playerCoord->entity->weaps) {
-        int plane_wp_loadout = loadout->nb_weap;
-        for (auto hpts: weap_map.at(loadout->objct->wdat->weapon_id)) {
-            int cpt=0;
-            int next_hp = 0;
-            if (plane_wp_loadout == 0) {
-                break;
-            }
-            for (auto plane_hpts: player_plane->object->entity->hpts) {
-                if ((plane_hpts->id == std::stoi(std::get<0>(hpts))) && (next_hp == 0 || next_hp == plane_hpts->id)) {
-                    
-                    int nb_weap = std::get<1>(hpts) - ((loadout->nb_weap /2) - std::get<1>(hpts));
-                    plane_wp_loadout = plane_wp_loadout - nb_weap;
-                    SCWeaponLoadoutHardPoint *weap = new SCWeaponLoadoutHardPoint();
-                    weap->objct = loadout->objct;
-                    weap->nb_weap = std::get<1>(hpts);
-                    weap->hpts_type = std::stoi(std::get<0>(hpts));
-                    weap->name = loadout->name;
-                    weap->position = {(float) plane_hpts->x, (float) plane_hpts->y, (float) plane_hpts->z};
-                    weap->hud_pos = {0, 0};
-                    if (this->player_plane->weaps_load[cpt] == nullptr) {
-                        this->player_plane->weaps_load[cpt] = weap;
-                    }
-                    if (next_hp == 0) {
-                        next_hp = std::stoi(std::get<0>(hpts));
-                    } else {
-                        next_hp = 0;
-                    }
-                }
-                cpt++;
-            }
-        }
-    }
+    this->player_plane->InitLoadout();
     this->player_prof = this->current_mission->player->profile;
     for (auto actor: this->current_mission->actors) {
         SCAiPlane *aiPlane = new SCAiPlane();
         if (actor->plane != nullptr) {
             aiPlane->plane = actor->plane;
+            aiPlane->plane->InitLoadout();
             aiPlane->pilot = actor->pilot;
             aiPlane->object = actor->object;
             this->ai_planes.push_back(aiPlane);
@@ -559,7 +518,7 @@ void SCStrike::RunFrame(void) {
     this->cockpit->gear = this->player_plane->GetWheel();
     this->cockpit->flaps = this->player_plane->GetFlaps()>0;
     this->cockpit->airbrake = this->player_plane->GetSpoilers()>0;
-    this->cockpit->target = this->current_mission->enemies[this->current_target]->object;
+    this->cockpit->target = this->target;
     this->cockpit->player = this->player_plane->object;
     this->cockpit->weapoint_coords.x = this->current_mission->mission->mission_data.areas[this->nav_point_id]->XAxis;
     this->cockpit->weapoint_coords.y = this->current_mission->mission->mission_data.areas[this->nav_point_id]->ZAxis;
@@ -603,7 +562,6 @@ void SCStrike::RunFrame(void) {
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
     case View::TARGET: {
-        MISN_PART *target = this->current_mission->actors[this->current_target]->object;
         Vector3D pos = {target->position.x + this->camera_pos.x, target->position.y + this->camera_pos.y,
                         target->position.z + this->camera_pos.z};
         Vector3D targetPos = {target->position.x, target->position.y, target->position.z};
@@ -633,7 +591,6 @@ void SCStrike::RunFrame(void) {
     }
     break;
     case View::EYE_ON_TARGET: {
-        MISN_PART *target = this->current_mission->mission->mission_data.parts[this->current_target];
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
         Vector3D targetPos = {target->position.x, target->position.y,target->position.z };
         camera->SetPosition(&pos);
@@ -656,11 +613,17 @@ void SCStrike::RunFrame(void) {
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     
-    Renderer.RenderMissionObjects(this->current_mission->mission);
 
-    for (auto aiPlane : this->ai_planes) {
-        if (aiPlane->object->alive == false) {
-            aiPlane->plane->RenderSmoke();
+    for (auto actor: this->current_mission->actors) {
+        if (actor->plane != nullptr) {
+            if (actor->plane != this->player_plane) {
+                actor->plane->Render();
+                if (actor->plane->object->alive == false) {
+                     actor->plane->RenderSmoke();
+                }
+            }   
+        } else if (actor->object->entity != nullptr) {
+            Renderer.DrawModel(actor->object->entity, LOD_LEVEL_MAX);
         }
     }
     this->player_plane->RenderSimulatedObject();
@@ -771,7 +734,7 @@ void SCStrike::RenderMenu() {
             ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f", aiPlane->plane->airspeed, aiPlane->plane->y * 3.6,
                         360 - (aiPlane->plane->azimuthf / 10.0f), aiPlane->plane->tps);
             ImGui::SameLine();
-            ImGui::Text("X %d Y %d Z %d", aiPlane->object->position.x, aiPlane->object->position.y, aiPlane->object->position.z);
+            ImGui::Text("X %.0f Y %.0f Z %.0f", aiPlane->object->position.x, aiPlane->object->position.y, aiPlane->object->position.z);
         }
         ImGui::End();
     }
@@ -1044,8 +1007,7 @@ void SCStrike::RenderMenu() {
             ImGui::Text("Mouse control enabled");
         }
         ImGui::Text("Target %s", this->current_mission->actors[this->current_target]->actor_name.c_str());
-        MISN_PART *target = this->current_mission->actors[this->current_target]->object;
-        Vector3D targetPos = {target->position.x, target->position.y, target->position.z};
+        Vector3D targetPos = {this->target->position.x, this->target->position.y, this->target->position.z};
         Vector3D playerPos = {this->newPosition.x, this->newPosition.y, this->newPosition.z};
 
         Camera totarget;
@@ -1082,7 +1044,7 @@ void SCStrike::RenderMenu() {
                 );
                 ImGui::Text("X:%.3f\tY:%.3f\tZ:%.3f", missils->x+ 180000.0f, missils->y, missils->z+ 180000.0f);
                 if (missils->target != nullptr) {
-                    ImGui::Text("Target X:%d\tY:%d\tZ:%d", missils->target->position.x, missils->target->position.y, missils->target->position.z);    
+                    ImGui::Text("Target X:%.0f\tY:%.0f\tZ:%.0f", missils->target->position.x, missils->target->position.y, missils->target->position.z);    
                 }
                 
             }
@@ -1114,7 +1076,7 @@ void SCStrike::RenderMenu() {
         ImGui::Begin("Mission Parts and Areas");
         ImGui::Text("Mission %s", this->current_mission->mission->mission_data.name.c_str());
         ImGui::Text("Area %s", this->current_mission->mission->mission_data.world_filename.c_str());
-        ImGui::Text("Player Coord %d %d %d", this->current_mission->mission->getPlayerCoord()->position.x, this->current_mission->mission->getPlayerCoord()->position.y,
+        ImGui::Text("Player Coord %.0f %.0f %.0f", this->current_mission->mission->getPlayerCoord()->position.x, this->current_mission->mission->getPlayerCoord()->position.y,
                     this->current_mission->mission->getPlayerCoord()->position.z);
         ImGui::Text("Messages %d", this->current_mission->mission->mission_data.messages.size());
         if (ImGui::TreeNode("Messages")) {
@@ -1174,7 +1136,7 @@ void SCStrike::RenderMenu() {
                 if (ImGui::TreeNode((void *)(intptr_t)part->id, "Parts id %d, area id %d", part->id, part->area_id)) {
                     ImGui::Text("u1 %d", part->unknown1);
                     ImGui::Text("u2 %d", part->unknown2);
-                    ImGui::Text("x %d y %d z %d", part->position.x, part->position.y, part->position.z);
+                    ImGui::Text("x %.0f y %.0f z %.0f", part->position.x, part->position.y, part->position.z);
                     ImGui::Text("azymuth %d", part->azymuth);
                     ImGui::Text("Name %s", part->member_name.c_str());
                     ImGui::Text("Destroyed %s", part->member_name_destroyed.c_str());

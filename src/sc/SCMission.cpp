@@ -63,7 +63,7 @@ void SCMission::LoadMission() {
                 actor->profile = cast->profile;
                 
                 for (auto prg_id: actor->object->progs_id) {
-                    if (prg_id != 255) {
+                    if (prg_id != 255 && prg_id < this->mission->mission_data.prog.size()) {
                         std::vector<PROG> *prog = this->mission->mission_data.prog[prg_id];
                         actor->prog.push_back(prog);
                     }

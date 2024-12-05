@@ -17,7 +17,7 @@ typedef struct MapObject{
     
     Vector3D position{0,0,0};
     
-    RSEntity* entity;
+    RSEntity* entity{nullptr};
     std::vector<uint16_t> progs_id;
     
 } MapObject;
