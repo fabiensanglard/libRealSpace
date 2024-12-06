@@ -613,7 +613,6 @@ void SCStrike::RunFrame(void) {
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     
-
     for (auto actor: this->current_mission->actors) {
         if (actor->plane != nullptr) {
             if (actor->plane != this->player_plane) {
@@ -623,7 +622,20 @@ void SCStrike::RunFrame(void) {
                 }
             }   
         } else if (actor->object->entity != nullptr) {
+            glPushMatrix();
+
+            glTranslatef(static_cast<GLfloat>(actor->object->position.x), static_cast<GLfloat>(actor->object->position.y),
+                        static_cast<GLfloat>(actor->object->position.z));
+
+            float model_view_mat[4][4];
+            glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
+            glRotatef((360.0f - (float)actor->object->azymuth + 90.0f), 0, 1, 0);
+            glRotatef((float)actor->object->pitch, 0, 0, 1);
+            glRotatef(-(float)actor->object->roll, 1, 0, 0);
             Renderer.DrawModel(actor->object->entity, LOD_LEVEL_MAX);
+            glPopMatrix();
+        } else {
+            printf("Actor has no plane or object\n");
         }
     }
     this->player_plane->RenderSimulatedObject();

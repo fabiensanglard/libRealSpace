@@ -779,8 +779,6 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     }
     glDisable(GL_TEXTURE_2D);
     RenderMapOverlay(area);
-    RenderObjects(area, 0);
-
     glDisable(GL_FOG);
 }
 
