@@ -16,14 +16,6 @@ struct HudLine {
     Point2D end;
 };
 
-struct SCAiPlane {
-    SCPlane *plane;
-    SCPilot *pilot;
-    MISN_PART *object;
-    RSProf *ai;
-    std::string name;
-};
-
 class SCCockpit {
 private:
     VGAPalette palette;
@@ -65,18 +57,20 @@ public:
     int throttle{0};
     int comm_target{0};
 
-    MISN_PART *target;
-    MISN_PART *player;
-    RSProf *player_prof;
+    MISN_PART *target{nullptr};
+    MISN_PART *player{nullptr};
+    RSProf *player_prof{nullptr};
     std::vector<MISN_PART *> parts;
     std::vector<SCAiPlane *> ai_planes;
     Camera *cam;
     Vector2D weapoint_coords;
     SCPlane *player_plane;
-    
+    SCMission *current_mission;
+    uint8_t *nav_point_id{nullptr};
     SCCockpit();
     ~SCCockpit();
     void Init( );
+    void Update();
     void Render(int face);
 };
 #endif

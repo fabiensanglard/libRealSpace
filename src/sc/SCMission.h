@@ -1,6 +1,12 @@
 #pragma once
 #include "precomp.h"
-
+struct SCAiPlane {
+    SCPlane *plane;
+    SCPilot *pilot;
+    MISN_PART *object;
+    RSProf *ai;
+    std::string name;
+};
 
 struct SCMissionActors {
     std::string actor_name;

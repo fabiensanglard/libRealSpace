@@ -633,3 +633,23 @@ void SCCockpit::Render(int face) {
         VGA.SwithBuffers();
     }
 }
+void SCCockpit::Update() {
+    this->pitch = this->player_plane->elevationf/10.0f;
+    this->roll = this->player_plane->twist/10.0f;
+    this->yaw = this->player_plane->azimuthf/10.0f;
+    this->speed = (float) this->player_plane->airspeed;
+    this->throttle = this->player_plane->GetThrottle();
+    this->altitude = this->player_plane->y;
+    this->heading = this->player_plane->azimuthf/10.0f;
+    this->gear = this->player_plane->GetWheel();
+    this->flaps = this->player_plane->GetFlaps()>0;
+    this->airbrake = this->player_plane->GetSpoilers()>0;
+    this->target = this->target;
+    this->player = this->player_plane->object;
+    this->weapoint_coords.x = this->current_mission->mission->mission_data.areas[*this->nav_point_id]->XAxis;
+    this->weapoint_coords.y = this->current_mission->mission->mission_data.areas[*this->nav_point_id]->ZAxis;
+    this->ai_planes = this->ai_planes;
+    this->player_prof = this->player_prof;
+    this->player_plane = this->player_plane;
+
+}

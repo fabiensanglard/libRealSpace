@@ -370,6 +370,7 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_t:
             this->current_target = (this->current_target + 1) % this->current_mission->enemies.size();
             this->target = this->current_mission->enemies[this->current_target]->object;
+            this->cockpit->target = this->target;
             break;
         default:
             break;
@@ -388,8 +389,6 @@ void SCStrike::CheckKeyboard(void) {
 void SCStrike::Init(void) {
     this->mouse_control = false;
     this->SetMission("TEMPLATE.IFF");
-    this->cockpit = new SCCockpit();
-    this->cockpit->Init();
     this->pilote_lookat = {0, 0};
 }
 
@@ -452,6 +451,11 @@ void SCStrike::SetMission(char const *missionName) {
             this->ai_planes.push_back(aiPlane);
         }
     }
+    this->cockpit = new SCCockpit();
+    this->cockpit->Init();
+    this->cockpit->player_plane = this->player_plane;
+    this->cockpit->current_mission = this->current_mission;
+    this->cockpit->nav_point_id = &this->nav_point_id;
 }
 /**
  * @brief Executes a single frame of the game simulation.
@@ -508,25 +512,7 @@ void SCStrike::RunFrame(void) {
         this->player_plane->object->position.z = newPosition.z;
         this->player_plane->object->position.y = newPosition.y;
     }
-    this->cockpit->pitch = this->player_plane->elevationf/10.0f;
-    this->cockpit->roll = this->player_plane->twist/10.0f;
-    this->cockpit->yaw = this->player_plane->azimuthf/10.0f;
-    this->cockpit->speed = (float) this->player_plane->airspeed;
-    this->cockpit->throttle = this->player_plane->GetThrottle();
-    this->cockpit->altitude = this->player_plane->y;
-    this->cockpit->heading = this->player_plane->azimuthf/10.0f;
-    this->cockpit->gear = this->player_plane->GetWheel();
-    this->cockpit->flaps = this->player_plane->GetFlaps()>0;
-    this->cockpit->airbrake = this->player_plane->GetSpoilers()>0;
-    this->cockpit->target = this->target;
-    this->cockpit->player = this->player_plane->object;
-    this->cockpit->weapoint_coords.x = this->current_mission->mission->mission_data.areas[this->nav_point_id]->XAxis;
-    this->cockpit->weapoint_coords.y = this->current_mission->mission->mission_data.areas[this->nav_point_id]->ZAxis;
-    this->cockpit->parts = this->current_mission->mission->mission_data.parts;
-    this->cockpit->ai_planes = this->ai_planes;
-    this->cockpit->player_prof = this->player_prof;
-    this->cockpit->player_plane = this->player_plane;
-
+    this->cockpit->Update();
     if (this->mfd_timeout <= 0) {
         if (this->cockpit->show_comm) {
             this->cockpit->show_comm = false;
