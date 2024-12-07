@@ -355,8 +355,8 @@ void SCStrike::CheckKeyboard(void) {
             Game.AddActivity(nav_screen);
         } break;
         case SDLK_a:
-            this->player_plane->x = this->current_mission->mission->mission_data.areas[this->nav_point_id]->XAxis;
-            this->player_plane->z = this->current_mission->mission->mission_data.areas[this->nav_point_id]->ZAxis;
+            this->player_plane->x = this->current_mission->mission->mission_data.areas[this->nav_point_id]->position.x;
+            this->player_plane->z = this->current_mission->mission->mission_data.areas[this->nav_point_id]->position.z;
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             break;
@@ -486,10 +486,10 @@ void SCStrike::RunFrame(void) {
             if (aiPlane->object->area_id != 255) {
                 AREA *ar = this->current_mission->mission->mission_data.areas[aiPlane->object->area_id];
 
-                float minX = (float) ar->XAxis-(ar->AreaWidth/2);
-                float minZ = (float) ar->ZAxis-(ar->AreaWidth/2);
-                float maxX = (float) ar->XAxis+(ar->AreaWidth/2);
-                float maxZ = (float) ar->ZAxis+(ar->AreaWidth/2);
+                float minX = (float) ar->position.x-(ar->AreaWidth/2);
+                float minZ = (float) ar->position.z-(ar->AreaWidth/2);
+                float maxX = (float) ar->position.x+(ar->AreaWidth/2);
+                float maxZ = (float) ar->position.z+(ar->AreaWidth/2);
 
                 if (npos.x < minX || npos.x > maxX || npos.z < minZ || npos.z > maxZ) {
                     aiPlane->pilot->target_azimut = aiPlane->pilot->target_azimut + 180;
@@ -1087,7 +1087,7 @@ void SCStrike::RenderMenu() {
             for (auto area : this->current_mission->mission->mission_data.areas) {
                 if (ImGui::TreeNode((void *)(intptr_t)area->id, "Area id %d", area->id)) {
                     ImGui::Text("Area name %s", area->AreaName);
-                    ImGui::Text("Area x %d y %d z %d", area->XAxis, area->YAxis, area->ZAxis);
+                    ImGui::Text("Area x %.0f y %.0f z %.0f", area->position.x, area->position.y, area->position.z);
                     ImGui::Text("Area width %d height %d", area->AreaWidth, area->AreaHeight);
                     ImGui::TreePop();
                 }
@@ -1109,7 +1109,7 @@ void SCStrike::RenderMenu() {
             for (auto spot : this->current_mission->mission->mission_data.spots) {
                 if (ImGui::TreeNode((void *)(intptr_t)spot, "Spot %d", spot->id)) {
                     ImGui::Text("Spot area_id %d", spot->area_id);
-                    ImGui::Text("Spot x %d y %d z %d", spot->XAxis, spot->YAxis, spot->ZAxis);
+                    ImGui::Text("Spot x %.0f y %.0f z %.0f", spot->position.x, spot->position.y, spot->position.z);
                     ImGui::TreePop();
                 }
             }

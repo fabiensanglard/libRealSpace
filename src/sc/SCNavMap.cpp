@@ -160,8 +160,8 @@ void SCNavMap::RunFrame(void) {
                     this->navMap->font->GetShapeForChar('A')->GetWidth()
                 );*/
             }
-            int newx = (int) (((area->XAxis+center)/map_width)*w)+l;
-            int newy = (int) (((area->ZAxis+center)/map_width)*h)+t;
+            int newx = (int) (((area->position.x+center)/map_width)*w)+l;
+            int newy = (int) (((area->position.z+center)/map_width)*h)+t;
             int neww = (int) ((area->AreaWidth / map_width) * w);
             int newh = neww;
             if (area->AreaHeight != 0) {

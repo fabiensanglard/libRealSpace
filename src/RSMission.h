@@ -22,9 +22,7 @@ struct AREA {
     int id;
     unsigned char AreaType;
     char AreaName[33];
-    long XAxis;
-    long YAxis;
-    long ZAxis;
+    Vector3D position;
     unsigned int AreaWidth;
     unsigned int AreaHeight;
     unsigned char Unknown[5];
@@ -51,10 +49,7 @@ struct MISN_PART {
 struct SPOT {
     int id;
     short area_id;
-
-    long XAxis;
-    long YAxis;
-    long ZAxis;
+    Vector3D position;
 };
 struct MSGS {
     char message[255];
@@ -82,7 +77,7 @@ struct MISN {
     std::vector<std::vector<PROG> *> prog;
     std::vector<uint8_t> nums;
     std::vector<MISN_PART *> parts;
-    std::vector<uint8_t> team;
+    std::vector<uint16_t> team;
     std::vector<std::vector<uint8_t>> scenes;
     std::vector<uint8_t> load;
 };

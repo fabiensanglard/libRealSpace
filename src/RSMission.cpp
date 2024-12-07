@@ -125,9 +125,9 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
                 tmparea->AreaName[k] = stream.ReadByte();
             }
             missionstrtoupper(tmparea->AreaName);
-            tmparea->XAxis = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            tmparea->ZAxis = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            tmparea->YAxis = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
+            tmparea->position.x = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->position.z = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->position.y = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
 
             tmparea->AreaWidth = stream.ReadUShort();
             Blank0 = stream.ReadByte();
@@ -139,9 +139,10 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
                 tmparea->AreaName[k] = stream.ReadByte();
             }
             missionstrtoupper(tmparea->AreaName);
-            tmparea->XAxis = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            tmparea->ZAxis = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            tmparea->YAxis = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
+            tmparea->position.x = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->position.z = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->position.y = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
+
             
             tmparea->AreaWidth = stream.ReadUShort();
 
@@ -159,10 +160,10 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
                 tmparea->AreaName[k] = stream.ReadByte();
             }
             missionstrtoupper(tmparea->AreaName);
-            tmparea->XAxis = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            tmparea->ZAxis = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            tmparea->YAxis = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
-            
+            tmparea->position.x = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->position.z = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            tmparea->position.y = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
+
             tmparea->AreaWidth = stream.ReadUShort();
 
             // unsigned char Blank0[10]; // off 48-59
@@ -203,9 +204,9 @@ void RSMission::parseMISN_SPOT(uint8_t *data, size_t size) {
             spt->area_id |= stream.ReadByte() << 8;
 
             stream.ReadByte();
-            spt->XAxis = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            spt->ZAxis = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            spt->YAxis = stream.ReadShort() * HEIGH_MAP_SCALE;
+            spt->position.x = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            spt->position.z = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
+            spt->position.y = stream.ReadShort() * HEIGH_MAP_SCALE;
             stream.ReadByte();
             this->mission_data.spots.push_back(spt);
         }
@@ -389,9 +390,9 @@ void RSMission::fixMissionObjectsCoords(void) {
         if (obj->area_id != 255) {
             for (auto area : this->mission_data.areas) {
                 if (area->id-1 == obj->area_id) {
-                    obj->position.x += area->XAxis;
-                    obj->position.z += area->ZAxis;
-                    obj->position.y += (uint16_t) area->YAxis;
+                    obj->position.x += area->position.x;
+                    obj->position.z += area->position.z;
+                    obj->position.y += area->position.y;
                     break;
                 }
             }
