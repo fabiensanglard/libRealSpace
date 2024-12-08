@@ -3,7 +3,7 @@
 SCMission::SCMission(std::string mission_name, std::map<std::string, RSEntity *> *objCache) {
     this->mission_name = mission_name;
     this->obj_cache = objCache;
-    this->LoadMission();
+    this->loadMission();
 }
 SCMission::~SCMission() {
     this->cleanup();
@@ -25,7 +25,7 @@ void SCMission::cleanup() {
     this->actors.clear();
     this->actors.shrink_to_fit();
 }
-void SCMission::LoadMission() {
+void SCMission::loadMission() {
     std::string miss_file_name = "..\\..\\DATA\\MISSIONS\\" + this->mission_name; 
     
     TreEntry *mission_tre = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(miss_file_name.c_str());
@@ -144,5 +144,41 @@ void SCMission::LoadMission() {
         if (std::find(this->friendlies.begin(), this->friendlies.end(), enemis) == this->friendlies.end()) {
             this->enemies.push_back(enemis);
         }
+    }
+}
+
+void SCMission::update() {
+    for (auto ai_actor : this->actors) {
+        if (ai_actor->pilot == nullptr) {
+            continue;
+        }
+        if (ai_actor->plane == nullptr) {
+            continue;
+        }
+        ai_actor->plane->Simulate();
+        ai_actor->pilot->AutoPilot();
+        Vector3D npos;
+        ai_actor->plane->getPosition(&npos);
+        if (ai_actor->object->area_id != 255) {
+            AREA *ar = this->mission->mission_data.areas[ai_actor->object->area_id];
+
+            float minX = (float) ar->position.x-(ar->AreaWidth/2);
+            float minZ = (float) ar->position.z-(ar->AreaWidth/2);
+            float maxX = (float) ar->position.x+(ar->AreaWidth/2);
+            float maxZ = (float) ar->position.z+(ar->AreaWidth/2);
+
+            if (npos.x < minX || npos.x > maxX || npos.z < minZ || npos.z > maxZ) {
+                ai_actor->pilot->target_azimut = ai_actor->pilot->target_azimut + 180;
+                if (ai_actor->pilot->target_azimut > 360) {
+                    ai_actor->pilot->target_azimut = ai_actor->pilot->target_azimut - 360;
+                }
+            }
+        }
+        ai_actor->object->position.x = npos.x;
+        ai_actor->object->position.z = npos.z;
+        ai_actor->object->position.y = npos.y;
+        ai_actor->object->azymuth = 360 - (uint16_t)(ai_actor->plane->azimuthf / 10.0f);
+        ai_actor->object->roll = (uint16_t)(ai_actor->plane->twist / 10.0f);
+        ai_actor->object->pitch = (uint16_t)(ai_actor->plane->elevationf / 10.0f);
     }
 }

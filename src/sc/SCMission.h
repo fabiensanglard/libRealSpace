@@ -37,6 +37,7 @@ public:
     
     SCMission(std::string mission_name, std::map<std::string, RSEntity *> *objCache);
     ~SCMission();
-    void LoadMission();
-    void SCMission::cleanup();
+    void loadMission();
+    void cleanup();
+    void update();
 };

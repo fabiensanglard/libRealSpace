@@ -478,33 +478,7 @@ void SCStrike::RunFrame(void) {
     if (!this->pause_simu) {
         this->mfd_timeout--;
         this->player_plane->Simulate();
-        for (auto aiPlane : this->ai_planes) {
-            aiPlane->plane->Simulate();
-            aiPlane->pilot->AutoPilot();
-            Vector3D npos;
-            aiPlane->plane->getPosition(&npos);
-            if (aiPlane->object->area_id != 255) {
-                AREA *ar = this->current_mission->mission->mission_data.areas[aiPlane->object->area_id];
-
-                float minX = (float) ar->position.x-(ar->AreaWidth/2);
-                float minZ = (float) ar->position.z-(ar->AreaWidth/2);
-                float maxX = (float) ar->position.x+(ar->AreaWidth/2);
-                float maxZ = (float) ar->position.z+(ar->AreaWidth/2);
-
-                if (npos.x < minX || npos.x > maxX || npos.z < minZ || npos.z > maxZ) {
-                    aiPlane->pilot->target_azimut = aiPlane->pilot->target_azimut + 180;
-                    if (aiPlane->pilot->target_azimut > 360) {
-                        aiPlane->pilot->target_azimut = aiPlane->pilot->target_azimut - 360;
-                    }
-                }
-            }
-            aiPlane->object->position.x = npos.x;
-            aiPlane->object->position.z = npos.z;
-            aiPlane->object->position.y = npos.y;
-            aiPlane->object->azymuth = 360 - (uint16_t)(aiPlane->plane->azimuthf / 10.0f);
-            aiPlane->object->roll = (uint16_t)(aiPlane->plane->twist / 10.0f);
-            aiPlane->object->pitch = (uint16_t)(aiPlane->plane->elevationf / 10.0f);
-        }
+        this->current_mission->update();
     }
     this->player_plane->getPosition(&newPosition);
     if (this->player_plane->object != nullptr) {

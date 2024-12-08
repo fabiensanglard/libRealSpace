@@ -117,33 +117,8 @@ void SCNavMap::RunFrame(void) {
         int h = 155;
         int t = 18;
         int l = 6;
-        
-        for (auto ob: this->missionObj->mission_data.parts) {
-            int newx = (int) (((ob->position.x+center)/map_width)*w)+l;
-            int newy = (int) (((ob->position.z+center)/map_width)*h)+t;
-            if (ob->member_name != "F-16DES" || ob->weapon_load != "") {
-                
-                if (newx>0 && newx<320 && newy>0 && newy<200) {
-                    VGA.plot_pixel(newx, newy, ob->id);
-                    VGA.line(newx-5, newy, newx+5, newy, ob->id);
-                    VGA.line(newx, newy-5, newx, newy+5, ob->id);
-                    VGA.line(newx-5, newy-5, newx+5, newy+5, ob->id);
-                    VGA.line(newx+5, newy-5, newx-5, newy+5, ob->id);
-                }
-            } else {
-                newy = (int) (((ob->position.z+center)/map_width)*h)+t;
-                if (newx>0 && newx<320 && newy>0 && newy<200) {
-                    VGA.plot_pixel(newx, newy, ob->id);
-                    VGA.line(newx-5, newy-5, newx+5, newy-5, ob->id);
-                    VGA.line(newx-5, newy+5, newx+5, newy+5, ob->id);
-                    VGA.line(newx-5, newy-5, newx-5, newy+5, ob->id);
-                    VGA.line(newx+5, newy-5, newx+5, newy+5, ob->id);
-                }
-            }
-        }
-        
         for (auto area: this->missionObj->mission_data.areas) {
-            int c = this->color;
+            int c = 134;
             if (area->id - 1 == *this->current_nav_point) {
                 c=0;
                 /*int msg_newx = 246+(3*2);
@@ -208,6 +183,29 @@ void SCNavMap::RunFrame(void) {
                 }
             }
         }
+
+        for (auto ob: this->missionObj->mission_data.parts) {
+            int newx = (int) (((ob->position.x+center)/map_width)*w)+l;
+            int newy = newy = (int) (((ob->position.z+center)/map_width)*h)+t;
+            if (newx>0 && newx<320 && newy>0 && newy<200) {
+                VGA.plot_pixel(newx, newy, ob->id);
+                VGA.line(newx-5, newy-5, newx+5, newy-5, ob->id);
+                VGA.line(newx-5, newy+5, newx+5, newy+5, ob->id);
+                VGA.line(newx-5, newy-5, newx-5, newy+5, ob->id);
+                VGA.line(newx+5, newy-5, newx+5, newy+5, ob->id);
+                Point2D *obj_pos = new Point2D({newx, newy});
+                
+                VGA.PrintText(
+                    this->navMap->font,
+                    obj_pos,
+                    (char*) ob->member_name.c_str(),
+                    this->color,
+                    0,
+                    (int32_t)ob->member_name.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth());
+            }
+        }
+        
+       
     }
     
     Mouse.Draw();
