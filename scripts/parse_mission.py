@@ -58,7 +58,7 @@ def parse_iff_filereader(f, file_path, dec=0):
             if chunk_type == b"VERS":
                 print_int_from_chunk(chunk_data, dec+2)
             if chunk_type == b"INFO":
-                print_int_from_chunk(chunk_data, dec+2)
+                parse_NAME_chunk(chunk_data, chunk_size, dec+2)
             if chunk_type == b"TUNE":
                 print_int_from_chunk(chunk_data, dec+2)
             if chunk_type == b"MSGS":
@@ -132,9 +132,9 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             offset += 33
             XAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
             offset += 4
-            YAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
-            offset += 4
             ZAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
+            offset += 4
+            YAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
             offset += 4
             AreaWidth = chunk_data[offset]
             ubyte = chunk_data[offset+1:offset+4]
@@ -150,9 +150,9 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             offset += 32
             XAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
             offset += 4
-            YAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
-            offset += 4
             ZAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
+            offset += 4
+            YAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
             offset += 4
             AreaWidth = chunk_data[offset]
             offset += 1
@@ -175,12 +175,12 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             Xrelative = Xrelative_u if not (Xrelative_u & 0x800000) else Xrelative_u - 0x1000000
         
             offset += 4
-            YAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
+            ZAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
             Yrelative_u = chunk_data[offset] + (chunk_data[offset+1] << 8) + (chunk_data[offset+2] << 16)
             Yrelative = Yrelative_u if not (Yrelative_u & 0x800000) else Yrelative_u - 0x1000000
         
             offset += 4
-            ZAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
+            YAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
             offset += 4
             AreaWidth = chunk_data[offset]
             offset += 2
@@ -192,7 +192,7 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             offset += 5
             print(' ' * dec, f"ID: {id}, {area_name} Area type: {chr(area_type)})")
             print(' ' * (dec+2), f"X: {XAxis}, Y: {YAxis}, Z: {ZAxis}, Width: {AreaWidth}, Height: {area_height}")
-            print(' ' * (dec+2), f"Xrelativ (control): {Xrelative}, Yrelativ (control): {Yrelative}")
+            print(' ' * (dec+2), f"Xrelativ (control): {Xrelative}, Zrelativ (control): {Yrelative}")
             print(' ' * (dec+2), "unknown bytes 1 : ")
             for c in ubyte:
                 print(' ' * (dec+4), '0x{:02X}\t'.format(c), c)
@@ -235,9 +235,9 @@ def parse_PART_chunk(chunk_data, chunk_size, dec):
         Xrelative = Xrelative_u if not (Xrelative_u & 0x800000) else Xrelative_u - 0x1000000
         offset = offset + 4
         Yrelative_u = chunk_data[offset] + (chunk_data[offset+1] << 8) + (chunk_data[offset+2] << 16) 
-        Yrelative = Yrelative_u if not (Yrelative_u & 0x800000) else Yrelative_u - 0x1000000
+        Zrelative = Yrelative_u if not (Yrelative_u & 0x800000) else Yrelative_u - 0x1000000
         offset = offset + 4
-        Zrelative = chunk_data[offset] + (chunk_data[offset+1] << 8)
+        Yrelative = chunk_data[offset] + (chunk_data[offset+1] << 8)
         print (' ' * (dec+2), f"Relative: {Xrelative}, {Yrelative}, {Zrelative}")
         offset = offset + 2
         ub = chunk_data[offset]
@@ -296,14 +296,20 @@ def print_int_from_chunk(chunk_data, dec):
         print(' ' * dec, '0x{:02X}\t'.format(c), c)
 
 def print_efect_from_chunk(chunk_data, dec):
-    i = 0
-    for c in chunk_data:
-        if i == 0:
-            print(' ' * dec, 'OPCODE', '0x{:02X}\t'.format(c), c, end='')
-            i = 1
-        elif i == 1:
-            print(' ' * dec, 'VALUE','0x{:02X}\t'.format(c), c)
-            i = 0
+    timestampinms = int(time.time() * 1000)
+    fname = f"prog_{timestampinms}.txt"
+    with open(fname, 'w', encoding='utf-8') as f:    
+        i = 0
+        for c in chunk_data:
+            if i == 0:
+                print(' ' * dec, 'OPCODE', '0x{:02X}\t'.format(c), c, end='')
+                opcode = f'OPCODE 0x{c} '+str(c)+' '
+                i = 1
+            elif i == 1:
+                print(' ' * dec, 'VALUE','0x{:02X}\t'.format(c), c)
+                i = 0
+                f.write(opcode + 'VALUE 0x{:02X} '.format(c) + str(c) + '\n')
+            
 
 
 

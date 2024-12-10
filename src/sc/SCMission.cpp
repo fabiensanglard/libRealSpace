@@ -145,6 +145,10 @@ void SCMission::loadMission() {
             this->enemies.push_back(enemis);
         }
     }
+    for (auto prg: this->player->prog) {
+        this->executeProg(prg);
+    }
+    
 }
 
 void SCMission::update() {
@@ -180,5 +184,33 @@ void SCMission::update() {
         ai_actor->object->azymuth = 360 - (uint16_t)(ai_actor->plane->azimuthf / 10.0f);
         ai_actor->object->roll = (uint16_t)(ai_actor->plane->twist / 10.0f);
         ai_actor->object->pitch = (uint16_t)(ai_actor->plane->elevationf / 10.0f);
+    }
+}
+
+
+void SCMission::executeProg(std::vector<PROG> *prog) {
+    for (auto instr : *prog) {
+        switch (instr.opcode) {
+            case PROG_OP_SET_MESSAGE: {
+                printf("SET MESSAGE %d\n", instr.arg);
+                std::transform(this->mission->mission_data.messages[instr.arg]->begin(), this->mission->mission_data.messages[instr.arg]->end(), this->mission->mission_data.messages[instr.arg]->begin(), ::tolower);
+                if (this->waypoints.size() > 0) {
+                    this->waypoints.back()->message = this->mission->mission_data.messages[instr.arg];
+                }
+            } break;
+            case PROG_OP_SET_SPOT: {
+                SCMissionWaypoint *waypoint = new SCMissionWaypoint();
+                waypoint->spot = this->mission->mission_data.spots[instr.arg];
+                this->waypoints.push_back(waypoint);
+            } break;
+            case PROG_OP_SET_SPOT_2: {
+                SCMissionWaypoint *waypoint = new SCMissionWaypoint();
+                waypoint->spot = this->mission->mission_data.spots[instr.arg];
+                this->waypoints.push_back(waypoint);
+            } break;
+            case PROG_OP_SET_PRIMARY_TARGET: {
+                printf("SET PRIMARY TARGET %d\n", instr.arg);
+            } break;
+        }
     }
 }

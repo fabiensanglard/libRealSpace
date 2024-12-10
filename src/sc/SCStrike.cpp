@@ -350,6 +350,7 @@ void SCStrike::CheckKeyboard(void) {
             SCNavMap *nav_screen = new SCNavMap();
             nav_screen->Init();
             nav_screen->SetName((char *)this->current_mission->world->tera.c_str());
+            nav_screen->mission = this->current_mission;
             nav_screen->missionObj = this->current_mission->mission = this->current_mission->mission;
             nav_screen->current_nav_point = &this->nav_point_id;
             Game.AddActivity(nav_screen);

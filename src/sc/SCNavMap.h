@@ -19,6 +19,7 @@ public:
     void SetName(char *name);
     void RunFrame(void);
     RSMission *missionObj;
+    SCMission *mission{nullptr};
     uint8_t *current_nav_point;
     
 private:
@@ -28,5 +29,11 @@ private:
     
     VGAPalette palette;
     VGAPalette objpal;
+
+    bool show_area{false};
+    bool show_obj{false};
+    bool show_waypoint{true};
+
     void CheckKeyboard(void);
+    void showArea(AREA *area, float center, float map_width, int w, int h, int t, int l, int c);
 };
