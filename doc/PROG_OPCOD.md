@@ -4,9 +4,14 @@
 - A6 (166) set objective to fly to way area
 - A2 (162) set objective to land plane at waypoint
 - A1 (161) set objective to takeoff from waypoint (simulate takeoff for ai)
-
+- AA (170) set objective to follow leader
+- A8 (168) set objective to defend ally with id as the value
 
 - A7 (167) set primary target for enemy ai, value is the id of the part (object) in the mission file
+
+- 08 (8) define new objective for AI with value might be a percentage to respect the  objective
+
+
 
 From the strike.exe we should have the following:
 
@@ -20,11 +25,11 @@ Way Point
 Way Area
 - 167 : Destroy
 Target
-- Defend
+- 168 Defend
 Ally
 - Defend
 Point
-- Follow
+- 170 Follow
 Leader
 
 # NOTE on TEAM CHUNK
