@@ -9,8 +9,14 @@
 
 - A7 (167) set primary target for enemy ai, value is the id of the part (object) in the mission file
 
-- 08 (8) define new objective for AI with value might be a percentage to respect the  objective
+# not complety sure about the following
 
+- 45 (69) set ai state machine id (MVRS in RSPROF)
+- 10 (16) set label number
+- 48 (72) set label number
+- 08 (8) goto label number
+- 01 (1) if objectiv is complete, skip next instruction
+- 92 (146) check if part id is alive
 
 
 From the strike.exe we should have the following:
