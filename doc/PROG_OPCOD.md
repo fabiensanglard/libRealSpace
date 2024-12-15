@@ -4,20 +4,19 @@
 - A6 (166) set objective to fly to way area
 - A2 (162) set objective to land plane at waypoint
 - A1 (161) set objective to takeoff from waypoint (simulate takeoff for ai)
-- AA (170) set objective to follow leader
-- A8 (168) set objective to defend ally with id as the value
-
-- A7 (167) set primary target for enemy ai, value is the id of the part (object) in the mission file
+- AA (170) set objective to follow target with id as the value of the index of the part in the mission file
+- A8 (168) set objective to defend ally with id as the value  of the index of the part in the mission file
+- A7 (167) destroy target with id as the value id is the index of the part in the mission file
 
 # not complety sure about the following
 
-- 45 (69) set ai state machine id (MVRS in RSPROF)
+- 45 (69) check flag with id as flag number
 - 10 (16) set label number
 - 48 (72) set label number
 - 08 (8) goto label number
 - 01 (1) if objectiv is complete, skip next instruction
-- 92 (146) check if part id is alive
-
+- 92 (146) check if plane is at waypoint
+- 52 (82) set flag with id as flag number
 
 From the strike.exe we should have the following:
 

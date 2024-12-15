@@ -2,7 +2,7 @@ import io
 import time
 import argparse
 
-
+progs_map = {}
 def parse_iff_filereader(f, file_path, dec=0):
     while True:
         try:
@@ -54,7 +54,7 @@ def parse_iff_filereader(f, file_path, dec=0):
             if chunk_type == b"SPOT":
                 parse_SPOT_chunk(chunk_data,chunk_size, dec+2)
             if chunk_type == b"PROG":
-                print_efect_from_chunk(chunk_data, dec+2)
+                print_prog_from_chunk(chunk_data, dec+2)
             if chunk_type == b"VERS":
                 print_int_from_chunk(chunk_data, dec+2)
             if chunk_type == b"INFO":
@@ -249,6 +249,16 @@ def parse_PART_chunk(chunk_data, chunk_size, dec):
         print (' ' * (dec+2), "remaining data", 62-(offset-(62*i+1)))
         for j in range((62-(offset-(62*i+1))-1)):
             print(' ' * (dec+4), '0x{:02X}\t'.format(chunk_data[offset+j]), chunk_data[offset+j])
+        
+        progs_offset = 11
+        for j in range(4):
+            prog = chunk_data[offset+progs_offset] + (chunk_data[offset+progs_offset+1] << 8)
+            print(' ' * (dec+2), f"Program: {prog}")
+            progs_offset = progs_offset + 2
+            if prog != 0xFFFF:
+                for k in progs_map[prog]:
+                    print (' ' * (dec+4), k)
+        
 
 
 
@@ -296,22 +306,65 @@ def print_int_from_chunk(chunk_data, dec):
         print(' ' * dec, '0x{:02X}\t'.format(c), c)
 
 def print_efect_from_chunk(chunk_data, dec):
-    timestampinms = int(time.time() * 1000)
-    fname = f"prog_{timestampinms}.txt"
-    with open(fname, 'w', encoding='utf-8') as f:    
-        i = 0
-        for c in chunk_data:
-            if i == 0:
-                print(' ' * dec, 'OPCODE', '0x{:02X}\t'.format(c), c, end='')
-                opcode = f'OPCODE 0x{c} '+str(c)+' '
-                i = 1
-            elif i == 1:
-                print(' ' * dec, 'VALUE','0x{:02X}\t'.format(c), c)
-                i = 0
-                f.write(opcode + 'VALUE 0x{:02X} '.format(c) + str(c) + '\n')
+    i = 0
+    for c in chunk_data:
+        if i == 0:
+            print(' ' * dec, 'OPCODE', '0x{:02X}\t'.format(c), c, end='')
+            opcode = f'OPCODE 0x{c} '+str(c)+' '
+            i = 1
+        elif i == 1:
+            print(' ' * dec, 'VALUE','0x{:02X}\t'.format(c), c)
+            i = 0
+                
             
 
+def print_prog_from_chunk(chunk_data, dec):
+    opcodes = {
+        161: 'TAKE OFF FROM WAYPOINT ID',
+        162: 'LAND TO WAYPOINT ID',
+        165: 'FLY TO WAYPOINT ID',
+        166: 'FLY TO WAY AREA ID',
+        167: 'DESTROY TARGET ID',
+        168: 'DEFEND ALLY ID',
+        170: 'FOLLOW TARGET ID',
+        171: 'PLAY MESSAGE ID',
+        146: 'IF PLANE IS AT WAYPOINT ID',
+        69: 'FLAG INSTRUCTION 1',
+        65: 'FLAG INSTRUCTION 2',
+        
+        70: 'AI STATE INSTRUCTION 1',
+        71: 'AI STATE INSTRUCTION 2',
+        72: 'AI STATE INSTRUCTION 3',
+        73: 'AI STATE INSTRUCTION 4',
+        8: 'CREATE AI STATE'
+    }
+    progid = 0
+    print (' ' * dec, '==== PROG ID', progid)
+    i = 0
+    progs = []
+    for c in chunk_data:
+        if i == 0:
+            if c in opcodes:
+                opcode = opcodes[c]
+            else:
+                opcode = f'OPCODE '+'0x{:02X}'.format(c)+' '+str(c)+' '
+            opc = c
+            print(' ' * (dec+2), opcode, end='')
+            i = 1
+        elif i == 1:
+            print(' ' * (dec+2), 'VALUE','0x{:02X}\t'.format(c), c)
+            i = 0
+            progs.append(opcode+' '+'0x{:02X}'.format(c)+' '+str(c)+' ')
+            if opc == 0 and c == 0:
+                progs_map[progid] = progs
+                progs = []
+                progid = progid + 1
+                print (' ' * dec, '==== PROG ID', progid)
 
+
+        
+
+            
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(description='Parse IFF Mission file')  
