@@ -3,6 +3,35 @@ import time
 import argparse
 
 progs_map = {}
+encode_progs_map = {}
+parts = {}
+prof = {}
+areas = {}
+spots = {}
+messages = {}
+
+opcodes = {
+    161: 'TAKE OFF FROM WAYPOINT ID',
+    162: 'LAND TO WAYPOINT ID',
+    165: 'FLY TO WAYPOINT ID',
+    166: 'FLY TO WAY AREA ID',
+    167: 'DESTROY TARGET ID',
+    168: 'DEFEND ALLY ID',
+    170: 'FOLLOW TARGET ID',
+    171: 'PLAY MESSAGE ID',
+    146: 'IF PLANE IS AT WAYPOINT ID',
+    190: 'ACTIVATE AI ON TARGET',
+    69: 'GET FLAG ID',
+    65: 'FLAG INSTRUCTION 2',
+    82: 'SET FLAG ID TO TRUE',
+    70: 'AI STATE INSTRUCTION 1',
+    71: 'AI STATE INSTRUCTION 2',
+    72: 'IF CURRENT FLAG IS TRUE',
+    73: 'IF CURRENT FLAG IS FALSE',
+    16: 'ACTIVATE AI STATE ID',
+    8: 'CREATE AI STATE'
+}
+
 def parse_iff_filereader(f, file_path, dec=0):
     while True:
         try:
@@ -92,16 +121,25 @@ def parse_SPOT_chunk(chunk_data, chunk_size, dec):
     print(' ' * dec, f"Nombre de spot: {nbspot}")
     for i in range(int(nbspot)):
         offset = i*14
-        for j in range(3):
+        areaid = chunk_data[offset]
+        offset = offset + 1
+        for j in range(2):
             print(' ' * dec, '0x{:02X}\t'.format(chunk_data[offset+j]), chunk_data[offset+j])
         offset = offset + 3
         XAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
         offset = offset + 4
-        YAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
+        ZAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
         offset = offset + 4
-        ZAxis = int.from_bytes(chunk_data[offset:offset+2], byteorder='little', signed=True)
+        YAxis = int.from_bytes(chunk_data[offset:offset+2], byteorder='little', signed=True)
         offset = offset + 2
-        print (' ' * dec, f"X: {XAxis}, Y: {YAxis}, Z: {ZAxis}")
+        print (' ' * dec, f"AREA {areaid}, X: {XAxis}, Y: {YAxis}, Z: {ZAxis}")
+        spot = {
+            'area': areaid,
+            'X': XAxis,
+            'Y': YAxis,
+            'Z': ZAxis
+        }
+        spots[i] = spot
         
 
 def parse_CAST_chunk(chunk_data, chunk_size, dec):
@@ -144,7 +182,17 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             print(' ' * (dec+2), "remaining data", chunk_size-offset, offset, offset - check)
             for c in ubyte:
                 print(' ' * (dec+4), '0x{:02X}\t'.format(c), c)
+            area = {
+                'name': area_name,
+                'X': XAxis,
+                'Y': YAxis,
+                'Z': ZAxis,
+                'width': AreaWidth,
+                'type': area_type
+            }
+            areas[id] = area
             id = id + 1
+            
         elif area_type == ord('C'):
             area_name = chunk_data[offset:offset+32].decode().strip('\0')
             offset += 32
@@ -166,6 +214,16 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             print(' ' * dec, f"ID: {id}, {area_name} Area type: {chr(area_type)})")
             print(' ' * (dec+2), f"X: {XAxis}, Y: {YAxis}, Z: {ZAxis}, Width: {AreaWidth}, Height: {area_height}")
             print(' ' * (dec+2), "remaining data", chunk_size-offset, offset, offset - check)
+            area = {
+                'name': area_name,
+                'X': XAxis,
+                'Y': YAxis,
+                'Z': ZAxis,
+                'width': AreaWidth,
+                'height': area_height,
+                'type': area_type
+            }
+            areas[id] = area
             id = id + 1
         elif area_type == ord('B'):
             area_name = chunk_data[offset:offset+33].decode().strip('\0')
@@ -201,6 +259,16 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
                 print(' ' * (dec+4), '0x{:02X}\t'.format(c), c)
 
             print(' ' * (dec+2), "remaining data", chunk_size-offset, offset, offset - check)
+            area = {
+                'name': area_name,
+                'X': XAxis,
+                'Y': YAxis,
+                'Z': ZAxis,
+                'width': AreaWidth,
+                'height': area_height,
+                'type': area_type
+            }
+            areas[id] = area
             id = id + 1
         else:
             print(' ' * dec, f"Unknown byte: {area_type}", '0x{:02X}\t'.format(area_type))
@@ -209,15 +277,20 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
 def parse_PART_chunk(chunk_data, chunk_size, dec):
     nbpart = chunk_size / 62
     print(' ' * dec, f"Nombre de part: {nbpart}")
+    
     for i in range(int(nbpart)):
+        current_part = {}
         offset = i*62
         id = chunk_data[offset] + (chunk_data[offset+1] << 8)
         offset = offset + 2
         print (' ' * dec, f"ID: {id}")
+        current_part['id'] = id
         name = chunk_data[offset:offset+8].decode().strip('\0')
+        current_part['name'] = name
         offset = offset + 8
         print (' ' * (dec+2), f"Nom: {name}")
         destroyed = chunk_data[offset:offset+8].decode().strip('\0')
+        current_part['destroyed'] = destroyed
         offset = offset + 8
         print (' ' * (dec+2), f"destroyed: {destroyed}")
         load = chunk_data[offset:offset+8].decode().strip('\0')
@@ -240,6 +313,7 @@ def parse_PART_chunk(chunk_data, chunk_size, dec):
         Yrelative = chunk_data[offset] + (chunk_data[offset+1] << 8)
         print (' ' * (dec+2), f"Relative: {Xrelative}, {Yrelative}, {Zrelative}")
         offset = offset + 2
+        current_part['position'] = (Xrelative, Yrelative, Zrelative)
         ub = chunk_data[offset]
         print (' ' * (dec+2), f"UB: {ub}")
         offset = offset + 1
@@ -251,13 +325,16 @@ def parse_PART_chunk(chunk_data, chunk_size, dec):
             print(' ' * (dec+4), '0x{:02X}\t'.format(chunk_data[offset+j]), chunk_data[offset+j])
         
         progs_offset = 11
+        current_part['prog'] = []
         for j in range(4):
             prog = chunk_data[offset+progs_offset] + (chunk_data[offset+progs_offset+1] << 8)
             print(' ' * (dec+2), f"Program: {prog}")
             progs_offset = progs_offset + 2
+            current_part['prog'].append(prog)
             if prog != 0xFFFF:
                 for k in progs_map[prog]:
                     print (' ' * (dec+4), k)
+        parts[id] = current_part
         
 
 
@@ -319,29 +396,13 @@ def print_efect_from_chunk(chunk_data, dec):
             
 
 def print_prog_from_chunk(chunk_data, dec):
-    opcodes = {
-        161: 'TAKE OFF FROM WAYPOINT ID',
-        162: 'LAND TO WAYPOINT ID',
-        165: 'FLY TO WAYPOINT ID',
-        166: 'FLY TO WAY AREA ID',
-        167: 'DESTROY TARGET ID',
-        168: 'DEFEND ALLY ID',
-        170: 'FOLLOW TARGET ID',
-        171: 'PLAY MESSAGE ID',
-        146: 'IF PLANE IS AT WAYPOINT ID',
-        69: 'FLAG INSTRUCTION 1',
-        65: 'FLAG INSTRUCTION 2',
-        
-        70: 'AI STATE INSTRUCTION 1',
-        71: 'AI STATE INSTRUCTION 2',
-        72: 'AI STATE INSTRUCTION 3',
-        73: 'AI STATE INSTRUCTION 4',
-        8: 'CREATE AI STATE'
-    }
+    
     progid = 0
     print (' ' * dec, '==== PROG ID', progid)
     i = 0
     progs = []
+    encode_progs = []
+    instruction = {}
     for c in chunk_data:
         if i == 0:
             if c in opcodes:
@@ -349,17 +410,24 @@ def print_prog_from_chunk(chunk_data, dec):
             else:
                 opcode = f'OPCODE '+'0x{:02X}'.format(c)+' '+str(c)+' '
             opc = c
+            instruction['opcode'] = c
             print(' ' * (dec+2), opcode, end='')
             i = 1
         elif i == 1:
             print(' ' * (dec+2), 'VALUE','0x{:02X}\t'.format(c), c)
             i = 0
+            instruction['value'] = c
             progs.append(opcode+' '+'0x{:02X}'.format(c)+' '+str(c)+' ')
+            encode_progs.append(instruction)
+            instruction = {}
             if opc == 0 and c == 0:
-                progs_map[progid] = progs
-                progs = []
-                progid = progid + 1
-                print (' ' * dec, '==== PROG ID', progid)
+                if len(progs) > 0:
+                    progs_map[progid] = progs
+                    encode_progs_map[progid] = encode_progs
+                    encode_progs = []
+                    progs = []
+                    progid = progid + 1
+                    print (' ' * dec, '==== PROG ID', progid)
 
 
         
@@ -371,3 +439,60 @@ if __name__ == "__main__":
     arg_parser.add_argument('file', type=str, help='IFF Mission file to parse')
     args = arg_parser.parse_args()
     parse_iff_file(args.file)
+    for p in parts:
+        print(f"Part {p} {parts[p]['name']} {parts[p]['prog']}")
+        for n in parts[p]['prog']:
+            if n in encode_progs_map:
+                for k in encode_progs_map[n]:
+                    if k['opcode'] == 168:
+                        print(f"   ** Defend ally {parts[k['value']]['name']}")
+                    elif k['opcode'] == 167:
+                        print(f"   ** Destroy target {parts[k['value']]['name']}")
+                    elif k['opcode'] == 190:
+                        if k['value'] in parts:
+                            print(f"   -- activate {parts[k['value']]['name']}")
+                        else:
+                            print(f"   -- activate {k['value']}")
+                    elif k['opcode'] == 170:
+                        print(f"   ** Follow target {parts[k['value']]['name']}")
+                    elif k['opcode'] == 161:
+                        if spots[k['value']]['area'] in areas:
+                            print(f"   ** Take off from waypoint {k['value']}[{spots[k['value']]['X']}, {spots[k['value']]['Y']}, {spots[k['value']]['Z']}] - Area {areas[spots[k['value']]['area']]['name']}")
+                        else:
+                            print(f"   ** Take off from waypoint {k['value']}")
+                    elif k['opcode'] == 162:
+                        if spots[k['value']]['area'] in areas:
+                            print(f"   ** Land to waypoint {k['value']}[{spots[k['value']]['X']}, {spots[k['value']]['Y']}, {spots[k['value']]['Z']}] - Area {areas[spots[k['value']]['area']]['name']}")
+                        else:
+                            print(f"   ** Land to waypoint {k['value']}")
+                    elif k['opcode'] == 165:
+                        if spots[k['value']]['area'] in areas:
+                            print(f"   ** Fly to waypoint {k['value']}[{spots[k['value']]['X']}, {spots[k['value']]['Y']}, {spots[k['value']]['Z']}] - Area {areas[spots[k['value']]['area']]['name']}")
+                        else:
+                            print(f"   ** Fly to waypoint {k['value']}")
+                    elif k['opcode'] == 166:
+                        if k['value'] in spots:
+                            if spots[k['value']]['area'] in areas:
+                                print(f"   ** Fly to area {k['value']}[{spots[k['value']]['X']}, {spots[k['value']]['Y']}, {spots[k['value']]['Z']}] - Area {areas[spots[k['value']]['area']]['name']}")
+                            else:
+                                print(f"   ** Fly to area {k['value']}")
+                        else:
+                            print(f"   ** Fly to area {k['value']}")
+                    elif k['opcode'] == 146:
+                        if k['value'] in spots:
+                            if spots[k['value']]['area'] in areas:
+                                print(f"   -- if plane is at waypoint {k['value']}[{spots[k['value']]['X']}, {spots[k['value']]['Y']}, {spots[k['value']]['Z']}] - Area {areas[spots[k['value']]['area']]['name']}")
+                            else:
+                                print(f"   -- if plane is at waypoint (area not found) {k['value']}")
+                        else:
+                            print(f"   -- if plane is at waypoint(wp not found) {k['value']}")
+                    elif k['opcode'] == 69:
+                        print(f"   -- if flag {k['value']} is true")
+                    elif k['opcode'] == 82:
+                        print(f"   -- set flag {k['value']} to true")
+                    elif k['opcode'] == 16:
+                        print(f"   -- activate ia state {k['value']}")
+                    elif k['opcode'] in opcodes:
+                        print(f"   {opcodes[k['opcode']]}\t{k['value']}")
+                    else:
+                        print(f"   UNDEC OPCODE :[{k['opcode']}]\t{k['value']}")
