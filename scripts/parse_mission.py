@@ -20,7 +20,7 @@ opcodes = {
     170: 'FOLLOW TARGET ID',
     171: 'PLAY MESSAGE ID',
     146: 'IF PLANE IS AT WAYPOINT ID',
-    190: 'ACTIVATE AI ON TARGET',
+    190: 'DE ACTIVATE AI ON TARGET',
     69: 'GET FLAG ID',
     65: 'FLAG INSTRUCTION 2',
     82: 'SET FLAG ID TO TRUE',
@@ -450,9 +450,9 @@ if __name__ == "__main__":
                         print(f"   ** Destroy target {parts[k['value']]['name']}")
                     elif k['opcode'] == 190:
                         if k['value'] in parts:
-                            print(f"   -- activate {parts[k['value']]['name']}")
+                            print(f"   -- deactivate {parts[k['value']]['name']}")
                         else:
-                            print(f"   -- activate {k['value']}")
+                            print(f"   -- deactivate {k['value']}")
                     elif k['opcode'] == 170:
                         print(f"   ** Follow target {parts[k['value']]['name']}")
                     elif k['opcode'] == 161:
