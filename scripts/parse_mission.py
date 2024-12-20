@@ -20,14 +20,15 @@ opcodes = {
     170: 'FOLLOW TARGET ID',
     171: 'PLAY MESSAGE ID',
     146: 'IF PLANE IS AT WAYPOINT ID',
+    148: 'INSTANT KILL TARGET ID',
     190: 'DE ACTIVATE AI ON TARGET',
     69: 'GET FLAG ID',
     65: 'FLAG INSTRUCTION 2',
     82: 'SET FLAG ID TO TRUE',
     70: 'AI STATE INSTRUCTION 1',
     71: 'AI STATE INSTRUCTION 2',
-    72: 'IF CURRENT FLAG IS TRUE',
-    73: 'IF CURRENT FLAG IS FALSE',
+    72: 'EXEC AI STATE ID',
+    73: 'AI STATE INSTRUCTION 4',
     16: 'ACTIVATE AI STATE ID',
     8: 'CREATE AI STATE'
 }
@@ -453,6 +454,11 @@ if __name__ == "__main__":
                             print(f"   -- deactivate {parts[k['value']]['name']}")
                         else:
                             print(f"   -- deactivate {k['value']}")
+                    elif k['opcode'] == 148:
+                        if k['value'] in parts:
+                            print(f"   -- instant kill {parts[k['value']]['name']}")
+                        else:
+                            print(f"   -- instant kill {k['value']}")
                     elif k['opcode'] == 170:
                         print(f"   ** Follow target {parts[k['value']]['name']}")
                     elif k['opcode'] == 161:
@@ -486,10 +492,11 @@ if __name__ == "__main__":
                                 print(f"   -- if plane is at waypoint (area not found) {k['value']}")
                         else:
                             print(f"   -- if plane is at waypoint(wp not found) {k['value']}")
+                    
                     elif k['opcode'] == 69:
-                        print(f"   -- if flag {k['value']} is true")
+                        print(f"   -- if flag {k['value']} ")
                     elif k['opcode'] == 82:
-                        print(f"   -- set flag {k['value']} to true")
+                        print(f"   -- exit if flag {k['value']}")
                     elif k['opcode'] == 16:
                         print(f"   -- activate ia state {k['value']}")
                     elif k['opcode'] in opcodes:

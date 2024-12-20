@@ -16,6 +16,8 @@
 - 08 (8) goto label number
 - 01 (1) if objectiv is complete, skip next instruction
 - 92 (146) check if plane is at waypoint
+- 94 (148) destroy / instant kill target
+- BE (190) deactivate target / disable AI on target id
 - 52 (82) set flag with id as flag number
 
 From the strike.exe we should have the following:
