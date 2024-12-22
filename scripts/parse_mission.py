@@ -11,26 +11,26 @@ spots = {}
 messages = {}
 
 opcodes = {
-    161: 'TAKE OFF FROM WAYPOINT ID',
-    162: 'LAND TO WAYPOINT ID',
-    165: 'FLY TO WAYPOINT ID',
-    166: 'FLY TO WAY AREA ID',
-    167: 'DESTROY TARGET ID',
-    168: 'DEFEND ALLY ID',
-    170: 'FOLLOW TARGET ID',
-    171: 'PLAY MESSAGE ID',
-    146: 'IF PLANE IS AT WAYPOINT ID',
-    148: 'INSTANT KILL TARGET ID',
-    190: 'DE ACTIVATE AI ON TARGET',
-    69: 'GET FLAG ID',
-    65: 'FLAG INSTRUCTION 2',
-    82: 'SET FLAG ID TO TRUE',
-    70: 'AI STATE INSTRUCTION 1',
-    71: 'AI STATE INSTRUCTION 2',
-    72: 'EXEC AI STATE ID',
-    73: 'AI STATE INSTRUCTION 4',
-    16: 'ACTIVATE AI STATE ID',
-    8: 'CREATE AI STATE'
+    161: '[161] TAKE OFF FROM WAYPOINT ID',
+    162: '[162] LAND TO WAYPOINT ID',
+    165: '[165] FLY TO WAYPOINT ID',
+    166: '[166] FLY TO WAY AREA ID',
+    167: '[167] DESTROY TARGET ID',
+    168: '[168] DEFEND ALLY ID',
+    170: '[170] FOLLOW TARGET ID',
+    171: '[171] PLAY MESSAGE ID',
+    146: '[146] IF PART ID IS SAME AREA',
+    148: '[148] INSTANT KILL TARGET ID',
+    190: '[190] DE ACTIVATE AI ON TARGET',
+    69: '[69 ] GET FLAG ID',
+    65: '[65 ] FLAG INSTRUCTION 2',
+    82: '[82 ] SET FLAG ID TO TRUE',
+    70: '[70 ] AI STATE INSTRUCTION 1',
+    71: '[71 ] AI STATE INSTRUCTION 2',
+    72: '[72 ] EXEC AI STATE ID',
+    73: '[73 ] AI STATE INSTRUCTION 4',
+    16: '[16 ] ACTIVATE AI STATE ID',
+    8: '[8  ] CREATE AI STATE'
 }
 
 def parse_iff_filereader(f, file_path, dec=0):
@@ -485,13 +485,10 @@ if __name__ == "__main__":
                         else:
                             print(f"   ** Fly to area {k['value']}")
                     elif k['opcode'] == 146:
-                        if k['value'] in spots:
-                            if spots[k['value']]['area'] in areas:
-                                print(f"   -- if plane is at waypoint {k['value']}[{spots[k['value']]['X']}, {spots[k['value']]['Y']}, {spots[k['value']]['Z']}] - Area {areas[spots[k['value']]['area']]['name']}")
-                            else:
-                                print(f"   -- if plane is at waypoint (area not found) {k['value']}")
+                        if k['value'] in parts:
+                            print(f"   -- if {parts[k['value']]['name']} is in same area")
                         else:
-                            print(f"   -- if plane is at waypoint(wp not found) {k['value']}")
+                            print(f"   -- if {k['value']} (not found in part) is in same area")
                     
                     elif k['opcode'] == 69:
                         print(f"   -- if flag {k['value']} ")

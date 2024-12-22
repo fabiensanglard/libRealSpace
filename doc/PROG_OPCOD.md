@@ -7,17 +7,20 @@
 - AA (170) set objective to follow target with id as the value of the index of the part in the mission file
 - A8 (168) set objective to defend ally with id as the value  of the index of the part in the mission file
 - A7 (167) destroy target with id as the value id is the index of the part in the mission file
+- 92 (146) check if part ID is in same area.
+- 94 (148) destroy / instant kill target
+- BE (190) deactivate target / disable AI on target id
+- 48 (72) execute ai state
+- 08 (8) define ai state
+- 01 (1) exit prog
 
 # not complety sure about the following
 
 - 45 (69) check flag with id as flag number
 - 10 (16) set label number
-- 48 (72) set label number
-- 08 (8) goto label number
-- 01 (1) if objectiv is complete, skip next instruction
-- 92 (146) check if plane is at waypoint
-- 94 (148) destroy / instant kill target
-- BE (190) deactivate target / disable AI on target id
+
+
+
 - 52 (82) set flag with id as flag number
 
 From the strike.exe we should have the following:
