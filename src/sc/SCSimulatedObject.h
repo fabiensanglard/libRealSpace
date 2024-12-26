@@ -7,8 +7,8 @@ class SCSimulatedObject {
     float last_py{0.0f};
     float last_pz{0.0f};
 
-    Vector3D SCSimulatedObject::calculate_drag(Vector3D velocity);
-    Vector3D SCSimulatedObject::calculate_lift(Vector3D velocity);
+    Vector3D calculate_drag(Vector3D velocity);
+    Vector3D calculate_lift(Vector3D velocity);
     int tps{30};
     std::vector<Vector3D> smoke_positions;
 public:

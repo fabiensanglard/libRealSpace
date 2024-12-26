@@ -8,11 +8,11 @@ struct CHUD_SHAPE {
     RLEShape *SHP2;
     std::vector<uint8_t> INFO;
 };
-struct HINF {
+struct SHINF {
     std::vector<uint8_t> INFO;
     std::string font;
 };
-struct LADD {
+struct SLADD {
     std::vector<uint8_t> INFO;
     CHUD_SHAPE *VECT;
 };
@@ -20,7 +20,7 @@ struct HUD_POS {
     uint16_t x;
     uint16_t y;
 };
-struct TTAG {
+struct STTAG {
     HUD_POS CLSR;
     HUD_POS TARG;
     HUD_POS NUMW;
@@ -40,10 +40,10 @@ struct TTAG {
 
 struct CHUD {
     uint8_t type;
-    HINF *HINF;
+    SHINF *HINF;
     CHUD_SHAPE *ASPD;
     CHUD_SHAPE *ALTI;
-    LADD *LADD;
+    SLADD *LADD;
     CHUD_SHAPE *HEAD;
     CHUD_SHAPE *COLL;
     CHUD_SHAPE *STAL;
@@ -56,7 +56,7 @@ struct CHUD {
     CHUD_SHAPE *CCIP;
     CHUD_SHAPE *CCRP;
     CHUD_SHAPE *STRF;
-    TTAG *TTAG;
+    STTAG *TTAG;
 };
 
 

@@ -256,7 +256,9 @@ void RSVGA::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, siz
         char chartoDraw = text[start + i];
 
         RLEShape *shape = font->GetShapeForChar(chartoDraw);
-
+        if (shape == nullptr) {
+            continue;
+        }
         shape->SetColorOffset(color);
         // Adjust height
         int32_t lineHeight = coo->y;

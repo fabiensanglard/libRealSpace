@@ -37,7 +37,7 @@ void SCSmokeSet::Init(){
             img->buffer_size.x = tex->width;
             img->buffer_size.y = tex->height;
             size_t imgsize = tex->width*tex->height;
-            byte *imgdata = (byte *)malloc(imgsize);
+            uint8_t *imgdata = (uint8_t *)malloc(imgsize);
             size_t byteRead = 0;
             img->Expand(imgdata, &byteRead);
             if (byteRead > imgsize) {
@@ -46,7 +46,7 @@ void SCSmokeSet::Init(){
             
             tex->data = (uint8_t *)malloc(imgsize*4);
 
-            byte *dst = tex->data;
+            uint8_t *dst = tex->data;
             long checksum = 0;
             for (size_t j = 0; j < imgsize; j++) {
                 Texel *rgba = this->palette.GetRGBColor(imgdata[j]);
