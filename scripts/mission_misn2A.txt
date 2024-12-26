@@ -4,6 +4,7 @@
        0x00	 0
        0x05	 5
      Chunk: INFO, Taille: 0
+       Value: 
      Chunk: TUNE, Taille: 2
        0x03	 3
        0x00	 0
@@ -15,14 +16,14 @@
            Value: turkey
      Chunk: AREA, Taille: 164
        ID 0, Wildcat Base, Area type: S)
-         X: 100000, Y: -144000, Z: 1845, Width: 32
+         X: 100000, Y: 1845, Z: -144000, Width: 32
          remaining data 115 49 49
            0x4E	 78
            0x00	 0
            0x42	 66
        ID: 1, TWP Base Area type: B)
-         X: -102000, Y: 100000, Z: 580, Width: 16, Height: 136
-         Xrelativ (control): -102000, Yrelativ (control): 100000
+         X: -102000, Y: 580, Z: 100000, Width: 16, Height: 136
+         Xrelativ (control): -102000, Zrelativ (control): 100000
          unknown bytes 1 : 
            0x00	 0
            0x00	 0
@@ -42,7 +43,7 @@
            0x01	 1
          remaining data 50 114 65
        ID 2, ., Area type: S)
-         X: 0, Y: 0, Z: 10000, Width: 80
+         X: 0, Y: 10000, Z: 0, Width: 80
          remaining data 1 163 49
            0xC3	 195
            0x00	 0
@@ -52,32 +53,25 @@
        Nombre de spot: 7.0
        0x00	 0
        0x00	 0
-       0x00	 0
-       X: -460, Y: -2482, Z: 0
-       0x00	 0
+       AREA 0, X: 65534, Y: 0, Z: 65526
        0x00	 0
        0x00	 0
-       X: -460, Y: -400, Z: 0
+       AREA 0, X: 65534, Y: 0, Z: 65534
        0x00	 0
        0x00	 0
-       0x00	 0
-       X: -460, Y: 2600, Z: 1000
-       0x01	 1
+       AREA 0, X: 65534, Y: 3, Z: 10
        0x00	 0
        0x00	 0
-       X: 0, Y: 0, Z: 2000
-       0x01	 1
+       AREA 1, X: 0, Y: 7, Z: 0
        0x00	 0
        0x00	 0
-       X: -2605, Y: -735, Z: 0
-       0x01	 1
+       AREA 1, X: 65525, Y: 0, Z: 65533
        0x00	 0
        0x00	 0
-       X: 33, Y: -735, Z: 0
-       0x01	 1
+       AREA 1, X: 0, Y: 0, Z: 65533
        0x00	 0
        0x00	 0
-       X: 2033, Y: -735, Z: 1000
+       AREA 1, X: 7, Y: 3, Z: 65533
      Chunk: NUMS, Taille: 0
      Chunk: MSGS, Taille: 34
        Message: Learjet#Intercept
@@ -121,61 +115,70 @@
        ID: 14, Nom: TWPGOON
        ID: 15, Nom: TWPGOONR
      Chunk: PROG, Taille: 110
-       OPCODE 0xA1	 161       VALUE 0x01	 1
-       OPCODE 0xA6	 166       VALUE 0x03	 3
-       OPCODE 0xAB	 171       VALUE 0x00	 0
-       OPCODE 0xA5	 165       VALUE 0x02	 2
-       OPCODE 0xAB	 171       VALUE 0x01	 1
-       OPCODE 0xA2	 162       VALUE 0x02	 2
-       OPCODE 0x09	 9       VALUE 0x01	 1
-      1 OPCODE 0x00	 0       VALUE 0x00	 0
-       OPCODE 0x45	 69       VALUE 0x03	 3
-       OPCODE 0x48	 72       VALUE 0x42	 66
-       OPCODE 0x45	 69       VALUE 0x02	 2
-       OPCODE 0x49	 73       VALUE 0x41	 65
-       OPCODE 0xAB	 171       VALUE 0x15	 21
-       OPCODE 0x55	 85       VALUE 0x03	 3
-       OPCODE 0x08	 8       VALUE 0x41	 65
-       OPCODE 0x45	 69       VALUE 0x01	 1
-       OPCODE 0x49	 73       VALUE 0x42	 66
-       OPCODE 0xAB	 171       VALUE 0x14	 20
-       OPCODE 0x55	 85       VALUE 0x03	 3
-       OPCODE 0x08	 8       VALUE 0x42	 66
-      2 OPCODE 0x00	 0       VALUE 0x00	 0
-       OPCODE 0x11	 17       VALUE 0x02	 2
-       OPCODE 0x14	 20       VALUE 0x07	 7
-       OPCODE 0x11	 17       VALUE 0x01	 1
-       OPCODE 0x14	 20       VALUE 0x00	 0
-       OPCODE 0x2E	 46       VALUE 0x1E	 30
-       OPCODE 0x2E	 46       VALUE 0x64	 100
-       OPCODE 0x14	 20       VALUE 0x01	 1
-      3 OPCODE 0x00	 0       VALUE 0x00	 0
-       OPCODE 0xB8	 184       VALUE 0xFF	 255
-       OPCODE 0xB6	 182       VALUE 0xFF	 255
-      4 OPCODE 0x00	 0       VALUE 0x00	 0
-       OPCODE 0x45	 69      VALUE 0x05	 5
-       OPCODE 0x48	 72      VALUE 0x41	 65
-       OPCODE 0xA7	 167     VALUE 0x0B	 11
-       OPCODE 0x01	 1       VALUE 0x00	 0
-       OPCODE 0x08	 8       VALUE 0x41	 65
-       OPCODE 0x45	 69      VALUE 0x04	 4
-       OPCODE 0x48	 72      VALUE 0x42	 66
-       OPCODE 0xAB	 171     VALUE 0x15	 21
-       OPCODE 0x52	 82      VALUE 0x04	 4
-       OPCODE 0x08	 8       VALUE 0x42	 66
-       OPCODE 0xAA	 170     VALUE 0x01	 1
-      5 OPCODE 0x00	 0       VALUE 0x00	 0
-       OPCODE 0xA0	 160     VALUE 0x03	 3
-       OPCODE 0x46	 70      VALUE 0x41	 65
-       OPCODE 0x94	 148     VALUE 0x0B	 11
-       OPCODE 0x08	 8       VALUE 0x41	 65
-      6 OPCODE 0x00	 0       VALUE 0x00	 0
-       OPCODE 0x80	 128       VALUE 0x02	 2
-       OPCODE 0x52	 82       VALUE 0x05	 5
-       OPCODE 0x52	 82       VALUE 0x01	 1
-      7 OPCODE 0x00	 0       VALUE 0x00	 0
-       OPCODE 0xA7	 167       VALUE 0x01	 1
-      OPCODE 0x00	 0       VALUE 0x00	 0
+       ==== PROG ID 0
+         [161] TAKE OFF FROM WAYPOINT ID         VALUE 0x01	 1
+         [166] FLY TO WAY AREA ID         VALUE 0x03	 3
+         [171] PLAY MESSAGE ID         VALUE 0x00	 0
+         [165] FLY TO WAYPOINT ID         VALUE 0x02	 2
+         [171] PLAY MESSAGE ID         VALUE 0x01	 1
+         [162] LAND TO WAYPOINT ID         VALUE 0x02	 2
+         OPCODE 0x09 9          VALUE 0x01	 1
+         OPCODE 0x00 0          VALUE 0x00	 0
+       ==== PROG ID 1
+         [69 ] GET FLAG ID         VALUE 0x03	 3
+         [72 ] EXEC AI STATE ID         VALUE 0x42	 66
+         [69 ] GET FLAG ID         VALUE 0x02	 2
+         [73 ] AI STATE INSTRUCTION 4         VALUE 0x41	 65
+         [171] PLAY MESSAGE ID         VALUE 0x15	 21
+         OPCODE 0x55 85          VALUE 0x03	 3
+         [8  ] CREATE AI STATE         VALUE 0x41	 65
+         [69 ] GET FLAG ID         VALUE 0x01	 1
+         [73 ] AI STATE INSTRUCTION 4         VALUE 0x42	 66
+         [171] PLAY MESSAGE ID         VALUE 0x14	 20
+         OPCODE 0x55 85          VALUE 0x03	 3
+         [8  ] CREATE AI STATE         VALUE 0x42	 66
+         OPCODE 0x00 0          VALUE 0x00	 0
+       ==== PROG ID 2
+         OPCODE 0x11 17          VALUE 0x02	 2
+         OPCODE 0x14 20          VALUE 0x07	 7
+         OPCODE 0x11 17          VALUE 0x01	 1
+         OPCODE 0x14 20          VALUE 0x00	 0
+         OPCODE 0x2E 46          VALUE 0x1E	 30
+         OPCODE 0x2E 46          VALUE 0x64	 100
+         OPCODE 0x14 20          VALUE 0x01	 1
+         OPCODE 0x00 0          VALUE 0x00	 0
+       ==== PROG ID 3
+         OPCODE 0xB8 184          VALUE 0xFF	 255
+         OPCODE 0xB6 182          VALUE 0xFF	 255
+         OPCODE 0x00 0          VALUE 0x00	 0
+       ==== PROG ID 4
+         [69 ] GET FLAG ID         VALUE 0x05	 5
+         [72 ] EXEC AI STATE ID         VALUE 0x41	 65
+         [170] FOLLOW TARGET ID         VALUE 0x01	 1
+         OPCODE 0x01 1          VALUE 0x00	 0
+         [8  ] CREATE AI STATE         VALUE 0x41	 65
+         [69 ] GET FLAG ID         VALUE 0x04	 4
+         [72 ] EXEC AI STATE ID         VALUE 0x42	 66
+         [171] PLAY MESSAGE ID         VALUE 0x15	 21
+         [82 ] SET FLAG ID TO TRUE         VALUE 0x04	 4
+         [8  ] CREATE AI STATE         VALUE 0x42	 66
+         [170] FOLLOW TARGET ID         VALUE 0x01	 1
+         OPCODE 0x00 0          VALUE 0x00	 0
+       ==== PROG ID 5
+         OPCODE 0xA0 160          VALUE 0x03	 3
+         [70 ] AI STATE INSTRUCTION 1         VALUE 0x41	 65
+         [148] INSTANT KILL TARGET ID         VALUE 0x0B	 11
+         [8  ] CREATE AI STATE         VALUE 0x41	 65
+         OPCODE 0x00 0          VALUE 0x00	 0
+       ==== PROG ID 6
+         OPCODE 0x80 128          VALUE 0x02	 2
+         [82 ] SET FLAG ID TO TRUE         VALUE 0x05	 5
+         [82 ] SET FLAG ID TO TRUE         VALUE 0x01	 1
+         OPCODE 0x00 0          VALUE 0x00	 0
+       ==== PROG ID 7
+         [167] DESTROY TARGET ID         VALUE 0x01	 1
+         OPCODE 0x00 0          VALUE 0x00	 0
+       ==== PROG ID 8
      Chunk: PART, Taille: 992
        Nombre de part: 16.0
        ID: 3
@@ -187,7 +190,7 @@
          0x00	 0
          0x00	 0
          Unknown: 1, 0, 1
-         Relative: -1480, -735, 0
+         Relative: -1480, 0, -735
          UB: 0
          Azymuth: 0
          remaining data 20
@@ -210,6 +213,10 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 65535
+         Program: 65535
+         Program: 65535
        ID: 2
          Nom: RWYEXT18
          destroyed: 
@@ -219,7 +226,7 @@
          0x00	 0
          0x00	 0
          Unknown: 0, 0, 0
-         Relative: -460, -1440, 0
+         Relative: -460, 0, -1440
          UB: 0
          Azymuth: 0
          remaining data 20
@@ -242,6 +249,10 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 65535
+         Program: 65535
+         Program: 65535
        ID: 4
          Nom: WCB78
          destroyed: 
@@ -251,7 +262,7 @@
          0x00	 0
          0x00	 0
          Unknown: 65535, 0, 65535
-         Relative: 99750, -146000, 1845
+         Relative: 99750, 1845, -146000
          UB: 0
          Azymuth: 90
          remaining data 20
@@ -274,6 +285,23 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 1
+           [69 ] GET FLAG ID 0x03 3 
+           [72 ] EXEC AI STATE ID 0x42 66 
+           [69 ] GET FLAG ID 0x02 2 
+           [73 ] AI STATE INSTRUCTION 4 0x41 65 
+           [171] PLAY MESSAGE ID 0x15 21 
+           OPCODE 0x55 85  0x03 3 
+           [8  ] CREATE AI STATE 0x41 65 
+           [69 ] GET FLAG ID 0x01 1 
+           [73 ] AI STATE INSTRUCTION 4 0x42 66 
+           [171] PLAY MESSAGE ID 0x14 20 
+           OPCODE 0x55 85  0x03 3 
+           [8  ] CREATE AI STATE 0x42 66 
+           OPCODE 0x00 0  0x00 0 
+         Program: 65535
+         Program: 65535
        ID: 5
          Nom: HANGB22
          destroyed: HANGB22D
@@ -283,7 +311,7 @@
          0x00	 0
          0x00	 0
          Unknown: 0, 0, 0
-         Relative: -250, -2350, 0
+         Relative: -250, 0, -2350
          UB: 0
          Azymuth: 270
          remaining data 20
@@ -306,6 +334,10 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 65535
+         Program: 65535
+         Program: 65535
        ID: 6
          Nom: HANGB22
          destroyed: HANGB22D
@@ -315,7 +347,7 @@
          0x00	 0
          0x00	 0
          Unknown: 0, 0, 0
-         Relative: -250, -2500, 0
+         Relative: -250, 0, -2500
          UB: 0
          Azymuth: 270
          remaining data 20
@@ -338,6 +370,10 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 65535
+         Program: 65535
+         Program: 65535
        ID: 7
          Nom: HANGB22
          destroyed: HANGB22D
@@ -347,7 +383,7 @@
          0x00	 0
          0x00	 0
          Unknown: 0, 0, 0
-         Relative: -470, -2750, 0
+         Relative: -470, 0, -2750
          UB: 0
          Azymuth: 180
          remaining data 20
@@ -370,6 +406,10 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 65535
+         Program: 65535
+         Program: 65535
        ID: 8
          Nom: HANGB22
          destroyed: HANGB22D
@@ -379,7 +419,7 @@
          0x00	 0
          0x00	 0
          Unknown: 0, 0, 0
-         Relative: -700, -2750, 0
+         Relative: -700, 0, -2750
          UB: 0
          Azymuth: 180
          remaining data 20
@@ -402,6 +442,10 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 65535
+         Program: 65535
+         Program: 65535
        ID: 9
          Nom: TOWB24
          destroyed: TOWB24D
@@ -411,7 +455,7 @@
          0x00	 0
          0x00	 0
          Unknown: 0, 0, 0
-         Relative: -600, -700, 0
+         Relative: -600, 0, -700
          UB: 0
          Azymuth: 0
          remaining data 20
@@ -434,6 +478,10 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 65535
+         Program: 65535
+         Program: 65535
        ID: 10
          Nom: RDRSTL2
          destroyed: DRADARST
@@ -443,7 +491,7 @@
          0x00	 0
          0x00	 0
          Unknown: 0, 0, 0
-         Relative: -600, -300, 0
+         Relative: -600, 0, -300
          UB: 0
          Azymuth: 0
          remaining data 20
@@ -466,6 +514,10 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 65535
+         Program: 65535
+         Program: 65535
        ID: 1
          Nom: F-16DES
          destroyed: 
@@ -475,7 +527,7 @@
          0x00	 0
          0x00	 0
          Unknown: 65535, 0, 65535
-         Relative: 99520, -146510, 1850
+         Relative: 99520, 1850, -146510
          UB: 0
          Azymuth: 0
          remaining data 20
@@ -498,6 +550,18 @@
            0xFF	 255
            0x00	 0
            0x00	 0
+         Program: 65535
+         Program: 65535
+         Program: 65535
+         Program: 0
+           [161] TAKE OFF FROM WAYPOINT ID 0x01 1 
+           [166] FLY TO WAY AREA ID 0x03 3 
+           [171] PLAY MESSAGE ID 0x00 0 
+           [165] FLY TO WAYPOINT ID 0x02 2 
+           [171] PLAY MESSAGE ID 0x01 1 
+           [162] LAND TO WAYPOINT ID 0x02 2 
+           OPCODE 0x09 9  0x01 1 
+           OPCODE 0x00 0  0x00 0 
        ID: 11
          Nom: LEARJET
          destroyed: 
@@ -507,7 +571,7 @@
          0x01	 1
          0x00	 0
          Unknown: 1, 1, 65537
-         Relative: -500, 2000, 0
+         Relative: -500, 0, 2000
          UB: 0
          Azymuth: 90
          remaining data 20
@@ -530,6 +594,19 @@
            0x00	 0
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 5
+           OPCODE 0xA0 160  0x03 3 
+           [70 ] AI STATE INSTRUCTION 1 0x41 65 
+           [148] INSTANT KILL TARGET ID 0x0B 11 
+           [8  ] CREATE AI STATE 0x41 65 
+           OPCODE 0x00 0  0x00 0 
+         Program: 6
+           OPCODE 0x80 128  0x02 2 
+           [82 ] SET FLAG ID TO TRUE 0x05 5 
+           [82 ] SET FLAG ID TO TRUE 0x01 1 
+           OPCODE 0x00 0  0x00 0 
+         Program: 65535
        ID: 0
          Nom: F-16DES
          destroyed: 
@@ -539,7 +616,7 @@
          0x01	 1
          0x00	 0
          Unknown: 1, 1, 65537
-         Relative: -2000, 2000, 0
+         Relative: -2000, 0, 2000
          UB: 0
          Azymuth: 90
          remaining data 20
@@ -562,6 +639,25 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 3
+           OPCODE 0xB8 184  0xFF 255 
+           OPCODE 0xB6 182  0xFF 255 
+           OPCODE 0x00 0  0x00 0 
+         Program: 4
+           [69 ] GET FLAG ID 0x05 5 
+           [72 ] EXEC AI STATE ID 0x41 65 
+           [170] FOLLOW TARGET ID 0x01 1 
+           OPCODE 0x01 1  0x00 0 
+           [8  ] CREATE AI STATE 0x41 65 
+           [69 ] GET FLAG ID 0x04 4 
+           [72 ] EXEC AI STATE ID 0x42 66 
+           [171] PLAY MESSAGE ID 0x15 21 
+           [82 ] SET FLAG ID TO TRUE 0x04 4 
+           [8  ] CREATE AI STATE 0x42 66 
+           [170] FOLLOW TARGET ID 0x01 1 
+           OPCODE 0x00 0  0x00 0 
+         Program: 65535
+         Program: 65535
        ID: 12
          Nom: SU27
          destroyed: 
@@ -571,7 +667,7 @@
          0x01	 1
          0x00	 0
          Unknown: 1, 1, 65537
-         Relative: 7000, 14000, 1000
+         Relative: 7000, 1000, 14000
          UB: 0
          Azymuth: 180
          remaining data 20
@@ -594,6 +690,12 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 7
+           [167] DESTROY TARGET ID 0x01 1 
+           OPCODE 0x00 0  0x00 0 
+         Program: 65535
+         Program: 65535
        ID: 13
          Nom: SU27
          destroyed: 
@@ -603,7 +705,7 @@
          0x01	 1
          0x00	 0
          Unknown: 1, 1, 65537
-         Relative: 7000, 15000, 1000
+         Relative: 7000, 1000, 15000
          UB: 0
          Azymuth: 180
          remaining data 20
@@ -626,6 +728,12 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 7
+           [167] DESTROY TARGET ID 0x01 1 
+           OPCODE 0x00 0  0x00 0 
+         Program: 65535
+         Program: 65535
        ID: 14
          Nom: MIG29
          destroyed: 
@@ -635,7 +743,7 @@
          0x01	 1
          0x00	 0
          Unknown: 2, 1, 65538
-         Relative: 0, -9000, 1000
+         Relative: 0, 1000, -9000
          UB: 0
          Azymuth: 0
          remaining data 20
@@ -658,6 +766,12 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 7
+           [167] DESTROY TARGET ID 0x01 1 
+           OPCODE 0x00 0  0x00 0 
+         Program: 65535
+         Program: 65535
        ID: 15
          Nom: MIG29
          destroyed: 
@@ -667,7 +781,7 @@
          0x01	 1
          0x00	 0
          Unknown: 2, 1, 65538
-         Relative: 0, -11000, 1000
+         Relative: 0, 1000, -11000
          UB: 0
          Azymuth: 0
          remaining data 20
@@ -690,6 +804,12 @@
            0xFF	 255
            0xFF	 255
            0xFF	 255
+         Program: 65535
+         Program: 7
+           [167] DESTROY TARGET ID 0x01 1 
+           OPCODE 0x00 0  0x00 0 
+         Program: 65535
+         Program: 65535
      Chunk: TEAM, Taille: 4
        0x09	 9
        0x00	 0
@@ -698,137 +818,101 @@
      Chunk: FORM, Taille: 164
          TYPE: PLAY
          Chunk: SCNE, Taille: 28
-           0x01	 1
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0x02	 2
-           0x00	 0
-           0x00	 0
-           0xB4	 180
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x09	 9
-           0x00	 0
-           0x02	 2
-           0x00	 0
+           IS_ACTIVE: 1
+           Area ID: 65535
+           Prog ID: 65535, 65535, 2
+           Unknown: 0
+           Unknown: 180
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Nombre de cast: 2
+            Cast ID: 9
+            Cast ID: 2
          Chunk: SCNE, Taille: 38
-           0x01	 1
-           0x00	 0
-           0x00	 0
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0x01	 1
-           0xB4	 180
-           0x00	 0
-           0x00	 0
-           0xD4	 212
-           0x84	 132
-           0x01	 1
-           0x00	 0
-           0x90	 144
-           0xDB	 219
-           0xFD	 253
-           0x00	 0
-           0x1D	 29
-           0x0B	 11
-           0x00	 0
-           0x01	 1
-           0x00	 0
-           0x03	 3
-           0x00	 0
-           0x04	 4
-           0x00	 0
-           0x05	 5
-           0x00	 0
-           0x06	 6
-           0x00	 0
-           0x07	 7
-           0x00	 0
-           0x08	 8
-           0x00	 0
+           IS_ACTIVE: 1
+           Area ID: 0
+           Prog ID: 65535, 65535, 65535
+           Unknown: 1
+           Unknown: 180
+           Unknown: 0
+           Unknown: 0
+           Unknown: 212
+           Unknown: 132
+           Unknown: 1
+           Unknown: 0
+           Unknown: 144
+           Unknown: 219
+           Unknown: 253
+           Unknown: 0
+           Unknown: 29
+           Unknown: 11
+           Unknown: 0
+           Nombre de cast: 7
+            Cast ID: 1
+            Cast ID: 3
+            Cast ID: 4
+            Cast ID: 5
+            Cast ID: 6
+            Cast ID: 7
+            Cast ID: 8
          Chunk: SCNE, Taille: 34
-           0x01	 1
-           0x01	 1
-           0x00	 0
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0x00	 0
-           0xB4	 180
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x0A	 10
-           0x00	 0
-           0x0B	 11
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x0C	 12
-           0x00	 0
-           0x0D	 13
-           0x00	 0
+           IS_ACTIVE: 1
+           Area ID: 1
+           Prog ID: 65535, 65535, 65535
+           Unknown: 0
+           Unknown: 180
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Nombre de cast: 5
+            Cast ID: 10
+            Cast ID: 11
+            Cast ID: 0
+            Cast ID: 12
+            Cast ID: 13
          Chunk: SCNE, Taille: 28
-           0x00	 0
-           0x02	 2
-           0x00	 0
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0xFF	 255
-           0x00	 0
-           0xB4	 180
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x00	 0
-           0x0E	 14
-           0x00	 0
-           0x0F	 15
-           0x00	 0
+           IS_ACTIVE: 0
+           Area ID: 2
+           Prog ID: 65535, 65535, 65535
+           Unknown: 0
+           Unknown: 180
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Unknown: 0
+           Nombre de cast: 2
+            Cast ID: 14
+            Cast ID: 15
      Chunk: LOAD, Taille: 180
        File: F-16des
        File: FUELEXP1
@@ -850,3 +934,113 @@
        File: F16GDEB3
        File: F16GDEB4
        File: DEBSU27
+Part 3 RWYEXT27 [65535, 65535, 65535, 65535]
+Part 2 RWYEXT18 [65535, 65535, 65535, 65535]
+Part 4 WCB78 [65535, 1, 65535, 65535]
+   -- if flag 3 
+   [72 ] EXEC AI STATE ID	66
+   -- if flag 2 
+   [73 ] AI STATE INSTRUCTION 4	65
+   [171] PLAY MESSAGE ID	21
+   UNDEC OPCODE :[85]	3
+   [8  ] CREATE AI STATE	65
+   -- if flag 1 
+   [73 ] AI STATE INSTRUCTION 4	66
+   [171] PLAY MESSAGE ID	20
+   UNDEC OPCODE :[85]	3
+   [8  ] CREATE AI STATE	66
+   UNDEC OPCODE :[0]	0
+Part 5 HANGB22 [65535, 65535, 65535, 65535]
+Part 6 HANGB22 [65535, 65535, 65535, 65535]
+Part 7 HANGB22 [65535, 65535, 65535, 65535]
+Part 8 HANGB22 [65535, 65535, 65535, 65535]
+Part 9 TOWB24 [65535, 65535, 65535, 65535]
+Part 10 RDRSTL2 [65535, 65535, 65535, 65535]
+Part 1 F-16DES [65535, 65535, 65535, 0]
+   ** Take off from waypoint 1[65534, 0, 65534] - Area Wildcat Base
+   ** Fly to area 3[0, 7, 0] - Area TWP Base
+   [171] PLAY MESSAGE ID	0
+   ** Fly to waypoint 2[65534, 3, 10] - Area Wildcat Base
+   [171] PLAY MESSAGE ID	1
+   ** Land to waypoint 2[65534, 3, 10] - Area Wildcat Base
+   UNDEC OPCODE :[9]	1
+   UNDEC OPCODE :[0]	0
+Part 11 LEARJET [65535, 5, 6, 65535]
+   UNDEC OPCODE :[160]	3
+   [70 ] AI STATE INSTRUCTION 1	65
+   -- instant kill LEARJET
+   [8  ] CREATE AI STATE	65
+   UNDEC OPCODE :[0]	0
+   UNDEC OPCODE :[128]	2
+   -- exit if flag 5
+   -- exit if flag 1
+   UNDEC OPCODE :[0]	0
+Part 0 F-16DES [3, 4, 65535, 65535]
+   UNDEC OPCODE :[184]	255
+   UNDEC OPCODE :[182]	255
+   UNDEC OPCODE :[0]	0
+   -- if flag 5 
+   [72 ] EXEC AI STATE ID	65
+   ** Follow target F-16DES
+   UNDEC OPCODE :[1]	0
+   [8  ] CREATE AI STATE	65
+   -- if flag 4 
+   [72 ] EXEC AI STATE ID	66
+   [171] PLAY MESSAGE ID	21
+   -- exit if flag 4
+   [8  ] CREATE AI STATE	66
+   ** Follow target F-16DES
+   UNDEC OPCODE :[0]	0
+Part 12 SU27 [65535, 7, 65535, 65535]
+   ** Destroy target F-16DES
+   UNDEC OPCODE :[0]	0
+Part 13 SU27 [65535, 7, 65535, 65535]
+   ** Destroy target F-16DES
+   UNDEC OPCODE :[0]	0
+Part 14 MIG29 [65535, 7, 65535, 65535]
+   ** Destroy target F-16DES
+   UNDEC OPCODE :[0]	0
+Part 15 MIG29 [65535, 7, 65535, 65535]
+   ** Destroy target F-16DES
+   UNDEC OPCODE :[0]	0
+Scene 0 1
+   Area: 65535 Id not found
+   Prog:
+    prog id 2
+     OPCODE 0x11 17  0x02 2 
+     OPCODE 0x14 20  0x07 7 
+     OPCODE 0x11 17  0x01 1 
+     OPCODE 0x14 20  0x00 0 
+     OPCODE 0x2E 46  0x1E 30 
+     OPCODE 0x2E 46  0x64 100 
+     OPCODE 0x14 20  0x01 1 
+     OPCODE 0x00 0  0x00 0 
+   Cast:
+     - F-16DES
+     - WCB78
+Scene 1 1
+   Area: Wildcat Base
+   Prog:
+   Cast:
+     - RWYEXT18
+     - HANGB22
+     - HANGB22
+     - HANGB22
+     - HANGB22
+     - TOWB24
+     - RDRSTL2
+Scene 2 1
+   Area: TWP Base
+   Prog:
+   Cast:
+     - LEARJET
+     - F-16DES
+     - RWYEXT27
+     - SU27
+     - SU27
+Scene 3 0
+   Area: .
+   Prog:
+   Cast:
+     - MIG29
+     - MIG29

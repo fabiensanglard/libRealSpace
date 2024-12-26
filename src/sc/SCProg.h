@@ -26,11 +26,10 @@ class SCProg {
         OP_DEACTIVATE_OBJ = 190,
     };
 
-    SCProg(RSProf *profile, std::vector<PROG> prog, SCMission *mission) {
-        this->profile = profile;
+    SCProg(SCMissionActors *profile, std::vector<PROG> prog, SCMission *mission) {
+        this->actor = profile;
         this->prog = prog;
         this->mission = mission;
     };
-    void parse();
     void execute();
 };

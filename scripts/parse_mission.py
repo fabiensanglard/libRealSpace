@@ -5,10 +5,12 @@ import argparse
 progs_map = {}
 encode_progs_map = {}
 parts = {}
+parts_array = []
 prof = {}
 areas = {}
 spots = {}
 messages = {}
+scenes = []
 
 opcodes = {
     161: '[161] TAKE OFF FROM WAYPOINT ID',
@@ -78,7 +80,7 @@ def parse_iff_filereader(f, file_path, dec=0):
             if chunk_type == b"LOAD":
                 parse_LOAD_chunk(chunk_data, chunk_size, dec+2)
             if chunk_type == b"SCNE":
-                print_int_from_chunk(chunk_data, dec+2)
+                parse_SCNE_chunk(chunk_data, chunk_size, dec+2)
             if chunk_type == b"FLAG":
                 print_int_from_chunk(chunk_data, dec+2)
             if chunk_type == b"SPOT":
@@ -336,6 +338,7 @@ def parse_PART_chunk(chunk_data, chunk_size, dec):
                 for k in progs_map[prog]:
                     print (' ' * (dec+4), k)
         parts[id] = current_part
+        parts_array.append(current_part)
         
 
 
@@ -378,6 +381,42 @@ def parse_LOAD_chunk(chunk_data, chunk_size, dec):
 def parse_iff_file(file_path):
     with open(file_path, 'rb') as f:
         parse_iff_filereader(f, file_path)
+
+
+def parse_SCNE_chunk(chunk_data, chunk_size, dec):
+    read = 0
+    id = 0
+    while read < chunk_size:
+        active = chunk_data[read]
+        print(' ' * dec, f"IS_ACTIVE: {active}")
+        read += 1
+        area_id = chunk_data[read] + (chunk_data[read+1] << 8)
+        print(' ' * dec, f"Area ID: {area_id}")
+        read += 2
+        prog_id1 = chunk_data[read] + (chunk_data[read+1] << 8)
+        prog_id2 = chunk_data[read+2] + (chunk_data[read+3] << 8)
+        prog_id3 = chunk_data[read+4] + (chunk_data[read+5] << 8)
+        print(' ' * dec, f"Prog ID: {prog_id1}, {prog_id2}, {prog_id3}")
+        read += 6
+        for i in range(15):
+            print(' ' * dec, f"Unknown: {chunk_data[read+i]}")
+        read += 15
+        nbcast = int((chunk_size - read) / 2)
+        print(' ' * dec, f"Nombre de cast: {nbcast}")
+        cast = []
+        for i in range(nbcast):
+            cast_id = chunk_data[read+i*2] + (chunk_data[read+i*2+1] << 8)
+            cast.append(cast_id)
+            print(' ' * (dec+1), f"Cast ID: {cast_id}")
+        scene = {
+            'id': id,
+            'active': active,
+            'area_id': area_id,
+            'prog': [prog_id1, prog_id2, prog_id3],
+            'cast': cast
+        }
+        scenes.append(scene)
+        read += nbcast*2
 
 def print_int_from_chunk(chunk_data, dec):
     for c in chunk_data:
@@ -500,3 +539,22 @@ if __name__ == "__main__":
                         print(f"   {opcodes[k['opcode']]}\t{k['value']}")
                     else:
                         print(f"   UNDEC OPCODE :[{k['opcode']}]\t{k['value']}")
+    id = 0
+    for s in scenes:
+        print(f"Scene {id} {s['active']}")
+        if s['area_id'] in areas:
+            print(f"   Area: {areas[s['area_id']]['name']}")
+        else:
+            print(f"   Area: {s['area_id']} Id not found")
+        print("   Prog:")
+        for p in s['prog']:
+            if p in progs_map:
+                print(f"    prog id {p}")
+                for op in progs_map[p]:
+                    print(f"     {op}")
+                
+        print("   Cast:")
+        for c in s['cast']:
+            print(f"     - {parts_array[c]['name']}")
+            
+        id += 1
