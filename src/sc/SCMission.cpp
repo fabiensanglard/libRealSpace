@@ -57,11 +57,14 @@ void SCMission::loadMission() {
         for (auto cast : mission->mission_data.casting) {
             if (part->id == search_id) {
                 SCMissionActors *actor = new SCMissionActors();
+                if (cast->actor == "PLAYER") {
+                    actor = new SCMissionActorsPlayer();
+                }
                 actor->actor_name = cast->actor;
                 actor->actor_id = part->id;
                 actor->object = part;
                 actor->profile = cast->profile;
-                
+                actor->mission = this;
                 for (auto prg_id: actor->object->progs_id) {
                     if (prg_id != 255 && prg_id < this->mission->mission_data.prog.size()) {
                         std::vector<PROG> *prog = this->mission->mission_data.prog[prg_id];
@@ -146,7 +149,8 @@ void SCMission::loadMission() {
         }
     }
     for (auto prg: this->player->prog) {
-        this->executeProg(prg);
+        SCProg *p = new SCProg(this->player, *prg, this);
+        p->execute();
     }
     
 }
@@ -189,28 +193,5 @@ void SCMission::update() {
 
 
 void SCMission::executeProg(std::vector<PROG> *prog) {
-    for (auto instr : *prog) {
-        switch (instr.opcode) {
-            case PROG_OP_SET_MESSAGE: {
-                printf("SET MESSAGE %d\n", instr.arg);
-                std::transform(this->mission->mission_data.messages[instr.arg]->begin(), this->mission->mission_data.messages[instr.arg]->end(), this->mission->mission_data.messages[instr.arg]->begin(), ::tolower);
-                if (this->waypoints.size() > 0) {
-                    this->waypoints.back()->message = this->mission->mission_data.messages[instr.arg];
-                }
-            } break;
-            case PROG_OP_SET_SPOT: {
-                SCMissionWaypoint *waypoint = new SCMissionWaypoint();
-                waypoint->spot = this->mission->mission_data.spots[instr.arg];
-                this->waypoints.push_back(waypoint);
-            } break;
-            case PROG_OP_SET_SPOT_2: {
-                SCMissionWaypoint *waypoint = new SCMissionWaypoint();
-                waypoint->spot = this->mission->mission_data.spots[instr.arg];
-                this->waypoints.push_back(waypoint);
-            } break;
-            case PROG_OP_SET_PRIMARY_TARGET: {
-                printf("SET PRIMARY TARGET %d\n", instr.arg);
-            } break;
-        }
-    }
+    
 }

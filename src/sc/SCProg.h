@@ -4,6 +4,7 @@
 
 
 class SCProg {
+public:
     SCMissionActors *actor;
     std::vector<PROG> prog;
     SCMission *mission;

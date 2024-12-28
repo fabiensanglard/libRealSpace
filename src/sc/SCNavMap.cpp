@@ -240,8 +240,37 @@ void SCNavMap::RunFrame(void) {
                 }
                 if (cpt == *this->current_nav_point) {
                     int msg_newx = 257;
-                    int msg_newy = 143;
+                    int msg_newy = 90;
                     Point2D *msg_p1 = new Point2D({msg_newx, msg_newy});
+                    VGA.PrintText(
+                        this->navMap->font,
+                        msg_p1,
+                        "objective",
+                        0,
+                        0,
+                        9,
+                        1,
+                        this->navMap->font->GetShapeForChar('A')->GetWidth()
+                    );
+                    msg_p1->y += this->navMap->font->GetShapeForChar('A')->GetHeight();
+                    msg_p1->x = msg_newx;
+                    if (wp->objective != nullptr) {
+                        std::transform(wp->objective->begin(), wp->objective->end(), wp->objective->begin(), ::tolower);
+                        VGA.PrintText(
+                            this->navMap->font,
+                            msg_p1,
+                            (char*) wp->objective->c_str(),
+                            0,
+                            0,
+                            (int32_t)wp->objective->size(),
+                            1,
+                            this->navMap->font->GetShapeForChar('A')->GetWidth()
+                        );
+                    }
+
+                    msg_newx = 257;
+                    msg_newy = 143;
+                    msg_p1 = new Point2D({msg_newx, msg_newy});
                     VGA.PrintText(
                         this->navMap->font,
                         msg_p1,
@@ -254,17 +283,19 @@ void SCNavMap::RunFrame(void) {
                     );
                     msg_p1->y += this->navMap->font->GetShapeForChar('A')->GetHeight();
                     msg_p1->x = msg_newx;
-                    std::transform(wp->message->begin(), wp->message->end(), wp->message->begin(), ::tolower);
-                    VGA.PrintText(
-                        this->navMap->font,
-                        msg_p1,
-                        (char*) wp->message->c_str(),
-                        0,
-                        0,
-                        (int32_t)wp->message->size(),
-                        1,
-                        this->navMap->font->GetShapeForChar('A')->GetWidth()
-                    );
+                    if (wp->message != nullptr) {
+                        std::transform(wp->message->begin(), wp->message->end(), wp->message->begin(), ::tolower);
+                        VGA.PrintText(
+                            this->navMap->font,
+                            msg_p1,
+                            (char*) wp->message->c_str(),
+                            0,
+                            0,
+                            (int32_t)wp->message->size(),
+                            1,
+                            this->navMap->font->GetShapeForChar('A')->GetWidth()
+                        );
+                    }
                     c = 255;
                     newx = (int) (((this->missionObj->mission_data.areas[wp->spot->area_id]->position.x+center)/map_width)*w)+l;
                     newy = (int) (((this->missionObj->mission_data.areas[wp->spot->area_id]->position.z+center)/map_width)*h)+t;

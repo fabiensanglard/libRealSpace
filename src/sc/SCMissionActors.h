@@ -1,6 +1,8 @@
 #pragma once
 #include "precomp.h"
 
+class SCMission;
+
 enum prog_op {
     OP_EXIT_PROG = 1,
     OP_SET_LABEL = 8,
@@ -27,6 +29,7 @@ public:
     MISN_PART *object;
     SCPlane *plane;
     SCPilot *pilot;
+    SCMission *mission;
 
     virtual bool execute();
     virtual bool takeOff(uint8_t arg); 
@@ -37,4 +40,15 @@ public:
     virtual bool defendTarget(uint8_t arg);
     virtual bool deactivate(uint8_t arg);
     virtual bool setMessage(uint8_t arg);
+};
+
+class SCMissionActorsPlayer : public SCMissionActors {
+public:
+    bool takeOff(uint8_t arg); 
+    bool land(uint8_t arg);
+    bool flyToWaypoint(uint8_t arg);
+    bool flyToArea(uint8_t arg);
+    bool destroyTarget(uint8_t arg);
+    bool defendTarget(uint8_t arg);
+    bool setMessage(uint8_t arg);
 };
