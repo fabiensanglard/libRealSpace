@@ -8,16 +8,6 @@ struct SCAiPlane {
     std::string name;
 };
 
-struct SCMissionActors {
-    std::string actor_name;
-    uint8_t actor_id;
-    RSProf *profile;
-    std::vector<std::vector<PROG> *> prog;
-    MISN_PART *object;
-    SCPlane *plane;
-    SCPilot *pilot;
-};
-
 struct SCMissionWaypoint {
     SPOT *spot;
     std::string *message;
