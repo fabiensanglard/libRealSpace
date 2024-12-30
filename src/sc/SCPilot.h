@@ -22,6 +22,6 @@ public:
     SCPlane* plane{nullptr};
     SCPilot();
     ~SCPilot();
-
+    void SetTargetWaypoint(Vector3D waypoint);
     void AutoPilot();
 };

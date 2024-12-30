@@ -243,10 +243,18 @@ public:
     int selected_weapon{0};
     MISN_PART *object;
 
+
+    float pitch{0.0f};
+    float roll{0.0f};
+    float yaw{0.0f};
+    Vector3D velocity {0.0f, 0.0f, 0.0f};
+    Vector3D position {0.0f, 0.0f, 0.0f};
+    Vector3D acceleration {0.0f, 0.0f, 0.0f};
+    
     /* my ptw matrix, temp matrix	*/
     Matrix ptw;
     Matrix incremental;
-
+    bool disable_azimuth{false};
     SCPlane();
     SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELEVF_CSTE, float ROLLFF_CSTE, float s, float W,
             float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED,
@@ -265,6 +273,8 @@ public:
 
     void SetControlStick(int x, int y);
     void Simulate();
+    void OrigSimulate();
+    void SimplifiedSimulate();
     void getPosition(Point3D *position);
     void Render();
     void RenderSimulatedObject();

@@ -259,7 +259,7 @@ void SCPlane::Init() {
  * such as its position, velocity, and acceleration. These variables are used
  * by the rendering code to draw the plane on the screen.
  */
-void SCPlane::Simulate() {
+void SCPlane::OrigSimulate() {
     int itemp;
     float temp;
     float elevtemp = 0.0f;
@@ -363,7 +363,10 @@ void SCPlane::Simulate() {
                 itemp = itemp > 0 ? 1 : -1;
             }
         }
+        
         this->azimuth_speedf += itemp;
+        
+        
         if (this->on_ground) {
             /* dont allow negative pitch unless positive elevation	*/
             if (this->elevation_speedf < 0) {
@@ -747,6 +750,78 @@ void SCPlane::Simulate() {
     this->tick_counter++;
 }
 
+
+void SCPlane::Simulate() {
+    this->SimplifiedSimulate();
+}
+void SCPlane::SimplifiedSimulate() {
+        // Time step for the simulation
+    float dt = 0.1f; // Adjust as needed
+
+    // Update the plane's velocity based on control inputs
+    float pitch_input = this->control_stick_y / 100.0f;
+    float roll_input = this->control_stick_x / 100.0f;
+
+    // Update the plane's orientation based on pitch and roll inputs
+    this->pitch += pitch_input * dt;
+    this->roll += roll_input * dt;
+    
+
+    // Calculate the forward, right, and up vectors based on the plane's orientation
+    Vector3D forward = Vector3D(cos(this->yaw) * cos(this->pitch), sin(this->pitch), sin(this->yaw) * cos(this->pitch));
+    Vector3D right = Vector3D(sin(this->yaw), 0, -cos(this->yaw));
+    Vector3D up = Vector3D::Cross(forward, right);
+
+    // Update the plane's velocity based on the forward vector and throttle
+    float throttle = this->thrust / 100.0f;
+    this->velocity = this->velocity + forward * throttle * dt;
+
+    // Update the plane's position based on its velocity
+    this->position += (this->velocity * dt);
+
+    // Update the plane's acceleration based on the forces acting on it
+    Vector3D gravity = Vector3D(0, -9.81f, 0); // Gravity force
+    Vector3D lift = up * (this->velocity.Length() * this->velocity.Length() * 0.5f); // Simplified lift force
+    
+    float max_lift = 1000.0f; // Adjust this value as needed
+    lift = lift * (std::clamp(lift.Length(), 0.0f, max_lift) / lift.Length());
+
+    Vector3D drag = -this->velocity * (this->velocity.Length() * 0.1f); // Simplified drag force
+
+    this->acceleration = (lift + gravity + drag) * this->inverse_mass;
+
+    // Update the plane's velocity based on its acceleration
+    this->velocity += this->acceleration * dt;
+
+    // Update the plane's position based on its velocity
+    this->position += this->velocity * dt;
+
+    // Update the yaw based on the new velocity direction and roll angle
+    if (std::abs(this->roll) > 0.1f) { // If roll is significant
+        this->yaw += pitch_input * dt * cos(this->roll);
+    } else {
+        this->yaw = atan2(this->velocity.z, this->velocity.x);
+    }
+
+    this->x = this->position.x;
+    this->y = this->position.y;
+    this->z = this->position.z;
+    this->vx = this->velocity.x;
+    this->vy = this->velocity.y;
+    this->vz = this->velocity.z;
+    this->ax = this->acceleration.x;
+    this->ay = this->acceleration.y;
+    this->az = this->acceleration.z;
+
+    this->airspeed = -(int)(this->velocity.Length() * 1.94384f); // Convert m/s to knots
+    this->climbspeed = (short)(this->velocity.y * 3.28084f); // Convert m/s to ft/s
+    this->twist = this->roll * 180.0f / M_PI;
+    this->elevationf = this->pitch * 180.0f / M_PI;
+    this->azimuthf = this->yaw * 180.0f / M_PI;
+
+    // Update the tick counter
+    this->tick_counter++;
+}
 /**
  * IN_BOX: Check if the plane is inside a box.
  * 

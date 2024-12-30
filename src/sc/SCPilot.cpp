@@ -7,6 +7,24 @@
 //
 #include <algorithm>
 #include "precomp.h"
+class PIDController {
+public:
+    PIDController(float kp, float ki, float kd)
+        : kp(kp), ki(ki), kd(kd), prev_error(0), integral(0) {}
+
+    float calculate(float setpoint, float measured_value, float dt) {
+        float error = setpoint - measured_value;
+        integral += error * dt;
+        float derivative = (error - prev_error) / dt;
+        prev_error = error;
+        return kp * error + ki * integral + kd * derivative;
+    }
+
+private:
+    float kp, ki, kd;
+    float prev_error;
+    float integral;
+};
 
 SCPilot::SCPilot() {
     target_speed = 0;
@@ -16,8 +34,21 @@ SCPilot::SCPilot() {
 
 SCPilot::~SCPilot() {}
 
+void SCPilot::SetTargetWaypoint(Vector3D waypoint) {
+    float azimuth = atan2(waypoint.z - plane->z, waypoint.x - plane->x);
+    target_azimut = azimuth * 180.0f / (float) M_PI;
+    
+    if (waypoint.y > plane->y) {
+        target_climb = waypoint.y;
+    } else {
+        target_climb = plane->y;
+    }
+}
 
 void SCPilot::AutoPilot() {
+    PIDController altitudeController(1.0f, 0.1f, 0.05f); // Adjust these values as needed
+    PIDController azimuthController(1.0f, 0.1f, 0.05f); // Adjust these values as needed
+
     if (!this->alive) {
         return;
     }
@@ -44,37 +75,27 @@ void SCPilot::AutoPilot() {
     }
 
 
-    float target_elevation = atan2(
-        this->plane->y - (this->plane->y + (60*this->plane->vz)),
-        this->plane->y - this->target_climb
-    );
+    float horizontal_distance = 1000.0f;
+    float vertical_distance = this->target_climb - this->plane->y;
+    float target_elevation_rad = atan2(vertical_distance, horizontal_distance);
+    float target_elevation = target_elevation_rad * 180.0f / (float) M_PI;
 
-    target_elevation = target_elevation * 180.0f / (float) M_PI;
 
-    if (target_elevation > 180.0f) {
+    /*if (target_elevation > 180.0f) {
         target_elevation -= 360.0f;
     } else if (target_elevation < -180.0f) {
         target_elevation += 360.0f;
     }
-    target_elevation = target_elevation - 90.0f;
+    target_elevation = target_elevation - 90.0f;*/
     
     target_elevation = std::clamp(target_elevation, -75.0f, 75.0f);
     
-    if (this->plane->y < this->target_climb) {
-        if ((this->plane->elevationf/10.0f) < target_elevation) {
-            this->plane->control_stick_y = this->plane->control_stick_y + 1;
-        } else {
-            this->plane->control_stick_y = 0;
-        }
-    } else {
-        if ((this->plane->elevationf/10.0f) > target_elevation) {
-            this->plane->control_stick_y = this->plane->control_stick_y - 1;
-        } else {
-            this->plane->control_stick_y = 0;
-        }
-    }
+    float dt = 0.1f; // Time step, adjust as needed
+    float control_signal = altitudeController.calculate(target_elevation, this->plane->elevationf / 10.0f, dt);
+    this->plane->control_stick_y = std::clamp(static_cast<int>(control_signal), -100, 100);
 
-    this->plane->control_stick_y = std::clamp(this->plane->control_stick_y, -100, 100);
+    const float max_twist_angle = 80.0f;
+    const float Kp = 3.0f;
 
     float azimut_diff = this->target_azimut - (360 - (this->plane->azimuthf / 10.0f));
 
@@ -83,9 +104,6 @@ void SCPilot::AutoPilot() {
     } else if (azimut_diff < -180.0f) {
         azimut_diff += 360.0f;
     }
-
-    const float max_twist_angle = 80.0f;
-    const float Kp = 3.0f;
 
     float target_twist_angle = Kp * azimut_diff;
     float current_twist = 360 - this->plane->twist / 10.0f;

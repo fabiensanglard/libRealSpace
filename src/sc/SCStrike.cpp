@@ -676,6 +676,7 @@ void SCStrike::RenderMenu() {
     static bool show_simulation_config = false;
     static bool azymuth_control = false;
     static bool show_ai = false;
+    static bool go_to_nav = false;
     static int altitude = 0;
     static int azimuth = 0;
     static int throttle = 0;
@@ -755,7 +756,22 @@ void SCStrike::RenderMenu() {
         if (ImGui::Button("Autopilot")) {
             this->pilot.plane = this->player_plane;
             this->autopilot = !this->autopilot;
+            go_to_nav = false;
         }
+        if (go_to_nav) {
+            this->pilot.plane = this->player_plane;
+            this->pilot.target_speed = -speed;
+            this->pilot.SetTargetWaypoint(this->current_mission->waypoints[this->nav_point_id]->spot->position);
+            this->pilot.AutoPilot();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Go To Waypoint")) {
+            this->pilot.plane = this->player_plane;
+            this->pilot.SetTargetWaypoint(this->current_mission->waypoints[this->nav_point_id]->spot->position);
+            go_to_nav = !go_to_nav;
+            this->autopilot = false;
+        }
+        
         ImGui::PopStyleColor(3);
         ImGui::PopID();
 

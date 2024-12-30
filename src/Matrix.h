@@ -81,17 +81,23 @@ public:
         return result;
     }
 
-    
+    static Vector3D Cross(const Vector3D& v1, const Vector3D& v2) {
+        return Vector3D{
+            v1.y * v2.z - v1.z * v2.y,
+            v1.z * v2.x - v1.x * v2.z,
+            v1.x * v2.y - v1.y * v2.x
+        };
+    };
+
     inline void Normalize(void){
         float ilength;
-        
         ilength = DotProduct(this);
-        
         float invSqrtLength = InvSqrt(ilength);
-        
         Scale(invSqrtLength);
     }
-    
+    inline float Length() {
+        return sqrtf(this->x * this->x + this->y * this->y + this->z * this->z);
+    }
     
     inline float DotProduct(Vector3D* other){
         
@@ -113,12 +119,21 @@ public:
         }
         return *this;
     };
+    inline Vector3D operator+=(const Vector3D& other) {
+        this->x = this->x + other.x;
+        this->y = this->y + other.y;
+        this->z = this-> z + other.z;
+        return *this;
+    };
     inline Vector3D operator+(const Vector3D& other) {
         return Vector3D(this->x + other.x, this->y + other.y, this->z + other.z);
     };
     inline Vector3D operator-(const Vector3D& other) {
         return Vector3D(this->x - other.x, this->y - other.y, this->z - other.z);
     };
+    inline Vector3D operator-() {
+        return Vector3D(-this->x, -this->y, -this->z);
+    }
     inline Vector3D operator*(const float& factor) {
         return Vector3D(this->x * factor, this->y * factor, this->z * factor);
     }
