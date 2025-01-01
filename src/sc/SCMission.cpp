@@ -152,6 +152,12 @@ void SCMission::loadMission() {
         SCProg *p = new SCProg(this->player, *prg, this);
         p->execute();
     }
+    for (auto spot: this->mission->mission_data.spots) {
+        if (spot->area_id != -1) {
+            AREA *ar = this->mission->mission_data.areas[spot->area_id];
+            spot->position += ar->position;
+        }
+    }
     
 }
 

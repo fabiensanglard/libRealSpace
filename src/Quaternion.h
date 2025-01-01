@@ -31,6 +31,7 @@ class Quaternion{
     
     void Normalize(void);
     void GetAngles(float& pitch, float& yaw, float& roll);
+    void fromEulerAngles(float pitch, float roll);
             
     private:
     

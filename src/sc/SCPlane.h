@@ -249,7 +249,7 @@ public:
     float yaw{0.0f};
     Vector3D velocity {0.0f, 0.0f, 0.0f};
     Vector3D position {0.0f, 0.0f, 0.0f};
-    Vector3D acceleration {0.0f, 0.0f, 0.0f};
+    Vector3D forward = {0, 0, -1};
     
     /* my ptw matrix, temp matrix	*/
     Matrix ptw;

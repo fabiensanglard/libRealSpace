@@ -35,9 +35,14 @@ SCPilot::SCPilot() {
 SCPilot::~SCPilot() {}
 
 void SCPilot::SetTargetWaypoint(Vector3D waypoint) {
+
     float azimuth = atan2(waypoint.z - plane->z, waypoint.x - plane->x);
     target_azimut = azimuth * 180.0f / (float) M_PI;
-    
+    if (target_azimut < 0) {
+        target_azimut += 360.0f;
+    } else if (target_azimut > 360.0f) {
+        target_azimut -= 360.0f;
+    }
     if (waypoint.y > plane->y) {
         target_climb = waypoint.y;
     } else {
@@ -78,22 +83,12 @@ void SCPilot::AutoPilot() {
     float horizontal_distance = 1000.0f;
     float vertical_distance = this->target_climb - this->plane->y;
     float target_elevation_rad = atan2(vertical_distance, horizontal_distance);
-    float target_elevation = target_elevation_rad * 180.0f / (float) M_PI;
 
-
-    /*if (target_elevation > 180.0f) {
-        target_elevation -= 360.0f;
-    } else if (target_elevation < -180.0f) {
-        target_elevation += 360.0f;
-    }
-    target_elevation = target_elevation - 90.0f;*/
-    
-    target_elevation = std::clamp(target_elevation, -75.0f, 75.0f);
     
     float dt = 0.1f; // Time step, adjust as needed
-    float control_signal = altitudeController.calculate(target_elevation, this->plane->elevationf / 10.0f, dt);
-    this->plane->control_stick_y = std::clamp(static_cast<int>(control_signal), -100, 100);
-
+    float control_signal = altitudeController.calculate(target_elevation_rad, this->plane->pitch, dt);
+    
+    this->plane->pitch = target_elevation_rad;
     const float max_twist_angle = 80.0f;
     const float Kp = 3.0f;
 
@@ -105,38 +100,7 @@ void SCPilot::AutoPilot() {
         azimut_diff += 360.0f;
     }
 
-    float target_twist_angle = Kp * azimut_diff;
-    float current_twist = 360 - this->plane->twist / 10.0f;
+    float target_yaw = this->target_azimut * M_PI / 180.0f;
+    this->plane->yaw = target_yaw;
 
-    if (current_twist > 180.0f) {
-        current_twist -= 360.0f;
-    } else if (current_twist < -180.0f) {
-        current_twist += 360.0f;
-    }
-
-    if (target_twist_angle > 180.0f) {
-        target_twist_angle -= 360.0f;
-    } else if (target_twist_angle < -180.0f) {
-        target_twist_angle += 360.0f;
-    }
-
-    if (target_twist_angle > max_twist_angle) {
-        target_twist_angle = max_twist_angle;
-    } else if (target_twist_angle < -max_twist_angle) {
-        target_twist_angle = -max_twist_angle;
-    }
-
-    if (azimut_diff > 0) {
-        if (current_twist - target_twist_angle < 0) {
-            this->plane->control_stick_x = 50;
-        } else {
-            this->plane->control_stick_x = 0;
-        }
-    } else {
-        if (current_twist - target_twist_angle > 0) {
-            this->plane->control_stick_x = -50;
-        } else {
-            this->plane->control_stick_x = 0;
-        }
-    }
 }

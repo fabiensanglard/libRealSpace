@@ -8,6 +8,12 @@
 #include "precomp.h"
 #include "SDL2/SDL_opengl_glext.h"
 
+// Définition des constantes physiques
+const float GRAVITY = 9.81f; // m/s^2
+const float AIR_DENSITY = 1.225f; // kg/m^3
+const float DRAG_COEFFICIENT = 0.47f;
+const float LIFT_COEFFICIENT = 0.5f; // Doit être ajusté en fonction de la forme de l'objet
+const float WING_AREA = 1.0f; // m^2
 
 /**
  * \brief Computes sine and cosine of angle a, given in 10th of degree.
@@ -755,71 +761,73 @@ void SCPlane::Simulate() {
     this->SimplifiedSimulate();
 }
 void SCPlane::SimplifiedSimulate() {
-        // Time step for the simulation
-    float dt = 0.1f; // Adjust as needed
 
-    // Update the plane's velocity based on control inputs
-    float pitch_input = this->control_stick_y / 100.0f;
-    float roll_input = this->control_stick_x / 100.0f;
-
-    // Update the plane's orientation based on pitch and roll inputs
-    this->pitch += pitch_input * dt;
-    this->roll += roll_input * dt;
+    uint32_t current_time = SDL_GetTicks();
+    uint32_t elapsed_time = (current_time - this->last_time) / 1000;
+    int newtps = 0;
+    if (elapsed_time > 1) {
+        uint32_t ticks = this->tick_counter - this->last_tick;
+        newtps = ticks / elapsed_time;
+        this->last_time = current_time;
+        this->last_tick = this->tick_counter;
+        if (newtps > this->tps / 2) {    
+            this->tps = newtps;
+        }
+    }
+    float deltaTime = 1.0f / (float) this->tps;
     
-
-    // Calculate the forward, right, and up vectors based on the plane's orientation
-    Vector3D forward = Vector3D(cos(this->yaw) * cos(this->pitch), sin(this->pitch), sin(this->yaw) * cos(this->pitch));
-    Vector3D right = Vector3D(sin(this->yaw), 0, -cos(this->yaw));
-    Vector3D up = Vector3D::Cross(forward, right);
-
-    // Update the plane's velocity based on the forward vector and throttle
-    float throttle = this->thrust / 100.0f;
-    this->velocity = this->velocity + forward * throttle * dt;
-
-    // Update the plane's position based on its velocity
-    this->position += (this->velocity * dt);
-
-    // Update the plane's acceleration based on the forces acting on it
-    Vector3D gravity = Vector3D(0, -9.81f, 0); // Gravity force
-    Vector3D lift = up * (this->velocity.Length() * this->velocity.Length() * 0.5f); // Simplified lift force
+    float pitch_input = (this->control_stick_y / 100.0f) * deltaTime;
+    float roll_input = (-this->control_stick_x / 100.0f) * deltaTime;
     
-    float max_lift = 1000.0f; // Adjust this value as needed
-    lift = lift * (std::clamp(lift.Length(), 0.0f, max_lift) / lift.Length());
+    Matrix rottm;
+    rottm.Identity();
+    rottm.translateM(this->x, this->y, this->z);
 
-    Vector3D drag = -this->velocity * (this->velocity.Length() * 0.1f); // Simplified drag force
+    rottm.rotateM(this->yaw, 0, 1, 0);
+    rottm.rotateM(this->pitch, 1, 0, 0);
+    rottm.rotateM(this->roll, 0, 0, 1);
 
-    this->acceleration = (lift + gravity + drag) * this->inverse_mass;
+    rottm.rotateM(pitch_input, 1, 0, 0);
+    rottm.rotateM(roll_input, 0, 0, 1);
+    this->vz = - (.01f / this->tps / this->tps * this->thrust * this->Mthrust);
+    rottm.translateM(this->vx, this->vy, this->vz);
 
-    // Update the plane's velocity based on its acceleration
-    this->velocity += this->acceleration * dt;
-
-    // Update the plane's position based on its velocity
-    this->position += this->velocity * dt;
-
-    // Update the yaw based on the new velocity direction and roll angle
-    if (std::abs(this->roll) > 0.1f) { // If roll is significant
-        this->yaw += pitch_input * dt * cos(this->roll);
-    } else {
-        this->yaw = atan2(this->velocity.z, this->velocity.x);
+    this->pitch = -asinf(rottm.v[2][1]);
+    float temp = cosf(this->pitch);
+    if (temp != 0.0) {
+        float sincosas = rottm.v[2][0] / temp;
+        if (sincosas > 1.0f) {
+            sincosas = 1.0f;
+        } else if (sincosas < -1.0f) {
+            sincosas = -1;
+        }
+        this->yaw = asinf(sincosas);
+        if (rottm.v[2][2] < 0.0f) {
+            this->yaw = (float)M_PI - this->yaw;
+        }
+        if (this->yaw < 0.0f) {
+            this->yaw += 2.0f*(float)M_PI;
+        }
+        if (this->yaw > 2.0f*(float)M_PI) {
+            this->yaw -= 2.0f*(float)M_PI;
+        }
+        this->roll = asinf(rottm.v[0][1] / temp);
+        if (rottm.v[1][1] < 0.0f) {
+            /* if upside down	*/
+            this->roll = (float)M_PI - this->roll;
+        }
+        if (this->roll < 0) {
+            this->roll += 2.0f*(float)M_PI;
+        }
     }
 
-    this->x = this->position.x;
-    this->y = this->position.y;
-    this->z = this->position.z;
-    this->vx = this->velocity.x;
-    this->vy = this->velocity.y;
-    this->vz = this->velocity.z;
-    this->ax = this->acceleration.x;
-    this->ay = this->acceleration.y;
-    this->az = this->acceleration.z;
+    this->x = rottm.v[3][0];
+    this->y = rottm.v[3][1];
+    this->z = rottm.v[3][2];
 
-    this->airspeed = -(int)(this->velocity.Length() * 1.94384f); // Convert m/s to knots
-    this->climbspeed = (short)(this->velocity.y * 3.28084f); // Convert m/s to ft/s
-    this->twist = this->roll * 180.0f / M_PI;
-    this->elevationf = this->pitch * 180.0f / M_PI;
-    this->azimuthf = this->yaw * 180.0f / M_PI;
-
-    // Update the tick counter
+    this->azimuthf = (this->yaw * 180.0f / M_PI) * 10.0f;
+    this->elevationf = (this->pitch * 180.0f / M_PI) * 10.0f;
+    this->twist = (this->roll * 180.0f / M_PI) * 10.0f;
     this->tick_counter++;
 }
 /**
