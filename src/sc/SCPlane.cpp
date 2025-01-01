@@ -789,7 +789,8 @@ void SCPlane::SimplifiedSimulate() {
 
     rottm.rotateM(pitch_input, 1, 0, 0);
     rottm.rotateM(roll_input, 0, 0, 1);
-    this->vz = - (.01f / this->tps / this->tps * this->thrust * this->Mthrust);
+    this->vz = this->vz - ((.01f / this->tps / this->tps * this->thrust * this->Mthrust) + (DRAG_COEFFICIENT * this->vz)) * deltaTime;
+    this->vz = std::clamp(this->vz, -25.0f, 25.0f);
     rottm.translateM(this->vx, this->vy, this->vz);
 
     this->pitch = -asinf(rottm.v[2][1]);

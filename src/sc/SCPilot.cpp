@@ -37,7 +37,7 @@ SCPilot::~SCPilot() {}
 void SCPilot::SetTargetWaypoint(Vector3D waypoint) {
 
     float azimuth = atan2(waypoint.z - plane->z, waypoint.x - plane->x);
-    target_azimut = azimuth * 180.0f / (float) M_PI;
+    target_azimut = ((float) M_2_PI - azimuth) * 180.0f / (float) M_PI;
     if (target_azimut < 0) {
         target_azimut += 360.0f;
     } else if (target_azimut > 360.0f) {
@@ -88,19 +88,54 @@ void SCPilot::AutoPilot() {
     float dt = 0.1f; // Time step, adjust as needed
     float control_signal = altitudeController.calculate(target_elevation_rad, this->plane->pitch, dt);
     
-    this->plane->pitch = target_elevation_rad;
-    const float max_twist_angle = 80.0f;
-    const float Kp = 3.0f;
-
-    float azimut_diff = this->target_azimut - (360 - (this->plane->azimuthf / 10.0f));
-
-    if (azimut_diff > 180.0f) {
-        azimut_diff -= 360.0f;
-    } else if (azimut_diff < -180.0f) {
-        azimut_diff += 360.0f;
+    if (this->plane->pitch > target_elevation_rad) {
+        if (std::abs(target_elevation_rad) > 0.01f) {
+            this->plane->pitch -= 0.01f;
+        } else {
+            this->plane->pitch = target_elevation_rad;
+        } 
+    } else if (this->plane->pitch < target_elevation_rad) {
+        if (std::abs(target_elevation_rad) > 0.01f) {
+            this->plane->pitch += 0.01f;
+        } else {
+            this->plane->pitch = target_elevation_rad;
+        }
     }
 
-    float target_yaw = this->target_azimut * M_PI / 180.0f;
-    this->plane->yaw = target_yaw;
-
+    float target_yaw = (float) (this->target_azimut * M_PI / 180.0f);
+    float target_roll = 0.0f;
+    if (this->plane->yaw > target_yaw) {
+        target_roll = -0.5f;
+        if (this->plane->roll > target_roll) {
+            this->plane->roll -= 0.01f;
+        }
+        if (std::abs(this->plane->yaw-target_yaw) > 0.01f) {
+            this->plane->yaw -= 0.01f;
+        } else {
+            this->plane->yaw = target_yaw;
+        }
+    } else if (this->plane->yaw < target_yaw) {
+        target_roll = 0.5f;
+        if (this->plane->roll < target_roll) {
+            this->plane->roll += 0.01f;
+        }
+        if (std::abs(this->plane->yaw-target_yaw) > 0.01f) {
+            this->plane->yaw += 0.01f;
+        } else {
+            this->plane->yaw = target_yaw;
+        }
+    } 
+    
+    if (this->plane->yaw == target_yaw) {
+        target_roll = 0.0f;
+        if (this->plane->roll < target_roll) {
+            this->plane->roll += 0.01f;
+        } else if (this->plane->roll > target_roll) {
+            this->plane->roll -= 0.01f;
+        }
+    }
+    if (std::abs(target_roll - this->plane->roll) < 0.01f) {
+        this->plane->roll = target_roll;
+    }
+    this->plane->roll = std::clamp(this->plane->roll, -0.5f, 0.5f);
 }

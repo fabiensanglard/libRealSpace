@@ -169,25 +169,15 @@ void SCMission::update() {
         if (ai_actor->plane == nullptr) {
             continue;
         }
+        if (ai_actor->object->area_id != 255) {
+            AREA *ar = this->mission->mission_data.areas[ai_actor->object->area_id];
+            ai_actor->pilot->SetTargetWaypoint(ar->position);
+        }
         ai_actor->plane->Simulate();
         ai_actor->pilot->AutoPilot();
         Vector3D npos;
         ai_actor->plane->getPosition(&npos);
-        if (ai_actor->object->area_id != 255) {
-            AREA *ar = this->mission->mission_data.areas[ai_actor->object->area_id];
-
-            float minX = (float) ar->position.x-(ar->AreaWidth/2);
-            float minZ = (float) ar->position.z-(ar->AreaWidth/2);
-            float maxX = (float) ar->position.x+(ar->AreaWidth/2);
-            float maxZ = (float) ar->position.z+(ar->AreaWidth/2);
-
-            if (npos.x < minX || npos.x > maxX || npos.z < minZ || npos.z > maxZ) {
-                ai_actor->pilot->target_azimut = ai_actor->pilot->target_azimut + 180;
-                if (ai_actor->pilot->target_azimut > 360) {
-                    ai_actor->pilot->target_azimut = ai_actor->pilot->target_azimut - 360;
-                }
-            }
-        }
+        
         ai_actor->object->position.x = npos.x;
         ai_actor->object->position.z = npos.z;
         ai_actor->object->position.y = npos.y;
