@@ -4,7 +4,11 @@ bool SCMissionActors::execute() {
     return true;
 }
 bool SCMissionActors::takeOff(uint8_t arg) {
-    return true;
+    if (this->pilot->target_climb == 0) {
+        this->pilot->target_speed = -15;
+        this->pilot->target_climb = this->plane->y + 300;
+    }
+    return (std::abs(this->plane->y-this->pilot->target_climb) < 10.0f);
 }
 bool SCMissionActors::land(uint8_t arg) {
     return true;
@@ -26,6 +30,18 @@ bool SCMissionActors::deactivate(uint8_t arg) {
 }
 bool SCMissionActors::setMessage(uint8_t arg) {
     return true;
+}
+bool SCMissionActors::followAlly(uint8_t arg) {
+    Vector3D wp;
+    for (auto actor: this->mission->actors) {
+        if (actor->actor_id == arg) {
+            wp.x = actor->plane->x;
+            wp.y = actor->plane->y;
+            wp.z = actor->plane->z;
+            this->pilot->SetTargetWaypoint(wp);
+            return true;
+        }
+    }
 }
 
 

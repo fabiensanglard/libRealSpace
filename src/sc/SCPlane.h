@@ -250,7 +250,7 @@ public:
     Vector3D velocity {0.0f, 0.0f, 0.0f};
     Vector3D position {0.0f, 0.0f, 0.0f};
     Vector3D forward = {0, 0, -1};
-    
+    bool simple_simulation{true};
     /* my ptw matrix, temp matrix	*/
     Matrix ptw;
     Matrix incremental;

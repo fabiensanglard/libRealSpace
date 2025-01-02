@@ -15,9 +15,9 @@ private:
     bool alive{true};
 public:
 
-    int target_speed;
-    int target_climb;
-    float target_azimut;
+    int target_speed{0};
+    int target_climb{0};
+    float target_azimut{0.0f};
 
     SCPlane* plane{nullptr};
     SCPilot();

@@ -67,8 +67,9 @@ void SCMission::loadMission() {
                 actor->mission = this;
                 for (auto prg_id: actor->object->progs_id) {
                     if (prg_id != 255 && prg_id < this->mission->mission_data.prog.size()) {
-                        std::vector<PROG> *prog = this->mission->mission_data.prog[prg_id];
-                        actor->prog.push_back(prog);
+                        for (auto op: *this->mission->mission_data.prog[prg_id]) {
+                            actor->prog.push_back(op);
+                        }
                     }
                 }
                 if (cast->profile != nullptr && cast->profile->ai.isAI) {
@@ -78,6 +79,7 @@ void SCMission::loadMission() {
                                                  23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
                                                  part->position.y, part->position.z);
                         actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
+                        actor->plane->yaw = (360 - part->azymuth) * M_PI / 180.0f;
                         actor->plane->object = part;
                         if (this->area->getY(part->position.x, part->position.z) == part->position.y) {
                             actor->plane->on_ground = true;
@@ -91,12 +93,16 @@ void SCMission::loadMission() {
                             actor->plane->SetThrottle(100);
                             actor->pilot->target_climb = (int) (part->position.y);
                             actor->plane->vz = -20;
+                            actor->pilot->target_azimut = actor->plane->azimuthf / 10.0f;
+                            actor->pilot->target_speed = -20;
                         } else {
-                            actor->pilot->target_climb = 10000;
+                            actor->plane->SetThrottle(0);
+                            actor->pilot->target_climb = 0;
+                            actor->plane->vz = 0;
+                            actor->pilot->target_azimut = actor->plane->azimuthf / 10.0f;
+                            actor->pilot->target_speed = 0;
                         }
                         actor->pilot->plane = actor->plane;
-                        actor->pilot->target_azimut = (int) (actor->plane->azimuthf / 10.0f);
-                        actor->pilot->target_speed = -20;
                     }
                     this->actors.push_back(actor);
                 } else if (cast->profile != nullptr && cast->actor == "PLAYER") {
@@ -104,7 +110,10 @@ void SCMission::loadMission() {
                                                  23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
                                                  part->position.y, part->position.z);
                     actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
+                    actor->plane->simple_simulation = false;
+                    actor->plane->yaw = (360 - part->azymuth) * M_PI / 180.0f;
                     actor->plane->object = part;
+                    this->actors.push_back(actor);
                     this->player = actor;
                 }
                 cpt_actor++;
@@ -129,8 +138,9 @@ void SCMission::loadMission() {
         actor->profile = nullptr;
         for (auto prg_id: area_actor.progs_id) {
             if (prg_id != 255 && prg_id != 0 && prg_id < this->mission->mission_data.prog.size()) {
-                std::vector<PROG> *prog = this->mission->mission_data.prog[prg_id];
-                actor->prog.push_back(prog);
+                for (auto prg: *this->mission->mission_data.prog[prg_id]) {
+                    actor->prog.push_back(prg);
+                }
             }
         }
         this->actors.push_back(actor);
@@ -148,8 +158,9 @@ void SCMission::loadMission() {
             this->enemies.push_back(enemis);
         }
     }
-    for (auto prg: this->player->prog) {
-        SCProg *p = new SCProg(this->player, *prg, this);
+    
+    if (this->player->prog.size() > 0) {
+        SCProg *p = new SCProg(this->player, this->player->prog, this);
         p->execute();
     }
     for (auto spot: this->mission->mission_data.spots) {
@@ -173,8 +184,13 @@ void SCMission::update() {
             AREA *ar = this->mission->mission_data.areas[ai_actor->object->area_id];
             ai_actor->pilot->SetTargetWaypoint(ar->position);
         }
+        if (ai_actor->prog.size() > 0) {
+            SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
+            p->execute();
+        }
         ai_actor->plane->Simulate();
         ai_actor->pilot->AutoPilot();
+        
         Vector3D npos;
         ai_actor->plane->getPosition(&npos);
         

@@ -758,7 +758,11 @@ void SCPlane::OrigSimulate() {
 
 
 void SCPlane::Simulate() {
-    this->SimplifiedSimulate();
+    if (simple_simulation) {
+        this->SimplifiedSimulate();
+    } else {
+        this->OrigSimulate();
+    }
 }
 void SCPlane::SimplifiedSimulate() {
 
@@ -774,6 +778,7 @@ void SCPlane::SimplifiedSimulate() {
             this->tps = newtps;
         }
     }
+    this->fps_knots = this->tps * (3600.0f / 6082.0f);
     float deltaTime = 1.0f / (float) this->tps;
     
     float pitch_input = (this->control_stick_y / 100.0f) * deltaTime;
@@ -826,6 +831,7 @@ void SCPlane::SimplifiedSimulate() {
     this->y = rottm.v[3][1];
     this->z = rottm.v[3][2];
 
+    this->airspeed = -(int)(this->fps_knots * this->vz);
     this->azimuthf = (this->yaw * 180.0f / M_PI) * 10.0f;
     this->elevationf = (this->pitch * 180.0f / M_PI) * 10.0f;
     this->twist = (this->roll * 180.0f / M_PI) * 10.0f;

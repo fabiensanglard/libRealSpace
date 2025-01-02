@@ -145,6 +145,13 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_F8:
             this->camera_mode = View::MISSILE_CAM;
             break;
+        case SDLK_F9:
+            if (this->camera_mode != View::OBJECT) {
+                this->camera_mode = View::OBJECT;
+            } else {
+                this->current_object_to_view = (this->current_object_to_view + 1) % this->current_mission->actors.size();
+            }
+            break;
         case SDLK_KP_8:
             this->camera_pos.z += 1;
             break;
@@ -425,14 +432,12 @@ void SCStrike::SetMission(char const *missionName) {
 
     camera = Renderer.GetCamera();
     camera->SetPosition(&newPosition);
-    yaw = 0.0f;
     this->current_target = 0;
     this->target = this->current_mission->enemies[this->current_target]->object;
     this->nav_point_id = 0;
-    this->player_plane =
-        new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f, 23000.0f, 32.0f, .93f, 120,
-                    &this->area, newPosition.x, newPosition.y, newPosition.z);
+    this->player_plane = this->current_mission->player->plane;
     this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
+    this->player_plane->yaw = (360 - playerCoord->azymuth) * (float) M_PI / 180.0f;
     this->player_plane->object = playerCoord;
     if (this->area.getY(newPosition.x, newPosition.z) < newPosition.y) {
         this->player_plane->SetThrottle(100);
@@ -530,6 +535,14 @@ void SCStrike::RunFrame(void) {
         camera->LookAt(&targetPos);
     }
     break;
+    case View::OBJECT: {
+        Vector3D obj_pos = this->current_mission->actors[this->current_object_to_view]->object->position;
+        Vector3D pos = {obj_pos.x + this->camera_pos.x, obj_pos.y + this->camera_pos.y,
+                        obj_pos.z + this->camera_pos.z};
+        camera->SetPosition(&pos);
+        camera->LookAt(&obj_pos);
+    }
+    break;
     case View::MISSILE_CAM: {
         if (this->player_plane->weaps_object.size() == 0) {
             this->camera_mode = View::FRONT;
@@ -607,6 +620,7 @@ void SCStrike::RunFrame(void) {
         break;
     case View::MISSILE_CAM:
     case View::TARGET:
+    case View::OBJECT:
     case View::FOLLOW:
         this->player_plane->Render();
         break;
@@ -695,7 +709,7 @@ void SCStrike::RenderMenu() {
         }
         int sceneid = -1;
         ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s",
-                    this->player_plane->airspeed, this->newPosition.y * 3.6,
+                    this->player_plane->airspeed, this->newPosition.y,
                     360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
                     this->current_mission->mission->mission_data.name.c_str(), this->miss_file_name.c_str());
         ImGui::EndMainMenuBar();
@@ -705,8 +719,12 @@ void SCStrike::RenderMenu() {
         for (auto aiPlane : ai_planes) {
             ImGui::Text("Plane %s", aiPlane->object->member_name.c_str());
             ImGui::SameLine();
-            ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f", aiPlane->plane->airspeed, aiPlane->plane->y * 3.6,
+            ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTarget H %.0f", aiPlane->plane->airspeed, aiPlane->plane->y,
                         360 - (aiPlane->plane->azimuthf / 10.0f), aiPlane->plane->tps);
+            ImGui::SameLine();
+            if (aiPlane->pilot != nullptr) {
+                ImGui::Text("target heading %.0f", aiPlane->pilot->target_azimut);
+            }
             ImGui::SameLine();
             ImGui::Text("X %.0f Y %.0f Z %.0f", aiPlane->object->position.x, aiPlane->object->position.y, aiPlane->object->position.z);
         }
@@ -1229,9 +1247,9 @@ void SCStrike::RenderMenu() {
                     }
                     if (ImGui::TreeNode("PROGS")) {
                         int cpt=0;
-                        for (auto prog : actor->prog) {
-                            if (ImGui::TreeNode((void *)(intptr_t)prog, "Prog %d", cpt)) {
-                                for (auto opcodes: *prog) {
+                        if (actor->prog.size() > 0) {
+                            if (ImGui::TreeNode((void *)(intptr_t)&actor->prog, "Prog %d", cpt)) {
+                                for (auto opcodes: actor->prog) {
                                     ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
                                 }
                                 ImGui::TreePop();
