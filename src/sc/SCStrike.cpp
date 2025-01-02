@@ -719,7 +719,7 @@ void SCStrike::RenderMenu() {
         for (auto aiPlane : ai_planes) {
             ImGui::Text("Plane %s", aiPlane->object->member_name.c_str());
             ImGui::SameLine();
-            ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTarget H %.0f", aiPlane->plane->airspeed, aiPlane->plane->y,
+            ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f", aiPlane->plane->airspeed, aiPlane->plane->y,
                         360 - (aiPlane->plane->azimuthf / 10.0f), aiPlane->plane->tps);
             ImGui::SameLine();
             if (aiPlane->pilot != nullptr) {
