@@ -13,6 +13,7 @@
 class SCPilot {
 private:
     bool alive{true};
+    bool turning{false};
 public:
 
     int target_speed{0};

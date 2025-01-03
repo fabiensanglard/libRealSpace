@@ -38,7 +38,10 @@ void SCPilot::SetTargetWaypoint(Vector3D waypoint) {
     Vector2D weapoint_direction = {waypoint.x - plane->x,
                                    waypoint.z - plane->z};
     float az = (atan2f((float)weapoint_direction.y, (float)weapoint_direction.x) * 180.0f / (float)M_PI);
-    
+    if (turning) {
+        return;
+    }
+    turning = true;
     az -= 360.0f;
     az += 90.0f;
     if (az > 360.0f) {
@@ -48,12 +51,7 @@ void SCPilot::SetTargetWaypoint(Vector3D waypoint) {
         az += 360.0f;
     }
     this->target_azimut = az;
-    if (az < 0.8f) {
-        this->target_azimut += 2.0f;
-    }
-    if (this->target_azimut == 180.0f) {
-        this->target_azimut += 360.0f;
-    }
+    
     if (waypoint.y > plane->y) {
         target_climb = waypoint.y;
     } else {
@@ -136,11 +134,11 @@ void SCPilot::AutoPilot() {
         }
     } 
     
-    if (this->plane->yaw == target_yaw) {
+    if (std::abs(this->plane->yaw-target_yaw) < 0.1f) {
         target_roll = 0.0f;
-       
+        this->plane->yaw = target_yaw;
         this->plane->roll = 0.0f;
-        
+        turning = false;
     }
     
 }
