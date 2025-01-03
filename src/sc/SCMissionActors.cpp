@@ -39,6 +39,18 @@ bool SCMissionActors::followAlly(uint8_t arg) {
             wp.y = actor->plane->y;
             wp.z = actor->plane->z;
             this->pilot->SetTargetWaypoint(wp);
+            Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
+            Vector3D diff = wp - position;
+            float dist = diff.Length();
+            if (!actor->plane->on_ground) {
+                this->pilot->target_climb = (int) wp.y;
+                if (dist > 1000.0f) {
+                    this->pilot->target_speed = -60;
+                } else if (dist > 300.0f) {
+                    this->pilot->target_speed = (int) actor->plane->vz;
+                }
+            }
+            
             return true;
         }
     }
