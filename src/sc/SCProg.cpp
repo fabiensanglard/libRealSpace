@@ -92,7 +92,7 @@ void SCProg::execute() {
                     objective_flag = this->actor->setMessage(prog.arg);
                 }
             break;
-            case op_SET_OBJ_FOLLOW_ALLY:
+            case OP_SET_OBJ_FOLLOW_ALLY:
                 if (exec) {
                     printf("FOLLOW ALLY %d\n", prog.arg);
                     objective_flag = this->actor->followAlly(prog.arg);

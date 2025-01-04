@@ -733,9 +733,12 @@ void SCStrike::RenderMenu() {
             ImGui::SameLine();
             if (aiPlane->pilot != nullptr) {
                 ImGui::Text("target heading %.0f", aiPlane->pilot->target_azimut);
+                ImGui::SameLine();
+                ImGui::Text("AI OBJ %d", aiPlane->pilot->current_objective);
             }
             ImGui::SameLine();
             ImGui::Text("X %.0f Y %.0f Z %.0f", aiPlane->object->position.x, aiPlane->object->position.y, aiPlane->object->position.z);
+           
         }
         ImGui::End();
     }

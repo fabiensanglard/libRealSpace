@@ -17,7 +17,7 @@ enum prog_op {
     OP_SET_OBJ_FLY_TO_AREA = 166,
     OP_SET_OBJ_DESTROY_TARGET = 167,
     OP_SET_OBJ_DEFEND_TARGET = 168,
-    op_SET_OBJ_FOLLOW_ALLY = 170,
+    OP_SET_OBJ_FOLLOW_ALLY = 170,
     OP_SET_MESSAGE = 171,
     OP_DEACTIVATE_OBJ = 190,
     OP_85_UNKNOWN = 85,
@@ -34,7 +34,7 @@ public:
     SCPlane *plane{nullptr};
     SCPilot *pilot{nullptr};
     SCMission *mission{nullptr};
-
+    prog_op current_objective;
     virtual bool execute();
     virtual bool takeOff(uint8_t arg); 
     virtual bool land(uint8_t arg);
