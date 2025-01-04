@@ -136,6 +136,7 @@ void SCCockpit::RenderHeading() {
     this->hud->small_hud->HEAD->SHAP->SetPosition(&heading_pos);
 
     std::vector<Point2D> heading_points;
+    std::string txt;
     heading_points.reserve(36);
     for (int i = 0; i < 36; i++) {
         Point2D p;
@@ -163,7 +164,8 @@ void SCCockpit::RenderHeading() {
             if (toprint == 36) {
                 toprint = 0;
             }
-            VGA.PrintText(this->font, &txt_pos, (char *)std::to_string(toprint).c_str(), 0, 0, 3, 2, 2);
+            txt = std::to_string(toprint);
+            VGA.PrintText(this->font, &txt_pos, (char *)txt.c_str(), 0, 0, txt.length(), 2, 2);
         }
         if (headcpt % 3 == 0) {
             Point2D headspeed;
@@ -201,6 +203,7 @@ void SCCockpit::RenderHeading() {
 }
 void SCCockpit::RenderSpeed() {
     std::vector<Point2D> speed_band_roll;
+    std::string txt;
     speed_band_roll.reserve(30);
     for (int i = 0; i < 150; i++) {
         Point2D p;
@@ -214,7 +217,8 @@ void SCCockpit::RenderSpeed() {
         p.x = 118;
         p.y = (29 + this->hud->small_hud->ASPD->SHAP->GetHeight() / 2) + p.y - (int)this->speed;
         if (p.y > 30 && p.y < 29 + this->hud->small_hud->ASPD->SHAP->GetHeight()) {
-            VGA.PrintText(this->font, &p, (char *)std::to_string(cpt_speed).c_str(), 0, 0, 3, 2, 2);
+            txt = std::to_string(cpt_speed);
+            VGA.PrintText(this->font, &p, (char *)txt.c_str(), 0, 0, txt.length(), 2, 2);
         }
         if (cpt_speed % 5 == 0) {
             if (p.y > 10 && p.y < 29 + this->hud->small_hud->ASPD->SHAP->GetHeight()) {
@@ -229,9 +233,11 @@ void SCCockpit::RenderSpeed() {
     }
 
     Point2D speed_text = {125, 35 + this->hud->small_hud->ASPD->SHAP->GetHeight()};
-    VGA.PrintText(this->font, &speed_text, (char *)std::to_string(this->speed).c_str(), 0, 0, 3, 2, 2);
+    txt = std::to_string((int)this->speed);
+    VGA.PrintText(this->font, &speed_text, (char *)txt.c_str(), 0, 0, txt.length(), 2, 2);
     Point2D throttle_text = {125, speed_text.y + 5};
-    VGA.PrintText(this->font, &throttle_text, (char *)std::to_string(this->throttle).c_str(), 0, 0, 3, 2, 2);
+    txt = std::to_string(this->throttle);
+    VGA.PrintText(this->font, &throttle_text, (char *)txt.c_str(), 0, 0, txt.length(), 2, 2);
     Point2D flaps = {125, throttle_text.y + 5};
     if (this->flaps) {
         VGA.PrintText(this->font, &flaps, "FLAPS", 0, 0, 5, 2, 2);
@@ -267,7 +273,7 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
     int bottom = by2;
     int left = bx1 + 5;
     int ligne_width = width - 10;
-
+    std::string txt;
     std::vector<HudLine> *hline = new std::vector<HudLine>();
     hline->resize(36);
     for (int i = 0; i < 36; i++) {
@@ -298,17 +304,17 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
 
         l2.start = rotateAroundPoint(l2.start, center, this->roll * (float)M_PI / 180.0f);
         l2.end = rotateAroundPoint(l2.end, center, this->roll * (float)M_PI / 180.0f);
-
+        txt = std::to_string(ladder);
         if (l.start.x > bx1 && l.start.x < bx2 && l.start.y > by1 && l.start.y < by2) {
             Point2D p = l.start;
             p.y -= 2;
-            VGA.PrintText(this->font, &p, (char *)std::to_string(ladder).c_str(), 0, 0, 3, 2, 2);
+            VGA.PrintText(this->font, &p, (char *)txt.c_str(), 0, 0, txt.length(), 2, 2);
         }
         if (l2.end.x > bx1 && l2.end.x < bx2 && l2.end.y > by1 && l2.end.y < by2) {
             Point2D p = l2.end;
             p.x = p.x - 8;
             p.y -= 2;
-            VGA.PrintText(this->font, &p, (char *)std::to_string(ladder).c_str(), 0, 0, 3, 2, 2);
+            VGA.PrintText(this->font, &p, (char *)txt.c_str(), 0, 0, txt.length(), 2, 2);
         }
         int color = 223;
         if (ladder == 0) {
@@ -368,6 +374,7 @@ void SCCockpit::RenderTargetWithCam() {
     }
 }
 void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
+    std::string txt;
     this->RenderMFDS(pmfd_right);
     Point2D pmfd_right_center = {pmfd_right.x + this->cockpit->MONI.SHAP.GetWidth() / 2,
                                  pmfd_right.y + this->cockpit->MONI.SHAP.GetHeight() / 2};
@@ -408,16 +415,18 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
             RLEShape *shape = this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(weapons_shape[weapon_id]+selected);
             int32_t s_width = shape->GetWidth();
             int32_t s_height = shape->GetHeight();
+            
             if (nb_weap > 0) {
                 Point2D pmfd_right_weapon_hp = {
                     pmfd_right_center.x - 15 - s_width / 2 - i * 9,
                     pmfd_right_center.y - 18 - s_height / 2 + i * 9};
                 shape->SetPosition(&pmfd_right_weapon_hp);
                 VGA.DrawShape(shape);
+                txt = std::to_string(nb_weap);
                 Point2D pmfd_right_weapon_hp_text = {
                     pmfd_right_weapon_hp.x + s_width / 2 + 1,
                     pmfd_right_weapon_hp.y + s_height + 6};
-                VGA.PrintText(this->big_font, &pmfd_right_weapon_hp_text, (char *)std::to_string(nb_weap).c_str(), 0, 0, 3, 2, 2);
+                VGA.PrintText(this->big_font, &pmfd_right_weapon_hp_text, (char *)txt.c_str(), 0, 0, txt.length(), 2, 2);
             }
             
             nb_weap = this->player_plane->weaps_load[9-indice]->nb_weap;
@@ -429,10 +438,11 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
                     pmfd_right_center.y - 18 - s_height / 2 + i * 9};
                 shape->SetPosition(&pmfd_right_weapon_hp_left);
                 VGA.DrawShape(shape);
+                txt = std::to_string(nb_weap);
                 Point2D pmfd_right_weapon_hp_text_left = {
                     pmfd_right_weapon_hp_left.x + s_width / 2 - 1,
                     pmfd_right_weapon_hp_left.y + s_height + 6};
-                VGA.PrintText(this->big_font, &pmfd_right_weapon_hp_text_left, (char *)std::to_string(nb_weap).c_str(), 0, 0, 3, 2, 2);
+                VGA.PrintText(this->big_font, &pmfd_right_weapon_hp_text_left, (char *)txt.c_str(), 0, 0, txt.length(), 2, 2);
             }
         }
     }
@@ -444,7 +454,8 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
     Point2D pmfd_right_weapon_gun{pmfd_right_weapon.x - 8 +
                                       this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
                                   pmfd_right_weapon.y + 6};
-    VGA.PrintText(this->big_font, &pmfd_right_weapon_gun, (char *)std::to_string(sel_nb_weap).c_str(), 0, 0, 4, 2, 2);
+    txt = std::to_string(sel_nb_weap);
+    VGA.PrintText(this->big_font, &pmfd_right_weapon_gun, (char *)txt.c_str(), 0, 0, txt.length(), 2, 2);
 
     Point2D pmfd_right_weapon_radar{pmfd_right_weapon.x, pmfd_right_weapon.y + 5};
     VGA.PrintText(this->big_font, &pmfd_right_weapon_radar, "NORM", 0, 0, 4, 2, 2);
@@ -452,7 +463,7 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
     Point2D pmfd_right_weapon_selected{pmfd_right_weapon.x + 12 +
                                            this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
                                        pmfd_right_weapon.y + 5};
-    VGA.PrintText(this->big_font, &pmfd_right_weapon_selected, (char *)weapon_names[sel_weapon_id].c_str(), 0, 0, 5, 2, 2);
+    VGA.PrintText(this->big_font, &pmfd_right_weapon_selected, (char *)weapon_names[sel_weapon_id].c_str(), 0, 0, weapon_names[sel_weapon_id].length(), 2, 2);
 
     Point2D pmfd_right_weapon_chaff{pmfd_right_weapon.x - 7 +
                                         this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
