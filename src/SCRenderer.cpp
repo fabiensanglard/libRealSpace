@@ -835,7 +835,88 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
         glPopMatrix();
     }
 }
+void SCRenderer::RenderLineCube(Vector3D position, int32_t size) {
+    glPushMatrix();
+    glTranslatef(position.x, position.y, position.z);
+    glScalef(size, size, size);
+    glBegin(GL_LINES);
+    // Front face
+    glColor3f(1.0f, 0.0f, 0.0f); // Red
+    glVertex3f(-0.5f, -0.5f,  0.5f);
+    glVertex3f( 0.5f, -0.5f,  0.5f);
+    glVertex3f( 0.5f, -0.5f,  0.5f);
+    glVertex3f( 0.5f,  0.5f,  0.5f);
+    glVertex3f( 0.5f,  0.5f,  0.5f);
+    glVertex3f(-0.5f,  0.5f,  0.5f);
+    glVertex3f(-0.5f,  0.5f,  0.5f);
+    glVertex3f(-0.5f, -0.5f,  0.5f);
 
+    // Back face
+    glColor3f(0.0f, 1.0f, 0.0f); // Green
+    glVertex3f(-0.5f, -0.5f, -0.5f);
+    glVertex3f(-0.5f,  0.5f, -0.5f);
+    glVertex3f(-0.5f,  0.5f, -0.5f);
+    glVertex3f( 0.5f,  0.5f, -0.5f);
+    glVertex3f( 0.5f,  0.5f, -0.5f);
+    glVertex3f( 0.5f, -0.5f, -0.5f);
+    glVertex3f( 0.5f, -0.5f, -0.5f);
+    glVertex3f(-0.5f, -0.5f, -0.5f);
+
+    // Edges
+    glColor3f(0.0f, 0.0f, 1.0f); // Blue
+    glVertex3f(-0.5f, -0.5f, -0.5f);
+    glVertex3f(-0.5f, -0.5f,  0.5f);
+    glVertex3f(-0.5f,  0.5f, -0.5f);
+    glVertex3f(-0.5f,  0.5f,  0.5f);
+    glVertex3f( 0.5f, -0.5f, -0.5f);
+    glVertex3f( 0.5f, -0.5f,  0.5f);
+    glVertex3f( 0.5f,  0.5f, -0.5f);
+    glVertex3f( 0.5f,  0.5f,  0.5f);
+
+    glEnd();
+    glPopMatrix();
+}
+void SCRenderer::RenderBBox(Vector3D position, Point3D min, Point3D max) {
+    glPushMatrix();
+    glTranslatef(position.x, position.y, position.z);
+    glScalef(max.x - min.x, max.y - min.y, max.z - min.z);
+    glBegin(GL_LINES);
+    // Front face
+    glColor3f(1.0f, 0.0f, 0.0f); // Red
+    glVertex3f(-0.5f, -0.5f,  0.5f);
+    glVertex3f( 0.5f, -0.5f,  0.5f);
+    glVertex3f( 0.5f, -0.5f,  0.5f);
+    glVertex3f( 0.5f,  0.5f,  0.5f);
+    glVertex3f( 0.5f,  0.5f,  0.5f);
+    glVertex3f(-0.5f,  0.5f,  0.5f);
+    glVertex3f(-0.5f,  0.5f,  0.5f);
+    glVertex3f(-0.5f, -0.5f,  0.5f);
+
+    // Back face
+    glColor3f(0.0f, 1.0f, 0.0f); // Green
+    glVertex3f(-0.5f, -0.5f, -0.5f);
+    glVertex3f(-0.5f,  0.5f, -0.5f);
+    glVertex3f(-0.5f,  0.5f, -0.5f);
+    glVertex3f( 0.5f,  0.5f, -0.5f);
+    glVertex3f( 0.5f,  0.5f, -0.5f);
+    glVertex3f( 0.5f, -0.5f, -0.5f);
+    glVertex3f( 0.5f, -0.5f, -0.5f);
+    glVertex3f(-0.5f, -0.5f, -0.5f);
+
+    // Edges
+    glColor3f(0.0f, 0.0f, 1.0f); // Blue
+    glVertex3f(-0.5f, -0.5f, -0.5f);
+    glVertex3f(-0.5f, -0.5f,  0.5f);
+    glVertex3f(-0.5f,  0.5f, -0.5f);
+    glVertex3f(-0.5f,  0.5f,  0.5f);
+    glVertex3f( 0.5f, -0.5f, -0.5f);
+    glVertex3f( 0.5f, -0.5f,  0.5f);
+    glVertex3f( 0.5f,  0.5f, -0.5f);
+    glVertex3f( 0.5f,  0.5f,  0.5f);
+
+    glEnd();
+    glPopMatrix();
+}
 void SCRenderer::RenderMapOverlay(RSArea *area) {
 
     // glDepthFunc(GL_LESS);

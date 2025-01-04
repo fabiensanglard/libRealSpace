@@ -20,7 +20,31 @@ bool SCMissionActors::flyToArea(uint8_t arg) {
     return true;
 }
 bool SCMissionActors::destroyTarget(uint8_t arg) {
-    return true;
+    Vector3D wp;
+    
+    for (auto actor: this->mission->actors) {
+        if (actor->actor_id == arg) {
+            if (!actor->plane->object->alive) {
+                return true;
+            }
+            wp.x = actor->plane->x;
+            wp.y = actor->plane->y;
+            wp.z = actor->plane->z;
+            this->pilot->SetTargetWaypoint(wp);
+            Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
+            Vector3D diff = wp - position;
+            float dist = diff.Length();
+            if (!actor->plane->on_ground) {
+                this->pilot->target_climb = (int) wp.y;
+                if (dist > 1000.0f) {
+                    this->pilot->target_speed = -60;
+                } else if (dist > 300.0f) {
+                    this->pilot->target_speed = (int) actor->plane->vz;
+                }
+            }
+            return false;
+        }
+    }
 }
 bool SCMissionActors::defendTarget(uint8_t arg) {
     return true;
@@ -54,6 +78,19 @@ bool SCMissionActors::followAlly(uint8_t arg) {
             return true;
         }
     }
+}
+bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
+    Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
+    Uint8 area_id = this->mission->getAreaID(position);
+    for (auto actor: this->mission->actors) {
+        if (actor->actor_id == arg) {
+            Uint8 target_area_id = this->mission->getAreaID({actor->plane->x, actor->plane->y, actor->plane->z});
+            if (area_id == target_area_id) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 

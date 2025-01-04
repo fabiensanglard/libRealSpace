@@ -758,7 +758,7 @@ void SCPlane::OrigSimulate() {
 
 
 void SCPlane::Simulate() {
-    if (simple_simulation) {
+    if (simple_simulation && this->object->alive) {
         this->SimplifiedSimulate();
     } else {
         this->OrigSimulate();

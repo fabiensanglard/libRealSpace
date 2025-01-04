@@ -586,11 +586,17 @@ void SCStrike::RunFrame(void) {
     }
 
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
-    
+    for (auto rrarea: this->current_mission->mission->mission_data.areas) {
+        Renderer.RenderLineCube(rrarea->position, rrarea->AreaWidth);
+    }
+
     for (auto actor: this->current_mission->actors) {
         if (actor->plane != nullptr) {
             if (actor->plane != this->player_plane) {
                 actor->plane->Render();
+                BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
+                Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};
+                Renderer.RenderBBox(position, bb->min, bb->max);
                 if (actor->plane->object->alive == false) {
                      actor->plane->RenderSmoke();
                 }
@@ -667,6 +673,7 @@ void SCStrike::RunFrame(void) {
         break;
     }
     
+
     this->RenderMenu();
 }
 
@@ -708,10 +715,12 @@ void SCStrike::RenderMenu() {
             ImGui::EndMenu();
         }
         int sceneid = -1;
-        ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s",
+        Vector3D plane_player_pos = {this->player_plane->x, this->player_plane->y, this->player_plane->z};
+        uint8_t area_id = this->current_mission->getAreaID(plane_player_pos);
+        ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s\tArea ID: %d",
                     this->player_plane->airspeed, this->newPosition.y,
                     360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
-                    this->current_mission->mission->mission_data.name.c_str(), this->miss_file_name.c_str());
+                    this->current_mission->mission->mission_data.name.c_str(), this->miss_file_name.c_str(),area_id);
         ImGui::EndMainMenuBar();
     }
     if (show_ai) {

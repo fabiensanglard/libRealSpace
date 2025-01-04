@@ -45,6 +45,7 @@ public:
     virtual bool deactivate(uint8_t arg);
     virtual bool setMessage(uint8_t arg);
     virtual bool followAlly(uint8_t arg);
+    virtual bool ifTargetInSameArea(uint8_t arg);
 };
 
 class SCMissionActorsPlayer : public SCMissionActors {

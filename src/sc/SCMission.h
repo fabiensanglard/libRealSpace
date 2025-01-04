@@ -44,4 +44,5 @@ public:
     void cleanup();
     void update();
     void executeProg(std::vector<PROG> *prog);
+    uint8_t getAreaID(Vector3D position);
 };

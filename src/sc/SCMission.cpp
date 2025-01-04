@@ -207,3 +207,14 @@ void SCMission::update() {
 void SCMission::executeProg(std::vector<PROG> *prog) {
     
 }
+uint8_t SCMission::getAreaID(Vector3D position) {
+    uint8_t area_id = 255;
+    for (auto ar: this->mission->mission_data.areas) {
+        if (ar->position.x - ar->AreaWidth / 2 <= position.x && ar->position.x + ar->AreaWidth / 2 >= position.x) {
+            if (ar->position.z - ar->AreaWidth / 2 <= position.z && ar->position.z + ar->AreaWidth / 2 >= position.z) {
+                area_id = ar->id;
+            }
+        }
+    }
+    return area_id;
+}

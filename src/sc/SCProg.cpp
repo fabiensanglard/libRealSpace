@@ -47,7 +47,9 @@ void SCProg::execute() {
                 }
             break;
             case OP_IF_TARGET_IN_AREA:
-                objective_flag = false;
+                if (exec) {
+                    objective_flag = this->actor->ifTargetInSameArea(prog.arg);
+                }
             break;
             case OP_85_UNKNOWN:
                 true_flag = true;
