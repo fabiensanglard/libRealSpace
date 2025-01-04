@@ -35,6 +35,9 @@ public:
     SCPilot *pilot{nullptr};
     SCMission *mission{nullptr};
     prog_op current_objective;
+
+    bool taken_off{false};
+
     virtual bool execute();
     virtual bool takeOff(uint8_t arg); 
     virtual bool land(uint8_t arg);

@@ -725,20 +725,21 @@ void SCStrike::RenderMenu() {
     }
     if (show_ai) {
         ImGui::Begin("AI");
-        for (auto aiPlane : ai_planes) {
-            ImGui::Text("Plane %s", aiPlane->object->member_name.c_str());
-            ImGui::SameLine();
-            ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f", aiPlane->plane->airspeed, aiPlane->plane->y,
-                        360 - (aiPlane->plane->azimuthf / 10.0f), aiPlane->plane->tps);
-            ImGui::SameLine();
-            if (aiPlane->pilot != nullptr) {
-                ImGui::Text("target heading %.0f", aiPlane->pilot->target_azimut);
+        for (auto ai_actor: this->current_mission->actors) {
+            if (ai_actor->pilot != nullptr) {
+                ImGui::Text("AI %s", ai_actor->object->member_name.c_str());
                 ImGui::SameLine();
-                ImGui::Text("AI OBJ %d", aiPlane->pilot->current_objective);
+                ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f", ai_actor->plane->airspeed, ai_actor->plane->y,
+                            360 - (ai_actor->plane->azimuthf / 10.0f));
+                ImGui::SameLine();
+                if (ai_actor->pilot != nullptr) {
+                    ImGui::Text("target heading %.0f", ai_actor->pilot->target_azimut);
+                    ImGui::SameLine();
+                    ImGui::Text("AI OBJ %d", ai_actor->current_objective);
+                }
+                ImGui::SameLine();
+                ImGui::Text("X %.0f Y %.0f Z %.0f", ai_actor->plane->x, ai_actor->plane->y, ai_actor->plane->z);
             }
-            ImGui::SameLine();
-            ImGui::Text("X %.0f Y %.0f Z %.0f", aiPlane->object->position.x, aiPlane->object->position.y, aiPlane->object->position.z);
-           
         }
         ImGui::End();
     }

@@ -4,27 +4,33 @@ bool SCMissionActors::execute() {
     return true;
 }
 bool SCMissionActors::takeOff(uint8_t arg) {
-    this->pilot->current_objective = OP_SET_OBJ_TAKE_OFF;
+    if (taken_off) {
+        return true;
+    }
+    this->current_objective = OP_SET_OBJ_TAKE_OFF;
     if (this->pilot->target_climb == 0) {
         this->pilot->target_speed = -15;
         this->pilot->target_climb = this->plane->y + 300;
     }
-    return (std::abs(this->plane->y-this->pilot->target_climb) < 10.0f);
+    if (std::abs(this->plane->y-this->pilot->target_climb) < 10.0f) {
+        this->taken_off = true;
+    }
+    return this->taken_off;
 }
 bool SCMissionActors::land(uint8_t arg) {
     return true;
 }
 bool SCMissionActors::flyToWaypoint(uint8_t arg) {
-    this->pilot->current_objective = OP_SET_OBJ_FLY_TO_WP;
+    this->current_objective = OP_SET_OBJ_FLY_TO_WP;
     return true;
 }
 bool SCMissionActors::flyToArea(uint8_t arg) {
-    this->pilot->current_objective = OP_SET_OBJ_FLY_TO_AREA;
+    this->current_objective = OP_SET_OBJ_FLY_TO_AREA;
     return true;
 }
 bool SCMissionActors::destroyTarget(uint8_t arg) {
     Vector3D wp;
-    this->pilot->current_objective = OP_SET_OBJ_DESTROY_TARGET;
+    this->current_objective = OP_SET_OBJ_DESTROY_TARGET;
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
             if (!actor->plane->object->alive) {
@@ -50,7 +56,7 @@ bool SCMissionActors::destroyTarget(uint8_t arg) {
     return false;
 }
 bool SCMissionActors::defendTarget(uint8_t arg) {
-    this->pilot->current_objective = OP_SET_OBJ_DEFEND_TARGET;
+    this->current_objective = OP_SET_OBJ_DEFEND_TARGET;
     return true;
 }
 bool SCMissionActors::deactivate(uint8_t arg) {
@@ -61,7 +67,7 @@ bool SCMissionActors::setMessage(uint8_t arg) {
 }
 bool SCMissionActors::followAlly(uint8_t arg) {
     Vector3D wp;
-    this->pilot->current_objective = OP_SET_OBJ_FOLLOW_ALLY;
+    this->current_objective = OP_SET_OBJ_FOLLOW_ALLY;
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
             wp.x = actor->plane->x;

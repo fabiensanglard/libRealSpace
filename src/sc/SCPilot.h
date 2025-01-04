@@ -19,7 +19,7 @@ public:
     int target_speed{0};
     int target_climb{0};
     float target_azimut{0.0f};
-    int current_objective;
+
     SCPlane* plane{nullptr};
     SCPilot();
     ~SCPilot();
