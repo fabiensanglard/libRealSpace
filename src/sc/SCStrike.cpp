@@ -22,7 +22,7 @@
  */
 SCStrike::SCStrike() {
     this->camera_mode = 0;
-    this->camera_pos = {16, 2, -29};
+    this->camera_pos = {-169.0f, 79.0f, -189.0f};
     this->counter = 0;
 }
 
@@ -121,7 +121,6 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_F2:
             this->camera_mode = View::FOLLOW;
-            this->camera_pos = {-2, 4, -43};
             break;
         case SDLK_F3:
             this->camera_mode = View::RIGHT;

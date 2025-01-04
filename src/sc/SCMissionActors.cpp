@@ -57,6 +57,28 @@ bool SCMissionActors::destroyTarget(uint8_t arg) {
 }
 bool SCMissionActors::defendTarget(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_DEFEND_TARGET;
+    if (this->profile->ai.goal[0] != 0) {
+        bool ret = this->destroyTarget(this->profile->ai.goal[0]);
+        if (ret) {
+            this->profile->ai.goal[0] = 0;
+        }
+        return ret;
+    }
+    Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
+    uint8_t area_id = this->mission->getAreaID(position);
+    for (auto actor: this->mission->enemies) {
+        if (actor->plane != nullptr) {
+            uint8_t actor_area_id = this->mission->getAreaID({actor->plane->x, actor->plane->y, actor->plane->z});
+            if (actor_area_id == area_id) {
+                this->profile->ai.goal[0] = actor->actor_id;
+                bool ret = this->destroyTarget(actor->actor_id);
+                if (ret) {
+                    this->profile->ai.goal[0] = 0;
+                }
+                return ret;
+            }
+        }
+    }
     return true;
 }
 bool SCMissionActors::deactivate(uint8_t arg) {
