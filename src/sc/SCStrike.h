@@ -23,7 +23,7 @@ static const char *mission_list[] = {
 };
 static int mission_idx = 0;
 
-enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET, MISSILE_CAM };
+enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET, MISSILE_CAM, OBJECT };
 
 
 /**
@@ -133,6 +133,8 @@ private:
      * @brief The MFD timeout
      */
     int32_t mfd_timeout{0};
+
+    uint8_t current_object_to_view{0};
 
     MISN_PART *target{nullptr};
 

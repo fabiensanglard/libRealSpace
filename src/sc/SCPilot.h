@@ -13,15 +13,16 @@
 class SCPilot {
 private:
     bool alive{true};
+    bool turning{false};
 public:
 
-    int target_speed;
-    int target_climb;
-    int target_azimut;
+    int target_speed{0};
+    int target_climb{0};
+    float target_azimut{0.0f};
 
     SCPlane* plane{nullptr};
     SCPilot();
     ~SCPilot();
-
+    void SetTargetWaypoint(Vector3D waypoint);
     void AutoPilot();
 };

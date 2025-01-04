@@ -1,27 +1,20 @@
 #pragma once
 #include "precomp.h"
 struct SCAiPlane {
-    SCPlane *plane;
-    SCPilot *pilot;
-    MISN_PART *object;
-    RSProf *ai;
+    SCPlane *plane{nullptr};
+    SCPilot *pilot{nullptr};
+    MISN_PART *object{nullptr};
+    RSProf *ai{nullptr};
     std::string name;
 };
 
-struct SCMissionActors {
-    std::string actor_name;
-    uint8_t actor_id;
-    RSProf *profile;
-    std::vector<std::vector<PROG> *> prog;
-    MISN_PART *object;
-    SCPlane *plane;
-    SCPilot *pilot;
+struct SCMissionWaypoint {
+    SPOT *spot{nullptr};
+    std::string *message{nullptr};
+    std::string *objective{nullptr};
 };
 
-struct SCMissionWaypoint {
-    SPOT *spot;
-    std::string *message;
-};
+class SCProg;
 
 class SCMission {
     enum prog_opcode {
@@ -32,7 +25,7 @@ class SCMission {
     };
 private:
     std::string mission_name;
-    std::map<std::string, RSEntity *> *obj_cache;
+    std::map<std::string, RSEntity *> *obj_cache{nullptr};
 
 public:    
     std::vector<SCMissionActors *> actors;
@@ -40,7 +33,7 @@ public:
     std::vector<SCMissionActors *> friendlies;
     std::vector<SCMissionWaypoint *> waypoints;
 
-    SCMissionActors *player;
+    SCMissionActors *player{nullptr};
     RSArea *area{nullptr};
     RSMission *mission{nullptr};
     RSWorld *world{nullptr};

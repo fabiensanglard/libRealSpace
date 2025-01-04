@@ -23,7 +23,40 @@ extern "C" {
 #include "Maths.h"
 
 #define DEG_TO_RAD (2.0f*M_PI/360.0f)
-
+class Vector3DHomogeneous {
+public:
+    float x;
+    float y;
+    float z;
+    float w;
+};
+class Matrix{
+    
+public:
+    
+    void Clear(void);
+    void Identity(void);
+    
+    void Multiply(Matrix* other);
+    
+    void Print(void);
+    
+    float* ToGL(void);
+    
+    void Transpose(void);
+    
+    float v[4][4];
+    
+    void SetTranslation(float x, float y, float z);
+    void SetRotationX(float angle);
+    void SetRotationY(float angle);
+    void SetRotationZ(float angle);
+    void translateM(float x, float y, float z);
+    void rotateM(float angle, float x, float y, float z);
+    void Multiply(Vector3DHomogeneous other);
+    Vector3DHomogeneous multiplyMatrixVector(Vector3DHomogeneous v);
+private:
+};
 class Vector3D{
     
 public:
@@ -81,17 +114,23 @@ public:
         return result;
     }
 
-    
+    static Vector3D Cross(const Vector3D& v1, const Vector3D& v2) {
+        return Vector3D{
+            v1.y * v2.z - v1.z * v2.y,
+            v1.z * v2.x - v1.x * v2.z,
+            v1.x * v2.y - v1.y * v2.x
+        };
+    };
+
     inline void Normalize(void){
         float ilength;
-        
         ilength = DotProduct(this);
-        
         float invSqrtLength = InvSqrt(ilength);
-        
         Scale(invSqrtLength);
     }
-    
+    inline float Length() {
+        return sqrtf(this->x * this->x + this->y * this->y + this->z * this->z);
+    }
     
     inline float DotProduct(Vector3D* other){
         
@@ -113,12 +152,28 @@ public:
         }
         return *this;
     };
+    inline Vector3D operator+=(const Vector3D& other) {
+        this->x = this->x + other.x;
+        this->y = this->y + other.y;
+        this->z = this-> z + other.z;
+        return *this;
+    };
+    inline Vector3D applyRotation(Matrix matrix) {
+        Vector3D result;
+        result.x = matrix.v[0][0] * this->x + matrix.v[0][1] * this->y + matrix.v[0][2] * this->z;
+        result.y = matrix.v[1][0] * this->x + matrix.v[1][1] * this->y + matrix.v[1][2] * this->z;
+        result.z = matrix.v[2][0] * this->x + matrix.v[2][1] * this->y + matrix.v[2][2] * this->z;
+        return result;
+    }
     inline Vector3D operator+(const Vector3D& other) {
         return Vector3D(this->x + other.x, this->y + other.y, this->z + other.z);
     };
     inline Vector3D operator-(const Vector3D& other) {
         return Vector3D(this->x - other.x, this->y - other.y, this->z - other.z);
     };
+    inline Vector3D operator-() {
+        return Vector3D(-this->x, -this->y, -this->z);
+    }
     inline Vector3D operator*(const float& factor) {
         return Vector3D(this->x * factor, this->y * factor, this->z * factor);
     }
@@ -131,39 +186,7 @@ private:
 
 #define Point3D Vector3D
 
-class Vector3DHomogeneous {
-public:
-    float x;
-    float y;
-    float z;
-    float w;
-};
 
-class Matrix{
-    
-public:
-    
-    void Clear(void);
-    void Identity(void);
-    
-    void Multiply(Matrix* other);
-    
-    void Print(void);
-    
-    float* ToGL(void);
-    
-    void Transpose(void);
-    
-    float v[4][4];
-    
-    void SetTranslation(float x, float y, float z);
-    void SetRotationX(float angle);
-    void SetRotationY(float angle);
-    void SetRotationZ(float angle);
-    void translateM(float x, float y, float z);
-    void rotateM(float angle, float x, float y, float z);
-    void Multiply(Vector3DHomogeneous other);
-    Vector3DHomogeneous multiplyMatrixVector(Vector3DHomogeneous v);
-private:
-};
+
+
 
