@@ -41,7 +41,19 @@ bool SCMissionActors::land(uint8_t arg) {
 }
 bool SCMissionActors::flyToWaypoint(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_FLY_TO_WP;
-    return true;
+    if (arg < this->mission->mission->mission_data.spots.size()) {
+        SPOT *wp = this->mission->mission->mission_data.spots[arg];
+        this->pilot->SetTargetWaypoint(wp->position);
+        this->pilot->target_speed = -10;
+        Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
+        Vector3D diff = wp->position - position;
+        float dist = diff.Length();
+        if (dist < 100.0f) {
+            return true;
+        }
+    }
+    
+    return false;
 }
 bool SCMissionActors::flyToArea(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_FLY_TO_AREA;
@@ -68,24 +80,37 @@ bool SCMissionActors::flyToArea(uint8_t arg) {
 bool SCMissionActors::destroyTarget(uint8_t arg) {
     Vector3D wp;
     this->current_objective = OP_SET_OBJ_DESTROY_TARGET;
+    Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
+    Uint8 area_id = this->mission->getAreaID(position);
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
             if (!actor->plane->object->alive) {
                 return true;
             }
-            wp.x = actor->plane->x;
-            wp.y = actor->plane->y;
-            wp.z = actor->plane->z;
-            this->pilot->SetTargetWaypoint(wp);
-            Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
-            Vector3D diff = wp - position;
-            float dist = diff.Length();
-            if (!actor->plane->on_ground) {
-                this->pilot->target_climb = (int) wp.y;
-                if (dist > 1000.0f) {
-                    this->pilot->target_speed = -60;
-                } else if (dist > 300.0f) {
-                    this->pilot->target_speed = (int) actor->plane->vz;
+            Uint8 target_area_id = this->mission->getAreaID({actor->plane->x, actor->plane->y, actor->plane->z});
+            if (area_id = target_area_id) {
+                wp.x = actor->plane->x;
+                wp.y = actor->plane->y;
+                wp.z = actor->plane->z;
+                this->pilot->SetTargetWaypoint(wp);
+                Vector3D diff = wp - position;
+                float dist = diff.Length();
+                if (!actor->plane->on_ground) {
+                    this->pilot->target_climb = (int) wp.y;
+                    if (dist > 1000.0f) {
+                        this->pilot->target_speed = -60;
+                    } else if (dist > 300.0f) {
+                        this->pilot->target_speed = (int) actor->plane->vz;
+                    }
+                }
+                return false;
+            } else {
+                for (auto area: this->mission->mission->mission_data.areas) {
+                    if (area->id == area_id) {
+                        wp = area->position;
+                        this->pilot->SetTargetWaypoint(wp);
+                        return false;
+                    }
                 }
             }
         }

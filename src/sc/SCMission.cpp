@@ -180,10 +180,10 @@ void SCMission::update() {
         if (ai_actor->plane == nullptr) {
             continue;
         }
-        if (ai_actor->object->area_id != 255) {
+        /*if (ai_actor->object->area_id != 255) {
             AREA *ar = this->mission->mission_data.areas[ai_actor->object->area_id];
             ai_actor->pilot->SetTargetWaypoint(ar->position);
-        }
+        }*/
         if (ai_actor->prog.size() > 0) {
             SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
             p->execute();
