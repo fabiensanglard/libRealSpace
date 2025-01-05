@@ -59,7 +59,6 @@ typedef struct VGAPalette{
                colors[i].b != other->colors[i].b ||
                colors[i].a != other->colors[i].a
                )
-                printf("diff: %d.\n",i);
         }
             
     }
@@ -70,7 +69,6 @@ typedef struct VGAPalette{
         int16_t numColors = s->ReadShort();
         
         if (offset + numColors > 256){
-            printf("VGAPalette::ReadPatch => Error, this will overflow.\n");
             return;
         }
         

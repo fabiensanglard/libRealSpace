@@ -75,7 +75,6 @@ SCGameFlow::~SCGameFlow() {}
  * @return None
  */
 void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
-    printf("clicked on %d\n", id);
     this->efect = script;
     this->currentSpriteId = id;
     this->currentOptCode = 0;

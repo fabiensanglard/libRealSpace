@@ -33,7 +33,6 @@ void SCProg::execute() {
                     if (objective_flag) {
                         jump_to = prog.arg;
                         exec = false;
-                        printf("OBJ TRUE GOTO %d\n", jump_to);
                     }
                 }
             break;
@@ -42,7 +41,6 @@ void SCProg::execute() {
                     if (!objective_flag) {
                         jump_to = prog.arg;
                         exec = false;
-                        printf("OBJ FALSE GOTO %d\n", jump_to);
                     }
                 }
             break;
@@ -59,7 +57,6 @@ void SCProg::execute() {
             case OP_SET_OBJ_TAKE_OFF:
                 if (exec) {
                     objective_flag = this->actor->takeOff(prog.arg);
-                    printf("TAKE OFF %d\n", prog.arg);
                 }
             break;
             case OP_SET_OBJ_LAND:
@@ -94,7 +91,6 @@ void SCProg::execute() {
             break;
             case OP_SET_OBJ_FOLLOW_ALLY:
                 if (exec) {
-                    printf("FOLLOW ALLY %d\n", prog.arg);
                     objective_flag = this->actor->followAlly(prog.arg);
                 }
             break;

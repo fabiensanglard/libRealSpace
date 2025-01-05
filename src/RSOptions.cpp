@@ -48,7 +48,6 @@ void RSOption::parseOPTS_SCEN(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
     std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
 
-    printf("Parsing SCEN %llu\n", size);
     this->tmpscen = new SCEN();
 
     handlers["INFO"] = std::bind(&RSOption::parseOPTS_SCEN_INFO, this, std::placeholders::_1, std::placeholders::_2);
@@ -58,25 +57,21 @@ void RSOption::parseOPTS_SCEN(uint8_t *data, size_t size) {
     handlers["FORE"] = std::bind(&RSOption::parseOPTS_SCEN_FORE, this, std::placeholders::_1, std::placeholders::_2);
 
     lexer.InitFromRAM(data, size, handlers);
-    printf("SCEN INFO ID %d\n", this->tmpscen->infos.ID);
     this->opts[this->tmpscen->infos.ID] = this->tmpscen;
 }
 
 void RSOption::parseOPTS_SCEN_INFO(uint8_t *data, size_t size) {
-    printf("Parsing INFO %llu\n", size);
     this->tmpscen->infos.ID = *data++;
     this->tmpscen->infos.UNKOWN = *data;
 }
 
 void RSOption::parseOPTS_SCEN_COLR(uint8_t *data, size_t size) {
-    printf("Parsing COLR %llu\n", size);
     this->tmpscen->colr.UNKOWN_1 = *data++;
     this->tmpscen->colr.UNKOWN_2 = *data;
 }
 
 void RSOption::parseOPTS_SCEN_TUNE(uint8_t *data, size_t size) {
     TUNE *tmptune = new TUNE();
-    printf("Parsing TUNE %llu\n", size);
     tmptune->ID = *data++;
     tmptune->UNKOWN = *data;
     this->tmpscen->tune = tmptune;
@@ -86,7 +81,6 @@ void RSOption::parseOPTS_SCEN_BACK(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
     std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
 
-    printf("Parsing BACK %llu\n", size);
     this->tmpback = new BACK();
     handlers["PALT"] =
         std::bind(&RSOption::parseOPTS_SCEN_BACK_PALT, this, std::placeholders::_1, std::placeholders::_2);

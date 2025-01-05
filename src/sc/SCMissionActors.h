@@ -21,6 +21,7 @@ enum prog_op {
     OP_SET_MESSAGE = 171,
     OP_DEACTIVATE_OBJ = 190,
     OP_85_UNKNOWN = 85,
+    OP_ACTIVATE_OBJ = 144,
 };
 
 class SCMissionActors {
