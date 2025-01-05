@@ -596,6 +596,8 @@ void SCStrike::RunFrame(void) {
                 BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
                 Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};
                 Renderer.RenderBBox(position, bb->min, bb->max);
+                Renderer.RenderBBox(position+actor->formation_pos_offset, bb->min, bb->max);
+                Renderer.RenderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
                 if (actor->plane->object->alive == false) {
                      actor->plane->RenderSmoke();
                 }

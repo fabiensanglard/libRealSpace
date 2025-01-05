@@ -35,6 +35,8 @@ public:
     SCPilot *pilot{nullptr};
     SCMission *mission{nullptr};
     prog_op current_objective;
+    Vector3D formation_pos_offset{150.0f, 0.0f, 0.0f};
+    Vector3D attack_pos_offset{0.0f, 0.0f, -200.0f};
 
     bool taken_off{false};
 

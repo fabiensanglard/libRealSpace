@@ -176,6 +176,7 @@ bool SCMissionActors::followAlly(uint8_t arg) {
             wp.x = actor->plane->x;
             wp.y = actor->plane->y;
             wp.z = actor->plane->z;
+            wp = wp + actor->formation_pos_offset;
             this->pilot->SetTargetWaypoint(wp);
             Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
             Vector3D diff = wp - position;
@@ -184,8 +185,9 @@ bool SCMissionActors::followAlly(uint8_t arg) {
                 this->pilot->target_climb = (int) wp.y;
                 if (dist > 1000.0f) {
                     this->pilot->target_speed = -60;
-                } else if (dist > 300.0f) {
+                } else if (dist < 100.0f) {
                     this->pilot->target_speed = (int) actor->plane->vz;
+                    this->pilot->turning = false;
                 }
             }
             

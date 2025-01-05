@@ -13,9 +13,9 @@
 class SCPilot {
 private:
     bool alive{true};
-    bool turning{false};
+    
 public:
-
+    bool turning{false};
     int target_speed{0};
     int target_climb{0};
     float target_azimut{0.0f};
