@@ -3,6 +3,23 @@
 bool SCMissionActors::execute() {
     return true;
 }
+/**
+ * SCMissionActors::takeOff
+ *
+ * Called when the "take off" mission objective is triggered.
+ *
+ * If the actor has already taken off, this function does nothing and
+ * returns true.
+ *
+ * Otherwise, this function sets the actor's current objective to
+ * OP_SET_OBJ_TAKE_OFF and sets the pilot's target climb to 300 units above
+ * the current height.  If the actor is close enough to the target height,
+ * the actor is marked as having taken off and the function returns true.
+ *
+ * @param arg Unused argument.
+ *
+ * @return True if the actor has taken off, false otherwise.
+ */
 bool SCMissionActors::takeOff(uint8_t arg) {
     if (taken_off) {
         return true;
@@ -18,6 +35,8 @@ bool SCMissionActors::takeOff(uint8_t arg) {
     return this->taken_off;
 }
 bool SCMissionActors::land(uint8_t arg) {
+    this->current_objective = OP_SET_OBJ_LAND;
+    
     return true;
 }
 bool SCMissionActors::flyToWaypoint(uint8_t arg) {
@@ -28,6 +47,24 @@ bool SCMissionActors::flyToArea(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_FLY_TO_AREA;
     return true;
 }
+/**
+ * SCMissionActors::destroyTarget
+ *
+ * Called when the "destroy target" mission objective is triggered.
+ *
+ * This function sets the actor's current objective to
+ * OP_SET_OBJ_DESTROY_TARGET and sets the pilot's target waypoint to the
+ * position of the target actor.  If the target actor is not on the ground,
+ * the pilot's target climb is set to the target actor's current height and
+ * the target speed is set to either -60 or the target actor's current
+ * vertical speed, depending on how far away the actor is.
+ *
+ * If the target actor is already destroyed, this function returns true.
+ *
+ * @param arg The ID of the target actor to destroy.
+ *
+ * @return True if the target actor is already destroyed, false otherwise.
+ */
 bool SCMissionActors::destroyTarget(uint8_t arg) {
     Vector3D wp;
     this->current_objective = OP_SET_OBJ_DESTROY_TARGET;
@@ -55,6 +92,25 @@ bool SCMissionActors::destroyTarget(uint8_t arg) {
     }
     return false;
 }
+/**
+ * SCMissionActors::defendTarget
+ *
+ * Called when the "defend target" mission objective is triggered.
+ *
+ * This function sets the actor's current objective to OP_SET_OBJ_DEFEND_TARGET.
+ * It first checks if there is an existing goal to destroy a target. If so,
+ * it attempts to destroy that target and resets the goal if successful.
+ *
+ * If no current goal exists, the function determines the area in which the actor is located
+ * and checks for any enemies within the same area. If an enemy is found, it sets the goal
+ * to destroy that enemy and attempts to do so.
+ *
+ * @param arg Unused argument.
+ *
+ * @return True if no action is taken or if the current goal is successfully completed,
+ *         false otherwise.
+ */
+
 bool SCMissionActors::defendTarget(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_DEFEND_TARGET;
     if (this->profile->ai.goal[0] != 0) {
@@ -113,6 +169,17 @@ bool SCMissionActors::followAlly(uint8_t arg) {
     }
     return false;
 }
+/**
+ * SCMissionActors::ifTargetInSameArea
+ *
+ * Returns true if the actor with the given ID is in the same area as
+ * the current actor, false otherwise.
+ *
+ * @param arg The ID of the target actor to check.
+ *
+ * @return True if the target actor is in the same area as the current
+ * actor, false otherwise.
+ */
 bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
     Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
     Uint8 area_id = this->mission->getAreaID(position);
@@ -128,6 +195,16 @@ bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
 }
 
 
+/**
+ * SCMissionActorsPlayer::takeOff
+ *
+ * Sets the current objective to a take-off objective with the given
+ * argument as the target spot ID.
+ *
+ * @param arg The ID of the target spot to take off from.
+ *
+ * @return True if the objective was set successfully, false otherwise.
+ */
 bool SCMissionActorsPlayer::takeOff(uint8_t arg) {
     SCMissionWaypoint *waypoint = new SCMissionWaypoint();
     waypoint->spot = this->mission->mission->mission_data.spots[arg];
@@ -135,6 +212,16 @@ bool SCMissionActorsPlayer::takeOff(uint8_t arg) {
     this->mission->waypoints.push_back(waypoint);
     return true;
 }
+/**
+ * SCMissionActorsPlayer::land
+ *
+ * Sets the current objective to a land objective with the given
+ * argument as the target spot ID.
+ *
+ * @param arg The ID of the target spot to land on.
+ *
+ * @return True if the objective was set successfully, false otherwise.
+ */
 bool SCMissionActorsPlayer::land(uint8_t arg) {
     SCMissionWaypoint *waypoint = new SCMissionWaypoint();
     waypoint->spot = this->mission->mission->mission_data.spots[arg];
@@ -142,6 +229,14 @@ bool SCMissionActorsPlayer::land(uint8_t arg) {
     this->mission->waypoints.push_back(waypoint);
     return true;
 }
+/**
+ * Sets the current objective to a fly-to-waypoint objective with the given
+ * argument as the target waypoint ID.
+ *
+ * @param arg The ID of the target waypoint to fly to.
+ *
+ * @return True if the objective was set successfully, false otherwise.
+ */
 bool SCMissionActorsPlayer::flyToWaypoint(uint8_t arg) {
     SCMissionWaypoint *waypoint = new SCMissionWaypoint();
     waypoint->spot = this->mission->mission->mission_data.spots[arg];
@@ -149,6 +244,16 @@ bool SCMissionActorsPlayer::flyToWaypoint(uint8_t arg) {
     this->mission->waypoints.push_back(waypoint);
     return true;
 }
+/**
+ * SCMissionActorsPlayer::flyToArea
+ *
+ * Sets the current objective to a fly-to-waypoint objective with the given
+ * argument as the target waypoint ID.
+ *
+ * @param arg The ID of the target waypoint to fly to.
+ *
+ * @return True if the objective was set successfully, false otherwise.
+ */
 bool SCMissionActorsPlayer::flyToArea(uint8_t arg) {
     SCMissionWaypoint *waypoint = new SCMissionWaypoint();
     waypoint->spot = this->mission->mission->mission_data.spots[arg];
@@ -156,6 +261,14 @@ bool SCMissionActorsPlayer::flyToArea(uint8_t arg) {
     this->mission->waypoints.push_back(waypoint);
     return true;
 }
+/**
+ * Sets the current objective to a destroy-target objective with the given
+ * argument as the target object ID.
+ *
+ * @param arg The ID of the target object to destroy.
+ *
+ * @return True if the objective was set successfully, false otherwise.
+ */
 bool SCMissionActorsPlayer::destroyTarget(uint8_t arg) {
     SCMissionWaypoint *waypoint = new SCMissionWaypoint();
     waypoint->spot = this->mission->mission->mission_data.spots[arg];
@@ -163,6 +276,16 @@ bool SCMissionActorsPlayer::destroyTarget(uint8_t arg) {
     this->mission->waypoints.push_back(waypoint);
     return true;
 }
+/**
+ * SCMissionActorsPlayer::defendTarget
+ *
+ * Sets the current objective to a defend-target objective with the given
+ * argument as the target object ID.
+ *
+ * @param arg The ID of the target object to defend.
+ *
+ * @return True if the objective was set successfully, false otherwise.
+ */
 bool SCMissionActorsPlayer::defendTarget(uint8_t arg) {
     SCMissionWaypoint *waypoint = new SCMissionWaypoint();
     waypoint->spot = this->mission->mission->mission_data.spots[arg];
@@ -170,11 +293,17 @@ bool SCMissionActorsPlayer::defendTarget(uint8_t arg) {
     this->mission->waypoints.push_back(waypoint);
     return true;
 }
-/*
-Fly to#Precise Way
-Defend#Point
-Follow#Leader
-*/
+
+/**
+ * SCMissionActorsPlayer::setMessage
+ *
+ * Sets the current objective to display a message with the given
+ * argument as the message ID.
+ *
+ * @param arg The ID of the message to display.
+ *
+ * @return True if the objective was set successfully, false otherwise.
+ */
 bool SCMissionActorsPlayer::setMessage(uint8_t arg) {
     std::transform(this->mission->mission->mission_data.messages[arg]->begin(), this->mission->mission->mission_data.messages[arg]->end(), this->mission->mission->mission_data.messages[arg]->begin(), ::tolower);
     if (this->mission->waypoints.size() > 0) {
@@ -182,3 +311,9 @@ bool SCMissionActorsPlayer::setMessage(uint8_t arg) {
     }
     return true;
 }
+/*
+@TODO
+Fly to#Precise Way
+Defend#Point
+Follow#Leader
+*/
