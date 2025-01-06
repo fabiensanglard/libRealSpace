@@ -21,9 +21,14 @@ void SCMission::cleanup() {
     for (auto actor : this->actors) {
         delete actor;
     }
-    
     this->actors.clear();
     this->actors.shrink_to_fit();
+    for (auto wp : this->waypoints) {
+        delete wp;
+    }
+    this->waypoints.clear();
+    this->waypoints.shrink_to_fit();
+    
 }
 void SCMission::loadMission() {
     std::string miss_file_name = "..\\..\\DATA\\MISSIONS\\" + this->mission_name; 

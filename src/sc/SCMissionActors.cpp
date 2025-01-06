@@ -84,6 +84,9 @@ bool SCMissionActors::destroyTarget(uint8_t arg) {
     Uint8 area_id = this->mission->getAreaID(position);
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
+            if (actor->plane == nullptr) {
+                return true;
+            }
             if (!actor->plane->object->alive) {
                 return true;
             }
@@ -247,6 +250,9 @@ bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
     Uint8 area_id = this->mission->getAreaID(position);
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
+            if (actor->plane == nullptr) {
+                return (area_id == actor->object->area_id);
+            }
             Uint8 target_area_id = this->mission->getAreaID({actor->plane->x, actor->plane->y, actor->plane->z});
             if (area_id == target_area_id) {
                 return true;
