@@ -3,6 +3,8 @@
 void SCProg::execute() {
     size_t i = 0;
     size_t jump_to = 0;
+    size_t call_to = 0;
+    int flag_number = 0;
     bool exec = true;
     bool objective_flag = false;
     bool true_flag = false;
@@ -24,8 +26,7 @@ void SCProg::execute() {
             break;
             case OP_CALL_LABEL:
                 if (exec) {
-                    jump_to = prog.arg;
-                    exec = false;
+                    call_to = prog.arg;
                 }
             break;
             case OP_GOTO_LABEL_IF_TRUE:
@@ -50,7 +51,10 @@ void SCProg::execute() {
                 }
             break;
             case OP_85_UNKNOWN:
-                true_flag = true;
+                if (exec) {
+                    true_flag = this->mission->mission->mission_data.flags[prog.arg] != 0;
+                }
+                
             break;
             case OP_INSTANT_DESTROY_TARGET:
             break;
@@ -103,6 +107,27 @@ void SCProg::execute() {
                 if (exec) {
                     this->actor->activateTarget(prog.arg);
                 }
+            case OP_SELECT_FLAG:
+                if (exec) {
+                    flag_number = prog.arg;
+                }
+            break;
+            case OP_SAVE_VALUE_TO_FLAG:
+                if (exec) {
+                    this->mission->mission->mission_data.flags[flag_number] = prog.arg;
+                }
+            break;
+            case OP_STORE_CALL_TO_VALUE:
+                if (exec) {
+                    this->mission->mission->mission_data.flags[prog.arg] = (uint8_t) call_to;
+                }
+            break;
+            case OP_EXECUTE_CALL:
+                if (exec) {
+                    jump_to = this->mission->mission->mission_data.flags[flag_number];
+                    exec = false;
+                }
+            break;
             default:
             break;
         }

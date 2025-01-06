@@ -1151,6 +1151,12 @@ void SCStrike::RenderMenu() {
             }
             ImGui::TreePop();
         }
+        if (ImGui::TreeNode("Flags")) {
+            for (auto flag : this->current_mission->mission->mission_data.flags) {
+                ImGui::Text("Flag %d", flag);
+            }
+            ImGui::TreePop();
+        }
         if (ImGui::TreeNode("Scenes")) {
             int cpt_scenes = 0;
             for (auto scene : this->current_mission->mission->mission_data.scenes) {

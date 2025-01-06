@@ -7,6 +7,8 @@ enum prog_op {
     OP_EXIT_PROG = 1,
     OP_SET_LABEL = 8,
     OP_CALL_LABEL = 16,
+    OP_SELECT_FLAG = 17,
+    OP_SAVE_VALUE_TO_FLAG = 20,
     OP_GOTO_LABEL_IF_TRUE = 72,
     OP_GOTO_LABEL_IF_FALSE = 70,
     OP_IF_TARGET_IN_AREA = 146,
@@ -21,6 +23,8 @@ enum prog_op {
     OP_SET_MESSAGE = 171,
     OP_DEACTIVATE_OBJ = 190,
     OP_85_UNKNOWN = 85,
+    OP_STORE_CALL_TO_VALUE = 80,
+    OP_EXECUTE_CALL = 79,
     OP_ACTIVATE_OBJ = 144,
 };
 
