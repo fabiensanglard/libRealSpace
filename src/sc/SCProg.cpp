@@ -101,7 +101,7 @@ void SCProg::execute() {
             break;
             case OP_ACTIVATE_OBJ:
                 if (exec) {
-                    this->actor->is_active = true;
+                    this->actor->activateTarget(prog.arg);
                 }
             default:
             break;

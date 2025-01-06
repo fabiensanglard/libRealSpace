@@ -220,6 +220,14 @@ bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
     }
     return false;
 }
+bool SCMissionActors::activateTarget(uint8_t arg) {
+    for (auto actor: this->mission->actors) {
+        if (actor->actor_id == arg) {
+            actor->is_active = true;
+            return true;
+        }
+    }
+}
 
 
 /**

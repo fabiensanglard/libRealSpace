@@ -198,7 +198,7 @@ void SCMission::update() {
             }
             std::vector<PROG> prog;
             for (auto prg_id: scene->progs_id) {
-                if (prg_id != 255 && prg_id < this->mission->mission_data.prog.size()) {
+                if (prg_id != 255 && prg_id-1 < this->mission->mission_data.prog.size()) {
                     for (auto prg: *this->mission->mission_data.prog[prg_id]) {
                         prog.push_back(prg);
                     }
