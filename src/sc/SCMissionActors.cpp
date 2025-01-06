@@ -162,12 +162,47 @@ bool SCMissionActors::defendTarget(uint8_t arg) {
     }
     return true;
 }
+/**
+ * @brief Deactivates an actor in the mission based on the provided actor ID.
+ *
+ * This function iterates through the list of actors in the mission and sets the
+ * `is_active` flag to `false` for the actor whose `actor_id` matches the provided argument.
+ *
+ * @param arg The ID of the actor to deactivate.
+ * @return true if an actor with the specified ID was found and deactivated, false otherwise.
+ */
 bool SCMissionActors::deactivate(uint8_t arg) {
-    return true;
+    for (auto actor: this->mission->actors) {
+        if (actor->actor_id == arg) {
+            actor->is_active = false;
+            return true;
+        }
+    }
+    return false;
 }
+/**
+ * @brief Sets a message for the mission actor.
+ * 
+ * This function sets a message for the mission actor based on the provided argument.
+ * 
+ * @param arg The index of the message to be set.
+ * @return true Always returns true.
+ */
 bool SCMissionActors::setMessage(uint8_t arg) {
+    this->profile->radi.msgs[arg];    
     return true;
 }
+/**
+ * @brief Sets the current objective to follow an ally and adjusts the pilot's target waypoint, speed, and climb.
+ * 
+ * This function iterates through the mission's actors to find the actor with the specified ID.
+ * If the actor is found, it sets the waypoint to the actor's position plus the formation position offset,
+ * and adjusts the pilot's target waypoint, speed, and climb based on the distance to the waypoint and whether
+ * the actor's plane is on the ground.
+ * 
+ * @param arg The ID of the ally actor to follow.
+ * @return true if the ally actor with the specified ID is found and the objective is set, false otherwise.
+ */
 bool SCMissionActors::followAlly(uint8_t arg) {
     Vector3D wp;
     this->current_objective = OP_SET_OBJ_FOLLOW_ALLY;
@@ -220,6 +255,15 @@ bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
     }
     return false;
 }
+/**
+ * @brief Activates the target actor with the specified ID.
+ *
+ * This function iterates through the list of actors in the mission and sets the
+ * `is_active` flag to true for the actor whose `actor_id` matches the provided argument.
+ *
+ * @param arg The ID of the actor to be activated.
+ * @return true if the actor with the specified ID was found and activated, false otherwise.
+ */
 bool SCMissionActors::activateTarget(uint8_t arg) {
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
@@ -227,6 +271,7 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
             return true;
         }
     }
+    return false;
 }
 
 

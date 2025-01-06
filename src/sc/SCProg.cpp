@@ -1,5 +1,45 @@
 #include "precomp.h"
 
+/**
+ * @brief Executes the script program for the actor.
+ * 
+ * This function iterates through the program instructions and executes them based on the opcode.
+ * It handles various operations such as setting labels, calling labels, conditional jumps, 
+ * checking if the target is in the same area, and performing specific actions like take off, 
+ * land, fly to waypoint, destroy target, etc.
+ * 
+ * The function maintains several state variables to control the flow of execution:
+ * - `jump_to`: The label to jump to.
+ * - `call_to`: The label to call.
+ * - `flag_number`: The current flag number.
+ * - `exec`: A flag indicating whether the current instruction should be executed.
+ * - `objective_flag`: A flag indicating the result of the last objective-related operation.
+ * - `true_flag`: A flag indicating the result of the last flag check operation.
+ * 
+ * The function supports the following opcodes:
+ * - `OP_EXIT_PROG`: Exits the program.
+ * - `OP_SET_LABEL`: Sets the execution point to a label.
+ * - `OP_CALL_LABEL`: Calls a label.
+ * - `OP_GOTO_LABEL_IF_TRUE`: Jumps to a label if the objective flag is true.
+ * - `OP_GOTO_LABEL_IF_FALSE`: Jumps to a label if the objective flag is false.
+ * - `OP_IF_TARGET_IN_AREA`: Checks if the target is in the same area.
+ * - `OP_85_UNKNOWN`: Checks a mission flag.
+ * - `OP_INSTANT_DESTROY_TARGET`: Placeholder for instant destroy target operation.
+ * - `OP_SET_OBJ_TAKE_OFF`: Sets the objective to take off.
+ * - `OP_SET_OBJ_LAND`: Sets the objective to land.
+ * - `OP_SET_OBJ_FLY_TO_WP`: Sets the objective to fly to a waypoint.
+ * - `OP_SET_OBJ_FLY_TO_AREA`: Sets the objective to fly to an area.
+ * - `OP_SET_OBJ_DESTROY_TARGET`: Sets the objective to destroy a target.
+ * - `OP_SET_OBJ_DEFEND_TARGET`: Sets the objective to defend a target.
+ * - `OP_SET_MESSAGE`: Sets a message.
+ * - `OP_SET_OBJ_FOLLOW_ALLY`: Sets the objective to follow an ally.
+ * - `OP_DEACTIVATE_OBJ`: Deactivates an objective.
+ * - `OP_ACTIVATE_OBJ`: Activates an objective.
+ * - `OP_SELECT_FLAG`: Selects a flag.
+ * - `OP_SAVE_VALUE_TO_FLAG`: Saves a value to a flag.
+ * - `OP_STORE_CALL_TO_VALUE`: Stores the call-to value in a flag.
+ * - `OP_EXECUTE_CALL`: Executes a call to a label.
+ */
 void SCProg::execute() {
     size_t i = 0;
     size_t jump_to = 0;
@@ -54,7 +94,6 @@ void SCProg::execute() {
                 if (exec) {
                     true_flag = this->mission->mission->mission_data.flags[prog.arg] != 0;
                 }
-                
             break;
             case OP_INSTANT_DESTROY_TARGET:
             break;

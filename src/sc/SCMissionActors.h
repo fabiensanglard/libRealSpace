@@ -28,6 +28,7 @@ enum prog_op {
     OP_ACTIVATE_OBJ = 144,
 };
 
+
 class SCMissionActors {
 public:
 
