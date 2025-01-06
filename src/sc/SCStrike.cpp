@@ -1151,6 +1151,28 @@ void SCStrike::RenderMenu() {
             }
             ImGui::TreePop();
         }
+        if (ImGui::TreeNode("Scenes")) {
+            int cpt_scenes = 0;
+            for (auto scene : this->current_mission->mission->mission_data.scenes) {
+                if (ImGui::TreeNode((void *)(intptr_t)scene, "Scene %d", cpt_scenes)) {
+                    if (scene->area_id >= 0) {
+                        ImGui::Text("Scene area_id %s", this->current_mission->mission->mission_data.areas[scene->area_id]->AreaName);
+                    } else {
+                        ImGui::Text("Scene area_id %d", scene->area_id);
+                    }
+                    ImGui::Text("IS ACTIVE %d", scene->is_active);
+                    for (auto cast : scene->cast) {
+                        ImGui::Text("Cast %d", cast);
+                    }
+                    for (auto prog : scene->progs_id) {
+                        ImGui::Text("Prog %d", prog);
+                    }
+                    ImGui::TreePop();
+                }
+                cpt_scenes++;
+            }
+            ImGui::TreePop();
+        }
         ImGui::Text("Mission Parts %d", this->current_mission->mission->mission_data.parts.size());
         if (ImGui::TreeNode("Parts")) {
             for (auto part : this->current_mission->mission->mission_data.parts) {

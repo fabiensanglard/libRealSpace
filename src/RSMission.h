@@ -63,6 +63,13 @@ struct PROG {
     uint8_t opcode;
     uint8_t arg;
 };
+struct MISN_SCEN {
+    uint8_t is_active {0};
+    int16_t area_id {0};
+    std::vector<int16_t> progs_id;   
+    std::vector<uint8_t> unknown_bytes;
+    std::vector<uint8_t> cast;
+};
 struct MISN {
     uint16_t version;
     std::string info;
@@ -78,7 +85,7 @@ struct MISN {
     std::vector<uint8_t> nums;
     std::vector<MISN_PART *> parts;
     std::vector<uint16_t> team;
-    std::vector<std::vector<uint8_t>> scenes;
+    std::vector<MISN_SCEN *> scenes;
     std::vector<uint8_t> load;
 };
 class RSMission {

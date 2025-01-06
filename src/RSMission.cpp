@@ -367,18 +367,31 @@ void RSMission::parseMISN_PLAY(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
 
     std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
-    handlers["SCEN"] = std::bind(&RSMission::parseMISN_PLAY_SCEN, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SCNE"] = std::bind(&RSMission::parseMISN_PLAY_SCEN, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSMission::parseMISN_PLAY_SCEN(uint8_t *data, size_t size) {
-    for (int i = 0; i < size; i++) {
-        std::vector<uint8_t> scene;
-        for (int j = 0; j < 8; j++) {
-            scene.push_back(data[i]);
-            i++;
+    MISN_SCEN *scen = new MISN_SCEN();
+    ByteStream stream(data);
+    scen->is_active = stream.ReadByte();
+    scen->area_id = stream.ReadShort();
+    int16_t prog_id = 0;
+    for (int i = 0 ; i<3; i++) {
+        prog_id = stream.ReadShort();
+        if (prog_id > 0) {
+            scen->progs_id.push_back(prog_id);
         }
-        this->mission_data.scenes.push_back(scene);
     }
+    for (int i = 0; i < 15; i++) {
+        scen->unknown_bytes.push_back(stream.ReadByte());
+    }
+    size_t read = 24;
+    while (read < size) {
+        scen->cast.push_back(stream.ReadByte());
+        stream.ReadByte();
+        read+=2;
+    }
+    this->mission_data.scenes.push_back(scen);
 }
 void RSMission::parseMISN_LOAD(uint8_t *data, size_t size) {
     for (int i = 0; i < size; i++) {

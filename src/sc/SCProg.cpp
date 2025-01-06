@@ -99,6 +99,10 @@ void SCProg::execute() {
                     objective_flag = this->actor->deactivate(prog.arg);
                 }
             break;
+            case OP_ACTIVATE_OBJ:
+                if (exec) {
+                    this->actor->is_active = true;
+                }
             default:
             break;
         }

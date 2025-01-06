@@ -58,7 +58,7 @@ typedef struct VGAPalette{
                colors[i].g != other->colors[i].g ||
                colors[i].b != other->colors[i].b ||
                colors[i].a != other->colors[i].a
-               )
+               ) {}
         }
             
     }

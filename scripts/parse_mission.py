@@ -27,12 +27,12 @@ opcodes = {
     69: '[69 ] GET FLAG ID',
     65: '[65 ] FLAG INSTRUCTION 2',
     82: '[82 ] SET FLAG ID TO TRUE',
-    70: '[70 ] AI STATE INSTRUCTION 1',
+    70: '[70 ] IF OBJECTIVE IS FALSE GOTO',
     71: '[71 ] AI STATE INSTRUCTION 2',
-    72: '[72 ] EXEC AI STATE ID',
-    73: '[73 ] AI STATE INSTRUCTION 4',
-    16: '[16 ] ACTIVATE AI STATE ID',
-    8: '[8  ] CREATE AI STATE'
+    72: '[72 ] IF TRUE GOTO',
+    73: '[73 ] IF FALSE GOTO',
+    16: '[16 ] SOME SORT OF GOTO',
+    8: '[8  ] CREATE LABEL'
 }
 
 def parse_iff_filereader(f, file_path, dec=0):
@@ -528,13 +528,6 @@ if __name__ == "__main__":
                             print(f"   -- if {parts[k['value']]['name']} is in same area")
                         else:
                             print(f"   -- if {k['value']} (not found in part) is in same area")
-                    
-                    elif k['opcode'] == 69:
-                        print(f"   -- if flag {k['value']} ")
-                    elif k['opcode'] == 82:
-                        print(f"   -- exit if flag {k['value']}")
-                    elif k['opcode'] == 16:
-                        print(f"   -- activate ia state {k['value']}")
                     elif k['opcode'] in opcodes:
                         print(f"   {opcodes[k['opcode']]}\t{k['value']}")
                     else:

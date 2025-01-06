@@ -173,17 +173,54 @@ void SCMission::loadMission() {
 }
 
 void SCMission::update() {
+    uint8_t area_id = this->getAreaID({this->player->plane->x, this->player->plane->y, this->player->plane->z});
+
+    for (auto scene: this->mission->mission_data.scenes) {
+
+        if (scene->area_id == area_id-1 || scene->area_id == -1) {
+            if (scene->is_active == 0) {
+                continue;
+            }
+            for (auto cast: scene->cast) {
+                int i=0;
+                for (auto part: this->mission->mission_data.parts) {
+                    if (i == cast) {
+                        for (auto actor: this->actors) {
+                            if (actor->actor_id == part->id) {
+                                actor->is_active = true;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    i++;
+                }
+            }
+            std::vector<PROG> prog;
+            for (auto prg_id: scene->progs_id) {
+                if (prg_id != 255 && prg_id < this->mission->mission_data.prog.size()) {
+                    for (auto prg: *this->mission->mission_data.prog[prg_id]) {
+                        prog.push_back(prg);
+                    }
+                }
+            }
+            if (prog.size() > 0) {
+                SCProg *p = new SCProg(this->player, prog, this);
+                p->execute();
+            }
+            scene->is_active = 0;
+        }
+    }
     for (auto ai_actor : this->actors) {
+        if (ai_actor->is_active == false) {
+            continue;
+        }
         if (ai_actor->pilot == nullptr) {
             continue;
         }
         if (ai_actor->plane == nullptr) {
             continue;
         }
-        /*if (ai_actor->object->area_id != 255) {
-            AREA *ar = this->mission->mission_data.areas[ai_actor->object->area_id];
-            ai_actor->pilot->SetTargetWaypoint(ar->position);
-        }*/
         if (ai_actor->prog.size() > 0) {
             SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
             p->execute();
