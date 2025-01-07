@@ -250,6 +250,9 @@ bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
     Uint8 area_id = this->mission->getAreaID(position);
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
+            if (actor->is_active == false) {
+                return false;
+            }
             if (actor->plane == nullptr) {
                 return (area_id == actor->object->area_id);
             }

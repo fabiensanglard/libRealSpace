@@ -583,12 +583,10 @@ void SCStrike::RunFrame(void) {
                        (-(float)this->player_plane->twist / 10.0f) * ((float)M_PI / 180.0f));
     } break;
     }
-
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     for (auto rrarea: this->current_mission->mission->mission_data.areas) {
         Renderer.RenderLineCube(rrarea->position, rrarea->AreaWidth);
     }
-
     for (auto actor: this->current_mission->actors) {
         if (actor->plane != nullptr) {
             if (actor->plane != this->player_plane) {

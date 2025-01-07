@@ -90,11 +90,15 @@ void SCProg::execute() {
                     objective_flag = this->actor->ifTargetInSameArea(prog.arg);
                 }
             break;
-            case OP_85_UNKNOWN:
+            case OP_ADD_1_TO_FLAG:
                 if (exec) {
-                    true_flag = this->mission->mission->mission_data.flags[prog.arg] != 0;
+                    this->mission->mission->mission_data.flags[prog.arg]++;
                 }
             break;
+            case OP_ADD_3_TO_FLAG:
+                if (exec) {
+                    this->mission->mission->mission_data.flags[prog.arg] += 3;
+                }
             case OP_INSTANT_DESTROY_TARGET:
             break;
             case OP_SET_OBJ_TAKE_OFF:
@@ -158,7 +162,9 @@ void SCProg::execute() {
             break;
             case OP_STORE_CALL_TO_VALUE:
                 if (exec) {
-                    this->mission->mission->mission_data.flags[prog.arg] = (uint8_t) call_to;
+                    if (this->mission->mission->mission_data.flags[prog.arg] == 0) {
+                        this->mission->mission->mission_data.flags[prog.arg] = (uint8_t) call_to;
+                    }
                 }
             break;
             case OP_EXECUTE_CALL:
@@ -167,6 +173,17 @@ void SCProg::execute() {
                     exec = false;
                 }
             break;
+            case OP_EXEC_SUB_PROG:
+                if (exec) {
+                    std::vector<PROG> *sub_prog = this->mission->mission->mission_data.prog[prog.arg];
+                    SCProg *sub_prog_obj = new SCProg(this->actor, *sub_prog, this->mission);
+                    sub_prog_obj->execute();
+                }
+            break;
+            case OP_CMP_GREATER_EQUAL_THAN:
+                if (exec) {
+                    true_flag = this->mission->mission->mission_data.flags[flag_number] >= prog.arg;
+                }
             default:
             break;
         }
