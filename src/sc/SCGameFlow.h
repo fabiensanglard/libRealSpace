@@ -101,6 +101,7 @@ private:
     void CheckKeyboard(void);
     SCZone *CheckZones(void);
     void createScen();
+    SCEN* loadScene(uint8_t scene_id);
     RSImageSet *getShape(uint8_t shpid);
 };
 

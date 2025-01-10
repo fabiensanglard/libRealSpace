@@ -55,6 +55,7 @@ void RSOption::parseOPTS_SCEN(uint8_t *data, size_t size) {
     handlers["TUNE"] = std::bind(&RSOption::parseOPTS_SCEN_TUNE, this, std::placeholders::_1, std::placeholders::_2);
     handlers["BACK"] = std::bind(&RSOption::parseOPTS_SCEN_BACK, this, std::placeholders::_1, std::placeholders::_2);
     handlers["FORE"] = std::bind(&RSOption::parseOPTS_SCEN_FORE, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["EXTR"] = std::bind(&RSOption::parseOPTS_SCEN_EXTR, this, std::placeholders::_1, std::placeholders::_2);
 
     lexer.InitFromRAM(data, size, handlers);
     this->opts[this->tmpscen->infos.ID] = this->tmpscen;
@@ -307,4 +308,18 @@ void RSOption::parseMARK(uint8_t *data, size_t size) {
     // handlers["SHOT"] = std::bind(&RSOption::parseSHOT, this, std::placeholders::_1, std::placeholders::_2);
 
     lexer.InitFromRAM(data, size, handlers);
+}
+void RSOption::parseOPTS_SCEN_EXTR(uint8_t* data, size_t size) {
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+
+    handlers["SHAP"] = std::bind(&RSOption::parseOPTS_SCEN_EXTR_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSOption::parseOPTS_SCEN_EXTR_SHAP(uint8_t* data, size_t size) {
+    EXTR_SHAP *shap = new EXTR_SHAP();
+    shap->BACK_ID = *data++;
+    shap->FORE_ID = *data;
+    this->tmpscen->extr.push_back(shap);
 }
