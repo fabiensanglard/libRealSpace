@@ -29,6 +29,11 @@ enum prog_op {
     OP_EXEC_SUB_PROG = 2,
     OP_CMP_GREATER_EQUAL_THAN = 64,
     OP_ADD_3_TO_FLAG = 35,
+    OP_GOTO_IF_TRUE_74 = 74,
+    OP_GOTO_IF_FALSE_73 = 73,
+    OP_SELECT_FLAG_208 = 208,
+    OP_SET_FLAG_TO_TRUE = 82,
+    OP_GET_FLAG_ID = 69,
 };
 
 
@@ -48,7 +53,9 @@ public:
     Vector3D attack_pos_offset{0.0f, 0.0f, -200.0f};
     bool is_active{false};
     bool taken_off{false};
-
+    bool is_destroyed{false};
+    bool prog_executed{false};
+    
     virtual bool execute();
     virtual bool takeOff(uint8_t arg); 
     virtual bool land(uint8_t arg);

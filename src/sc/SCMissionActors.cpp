@@ -192,7 +192,8 @@ bool SCMissionActors::deactivate(uint8_t arg) {
  * @return true Always returns true.
  */
 bool SCMissionActors::setMessage(uint8_t arg) {
-    this->profile->radi.msgs[arg];    
+    this->profile->radi.msgs[arg];   
+    printf("Message  %s\n", this->profile->radi.msgs[arg].c_str()); 
     return true;
 }
 /**

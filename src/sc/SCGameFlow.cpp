@@ -349,6 +349,18 @@ void SCGameFlow::CheckKeyboard(void) {
             this->currentOptCode = 0;
             this->createMiss();
             break;
+        case SDLK_a:
+            this->extcpt++;
+            if (this->extcpt > this->sceneOpts->extr.size()-1) {
+                this->extcpt--;
+            }
+            break;
+        case SDLK_z:
+            this->extcpt--;
+            if (this->extcpt <= 0) {
+                this->extcpt = 0;
+            }
+            break;
         case SDLK_RETURN:
             this->current_scen++;
             if (this->current_scen >= this->gameFlowParser.game.game[this->current_miss]->scen.size()) {
@@ -519,7 +531,7 @@ void SCGameFlow::createScen() {
 SCEN* SCGameFlow::loadScene(uint8_t scene_id) {
     // note pour plus tard, une scene peu être composé de plusieur background
         // donc il faut boucler.
-    SCEN *sceneOpts = this->optionParser.opts[scene_id];
+    this->sceneOpts = this->optionParser.opts[scene_id];
     if (sceneOpts->tune != nullptr) {
         Mixer.SwitchBank(1);
         Mixer.StopMusic();
@@ -537,7 +549,7 @@ SCEN* SCGameFlow::loadScene(uint8_t scene_id) {
 
     this->rawPalette = this->optPals.GetEntry(paltID)->data;
     this->forPalette = this->optPals.GetEntry(forPalTID)->data;
-    return sceneOpts;
+    return this->sceneOpts;
 }
 /**
  * Retrieves an RSImageSet object for the specified shape ID.
@@ -625,7 +637,16 @@ void SCGameFlow::RunFrame(void) {
     paletteReader.Set((this->forPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
-
+    if (this->sceneOpts->extr.size()>0) {
+        EXTR_SHAP *extr = this->sceneOpts->extr[this->extcpt];
+        //for (auto extr: this->sceneOpts->extr) {
+            RSImageSet *shp;
+            shp = this->getShape(this->sceneOpts->extr[0]->SHAPE_ID);
+            VGA.DrawShape(shp->GetShape(0));
+            shp = this->getShape(extr->SHAPE_ID);
+            VGA.DrawShape(shp->GetShape(0));
+        //}
+    }
     this->CheckZones();
 
     for (int zi = 0; zi < this->zones.size(); zi++) {

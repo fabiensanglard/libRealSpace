@@ -184,6 +184,37 @@ void SCProg::execute() {
                 if (exec) {
                     true_flag = this->mission->mission->mission_data.flags[flag_number] >= prog.arg;
                 }
+            break;
+            case OP_GOTO_IF_TRUE_74:
+                if (exec) {
+                    if (true_flag) {
+                        jump_to = prog.arg;
+                        exec = false;
+                    }
+                }
+            break;
+            case OP_GOTO_IF_FALSE_73:
+                if (exec) {
+                    if (!true_flag) {
+                        jump_to = prog.arg;
+                        exec = false;
+                    }
+                }
+            case OP_SELECT_FLAG_208:
+                if (exec) {
+                    // je sais pas
+                }
+            break;
+            case OP_SET_FLAG_TO_TRUE:
+                if (exec) {
+                    this->mission->mission->mission_data.flags[prog.arg] = 1;
+                }
+            break;
+            case OP_GET_FLAG_ID:
+                if (exec) {
+                    true_flag = this->mission->mission->mission_data.flags[prog.arg];
+                }
+            break;
             default:
             break;
         }

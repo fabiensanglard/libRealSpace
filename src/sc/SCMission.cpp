@@ -120,6 +120,8 @@ void SCMission::loadMission() {
                     actor->plane->object = part;
                     this->actors.push_back(actor);
                     this->player = actor;
+                } else {
+                    this->actors.push_back(actor);
                 }
                 cpt_actor++;
                 break;
@@ -167,6 +169,7 @@ void SCMission::loadMission() {
     if (this->player->prog.size() > 0) {
         SCProg *p = new SCProg(this->player, this->player->prog, this);
         p->execute();
+        this->player->prog_executed = true;
     }
     for (auto spot: this->mission->mission_data.spots) {
         if (spot->area_id != -1) {
@@ -217,8 +220,32 @@ void SCMission::update() {
         }
     }
     for (auto ai_actor : this->actors) {
+        if (ai_actor->prog_executed == true) {
+            continue;
+        }
+        if (ai_actor->object->alive == false && ai_actor->is_destroyed == false) {
+            ai_actor->is_destroyed = true;
+        }
+        if (ai_actor->is_destroyed && ai_actor->prog_executed == false) {
+            SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
+            p->execute();
+            ai_actor->prog_executed = true;
+            continue;
+        }
+        if (ai_actor->profile == nullptr) {
+            continue;
+        }
+        if (ai_actor->profile->radi.info.callsign == "Strike Base") {
+            SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
+            p->execute();
+            continue;
+        }
         if (ai_actor->is_active == false) {
             continue;
+        }
+        if (ai_actor->prog.size() > 0) {
+            SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
+            p->execute();
         }
         if (ai_actor->pilot == nullptr) {
             continue;
@@ -226,10 +253,7 @@ void SCMission::update() {
         if (ai_actor->plane == nullptr) {
             continue;
         }
-        if (ai_actor->prog.size() > 0) {
-            SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
-            p->execute();
-        }
+        
         ai_actor->plane->Simulate();
         ai_actor->pilot->AutoPilot();
         

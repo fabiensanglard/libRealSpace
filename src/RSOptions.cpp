@@ -319,7 +319,7 @@ void RSOption::parseOPTS_SCEN_EXTR(uint8_t* data, size_t size) {
 }
 void RSOption::parseOPTS_SCEN_EXTR_SHAP(uint8_t* data, size_t size) {
     EXTR_SHAP *shap = new EXTR_SHAP();
-    shap->BACK_ID = *data++;
-    shap->FORE_ID = *data;
+    shap->EXTR_ID = *data++;
+    shap->SHAPE_ID = *data;
     this->tmpscen->extr.push_back(shap);
 }

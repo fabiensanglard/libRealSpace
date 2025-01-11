@@ -75,6 +75,9 @@ public:
 private:
     RSGameFlow gameFlowParser;
     RSOption optionParser;
+    SCEN *sceneOpts;
+    int extcpt{0};
+
     PakArchive optShps;
     PakArchive optPals;
     std::vector<background *> layers;

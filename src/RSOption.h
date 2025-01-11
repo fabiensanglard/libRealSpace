@@ -9,8 +9,8 @@
 #include <map>
 
 struct EXTR_SHAP {
-    uint8_t BACK_ID;
-    uint8_t FORE_ID;
+    uint8_t EXTR_ID;
+    uint8_t SHAPE_ID;
 };
 struct QUAD {
     uint16_t xa1;
