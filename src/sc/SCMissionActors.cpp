@@ -293,6 +293,10 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
             actor->is_active = true;
+            float zero_level = this->mission->area->getY(actor->plane->x, actor->plane->z);
+            if (actor->plane->y < zero_level) {
+                actor->plane->y += zero_level;
+            }
             return true;
         }
     }
