@@ -71,7 +71,7 @@ void SCProg::execute() {
             break;
             case OP_GOTO_LABEL_IF_TRUE:
                 if (exec) {
-                    if (objective_flag) {
+                    if (objective_flag || true_flag) {
                         jump_to = prog.arg;
                         exec = false;
                     }
@@ -212,7 +212,7 @@ void SCProg::execute() {
             break;
             case OP_GET_FLAG_ID:
                 if (exec) {
-                    true_flag = this->mission->mission->mission_data.flags[prog.arg];
+                    true_flag = this->mission->mission->mission_data.flags[prog.arg] > 0;
                 }
             break;
             default:
