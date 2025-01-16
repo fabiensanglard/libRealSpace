@@ -238,9 +238,6 @@ void SCMission::update() {
         }
     }
     for (auto ai_actor : this->actors) {
-        if (ai_actor->prog_executed == true) {
-            continue;
-        }
         if (ai_actor->object->alive == false && ai_actor->is_destroyed == false) {
             ai_actor->is_destroyed = true;
             if (ai_actor->on_is_destroyed.size() > 0) {
@@ -259,7 +256,7 @@ void SCMission::update() {
         if (ai_actor->is_active == false) {
             continue;
         }
-        if (ai_actor->on_update.size() > 0) {
+        if (ai_actor->on_update.size() > 0 && ai_actor->is_destroyed == false) {
             SCProg *p = new SCProg(ai_actor, ai_actor->on_update, this);
             p->execute();
         }

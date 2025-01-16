@@ -297,6 +297,10 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
             if (actor->plane->y < zero_level) {
                 actor->plane->y += zero_level;
             }
+            if (actor->on_is_activated.size() > 0) {
+                SCProg *p = new SCProg(actor, actor->on_is_activated, this->mission);
+                p->execute();
+            }
             return true;
         }
     }

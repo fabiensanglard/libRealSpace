@@ -100,6 +100,9 @@ void SCProg::execute() {
                     this->mission->mission->mission_data.flags[prog.arg] += 3;
                 }
             case OP_INSTANT_DESTROY_TARGET:
+                if (exec) {
+                    this->mission->actors[prog.arg]->object->alive = false;
+                }
             break;
             case OP_SET_OBJ_TAKE_OFF:
                 if (exec) {
