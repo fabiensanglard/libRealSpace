@@ -27,12 +27,23 @@ opcodes = {
     69: '[69 ] GET FLAG ID',
     65: '[65 ] FLAG INSTRUCTION 2',
     82: '[82 ] SET FLAG ID TO TRUE',
-    70: '[70 ] IF OBJECTIVE IS FALSE GOTO',
+    70: '[70 ] IF FALSE GOTO',
     71: '[71 ] AI STATE INSTRUCTION 2',
     72: '[72 ] IF TRUE GOTO',
     73: '[73 ] IF FALSE GOTO',
     16: '[16 ] SOME SORT OF GOTO',
-    8: '[8  ] CREATE LABEL'
+    8: '[8  ] CREATE LABEL',
+    1: '[1  ] EXIT',
+    2: '[2  ] EXEC SUB PROG',
+    17: '[17 ] SELECT FLAG',
+    20: '[20 ] SAVE VALUE TO FLAG',
+    35: '[35 ] ADD 3 TO FLAG',
+    64: '[64 ] CMP GREATER EQUAL THAN',
+    74: '[74 ] IF TRUE GOTO',
+    79: '[79 ] EXECUTE GOTO SAVED WITH [16]',
+    85: '[85 ] ADD 1 TO FLAG',
+    144: '[144] ACTIVATE OBJECT',
+
 }
 
 def parse_iff_filereader(f, file_path, dec=0):

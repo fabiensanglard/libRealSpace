@@ -320,6 +320,10 @@ void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
         for (int k = 0; k < 8; k=k+2) {
             prt->progs_id.push_back(prt->unknown_bytes[14+k]);
         }
+        prt->on_is_activated = prt->progs_id[0];
+        prt->on_mission_update = prt->progs_id[1];
+        prt->on_is_destroyed = prt->progs_id[2];
+        prt->on_missions_init = prt->progs_id[3];
         prt->azymuth = 0;
         prt->azymuth |= prt->unknown_bytes[1] << 0;
         prt->azymuth |= prt->unknown_bytes[2] << 8;

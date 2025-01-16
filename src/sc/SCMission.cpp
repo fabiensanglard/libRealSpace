@@ -70,13 +70,27 @@ void SCMission::loadMission() {
                 actor->object = part;
                 actor->profile = cast->profile;
                 actor->mission = this;
-                for (auto prg_id: actor->object->progs_id) {
-                    if (prg_id != 255 && prg_id < this->mission->mission_data.prog.size()) {
-                        for (auto op: *this->mission->mission_data.prog[prg_id]) {
-                            actor->prog.push_back(op);
-                        }
+                if (actor->object->on_is_activated != 255) {
+                    for (auto op: *this->mission->mission_data.prog[actor->object->on_is_activated]) {
+                        actor->on_is_activated.push_back(op);
                     }
                 }
+                if (actor->object->on_is_destroyed != 255) {
+                    for (auto op: *this->mission->mission_data.prog[actor->object->on_is_destroyed]) {
+                        actor->on_is_destroyed.push_back(op);
+                    }
+                }
+                if (actor->object->on_missions_init != 255) {
+                    for (auto op: *this->mission->mission_data.prog[actor->object->on_missions_init]) {
+                        actor->on_mission_start.push_back(op);
+                    }
+                }
+                if (actor->object->on_mission_update != 255) {
+                    for (auto op: *this->mission->mission_data.prog[actor->object->on_mission_update]) {
+                        actor->on_update.push_back(op);
+                    }
+                }
+                
                 if (cast->profile != nullptr && cast->profile->ai.isAI) {
                     if (cast->profile->ai.goal.size() > 0) {
                         actor->pilot = new SCPilot();
@@ -166,8 +180,8 @@ void SCMission::loadMission() {
         }
     }
     
-    if (this->player->prog.size() > 0) {
-        SCProg *p = new SCProg(this->player, this->player->prog, this);
+    if (this->player->on_mission_start.size() > 0 && this->player->prog_executed == false) {
+        SCProg *p = new SCProg(this->player, this->player->on_mission_start, this);
         p->execute();
         this->player->prog_executed = true;
     }
@@ -196,6 +210,10 @@ void SCMission::update() {
                         for (auto actor: this->actors) {
                             if (actor->actor_id == part->id) {
                                 actor->is_active = true;
+                                if (actor->on_is_activated.size() > 0) {
+                                    SCProg *p = new SCProg(actor, actor->on_is_activated, this);
+                                    p->execute();
+                                }
                                 break;
                             }
                         }
@@ -225,26 +243,24 @@ void SCMission::update() {
         }
         if (ai_actor->object->alive == false && ai_actor->is_destroyed == false) {
             ai_actor->is_destroyed = true;
-        }
-        if (ai_actor->is_destroyed && ai_actor->prog_executed == false) {
-            SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
-            p->execute();
-            ai_actor->prog_executed = true;
-            continue;
+            if (ai_actor->on_is_destroyed.size() > 0) {
+                SCProg *p = new SCProg(ai_actor, ai_actor->on_is_destroyed, this);
+                p->execute();
+            }
         }
         if (ai_actor->profile == nullptr) {
             continue;
         }
         if (ai_actor->profile->radi.info.callsign == "Strike Base") {
-            SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
+            SCProg *p = new SCProg(ai_actor, ai_actor->on_update, this);
             p->execute();
             continue;
         }
         if (ai_actor->is_active == false) {
             continue;
         }
-        if (ai_actor->prog.size() > 0) {
-            SCProg *p = new SCProg(ai_actor, ai_actor->prog, this);
+        if (ai_actor->on_update.size() > 0) {
+            SCProg *p = new SCProg(ai_actor, ai_actor->on_update, this);
             p->execute();
         }
         if (ai_actor->pilot == nullptr) {

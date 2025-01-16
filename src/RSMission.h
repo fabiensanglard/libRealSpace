@@ -41,6 +41,12 @@ struct MISN_PART {
     uint16_t roll{0};
     uint16_t pitch{0};
     std::vector<uint8_t> progs_id;
+    
+    uint8_t on_is_activated{255};
+    uint8_t on_mission_update{255};
+    uint8_t on_is_destroyed{255};
+    uint8_t on_missions_init{255};
+
     std::vector<uint8_t> unknown_bytes;
     RSEntity *entity{nullptr};
     bool alive{true};

@@ -18,7 +18,7 @@ enum prog_op {
     OP_GOTO_IF_FALSE_73 = 73,
     OP_GOTO_IF_TRUE_74 = 74,
     OP_EXECUTE_CALL = 79,
-     OP_STORE_CALL_TO_VALUE = 80,
+    OP_STORE_CALL_TO_VALUE = 80,
     OP_SET_FLAG_TO_TRUE = 82,
     OP_ADD_1_TO_FLAG = 85,
     OP_ACTIVATE_OBJ = 144,
@@ -44,6 +44,10 @@ public:
     uint8_t actor_id;
     RSProf *profile{nullptr};
     std::vector<PROG> prog;
+    std::vector<PROG> on_mission_start;
+    std::vector<PROG> on_is_activated;
+    std::vector<PROG> on_is_destroyed;
+    std::vector<PROG> on_update;
     MISN_PART *object{nullptr};
     SCPlane *plane{nullptr};
     SCPilot *pilot{nullptr};
