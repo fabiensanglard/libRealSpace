@@ -1150,8 +1150,10 @@ void SCStrike::RenderMenu() {
             ImGui::TreePop();
         }
         if (ImGui::TreeNode("Flags")) {
+            int cpt_flags = 0;
             for (auto flag : this->current_mission->mission->mission_data.flags) {
-                ImGui::Text("Flag %d", flag);
+                ImGui::Text("Flag %d : %d", cpt_flags, flag);
+                cpt_flags++;
             }
             ImGui::TreePop();
         }
@@ -1285,11 +1287,50 @@ void SCStrike::RenderMenu() {
                         ImGui::Text("Name %s", actor->actor_name.c_str());
                         ImGui::Text("No profile");
                     }
-                    if (ImGui::TreeNode("PROGS")) {
+                    if (ImGui::TreeNode("On is activated")) {
                         int cpt=0;
-                        if (actor->prog.size() > 0) {
-                            if (ImGui::TreeNode((void *)(intptr_t)&actor->prog, "Prog %d", cpt)) {
-                                for (auto opcodes: actor->prog) {
+                        if (actor->on_is_activated.size() > 0) {
+                            if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_activated, "Prog %d", cpt)) {
+                                for (auto opcodes: actor->on_is_activated) {
+                                    ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
+                                }
+                                ImGui::TreePop();
+                            }
+                            cpt++;
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("On update")) {
+                        int cpt=0;
+                        if (actor->on_is_activated.size() > 0) {
+                            if (ImGui::TreeNode((void *)(intptr_t)&actor->on_update, "Prog %d", cpt)) {
+                                for (auto opcodes: actor->on_update) {
+                                    ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
+                                }
+                                ImGui::TreePop();
+                            }
+                            cpt++;
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("On is destroyed")) {
+                        int cpt=0;
+                        if (actor->on_is_destroyed.size() > 0) {
+                            if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_destroyed, "Prog %d", cpt)) {
+                                for (auto opcodes: actor->on_is_destroyed) {
+                                    ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
+                                }
+                                ImGui::TreePop();
+                            }
+                            cpt++;
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("On mission start")) {
+                        int cpt=0;
+                        if (actor->on_mission_start.size() > 0) {
+                            if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_destroyed, "Prog %d", cpt)) {
+                                for (auto opcodes: actor->on_mission_start) {
                                     ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
                                 }
                                 ImGui::TreePop();
