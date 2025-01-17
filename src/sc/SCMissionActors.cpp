@@ -63,7 +63,10 @@ bool SCMissionActors::flyToWaypoint(uint8_t arg) {
         Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
         Vector3D diff = wp->position - position;
         float dist = diff.Length();
-        if (dist < 100.0f) {
+        if (dist < 3000.0f) {
+            this->pilot->turning = false;
+        }
+        if (dist < 1000.0f) {
             return true;
         }
     }
