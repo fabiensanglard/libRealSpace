@@ -45,6 +45,7 @@ void SCProg::execute() {
     size_t jump_to = 0;
     size_t call_to = 0;
     int flag_number = 0;
+    int work_register = 0;
     bool exec = true;
     bool objective_flag = false;
     bool true_flag = false;
@@ -155,24 +156,22 @@ void SCProg::execute() {
                 }
             case OP_SELECT_FLAG:
                 if (exec) {
-                    flag_number = prog.arg;
+                    work_register = this->mission->mission->mission_data.flags[prog.arg];
                 }
             break;
             case OP_SAVE_VALUE_TO_FLAG:
                 if (exec) {
-                    this->mission->mission->mission_data.flags[flag_number] = prog.arg;
+                    this->mission->mission->mission_data.flags[prog.arg] = work_register;
                 }
             break;
             case OP_STORE_CALL_TO_VALUE:
                 if (exec) {
-                    if (this->mission->mission->mission_data.flags[prog.arg] == 0) {
-                        this->mission->mission->mission_data.flags[prog.arg] = (uint8_t) call_to;
-                    }
+                    this->mission->mission->mission_data.flags[prog.arg] = (uint8_t) call_to;
                 }
             break;
             case OP_EXECUTE_CALL:
                 if (exec) {
-                    jump_to = this->mission->mission->mission_data.flags[flag_number];
+                    jump_to = work_register;
                     exec = false;
                 }
             break;
@@ -185,7 +184,7 @@ void SCProg::execute() {
             break;
             case OP_CMP_GREATER_EQUAL_THAN:
                 if (exec) {
-                    true_flag = this->mission->mission->mission_data.flags[flag_number] >= prog.arg;
+                    true_flag = this->mission->mission->mission_data.flags[work_register] >= prog.arg;
                 }
             break;
             case OP_GOTO_IF_TRUE_74:
@@ -216,6 +215,11 @@ void SCProg::execute() {
             case OP_GET_FLAG_ID:
                 if (exec) {
                     true_flag = this->mission->mission->mission_data.flags[prog.arg] > 0;
+                }
+            break;
+            case OP_ADD_VALUE_TO_WORK:
+                if (exec) {
+                    work_register += prog.arg;
                 }
             break;
             default:
