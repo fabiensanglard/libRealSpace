@@ -46,6 +46,7 @@ void SCProg::execute() {
     size_t call_to = 0;
     int flag_number = 0;
     int work_register = 0;
+    int compare_flag = 0;
     bool exec = true;
     bool objective_flag = false;
     bool true_flag = false;
@@ -60,6 +61,11 @@ void SCProg::execute() {
                     }
                 }
             break;
+            case OP_INVERT_FLAG:
+                if (exec) {
+                    //this->mission->mission->mission_data.flags[prog.arg] = !this->mission->mission->mission_data.flags[prog.arg];
+                }
+            break;
             case OP_SET_LABEL:
                 if (jump_to == prog.arg) {
                     exec = true;
@@ -72,15 +78,15 @@ void SCProg::execute() {
             break;
             case OP_GOTO_LABEL_IF_TRUE:
                 if (exec) {
-                    if (objective_flag || true_flag) {
+                    if (true_flag) {
                         jump_to = prog.arg;
                         exec = false;
                     }
                 }
             break;
-            case OP_GOTO_LABEL_IF_FALSE:
+            case OP_GOTO_IF_CURRENT_COMMAND_IN_PROGRESS:
                 if (exec) {
-                    if (!objective_flag) {
+                    if (!this->actor->current_command_executed) {
                         jump_to = prog.arg;
                         exec = false;
                     }
@@ -88,7 +94,7 @@ void SCProg::execute() {
             break;
             case OP_IF_TARGET_IN_AREA:
                 if (exec) {
-                    objective_flag = this->actor->ifTargetInSameArea(prog.arg);
+                    this->actor->current_command_executed = this->actor->ifTargetInSameArea(prog.arg);
                 }
             break;
             case OP_ADD_1_TO_FLAG:
@@ -107,47 +113,47 @@ void SCProg::execute() {
             break;
             case OP_SET_OBJ_TAKE_OFF:
                 if (exec) {
-                    objective_flag = this->actor->takeOff(prog.arg);
+                    this->actor->current_command_executed = this->actor->takeOff(prog.arg);
                 }
             break;
             case OP_SET_OBJ_LAND:
                 if (exec) {
-                    objective_flag = this->actor->land(prog.arg);
+                    this->actor->current_command_executed = this->actor->land(prog.arg);
                 }
             break;
             case OP_SET_OBJ_FLY_TO_WP:
                 if (exec) {
-                    objective_flag = this->actor->flyToWaypoint(prog.arg);
+                    this->actor->current_command_executed = this->actor->flyToWaypoint(prog.arg);
                 }
             break;
             case OP_SET_OBJ_FLY_TO_AREA:
                 if (exec) {
-                    objective_flag = this->actor->flyToArea(prog.arg);
+                    this->actor->current_command_executed = this->actor->flyToArea(prog.arg);
                 }
             break;
             case OP_SET_OBJ_DESTROY_TARGET:
                 if (exec) {
-                    objective_flag = this->actor->destroyTarget(prog.arg);
+                    this->actor->current_command_executed = this->actor->destroyTarget(prog.arg);
                 }
             break;
             case OP_SET_OBJ_DEFEND_TARGET:
                 if (exec) {
-                    objective_flag = this->actor->defendTarget(prog.arg);
+                    this->actor->current_command_executed = this->actor->defendTarget(prog.arg);
                 }
             break;
             case OP_SET_MESSAGE:
                 if (exec) {
-                    objective_flag = this->actor->setMessage(prog.arg);
+                    this->actor->current_command_executed = this->actor->setMessage(prog.arg);
                 }
             break;
             case OP_SET_OBJ_FOLLOW_ALLY:
                 if (exec) {
-                    objective_flag = this->actor->followAlly(prog.arg);
+                    this->actor->current_command_executed = this->actor->followAlly(prog.arg);
                 }
             break;
             case OP_DEACTIVATE_OBJ:
                 if (exec) {
-                    objective_flag = this->actor->deactivate(prog.arg);
+                    this->actor->current_command_executed = this->actor->deactivate(prog.arg);
                 }
             break;
             case OP_ACTIVATE_OBJ:
@@ -184,12 +190,18 @@ void SCProg::execute() {
             break;
             case OP_CMP_GREATER_EQUAL_THAN:
                 if (exec) {
-                    true_flag = this->mission->mission->mission_data.flags[work_register] >= prog.arg;
+                    if (work_register == prog.arg) {
+                        compare_flag = 0;
+                    } else if (work_register > prog.arg) {
+                        compare_flag = 1;
+                    } else if (work_register < prog.arg) {
+                        compare_flag = -1;
+                    }
                 }
             break;
             case OP_GOTO_IF_TRUE_74:
                 if (exec) {
-                    if (true_flag) {
+                    if (compare_flag == 1) {
                         jump_to = prog.arg;
                         exec = false;
                     }
@@ -205,6 +217,11 @@ void SCProg::execute() {
             case OP_SELECT_FLAG_208:
                 if (exec) {
                     // je sais pas
+                }
+            break;
+            case OP_DIST_TO_TARGET:
+                if (exec) {
+                    work_register = this->actor->getDistanceToTarget(prog.arg);
                 }
             break;
             case OP_SET_FLAG_TO_TRUE:

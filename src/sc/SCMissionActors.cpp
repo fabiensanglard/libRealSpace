@@ -267,16 +267,16 @@ bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
     Uint8 area_id = this->mission->getAreaID(position);
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
-            if (actor->is_active == false) {
-                return false;
+            if (actor->is_active == true && !actor->is_destroyed) {
+                return true;
             }
-            if (actor->plane == nullptr) {
+            /*if (actor->plane == nullptr) {
                 return (area_id == actor->object->area_id);
             }
             Uint8 target_area_id = this->mission->getAreaID({actor->plane->x, actor->plane->y, actor->plane->z});
             if (area_id == target_area_id) {
                 return true;
-            }
+            }*/
         }
     }
     return false;
@@ -308,6 +308,11 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
     return false;
 }
 
+int SCMissionActors::getDistanceToTarget(uint8_t arg) {
+    Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
+    Vector3D diff = this->mission->actors[arg]->plane->position - position;
+    return (int) diff.Length();
+}
 
 /**
  * SCMissionActorsPlayer::takeOff
@@ -425,6 +430,7 @@ bool SCMissionActorsPlayer::setMessage(uint8_t arg) {
     }
     return true;
 }
+
 /*
 @TODO
 Fly to#Precise Way

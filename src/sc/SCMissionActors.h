@@ -7,6 +7,7 @@ enum prog_op {
     OP_EXIT_PROG = 1,
     OP_EXEC_SUB_PROG = 2,
     OP_SET_LABEL = 8,
+    OP_INVERT_FLAG = 9,
     OP_CALL_LABEL = 16,
     OP_SELECT_FLAG = 17,
     OP_SAVE_VALUE_TO_FLAG = 20,
@@ -14,7 +15,7 @@ enum prog_op {
     OP_ADD_VALUE_TO_WORK = 46, 
     OP_CMP_GREATER_EQUAL_THAN = 64,
     OP_GET_FLAG_ID = 69,
-    OP_GOTO_LABEL_IF_FALSE = 70,
+    OP_GOTO_IF_CURRENT_COMMAND_IN_PROGRESS = 70,
     OP_GOTO_LABEL_IF_TRUE = 72,
     OP_GOTO_IF_FALSE_73 = 73,
     OP_GOTO_IF_TRUE_74 = 74,
@@ -25,6 +26,7 @@ enum prog_op {
     OP_ACTIVATE_OBJ = 144,
     OP_IF_TARGET_IN_AREA = 146,
     OP_INSTANT_DESTROY_TARGET = 148,
+    OP_DIST_TO_TARGET = 149,
     OP_SET_OBJ_TAKE_OFF = 161,
     OP_SET_OBJ_LAND = 162,
     OP_SET_OBJ_FLY_TO_WP = 165,
@@ -60,7 +62,8 @@ public:
     bool taken_off{false};
     bool is_destroyed{false};
     bool prog_executed{false};
-    
+    bool current_command_executed{false};
+
     virtual bool execute();
     virtual bool takeOff(uint8_t arg); 
     virtual bool land(uint8_t arg);
@@ -73,6 +76,7 @@ public:
     virtual bool followAlly(uint8_t arg);
     virtual bool ifTargetInSameArea(uint8_t arg);
     virtual bool activateTarget(uint8_t arg);
+    virtual int getDistanceToTarget(uint8_t arg);
 };
 
 class SCMissionActorsPlayer : public SCMissionActors {
