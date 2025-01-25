@@ -37,7 +37,8 @@ public:
     RSArea *area{nullptr};
     RSMission *mission{nullptr};
     RSWorld *world{nullptr};
-    
+    std::vector<std::string*> radio_messages;
+
     SCMission(std::string mission_name, std::map<std::string, RSEntity *> *objCache);
     ~SCMission();
     void loadMission();

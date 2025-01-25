@@ -31,6 +31,8 @@ private:
     void RenderMFDSComm(Point2D pmfd_left, int mode);
     RSFont *font;
     RSFont *big_font;
+    int radio_mission_timer{0};
+    
 public:
     RSCockpit* cockpit;
     RSHud* hud;

@@ -21,11 +21,12 @@ public:
     RSMission *missionObj;
     SCMission *mission{nullptr};
     uint8_t *current_nav_point;
+    RSNavMap* navMap;
     
 private:
     int color{134};
     std::string *name;
-    RSNavMap* navMap;
+    
     
     VGAPalette palette;
     VGAPalette objpal;

@@ -266,7 +266,9 @@ void SCMission::update() {
         if (ai_actor->plane == nullptr) {
             continue;
         }
-        
+        if (ai_actor->plane->status == 0) {
+            continue;
+        }
         ai_actor->plane->Simulate();
         ai_actor->pilot->AutoPilot();
         

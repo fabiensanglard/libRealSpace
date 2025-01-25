@@ -71,9 +71,9 @@ void SCProg::execute() {
                     exec = true;
                 }
             break;
-            case OP_CALL_LABEL:
+            case OP_MOVE_VALUE_TO_WORK_REGISTER:
                 if (exec) {
-                    call_to = prog.arg;
+                    work_register = prog.arg;
                 }
             break;
             case OP_GOTO_LABEL_IF_TRUE:
@@ -94,7 +94,7 @@ void SCProg::execute() {
             break;
             case OP_IF_TARGET_IN_AREA:
                 if (exec) {
-                    this->actor->current_command_executed = this->actor->ifTargetInSameArea(prog.arg);
+                    true_flag = this->actor->ifTargetInSameArea(prog.arg);
                 }
             break;
             case OP_ADD_1_TO_FLAG:
@@ -143,7 +143,7 @@ void SCProg::execute() {
             break;
             case OP_SET_MESSAGE:
                 if (exec) {
-                    this->actor->current_command_executed = this->actor->setMessage(prog.arg);
+                    this->actor->setMessage(prog.arg);
                 }
             break;
             case OP_SET_OBJ_FOLLOW_ALLY:
@@ -153,14 +153,14 @@ void SCProg::execute() {
             break;
             case OP_DEACTIVATE_OBJ:
                 if (exec) {
-                    this->actor->current_command_executed = this->actor->deactivate(prog.arg);
+                    this->actor->deactivate(prog.arg);
                 }
             break;
             case OP_ACTIVATE_OBJ:
                 if (exec) {
                     this->actor->activateTarget(prog.arg);
                 }
-            case OP_SELECT_FLAG:
+            case OP_MOVE_FLAG_TO_WORK_REGISTER:
                 if (exec) {
                     work_register = this->mission->mission->mission_data.flags[prog.arg];
                 }
@@ -170,9 +170,9 @@ void SCProg::execute() {
                     this->mission->mission->mission_data.flags[prog.arg] = work_register;
                 }
             break;
-            case OP_STORE_CALL_TO_VALUE:
+            case OP_MOVE_WORK_REGISTER_TO_FLAG:
                 if (exec) {
-                    this->mission->mission->mission_data.flags[prog.arg] = (uint8_t) call_to;
+                    this->mission->mission->mission_data.flags[prog.arg] = (uint8_t) work_register;
                 }
             break;
             case OP_EXECUTE_CALL:
@@ -199,7 +199,15 @@ void SCProg::execute() {
                     }
                 }
             break;
-            case OP_GOTO_IF_TRUE_74:
+            case OP_IF_LESS_THAN_GOTO:
+                if (exec) {
+                    if (compare_flag == -1) {
+                        jump_to = prog.arg;
+                        exec = false;
+                    }
+                }
+            break;
+            case OP_IF_GREATER_THAN_GOTO:
                 if (exec) {
                     if (compare_flag == 1) {
                         jump_to = prog.arg;

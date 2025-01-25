@@ -139,6 +139,7 @@ private:
     MISN_PART *target{nullptr};
 
     SCMission *current_mission{nullptr};
+    int radio_mission_timer{0};
 
 public:
     /**

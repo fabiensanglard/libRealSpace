@@ -492,6 +492,9 @@ void SCPlane::OrigSimulate() {
             this->on_ground = FALSE;
         } else if (this->y < groundlevel) {
             /* check for on the ground */
+            if (this->object->alive == 0) {
+                this->status = MEXPLODE;
+            }
             if (this->nocrash == 0) {
                 if (this->isOnRunWay())
                     /* and not on ground before */

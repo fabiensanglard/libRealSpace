@@ -640,6 +640,29 @@ void SCCockpit::Render(int face) {
                 this->RenderMFDSComm(pmfd, this->comm_target);
             }
         }
+        if (this->current_mission->radio_messages.size() > 0) {
+            if (this->radio_mission_timer == 0) {
+                this->radio_mission_timer = 500;
+            }
+            Point2D radio_text = {2, 20};
+            VGA.PrintText(
+                this->big_font, 
+                &radio_text,
+                (char *)this->current_mission->radio_messages[0]->c_str(),
+                0,
+                0,
+                this->current_mission->radio_messages[0]->size(),
+                2,
+                2
+            );
+            if (this->radio_mission_timer > 0) {
+                this->radio_mission_timer--;
+            }
+            if (this->radio_mission_timer <= 0) {
+                this->current_mission->radio_messages.erase(this->current_mission->radio_messages.begin());
+                this->radio_mission_timer = 0;
+            }
+        }
         VGA.VSync();
         VGA.SwithBuffers();
     }

@@ -67,7 +67,7 @@ private:
     short type;
     short alive;
     char myname[NAME_LENGTH + 1];
-    unsigned int status;
+    
     /* for msgs these 2 shorts */
     unsigned short won;
     /* hold the plane id	*/
@@ -178,7 +178,7 @@ private:
     std::vector<Vector3D> smoke_positions;
     
 public:
-
+    unsigned int status;
     float s;
     float b;
     float W;

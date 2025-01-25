@@ -671,8 +671,6 @@ void SCStrike::RunFrame(void) {
         glPopMatrix();
         break;
     }
-    
-
     this->RenderMenu();
 }
 

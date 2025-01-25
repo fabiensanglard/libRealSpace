@@ -207,8 +207,8 @@ bool SCMissionActors::deactivate(uint8_t arg) {
  * @param arg The index of the message to be set.
  * @return true Always returns true.
  */
-bool SCMissionActors::setMessage(uint8_t arg) {
-    this->profile->radi.msgs[arg];   
+bool SCMissionActors::setMessage(uint8_t arg) {   
+    this->mission->radio_messages.push_back(&this->profile->radi.msgs[arg]);
     printf("Message  %s\n", this->profile->radi.msgs[arg].c_str()); 
     return true;
 }
