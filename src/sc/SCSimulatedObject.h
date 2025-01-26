@@ -1,6 +1,8 @@
 #pragma once
 #include "precomp.h"
 
+class SCMissionActors;
+
 class SCSimulatedObject {
 
     float last_px{0.0f};
@@ -26,7 +28,8 @@ public:
 
     bool alive{true};
     RSEntity *obj;
-    MISN_PART *target{nullptr};
+    SCMissionActors *target{nullptr};
+    SCMissionActors *shooter{nullptr};
     SCSimulatedObject();
     ~SCSimulatedObject();
     void Simulate(int tps);

@@ -142,9 +142,9 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
         0.0f
     };
     if (this->target != nullptr) {
-        to_target.x = (float) this->target->position.x;
-        to_target.y = (float) this->target->position.y;
-        to_target.z = (float) this->target->position.z;
+        to_target.x = (float) this->target->object->position.x;
+        to_target.y = (float) this->target->object->position.y;
+        to_target.z = (float) this->target->object->position.z;
     }
     Vector3D gravity_force = {0.0, -this->weight * GRAVITY, 0.0};
     Vector3D drag_force = this->calculate_drag(velocity);
@@ -156,7 +156,13 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
     
     if (this->target != nullptr && error.Norm() < 10.0f) {
         this->alive = false;
-        this->target->alive = false;
+        this->target->object->alive = false;
+        this->shooter->score += 100;
+        if (this->target->plane != nullptr) {
+            this->shooter->plane_down += 1;
+        } else {
+            this->shooter->ground_down += 1;
+        }
         return;
     }
     // Force de poussée ajustée en fonction de la direction de l'erreur

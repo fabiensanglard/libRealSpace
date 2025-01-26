@@ -376,8 +376,8 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_t:
             this->current_target = (this->current_target + 1) % this->current_mission->enemies.size();
-            this->target = this->current_mission->enemies[this->current_target]->object;
-            this->cockpit->target = this->target;
+            this->target = this->current_mission->enemies[this->current_target];
+            this->cockpit->target = this->target->object;
             break;
         default:
             break;
@@ -432,7 +432,7 @@ void SCStrike::SetMission(char const *missionName) {
     camera = Renderer.GetCamera();
     camera->SetPosition(&newPosition);
     this->current_target = 0;
-    this->target = this->current_mission->enemies[this->current_target]->object;
+    this->target = this->current_mission->enemies[this->current_target];
     this->nav_point_id = 0;
     this->player_plane = this->current_mission->player->plane;
     this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
@@ -527,9 +527,9 @@ void SCStrike::RunFrame(void) {
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
         break;
     case View::TARGET: {
-        Vector3D pos = {target->position.x + this->camera_pos.x, target->position.y + this->camera_pos.y,
-                        target->position.z + this->camera_pos.z};
-        Vector3D targetPos = {target->position.x, target->position.y, target->position.z};
+        Vector3D pos = {target->object->position.x + this->camera_pos.x, target->object->position.y + this->camera_pos.y,
+                        target->object->position.z + this->camera_pos.z};
+        Vector3D targetPos = {target->object->position.x, target->object->position.y, target->object->position.z};
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
     }
@@ -565,7 +565,7 @@ void SCStrike::RunFrame(void) {
     break;
     case View::EYE_ON_TARGET: {
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
-        Vector3D targetPos = {target->position.x, target->position.y,target->position.z };
+        Vector3D targetPos = {target->object->position.x, target->object->position.y,target->object->position.z };
         camera->SetPosition(&pos);
         camera->LookAt(&targetPos);
     } break;
@@ -1024,7 +1024,7 @@ void SCStrike::RenderMenu() {
             ImGui::Text("Mouse control enabled");
         }
         ImGui::Text("Target %s", this->current_mission->actors[this->current_target]->actor_name.c_str());
-        Vector3D targetPos = {this->target->position.x, this->target->position.y, this->target->position.z};
+        Vector3D targetPos = {this->target->object->position.x, this->target->object->position.y, this->target->object->position.z};
         Vector3D playerPos = {this->newPosition.x, this->newPosition.y, this->newPosition.z};
 
         Camera totarget;
@@ -1061,7 +1061,7 @@ void SCStrike::RenderMenu() {
                 );
                 ImGui::Text("X:%.3f\tY:%.3f\tZ:%.3f", missils->x+ 180000.0f, missils->y, missils->z+ 180000.0f);
                 if (missils->target != nullptr) {
-                    ImGui::Text("Target X:%.0f\tY:%.0f\tZ:%.0f", missils->target->position.x, missils->target->position.y, missils->target->position.z);    
+                    ImGui::Text("Target X:%.0f\tY:%.0f\tZ:%.0f", missils->target->object->position.x, missils->target->object->position.y, missils->target->object->position.z);    
                 }
                 
             }
@@ -1279,6 +1279,12 @@ void SCStrike::RenderMenu() {
                             ImGui::Text("AA %d", actor->profile->ai.atrb.AA);
                             ImGui::Text("SM %d", actor->profile->ai.atrb.SM);
                             ImGui::Text("AR %d", actor->profile->ai.atrb.AR);
+                            ImGui::TreePop();
+                        }
+                        if (ImGui::TreeNode("Score")) {
+                            ImGui::Text("Score %d", actor->score);
+                            ImGui::Text("Plane %d", actor->plane_down);
+                            ImGui::Text("Ground %d", actor->ground_down);
                             ImGui::TreePop();
                         }
                     } else {

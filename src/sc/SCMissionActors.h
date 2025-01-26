@@ -43,7 +43,9 @@ enum prog_op {
 
 class SCMissionActors {
 public:
-
+    int score{0};
+    int plane_down{0};
+    int ground_down{0};
     std::string actor_name;
     uint8_t actor_id;
     RSProf *profile{nullptr};

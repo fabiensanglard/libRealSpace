@@ -136,7 +136,7 @@ private:
 
     uint8_t current_object_to_view{0};
 
-    MISN_PART *target{nullptr};
+    SCMissionActors *target{nullptr};
 
     SCMission *current_mission{nullptr};
     int radio_mission_timer{0};

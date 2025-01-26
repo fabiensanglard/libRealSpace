@@ -34,15 +34,16 @@
 #include "SCSimulatedObject.h"
 #include "SCPlane.h"
 #include "SCPilot.h"
+#include "SCMissionActors.h"
+#include "SCMission.h"
+#include "SCProg.h"
 
 //Activities
 #include "SCConvPlayer.h"
 #include "SCAnimationPlayer.h"
 #include "SCRegister.h"
 #include "SCWildCatBase.h"
-#include "SCMissionActors.h"
-#include "SCMission.h"
-#include "SCProg.h"
+
 #include "SCNavMap.h"
 #include "SCCockpit.h"
 #include "SCStrike.h"

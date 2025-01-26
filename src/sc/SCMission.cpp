@@ -100,6 +100,7 @@ void SCMission::loadMission() {
                         actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                         actor->plane->yaw = (360 - part->azymuth) * (float) M_PI / 180.0f;
                         actor->plane->object = part;
+                        actor->plane->pilot = actor;
                         if (this->area->getY(part->position.x, part->position.z) == part->position.y) {
                             actor->plane->on_ground = true;
                         } else {
@@ -132,6 +133,7 @@ void SCMission::loadMission() {
                     actor->plane->simple_simulation = false;
                     actor->plane->yaw = (360 - part->azymuth) * (float) M_PI / 180.0f;
                     actor->plane->object = part;
+                    actor->plane->pilot = actor;
                     this->actors.push_back(actor);
                     this->player = actor;
                 } else {

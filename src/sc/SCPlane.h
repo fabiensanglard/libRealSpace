@@ -46,6 +46,8 @@ static float ro[75] = {
 
 #define COORD_SCALE 1.0f
 
+class SCMissionActors;
+
 struct SCWeaponLoadoutHardPoint {
     RSEntity *objct;
     int nb_weap;
@@ -242,7 +244,7 @@ public:
     std::vector <SCSimulatedObject *> weaps_object;
     int selected_weapon{0};
     MISN_PART *object;
-
+    SCMissionActors *pilot;
 
     float pitch{0.0f};
     float roll{0.0f};
@@ -279,7 +281,7 @@ public:
     void Render();
     void RenderSimulatedObject();
     void RenderSmoke(); 
-    void Shoot(int weapon_id, MISN_PART *target);
+    void Shoot(int weapon_id, SCMissionActors *target);
     void InitLoadout();
 };
 
