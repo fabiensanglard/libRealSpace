@@ -531,6 +531,7 @@ void SCGameFlow::createScen() {
 SCEN* SCGameFlow::loadScene(uint8_t scene_id) {
     // note pour plus tard, une scene peu être composé de plusieur background
         // donc il faut boucler.
+    this->test_shape = nullptr;
     this->sceneOpts = this->optionParser.opts[scene_id];
     if (sceneOpts->tune != nullptr) {
         Mixer.SwitchBank(1);
@@ -647,6 +648,9 @@ void SCGameFlow::RunFrame(void) {
             VGA.DrawShape(shp->GetShape(0));
         //}
     }
+    if (this->test_shape != nullptr) {
+        VGA.DrawShape(this->test_shape);
+    }
     this->CheckZones();
 
     for (int zi = 0; zi < this->zones.size(); zi++) {
@@ -689,11 +693,15 @@ void SCGameFlow::RenderMenu() {
     static bool show_load_miss = false;
     static bool show_load_scene = false;
     static bool show_gamestate = false;
+    static bool show_shots = false;
+    static bool load_sprites = false;
     static int miss_selected = 0;
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("GameFlow")) {
             ImGui::MenuItem("Load Miss", NULL, &show_load_miss);
             ImGui::MenuItem("Load Scene", NULL, &show_load_scene);
+            ImGui::MenuItem("Load shots", NULL, &show_shots);
+            ImGui::MenuItem("load sprites from current scene", NULL, &load_sprites);
             ImGui::MenuItem("Info", NULL, &show_scene_window);
             ImGui::MenuItem("GameState", NULL, &show_gamestate);
             ImGui::MenuItem("Quit", NULL, &quit_gameflow);
@@ -815,6 +823,28 @@ void SCGameFlow::RenderMenu() {
                 ImGui::TreePop();
             }
         }
+        if (ImGui::TreeNode("Scene Info")) {
+            if (ImGui::TreeNode("Forground Sprites")) {
+                for (auto sprt: this->sceneOpts->foreground->sprites) {
+                    ImGui::Text("Sprite %d", sprt.second->sprite.SHP_ID);
+                }
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Background")) {
+                for (auto bg: this->sceneOpts->background->images) {
+                    ImGui::Text("Image %d", bg->ID);
+                }
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Extras")) {
+                for (auto extra: this->sceneOpts->extr) {
+                    ImGui::Text("Extra %d", extra->SHAPE_ID);
+                }
+                ImGui::TreePop();
+            }
+            ImGui::TreePop();
+        }
+
         ImGui::End();
     }
     if (show_load_scene) {
@@ -834,7 +864,51 @@ void SCGameFlow::RenderMenu() {
             ImGui::EndCombo();
         }
         ImGui::End();
-    
+    }
+    if (show_shots) {
+        ImGui::Begin("Shots");
+        static ImGuiComboFlags shtsflags = 0;
+        if (ImGui::BeginCombo("List des shots", nullptr, shtsflags)) {
+            for (auto shot : this->optionParser.estb) {
+                if (ImGui::Selectable(std::to_string(shot.first).c_str(), false)) {
+                    SCShot *sht = new SCShot();
+                    sht->Init();
+                    sht->SetShotId(shot.first);
+                    this->cutsenes.push(sht);
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::End();
+    }
+    if (load_sprites) {
+        ImGui::Begin("Load Sprites");
+        static ImGuiComboFlags flags = 0;
+        if (ImGui::BeginCombo("List des extras", nullptr, flags)) {
+            int cpt_sprite = 0;
+            for (auto sprite : this->sceneOpts->extr) {
+                if (ImGui::Selectable(std::to_string(cpt_sprite).c_str(), false)) {
+                    RSImageSet *shp;
+                    shp = this->getShape(sprite->SHAPE_ID);
+                    this->test_shape = shp->GetShape(0);
+                }
+                cpt_sprite++;
+            }
+            ImGui::EndCombo();
+        }
+        if (ImGui::BeginCombo("List des sprites", nullptr, flags)) {
+            int cpt_sprite = 0;
+            for (auto sprite : this->sceneOpts->foreground->sprites) {
+                if (ImGui::Selectable(std::to_string(cpt_sprite).c_str(), false)) {
+                    RSImageSet *shp;
+                    shp = this->getShape(sprite.second->sprite.SHP_ID);
+                    this->test_shape = shp->GetShape(0);
+                }
+                cpt_sprite++;
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::End();
     }
     if (quit_gameflow) {
         Game.StopTopActivity();

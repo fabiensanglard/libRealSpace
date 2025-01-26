@@ -98,6 +98,8 @@ private:
     std::queue<SCShot *> cutsenes;
     std::queue<SCStrike *> fly_mission;
     
+    RLEShape *test_shape{nullptr};
+    
     void RenderMenu();
     void clicked(std::vector<EFCT *> *script, uint8_t id);
     void runEffect();
