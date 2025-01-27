@@ -484,6 +484,9 @@ void SCStrike::RunFrame(void) {
         this->mfd_timeout--;
         this->player_plane->Simulate();
         this->current_mission->update();
+        if (this->current_mission->mission_ended) {
+            Game.StopTopActivity();
+        }
     }
     this->player_plane->getPosition(&newPosition);
     if (this->player_plane->object != nullptr) {

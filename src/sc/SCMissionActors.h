@@ -92,3 +92,8 @@ public:
     bool defendTarget(uint8_t arg);
     bool setMessage(uint8_t arg);
 };
+
+class SCMissionActorsStrikeBase : public SCMissionActors {
+public:
+    bool setMessage(uint8_t arg);
+};

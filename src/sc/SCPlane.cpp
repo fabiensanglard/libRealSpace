@@ -406,7 +406,7 @@ void SCPlane::OrigSimulate() {
             this->ptw.rotateM(tenthOfDegreeToRad(this->elevationf), 1, 0, 0);
             this->ptw.rotateM(tenthOfDegreeToRad(this->twist), 0, 0, 1);
         }
-        this->ptw.translateM(this->vx, this->vy, this->vz);
+        this->ptw.translateM(this->vx/3.6, this->vy/3.6, this->vz/3.6);
         if (round(this->azimuth_speedf) != 0)
             this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->azimuth_speedf)), 0, 1, 0);
         if (round(this->elevation_speedf) != 0)
@@ -490,23 +490,24 @@ void SCPlane::OrigSimulate() {
                 this->min_throttle = 0;
             }
             this->on_ground = FALSE;
-        } else if (this->y < groundlevel) {
+        } else if (this->y <= groundlevel) {
             /* check for on the ground */
             if (this->object->alive == 0) {
                 this->status = MEXPLODE;
             }
-            if (this->nocrash == 0) {
-                if (this->isOnRunWay())
-                    /* and not on ground before */
-                    if (!this->on_ground) {
-                        int rating;
-                        /* increase drag	*/
-                        this->Cdp *= 3.0;
-                        /* allow reverse engines*/
-                        this->min_throttle = -this->max_throttle;
-                        rating = report_card(-this->climbspeed, this->twist, (int)(this->vx * this->tps),
-                                             (int)(-this->vz * this->fps_knots), this->wheels);
-                        /* oops - you crashed	*/
+            
+            if (this->isOnRunWay())
+                /* and not on ground before */
+                if (!this->on_ground) {
+                    int rating;
+                    /* increase drag	*/
+                    this->Cdp *= 3.0;
+                    /* allow reverse engines*/
+                    this->min_throttle = -this->max_throttle;
+                    rating = report_card(-this->climbspeed, this->twist, (int)(this->vx * this->tps),
+                                            (int)(-this->vz * this->fps_knots), this->wheels);
+                    /* oops - you crashed	*/
+                    if (this->nocrash) {
                         if (rating == -1) {
                             /* set to exploding	*/
                             this->status = MEXPLODE;
@@ -518,12 +519,21 @@ void SCPlane::OrigSimulate() {
                                 this->fuel = 100 << 7;
                             this->max_throttle = 100;
                         }
-                    } else {
+                    }
+                } else {
+                    if (this->nocrash == 0) {
                         this->status = MEXPLODE;
                     }
-            }
+                }
             this->ptw.v[3][1] = this->y = groundlevel;
             this->on_ground = TRUE;
+            if (this->airspeed < 1) {
+                this->vx = 0.0f;
+                this->vy = 0.0f;
+                this->vz = 0.0f;
+                this->airspeed = 0;
+                this->landed = true;
+            }
             if (this->status > MEXPLODE) {
                 /* kill negative elevation */
                 if (this->elevationf < 0) {
@@ -850,7 +860,7 @@ void SCPlane::SimplifiedSimulate() {
  * @return 1 if the plane is inside, 0 otherwise.
  */
 int SCPlane::IN_BOX(int llx, int urx, int llz, int urz) {
-    return (llx <= this->x && this->x <= urx && llz <= this->z && this->z <= urz);
+    return (llx <= this->x && this->x <= urx && urz <= this->z && this->z <= llz );
 }
 /**
  * Check if the plane is currently on a runway.
@@ -861,8 +871,8 @@ int SCPlane::isOnRunWay() {
 
     for (int i = 0; i < area->objectOverlay.size(); i++) {
 
-        if (IN_BOX(area->objectOverlay[i].lx, area->objectOverlay[i].hx, area->objectOverlay[i].ly,
-                   area->objectOverlay[i].hy)) {
+        if (IN_BOX(area->objectOverlay[i].lx, area->objectOverlay[i].hx, -area->objectOverlay[i].ly,
+                   -area->objectOverlay[i].hy)) {
 
             return 1;
         }

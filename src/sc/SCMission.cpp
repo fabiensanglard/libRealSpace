@@ -200,7 +200,6 @@ void SCMission::update() {
     uint8_t area_id = this->getAreaID({this->player->plane->x, this->player->plane->y, this->player->plane->z});
 
     for (auto scene: this->mission->mission_data.scenes) {
-
         if (scene->area_id == area_id-1 || scene->area_id == -1) {
             if (scene->is_active == 0) {
                 continue;
@@ -283,6 +282,9 @@ void SCMission::update() {
         ai_actor->object->azymuth = 360 - (uint16_t)(ai_actor->plane->azimuthf / 10.0f);
         ai_actor->object->roll = (uint16_t)(ai_actor->plane->twist / 10.0f);
         ai_actor->object->pitch = (uint16_t)(ai_actor->plane->elevationf / 10.0f);
+    }
+    if (this->player->plane->landed) {
+        this->mission_ended = true;
     }
 }
 

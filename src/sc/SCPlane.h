@@ -245,7 +245,7 @@ public:
     int selected_weapon{0};
     MISN_PART *object;
     SCMissionActors *pilot;
-
+    bool landed{false};
     float pitch{0.0f};
     float roll{0.0f};
     float yaw{0.0f};
