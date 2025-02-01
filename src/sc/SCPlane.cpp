@@ -484,13 +484,16 @@ void SCPlane::OrigSimulate() {
             this->thrust = 0;
         else if (this->y > groundlevel + 4.0) {
             /* not on ground	*/
-
+            if (!this->takeoff) {
+                this->takeoff = true;
+                this->landed = false;
+            }
             if (this->on_ground) {
                 this->Cdp /= 3.0;
                 this->min_throttle = 0;
             }
             this->on_ground = FALSE;
-        } else if (this->y <= groundlevel) {
+        } else if ((int) this->y <= groundlevel) {
             /* check for on the ground */
             if (this->object->alive == 0) {
                 this->status = MEXPLODE;
@@ -525,14 +528,16 @@ void SCPlane::OrigSimulate() {
                         this->status = MEXPLODE;
                     }
                 }
-            this->ptw.v[3][1] = this->y = groundlevel;
+            //this->ptw.v[3][1] = this->y = groundlevel;
             this->on_ground = TRUE;
-            if (this->airspeed < 1) {
+            if (this->airspeed < 1 && this->thrust == 0) {
                 this->vx = 0.0f;
                 this->vy = 0.0f;
                 this->vz = 0.0f;
                 this->airspeed = 0;
-                this->landed = true;
+                if (this->takeoff) {
+                    this->landed = true;
+                }
             }
             if (this->status > MEXPLODE) {
                 /* kill negative elevation */

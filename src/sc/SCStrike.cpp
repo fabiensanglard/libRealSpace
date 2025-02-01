@@ -485,6 +485,7 @@ void SCStrike::RunFrame(void) {
         this->player_plane->Simulate();
         this->current_mission->update();
         if (this->current_mission->mission_ended) {
+            GameState.requierd_flags[0] = !this->current_mission->failure;
             Game.StopTopActivity();
         }
     }
