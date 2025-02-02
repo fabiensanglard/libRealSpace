@@ -12,6 +12,7 @@
 class SCState {
 public:
     std::map<uint8_t, bool> requierd_flags;
+    std::vector<int64_t> missions_flags;
     bool mission_accepted{false};
     uint8_t mission_id{0};
     uint8_t mission_flyed{0};

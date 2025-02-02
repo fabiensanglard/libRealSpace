@@ -382,10 +382,11 @@ void RSMission::parseMISN_PLAY_SCEN(uint8_t *data, size_t size) {
     int16_t prog_id = 0;
     for (int i = 0 ; i<3; i++) {
         prog_id = stream.ReadShort();
-        if (prog_id > 0) {
-            scen->progs_id.push_back(prog_id);
-        }
+        scen->progs_id.push_back(prog_id);
     }
+    scen->on_is_activated = scen->progs_id[0];
+    scen->on_leaving = scen->progs_id[1];
+    scen->on_mission_update = scen->progs_id[2];
     for (int i = 0; i < 15; i++) {
         scen->unknown_bytes.push_back(stream.ReadByte());
     }

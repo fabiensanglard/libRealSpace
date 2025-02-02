@@ -362,8 +362,8 @@ void SCStrike::CheckKeyboard(void) {
             Game.AddActivity(nav_screen);
         } break;
         case SDLK_a:
-            this->player_plane->x = this->current_mission->mission->mission_data.areas[this->nav_point_id]->position.x;
-            this->player_plane->z = this->current_mission->mission->mission_data.areas[this->nav_point_id]->position.z;
+            this->player_plane->x = this->current_mission->waypoints[this->nav_point_id]->spot->position.x;
+            this->player_plane->z = this->current_mission->waypoints[this->nav_point_id]->spot->position.z;
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             break;
@@ -485,7 +485,11 @@ void SCStrike::RunFrame(void) {
         this->player_plane->Simulate();
         this->current_mission->update();
         if (this->current_mission->mission_ended) {
-            GameState.requierd_flags[0] = !this->current_mission->failure;
+            GameState.missions_flags.clear();
+            GameState.missions_flags.shrink_to_fit();
+            for (auto flags: this->current_mission->mission->mission_data.flags) {
+                GameState.missions_flags.push_back(flags);
+            }
             Game.StopTopActivity();
         }
     }

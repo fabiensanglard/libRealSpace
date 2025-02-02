@@ -242,9 +242,9 @@ void SCProg::execute() {
                     true_flag = this->mission->mission->mission_data.flags[prog.arg] > 0;
                 }
             break;
-            case OP_ADD_VALUE_TO_WORK:
+            case OP_MUL_VALUE_WITH_WORK:
                 if (exec) {
-                    work_register += prog.arg;
+                    work_register *= prog.arg;
                 }
             break;
             default:

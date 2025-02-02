@@ -433,13 +433,6 @@ bool SCMissionActorsPlayer::setMessage(uint8_t arg) {
 
 bool SCMissionActorsStrikeBase::setMessage(uint8_t arg) {
     this->mission->radio_messages.push_back(&this->profile->radi.msgs[arg]);
-    if (arg == 21) {
-        this->mission->success = true;
-        this->mission->failure = false;
-    } else if (arg == 20) {
-        this->mission->failure = true;
-        this->mission->success = false;
-    }
     printf("Message  %s\n", this->profile->radi.msgs[arg].c_str()); 
     return true;
 }

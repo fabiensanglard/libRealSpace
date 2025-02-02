@@ -72,7 +72,10 @@ struct PROG {
 struct MISN_SCEN {
     uint8_t is_active {0};
     int16_t area_id {0};
-    std::vector<int16_t> progs_id;   
+    std::vector<int16_t> progs_id;
+    int16_t on_is_activated {-1};
+    int16_t on_mission_update {-1};
+    int16_t on_leaving {-1};
     std::vector<uint8_t> unknown_bytes;
     std::vector<uint8_t> cast;
 };
@@ -85,7 +88,7 @@ struct MISN {
     std::vector<AREA *> areas;
     std::vector<SPOT *> spots;
     std::vector<std::string *> messages;
-    std::vector<uint8_t> flags;
+    std::vector<int16_t> flags;
     std::vector<CAST *> casting;
     std::vector<std::vector<PROG> *> prog;
     std::vector<uint8_t> nums;

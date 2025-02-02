@@ -202,6 +202,16 @@ void SCMission::update() {
     for (auto scene: this->mission->mission_data.scenes) {
         if (scene->area_id == area_id-1 || scene->area_id == -1) {
             if (scene->is_active == 0) {
+                if (scene->on_mission_update != -1) {
+                    if (scene->on_mission_update < this->mission->mission_data.prog.size()) {
+                        std::vector<PROG> prog;
+                        for (auto prg: *this->mission->mission_data.prog[scene->on_mission_update]) {
+                            prog.push_back(prg);
+                        }
+                        SCProg *p = new SCProg(this->player, prog, this);
+                        p->execute();
+                    }
+                }
                 continue;
             }
             for (auto cast: scene->cast) {
@@ -223,17 +233,15 @@ void SCMission::update() {
                     i++;
                 }
             }
-            std::vector<PROG> prog;
-            for (auto prg_id: scene->progs_id) {
-                if (prg_id != 255 && prg_id-1 < this->mission->mission_data.prog.size()) {
-                    for (auto prg: *this->mission->mission_data.prog[prg_id]) {
+            if (scene->on_is_activated != -1) {
+                if (scene->on_is_activated < this->mission->mission_data.prog.size()) {
+                    std::vector<PROG> prog;
+                    for (auto prg: *this->mission->mission_data.prog[scene->on_is_activated]) {
                         prog.push_back(prg);
                     }
+                    SCProg *p = new SCProg(this->player, prog, this);
+                    p->execute();
                 }
-            }
-            if (prog.size() > 0) {
-                SCProg *p = new SCProg(this->player, prog, this);
-                p->execute();
             }
             scene->is_active = 0;
         }
