@@ -512,7 +512,7 @@ void SCConvPlayer::RunFrame(void) {
 
     if (currentFrame.mode == ConvFrame::CONV_CLOSEUP) {
 
-        for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT; i++)
+        for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT+1; i++)
             VGA.FillLineColor(i, 0x00);
 
         for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
