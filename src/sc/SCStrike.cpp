@@ -490,6 +490,7 @@ void SCStrike::RunFrame(void) {
             for (auto flags: this->current_mission->mission->mission_data.flags) {
                 GameState.missions_flags.push_back(flags);
             }
+            GameState.mission_flyed_success[GameState.mission_flyed] = this->current_mission->mission->mission_data.flags[0];
             Game.StopTopActivity();
         }
     }

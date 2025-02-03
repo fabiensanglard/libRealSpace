@@ -28,23 +28,25 @@
 #define EFECT_OPT_END_MISS 22
 #define EFECT_OPT_MISS_ELSE 30
 #define EFECT_OPT_MISS_ENDIF 31
-#define EFECT_OPT_TEST_CURRENT_MISS 32
-#define EFFECT_OP_SHOW_MAP 18
+#define EFFCT_OPT_IF_MISS_SUCCESS 32
+
+// understood but not implemented
+#define EFECT_OPT_LOOK_AT_KILLBOARD 19
+#define EFFCT_OPT_SHOW_MAP 18
+#define EFECT_OPT_APPLY_CHANGE 34
+#define EFECT_OPT_LOOK_AT_LEDGER 25
+#define EFECT_OPT_VIEW_CATALOG 23
+#define EFECT_OPT_SAVE_GAME 16
+#define EFECT_OPT_LOAD_GAME 17
+#define EFECT_OPT_PLAY_MIDGAME 2
 
 // identified but unknown effect optcodes
-#define EFECT_OPT_U1 2
-#define EFECT_OPT_U2 4
-#define EFECT_OPT_U3 16
-#define EFECT_OPT_U4 17
 
-#define EFECT_OPT_U6 19
-#define EFECT_OPT_U7 23
+#define EFECT_OPT_U2 4
 #define EFECT_OPT_U8 24
-#define EFECT_OPT_U9 25
 #define EFECT_OPT_U10 26
 #define EFECT_OPT_U11 27
 #define EFECT_OPT_U12 29
-#define EFECT_OPT_U13 34
 #define EFECT_OPT_U14 36
 #define EFECT_OPT_U15 37
 #define EFECT_OPT_U16 38
@@ -296,12 +298,20 @@ void SCGameFlow::runEffect() {
                 ifStack.push(false);
             }
             break;
-        case EFECT_OPT_TEST_CURRENT_MISS:
-            if (GameState.mission_flyed == this->efect->at(i)->value) {
+        case EFFCT_OPT_IF_MISS_SUCCESS:
+            if (GameState.mission_flyed_success[this->efect->at(i)->value]) {
                 ifStack.push(true);
             } else {
                 ifStack.push(false);
             }
+            break;
+        case EFECT_OPT_LOOK_AT_LEDGER:
+            this->zones.clear();
+            this->loadScene(128);
+            break;
+        case EFECT_OPT_VIEW_CATALOG:
+            this->zones.clear();
+            this->loadScene(30);
             break;
         case EFECT_OPT_GO:
             this->next_miss = GameState.mission_id;
@@ -857,8 +867,8 @@ void SCGameFlow::RenderMenu() {
             for (auto scene: this->optionParser.opts) {
                 const bool is_selected = (this->current_scen == scene.first);
                 if (ImGui::Selectable(std::to_string(scene.first).c_str(), is_selected)) {
-                    this->loadScene(scene.first);
                     this->zones.clear();
+                    this->loadScene(scene.first);
                 }
                 if (is_selected)
                     ImGui::SetItemDefaultFocus();
