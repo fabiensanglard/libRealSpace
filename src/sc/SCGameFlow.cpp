@@ -135,11 +135,15 @@ void SCGameFlow::runEffect() {
         return;
     }
     std::stack<uint8_t> ifStack;
-
-    for (int i = this->currentOptCode; i < this->efect->size(); i++) {
+    int i=0;
+    for (auto instruction: *this->efect) {
+        if (i < this->currentOptCode) {
+            i++;
+            continue;
+        }
         if (ifStack.size() > 0) {
             if (ifStack.top() == false) {
-                switch (this->efect->at(i)->opcode) {
+                switch (instruction->opcode) {
                     case EFECT_OPT_MISS_ELSE:
                         if (ifStack.size() > 0) {
                             uint8_t ifval = 0;
@@ -154,24 +158,24 @@ void SCGameFlow::runEffect() {
                         }
                         break;
                     default:
-                        printf("Opcode %d ignored cause flag is false\n", this->efect->at(i)->opcode);
+                        printf("Opcode %d ignored cause flag is false\n", instruction->opcode);
                         break;
                 }
                 continue;
             }
         }
-        switch (this->efect->at(i)->opcode) {
+        switch (instruction->opcode) {
         case EFECT_OPT_CONV: {
-            printf("PLAYING CONV %d\n", this->efect->at(i)->value);
+            printf("PLAYING CONV %d\n", instruction->value);
             SCConvPlayer *conv = new SCConvPlayer();
             conv->Init();
-            conv->SetID(this->efect->at(i)->value);
+            conv->SetID(instruction->value);
             this->convs.push(conv);
         } break;
         case EFECT_OPT_SCEN:
             for (int j = 0; j < this->gameFlowParser.game.game[this->current_miss]->scen.size(); j++) {
                 if (this->gameFlowParser.game.game[this->current_miss]->scen.at(j)->info.ID ==
-                    this->efect->at(i)->value) {
+                    instruction->value) {
                     this->current_scen = j;
                     this->currentSpriteId = 0;
                     printf("PLAYING SCEN %d\n", this->current_scen);
@@ -201,20 +205,20 @@ void SCGameFlow::runEffect() {
         }            
         break;
         case EFECT_OPT_MIS2:
-            if (this->efect->at(i)->value != this->current_miss) {
-                GameState.mission_id = this->efect->at(i)->value;
-                printf("PLAYING MIS2 %d\n", this->efect->at(i)->value);
-            }
+            //if (instruction->value != this->current_miss) {
+            GameState.mission_id = instruction->value;
+            printf("PLAYING MIS2 %d\n", instruction->value);
+            //}
             break;
         case EFECT_OPT_SHOT: {
-            printf("PLAYING SHOT %d\n", this->efect->at(i)->value);
+            printf("PLAYING SHOT %d\n", instruction->value);
             SCShot *sht = new SCShot();
             sht->Init();
-            sht->SetShotId(this->efect->at(i)->value);
+            sht->SetShotId(instruction->value);
             this->cutsenes.push(sht);
         } break;
         case EFECT_OPT_FLYM: {
-            uint8_t flymID = this->efect->at(i)->value;
+            uint8_t flymID = instruction->value;
             GameState.mission_flyed = flymID;
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
@@ -228,7 +232,7 @@ void SCGameFlow::runEffect() {
             fly_mission.push(fly);
         } break;
         case EFECT_OPT_FLYM2: {
-            uint8_t flymID = this->efect->at(i)->value;
+            uint8_t flymID = instruction->value;
             GameState.mission_flyed = flymID;
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
@@ -243,10 +247,10 @@ void SCGameFlow::runEffect() {
             this->next_miss = GameState.mission_id;
         } break;
         case EFECT_OPT_SETFLAG_TRUE:
-            GameState.requierd_flags[this->efect->at(i)->value] = true;
+            GameState.requierd_flags[instruction->value] = true;
             break;
         case EFECT_OPT_SETFLAG_FALSE:
-            GameState.requierd_flags[this->efect->at(i)->value] = false;
+            GameState.requierd_flags[instruction->value] = false;
             break;
         case EFECT_OPT_MISS_ACCEPTED:
             if (this->convs.size() > 0) {
@@ -277,7 +281,7 @@ void SCGameFlow::runEffect() {
             }
             break;
         case EFECT_OPT_IF_FLAG:
-            if (GameState.requierd_flags[this->efect->at(i)->value] == true) {
+            if (GameState.requierd_flags[instruction->value] == true) {
                 ifStack.push(true);
             } else {
                 ifStack.push(false);
@@ -292,14 +296,14 @@ void SCGameFlow::runEffect() {
             }
             break;
         case EFECT_OPT_IF_NOT_FLAG:
-            if (GameState.requierd_flags[this->efect->at(i)->value] == false) {
+            if (GameState.requierd_flags[instruction->value] == false) {
                 ifStack.push(true);
             } else {
                 ifStack.push(false);
             }
             break;
         case EFFCT_OPT_IF_MISS_SUCCESS:
-            if (GameState.mission_flyed_success[this->efect->at(i)->value]) {
+            if (GameState.mission_flyed_success[instruction->value]) {
                 ifStack.push(true);
             } else {
                 ifStack.push(false);
@@ -322,9 +326,10 @@ void SCGameFlow::runEffect() {
             }
             break;
         default:
-            printf("Unkown opcode :%d, %d\n", this->efect->at(i)->opcode, this->efect->at(i)->value);
+            printf("Unkown opcode :%d, %d\n", instruction->opcode, instruction->value);
             break;
         };
+        i++;
     }
     this->efect = nullptr;
     this->currentOptCode = 0;
