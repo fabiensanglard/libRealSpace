@@ -58,6 +58,7 @@ struct animatedSprites {
 class SCZone{
     
 public:
+    bool active{true};
     SCZone();
     ~SCZone();
     uint8_t id;

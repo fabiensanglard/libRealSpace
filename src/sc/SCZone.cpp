@@ -36,31 +36,31 @@ void SCZone::OnAction(void){
 }
 
 bool  SCZone::IsActive(std::map<uint8_t, bool> *requierd_flags) {
-    bool active = true;
     if (this->sprite == nullptr || this->sprite->requ == nullptr) {
-        return true;
+        this->active = true;
+        return this->active;
     }
     for (auto requ_flag: *this->sprite->requ) {
         switch (requ_flag->op) {
             case 0:
                 if (requierd_flags->find(requ_flag->value) != requierd_flags->end()) {
-                    active = !requierd_flags->at(requ_flag->value);
+                    this->active = !requierd_flags->at(requ_flag->value);
                 } else if (active) {
-                    active = true;
+                    this->active = true;
                 }
                 break;
             case 1:
                 if (requierd_flags->find(requ_flag->value) != requierd_flags->end()) {
-                    active = requierd_flags->at(requ_flag->value);
+                    this->active = requierd_flags->at(requ_flag->value);
                 } else if (active) {
-                    active = false;
+                    this->active = false;
                 }
                 break;
             default:
                 break;
         }
     }
-    return active;
+    return this->active;
 }
 void SCZone::Draw(void) {
     int fpsupdate = 0;
