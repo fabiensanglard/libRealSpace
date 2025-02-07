@@ -512,7 +512,7 @@ void SCStrike::RunFrame(void) {
     switch (this->camera_mode) {
 
     case View::FRONT: {
-        Vector3D pos = {this->newPosition.x, this->newPosition.y + 3, this->newPosition.z - 2};
+        Vector3D pos = {this->newPosition.x, this->newPosition.y, this->newPosition.z+10};
         camera->SetPosition(&pos);
         camera->ResetRotate();
         camera->Rotate((-0.1f * this->player_plane->elevationf + 10) * ((float)M_PI / 180.0f),

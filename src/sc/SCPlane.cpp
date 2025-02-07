@@ -406,7 +406,7 @@ void SCPlane::OrigSimulate() {
             this->ptw.rotateM(tenthOfDegreeToRad(this->elevationf), 1, 0, 0);
             this->ptw.rotateM(tenthOfDegreeToRad(this->twist), 0, 0, 1);
         }
-        this->ptw.translateM(this->vx/3.6, this->vy/3.6, this->vz/3.6);
+        this->ptw.translateM(this->vx/3.2808399f, this->vy/3.2808399f, this->vz/3.2808399f);
         if (round(this->azimuth_speedf) != 0)
             this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->azimuth_speedf)), 0, 1, 0);
         if (round(this->elevation_speedf) != 0)
