@@ -20,7 +20,7 @@ struct RADI {
     std::map<std::uint8_t, std::string> msgs;
     std::map<std::string, std::string> asks;
     std::vector<std::string> asks_vector;
-    std::string opts;
+    std::vector<char> opts;
 };
 struct AI_ATTR {
     uint8_t TH{0};

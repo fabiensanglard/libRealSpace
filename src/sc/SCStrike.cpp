@@ -593,18 +593,23 @@ void SCStrike::RunFrame(void) {
     } break;
     }
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
-    for (auto rrarea: this->current_mission->mission->mission_data.areas) {
-        Renderer.RenderLineCube(rrarea->position, rrarea->AreaWidth);
+    if (this->show_bbox) {
+        for (auto rrarea: this->current_mission->mission->mission_data.areas) {
+            Renderer.RenderLineCube(rrarea->position, rrarea->AreaWidth);
+        }
     }
+    
     for (auto actor: this->current_mission->actors) {
         if (actor->plane != nullptr) {
             if (actor->plane != this->player_plane) {
                 actor->plane->Render();
                 BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
                 Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};
-                Renderer.RenderBBox(position, bb->min, bb->max);
-                Renderer.RenderBBox(position+actor->formation_pos_offset, bb->min, bb->max);
-                Renderer.RenderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
+                if (this->show_bbox) {
+                    Renderer.RenderBBox(position, bb->min, bb->max);
+                    Renderer.RenderBBox(position+actor->formation_pos_offset, bb->min, bb->max);
+                    Renderer.RenderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
+                }
                 if (actor->plane->object->alive == false) {
                      actor->plane->RenderSmoke();
                 }
@@ -711,12 +716,16 @@ void SCStrike::RenderMenu() {
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("SCStrike")) {
+            ImGui::MenuItem("Mission", NULL, &show_mission);
+            ImGui::MenuItem("Mission part and Area", NULL, &show_mission_parts_and_areas);
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Debug")) {
             ImGui::MenuItem("Simulation", NULL, &show_simulation);
             ImGui::MenuItem("Simulation config", NULL, &show_simulation_config);
             ImGui::MenuItem("Camera", NULL, &show_camera);
             ImGui::MenuItem("Cockpit", NULL, &show_cockpit);
-            ImGui::MenuItem("Mission", NULL, &show_mission);
-            ImGui::MenuItem("Mission part and Area", NULL, &show_mission_parts_and_areas);
+            ImGui::MenuItem("Show BBox", NULL, &this->show_bbox);
             ImGui::MenuItem("Ai pilot", NULL, &show_ai);
             ImGui::EndMenu();
         }

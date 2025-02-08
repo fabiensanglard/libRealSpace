@@ -53,7 +53,15 @@ void RSProf::parsePROF_RADI_OPTS(uint8_t *data, size_t size){
         return;
     }
     stream.Set(data);
-    this->radi.opts = stream.ReadStringNoSize(size);
+    int read = 0;
+    while (read < size) {
+        char r = stream.ReadByte();
+        if (r != '\0') {
+            this->radi.opts.push_back(r);
+        }
+        read++;    
+    }
+    
 }
 void RSProf::parsePROF_RADI_MSGS(uint8_t *data, size_t size){
     ByteStream stream;

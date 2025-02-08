@@ -551,13 +551,13 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode) {
     pmfd_text.y += 20;
     if (mode == 0) {
         int cpt=1;
-        for (auto ai : this->ai_planes) {
+        for (auto ai : this->current_mission->friendlies) {
             Vector2D ai_position = {ai->object->position.x, ai->object->position.z};
             Vector2D roa_dir = {ai_position.x-center.x, ai_position.y-center.y};
 
             float distance = sqrtf((float) (roa_dir.x * roa_dir.x) + (float) (roa_dir.y * roa_dir.y));
-            if (distance < 30000) {
-                std::string name_str = std::to_string(cpt) + ". " + ai->name;
+            if (ai->actor_name != "PLAYER" && ai->is_active) {
+                std::string name_str = std::to_string(cpt) + ". " + ai->actor_name;
                 Point2D pfmd_entry = {pmfd_text.x, pmfd_text.y};
                 VGA.PrintText(this->big_font, &pfmd_entry, (char*) name_str.c_str(), 120, 0, (uint32_t) name_str.length(), 2, 2);
                 pmfd_text.y += 10;
@@ -571,11 +571,19 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode) {
         }
     } else if (mode > 0) {
         int cpt=1;
-        for (auto asks: this->player_prof->radi.asks_vector) {
-            Point2D pfmd_entry = {pmfd_text.x, pmfd_text.y};
-            std::string asks_str = std::to_string(cpt) + ". " + asks;
-            VGA.PrintText(this->big_font, &pfmd_entry, (char*) asks_str.c_str(), 124, 0, (uint32_t) asks_str.length(), 2, 2);
-            pmfd_text.y += 6;
+        for (auto ai : this->current_mission->friendlies) {
+            if (cpt==mode) {
+                int cpt_message = 1;
+                for (auto asks: ai->profile->radi.opts) {
+                    std::string toask = std::string("") + asks;
+                    std::string request = this->current_mission->player->profile->radi.asks.at(toask);
+                    Point2D pfmd_entry = {pmfd_text.x, pmfd_text.y};
+                    std::string asks_str = std::to_string(cpt_message) + ". " + request;
+                    VGA.PrintText(this->big_font, &pfmd_entry, (char*) asks_str.c_str(), 124, 0, (uint32_t) asks_str.length(), 2, 2);
+                    pmfd_text.y += 6;
+                }
+                break;
+            }
             cpt++;
         }
     }
@@ -644,7 +652,10 @@ void SCCockpit::Render(int face) {
             if (this->radio_mission_timer == 0) {
                 this->radio_mission_timer = 500;
             }
-            Point2D radio_text = {2, 20};
+            Point2D radio_text = {2, 12};
+            for (int li=0; li<16; li++) {
+                VGA.FillLineColor(li, 0);
+            }
             VGA.PrintText(
                 this->big_font, 
                 &radio_text,

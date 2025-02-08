@@ -140,7 +140,7 @@ private:
 
     SCMission *current_mission{nullptr};
     int radio_mission_timer{0};
-
+    bool show_bbox{false};
 public:
     /**
      * @brief Constructor
