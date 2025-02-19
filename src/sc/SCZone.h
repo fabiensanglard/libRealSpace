@@ -81,7 +81,7 @@ public:
 private:
     
     int fps;
-    bool enabled ;
+    bool enabled{false} ;
    
 
 };

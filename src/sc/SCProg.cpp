@@ -108,7 +108,18 @@ void SCProg::execute() {
                 }
             case OP_INSTANT_DESTROY_TARGET:
                 if (exec) {
-                    this->mission->actors[prog.arg]->object->alive = false;
+                    for (auto actor: this->mission->actors) {
+                        if (actor->actor_id == prog.arg) {
+                            actor->object->alive = false;
+                            break;
+                        }
+                    }
+                }
+            break;
+            case OP_SET_OBJ_UNKNOWN:
+                if (exec) {
+                    this->actor->flyToWaypoint(prog.arg);
+                    this->actor->current_command_executed = true;
                 }
             break;
             case OP_SET_OBJ_TAKE_OFF:

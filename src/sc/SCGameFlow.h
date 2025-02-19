@@ -13,16 +13,7 @@
 #include <queue>
 
 
-/**
- * background is a structure used to store information about a background.
- *
- * - img: a pointer to a RSImageSet, which is a collection of images that can be used for animation.
- * - frameCounter: a variable that keeps track of the current frame of the animation.
- */
-struct background {
-    RSImageSet *img{nullptr};
-    uint8_t frameCounter{0};
-};
+
 
 /**
  * SCGameFlow is a class that manages the game flow of the game.
@@ -99,14 +90,15 @@ private:
     std::queue<SCStrike *> fly_mission;
     
     RLEShape *test_shape{nullptr};
-    
+    SCScene *scen{nullptr};
     void RenderMenu();
     void clicked(std::vector<EFCT *> *script, uint8_t id);
+    void returnFromScene(std::vector<EFCT *> *script, uint8_t id);
+    void flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id);
     void runEffect();
     void CheckKeyboard(void);
     SCZone *CheckZones(void);
     void createScen();
-    SCEN* loadScene(uint8_t scene_id);
     RSImageSet *getShape(uint8_t shpid);
 };
 

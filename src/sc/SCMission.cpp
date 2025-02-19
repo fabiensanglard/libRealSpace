@@ -219,7 +219,7 @@ void SCMission::update() {
                 for (auto part: this->mission->mission_data.parts) {
                     if (i == cast) {
                         for (auto actor: this->actors) {
-                            if (actor->actor_id == part->id) {
+                            if (actor->actor_id == part->id && actor->is_active == false) {
                                 actor->is_active = true;
                                 if (actor->on_is_activated.size() > 0) {
                                     SCProg *p = new SCProg(actor, actor->on_is_activated, this);

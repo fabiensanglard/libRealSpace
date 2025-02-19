@@ -83,7 +83,39 @@ void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
     this->currentOptCode = 0;
     this->runEffect();
 }
+/**
+ * Return from a scene and go back to the scenario.
+ *
+ * @param script The script of the scene.
+ * @param id The ID of the scene.
+ *
+ * @return None
+ *
+ * @throws None
+ */
+
+void SCGameFlow::returnFromScene(std::vector<EFCT *> *script, uint8_t id) {
+    this->createScen();
+}
+void SCGameFlow::flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id) {
+    switch (id) {
+        case 20:
+            this->createScen();
+            break;
+        default:
+            SCStrike *fly = new SCStrike();
+            fly->Init();
+            fly->SetMission(this->missionToFly);
+            this->missionToFly = nullptr;
+            fly_mission.push(fly);
+            this->next_miss = GameState.mission_id;
+        break;
+    }
+    
+}
 SCZone *SCGameFlow::CheckZones(void) {
+    static uint8_t color = 0;
+    color=128;
     for (size_t i = 0; i < zones.size(); i++) {
         SCZone *zone = zones[i];
         if (zone->active) {
@@ -95,7 +127,7 @@ SCZone *SCGameFlow::CheckZones(void) {
                     if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                         zone->OnAction();
                     Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
-                    VGA.PrintText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                    VGA.PrintText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), color, 0,
                                   static_cast<uint32_t>(zone->label->length()), 3, 5);
                     return zone;
                 }
@@ -111,7 +143,7 @@ SCZone *SCGameFlow::CheckZones(void) {
                 if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                     zone->OnAction();
                 Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
-                VGA.PrintText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                VGA.PrintText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), color, 0,
                               static_cast<uint32_t>(zone->label->length()), 3, 5);
 
                 return zone;
@@ -134,6 +166,7 @@ void SCGameFlow::runEffect() {
     if (this->efect == nullptr) {
         return;
     }
+    bool flymission = false;
     std::stack<uint8_t> ifStack;
     int i = 0;
     for (auto instruction : *this->efect) {
@@ -178,6 +211,7 @@ void SCGameFlow::runEffect() {
                     this->current_scen = j;
                     this->currentSpriteId = 0;
                     printf("PLAYING SCEN %d\n", this->current_scen);
+                    
                     this->createScen();
                 }
             }
@@ -223,11 +257,7 @@ void SCGameFlow::runEffect() {
             this->missionToFly = (char *)malloc(13);
             sprintf(this->missionToFly, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             strtoupper(this->missionToFly, this->missionToFly);
-            SCStrike *fly = new SCStrike();
-            fly->Init();
-            fly->SetMission(this->missionToFly);
-            this->missionToFly = nullptr;
-            fly_mission.push(fly);
+            flymission = true;
         } break;
         case EFECT_OPT_FLYM2: {
             uint8_t flymID = instruction->value;
@@ -237,12 +267,7 @@ void SCGameFlow::runEffect() {
             this->missionToFly = (char *)malloc(13);
             sprintf(this->missionToFly, "%s.IFF", this->gameFlowParser.game.mlst->data[flymID]->c_str());
             strtoupper(this->missionToFly, this->missionToFly);
-            SCStrike *fly = new SCStrike();
-            fly->Init();
-            fly->SetMission(this->missionToFly);
-            this->missionToFly = nullptr;
-            fly_mission.push(fly);
-            this->next_miss = GameState.mission_id;
+            flymission = true;
         } break;
         case EFECT_OPT_SETFLAG_TRUE:
             GameState.requierd_flags[instruction->value] = true;
@@ -309,11 +334,29 @@ void SCGameFlow::runEffect() {
             break;
         case EFECT_OPT_LOOK_AT_LEDGER:
             this->zones.clear();
-            this->loadScene(128);
+            if (this->scen != nullptr) {
+                delete this->scen;
+            }
+            this->scen = new LedgerScene(&this->optShps, &this->optPals);
+
+            this->zones = this->scen->Init(
+                this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
+                this->optionParser.opts[128],
+                std::bind(&SCGameFlow::returnFromScene, this, std::placeholders::_1, std::placeholders::_2)
+            );
             break;
         case EFECT_OPT_VIEW_CATALOG:
             this->zones.clear();
-            this->loadScene(30);
+            if (this->scen != nullptr) {
+                delete this->scen;
+            }
+            this->scen = new LedgerScene(&this->optShps, &this->optPals);
+
+            this->zones = this->scen->Init(
+                this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
+                this->optionParser.opts[30],
+                std::bind(&SCGameFlow::returnFromScene, this, std::placeholders::_1, std::placeholders::_2)
+            );
             break;
         case EFECT_OPT_GO:
             this->next_miss = GameState.mission_id;
@@ -328,6 +371,18 @@ void SCGameFlow::runEffect() {
             break;
         };
         i++;
+    }
+    if (flymission) {
+        if (this->scen != nullptr) {
+            delete this->scen;
+        }
+        this->next_miss = 0;
+        this->scen = new WeaponLoadoutScene(&this->optShps, &this->optPals);
+        this->zones = this->scen->Init(
+            this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
+            this->optionParser.opts[15],
+            std::bind(&SCGameFlow::flyOrReturnFromScene, this, std::placeholders::_1, std::placeholders::_2)
+        );
     }
     this->efect = nullptr;
     this->currentOptCode = 0;
@@ -461,113 +516,18 @@ void SCGameFlow::createScen() {
     this->zones.clear();
     if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
         uint8_t optionScenID = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
-        SCEN *sceneOpts = this->loadScene(optionScenID);
-        for (auto sprite : this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->sprt) {
-            uint8_t sprtId = sprite->info.ID;
-            // le clck dans sprite semble indiquer qu'il faut jouer l'animation après avoir cliquer et donc executer le
-            // efect à la fin de l'animation.
-            uint8_t zone_id = 0;
-            if (sceneOpts->foreground->sprites.count(sprtId) > 0) {
-                uint8_t optsprtId = sceneOpts->foreground->sprites[sprtId]->sprite.SHP_ID;
-                animatedSprites *sprt = new animatedSprites();
-                SCZone *z = new SCZone();
-                if (sceneOpts->foreground->sprites[sprtId]->zone != nullptr) {
-                    sprt->rect = new sprtRect();
-                    sprt->rect->x1 = sceneOpts->foreground->sprites[sprtId]->zone->X1;
-                    sprt->rect->y1 = sceneOpts->foreground->sprites[sprtId]->zone->Y1;
-                    sprt->rect->x2 = sceneOpts->foreground->sprites[sprtId]->zone->X2;
-                    sprt->rect->y2 = sceneOpts->foreground->sprites[sprtId]->zone->Y2;
-
-                    z->id = sprtId;
-                    z->position.x = sprt->rect->x1;
-                    z->position.y = sprt->rect->y1;
-                    z->dimension.x = sprt->rect->x2 - sprt->rect->x1;
-                    z->dimension.y = sprt->rect->y2 - sprt->rect->y1;
-                    z->label = sceneOpts->foreground->sprites[sprtId]->label;
-                    z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1, std::placeholders::_2);
-                    z->quad = nullptr;
-                }
-                if (sceneOpts->foreground->sprites[sprtId]->quad != nullptr) {
-                    sprt->quad = new std::vector<Point2D *>();
-
-                    Point2D *p;
-
-                    p = new Point2D();
-                    p->x = sceneOpts->foreground->sprites[sprtId]->quad->xa1;
-                    p->y = sceneOpts->foreground->sprites[sprtId]->quad->ya1;
-                    sprt->quad->push_back(p);
-
-                    p = new Point2D();
-                    p->x = sceneOpts->foreground->sprites[sprtId]->quad->xa2;
-                    p->y = sceneOpts->foreground->sprites[sprtId]->quad->ya2;
-                    sprt->quad->push_back(p);
-
-                    p = new Point2D();
-                    p->x = sceneOpts->foreground->sprites[sprtId]->quad->xb1;
-                    p->y = sceneOpts->foreground->sprites[sprtId]->quad->yb1;
-                    sprt->quad->push_back(p);
-
-                    p = new Point2D();
-                    p->x = sceneOpts->foreground->sprites[sprtId]->quad->xb2;
-                    p->y = sceneOpts->foreground->sprites[sprtId]->quad->yb2;
-                    sprt->quad->push_back(p);
-
-                    z->id = sprtId;
-                    z->quad = sprt->quad;
-                    z->label = sceneOpts->foreground->sprites[sprtId]->label;
-                    z->onclick = std::bind(&SCGameFlow::clicked, this, std::placeholders::_1, std::placeholders::_2);
-                }
-
-                sprt->id = sprite->info.ID;
-                sprt->shapid = optsprtId;
-                sprt->unkown = sprite->info.UNKOWN;
-                sprt->efect = sprite->efct;
-                sprt->img = this->getShape(optsprtId);
-                sprt->frameCounter = 0;
-                if (sceneOpts->foreground->sprites[sprtId]->CLCK == 1) {
-                    sprt->cliked = true;
-                    sprt->frameCounter = 1;
-                }
-                if (sceneOpts->foreground->sprites[sprtId]->SEQU != nullptr) {
-                    sprt->frames = sceneOpts->foreground->sprites[sprtId]->SEQU;
-                    sprt->frameCounter = 0;
-                }
-                sprt->requ = sprite->requ;
-                z->sprite = sprt;
-                z->id = zone_id;
-                zone_id++;
-                this->zones.push_back(z);
-            } else {
-                printf("%d, ID Sprite not found !!\n", sprtId);
-            }
+        if (this->scen != nullptr) {
+            //delete this->scen;
         }
-        for (auto zn: this->zones) {
-            zn->IsActive(&GameState.requierd_flags);
-        }
+        this->scen = new SCScene(&this->optShps, &this->optPals);
+        this->zones = this->scen->Init(
+            this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
+            this->optionParser.opts[optionScenID],
+            std::bind(&SCGameFlow::clicked, this, std::placeholders::_1, std::placeholders::_2)
+        );
     }
 }
-SCEN *SCGameFlow::loadScene(uint8_t scene_id) {
-    // note pour plus tard, une scene peu être composé de plusieur background
-    // donc il faut boucler.
-    this->test_shape = nullptr;
-    this->sceneOpts = this->optionParser.opts[scene_id];
-    if (sceneOpts->tune != nullptr) {
-        Mixer.SwitchBank(1);
-        Mixer.StopMusic();
-        Mixer.PlayMusic(sceneOpts->tune->ID);
-    }
-    for (auto bg : sceneOpts->background->images) {
-        background *tmpbg = new background();
-        tmpbg->img = this->getShape(bg->ID);
-        this->layers.push_back(tmpbg);
-    }
-    uint8_t paltID = sceneOpts->background->palette->ID;
-    uint8_t forPalTID = sceneOpts->foreground->palette->ID;
 
-    this->rawPalette = this->optPals.GetEntry(paltID)->data;
-    this->forPalette = this->optPals.GetEntry(forPalTID)->data;
-    return this->sceneOpts;
-}
 /**
  * Retrieves an RSImageSet object for the specified shape ID.
  *
@@ -640,43 +600,14 @@ void SCGameFlow::RunFrame(void) {
     CheckKeyboard();
     VGA.Activate();
     VGA.FillWithColor(0);
-    ByteStream paletteReader;
-    paletteReader.Set((this->rawPalette));
-    this->palette.ReadPatch(&paletteReader);
-    VGA.SetPalette(&this->palette);
-    for (auto layer : this->layers) {
-        VGA.DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
-        if (layer->img->sequence.size() > 1) {
-            layer->frameCounter = (uint8_t)(layer->frameCounter + fpsupdate) % layer->img->sequence.size();
+    if (this->scen != nullptr) {
+        this->scen->Render();
+        if (this->test_shape != nullptr) {
+            VGA.DrawShape(this->test_shape);
         }
+        this->CheckZones();
     }
-
-    paletteReader.Set((this->forPalette));
-    this->palette.ReadPatch(&paletteReader);
-    VGA.SetPalette(&this->palette);
-    if (this->sceneOpts->extr.size() > 0) {
-        EXTR_SHAP *extr = this->sceneOpts->extr[this->extcpt];
-        // for (auto extr: this->sceneOpts->extr) {
-        RSImageSet *shp;
-        shp = this->getShape(this->sceneOpts->extr[0]->SHAPE_ID);
-        VGA.DrawShape(shp->GetShape(0));
-        shp = this->getShape(extr->SHAPE_ID);
-        VGA.DrawShape(shp->GetShape(0));
-        //}
-    }
-    if (this->test_shape != nullptr) {
-        VGA.DrawShape(this->test_shape);
-    }
-    this->CheckZones();
-
-    for (auto zn: this->zones) {
-        if (zn->active) {
-            zn->Draw();   
-        }
-    }
-
     VGA.VSync();
-
     this->RenderMenu();
     VGA.SwithBuffers();
     VGA.Activate();
@@ -707,7 +638,6 @@ void SCGameFlow::RenderMenu() {
     static bool show_scene_window = false;
     static bool quit_gameflow = false;
     static bool show_load_miss = false;
-    static bool show_load_scene = false;
     static bool show_gamestate = false;
     static bool show_shots = false;
     static bool load_sprites = false;
@@ -716,7 +646,6 @@ void SCGameFlow::RenderMenu() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("GameFlow")) {
             ImGui::MenuItem("Load Miss", NULL, &show_load_miss);
-            ImGui::MenuItem("Load Scene", NULL, &show_load_scene);
             ImGui::MenuItem("Load shots", NULL, &show_shots);
             ImGui::MenuItem("Convert player", NULL, &conv_player);
             ImGui::MenuItem("load sprites from current scene", NULL, &load_sprites);
@@ -864,24 +793,6 @@ void SCGameFlow::RenderMenu() {
 
         ImGui::End();
     }
-    if (show_load_scene) {
-        ImGui::Begin("Load Scene");
-        static ImGuiComboFlags flags = 0;
-
-        if (ImGui::BeginCombo("List des scenes", nullptr, flags)) {
-            for (auto scene : this->optionParser.opts) {
-                const bool is_selected = (this->current_scen == scene.first);
-                if (ImGui::Selectable(std::to_string(scene.first).c_str(), is_selected)) {
-                    this->zones.clear();
-                    this->loadScene(scene.first);
-                }
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-            ImGui::EndCombo();
-        }
-        ImGui::End();
-    }
     if (show_shots) {
         ImGui::Begin("Shots");
         static ImGuiComboFlags shtsflags = 0;
@@ -919,7 +830,7 @@ void SCGameFlow::RenderMenu() {
         static ImGuiComboFlags flags = 0;
         if (ImGui::BeginCombo("List des extras", nullptr, flags)) {
             int cpt_sprite = 0;
-            for (auto sprite : this->sceneOpts->extr) {
+            for (auto sprite : this->scen->sceneOpts->extr) {
                 if (ImGui::Selectable(std::to_string(cpt_sprite).c_str(), false)) {
                     RSImageSet *shp;
                     shp = this->getShape(sprite->SHAPE_ID);
@@ -931,7 +842,7 @@ void SCGameFlow::RenderMenu() {
         }
         if (ImGui::BeginCombo("List des sprites", nullptr, flags)) {
             int cpt_sprite = 0;
-            for (auto sprite : this->sceneOpts->foreground->sprites) {
+            for (auto sprite : this->scen->sceneOpts->foreground->sprites) {
                 if (ImGui::Selectable(std::to_string(cpt_sprite).c_str(), false)) {
                     RSImageSet *shp;
                     shp = this->getShape(sprite.second->sprite.SHP_ID);

@@ -1324,7 +1324,7 @@ void SCStrike::RenderMenu() {
                     }
                     if (ImGui::TreeNode("On update")) {
                         int cpt=0;
-                        if (actor->on_is_activated.size() > 0) {
+                        if (actor->on_update.size() > 0) {
                             if (ImGui::TreeNode((void *)(intptr_t)&actor->on_update, "Prog %d", cpt)) {
                                 for (auto opcodes: actor->on_update) {
                                     ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);

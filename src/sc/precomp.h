@@ -53,6 +53,7 @@
 #include "SCSelectWeaponsF16.h"
 #include "SCMainMenu.h"
 #include "SCShot.h"
+#include "SCScene.h"
 #include "SCGameFlow.h"
 
 #endif
