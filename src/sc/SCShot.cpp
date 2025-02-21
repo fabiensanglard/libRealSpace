@@ -26,6 +26,19 @@ SCShot::~SCShot() {
  * @return None
  */
 void SCShot::CheckKeyboard(void) {
+    SDL_Event mouseEvents[5];
+    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
+    for (int i = 0; i < numMouseEvents; i++) {
+        SDL_Event *event = &mouseEvents[i];
+
+        switch (event->type) {
+        case SDL_MOUSEBUTTONUP:
+            Game.StopTopActivity();
+            break;
+        default:
+            break;
+        }
+    }
     SDL_Event keybEvents[1];
     int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
     for (int i = 0; i < numKeybEvents; i++) {

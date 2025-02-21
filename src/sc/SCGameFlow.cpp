@@ -66,6 +66,7 @@ SCGameFlow::SCGameFlow() {
     this->efect = nullptr;
     this->currentOptCode = 0;
     this->fps = SDL_GetTicks() / 10;
+    this->zones = new std::vector<SCZone *>();
 }
 
 SCGameFlow::~SCGameFlow() {}
@@ -116,8 +117,7 @@ void SCGameFlow::flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id) {
 SCZone *SCGameFlow::CheckZones(void) {
     static uint8_t color = 0;
     color=128;
-    for (size_t i = 0; i < zones.size(); i++) {
-        SCZone *zone = zones[i];
+    for (auto zone: *this->zones) {
         if (zone->active) {
             if (zone->quad != nullptr) {
                 if (isPointInQuad(Mouse.GetPosition(), zone->quad)) {
@@ -219,7 +219,7 @@ void SCGameFlow::runEffect() {
         case EFECT_OPT_END_MISS: {
             // @TODO Show weapons selection screen.
             bool direct = false;
-            for (auto z : this->zones) {
+            for (auto z : *this->zones) {
                 if (z->id == this->currentSpriteId) {
                     direct = z->sprite->requ == nullptr;
                     if (!direct) {
@@ -333,7 +333,7 @@ void SCGameFlow::runEffect() {
             }
             break;
         case EFECT_OPT_LOOK_AT_LEDGER:
-            this->zones.clear();
+            this->zones->clear();
             if (this->scen != nullptr) {
                 delete this->scen;
             }
@@ -346,7 +346,7 @@ void SCGameFlow::runEffect() {
             );
             break;
         case EFECT_OPT_VIEW_CATALOG:
-            this->zones.clear();
+            this->zones->clear();
             if (this->scen != nullptr) {
                 delete this->scen;
             }
@@ -487,7 +487,9 @@ void SCGameFlow::Init() {
 void SCGameFlow::createMiss() {
     this->missionToFly = nullptr;
     this->next_miss = 0;
-    this->zones.clear();
+    if (this->zones != nullptr) {
+        this->zones->clear();
+    }
     this->layers.clear();
     this->convs = std::queue<SCConvPlayer *>();
     this->cutsenes = std::queue<SCShot *>();
@@ -513,7 +515,7 @@ void SCGameFlow::createMiss() {
  * @throws None
  */
 void SCGameFlow::createScen() {
-    this->zones.clear();
+    this->zones->clear();
     if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
         uint8_t optionScenID = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
         if (this->scen != nullptr) {
@@ -723,10 +725,10 @@ void SCGameFlow::RenderMenu() {
             }
             ImGui::TreePop();
         }
-        ImGui::Text("Nb Zones %d", this->zones.size());
-        if (this->zones.size() > 1) {
+        ImGui::Text("Nb Zones %d", this->zones->size());
+        if (this->zones->size() > 1) {
             if (ImGui::TreeNode("Zones")) {
-                for (auto zone : this->zones) {
+                for (auto zone : *this->zones) {
                     if (ImGui::TreeNode((void *)(intptr_t)zone->id, "Zone %d", zone->id)) {
                         ImGui::Text(zone->label->c_str());
                         animatedSprites *sprite = zone->sprite;

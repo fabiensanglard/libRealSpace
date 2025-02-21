@@ -83,7 +83,7 @@ private:
     uint8_t requ;
     char *missionToFly;
     std::vector<EFCT *> *efect;
-    std::vector<SCZone *> zones;
+    std::vector<SCZone *> *zones;
 
     std::queue<SCConvPlayer *> convs;
     std::queue<SCShot *> cutsenes;
