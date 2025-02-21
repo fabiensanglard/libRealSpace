@@ -102,9 +102,9 @@ void SCProg::execute() {
                     this->mission->mission->mission_data.flags[prog.arg]++;
                 }
             break;
-            case OP_ADD_3_TO_FLAG:
+            case OP_ADD_WORK_REGISTER_TO_FLAG:
                 if (exec) {
-                    this->mission->mission->mission_data.flags[prog.arg] += 3;
+                    this->mission->mission->mission_data.flags[prog.arg] += work_register;
                 }
             case OP_INSTANT_DESTROY_TARGET:
                 if (exec) {
