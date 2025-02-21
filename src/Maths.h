@@ -17,7 +17,11 @@ typedef struct Point2D{
     int32_t y;
 } Point2D;
 
-typedef Point2D Vector2D;
+//typedef Point2D Vector2D;
+typedef struct Vector2D {
+    float x;
+    float y;
+}Vector2D;
 
 // Long life to however came up with this. You rule man.
 float InvSqrt(float x);

@@ -788,7 +788,7 @@ void SCStrike::RenderMenu() {
         if (this->autopilot) {
             this->pilot.target_speed = -speed;
             this->pilot.target_climb = altitude;
-            this->pilot.target_azimut = azimuth;
+            this->pilot.target_azimut = (float) azimuth;
             this->pilot.AutoPilot();
             ImGui::PushStyleColor(ImGuiCol_Button,
                                   (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));

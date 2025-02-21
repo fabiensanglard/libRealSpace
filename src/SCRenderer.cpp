@@ -837,7 +837,7 @@ void SCRenderer::RenderMissionObjects(RSMission *mission) {
 void SCRenderer::RenderLineCube(Vector3D position, int32_t size) {
     glPushMatrix();
     glTranslatef(position.x, position.y, position.z);
-    glScalef(size, size, size);
+    glScalef((float)size, (float)size, (float)size);
     glBegin(GL_LINES);
     // Front face
     glColor3f(1.0f, 0.0f, 0.0f); // Red

@@ -144,12 +144,12 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             tmparea->position.y = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
 
             
-            tmparea->AreaWidth = stream.ReadUShort() * BLOCK_COORD_SCALE;
+            tmparea->AreaWidth = stream.ReadUShort() * (int) BLOCK_COORD_SCALE;
 
             // unsigned int Blank0; // off 48-49
             stream.ReadByte();
             stream.ReadByte();
-            tmparea->AreaHeight = stream.ReadUShort() * HEIGH_MAP_SCALE;
+            tmparea->AreaHeight = stream.ReadUShort() * (int) HEIGH_MAP_SCALE;
             // unsigned char Blank1; // off 52
             stream.ReadByte();
             read += 52;
@@ -164,14 +164,14 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             tmparea->position.z = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
             tmparea->position.y = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
 
-            tmparea->AreaWidth = stream.ReadUShort() * BLOCK_COORD_SCALE;
+            tmparea->AreaWidth = stream.ReadUShort() * (int) BLOCK_COORD_SCALE;
 
             // unsigned char Blank0[10]; // off 48-59
             for (int k = 0; k < 10; k++) {
                 stream.ReadByte();
             }
             // unsigned int AreaHeight; // off 60-61
-            tmparea->AreaHeight = stream.ReadUShort()  * HEIGH_MAP_SCALE;
+            tmparea->AreaHeight = stream.ReadUShort()  * (int) HEIGH_MAP_SCALE;
 
             // unsigned char Unknown[5]; // off 62-67
             for (int k = 0; k < 5; k++) {
