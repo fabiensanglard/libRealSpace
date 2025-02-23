@@ -461,6 +461,8 @@ void SCStrike::SetMission(char const *missionName) {
     this->cockpit->player_plane = this->player_plane;
     this->cockpit->current_mission = this->current_mission;
     this->cockpit->nav_point_id = &this->nav_point_id;
+    Mixer.SwitchBank(2);
+    Mixer.PlayMusic(this->music);
 }
 /**
  * @brief Executes a single frame of the game simulation.
@@ -707,6 +709,7 @@ void SCStrike::RenderMenu() {
     static bool show_mission_parts_and_areas = false;
     static bool show_simulation_config = false;
     static bool azymuth_control = false;
+    static bool show_music_player = false;
     static bool show_ai = false;
     static bool go_to_nav = false;
     static int altitude = 0;
@@ -718,6 +721,7 @@ void SCStrike::RenderMenu() {
         if (ImGui::BeginMenu("SCStrike")) {
             ImGui::MenuItem("Mission", NULL, &show_mission);
             ImGui::MenuItem("Mission part and Area", NULL, &show_mission_parts_and_areas);
+            ImGui::MenuItem("Music", NULL, &show_music_player);
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Debug")) {
@@ -755,6 +759,17 @@ void SCStrike::RenderMenu() {
                 ImGui::SameLine();
                 ImGui::Text("X %.0f Y %.0f Z %.0f", ai_actor->plane->x, ai_actor->plane->y, ai_actor->plane->z);
             }
+        }
+        ImGui::End();
+    }
+    if (show_music_player) {
+        ImGui::Begin("Music Player");
+        if (ImGui::BeginCombo("Music list", 0, 0)) {
+            for (int i = 0; i < Mixer.music->musics[2].size(); i++) {
+                if (ImGui::Selectable(std::to_string(i).c_str(), false))
+                   Mixer.PlayMusic(i);
+            }
+            ImGui::EndCombo();
         }
         ImGui::End();
     }

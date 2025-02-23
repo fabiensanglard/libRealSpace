@@ -18,11 +18,10 @@ struct MemMusic {
 };
 
 class RSMusic {
-    uint8_t bank{0};
-
-    std::map<uint8_t, std::vector<MemMusic *>> musics;
+    uint8_t bank{0};    
     std::vector<MemMusic *> gameflow_music;
 public:
+    std::map<uint8_t, std::vector<MemMusic *>> musics;
     void Init();
     void SwitchBank(uint8_t bank);
     MemMusic *GetMusic(uint32_t index);

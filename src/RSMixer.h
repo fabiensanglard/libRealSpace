@@ -13,7 +13,6 @@
 class RSMixer {
 private:
     int initted;
-    RSMusic *music;
 public:
     RSMixer();
     ~RSMixer();
@@ -21,4 +20,5 @@ public:
     void PlayMusic(uint32_t index);
     void SwitchBank(uint8_t bank);
     void StopMusic();
+    RSMusic *music;
 };
