@@ -296,7 +296,7 @@ void SCConvPlayer::Init() {
     VGAPalette *rendererPalette = VGA.GetPalette();
     this->palette = *rendererPalette;
 
-    currentFrame.font = FontManager.GetFont("");
+    currentFrame.font = FontManager.GetFont("..\\..\\DATA\\FONTS\\CONVFONT.SHP");
 }
 
 /**

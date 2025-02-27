@@ -74,17 +74,9 @@ void SCCockpit::Init() {
         line.end.y = 0 + i * 20;
         horizon.push_back(line);
     }
-    TreEntry *fontdef = Assets.tres[AssetManager::TRE_MISC]->GetEntryByName("..\\..\\DATA\\FONTS\\SHUDFONT.SHP");
-    PakArchive *pak = new PakArchive();
-    pak->InitFromRAM("HUDFONT", fontdef->data, fontdef->size);
-    this->font = new RSFont();
-    this->font->InitFromPAK(pak);
-
-    TreEntry *bigfontdef = Assets.tres[AssetManager::TRE_MISC]->GetEntryByName("..\\..\\DATA\\FONTS\\HUDFONT.SHP");
-    PakArchive *bigpak = new PakArchive();
-    bigpak->InitFromRAM("HUDFONT", bigfontdef->data, bigfontdef->size);
-    this->big_font = new RSFont();
-    this->big_font->InitFromPAK(bigpak);
+    
+    this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\SHUDFONT.SHP");
+    this->big_font = FontManager.GetFont("..\\..\\DATA\\FONTS\\HUDFONT.SHP");
 }
 /**
  * SCCockpit::RenderAltitude
@@ -675,8 +667,9 @@ void SCCockpit::Render(int face) {
             for (int li=0; li<16; li++) {
                 VGA.FillLineColor(li, 0);
             }
+            RSFont *fnt = this->big_font;
             VGA.PrintText(
-                this->big_font, 
+                fnt, 
                 &radio_text,
                 (char *)this->current_mission->radio_messages[0]->c_str(),
                 0,

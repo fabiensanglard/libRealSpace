@@ -23,7 +23,6 @@ public:
     
 protected:
 private:
-    RSFont font;
-    std::map<char*,RSFont*,Char_String_Comparator> fonts;
+    std::map<std::string, RSFont*> fonts;
 };
 

@@ -19,32 +19,56 @@ RSFontManager::~RSFontManager(){
 
 void RSFontManager::Init(void){
     
-    /*
-    const char* fontPath = "..\\..\\DATA\\GAMEFLOW\\BWFONT.SHP";
-    const char* trePath = "GAMEFLOW.TRE";
-    TreArchive GAMEFLOW;
-    GAMEFLOW.InitFromFile(trePath);
-    TreEntry* convFontEntry = GAMEFLOW.GetEntryByName(fontPath);
-    */
+    const char* font_index[31] = {
+        "..\\..\\DATA\\FONTS\\CALCFONT.SHP",
+        "..\\..\\DATA\\FONTS\\CAMROPT.SHP",
+        "..\\..\\DATA\\FONTS\\CHKEXIT.SHP",
+        "..\\..\\DATA\\FONTS\\COCKOPT.SHP",
+        "..\\..\\DATA\\FONTS\\CONVFONT.SHP",
+        "..\\..\\DATA\\FONTS\\DETLOPT.SHP",
+        "..\\..\\DATA\\FONTS\\FLITOPT.SHP",
+        "..\\..\\DATA\\FONTS\\FORMFONT.SHP",
+        "..\\..\\DATA\\FONTS\\GAMEOPT.SHP",
+        "..\\..\\DATA\\FONTS\\GRAVFONT.SHP",
+        "..\\..\\DATA\\FONTS\\HUDFONT.SHP",
+        "..\\..\\DATA\\FONTS\\JOYCALIB.SHP",
+        "..\\..\\DATA\\FONTS\\LEDGFONT.SHP",
+        "..\\..\\DATA\\FONTS\\MAINOPT.SHP",
+        "..\\..\\DATA\\FONTS\\MAPFONT.SHP",
+        "..\\..\\DATA\\FONTS\\MENBGRND.SHP",
+        "..\\..\\DATA\\FONTS\\MENFONT.SHP",
+        "..\\..\\DATA\\FONTS\\MTYPEBUT.SHP",
+        "..\\..\\DATA\\FONTS\\OPTFONT.SHP",
+        "..\\..\\DATA\\FONTS\\OVBKGRND.SHP",
+        "..\\..\\DATA\\FONTS\\OVBUTUD.SHP",
+        "..\\..\\DATA\\FONTS\\OVPLAT.SHP",
+        "..\\..\\DATA\\FONTS\\RESTART.SHP",
+        "..\\..\\DATA\\FONTS\\SHUDFONT.SHP",
+        "..\\..\\DATA\\FONTS\\SM-FONT.SHP",
+        "..\\..\\DATA\\FONTS\\TR1PLAT.SHP",
+        "..\\..\\DATA\\FONTS\\TR2BUTUD.SHP",
+        "..\\..\\DATA\\FONTS\\TR2PLAT.SHP",
+        "..\\..\\DATA\\FONTS\\3DSTUFON.SHP",
+        "..\\..\\DATA\\FONTS\\AUDIOPT.SHP",
+        "..\\..\\DATA\\FONTS\\BOARDFNT.SH"
+    };
     
-    
-    const char* fontPath = "..\\..\\DATA\\FONTS\\CONVFONT.SHP";
-    const char* trePath = "MISC.TRE";
-    TreArchive MISC;
-    MISC.InitFromFile(trePath);
-    TreEntry* convFontEntry = MISC.GetEntryByName(fontPath);
-    
-    
-    PakArchive fontArch;
-    fontArch.InitFromRAM("CONVFONT.SHP",convFontEntry->data,convFontEntry->size);
-    //fontArch.List(stdout);
-    
-    
-    font.InitFromPAK(&fontArch);
 
+    for (int i = 0; i < 30; i++){
+        const char* fontPath = font_index[i];
+        const char* trePath = "MISC.TRE";
+        TreArchive MISC;
+        MISC.InitFromFile(trePath);
+        TreEntry* convFontEntry = MISC.GetEntryByName(fontPath);
+        PakArchive fontArch;
+        fontArch.InitFromRAM(font_index[i],convFontEntry->data,convFontEntry->size);
+        RSFont *font = new RSFont();
+        font->InitFromPAK(&fontArch);
+        fonts[fontPath] = font;
+    }
 }
 
 RSFont* RSFontManager::GetFont(const char* name){
-    return &font;
+    return fonts[name];
 }
 

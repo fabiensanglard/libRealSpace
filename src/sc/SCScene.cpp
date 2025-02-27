@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+
 #pragma warning(disable : 4996)
 template<typename ... Args>
 std::string string_format( const std::string& format, Args ... args )
@@ -27,6 +28,7 @@ std::vector<SCZone *>  *SCScene::Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::fun
     this->sceneOpts = sc_opts;
     this->zones.clear();
     this->zones.shrink_to_fit();
+    GameState.aircraftHooks.clear();
     for (auto bg : sceneOpts->background->images) {
         background *tmpbg = new background();
         tmpbg->img = this->getShape(bg->ID);
@@ -309,493 +311,213 @@ SCZone *WeaponLoadoutScene::addExtraZone(uint8_t id) {
  }
 
  void WeaponLoadoutScene::addWeapon(std::vector<EFCT *> *script, uint8_t id) {
+    // Réinitialiser les zones supplémentaires
+    this->extra_zones.clear();
+    this->extra_zones.shrink_to_fit();
 
-     this->extra_zones.clear();
-     this->extra_zones.shrink_to_fit();
-     switch (id) {
-     case AIM9J:
-         if (GameState.weapon_load_out.find(AIM9J) == GameState.weapon_load_out.end()) {
-             GameState.weapon_load_out[AIM9J] = 0;
-         }
-         if (GameState.weapon_load_out[AIM9J] < 6) {
-             GameState.weapon_load_out[AIM9J] += 2;
-         }
-         break;
-     case AIM9M:
-         if (GameState.weapon_load_out.find(AIM9M) == GameState.weapon_load_out.end()) {
-             GameState.weapon_load_out[AIM9M] = 0;
-         }
-         if (GameState.weapon_load_out[AIM9M] < 6) {
-             GameState.weapon_load_out[AIM9M] += 2;
-         }
-         break;
-     case AIM120:
-         if (GameState.weapon_load_out.find(AIM120) == GameState.weapon_load_out.end()) {
-             GameState.weapon_load_out[AIM120] = 0;
-         }
-         if (GameState.weapon_load_out[AIM120] < 6) {
-             GameState.weapon_load_out[AIM120] += 2;
-         }
-         break;
-     case DURANDAL:
-         if (GameState.weapon_load_out.find(DURANDAL) == GameState.weapon_load_out.end()) {
-             GameState.weapon_load_out[DURANDAL] = 0;
-         }
-         if (GameState.weapon_load_out[DURANDAL] < 12) {
-             GameState.weapon_load_out[DURANDAL] += 2;
-         }
-         break;
-     case MK82:
-         if (GameState.weapon_load_out.find(MK82) == GameState.weapon_load_out.end()) {
-             GameState.weapon_load_out[MK82] = 0;
-         }
-         if (GameState.weapon_load_out[MK82] < 24) {
-             GameState.weapon_load_out[MK82] += 2;
-         }
-         break;
-     case AGM65D:
-         if (GameState.weapon_load_out.find(AGM65D) == GameState.weapon_load_out.end()) {
-             GameState.weapon_load_out[AGM65D] = 0;
-         }
-         if (GameState.weapon_load_out[AGM65D] < 12) {
-             GameState.weapon_load_out[AGM65D] += 2;
-         }
-         break;
-     case MK20:
-         if (GameState.weapon_load_out.find(MK20) == GameState.weapon_load_out.end()) {
-             GameState.weapon_load_out[MK20] = 0;
-         }
-         if (GameState.weapon_load_out[MK20] < 12) {
-             GameState.weapon_load_out[MK20] += 2;
-         }
-         break;
-     case GBU15:
-         if (GameState.weapon_load_out.find(GBU15) == GameState.weapon_load_out.end()) {
-             GameState.weapon_load_out[GBU15] = 0;
-         }
-         if (GameState.weapon_load_out[GBU15] < 4) {
-             GameState.weapon_load_out[GBU15] += 2;
-         }
-         break;
-     case LAU3:
-         if (GameState.weapon_load_out.find(LAU3) == GameState.weapon_load_out.end()) {
-             GameState.weapon_load_out[LAU3] = 0;
-         }
-         if (GameState.weapon_load_out[LAU3] < 10) {
-             GameState.weapon_load_out[LAU3] += 2;
-         }
-         break;
-     }
-     this->updateWeaponDisplay();
+    // Déterminer la quantité maximale en fonction du type d'arme
+    int max = 0;
+    switch (id) {
+        case AIM9J:
+        case AIM9M:
+            max = 6;
+            break;
+        case AIM120:
+            max = 6;
+            break;
+        case DURANDAL:
+            max = 12;
+            break;
+        case MK82:
+            max = 24;
+            break;
+        case AGM65D:
+        case MK20:
+            max = 12;
+            break;
+        case GBU15:
+            max = 4;
+            break;
+        case LAU3:
+            max = 10;
+            break;
+        default:
+            break;
+    }
+    
+    if (GameState.weapon_load_out[id] < max) {
+        GameState.weapon_load_out[id] += 2;
+    }
+
+    this->updateWeaponDisplay();
 }
 
 void WeaponLoadoutScene::removeWeapon(std::vector<EFCT *> *script, uint8_t id) {
-        
     this->extra_zones.clear();
     this->extra_zones.shrink_to_fit();
-    switch (id) {
-        case AIM9J:
-            if (GameState.weapon_load_out.find(AIM9J) == GameState.weapon_load_out.end()) {
-                GameState.weapon_load_out[AIM9J]=0;    
-            }
-            if (GameState.weapon_load_out[AIM9J] > 0) {
-                GameState.weapon_load_out[AIM9J]-=2;
-            }
-        break;
-        case AIM9M:
-            if (GameState.weapon_load_out.find(AIM9M) == GameState.weapon_load_out.end()) {
-                GameState.weapon_load_out[AIM9M]=0;    
-            }
-            if (GameState.weapon_load_out[AIM9M] > 0) {
-                GameState.weapon_load_out[AIM9M]-=2;
-            }
-        break;
-        case AIM120:
-            if (GameState.weapon_load_out.find(AIM120) == GameState.weapon_load_out.end()) {
-                GameState.weapon_load_out[AIM120]=0;    
-            }
-            if (GameState.weapon_load_out[AIM120] > 0) {
-                GameState.weapon_load_out[AIM120]-=2;
-            }
-        break;
-        case DURANDAL:
-            if (GameState.weapon_load_out.find(DURANDAL) == GameState.weapon_load_out.end()) {
-                GameState.weapon_load_out[DURANDAL]=0;    
-            }
-            if (GameState.weapon_load_out[DURANDAL] > 0) {
-                GameState.weapon_load_out[DURANDAL]-=2;
-            }
-        break;
-        case MK82:
-            if (GameState.weapon_load_out.find(MK82) == GameState.weapon_load_out.end()) {
-                GameState.weapon_load_out[MK82]=0;    
-            }
-            if (GameState.weapon_load_out[MK82] > 0) {
-                GameState.weapon_load_out[MK82]-=2;
-            }
-        break;
-        case AGM65D:
-            if (GameState.weapon_load_out.find(AGM65D) == GameState.weapon_load_out.end()) {
-                GameState.weapon_load_out[AGM65D]=0;    
-            }
-            if (GameState.weapon_load_out[AGM65D] > 0) {
-                GameState.weapon_load_out[AGM65D]-=2;
-            }
-        break;
-        case MK20:
-            if (GameState.weapon_load_out.find(MK20) == GameState.weapon_load_out.end()) {
-                GameState.weapon_load_out[MK20]=0;    
-            }
-            if (GameState.weapon_load_out[MK20] > 0) {
-                GameState.weapon_load_out[MK20]-=2;
-            }
-        break;
-        case GBU15:
-            if (GameState.weapon_load_out.find(GBU15) == GameState.weapon_load_out.end()) {
-                GameState.weapon_load_out[GBU15]=0;    
-            }
-            if (GameState.weapon_load_out[GBU15] > 0) {
-                GameState.weapon_load_out[GBU15]-=2;
-            }
-        break;
-        case LAU3:
-            if (GameState.weapon_load_out.find(LAU3) == GameState.weapon_load_out.end()) {
-                GameState.weapon_load_out[LAU3]=0;    
-            }
-            if (GameState.weapon_load_out[LAU3] > 0) {
-                GameState.weapon_load_out[LAU3]-=2;
-            }
-        break;
-    }
+    // L'opérateur [] crée l'entrée si elle n'existe pas et retourne 0 par défaut.
+    GameState.weapon_load_out[id] = (std::max)(0, GameState.weapon_load_out[id] - 2);
     this->updateWeaponDisplay();
 }
 
 void WeaponLoadoutScene::updateWeaponDisplay() {
 
+    // Réinitialiser la liste des zones
     this->zones.clear();
     this->zones.shrink_to_fit();
-    SCZone *z=createZone(this->sceneOpts->foreground->sprites[this->gameflow_scene->info.ID], this->gameflow_scene->info.ID);
-    z->onclick = onclick;
-    z->active = true;
-    this->zones.push_back(z);
-    
-    // FLY MISSION
-    z=createZone(this->sceneOpts->foreground->sprites[12], 12);
-    z->onclick = onclick;
-    z->active = true;
-    this->zones.push_back(z);    
-    
-    z=createZone(this->sceneOpts->foreground->sprites[AIM9J], AIM9J);
-    z->active = true;
-    z->onclick = std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2);
-    this->zones.push_back(z);
 
-    z=createZone(this->sceneOpts->foreground->sprites[AIM9M], AIM9M);
-    z->active = true;
-    z->onclick = std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2);
-    this->zones.push_back(z);
+    // Lambda pour créer et ajouter une zone fixe
+    auto createAndAddZone = [this](uint8_t spriteId, uint8_t zoneId, auto callback) {
+        SCZone *z = createZone(this->sceneOpts->foreground->sprites[spriteId], zoneId);
+        z->active = true;
+        z->onclick = callback;
+        this->zones.push_back(z);
+    };
 
-    z=createZone(this->sceneOpts->foreground->sprites[AIM120], AIM120);
-    z->active = true;
-    z->onclick = std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2);
-    this->zones.push_back(z);
+    // Ajout des zones fixes
+    createAndAddZone(this->gameflow_scene->info.ID, this->gameflow_scene->info.ID, this->onclick);
+    createAndAddZone(12, 12, this->onclick);
+    createAndAddZone(AIM9J, AIM9J, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2));
+    createAndAddZone(AIM9M, AIM9M, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2));
+    createAndAddZone(AIM120, AIM120, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2));
+    createAndAddZone(DURANDAL, DURANDAL, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2));
+    createAndAddZone(MK82, MK82, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2));
+    createAndAddZone(AGM65D, AGM65D, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2));
+    createAndAddZone(MK20, MK20, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2));
+    createAndAddZone(GBU15, GBU15, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2));
+    createAndAddZone(LAU3, LAU3, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2));
 
-    z=createZone(this->sceneOpts->foreground->sprites[DURANDAL], DURANDAL);
-    z->active = true;
-    z->onclick = std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2);
-    this->zones.push_back(z);
+    // Lambda pour ajouter les zones de load-out (extra zones et zones "NoGfX")
+    auto addWeaponZones = [this](uint8_t weaponType, const std::string &wlabel,
+                                 const std::vector<uint8_t> &extraIds,
+                                 const std::vector<uint8_t> &noGfxIds) {
+        for (auto eid : extraIds)
+            this->extra_zones.push_back(this->addExtraZone(eid));
+        for (auto nid : noGfxIds)
+            this->zones.push_back(this->addNoGfXZone(nid, wlabel, weaponType));
+    };
 
-    z=createZone(this->sceneOpts->foreground->sprites[MK82], MK82);
-    z->active = true;
-    z->onclick = std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2);
-    this->zones.push_back(z);
-
-    z=createZone(this->sceneOpts->foreground->sprites[AGM65D], AGM65D);
-    z->active = true;
-    z->onclick = std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2);
-    this->zones.push_back(z);
-
-    z=createZone(this->sceneOpts->foreground->sprites[MK20], MK20);
-    z->active = true;
-    z->onclick = std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2);
-    this->zones.push_back(z);
-
-    z=createZone(this->sceneOpts->foreground->sprites[GBU15], GBU15);
-    z->active = true;
-    z->onclick = std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2);
-    this->zones.push_back(z);
-
-    z=createZone(this->sceneOpts->foreground->sprites[LAU3], LAU3);
-    z->active = true;
-    z->onclick = std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2);
-    this->zones.push_back(z);
     std::string wlabel;
+    // Pour chaque arme présente dans le load-out, ajouter les extra zones correspondantes
     for (auto wpl : GameState.weapon_load_out) {
         switch (wpl.first) {
             case AIM9J:
                 wlabel = string_format("AIM9J(%d)", wpl.second);
                 if (wpl.second == 2) {
-                    this->extra_zones.push_back(this->addExtraZone(4));
-                    this->zones.push_back(this->addNoGfXZone(117, wlabel, AIM9J));
-                    this->zones.push_back(this->addNoGfXZone(118, wlabel, AIM9J));
+                    addWeaponZones(AIM9J, wlabel, {4}, {117, 118});
                 } else if (wpl.second == 4) {
-                    this->extra_zones.push_back(this->addExtraZone(4));
-                    this->extra_zones.push_back(this->addExtraZone(5));
-                    this->zones.push_back(this->addNoGfXZone(117, wlabel, AIM9J));
-                    this->zones.push_back(this->addNoGfXZone(118, wlabel, AIM9J));
-                    this->zones.push_back(this->addNoGfXZone(119, wlabel, AIM9J));
-                    this->zones.push_back(this->addNoGfXZone(120, wlabel, AIM9J));
+                    addWeaponZones(AIM9J, wlabel, {4, 5}, {117, 118, 119, 120});
                 } else if (wpl.second == 6) {
-                    this->extra_zones.push_back(this->addExtraZone(4));
-                    this->extra_zones.push_back(this->addExtraZone(5));
-                    this->extra_zones.push_back(this->addExtraZone(40));
-                    this->zones.push_back(this->addNoGfXZone(117, wlabel, AIM9J));
-                    this->zones.push_back(this->addNoGfXZone(118, wlabel, AIM9J));
-                    this->zones.push_back(this->addNoGfXZone(119, wlabel, AIM9J));
-                    this->zones.push_back(this->addNoGfXZone(120, wlabel, AIM9J));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AIM9J));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AIM9J));
+                    addWeaponZones(AIM9J, wlabel, {4, 5, 40}, {117, 118, 119, 120, 121, 122});
                 }
             break;
             case AIM9M:
                 wlabel = string_format("AIM9M(%d)", wpl.second);
                 if (wpl.second == 2) {
-                    this->extra_zones.push_back(this->addExtraZone(6));
-                    this->zones.push_back(this->addNoGfXZone(117, wlabel, AIM9M));
-                    this->zones.push_back(this->addNoGfXZone(118, wlabel, AIM9M));
+                    addWeaponZones(AIM9M, wlabel, {6}, {117, 118});
                 } else if (wpl.second == 4) {
-                    this->extra_zones.push_back(this->addExtraZone(6));
-                    this->extra_zones.push_back(this->addExtraZone(7));
-                    this->zones.push_back(this->addNoGfXZone(117, wlabel, AIM9M));
-                    this->zones.push_back(this->addNoGfXZone(118, wlabel, AIM9M));
-                    this->zones.push_back(this->addNoGfXZone(119, wlabel, AIM9M));
-                    this->zones.push_back(this->addNoGfXZone(120, wlabel, AIM9M));
+                    addWeaponZones(AIM9M, wlabel, {6, 7}, {117, 118, 119, 120});
                 } else if (wpl.second == 6) {
-                    this->extra_zones.push_back(this->addExtraZone(6));
-                    this->extra_zones.push_back(this->addExtraZone(7));
-                    this->extra_zones.push_back(this->addExtraZone(41));
-                    this->zones.push_back(this->addNoGfXZone(117, wlabel, AIM9M));
-                    this->zones.push_back(this->addNoGfXZone(118, wlabel, AIM9M));
-                    this->zones.push_back(this->addNoGfXZone(119, wlabel, AIM9M));
-                    this->zones.push_back(this->addNoGfXZone(120, wlabel, AIM9M));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AIM9M));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AIM9M));
+                    addWeaponZones(AIM9M, wlabel, {6, 7, 41}, {117, 118, 119, 120, 121, 122});
                 }
             break;
             case AIM120:
                 wlabel = string_format("AIM120(%d)", wpl.second);
                 if (wpl.second == 2) {
+                    // Conserver les constantes : ici on ajoute directement les NoGfX zones
                     this->extra_zones.push_back(this->addExtraZone(1));
                     this->zones.push_back(this->addNoGfXZone(119, wlabel, AIM120));
                     this->zones.push_back(this->addNoGfXZone(120, wlabel, AIM120));
                 } else if (wpl.second == 4) {
-                    this->extra_zones.push_back(this->addExtraZone(1));
-                    this->extra_zones.push_back(this->addExtraZone(2));
-                    this->zones.push_back(this->addNoGfXZone(119, wlabel, AIM120));
-                    this->zones.push_back(this->addNoGfXZone(120, wlabel, AIM120));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AIM120));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AIM120));
+                    addWeaponZones(AIM120, wlabel, {1, 2}, {119, 120, 121, 122});
                 } else if (wpl.second == 6) {
-                    this->extra_zones.push_back(this->addExtraZone(1));
-                    this->extra_zones.push_back(this->addExtraZone(2));
-                    this->extra_zones.push_back(this->addExtraZone(3));
-                    this->zones.push_back(this->addNoGfXZone(119, wlabel, AIM120));
-                    this->zones.push_back(this->addNoGfXZone(120, wlabel, AIM120));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AIM120));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AIM120));
+                    addWeaponZones(AIM120, wlabel, {1, 2, 3}, {119, 120, 121, 122});
                 }
             break;
             case DURANDAL:
                 wlabel = string_format("DURANDAL(%d)", wpl.second);
                 if (wpl.second == 2) {
-                    this->extra_zones.push_back(this->addExtraZone(14));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, DURANDAL));
+                    addWeaponZones(DURANDAL, wlabel, {14}, {121, 122});
                 } else if (wpl.second == 4) {
-                    this->extra_zones.push_back(this->addExtraZone(15));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, DURANDAL));
+                    addWeaponZones(DURANDAL, wlabel, {15}, {121, 122});
                 } else if (wpl.second == 6) {
-                    this->extra_zones.push_back(this->addExtraZone(16));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, DURANDAL));
+                    addWeaponZones(DURANDAL, wlabel, {16}, {121, 122});
                 } else if (wpl.second == 8) {
-                    this->extra_zones.push_back(this->addExtraZone(16));
-                    this->extra_zones.push_back(this->addExtraZone(17));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, DURANDAL));
+                    addWeaponZones(DURANDAL, wlabel, {16, 17}, {121, 122, 123, 124});
                 } else if (wpl.second == 10) {
-                    this->extra_zones.push_back(this->addExtraZone(16));
-                    this->extra_zones.push_back(this->addExtraZone(18));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, DURANDAL));
+                    addWeaponZones(DURANDAL, wlabel, {16, 18}, {121, 122, 123, 124});
                 } else if (wpl.second == 12) {
-                    this->extra_zones.push_back(this->addExtraZone(16));
-                    this->extra_zones.push_back(this->addExtraZone(19));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, DURANDAL));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, DURANDAL));
+                    addWeaponZones(DURANDAL, wlabel, {16, 19}, {121, 122, 123, 124});
                 }
             break;
             case MK20:
                 wlabel = string_format("MK20(%d)", wpl.second);
                 if (wpl.second == 2) {
-                    this->extra_zones.push_back(this->addExtraZone(20));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK20));
+                    addWeaponZones(MK20, wlabel, {20}, {121, 122});
                 } else if (wpl.second == 4) {
-                    this->extra_zones.push_back(this->addExtraZone(21));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK20));
+                    addWeaponZones(MK20, wlabel, {21}, {121, 122});
                 } else if (wpl.second == 6) {
-                    this->extra_zones.push_back(this->addExtraZone(22));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK20));
+                    addWeaponZones(MK20, wlabel, {22}, {121, 122});
                 } else if (wpl.second == 8) {
-                    this->extra_zones.push_back(this->addExtraZone(22));
-                    this->extra_zones.push_back(this->addExtraZone(23));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, MK20));
+                    addWeaponZones(MK20, wlabel, {22, 23}, {121, 122, 123, 124});
                 } else if (wpl.second == 10) {
-                    this->extra_zones.push_back(this->addExtraZone(22));
-                    this->extra_zones.push_back(this->addExtraZone(24));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, MK20));
+                    addWeaponZones(MK20, wlabel, {22, 24}, {121, 122, 123, 124});
                 } else if (wpl.second == 12) {
-                    this->extra_zones.push_back(this->addExtraZone(22));
-                    this->extra_zones.push_back(this->addExtraZone(25));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, MK20));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, MK20));
+                    addWeaponZones(MK20, wlabel, {22, 25}, {121, 122, 123, 124});
                 }
             break;
             case AGM65D:
                 wlabel = string_format("AGM65D(%d)", wpl.second);
                 if (wpl.second == 2) {
-                    this->extra_zones.push_back(this->addExtraZone(8));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AGM65D));
+                    addWeaponZones(AGM65D, wlabel, {8}, {121, 122});
                 } else if (wpl.second == 4) {
-                    this->extra_zones.push_back(this->addExtraZone(9));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AGM65D));
+                    addWeaponZones(AGM65D, wlabel, {9}, {121, 122});
                 } else if (wpl.second == 6) {
-                    this->extra_zones.push_back(this->addExtraZone(10));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AGM65D));
+                    addWeaponZones(AGM65D, wlabel, {10}, {121, 122});
                 } else if (wpl.second == 8) {
-                    this->extra_zones.push_back(this->addExtraZone(10));
-                    this->extra_zones.push_back(this->addExtraZone(11));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, AGM65D));
+                    addWeaponZones(AGM65D, wlabel, {10, 11}, {121, 122, 123, 124});
                 } else if (wpl.second == 10) {
-                    this->extra_zones.push_back(this->addExtraZone(10));
-                    this->extra_zones.push_back(this->addExtraZone(12));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, AGM65D));
+                    addWeaponZones(AGM65D, wlabel, {10, 12}, {121, 122, 123, 124});
                 } else if (wpl.second == 12) {
-                    this->extra_zones.push_back(this->addExtraZone(10));
-                    this->extra_zones.push_back(this->addExtraZone(13));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, AGM65D));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, AGM65D));
+                    addWeaponZones(AGM65D, wlabel, {10, 13}, {121, 122, 123, 124});
                 }
             break;
             case MK82:
                 wlabel = string_format("MK82(%d)", wpl.second);
                 if (wpl.second == 2) {
-                    this->extra_zones.push_back(this->addExtraZone(26));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK82));
+                    addWeaponZones(MK82, wlabel, {26}, {121, 122});
                 } else if (wpl.second == 4) {
-                    this->extra_zones.push_back(this->addExtraZone(27));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK82));
+                    addWeaponZones(MK82, wlabel, {27}, {121, 122});
                 } else if (wpl.second == 6) {
-                    this->extra_zones.push_back(this->addExtraZone(28));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK82));
+                    addWeaponZones(MK82, wlabel, {28}, {121, 122});
                 } else if (wpl.second == 8) {
-                    this->extra_zones.push_back(this->addExtraZone(28));
-                    this->extra_zones.push_back(this->addExtraZone(29));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, MK82));
+                    addWeaponZones(MK82, wlabel, {28, 29}, {121, 122, 123, 124});
                 } else if (wpl.second == 10) {
-                    this->extra_zones.push_back(this->addExtraZone(28));
-                    this->extra_zones.push_back(this->addExtraZone(30));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, MK82));
-                } else if (wpl.second >= 12 && wpl.second <=24) {
-                    this->extra_zones.push_back(this->addExtraZone(28));
-                    this->extra_zones.push_back(this->addExtraZone(31));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, MK82));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, MK82));
+                    addWeaponZones(MK82, wlabel, {28, 30}, {121, 122, 123, 124});
+                } else if (wpl.second >= 12 && wpl.second <= 24) {
+                    addWeaponZones(MK82, wlabel, {28, 31}, {121, 122, 123, 124});
                 }
             break;
             case GBU15:
                 wlabel = string_format("GBU15(%d)", wpl.second);
                 if (wpl.second == 2) {
-                    this->extra_zones.push_back(this->addExtraZone(32));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, GBU15));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, GBU15));
+                    addWeaponZones(GBU15, wlabel, {32}, {121, 122});
                 } else if (wpl.second == 4) {
-                    this->extra_zones.push_back(this->addExtraZone(32));
-                    this->extra_zones.push_back(this->addExtraZone(33));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, GBU15));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, GBU15));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, GBU15));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, GBU15));
+                    addWeaponZones(GBU15, wlabel, {32, 33}, {121, 122, 123, 124});
                 }
             break;
             case LAU3:
                 wlabel = string_format("LAU3(%d)", wpl.second);
                 if (wpl.second == 2) {
-                    this->extra_zones.push_back(this->addExtraZone(34));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, LAU3));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, LAU3));
+                    addWeaponZones(LAU3, wlabel, {34}, {121, 122});
                 } else if (wpl.second == 4) {
-                    this->extra_zones.push_back(this->addExtraZone(35));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, LAU3));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, LAU3));
+                    addWeaponZones(LAU3, wlabel, {35}, {121, 122});
                 } else if (wpl.second == 6) {
-                    this->extra_zones.push_back(this->addExtraZone(36));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, LAU3));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, LAU3));
+                    addWeaponZones(LAU3, wlabel, {36}, {121, 122});
                 } else if (wpl.second == 8) {
-                    this->extra_zones.push_back(this->addExtraZone(36));
-                    this->extra_zones.push_back(this->addExtraZone(37));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, LAU3));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, LAU3));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, LAU3));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, LAU3));
+                    addWeaponZones(LAU3, wlabel, {36, 37}, {121, 122, 123, 124});
                 } else if (wpl.second == 10) {
-                    this->extra_zones.push_back(this->addExtraZone(36));
-                    this->extra_zones.push_back(this->addExtraZone(38));
-                    this->zones.push_back(this->addNoGfXZone(121, wlabel, LAU3));
-                    this->zones.push_back(this->addNoGfXZone(122, wlabel, LAU3));
-                    this->zones.push_back(this->addNoGfXZone(123, wlabel, LAU3));
-                    this->zones.push_back(this->addNoGfXZone(124, wlabel, LAU3));
+                    addWeaponZones(LAU3, wlabel, {36, 38}, {121, 122, 123, 124});
                 }
             break;
         }
