@@ -644,7 +644,6 @@ void SCGameFlow::RenderMenu() {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
     static bool show_scene_window = false;
-    static bool quit_gameflow = false;
     static bool show_load_miss = false;
     static bool show_gamestate = false;
     static bool show_shots = false;
@@ -661,7 +660,6 @@ void SCGameFlow::RenderMenu() {
             ImGui::MenuItem("Info", NULL, &show_scene_window);
             ImGui::MenuItem("GameState", NULL, &show_gamestate);
             ImGui::MenuItem("Music Player", NULL, &show_music_player);
-            ImGui::MenuItem("Quit", NULL, &quit_gameflow);
             ImGui::EndMenu();
         }
         int sceneid = -1;
@@ -886,9 +884,7 @@ void SCGameFlow::RenderMenu() {
         }
         ImGui::End();
     }
-    if (quit_gameflow) {
-        Game.StopTopActivity();
-    }
+
 
     ImGui::Render();
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());

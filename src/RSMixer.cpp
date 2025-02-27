@@ -18,8 +18,8 @@ void RSMixer::PlayMusic(uint32_t index, int loop) {
     if (this->music->bank == 1 && index == 0) {
         // this is a special case for the strike base ambient music
         // the wopl file does not work with it.
-        Mix_ADLMIDI_setSetDefaults();
-        Mix_ADLMIDI_setBankID(18);
+        //Mix_ADLMIDI_setSetDefaults();
+        //Mix_ADLMIDI_setBankID(18);
     } else {
         Mix_ADLMIDI_setCustomBankFile("./assets/STRIKE.wopl");
     }
