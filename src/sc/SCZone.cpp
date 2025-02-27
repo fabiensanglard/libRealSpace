@@ -28,7 +28,7 @@ void SCZone::OnAction(void){
         this->sprite->active = true;
     } else if (this->onclick != nullptr) {
         if (this->sprite != nullptr) {
-            this->onclick(this->sprite->efect, this->id);
+            this->onclick(this->sprite->efect, this->sprite->id);
         } else {
             this->onclick(nullptr, this->id);
         }
@@ -90,7 +90,7 @@ void SCZone::Draw(void) {
                 this->sprite->frameCounter += fpsupdate;
                 if (this->sprite->frameCounter >= this->sprite->img->sequence.size()-1) {
                     if (this->onclick != nullptr) {
-                        this->onclick(this->sprite->efect, this->id);
+                        this->onclick(this->sprite->efect, this->sprite->id);
                     }
                 }
             }

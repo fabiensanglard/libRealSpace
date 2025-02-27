@@ -24,17 +24,14 @@ int main(int argc, char* argv[]) {
 
     
     Assets.SetBase("./assets");
-    
     Mixer.Init();
-    
     Game.Init();
-    
-    
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();
     main->Init();
     Game.AddActivity(main);
     Game.Run();
+
     
     return EXIT_SUCCESS;
 }

@@ -11,14 +11,16 @@
 #include <SDL2/SDL_mixer_ext.h>
 
 class RSMixer {
-private:
     int initted;
+    bool isplaying;
+    uint32_t current_music{UINT32_MAX};
 public:
     RSMixer();
     ~RSMixer();
     void Init();
-    void PlayMusic(uint32_t index);
+    void PlayMusic(uint32_t index, int loop=1);
     void SwitchBank(uint8_t bank);
     void StopMusic();
+    uint32_t GetMusicID() { return this->current_music; };
     RSMusic *music;
 };

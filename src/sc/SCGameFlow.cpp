@@ -82,6 +82,11 @@ void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
     this->efect = script;
     this->currentSpriteId = id;
     this->currentOptCode = 0;
+    if (this->scen->sceneOpts->foreground->sprites[id]->tune != nullptr) {
+        Mixer.SwitchBank(1);
+        Mixer.StopMusic();
+        Mixer.PlayMusic(this->scen->sceneOpts->foreground->sprites[id]->tune->ID, 1);
+    }
     this->runEffect();
 }
 /**

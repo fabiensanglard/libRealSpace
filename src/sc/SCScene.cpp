@@ -30,15 +30,6 @@ std::vector<SCZone *>  *SCScene::Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::fun
     this->zones.clear();
     this->zones.shrink_to_fit();
 
-    Mixer.SwitchBank(1);
-    switch (sc_opts->infos.ID) {
-        case 11:
-            Mixer.PlayMusic(1);
-            break;
-        case 7:
-            Mixer.PlayMusic(2);
-            break;
-    }
     GameState.aircraftHooks.clear();
     for (auto bg : sceneOpts->background->images) {
         background *tmpbg = new background();
@@ -142,6 +133,12 @@ void SCScene::Render() {
     fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
     if (fpsupdate) {
         this->fps = (SDL_GetTicks() / 10);
+    }
+    if (this->sceneOpts->tune != nullptr) {
+        if (Mixer.GetMusicID() != this->sceneOpts->tune->ID) {
+            Mixer.SwitchBank(1);
+            Mixer.PlayMusic(this->sceneOpts->tune->ID);
+        }
     }
     ByteStream paletteReader;
     paletteReader.Set((this->rawPalette));
@@ -541,6 +538,7 @@ std::vector<SCZone *> *WeaponLoadoutScene::Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts
     this->sceneOpts = sc_opts;
     this->zones.clear();
     GameState.weapon_load_out.clear();
+        
     for (auto bg : sceneOpts->background->images) {
         background *tmpbg = new background();
         tmpbg->img = this->getShape(bg->ID);
@@ -569,6 +567,12 @@ void WeaponLoadoutScene::Render() {
     fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
     if (fpsupdate) {
         this->fps = (SDL_GetTicks() / 10);
+    }
+    if (this->sceneOpts->tune != nullptr) {
+        if (Mixer.GetMusicID() != this->sceneOpts->tune->ID) {
+            Mixer.SwitchBank(1);
+            Mixer.PlayMusic(this->sceneOpts->tune->ID);
+        }
     }
     ByteStream paletteReader;
     paletteReader.Set((this->rawPalette));
