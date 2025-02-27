@@ -14,6 +14,7 @@ RSMixer::~RSMixer() { Mix_Quit(); }
 void RSMixer::PlayMusic(uint32_t index) {
     MemMusic *mus = this->music->GetMusic(index);
     SDL_RWops *rw = SDL_RWFromConstMem(mus->data, (int) mus->size);
+    //Mix_ADLMIDI_setCustomBankFile("G:\\DOS\\DATA\\SOUND\\STRIKE.AD");
     Mix_Music *music = Mix_LoadMUSType_RW(rw, MUS_MID, 1);
     int error = Mix_PlayMusic(music, 1);
     if (error == -1) {

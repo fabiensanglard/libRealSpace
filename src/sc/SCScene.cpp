@@ -26,8 +26,19 @@ SCScene::~SCScene() {}
 std::vector<SCZone *>  *SCScene::Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick) {
     this->gameflow_scene = gf;
     this->sceneOpts = sc_opts;
+
     this->zones.clear();
     this->zones.shrink_to_fit();
+
+    Mixer.SwitchBank(1);
+    switch (sc_opts->infos.ID) {
+        case 11:
+            Mixer.PlayMusic(1);
+            break;
+        case 7:
+            Mixer.PlayMusic(2);
+            break;
+    }
     GameState.aircraftHooks.clear();
     for (auto bg : sceneOpts->background->images) {
         background *tmpbg = new background();
