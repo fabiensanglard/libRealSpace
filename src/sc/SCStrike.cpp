@@ -462,7 +462,7 @@ void SCStrike::SetMission(char const *missionName) {
     this->cockpit->current_mission = this->current_mission;
     this->cockpit->nav_point_id = &this->nav_point_id;
     Mixer.SwitchBank(2);
-    Mixer.PlayMusic(this->music);
+    Mixer.PlayMusic(this->current_mission->mission->mission_data.tune);
 }
 /**
  * @brief Executes a single frame of the game simulation.

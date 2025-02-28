@@ -23,6 +23,71 @@ SCConvPlayer::~SCConvPlayer() {}
 #define UNKNOWN 0x0E
 #define CHOOSE_WINGMAN 0x0F
 
+
+// Taking animation
+// 03 mouth anim
+// 04 mouth anim
+// 06 mouth anim
+// 07 mouth anim
+// 08 mouth anim
+// 09 mouth pinched
+// 10 mouth opened
+// 11 mouth something
+// 12 mouth something
+
+// Eyes animation
+// 13 eyes closed
+// 14 eyes closed
+// 15 eyes wide open
+// 16 eagle eyes
+// 16 left wink
+// 17 upper left eyes
+// 18 look right
+// 19 look left
+// 20 eyes straight
+// 21 eyes blink closed
+// 22 eyes blink mid-open
+
+// 23 eye brows semi-raised
+// 24 left eye brows semi-raised
+// 25 right eye brows semi-raised
+// 26 eye brows something
+
+// General face expression
+// 27 mouth heart
+// 28 face tensed
+// 29 face smile
+// 30 right face tensed
+// 31 right crooked
+// 32 pinched lips
+// 33 surprise
+// 34 seducing face
+// 35 look of desaproval face
+
+// Cloth
+// 35 civil clothes
+// 36 pilot clothes
+// 37 pilot clothes 2
+
+// 38 sunglasses
+// 39 pilot helmet (if drawing this, don't draw hairs
+// 40 pilot helmet visor (if drawing this draw 39 too
+
+std::map<uint8_t, std::vector<uint8_t>> faces_shape = {
+    {14, std::vector<uint8_t>{1,21,28,2,35}},
+    {16, std::vector<uint8_t>{1,17,2,35}},
+    {17, std::vector<uint8_t>{1,18,2,35}},
+    {18, std::vector<uint8_t>{1,19,2,35}},
+    {19, std::vector<uint8_t>{1,2,35}},
+    {20, std::vector<uint8_t>{1,21,28,2,35}},
+    {22, std::vector<uint8_t>{1,23,2,35}},
+    {23, std::vector<uint8_t>{1,24,2,35}},
+    {24, std::vector<uint8_t>{1,25,2,35}},
+    {25, std::vector<uint8_t>{1,26,2,35}},
+    {31, std::vector<uint8_t>{1,2,35}},
+    {255, std::vector<uint8_t>{1,2,35}},
+};
+
 void SCConvPlayer::Focus(void) {
     IActivity::Focus();
 }
@@ -87,7 +152,9 @@ void SCConvPlayer::ReadNextFrame(void) {
     case CLOSEUP: // Person talking
     {
         char *speakerName = (char *)conv.GetPosition();
+        currentFrame.face_expression = (uint8_t) *(conv.GetPosition() + 0x09);
         char *setName = (char *)conv.GetPosition() + 0xA;
+        
         char *sentence = (char *)conv.GetPosition() + 0x17;
 
         uint8_t pos = *(conv.GetPosition() + 0x13);
@@ -109,8 +176,8 @@ void SCConvPlayer::ReadNextFrame(void) {
         const char *pszExt = "normal";
         currentFrame.facePaletteID = ConvAssets.GetFacePaletteID(const_cast<char *>(pszExt));
 
-        printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X) pos %2X\n", this->conversationID,
-               speakerName, setName, sentence, color, pos);
+        printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X) pos %2X  face expression: '%d'\n", this->conversationID,
+               speakerName, setName, sentence, color, pos, currentFrame.face_expression);
         break;
     }
     case CLOSEUP_CONTINUATION: // Same person keep talking
@@ -536,110 +603,26 @@ void SCConvPlayer::RunFrame(void) {
         }
 
         if (currentFrame.face != NULL) {
-            // Face wiht of without hair
-            // 00 nothing
-            // 01 rest face
-            // 02 hair
-            for (size_t i = 1; i < 3; i++) {
-                RLEShape *s = currentFrame.face->appearances->GetShape(i);
-                s->SetPositionX(pos);
-                VGA.DrawShape(s);
+            RLEShape *s = nullptr;
+            if (faces_shape.find(currentFrame.face_expression) != faces_shape.end()) {
+                for (auto shape : faces_shape[currentFrame.face_expression]) {
+                    s = currentFrame.face->appearances->GetShape(shape);
+                    s->SetPositionX(pos);
+                    VGA.DrawShape(s);
+                }
             }
-
-            // Taking animation
-            // 03 mouth anim
-            // 04 mouth anim
-            // 06 mouth anim
-            // 07 mouth anim
-            // 08 mouth anim
-            // 09 mouth pinched
-            // 10 mouth opened
-            // 11 mouth something
-            // 12 mouth something
-
-            for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP; i++) {
-
+            for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP && currentFrame.text[0] != '\0' ; i++) {
                 RLEShape *s = currentFrame.face->appearances->GetShape(3 + (SDL_GetTicks() / 100) % 10);
                 s->SetPositionX(pos);
                 VGA.DrawShape(s);
             }
 
-            // Eyes animation
-            // 13 eyes closed
-            // 14 eyes closed
-            // 15 eyes wide open
-            // 16 eagle eyes
-            // 16 left wink
-            // 17 upper left eyes
-            // 18 look right
-            // 19 look left
-            // 20 eyes straight
-            // 21 eyes blink closed
-            // 22 eyes blink mid-open
-
-            // 23 eye brows semi-raised
-            // 24 left eye brows semi-raised
-            // 25 right eye brows semi-raised
-            // 26 eye brows something
-            for (size_t i = 13; i < 14; i++) {
-                RLEShape *s = currentFrame.face->appearances->GetShape(i);
-                s->SetPositionX(pos);
-                // VGA.DrawShape();
-            }
-
-            // General face expression
-            // 27 mouth heart
-            // 28 face tensed
-            // 29 face smile
-            // 30 right face tensed
-            // 31 right crooked
-            // 32 pinched lips
-            // 33 surprise
-            // 34 seducing face
-            // 35 look of desaproval face
-            for (size_t i = 29; i < 30; i++) {
-                RLEShape *s = currentFrame.face->appearances->GetShape(i);
-                s->SetPositionX(pos);
-                // VGA.DrawShape();
-            }
-
-            // Cloth
-            // 35 civil clothes
-            // 36 pilot clothes
-            // 37 pilot clothes 2
-            // for (size_t i=36; i< 37; i++) {
-            RLEShape *s = currentFrame.face->appearances->GetShape(35);
-            s->SetPositionX(pos);
-            VGA.DrawShape(s);
-            //}
-
-            // 38 sunglasses
-            // 39 pilot helmet (if drawing this, don't draw hairs
-            // 40 pilot helmet visor (if drawing this draw 39 too
-            for (size_t i = 41; i < 40; i++) {
-                RLEShape *s = currentFrame.face->appearances->GetShape(i);
-                s->SetPositionX(pos);
-                VGA.DrawShape(s);
-            }
-
-            // 40 to 54 ????
-
-            // 54 hand extension
             if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
                 RLEShape *s = currentFrame.face->appearances->GetShape(54);
                 s->SetPositionX(pos);
                 VGA.DrawShape(s);
             }
 
-            // 60 scary smile
-            // 61 look right
-            // 62 look left
-            for (size_t i = 55; i < 63; i++) {
-                // What is there ?
-                RLEShape *s = currentFrame.face->appearances->GetShape(i);
-                s->SetPositionX(pos);
-                // VGA.DrawShape();
-            }
         }
     }
 
