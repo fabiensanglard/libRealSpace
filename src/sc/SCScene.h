@@ -38,10 +38,13 @@ protected:
     RSImageSet *getShape(uint8_t shpid);
     SCZone *createZone(SPRT *sprts, uint8_t sprtId);
     int fps{12};
+    bool music{true};
 public:
     SCEN *sceneOpts;
     SCScene(PakArchive *optShps, PakArchive *optPals);
     ~SCScene();
+    void toggleMusic() { music = !music; };
+    void stopMusic() { music = false; };
     virtual std::vector<SCZone *> *Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
     virtual void Render();
 };

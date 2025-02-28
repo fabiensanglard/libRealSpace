@@ -19,4 +19,5 @@ public:
     bool mission_accepted{false};
     uint8_t mission_id{0};
     uint8_t mission_flyed{0};
+    uint8_t tune_modifier{0};
 };

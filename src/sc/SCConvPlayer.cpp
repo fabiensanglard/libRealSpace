@@ -25,7 +25,6 @@ SCConvPlayer::~SCConvPlayer() {}
 
 void SCConvPlayer::Focus(void) {
     IActivity::Focus();
-    Screen.SetTitle("CONVersation Player");
 }
 
 void SCConvPlayer::clicked(void *none, uint8_t id) {

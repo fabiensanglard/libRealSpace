@@ -26,6 +26,7 @@
 #define EFECT_OPT_MISS_ACCEPTED 20
 #define EFECT_OPT_MISS_REJECTED 21
 #define EFECT_OPT_END_MISS 22
+#define EFECT_OPT_TUNE_MODIFIER 27
 #define EFECT_OPT_MISS_ELSE 30
 #define EFECT_OPT_MISS_ENDIF 31
 #define EFFCT_OPT_IF_MISS_SUCCESS 32
@@ -85,7 +86,11 @@ void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
     if (this->scen->sceneOpts->foreground->sprites[id]->tune != nullptr) {
         Mixer.SwitchBank(1);
         Mixer.StopMusic();
-        Mixer.PlayMusic(this->scen->sceneOpts->foreground->sprites[id]->tune->ID, 1);
+        if (GameState.tune_modifier != 0 && id == 18) {
+            Mixer.PlayMusic(this->scen->sceneOpts->foreground->sprites[id]->tune->ID + GameState.tune_modifier, 1);
+        } else {
+            Mixer.PlayMusic(this->scen->sceneOpts->foreground->sprites[id]->tune->ID, 1);
+        }
     }
     this->runEffect();
 }
@@ -372,6 +377,9 @@ void SCGameFlow::runEffect() {
                 ifStack.pop();
             }
             break;
+        case EFECT_OPT_TUNE_MODIFIER:
+            GameState.tune_modifier = instruction->value;
+        break;
         default:
             printf("Unkown opcode :%d, %d\n", instruction->opcode, instruction->value);
             break;
@@ -674,6 +682,7 @@ void SCGameFlow::RenderMenu() {
         if (ImGui::BeginCombo("Music list Bank 1", 0, 0)) {
             for (int i = 0; i < Mixer.music->musics[1].size(); i++) {
                 if (ImGui::Selectable(std::to_string(i).c_str(), false)) {
+                    this->scen->stopMusic();
                     Mixer.SwitchBank(1);
                     Mixer.PlayMusic(i);
                 }

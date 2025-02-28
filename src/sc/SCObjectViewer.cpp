@@ -276,7 +276,6 @@ void SCObjectViewer::Init(void) {
 
     ParseObjList(&objToDisplay);
 
-    SetTitle("Neo Object Viewer");
 
     currentObject = 0;
 

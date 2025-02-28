@@ -134,10 +134,19 @@ void SCScene::Render() {
     if (fpsupdate) {
         this->fps = (SDL_GetTicks() / 10);
     }
-    if (this->sceneOpts->tune != nullptr) {
-        if (Mixer.GetMusicID() != this->sceneOpts->tune->ID) {
-            Mixer.SwitchBank(1);
-            Mixer.PlayMusic(this->sceneOpts->tune->ID);
+    if (this->sceneOpts->tune != nullptr && this->music) {
+        if (GameState.tune_modifier != 0 && (this->sceneOpts->infos.ID == 20 || this->sceneOpts->infos.ID == 29)) {
+            if (Mixer.GetMusicID() != this->sceneOpts->tune->ID+GameState.tune_modifier) {
+                Mixer.SwitchBank(1);
+                Mixer.StopMusic();
+                Mixer.PlayMusic(this->sceneOpts->tune->ID+GameState.tune_modifier);
+            }
+        } else {
+            if (Mixer.GetMusicID() != this->sceneOpts->tune->ID) {
+                Mixer.SwitchBank(1);
+                Mixer.StopMusic();
+                Mixer.PlayMusic(this->sceneOpts->tune->ID);
+            }
         }
     }
     ByteStream paletteReader;
