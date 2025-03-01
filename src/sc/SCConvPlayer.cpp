@@ -74,6 +74,7 @@ SCConvPlayer::~SCConvPlayer() {}
 // 40 pilot helmet visor (if drawing this draw 39 too
 
 std::map<uint8_t, std::vector<uint8_t>> faces_shape = {
+    {13, std::vector<uint8_t>{1,14,2,35}},
     {14, std::vector<uint8_t>{1,21,28,2,35}},
     {16, std::vector<uint8_t>{1,17,2,35}},
     {17, std::vector<uint8_t>{1,18,2,35}},
@@ -141,6 +142,9 @@ void SCConvPlayer::ReadNextFrame(void) {
         printf("ConvID: %d WIDEPLAN : LOCATION: '%s'\n", this->conversationID, location);
         conv.MoveForward(8);
         if (conv.PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
+            conv.MoveForward(1);
+            ReadNextFrame();
+        } else if (conv.PeekByte() == SHOW_TEXT) {
             conv.MoveForward(1);
             ReadNextFrame();
         } else {
@@ -280,10 +284,10 @@ void SCConvPlayer::ReadNextFrame(void) {
         int8_t color = conv.ReadByte();
         char *sentence = (char *)conv.GetPosition();
 
-        currentFrame.mode = ConvFrame::CONV_CLOSEUP;
+        currentFrame.mode = ConvFrame::CONV_WIDE;
         currentFrame.text = sentence;
         currentFrame.textColor = color;
-
+        currentFrame.face = nullptr;
         printf("ConvID: %d Show Text: '%s' \n", this->conversationID, sentence);
         conv.MoveForward(strlen(sentence) + 1);
 
