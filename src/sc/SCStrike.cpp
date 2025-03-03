@@ -369,9 +369,6 @@ void SCStrike::CheckKeyboard(void) {
         } break;
         case SDLK_a:
         {
-            /*this->player_plane->x = this->current_mission->waypoints[this->nav_point_id]->spot->position.x;
-            this->player_plane->z = this->current_mission->waypoints[this->nav_point_id]->spot->position.z;*/
-
             Vector2D destination = {this->current_mission->waypoints[this->nav_point_id]->spot->position.x,
                                     this->current_mission->waypoints[this->nav_point_id]->spot->position.z};
 
@@ -379,6 +376,15 @@ void SCStrike::CheckKeyboard(void) {
             std::vector<Vector2D> path;
             for (auto area: this->current_mission->mission->mission_data.areas) {
                 {
+                    bool area_active = false;
+                    for (auto scen: this->current_mission->mission->mission_data.scenes) {
+                        if (scen->area_id == area->id-1) {
+                            area_active = area_active || scen->is_active;
+                        }
+                    }
+                    if (!area_active) {
+                        continue;
+                    }
                     printf("check collision with Areas: %s\n", area->AreaName);
                     // Assume each area is represented as an axis-aligned rectangle in the X-Z plane.
                     // Compute rectangle boundaries.
