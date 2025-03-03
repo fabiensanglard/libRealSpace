@@ -37,6 +37,7 @@ struct MISN_PART {
     uint8_t unknown1{0};
     int16_t unknown2{0};
     Vector3D position{0, 0, 0};
+    uint8_t unknown3{0};
     uint16_t azymuth{0};
     uint16_t roll{0};
     uint16_t pitch{0};
@@ -56,6 +57,9 @@ struct SPOT {
     int id;
     short area_id;
     Vector3D position;
+    Vector3D origin;
+    uint8_t unknown1;
+    uint8_t unknown2;
 };
 struct MSGS {
     char message[255];

@@ -12,6 +12,9 @@
 #include <imgui_impl_opengl2.h>
 #include <imgui_impl_sdl2.h>
 #include <tuple>
+// Function to check if two line segments intersect.
+#include <optional>
+#include <cmath>
 #define SC_WORLD 1100
 
 /**
@@ -47,6 +50,9 @@ void SCStrike::CheckKeyboard(void) {
     SDL_GetMouseState(&msx, &msy);
     msy = msy - (Screen.height / 2);
     msx = msx - (Screen.width / 2);
+    if (this->camera_mode == View::AUTO_PILOT) {
+        return;
+    }
     if (this->mouse_control) {
         this->player_plane->control_stick_x = msx;
         this->player_plane->control_stick_y = msy;
@@ -362,11 +368,136 @@ void SCStrike::CheckKeyboard(void) {
             Game.AddActivity(nav_screen);
         } break;
         case SDLK_a:
-            this->player_plane->x = this->current_mission->waypoints[this->nav_point_id]->spot->position.x;
-            this->player_plane->z = this->current_mission->waypoints[this->nav_point_id]->spot->position.z;
-            this->player_plane->ptw.Identity();
-            this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
-            break;
+        {
+            /*this->player_plane->x = this->current_mission->waypoints[this->nav_point_id]->spot->position.x;
+            this->player_plane->z = this->current_mission->waypoints[this->nav_point_id]->spot->position.z;*/
+
+            Vector2D destination = {this->current_mission->waypoints[this->nav_point_id]->spot->position.x,
+                                    this->current_mission->waypoints[this->nav_point_id]->spot->position.z};
+
+            Vector2D origine = {this->player_plane->x, this->player_plane->z};
+            std::vector<Vector2D> path;
+            for (auto area: this->current_mission->mission->mission_data.areas) {
+                {
+                    printf("check collision with Areas: %s\n", area->AreaName);
+                    // Assume each area is represented as an axis-aligned rectangle in the X-Z plane.
+                    // Compute rectangle boundaries.
+                    float halfWidth  = area->AreaWidth / 2.0f;
+                    
+                    float left   = area->position.x - halfWidth;
+                    float right  = area->position.x + halfWidth;
+                    float top    = area->position.z - halfWidth;
+                    float bottom = area->position.z + halfWidth;
+
+                    // Lambda to test if a point is inside the rectangle.
+                    auto pointInRect = [&](const Vector2D &pt) -> bool {
+                        return (pt.x >= left && pt.x <= right && pt.y >= top && pt.y <= bottom);
+                    };
+                    if (pointInRect(origine)) {
+                        // we know we are in this area already
+                        printf("We are in area: %s\n", area->AreaName);
+                        continue;
+                    }
+                    // If either endpoint is inside, we have a collision.
+                    if (pointInRect(origine) || pointInRect(destination)) {
+                        printf("Collision detected with area: %s\n", area->AreaName);
+                        continue;
+                    }
+
+                    auto doLinesIntersect = [&](const Vector2D &p1, const Vector2D &p2,
+                                                  const Vector2D &p3, const Vector2D &p4) -> std::optional<Vector2D> {
+                        float r_px = p2.x - p1.x;
+                        float r_py = p2.y - p1.y;
+                        float s_px = p4.x - p3.x;
+                        float s_py = p4.y - p3.y;
+                        float denominator = r_px * s_py - r_py * s_px;
+                        if (fabs(denominator) < 1e-6f)
+                            return std::nullopt; // lines are parallel
+
+                        float t = ((p3.x - p1.x) * s_py - (p3.y - p1.y) * s_px) / denominator;
+                        float u = ((p3.x - p1.x) * r_py - (p3.y - p1.y) * r_px) / denominator;
+
+                        if (t >= 0.0f && t <= 1.0f && u >= 0.0f && u <= 1.0f) {
+                            // Return the intersection point
+                            return Vector2D { p1.x + t * r_px, p1.y + t * r_py };
+                        }
+                        return std::nullopt;
+                    };
+
+                    // Define rectangle edges (using two points per edge).
+                    Vector2D r1 = {left, top};
+                    Vector2D r2 = {right, top};
+                    Vector2D r3 = {right, bottom};
+                    Vector2D r4 = {left, bottom};
+
+                    std::optional<Vector2D> i1 = doLinesIntersect(origine, destination, r1, r2);
+                    std::optional<Vector2D> i2 = doLinesIntersect(origine, destination, r2, r3);
+                    std::optional<Vector2D> i3 = doLinesIntersect(origine, destination, r3, r4);
+                    std::optional<Vector2D> i4 = doLinesIntersect(origine, destination, r4, r1);
+
+                    // Check if the segment (origin,destination) intersects any rectangle edge.
+                    if (i1 != std::nullopt ||
+                        i2 != std::nullopt ||
+                        i3 != std::nullopt ||
+                        i4 != std::nullopt)
+                    {
+                        printf("Collision detected with area: %s\n", area->AreaName);
+                        //continue;
+                    }
+                    if (i1 != std::nullopt) {
+                        path.push_back(i1.value());
+                    }
+                    if (i2 != std::nullopt) {
+                        path.push_back(i2.value());
+                    }
+                    if (i3 != std::nullopt) {
+                        path.push_back(i3.value());
+                    }
+                    if (i4 != std::nullopt) {
+                        path.push_back(i4.value());
+                    }
+                }
+            }
+            if (!path.empty()) {
+                Vector2D selectedPoint;
+                float minDistSq = (std::numeric_limits<float>::max)();
+                for (const auto &pt : path) {
+                    float dx = pt.x - origine.x;
+                    float dy = pt.y - origine.y;
+                    float distSq = dx * dx + dy * dy;
+                    if (distSq < minDistSq) {
+                        minDistSq = distSq;
+                        selectedPoint = pt;
+                    }
+                }
+                printf("Selected point: (%.3f, %.3f)\n", selectedPoint.x, selectedPoint.y);
+                this->player_plane->x = selectedPoint.x;
+                this->player_plane->z = selectedPoint.y;
+                float desty = this->current_mission->area->getY(this->player_plane->x, this->player_plane->z);
+                if (this->player_plane->y < desty) {
+                    this->player_plane->y += desty;    
+                }
+                this->player_plane->ptw.Identity();
+                this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
+
+            } else {
+                printf("No intersection points found in path.\n");
+                this->player_plane->x = destination.x;
+                this->player_plane->z = destination.y;
+                float desty = this->current_mission->area->getY(this->player_plane->x, this->player_plane->z);
+                if (this->player_plane->y < desty) {
+                    this->player_plane->y += desty;    
+                }
+                this->player_plane->ptw.Identity();
+                this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
+            }
+            this->camera_mode = View::AUTO_PILOT;
+            this->autopilot_timeout = 200;
+            fflush(stdout);
+            
+        }
+        break;
+        
         case SDLK_SPACE:
             {
                 if (target != nullptr) {
@@ -462,7 +593,7 @@ void SCStrike::SetMission(char const *missionName) {
     this->cockpit->current_mission = this->current_mission;
     this->cockpit->nav_point_id = &this->nav_point_id;
     Mixer.SwitchBank(2);
-    Mixer.PlayMusic(this->current_mission->mission->mission_data.tune);
+    Mixer.PlayMusic(this->current_mission->mission->mission_data.tune+1);
 }
 /**
  * @brief Executes a single frame of the game simulation.
@@ -482,7 +613,7 @@ void SCStrike::SetMission(char const *missionName) {
  */
 void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
-    if (!this->pause_simu) {
+    if (!this->pause_simu || this->camera_mode!=View::AUTO_PILOT) {
         this->mfd_timeout--;
         this->player_plane->Simulate();
         this->current_mission->update();
@@ -512,7 +643,17 @@ void SCStrike::RunFrame(void) {
         }
     }
     switch (this->camera_mode) {
-
+    case View::AUTO_PILOT: {
+        if (this->autopilot_timeout > -200) {
+            this->autopilot_timeout-=2;
+            Vector3D pos = {this->newPosition.x +5, this->newPosition.y + 5, 
+                this->newPosition.z - (autopilot_timeout-(autopilot_timeout/2))};
+            camera->SetPosition(&pos);
+            camera->LookAt(&this->newPosition);
+        } else {
+            this->camera_mode = View::FRONT;
+        }
+    } break;
     case View::FRONT: {
         Vector3D pos = {this->newPosition.x, this->newPosition.y, this->newPosition.z+10};
         camera->SetPosition(&pos);
@@ -642,6 +783,7 @@ void SCStrike::RunFrame(void) {
     case View::MISSILE_CAM:
     case View::TARGET:
     case View::OBJECT:
+    case View::AUTO_PILOT:
     case View::FOLLOW:
         this->player_plane->Render();
         break;
@@ -1162,6 +1304,9 @@ void SCStrike::RenderMenu() {
                 if (ImGui::TreeNode((void *)(intptr_t)spot, "Spot %d", spot->id)) {
                     ImGui::Text("Spot area_id %d", spot->area_id);
                     ImGui::Text("Spot x %.0f y %.0f z %.0f", spot->position.x, spot->position.y, spot->position.z);
+                    ImGui::Text("Spot from file x %.0f y %.0f z %.0f", spot->origin.x, spot->origin.y, spot->origin.z);
+                    ImGui::Text("u1 %d", spot->unknown1);
+                    ImGui::Text("u2 %d", spot->unknown2);
                     ImGui::TreePop();
                 }
             }
@@ -1204,6 +1349,9 @@ void SCStrike::RenderMenu() {
                     for (auto prog : scene->progs_id) {
                         ImGui::Text("Prog %d", prog);
                     }
+                    for (auto b: scene->unknown_bytes) {
+                        ImGui::Text("ub %d", b);
+                    }
                     ImGui::TreePop();
                 }
                 cpt_scenes++;
@@ -1218,8 +1366,12 @@ void SCStrike::RenderMenu() {
                     ImGui::Text("u2 %d", part->unknown2);
                     ImGui::Text("x %.0f y %.0f z %.0f", part->position.x, part->position.y, part->position.z);
                     ImGui::Text("azymuth %d", part->azymuth);
+                    ImGui::Text("u3 %d", part->unknown3);
                     ImGui::Text("Name %s", part->member_name.c_str());
                     ImGui::Text("Destroyed %s", part->member_name_destroyed.c_str());
+                    for (auto obj : part->unknown_bytes) {
+                        ImGui::Text("ub %d", obj);
+                    }
                     ImGui::Text("Weapon load %s", part->weapon_load.c_str());
                     if (ImGui::TreeNode("RS ENTITY")) {
                         ImGui::Text("weight %d", part->entity->weight_in_kg);

@@ -95,7 +95,7 @@ void RSVGA::VSync(void) {
         dst++;
     }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
+
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -105,7 +105,7 @@ void RSVGA::VSync(void) {
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    
+
     glBegin(GL_QUADS);
     glTexCoord2f(0, 1);
     glVertex2d(0, 0);
@@ -119,7 +119,7 @@ void RSVGA::VSync(void) {
     glTexCoord2f(0, 0);
     glVertex2d(0, 200);
     glEnd();
-    
+
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -149,7 +149,8 @@ void RSVGA::lineWithBox(int x1, int y1, int x2, int y2, uint8_t color, int bx1, 
     this->lineWithBoxWithSkip(x1, y1, x2, y2, color, bx1, bx2, by1, by2, 1);
 }
 
-void RSVGA::lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t color, int bx1, int bx2, int by1, int by2, int skip) {
+void RSVGA::lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t color, int bx1, int bx2, int by1, int by2,
+                                int skip) {
     if (x1 > 320 || x2 > 320 || y1 > 200 || y2 > 200)
         return;
     int i, dx, dy, sdx, sdy, dxabs, dyabs, x, y, px, py;
@@ -166,7 +167,7 @@ void RSVGA::lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t color, i
     py = y1;
 
     if (px >= bx1 && px <= bx2 && py >= by1 && py <= by2) {
-        //frameBuffer[(py << 8) + (py << 6) + px] = color;
+        // frameBuffer[(py << 8) + (py << 6) + px] = color;
     }
 
     if (dxabs >= dyabs) /* the line is more horizontal than vertical */
@@ -178,12 +179,11 @@ void RSVGA::lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t color, i
                 py += sdy;
             }
             px += sdx;
-            if (i%skip == 0) {
+            if (i % skip == 0) {
                 if (px >= bx1 && px <= bx2 && py >= by1 && py <= by2) {
                     plot_pixel(px, py, color);
                 }
             }
-            
         }
     } else /* the line is more vertical than horizontal */
     {
@@ -194,7 +194,7 @@ void RSVGA::lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t color, i
                 px += sdx;
             }
             py += sdy;
-            if (i%skip == 0) {
+            if (i % skip == 0) {
                 if (px >= bx1 && px <= bx2 && py >= by1 && py <= by2) {
                     plot_pixel(px, py, color);
                 }
@@ -220,37 +220,42 @@ void RSVGA::rect_slow(int left, int top, int right, int bottom, uint8_t color) {
  *    Draws a circle by using floating point numbers and math fuctions.   *
  **************************************************************************/
 
-void RSVGA::circle_slow(int x,int y, int radius, uint8_t color) {
-  float n=0,invradius=1/(float)radius;
-  int dx=0,dy=radius-1;
-  uint16_t dxoffset,dyoffset,offset=(y<<8)+(y<<6)+x;
+void RSVGA::circle_slow(int x, int y, int radius, uint8_t color) {
+    float n = 0, invradius = 1 / (float)radius;
+    int dx = 0, dy = radius - 1;
+    uint16_t dxoffset, dyoffset, offset = (y << 8) + (y << 6) + x;
 
-  while (dx<=dy)
-  {
-    dxoffset = (dx<<8) + (dx<<6);
-    dyoffset = (dy<<8) + (dy<<6);
-    frameBuffer[offset+dy-dxoffset] = color;  /* octant 0 */
-    frameBuffer[offset+dx-dyoffset] = color;  /* octant 1 */
-    frameBuffer[offset-dx-dyoffset] = color;  /* octant 2 */
-    frameBuffer[offset-dy-dxoffset] = color;  /* octant 3 */
-    frameBuffer[offset-dy+dxoffset] = color;  /* octant 4 */
-    frameBuffer[offset-dx+dyoffset] = color;  /* octant 5 */
-    frameBuffer[offset+dx+dyoffset] = color;  /* octant 6 */
-    frameBuffer[offset+dy+dxoffset] = color;  /* octant 7 */
-    dx++;
-    n+=invradius;
-    dy=radius * (int) sinf(acosf(n));
-  }
+    while (dx <= dy) {
+        dxoffset = (dx << 8) + (dx << 6);
+        dyoffset = (dy << 8) + (dy << 6);
+        frameBuffer[offset + dy - dxoffset] = color; /* octant 0 */
+        frameBuffer[offset + dx - dyoffset] = color; /* octant 1 */
+        frameBuffer[offset - dx - dyoffset] = color; /* octant 2 */
+        frameBuffer[offset - dy - dxoffset] = color; /* octant 3 */
+        frameBuffer[offset - dy + dxoffset] = color; /* octant 4 */
+        frameBuffer[offset - dx + dyoffset] = color; /* octant 5 */
+        frameBuffer[offset + dx + dyoffset] = color; /* octant 6 */
+        frameBuffer[offset + dy + dxoffset] = color; /* octant 7 */
+        dx++;
+        n += invradius;
+        dy = radius * (int)sinf(acosf(n));
+    }
 }
 void RSVGA::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
-                     size_t interLetterSpace, size_t spaceSize) {
+                      size_t interLetterSpace, size_t spaceSize) 
+    {
+        this->PrintText_SM(font, coo, text, color, start, size, interLetterSpace, spaceSize, true);
+}
+
+void RSVGA::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
+                      size_t interLetterSpace, size_t spaceSize, bool isSmall) {
 
     if (text == NULL)
         return;
 
     if (size <= 0)
         return;
-    int startx=coo->x;
+    int startx = coo->x;
     for (size_t i = 0; i < size; i++) {
 
         char chartoDraw = text[start + i];
@@ -264,11 +269,11 @@ void RSVGA::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, siz
         int32_t lineHeight = coo->y;
         coo->y -= shape->GetHeight();
 
-        if (chartoDraw == 'p' || chartoDraw == 'y' || chartoDraw == 'g' || chartoDraw == 'q' || chartoDraw == 'j')
+        if (isSmall && (chartoDraw == 'p' || chartoDraw == 'y' || chartoDraw == 'g' || chartoDraw == 'q' || chartoDraw == 'j'))
             coo->y += 1;
         if (chartoDraw == '\n') {
             RLEShape *sp = font->GetShapeForChar('A');
-            coo->y += sp->GetHeight()+2;
+            coo->y += sp->GetHeight() + 2;
             lineHeight = coo->y;
             coo->x = startx;
         }

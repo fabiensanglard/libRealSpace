@@ -23,7 +23,7 @@ static const char *mission_list[] = {
 };
 static int mission_idx = 0;
 
-enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET, MISSILE_CAM, OBJECT };
+enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET, MISSILE_CAM, OBJECT, AUTO_PILOT };
 
 
 /**
@@ -101,6 +101,7 @@ private:
      * @brief Whether to use autopilot
      */
     bool autopilot{false};
+    int autopilot_timeout{0};
     /**
      * @brief The pilot AI
      */

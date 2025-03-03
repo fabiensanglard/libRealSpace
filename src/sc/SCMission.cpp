@@ -188,6 +188,7 @@ void SCMission::loadMission() {
         this->player->prog_executed = true;
     }
     for (auto spot: this->mission->mission_data.spots) {
+        spot->origin = {spot->position.x, spot->position.y, spot->position.z};
         if (spot->area_id != -1) {
             AREA *ar = this->mission->mission_data.areas[spot->area_id];
             spot->position += ar->position;

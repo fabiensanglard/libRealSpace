@@ -32,7 +32,7 @@ private:
     VGAPalette objpal;
 
     bool show_area{false};
-    bool show_obj{false};
+    bool show_obj{true};
     bool show_waypoint{true};
 
     void CheckKeyboard(void);

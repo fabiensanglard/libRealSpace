@@ -190,25 +190,48 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
         }
     }
 }
+int32_t ReadInt24LE_fromVec(std::vector<uint8_t>data, int offset) {
+    int32_t i = 0;
+    uint8_t buffer[4];
+    buffer[0] = data[offset];
+    buffer[1] = data[offset+1];
+    buffer[2] = data[offset+2];
+    buffer[3] = data[offset+3];
+    i = (buffer[2] << 16) | (buffer[1] << 8) | (buffer[0] << 0);
+    if (buffer[2] & 0x80) {
+        i = (0xff << 24) | i;
+    }
+    return i;
+}
 void RSMission::parseMISN_SPOT(uint8_t *data, size_t size) {
     size_t numParts = size / 14;
     ByteStream stream(data);
-
+    std::vector<uint8_t> data_vec;
+    for (int i = 0; i < size; i++) {
+        data_vec.push_back(data[i]);
+    }
+    int read = 0;
     for (int i = 0; i < numParts; i++) {
-        SPOT *spt;
-        spt = (SPOT *)malloc(sizeof(SPOT));
+        SPOT *spt = new SPOT();
         if (spt != NULL) {
             spt->id = i;
             spt->area_id = 0;
-            spt->area_id |= stream.ReadByte() << 0;
-            spt->area_id |= stream.ReadByte() << 8;
+            spt->area_id |= data_vec[read] << 0;
+            spt->area_id |= data_vec[read+1] << 8;
 
-            stream.ReadByte();
-            spt->position.x = stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            spt->position.z = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
-            spt->position.y = stream.ReadShort() * HEIGH_MAP_SCALE;
-            stream.ReadByte();
+            spt->unknown1 = data_vec[read+2];
+            int32_t x, z;
+            int16_t y;
+            x = ReadInt24LE_fromVec(data_vec, read+3);
+            z = ReadInt24LE_fromVec(data_vec, read+7);
+            y = 0;
+            y |= data_vec[read+11] << 0;
+            y |= data_vec[read+12] << 8;
+            spt->position = Vector3D(x * BLOCK_COORD_SCALE, y * HEIGH_MAP_SCALE, -z * BLOCK_COORD_SCALE);
+            
+            spt->unknown2 = data_vec[read+13];
             this->mission_data.spots.push_back(spt);
+            read += 14;
         }
     }
 }
@@ -314,19 +337,22 @@ void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
         y |= stream.ReadByte() << 8;
         prt->position = Vector3D(x * BLOCK_COORD_SCALE, y * HEIGH_MAP_SCALE, -z * BLOCK_COORD_SCALE);
 
-        for (int k = 0; k < 22; k++) {
+        prt->unknown3 = stream.ReadByte();
+        prt->azymuth = 0;
+        prt->azymuth |= stream.ReadByte() << 0;
+        prt->azymuth |= stream.ReadByte() << 8;
+        for (int k = 0; k < 11; k++) {
             prt->unknown_bytes.push_back(stream.ReadByte());
         }
-        for (int k = 0; k < 8; k=k+2) {
-            prt->progs_id.push_back(prt->unknown_bytes[14+k]);
+        for (int k = 0; k < 4; k++) {
+            prt->progs_id.push_back(stream.ReadByte());
+            stream.ReadByte();
         }
         prt->on_is_activated = prt->progs_id[0];
         prt->on_mission_update = prt->progs_id[1];
         prt->on_is_destroyed = prt->progs_id[2];
         prt->on_missions_init = prt->progs_id[3];
-        prt->azymuth = 0;
-        prt->azymuth |= prt->unknown_bytes[1] << 0;
-        prt->azymuth |= prt->unknown_bytes[2] << 8;
+        
         
         std::string hash = prt->member_name;
         std::map<std::string, RSEntity *>::iterator it;

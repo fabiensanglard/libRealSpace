@@ -42,6 +42,7 @@ public:
     void rect_slow(int left, int top, int right, int bottom, uint8_t color);
     void circle_slow(int x,int y, int radius, uint8_t color);
     void PrintText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, uint32_t size,size_t interLetterSpace, size_t spaceSize);
+    void PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size, size_t interLetterSpace, size_t spaceSize, bool isSmall);
     void SwithBuffers();
     void VSync(void);
     

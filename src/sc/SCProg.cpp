@@ -258,6 +258,15 @@ void SCProg::execute() {
                     work_register *= prog.arg;
                 }
             break;
+            case OP_ACTIVATE_SCENE:
+                if (exec) {
+                    for (auto scen: this->mission->mission->mission_data.scenes) {
+                        if (scen->area_id == prog.arg) {
+                            scen->is_active = 1;
+                            break;
+                        }
+                    }
+                }
             default:
             break;
         }
