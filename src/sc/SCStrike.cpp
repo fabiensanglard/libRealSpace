@@ -542,9 +542,31 @@ void SCStrike::CheckKeyboard(void) {
             }
             break;
         case SDLK_t:
-            this->current_target = (this->current_target + 1) % this->current_mission->enemies.size();
-            this->target = this->current_mission->enemies[this->current_target];
-            this->cockpit->target = this->target->object;
+            {
+                float minDistSq = (std::numeric_limits<float>::max)();
+                int nearestIndex = -1;
+                for (size_t i = 0; i < this->current_mission->enemies.size(); i++) {
+                    if (i == this->current_target) {
+                        continue;
+                    }
+                    auto enemy = this->current_mission->enemies[i];
+                    if (enemy->object->alive) {
+                        float dx = enemy->object->position.x - this->player_plane->x;
+                        float dy = enemy->object->position.y - this->player_plane->y;
+                        float dz = enemy->object->position.z - this->player_plane->z;
+                        float distSq = dx * dx + dy * dy + dz * dz;
+                        if (distSq < minDistSq) {
+                            minDistSq = distSq;
+                            nearestIndex = static_cast<int>(i);
+                        }
+                    }
+                }
+                if (nearestIndex != -1) {
+                    this->current_target = nearestIndex;
+                    this->target = this->current_mission->enemies[nearestIndex];
+                    this->cockpit->target = this->target->object;
+                }
+            }
             break;
         default:
             break;
