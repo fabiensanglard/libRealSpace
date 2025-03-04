@@ -102,6 +102,7 @@ private:
      */
     bool autopilot{false};
     int autopilot_timeout{0};
+    float autopilot_target_azimuth{0};
     /**
      * @brief The pilot AI
      */

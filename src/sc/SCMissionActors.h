@@ -67,6 +67,7 @@ public:
     bool taken_off{false};
     bool is_destroyed{false};
     bool prog_executed{false};
+    int current_target{0};
     bool current_command_executed{false};
 
     virtual bool execute();

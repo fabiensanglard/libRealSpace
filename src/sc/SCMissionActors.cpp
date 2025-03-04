@@ -36,6 +36,10 @@ bool SCMissionActors::takeOff(uint8_t arg) {
 }
 bool SCMissionActors::land(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_LAND;
+    auto it = std::find(this->mission->friendlies.begin(), this->mission->friendlies.end(), this);
+    if (it != this->mission->friendlies.end()) {
+        this->mission->friendlies.erase(it);
+    }
     if (arg < this->mission->mission->mission_data.spots.size()) {
         SPOT *wp = this->mission->mission->mission_data.spots[arg];
         this->pilot->SetTargetWaypoint(wp->position);
@@ -107,8 +111,8 @@ bool SCMissionActors::flyToArea(uint8_t arg) {
 bool SCMissionActors::destroyTarget(uint8_t arg) {
     Vector3D wp;
     this->current_objective = OP_SET_OBJ_DESTROY_TARGET;
+    this->current_target = arg;
     Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
-    Uint8 area_id = this->mission->getAreaID(position);
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
             if (actor->plane == nullptr) {
@@ -117,32 +121,21 @@ bool SCMissionActors::destroyTarget(uint8_t arg) {
             if (!actor->plane->object->alive) {
                 return true;
             }
-            Uint8 target_area_id = this->mission->getAreaID({actor->plane->x, actor->plane->y, actor->plane->z});
-            if (area_id = target_area_id) {
-                wp.x = actor->plane->x;
-                wp.y = actor->plane->y;
-                wp.z = actor->plane->z;
-                this->pilot->SetTargetWaypoint(wp);
-                Vector3D diff = wp - position;
-                float dist = diff.Length();
-                if (!actor->plane->on_ground) {
-                    this->pilot->target_climb = (int) wp.y;
-                    if (dist > 1000.0f) {
-                        this->pilot->target_speed = -60;
-                    } else if (dist > 300.0f) {
-                        this->pilot->target_speed = (int) actor->plane->vz;
-                    }
-                }
-                return false;
-            } else {
-                for (auto area: this->mission->mission->mission_data.areas) {
-                    if (area->id == area_id) {
-                        wp = area->position;
-                        this->pilot->SetTargetWaypoint(wp);
-                        return false;
-                    }
+            wp.x = actor->plane->x;
+            wp.y = actor->plane->y;
+            wp.z = actor->plane->z;
+            this->pilot->SetTargetWaypoint(wp);
+            Vector3D diff = wp - position;
+            float dist = diff.Length();
+            if (!actor->plane->on_ground) {
+                this->pilot->target_climb = (int) wp.y;
+                if (dist > 1000.0f) {
+                    this->pilot->target_speed = -60;
+                } else if (dist > 300.0f) {
+                    this->pilot->target_speed = (int) actor->plane->vz;
                 }
             }
+            return false;
         }
     }
     return false;
@@ -219,6 +212,9 @@ bool SCMissionActors::deactivate(uint8_t arg) {
  * @return true Always returns true.
  */
 bool SCMissionActors::setMessage(uint8_t arg) {   
+    if (arg >= this->profile->radi.msgs.size()) {
+        return true;
+    }
     this->mission->radio_messages.push_back(&this->profile->radi.msgs[arg]);
     printf("Message  %s\n", this->profile->radi.msgs[arg].c_str()); 
     return true;
@@ -305,6 +301,7 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
             actor->is_active = true;
+            actor->plane->on_ground = false;
             if (actor->object->unknown2 == 1) {
                 Vector3D correction = {
                     this->mission->player->plane->x,
@@ -444,6 +441,9 @@ bool SCMissionActorsPlayer::defendTarget(uint8_t arg) {
  * @return True if the objective was set successfully, false otherwise.
  */
 bool SCMissionActorsPlayer::setMessage(uint8_t arg) {
+    if (arg >= this->profile->radi.msgs.size()) {
+        return true;
+    }
     std::transform(this->mission->mission->mission_data.messages[arg]->begin(), this->mission->mission->mission_data.messages[arg]->end(), this->mission->mission->mission_data.messages[arg]->begin(), ::tolower);
     if (this->mission->waypoints.size() > 0) {
         this->mission->waypoints.back()->message = this->mission->mission->mission_data.messages[arg];

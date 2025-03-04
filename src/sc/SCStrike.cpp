@@ -16,7 +16,7 @@
 #include <optional>
 #include <cmath>
 #define SC_WORLD 1100
-
+#define AUTOPILOTE_TIMEOUT 400
 /**
  * @brief Constructor
  *
@@ -345,7 +345,7 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_c:
             this->cockpit->show_comm = !this->cockpit->show_comm;
             this->cockpit->comm_target = 0;
-            this->mfd_timeout = 400;
+            this->mfd_timeout = AUTOPILOTE_TIMEOUT;
             break;
         case SDLK_r:
             this->cockpit->show_radars = !this->cockpit->show_radars;
@@ -477,41 +477,58 @@ void SCStrike::CheckKeyboard(void) {
                     }
                 }
                 printf("Selected point: (%.3f, %.3f)\n", selectedPoint.x, selectedPoint.y);
+                this->autopilot_target_azimuth = atan2(destination.y - this->player_plane->z, destination.x - this->player_plane->x);
                 this->player_plane->x = selectedPoint.x;
                 this->player_plane->z = selectedPoint.y;
                 float desty = this->current_mission->area->getY(this->player_plane->x, this->player_plane->z);
                 if (this->player_plane->y < desty) {
                     this->player_plane->y += desty;    
                 }
-                this->player_plane->ptw.Identity();
-                this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
-
             } else {
                 printf("No intersection points found in path.\n");
+                this->autopilot_target_azimuth = atan2(destination.y - this->player_plane->z, destination.x - this->player_plane->x);
                 this->player_plane->x = destination.x;
                 this->player_plane->z = destination.y;
                 float desty = this->current_mission->area->getY(this->player_plane->x, this->player_plane->z);
                 if (this->player_plane->y < desty) {
-                    this->player_plane->y += desty;    
+                    this->player_plane->y = desty;    
                 }
-                this->player_plane->ptw.Identity();
-                this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             }
+            this->autopilot_target_azimuth = this->autopilot_target_azimuth * 180.0f / (float)M_PI;
+            this->autopilot_target_azimuth -= 360;
+            this->autopilot_target_azimuth += 90;
+            if (this->autopilot_target_azimuth > 360) {
+                this->autopilot_target_azimuth -= 360;
+            }
+            while (this->autopilot_target_azimuth < 0) {
+                this->autopilot_target_azimuth += 360;
+            }
+            
+            this->player_plane->ptw.Identity();
+            this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
+            this->player_plane->ptw.rotateM(0, 0, 1, 0);
+            this->player_plane->ptw.rotateM(0, 1, 0, 0);
+            this->player_plane->ptw.rotateM(0, 0, 0, 1);
+            this->player_plane->Simulate();
             int team_number = 1;
             for (auto team: this->current_mission->friendlies) {
                 if (team->is_active) {
                     if (team->plane != nullptr) {
-                        team->plane->x = this->player_plane->x + 50 * team_number;
+                        team->plane->x = this->player_plane->x + 50+team_number*5;
                         team->plane->z = this->player_plane->z;
                         team->plane->y = this->player_plane->y;
+                        team->plane->yaw=0;
+                        team->plane->pitch=0;
+                        team->plane->roll=0;
                         team->plane->ptw.Identity();
                         team->plane->ptw.translateM(team->plane->x, team->plane->y, team->plane->z);
-                        team_number+=2;
+                        team->plane->Simulate();
+                        team_number++;
                     }
                 }
             }
             this->camera_mode = View::AUTO_PILOT;
-            this->autopilot_timeout = 200;
+            this->autopilot_timeout = 400;
             fflush(stdout);
             
         }
@@ -632,7 +649,7 @@ void SCStrike::SetMission(char const *missionName) {
  */
 void SCStrike::RunFrame(void) {
     this->CheckKeyboard();
-    if (!this->pause_simu || this->camera_mode!=View::AUTO_PILOT) {
+    if (!this->pause_simu && this->camera_mode!=View::AUTO_PILOT) {
         this->mfd_timeout--;
         this->player_plane->Simulate();
         this->current_mission->update();
@@ -663,13 +680,17 @@ void SCStrike::RunFrame(void) {
     }
     switch (this->camera_mode) {
     case View::AUTO_PILOT: {
-        if (this->autopilot_timeout > -200) {
+        if (this->autopilot_timeout > -AUTOPILOTE_TIMEOUT) {
             this->autopilot_timeout-=2;
             Vector3D pos = {this->newPosition.x +5, this->newPosition.y + 5, 
                 this->newPosition.z - (autopilot_timeout-(autopilot_timeout/2))};
             camera->SetPosition(&pos);
             camera->LookAt(&this->newPosition);
         } else {
+            this->player_plane->ptw.Identity();
+            this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
+            this->player_plane->ptw.rotateM(this->autopilot_target_azimuth*(float) M_PI /180.0f, 0, 1, 0);
+            this->player_plane->Simulate();
             this->camera_mode = View::FRONT;
         }
     } break;
@@ -916,6 +937,8 @@ void SCStrike::RenderMenu() {
                     ImGui::Text("target heading %.0f", ai_actor->pilot->target_azimut);
                     ImGui::SameLine();
                     ImGui::Text("AI OBJ %d", ai_actor->current_objective);
+                    ImGui::SameLine();
+                    ImGui::Text("AI Target %d", ai_actor->current_target);
                 }
                 ImGui::SameLine();
                 ImGui::Text("X %.0f Y %.0f Z %.0f", ai_actor->plane->x, ai_actor->plane->y, ai_actor->plane->z);

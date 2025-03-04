@@ -166,7 +166,7 @@ void SCMission::loadMission() {
                 }
             }
         }
-        //this->actors.push_back(actor);
+        this->actors.push_back(actor);
     }
     for (auto member: this->mission->mission_data.team) {
         int id = this->mission->mission_data.parts[member]->id;
@@ -225,6 +225,7 @@ void SCMission::update() {
                             }
                             if (actor->actor_id == part->id && actor->is_active == false) {
                                 actor->is_active = true;
+                                
                                 if (actor->object->unknown2 == 1) {
                                     Vector3D correction;
                                     if (scene->is_coord_on_area) {
@@ -238,6 +239,7 @@ void SCMission::update() {
                                     }
                                     actor->object->position += correction;
                                     if (actor->plane != nullptr) {
+                                        actor->plane->on_ground = false;
                                         actor->plane->x = actor->object->position.x;
                                         actor->plane->y = actor->object->position.y;
                                         actor->plane->z = actor->object->position.z;
