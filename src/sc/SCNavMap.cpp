@@ -120,7 +120,7 @@ void SCNavMap::RunFrame(void) {
         
         std::string leader = "solo";
         if (this->mission->friendlies.size() > 0) {
-            leader = this->mission->friendlies[0]->actor_name;
+            leader = this->mission->friendlies[0]->profile->radi.info.callsign;
         }
         std::string mission_name = this->mission->mission->mission_data.info;
         std::transform(leader.begin(), leader.end(), leader.begin(), ::tolower);
@@ -166,7 +166,11 @@ void SCNavMap::RunFrame(void) {
             0,
             (int32_t)leader.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
         if (this->mission->friendlies.size() > 1) {
-            leader = this->mission->friendlies[1]->actor_name;
+            if (this->mission->friendlies[1]->profile != nullptr) {
+                leader = this->mission->friendlies[1]->profile->radi.info.callsign;
+            } else {
+                leader = "wingman";
+            }
             std::transform(leader.begin(), leader.end(), leader.begin(), ::tolower);
             leader_pos.y += this->navMap->font->GetShapeForChar('A')->GetHeight();
             leader_pos.x = 252;
@@ -295,7 +299,7 @@ void SCNavMap::RunFrame(void) {
                 if (ob->alive == 0) {
                     continue;
                 }
-                if (cast->profile->ai.isAI != 1 && cast->actor != "PLAYER") {
+                if (cast->profile != nullptr && cast->profile->ai.isAI != 1 && cast->actor != "PLAYER") {
                     continue;
                 }
                 if (cast->actor == "NULL") {
@@ -310,14 +314,20 @@ void SCNavMap::RunFrame(void) {
                     VGA.line(newx-5, newy-5, newx-5, newy+5, ob->id);
                     VGA.line(newx+5, newy-5, newx+5, newy+5, ob->id);
                     Point2D *obj_pos = new Point2D({newx, newy});
-                    
+                    std::string name;
+                    if (cast->profile != nullptr) {
+                        name = cast->profile->radi.info.callsign;
+                    } else {
+                        name = cast->actor;
+                    }
+                    std::transform(name.begin(), name.end(), name.begin(), ::toupper);
                     VGA.PrintText_SM(
                         this->navMap->font,
                         obj_pos,
-                        (char*) cast->actor.c_str(),
+                        (char*) name.c_str(),
                         34,
                         0,
-                        (int32_t)cast->actor.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
+                        (int32_t)name.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
                 }
             }
         }
@@ -342,17 +352,20 @@ void SCNavMap::showArea(AREA *area, float center, float map_width, int w, int h,
         Point2D *p1 = new Point2D({newx-(txtw/2)<0?newx:newx-(txtw/2), newy});
         switch (area->AreaType) {
             case 'S':
-                //VGA.circle_slow(newx, newy, neww, 128);
                 VGA.line(newx-neww, newy-neww, newx+neww, newy-neww, 1);
                 VGA.line(newx-neww, newy+neww, newx+neww, newy+neww, 1);
                 VGA.line(newx-neww, newy-neww, newx-neww, newy+neww, 1);
                 VGA.line(newx+neww, newy-neww, newx+neww, newy+neww, 1);
                 break;
             case 'C':
-                VGA.circle_slow(newx, newy, neww, 128);
+                VGA.circle_slow(newx, newy, neww, 1);
                 break;
             default:
-                VGA.plot_pixel(newx, newy, 128);
+                VGA.plot_pixel(newx, newy, 1);
+                VGA.line(newx-neww, newy-neww, newx+neww, newy-neww, 1);
+                VGA.line(newx-neww, newy+neww, newx+neww, newy+neww, 1);
+                VGA.line(newx-neww, newy-neww, newx-neww, newy+neww, 1);
+                VGA.line(newx+neww, newy-neww, newx+neww, newy+neww, 1);
                 break;
         }
         VGA.PrintText(

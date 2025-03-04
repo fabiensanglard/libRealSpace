@@ -497,6 +497,19 @@ void SCStrike::CheckKeyboard(void) {
                 this->player_plane->ptw.Identity();
                 this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             }
+            int team_number = 1;
+            for (auto team: this->current_mission->friendlies) {
+                if (team->is_active) {
+                    if (team->plane != nullptr) {
+                        team->plane->x = this->player_plane->x + 50 * team_number;
+                        team->plane->z = this->player_plane->z;
+                        team->plane->y = this->player_plane->y;
+                        team->plane->ptw.Identity();
+                        team->plane->ptw.translateM(team->plane->x, team->plane->y, team->plane->z);
+                        team_number+=2;
+                    }
+                }
+            }
             this->camera_mode = View::AUTO_PILOT;
             this->autopilot_timeout = 200;
             fflush(stdout);
@@ -1289,6 +1302,9 @@ void SCStrike::RenderMenu() {
                     ImGui::Text("Area name %s", area->AreaName);
                     ImGui::Text("Area x %.0f y %.0f z %.0f", area->position.x, area->position.y, area->position.z);
                     ImGui::Text("Area width %d height %d", area->AreaWidth, area->AreaHeight);
+                    for (auto ub: area->unknown_bytes) {
+                        ImGui::Text("ub %d", ub);
+                    }
                     ImGui::TreePop();
                 }
             }
@@ -1349,6 +1365,7 @@ void SCStrike::RenderMenu() {
                         ImGui::Text("Scene area_id %d", scene->area_id);
                     }
                     ImGui::Text("IS ACTIVE %d", scene->is_active);
+                    ImGui::Text("Is COORD RELATIVE TO AREA %d", scene->is_coord_on_area);
                     for (auto cast : scene->cast) {
                         ImGui::Text("Cast %d", cast);
                     }

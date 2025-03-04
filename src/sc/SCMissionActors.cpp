@@ -73,7 +73,18 @@ bool SCMissionActors::flyToWaypoint(uint8_t arg) {
 }
 bool SCMissionActors::flyToArea(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_FLY_TO_AREA;
-    return true;
+    if (arg < this->mission->mission->mission_data.areas.size()) {
+        AREA *area = this->mission->mission->mission_data.areas[arg];
+        this->pilot->SetTargetWaypoint(area->position);
+        this->pilot->target_speed = -10;
+        Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
+        Vector3D diff = area->position - position;
+        float dist = diff.Length();
+        if (dist < 3000.0f) {
+            return true;
+        }
+    }
+    return false;
 }
 /**
  * SCMissionActors::destroyTarget
@@ -294,9 +305,18 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
             actor->is_active = true;
-            float zero_level = this->mission->area->getY(actor->plane->x, actor->plane->z);
-            if (actor->plane->y < zero_level) {
-                actor->plane->y += zero_level;
+            if (actor->object->unknown2 == 1) {
+                Vector3D correction = {
+                    this->mission->player->plane->x,
+                    this->mission->player->plane->y,
+                    this->mission->player->plane->z
+                };
+                actor->object->position += correction;
+                if (actor->plane != nullptr) {
+                    actor->plane->x = actor->object->position.x;
+                    actor->plane->y = actor->object->position.y;
+                    actor->plane->z = actor->object->position.z;
+                }
             }
             if (actor->on_is_activated.size() > 0) {
                 SCProg *p = new SCProg(actor, actor->on_is_activated, this->mission);

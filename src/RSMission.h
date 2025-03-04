@@ -25,7 +25,7 @@ struct AREA {
     Vector3D position;
     unsigned int AreaWidth;
     unsigned int AreaHeight;
-    unsigned char Unknown[5];
+    std::vector<uint8_t> unknown_bytes;
 };
 
 struct MISN_PART {
@@ -80,6 +80,7 @@ struct MISN_SCEN {
     int16_t on_is_activated {-1};
     int16_t on_mission_update {-1};
     int16_t on_leaving {-1};
+    bool is_coord_on_area {false};
     std::vector<uint8_t> unknown_bytes;
     std::vector<uint8_t> cast;
 };
@@ -136,6 +137,4 @@ private:
 
     void parseMISN_PLAY_SCEN(uint8_t *data, size_t size);
     void parseMISN_WRLD_FILE(uint8_t *data, size_t size);
-
-    void fixMissionObjectsCoords(void);
 };

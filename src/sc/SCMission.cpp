@@ -166,7 +166,7 @@ void SCMission::loadMission() {
                 }
             }
         }
-        this->actors.push_back(actor);
+        //this->actors.push_back(actor);
     }
     for (auto member: this->mission->mission_data.team) {
         int id = this->mission->mission_data.parts[member]->id;
@@ -220,8 +220,29 @@ void SCMission::update() {
                 for (auto part: this->mission->mission_data.parts) {
                     if (i == cast) {
                         for (auto actor: this->actors) {
+                            if (actor->actor_name == "PLAYER") {
+                                continue;
+                            }
                             if (actor->actor_id == part->id && actor->is_active == false) {
                                 actor->is_active = true;
+                                if (actor->object->unknown2 == 1) {
+                                    Vector3D correction;
+                                    if (scene->is_coord_on_area) {
+                                        correction = this->mission->mission_data.areas[scene->area_id]->position;
+                                    } else {
+                                        correction = {
+                                            this->player->plane->x,
+                                            this->player->plane->y,
+                                            this->player->plane->z
+                                        };
+                                    }
+                                    actor->object->position += correction;
+                                    if (actor->plane != nullptr) {
+                                        actor->plane->x = actor->object->position.x;
+                                        actor->plane->y = actor->object->position.y;
+                                        actor->plane->z = actor->object->position.z;
+                                    }
+                                }
                                 if (actor->on_is_activated.size() > 0) {
                                     SCProg *p = new SCProg(actor, actor->on_is_activated, this);
                                     p->execute();
