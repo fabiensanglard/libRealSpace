@@ -51,7 +51,7 @@ bool SCMissionActors::land(uint8_t arg) {
         if (dist < landing_dist) {
             this->pilot->turning = false;
             this->pilot->land = true;
-            this->pilot->target_speed = -10.0f*(dist/landing_dist);
+            this->pilot->target_speed = (int) (-10.0f * (dist/landing_dist));
         }
         if (dist < 2000.0f) {
             return true;
