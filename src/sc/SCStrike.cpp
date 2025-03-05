@@ -16,7 +16,8 @@
 #include <optional>
 #include <cmath>
 #define SC_WORLD 1100
-#define AUTOPILOTE_TIMEOUT 400
+#define AUTOPILOTE_TIMEOUT 1000
+#define AUTOPILOTE_SPEED 4
 /**
  * @brief Constructor
  *
@@ -371,7 +372,7 @@ void SCStrike::CheckKeyboard(void) {
         {
             Vector2D destination = {this->current_mission->waypoints[this->nav_point_id]->spot->position.x,
                                     this->current_mission->waypoints[this->nav_point_id]->spot->position.z};
-
+            float dest_y = this->current_mission->waypoints[this->nav_point_id]->spot->position.y;
             Vector2D origine = {this->player_plane->x, this->player_plane->z};
             std::vector<Vector2D> path;
             for (auto area: this->current_mission->mission->mission_data.areas) {
@@ -405,10 +406,10 @@ void SCStrike::CheckKeyboard(void) {
                         continue;
                     }
                     // If either endpoint is inside, we have a collision.
-                    if (pointInRect(origine) || pointInRect(destination)) {
+                    /*if (pointInRect(origine) || pointInRect(destination)) {
                         printf("Collision detected with area: %s\n", area->AreaName);
                         continue;
-                    }
+                    }*/
 
                     auto doLinesIntersect = [&](const Vector2D &p1, const Vector2D &p2,
                                                   const Vector2D &p3, const Vector2D &p4) -> std::optional<Vector2D> {
@@ -480,21 +481,21 @@ void SCStrike::CheckKeyboard(void) {
                 this->autopilot_target_azimuth = atan2(destination.y - this->player_plane->z, destination.x - this->player_plane->x);
                 this->player_plane->x = selectedPoint.x;
                 this->player_plane->z = selectedPoint.y;
-                float desty = this->current_mission->area->getY(this->player_plane->x, this->player_plane->z);
-                if (this->player_plane->y < desty) {
-                    this->player_plane->y += desty;    
-                }
+                
             } else {
                 printf("No intersection points found in path.\n");
                 this->autopilot_target_azimuth = atan2(destination.y - this->player_plane->z, destination.x - this->player_plane->x);
                 this->player_plane->x = destination.x;
                 this->player_plane->z = destination.y;
-                float desty = this->current_mission->area->getY(this->player_plane->x, this->player_plane->z);
-                if (this->player_plane->y < desty) {
-                    this->player_plane->y = desty;    
-                }
+            }
+            float dest_min_altitude = this->current_mission->area->getY(this->player_plane->x, this->player_plane->z);
+            if (dest_y<dest_min_altitude) {
+                this->player_plane->y += dest_min_altitude;
+            } else if (this->player_plane->y < dest_y) {
+                this->player_plane->y = dest_y;    
             }
             this->autopilot_target_azimuth = this->autopilot_target_azimuth * 180.0f / (float)M_PI;
+            this->autopilot_target_azimuth += 90;
             this->autopilot_target_azimuth -= 360;
             this->autopilot_target_azimuth += 90;
             if (this->autopilot_target_azimuth > 360) {
@@ -510,13 +511,16 @@ void SCStrike::CheckKeyboard(void) {
             this->player_plane->ptw.rotateM(0, 1, 0, 0);
             this->player_plane->ptw.rotateM(0, 0, 0, 1);
             this->player_plane->Simulate();
+            Vector3D formation_pos_offset{80.0f, 0.0f, 40.0f};
             int team_number = 1;
+            Vector3D prev={this->player_plane->x, this->player_plane->y, this->player_plane->z};
             for (auto team: this->current_mission->friendlies) {
                 if (team->is_active) {
-                    if (team->plane != nullptr) {
-                        team->plane->x = this->player_plane->x + 50+team_number*5;
-                        team->plane->z = this->player_plane->z;
-                        team->plane->y = this->player_plane->y;
+                    if (team->plane != nullptr && team->plane != this->player_plane) {
+                        prev += formation_pos_offset;
+                        team->plane->x = prev.x;
+                        team->plane->z = prev.z;
+                        team->plane->y = prev.y;
                         team->plane->yaw=0;
                         team->plane->pitch=0;
                         team->plane->roll=0;
@@ -703,9 +707,9 @@ void SCStrike::RunFrame(void) {
     switch (this->camera_mode) {
     case View::AUTO_PILOT: {
         if (this->autopilot_timeout > -AUTOPILOTE_TIMEOUT) {
-            this->autopilot_timeout-=2;
+            this->autopilot_timeout -= AUTOPILOTE_SPEED;
             Vector3D pos = {this->newPosition.x +5, this->newPosition.y + 5, 
-                this->newPosition.z - (autopilot_timeout-(autopilot_timeout/2))};
+                this->newPosition.z - (autopilot_timeout)};
             camera->SetPosition(&pos);
             camera->LookAt(&this->newPosition);
         } else {
@@ -779,9 +783,23 @@ void SCStrike::RunFrame(void) {
     break;
     case View::EYE_ON_TARGET: {
         Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
+        float r_twist = tenthOfDegreeToRad(this->player_plane->twist);
+        float r_elev  = tenthOfDegreeToRad(this->player_plane->elevationf);
+        float r_azim  = tenthOfDegreeToRad(this->player_plane->azimuthf);
+        float cosT = cos(r_twist), sinT = sin(r_twist);
+        float cosE = cos(r_elev), sinE = sin(r_elev);
+        float cosA = cos(r_azim), sinA = sin(r_azim);
+
+        // Compute the up vector as the second column of the composite rotation matrix
+        // R = Ry(azim) * Rx(elev) * Rz(twist)
+        Vector3D up;
+        up.x = -cosA * sinT + sinA * sinE * cosT;
+        up.y = cosE * cosT;
+        up.z = sinA * sinT + cosA * sinE * cosT;
+        
         Vector3D targetPos = {target->object->position.x, target->object->position.y,target->object->position.z };
         camera->SetPosition(&pos);
-        camera->LookAt(&targetPos);
+        camera->LookAt(&targetPos, &up);
     } break;
     case View::REAL:
     default: {

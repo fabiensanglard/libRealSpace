@@ -226,11 +226,11 @@ void SCMission::update() {
                             if (actor->actor_id == part->id && actor->is_active == false) {
                                 actor->is_active = true;
                                 
-                                if (actor->object->unknown2 == 1) {
+                                if (scene->area_id != -1) {
                                     Vector3D correction;
-                                    if (scene->is_coord_on_area) {
+                                    if (actor->object->unknown2 == 0) {
                                         correction = this->mission->mission_data.areas[scene->area_id]->position;
-                                    } else {
+                                    } else if (actor->object->unknown2 == 1) {
                                         correction = {
                                             this->player->plane->x,
                                             this->player->plane->y,
@@ -245,6 +245,7 @@ void SCMission::update() {
                                         actor->plane->z = actor->object->position.z;
                                     }
                                 }
+                                
                                 if (actor->on_is_activated.size() > 0) {
                                     SCProg *p = new SCProg(actor, actor->on_is_activated, this);
                                     p->execute();

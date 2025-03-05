@@ -23,7 +23,7 @@ public:
     
     //Update orientation and Matrix view
     void LookAt(Point3D* lookAt);
-    
+    void LookAt(Point3D *lookAt, Vector3D *up);
     //Update position and Matrix view
     void SetPosition(Point3D* position);
     

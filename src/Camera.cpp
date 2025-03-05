@@ -71,6 +71,42 @@ void Camera::LookAt(Point3D *lookAt) {
     CalcViewMatrix();
 }
 
+void Camera::LookAt(Point3D *lookAt, Vector3D *up) {
+
+    // Update orientation
+    Vector3D vN(this->position);
+    vN.Substract(lookAt);
+
+    Vector3D vU = up->CrossProduct(&vN);
+
+    vU.Normalize();
+    vN.Normalize();
+
+    // determine v by crossing n and u
+    Vector3D vV = vN.CrossProduct(&vU);
+
+    Matrix m;
+    m.v[0][0] = vU.x;
+    m.v[1][0] = vU.y;
+    m.v[2][0] = vU.z;
+    m.v[3][0] = 0;
+    m.v[0][1] = vV.x;
+    m.v[1][1] = vV.y;
+    m.v[2][1] = vV.z;
+    m.v[3][1] = 0;
+    m.v[0][2] = vN.x;
+    m.v[1][2] = vN.y;
+    m.v[2][2] = vN.z;
+    m.v[3][2] = 0;
+    m.v[0][3] = 0.0f;
+    m.v[1][3] = 0.0f;
+    m.v[2][3] = 0.0f;
+    m.v[3][3] = 1.0f;
+
+    orientation.FromMatrix(&m);
+    CalcViewMatrix();
+}
+
 void Camera::SetPosition(Point3D *position) {
     this->position = *position;
     CalcViewMatrix();
