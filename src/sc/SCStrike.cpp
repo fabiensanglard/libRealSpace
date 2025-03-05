@@ -377,6 +377,8 @@ void SCStrike::CheckKeyboard(void) {
         {
             Vector2D destination = {this->current_mission->waypoints[this->nav_point_id]->spot->position.x,
                                     this->current_mission->waypoints[this->nav_point_id]->spot->position.z};
+            this->autopilot_target_azimuth = atan2(this->player_plane->x-destination.x, this->player_plane->z-destination.y);
+            this->autopilot_target_azimuth = this->autopilot_target_azimuth * 180.0f / (float)M_PI;
             float dest_y = this->current_mission->waypoints[this->nav_point_id]->spot->position.y;
             Vector2D origine = {this->player_plane->x, this->player_plane->z};
             std::vector<Vector2D> path;
@@ -483,13 +485,14 @@ void SCStrike::CheckKeyboard(void) {
                     }
                 }
                 printf("Selected point: (%.3f, %.3f)\n", selectedPoint.x, selectedPoint.y);
-                this->autopilot_target_azimuth = atan2(destination.y - this->player_plane->z, destination.x - this->player_plane->x);
+                
+                
                 this->player_plane->x = selectedPoint.x;
                 this->player_plane->z = selectedPoint.y;
                 
             } else {
                 printf("No intersection points found in path.\n");
-                this->autopilot_target_azimuth = atan2(destination.y - this->player_plane->z, destination.x - this->player_plane->x);
+                
                 this->player_plane->x = destination.x;
                 this->player_plane->z = destination.y;
             }
@@ -499,16 +502,8 @@ void SCStrike::CheckKeyboard(void) {
             } else {
                 this->player_plane->y = dest_y;    
             }
-            this->autopilot_target_azimuth = this->autopilot_target_azimuth * 180.0f / (float)M_PI;
-            this->autopilot_target_azimuth += 270;
-            this->autopilot_target_azimuth -= 360;
-            this->autopilot_target_azimuth += 90;
-            if (this->autopilot_target_azimuth > 360) {
-                this->autopilot_target_azimuth -= 360;
-            }
-            while (this->autopilot_target_azimuth < 0) {
-                this->autopilot_target_azimuth += 360;
-            }
+            
+            
             
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
@@ -721,6 +716,7 @@ void SCStrike::RunFrame(void) {
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
             this->player_plane->ptw.rotateM(this->autopilot_target_azimuth*(float) M_PI /180.0f, 0, 1, 0);
+            this->player_plane->azimuthf = this->autopilot_target_azimuth * 10.0f;
             this->player_plane->Simulate();
             this->camera_mode = View::FRONT;
         }

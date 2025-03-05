@@ -58,7 +58,7 @@ public:
     int radar_zoom{1};
     int throttle{0};
     int comm_target{0};
-
+    float way_az{0};
     MISN_PART *target{nullptr};
     MISN_PART *player{nullptr};
     RSProf *player_prof{nullptr};

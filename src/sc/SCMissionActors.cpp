@@ -215,8 +215,10 @@ bool SCMissionActors::setMessage(uint8_t arg) {
     if (arg >= this->profile->radi.msgs.size()) {
         return true;
     }
-    this->mission->radio_messages.push_back(&this->profile->radi.msgs[arg]);
-    printf("Message  %s\n", this->profile->radi.msgs[arg].c_str()); 
+    std::string *message = new std::string();
+    *message = this->profile->radi.info.callsign + ": " + this->profile->radi.msgs[arg];
+    this->mission->radio_messages.push_back(message);
+    printf("Message  %s\n", message->c_str()); 
     return true;
 }
 /**

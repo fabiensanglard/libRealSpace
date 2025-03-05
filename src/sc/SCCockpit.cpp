@@ -200,6 +200,7 @@ void SCCockpit::RenderHeading() {
     while (weapoint_azimut < 0) {
         weapoint_azimut += 360;
     }
+    this->way_az = weapoint_azimut;
     weapoint.x = weapoint.x + (int)(weapoint_azimut * 1.2f) - (int)((360 - this->heading) * 1.2f) + 160;
     if (weapoint.x < 0) {
         weapoint.x += 432;
