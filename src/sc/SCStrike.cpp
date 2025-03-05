@@ -7,12 +7,11 @@
 //
 
 #include "precomp.h"
-#include <cctype> // Include the header for the toupper function
+#include <cctype>
 #include <imgui.h>
 #include <imgui_impl_opengl2.h>
 #include <imgui_impl_sdl2.h>
 #include <tuple>
-// Function to check if two line segments intersect.
 #include <optional>
 #include <cmath>
 #define SC_WORLD 1100
@@ -175,6 +174,12 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_KP_9:
             this->camera_pos.y -= 1;
+            break;
+        case SDLK_KP_PLUS:
+            this->eye_y += 1;
+            break;
+        case SDLK_KP_MINUS:
+            this->eye_y -= 1;
             break;
         case SDLK_m:
             this->mouse_control = !this->mouse_control;
@@ -491,11 +496,11 @@ void SCStrike::CheckKeyboard(void) {
             float dest_min_altitude = this->current_mission->area->getY(this->player_plane->x, this->player_plane->z);
             if (dest_y<dest_min_altitude) {
                 this->player_plane->y += dest_min_altitude;
-            } else if (this->player_plane->y < dest_y) {
+            } else {
                 this->player_plane->y = dest_y;    
             }
             this->autopilot_target_azimuth = this->autopilot_target_azimuth * 180.0f / (float)M_PI;
-            this->autopilot_target_azimuth += 90;
+            this->autopilot_target_azimuth += 270;
             this->autopilot_target_azimuth -= 360;
             this->autopilot_target_azimuth += 90;
             if (this->autopilot_target_azimuth > 360) {
@@ -782,7 +787,7 @@ void SCStrike::RunFrame(void) {
     }
     break;
     case View::EYE_ON_TARGET: {
-        Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
+        Vector3D pos = {this->newPosition.x, this->newPosition.y + this->eye_y, this->newPosition.z};
         float r_twist = tenthOfDegreeToRad(this->player_plane->twist);
         float r_elev  = tenthOfDegreeToRad(this->player_plane->elevationf);
         float r_azim  = tenthOfDegreeToRad(this->player_plane->azimuthf);
@@ -803,7 +808,7 @@ void SCStrike::RunFrame(void) {
     } break;
     case View::REAL:
     default: {
-        Vector3D pos = {this->newPosition.x, this->newPosition.y + 1, this->newPosition.z + 1};
+        Vector3D pos = {this->newPosition.x, this->newPosition.y + this->eye_y, this->newPosition.z};
         camera->SetPosition(&pos);
         camera->ResetRotate();
 
@@ -882,31 +887,17 @@ void SCStrike::RunFrame(void) {
         Matrix cockpit_rotation;
         cockpit_rotation.Clear();
         cockpit_rotation.Identity();
-        cockpit_rotation.translateM(this->player_plane->x, (this->player_plane->y) - 2.0f,
+        cockpit_rotation.translateM(this->player_plane->x, this->player_plane->y,
                                     this->player_plane->z);
-        cockpit_rotation.rotateM(((this->player_plane->azimuthf + 900) / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f,
-                                 0.0f);
-        cockpit_rotation.rotateM((this->player_plane->elevationf / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);
-        cockpit_rotation.rotateM(-(this->player_plane->twist / 10.0f) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
+        cockpit_rotation.rotateM(tenthOfDegreeToRad(this->player_plane->azimuthf + 900), 0.0f, 1.0f,0.0f);
+        cockpit_rotation.rotateM(tenthOfDegreeToRad(this->player_plane->elevationf), 0.0f, 0.0f, 1.0f);
+        cockpit_rotation.rotateM(tenthOfDegreeToRad(-this->player_plane->twist), 1.0f, 0.0f, 0.0f);
 
         glMultMatrixf((float *)cockpit_rotation.v);
         glDisable(GL_CULL_FACE);
         Renderer.DrawModel(&this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX);
         glPopMatrix();
         glEnable(GL_CULL_FACE);
-
-        glPushMatrix();
-        Matrix rotation;
-        rotation.Clear();
-        rotation.Identity();
-        rotation.translateM(newPosition.x, newPosition.y, newPosition.z);
-
-        rotation.rotateM(-0.1f * (this->player_plane->azimuthf + 900.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
-        rotation.rotateM(-0.1f * (this->player_plane->elevationf) * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);
-        rotation.rotateM(-0.1f * (this->player_plane->twist) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
-
-        glMultMatrixf((float *)rotation.v);
-        glPopMatrix();
         break;
     }
     this->RenderMenu();

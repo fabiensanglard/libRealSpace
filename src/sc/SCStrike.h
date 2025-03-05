@@ -75,6 +75,7 @@ private:
      * @brief The current lookat position of the pilot
      */
     Point2D pilote_lookat;
+    int eye_y{3};
     /**
      * @brief The new orientation of the plane
      */
