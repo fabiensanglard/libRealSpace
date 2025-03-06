@@ -85,7 +85,9 @@ struct HPTS {
 };
 
 
+
 class RSEntity {
+
     struct CHLD {
         std::string name;
         int32_t x;
@@ -120,12 +122,14 @@ class RSEntity {
         uint32_t velovity_m_per_sec{0};
         uint32_t proximity_cm{0};
     };
+
+
+public:
     struct WEAPS {
         int nb_weap;
         std::string name;
         RSEntity *objct;
     };
-public:
     std::vector<RSImage *> images;
     std::vector<Point3D> vertices;
     std::vector<uvxyEntry> uvs;

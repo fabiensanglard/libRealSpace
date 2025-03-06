@@ -23,6 +23,8 @@ enum weapon_type_id {
     LAU3 = 36
 };
 
+
+
 class SCScene {
 protected:
     std::vector<EFCT *> *efect;
@@ -57,6 +59,98 @@ class WeaponLoadoutScene : public SCScene {
     void addWeapon(std::vector<EFCT *> *script, uint8_t id);
     void removeWeapon(std::vector<EFCT *> *script, uint8_t id);
     void updateWeaponDisplay();
+
+    std::vector<std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>> weapon_pylones = {
+        std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>{
+            {AIM9J, std::vector<std::vector<uint8_t>>{
+                {4},
+                {117, 118}
+            }},
+            {AIM9M, std::vector<std::vector<uint8_t>>{
+                {6}, 
+                {117, 118}
+            }},
+        },
+        std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>{
+            {AIM9J, std::vector<std::vector<uint8_t>>{
+                {5}, 
+                {119, 120}
+            }},
+            {AIM9M, std::vector<std::vector<uint8_t>>{
+                {7}, 
+                {119, 120}
+            }},
+            {AIM120, std::vector<std::vector<uint8_t>>{
+                {1},
+                {119, 120}
+            }},
+        },
+        std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>{
+            {AIM9J, std::vector<std::vector<uint8_t>>{
+                {40},
+                {121, 122}}
+            },
+            {AIM9M, std::vector<std::vector<uint8_t>>{
+                {41},
+                {121, 122}}
+            },
+            {AIM120, std::vector<std::vector<uint8_t>>{
+                {2,3},
+                {121, 122}}
+            },
+            {DURANDAL, std::vector<std::vector<uint8_t>>{
+                {14, 15, 16},
+                {121, 122}}
+            },
+            {MK20, std::vector<std::vector<uint8_t>>{
+                {20, 21, 22},
+                {121, 122}}
+            },
+            {AGM65D, std::vector<std::vector<uint8_t>>{
+                {8, 9, 10},
+                {121, 122}}
+            },
+            {MK82, std::vector<std::vector<uint8_t>>{
+                {26, 27, 28},
+                {121, 122}}
+            },
+            {GBU15, std::vector<std::vector<uint8_t>>{
+                {32},
+                {121, 122}}
+            },
+            {LAU3, std::vector<std::vector<uint8_t>>{
+                {34, 35, 36},
+                {121, 122}}
+            },
+        },
+        std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>{
+            {DURANDAL, std::vector<std::vector<uint8_t>>{
+                {17, 18, 19},
+                {123, 124}}
+            },
+            {MK20, std::vector<std::vector<uint8_t>>{
+                {23, 24, 25},
+                {123, 124}}
+            },
+            {AGM65D, std::vector<std::vector<uint8_t>>{
+                {11, 12, 13},
+                {123, 124}}
+            },
+            {MK82, std::vector<std::vector<uint8_t>>{
+                {29, 30, 31},
+                {123, 124}}
+            },
+            {GBU15, std::vector<std::vector<uint8_t>>{
+                {33},
+                {123, 124}}
+            },
+            {LAU3, std::vector<std::vector<uint8_t>>{
+                {37, 38, 39},
+                {123, 124}}
+            },
+        }
+    };
+    
 public:
     void Render();
     WeaponLoadoutScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};

@@ -637,6 +637,39 @@ void SCStrike::SetMission(char const *missionName) {
         this->player_plane->vz = -20;
         this->player_plane->Simulate();
     }
+    this->player_plane->object->entity->weaps.clear();
+    std::map<weapon_type_id, std::string> weapon_names = {
+        {AIM9J, "SWINDERJ"},
+        {AIM9M, "SWINDERM"},
+        {AIM120, "AMRAAM"},
+        {AGM65D, "AGM-65D"},
+        {DURANDAL, "DURANDAL"},
+        {MK20, "MK20"},
+        {MK82, "MK82"},
+        {GBU15, "GBU-15G"},
+        {LAU3, "POD"}
+    };
+    for (auto weapon: GameState.weapon_load_out) {
+        if (weapon.first < 5) {
+            continue;
+        }
+        if (weapon.second == 0) {
+            continue;
+        }
+        RSEntity::WEAPS *weap = new RSEntity::WEAPS();
+        weap->name = weapon_names[weapon_type_id(weapon.first)];
+        weap->nb_weap = weapon.second;
+        std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + weap->name + ".IFF";
+        RSEntity *objct = new RSEntity();
+        TreArchive *tre = new TreArchive();
+        tre->InitFromFile("OBJECTS.TRE");
+        TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
+        if (entry != nullptr) {
+            objct->InitFromRAM(entry->data, entry->size);
+            weap->objct = objct;
+        }
+        this->player_plane->object->entity->weaps.push_back(weap);
+    }
     this->player_plane->InitLoadout();
     this->player_prof = this->current_mission->player->profile;
     for (auto actor: this->current_mission->actors) {

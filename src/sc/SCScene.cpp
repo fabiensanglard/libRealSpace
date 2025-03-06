@@ -333,37 +333,114 @@ SCZone *WeaponLoadoutScene::addExtraZone(uint8_t id) {
     this->extra_zones.shrink_to_fit();
 
     // Déterminer la quantité maximale en fonction du type d'arme
+
     int max = 0;
     switch (id) {
         case AIM9J:
+            if (GameState.weapon_load_out[1] == 0) {
+                GameState.weapon_load_out[1] = AIM9J;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[2] == 0) {
+                GameState.weapon_load_out[2] = AIM9J;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[3] == 0){
+                GameState.weapon_load_out[3] = AIM9M;
+                GameState.weapon_load_out[id] += 2;
+            }
+            break;
         case AIM9M:
-            max = 6;
+            if (GameState.weapon_load_out[1] == 0) {
+                GameState.weapon_load_out[1] = AIM9M;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[2] == 0) {
+                GameState.weapon_load_out[2] = AIM9M;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[3] == 0){
+                GameState.weapon_load_out[3] = AIM9M;
+                GameState.weapon_load_out[id] += 2;
+            }
             break;
         case AIM120:
-            max = 6;
-            break;
-        case DURANDAL:
-            max = 12;
-            break;
-        case MK82:
-            max = 24;
+            if (GameState.weapon_load_out[2] == 0) {
+                GameState.weapon_load_out[2] = AIM120;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[3] == 0) {
+                GameState.weapon_load_out[3] = AIM120;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[3] == AIM120) {
+                if (GameState.weapon_load_out[2] == AIM120 && GameState.weapon_load_out[id] < 6) {
+                    GameState.weapon_load_out[id] += 2;
+                } else if (GameState.weapon_load_out[id] < 4) {
+                    GameState.weapon_load_out[id] += 2;
+                }
+            } 
             break;
         case AGM65D:
         case MK20:
-            max = 12;
+        case DURANDAL:
+            if (GameState.weapon_load_out[3] == 0) {
+                GameState.weapon_load_out[3] = id;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[3] == id && GameState.weapon_load_out[id] < 6) {
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[3] !=  id && GameState.weapon_load_out[4] == 0 && GameState.weapon_load_out[id] < 6) {
+                GameState.weapon_load_out[4] = id;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[3] !=  id && GameState.weapon_load_out[4] == id && GameState.weapon_load_out[id] < 6) {
+                GameState.weapon_load_out[4] = id;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[3] == id && GameState.weapon_load_out[4] == 0) {
+                GameState.weapon_load_out[4] = id;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[3] == id && GameState.weapon_load_out[4] == id && GameState.weapon_load_out[id] < 12) {
+                GameState.weapon_load_out[id] += 2;
+            } 
+            break;
+        case MK82:
+            if (GameState.weapon_load_out[3] == 0) {
+                GameState.weapon_load_out[3] = MK82;
+                if (GameState.weapon_load_out[id] < 12) {
+                    GameState.weapon_load_out[id] += 2;
+                }
+            } else if (GameState.weapon_load_out[4] == 0) {
+                GameState.weapon_load_out[4] = MK82;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[4] == MK82) {
+                if (GameState.weapon_load_out[4] == MK82 && GameState.weapon_load_out[id] < 24) {
+                    GameState.weapon_load_out[id] += 2;
+                } else if (GameState.weapon_load_out[id] < 12) {
+                    GameState.weapon_load_out[id] += 2;
+                }
+            } 
             break;
         case GBU15:
-            max = 4;
+            if (GameState.weapon_load_out[3] == 0) {
+                GameState.weapon_load_out[3] = GBU15;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[4] == 0) {
+                GameState.weapon_load_out[4] = GBU15;
+                GameState.weapon_load_out[id] += 2;
             break;
         case LAU3:
-            max = 10;
+            if (GameState.weapon_load_out[3] == 0) {
+                GameState.weapon_load_out[3] = LAU3;
+                if (GameState.weapon_load_out[id] < 3) {
+                    GameState.weapon_load_out[id] += 2;
+                }
+            } else if (GameState.weapon_load_out[4] == 0) {
+                GameState.weapon_load_out[4] = LAU3;
+                GameState.weapon_load_out[id] += 2;
+            } else if (GameState.weapon_load_out[4] == LAU3) {
+                if (GameState.weapon_load_out[4] == LAU3 && GameState.weapon_load_out[id] < 10) {
+                    GameState.weapon_load_out[id] += 2;
+                } else if (GameState.weapon_load_out[id] < 4) {
+                    GameState.weapon_load_out[id] += 2;
+                }
+            } 
             break;
         default:
             break;
-    }
-    
-    if (GameState.weapon_load_out[id] < max) {
-        GameState.weapon_load_out[id] += 2;
+        }
     }
 
     this->updateWeaponDisplay();
@@ -373,7 +450,30 @@ void WeaponLoadoutScene::removeWeapon(std::vector<EFCT *> *script, uint8_t id) {
     this->extra_zones.clear();
     this->extra_zones.shrink_to_fit();
     // L'opérateur [] crée l'entrée si elle n'existe pas et retourne 0 par défaut.
+    int nbweap = GameState.weapon_load_out[id];
+    std::map<weapon_type_id, uint8_t> max_weapons = {
+        {AIM9J,6},
+        {AIM9M,6},
+        {AIM120,6},
+        {AGM65D,12},
+        {DURANDAL,12},
+        {MK20,12},
+        {MK82,24},
+        {GBU15,2},
+        {LAU3,10}
+    };
     GameState.weapon_load_out[id] = (std::max)(0, GameState.weapon_load_out[id] - 2);
+    int last_id = 0;
+    int nb_pylone = 0;
+    for (int i=1; i<5; i++) {
+        if (GameState.weapon_load_out[i] == id) {
+            last_id = i;
+            nb_pylone++;
+        }
+    }
+    if ((GameState.weapon_load_out[id]<= max_weapons[weapon_type_id(id)]/nb_pylone && nb_pylone>1) || GameState.weapon_load_out[id] == 0) {
+        GameState.weapon_load_out[last_id] = 0;
+    }
     this->updateWeaponDisplay();
 }
 
@@ -406,135 +506,146 @@ void WeaponLoadoutScene::updateWeaponDisplay() {
 
     // Lambda pour ajouter les zones de load-out (extra zones et zones "NoGfX")
     auto addWeaponZones = [this](uint8_t weaponType, const std::string &wlabel,
-                                 const std::vector<uint8_t> &extraIds,
+                                 uint8_t &extraIds,
                                  const std::vector<uint8_t> &noGfxIds) {
-        for (auto eid : extraIds)
-            this->extra_zones.push_back(this->addExtraZone(eid));
+        this->extra_zones.push_back(this->addExtraZone(extraIds));
         for (auto nid : noGfxIds)
             this->zones.push_back(this->addNoGfXZone(nid, wlabel, weaponType));
     };
 
     std::string wlabel;
     // Pour chaque arme présente dans le load-out, ajouter les extra zones correspondantes
-    for (auto wpl : GameState.weapon_load_out) {
-        switch (wpl.first) {
+    
+    for (int i=1; i<5; i++) {
+        switch (GameState.weapon_load_out[i]) {
             case AIM9J:
-                wlabel = string_format("AIM9J(%d)", wpl.second);
-                if (wpl.second == 2) {
-                    addWeaponZones(AIM9J, wlabel, {4}, {117, 118});
-                } else if (wpl.second == 4) {
-                    addWeaponZones(AIM9J, wlabel, {4, 5}, {117, 118, 119, 120});
-                } else if (wpl.second == 6) {
-                    addWeaponZones(AIM9J, wlabel, {4, 5, 40}, {117, 118, 119, 120, 121, 122});
-                }
+                wlabel = string_format("AIM9J(%d)", GameState.weapon_load_out[AIM9J]);
+                addWeaponZones(AIM9J, wlabel, weapon_pylones[i-1][AIM9J][0][0], weapon_pylones[i-1][AIM9J][1]);
             break;
             case AIM9M:
-                wlabel = string_format("AIM9M(%d)", wpl.second);
-                if (wpl.second == 2) {
-                    addWeaponZones(AIM9M, wlabel, {6}, {117, 118});
-                } else if (wpl.second == 4) {
-                    addWeaponZones(AIM9M, wlabel, {6, 7}, {117, 118, 119, 120});
-                } else if (wpl.second == 6) {
-                    addWeaponZones(AIM9M, wlabel, {6, 7, 41}, {117, 118, 119, 120, 121, 122});
-                }
+                wlabel = string_format("AIM9M(%d)", GameState.weapon_load_out[AIM9M]);
+                addWeaponZones(AIM9M, wlabel, weapon_pylones[i-1][AIM9M][0][0], weapon_pylones[i-1][AIM9M][1]);
             break;
             case AIM120:
-                wlabel = string_format("AIM120(%d)", wpl.second);
-                if (wpl.second == 2) {
-                    // Conserver les constantes : ici on ajoute directement les NoGfX zones
-                    this->extra_zones.push_back(this->addExtraZone(1));
-                    this->zones.push_back(this->addNoGfXZone(119, wlabel, AIM120));
-                    this->zones.push_back(this->addNoGfXZone(120, wlabel, AIM120));
-                } else if (wpl.second == 4) {
-                    addWeaponZones(AIM120, wlabel, {1, 2}, {119, 120, 121, 122});
-                } else if (wpl.second == 6) {
-                    addWeaponZones(AIM120, wlabel, {1, 2, 3}, {119, 120, 121, 122});
+                wlabel = string_format("AIM120(%d)", GameState.weapon_load_out[AIM120]);
+                if (i==3) {
+                    if (GameState.weapon_load_out[AIM120] > 4 && GameState.weapon_load_out[i-1] == AIM120) {
+                        addWeaponZones(AIM120, wlabel, weapon_pylones[i-1][AIM120][0][1], weapon_pylones[i-1][AIM120][1]);
+                    } else {
+                        addWeaponZones(AIM120, wlabel, weapon_pylones[i-1][AIM120][0][0], weapon_pylones[i-1][AIM120][1]);
+                    }
+                } else {
+                    addWeaponZones(AIM120, wlabel, weapon_pylones[i-1][AIM120][0][0], weapon_pylones[i-1][AIM120][1]);
                 }
             break;
             case DURANDAL:
-                wlabel = string_format("DURANDAL(%d)", wpl.second);
-                if (wpl.second == 2) {
-                    addWeaponZones(DURANDAL, wlabel, {14}, {121, 122});
-                } else if (wpl.second == 4) {
-                    addWeaponZones(DURANDAL, wlabel, {15}, {121, 122});
-                } else if (wpl.second == 6) {
-                    addWeaponZones(DURANDAL, wlabel, {16}, {121, 122});
-                } else if (wpl.second == 8) {
-                    addWeaponZones(DURANDAL, wlabel, {16, 17}, {121, 122, 123, 124});
-                } else if (wpl.second == 10) {
-                    addWeaponZones(DURANDAL, wlabel, {16, 18}, {121, 122, 123, 124});
-                } else if (wpl.second == 12) {
-                    addWeaponZones(DURANDAL, wlabel, {16, 19}, {121, 122, 123, 124});
+                {
+                    wlabel = string_format("DURANDAL(%d)", GameState.weapon_load_out[DURANDAL]);
+                    int nbweap=0;
+                    weapon_type_id pylid = weapon_type_id(GameState.weapon_load_out[i]);
+                    if (i == 3) {
+                        if (GameState.weapon_load_out[pylid] >= 6) {
+                            nbweap = 2;
+                        } else {
+                            nbweap = GameState.weapon_load_out[pylid] / 2;
+                            nbweap = nbweap -1;
+                        }
+                    } else if (i == 4) {
+                        nbweap = GameState.weapon_load_out[pylid];
+                        if (GameState.weapon_load_out[pylid] > 6) {
+                            nbweap = GameState.weapon_load_out[pylid] - 6;
+                        }
+                        nbweap = nbweap / 2;                   
+                        nbweap = nbweap -1;
+
+                    }
+                    addWeaponZones(pylid, wlabel, weapon_pylones[i-1][pylid][0][nbweap], weapon_pylones[i-1][pylid][1]);
                 }
             break;
             case MK20:
-                wlabel = string_format("MK20(%d)", wpl.second);
-                if (wpl.second == 2) {
-                    addWeaponZones(MK20, wlabel, {20}, {121, 122});
-                } else if (wpl.second == 4) {
-                    addWeaponZones(MK20, wlabel, {21}, {121, 122});
-                } else if (wpl.second == 6) {
-                    addWeaponZones(MK20, wlabel, {22}, {121, 122});
-                } else if (wpl.second == 8) {
-                    addWeaponZones(MK20, wlabel, {22, 23}, {121, 122, 123, 124});
-                } else if (wpl.second == 10) {
-                    addWeaponZones(MK20, wlabel, {22, 24}, {121, 122, 123, 124});
-                } else if (wpl.second == 12) {
-                    addWeaponZones(MK20, wlabel, {22, 25}, {121, 122, 123, 124});
+                {
+                    wlabel = string_format("MK20(%d)", GameState.weapon_load_out[MK20]);
+                    int nbweap=0;
+                    weapon_type_id pylid = weapon_type_id(GameState.weapon_load_out[i]);
+                    if (i == 3) {
+                        if (GameState.weapon_load_out[pylid] >= 6) {
+                            nbweap = 2;
+                        } else {
+                            nbweap = GameState.weapon_load_out[pylid] / 2;
+                            nbweap = nbweap -1;
+                        }
+                    } else if (i == 4) {
+                        nbweap = GameState.weapon_load_out[pylid];
+                        if (GameState.weapon_load_out[pylid] > 6) {
+                            nbweap = GameState.weapon_load_out[pylid] - 6;
+                        }
+                        nbweap = nbweap / 2;                   
+                        nbweap = nbweap -1;
+
+                    }
+                    addWeaponZones(pylid, wlabel, weapon_pylones[i-1][pylid][0][nbweap], weapon_pylones[i-1][pylid][1]);
                 }
             break;
             case AGM65D:
-                wlabel = string_format("AGM65D(%d)", wpl.second);
-                if (wpl.second == 2) {
-                    addWeaponZones(AGM65D, wlabel, {8}, {121, 122});
-                } else if (wpl.second == 4) {
-                    addWeaponZones(AGM65D, wlabel, {9}, {121, 122});
-                } else if (wpl.second == 6) {
-                    addWeaponZones(AGM65D, wlabel, {10}, {121, 122});
-                } else if (wpl.second == 8) {
-                    addWeaponZones(AGM65D, wlabel, {10, 11}, {121, 122, 123, 124});
-                } else if (wpl.second == 10) {
-                    addWeaponZones(AGM65D, wlabel, {10, 12}, {121, 122, 123, 124});
-                } else if (wpl.second == 12) {
-                    addWeaponZones(AGM65D, wlabel, {10, 13}, {121, 122, 123, 124});
+                {
+                    wlabel = string_format("AGM65D(%d)", GameState.weapon_load_out[AGM65D]);
+                    int nbweap=0;
+                    weapon_type_id pylid = weapon_type_id(GameState.weapon_load_out[i]);
+                    if (i == 3) {
+                        if (GameState.weapon_load_out[pylid] >= 6) {
+                            nbweap = 2;
+                        } else {
+                            nbweap = GameState.weapon_load_out[pylid] / 2;
+                            nbweap = nbweap -1;
+                        }
+                    } else if (i == 4) {
+                        nbweap = GameState.weapon_load_out[pylid];
+                        if (GameState.weapon_load_out[pylid] > 6) {
+                            nbweap = GameState.weapon_load_out[pylid] - 6;
+                        }
+                        nbweap = nbweap / 2;                   
+                        nbweap = nbweap -1;
+
+                    }
+                    addWeaponZones(pylid, wlabel, weapon_pylones[i-1][pylid][0][nbweap], weapon_pylones[i-1][pylid][1]);
                 }
             break;
             case MK82:
-                wlabel = string_format("MK82(%d)", wpl.second);
-                if (wpl.second == 2) {
-                    addWeaponZones(MK82, wlabel, {26}, {121, 122});
-                } else if (wpl.second == 4) {
-                    addWeaponZones(MK82, wlabel, {27}, {121, 122});
-                } else if (wpl.second == 6) {
-                    addWeaponZones(MK82, wlabel, {28}, {121, 122});
-                } else if (wpl.second == 8) {
-                    addWeaponZones(MK82, wlabel, {28, 29}, {121, 122, 123, 124});
-                } else if (wpl.second == 10) {
-                    addWeaponZones(MK82, wlabel, {28, 30}, {121, 122, 123, 124});
-                } else if (wpl.second >= 12 && wpl.second <= 24) {
-                    addWeaponZones(MK82, wlabel, {28, 31}, {121, 122, 123, 124});
+                wlabel = string_format("MK82(%d)", GameState.weapon_load_out[MK82]);
+                {
+                    int nbweap=0;
+                    weapon_type_id pylid = weapon_type_id(GameState.weapon_load_out[i]);
+                    if (GameState.weapon_load_out[pylid]-6 > 0) {
+                        nbweap = GameState.weapon_load_out[pylid]-6;
+                    } else {
+                        nbweap = GameState.weapon_load_out[pylid];
+                    }
+                    nbweap = nbweap / 2;
+                    nbweap = nbweap -1;
+                    addWeaponZones(pylid, wlabel, weapon_pylones[i-1][pylid][0][nbweap], weapon_pylones[i-1][pylid][1]);
                 }
             break;
             case GBU15:
-                wlabel = string_format("GBU15(%d)", wpl.second);
-                if (wpl.second == 2) {
-                    addWeaponZones(GBU15, wlabel, {32}, {121, 122});
-                } else if (wpl.second == 4) {
-                    addWeaponZones(GBU15, wlabel, {32, 33}, {121, 122, 123, 124});
-                }
+                wlabel = string_format("GBU15(%d)", GameState.weapon_load_out[GBU15]);
+                addWeaponZones(GBU15, wlabel, weapon_pylones[i-1][GBU15][0][0], weapon_pylones[i-1][GBU15][1]);
             break;
             case LAU3:
-                wlabel = string_format("LAU3(%d)", wpl.second);
-                if (wpl.second == 2) {
-                    addWeaponZones(LAU3, wlabel, {34}, {121, 122});
-                } else if (wpl.second == 4) {
-                    addWeaponZones(LAU3, wlabel, {35}, {121, 122});
-                } else if (wpl.second == 6) {
-                    addWeaponZones(LAU3, wlabel, {36}, {121, 122});
-                } else if (wpl.second == 8) {
-                    addWeaponZones(LAU3, wlabel, {36, 37}, {121, 122, 123, 124});
-                } else if (wpl.second == 10) {
-                    addWeaponZones(LAU3, wlabel, {36, 38}, {121, 122, 123, 124});
+                wlabel = string_format("LAU3(%d)", GameState.weapon_load_out[LAU3]);
+                if (i==4) {
+                    if (GameState.weapon_load_out[LAU3] > 4 && GameState.weapon_load_out[i-1] == LAU3) {
+                        addWeaponZones(LAU3, wlabel, weapon_pylones[i-1][LAU3][0][1], weapon_pylones[i-1][LAU3][1]);
+                    } else {
+                        addWeaponZones(LAU3, wlabel, weapon_pylones[i-1][LAU3][0][0], weapon_pylones[i-1][LAU3][1]);
+                    }
+                } else {
+                    if (GameState.weapon_load_out[LAU3]-4 > 0) {
+                        int nbweap = GameState.weapon_load_out[LAU3]-4 / 3;
+                        addWeaponZones(LAU3, wlabel, weapon_pylones[i-1][LAU3][0][0], weapon_pylones[i-1][LAU3][1]);
+                    } else {
+                        int nbweap = GameState.weapon_load_out[LAU3] / 3;
+                        addWeaponZones(LAU3, wlabel, weapon_pylones[i-1][LAU3][0][0], weapon_pylones[i-1][LAU3][1]);
+                    }
+                    
                 }
             break;
         }
@@ -547,7 +658,10 @@ std::vector<SCZone *> *WeaponLoadoutScene::Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts
     this->sceneOpts = sc_opts;
     this->zones.clear();
     GameState.weapon_load_out.clear();
-        
+    GameState.weapon_load_out[1] = 0;
+    GameState.weapon_load_out[2] = 0;
+    GameState.weapon_load_out[3] = 0;
+    GameState.weapon_load_out[4] = 0;
     for (auto bg : sceneOpts->background->images) {
         background *tmpbg = new background();
         tmpbg->img = this->getShape(bg->ID);
@@ -608,6 +722,7 @@ void WeaponLoadoutScene::Render() {
         }    
     }
 }
+
 
 std::vector<SCZone *> *LedgerScene::Init(
     GAMEFLOW_SCEN *gf,
