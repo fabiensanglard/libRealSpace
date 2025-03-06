@@ -199,7 +199,17 @@ void SCMission::loadMission() {
     }
     
 }
-
+RSEntity * SCMission::LoadEntity(std::string name) {
+    std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + name + ".IFF";
+    RSEntity *objct = new RSEntity();
+    TreArchive *tre = new TreArchive();
+    tre->InitFromFile("OBJECTS.TRE");
+    TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
+    if (entry != nullptr) {
+        objct->InitFromRAM(entry->data, entry->size);
+        return objct;
+    }
+}
 void SCMission::update() {
     uint8_t area_id = this->getAreaID({this->player->plane->x, this->player->plane->y, this->player->plane->z});
 
@@ -280,6 +290,9 @@ void SCMission::update() {
             if (ai_actor->on_is_destroyed.size() > 0) {
                 SCProg *p = new SCProg(ai_actor, ai_actor->on_is_destroyed, this);
                 p->execute();
+            }
+            if (ai_actor->object->member_name_destroyed != "") {
+                ai_actor->object->entity = LoadEntity(ai_actor->object->member_name_destroyed);
             }
         }
         if (ai_actor->profile == nullptr) {

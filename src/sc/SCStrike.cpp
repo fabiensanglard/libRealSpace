@@ -609,6 +609,7 @@ RSEntity * SCStrike::LoadWeapon(std::string name) {
         return objct;
     }
 }
+
 /**
  * SetMission
  *

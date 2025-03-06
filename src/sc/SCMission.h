@@ -26,7 +26,7 @@ class SCMission {
 private:
     std::string mission_name;
     std::map<std::string, RSEntity *> *obj_cache{nullptr};
-
+    RSEntity * LoadEntity(std::string name);
 public:    
     std::vector<SCMissionActors *> actors;
     std::vector<SCMissionActors *> enemies;
