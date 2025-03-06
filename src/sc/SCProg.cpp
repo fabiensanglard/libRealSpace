@@ -86,6 +86,31 @@ void SCProg::execute() {
             break;
             case OP_GOTO_IF_CURRENT_COMMAND_IN_PROGRESS:
                 if (exec) {
+                    switch (this->actor->current_command) {
+                        case OP_SET_OBJ_TAKE_OFF:
+                            this->actor->current_command_executed = this->actor->takeOff(this->actor->current_command_arg);
+                            break;
+                        case OP_SET_OBJ_LAND:
+                            this->actor->current_command_executed = this->actor->land(this->actor->current_command_arg);
+                            break;
+                        case OP_SET_OBJ_FLY_TO_WP:
+                            this->actor->current_command_executed = this->actor->flyToWaypoint(this->actor->current_command_arg);
+                            break;
+                        case OP_SET_OBJ_FLY_TO_AREA:
+                            this->actor->current_command_executed = this->actor->flyToArea(this->actor->current_command_arg);
+                            break;
+                        case OP_SET_OBJ_DESTROY_TARGET:
+                            this->actor->current_command_executed = this->actor->destroyTarget(this->actor->current_command_arg);
+                            break;
+                        case OP_SET_OBJ_DEFEND_TARGET:
+                            this->actor->current_command_executed = this->actor->defendTarget(this->actor->current_command_arg);
+                            break;
+                        case OP_SET_OBJ_FOLLOW_ALLY:
+                            this->actor->current_command_executed = this->actor->followAlly(this->actor->current_command_arg);
+                            break;
+                        default:
+                            break;
+                    }
                     if (!this->actor->current_command_executed) {
                         jump_to = prog.arg;
                         exec = false;
@@ -106,6 +131,7 @@ void SCProg::execute() {
                 if (exec) {
                     this->mission->mission->mission_data.flags[prog.arg] += work_register;
                 }
+            break;
             case OP_INSTANT_DESTROY_TARGET:
                 if (exec) {
                     for (auto actor: this->mission->actors) {
@@ -125,31 +151,42 @@ void SCProg::execute() {
             case OP_SET_OBJ_TAKE_OFF:
                 if (exec) {
                     this->actor->current_command_executed = this->actor->takeOff(prog.arg);
+                    this->actor->current_command = OP_SET_OBJ_TAKE_OFF;
                 }
             break;
             case OP_SET_OBJ_LAND:
                 if (exec) {
                     this->actor->current_command_executed = this->actor->land(prog.arg);
+                    this->actor->current_command = OP_SET_OBJ_LAND;
+                    this->actor->current_command_arg = prog.arg;
                 }
             break;
             case OP_SET_OBJ_FLY_TO_WP:
                 if (exec) {
                     this->actor->current_command_executed = this->actor->flyToWaypoint(prog.arg);
+                    this->actor->current_command = OP_SET_OBJ_FLY_TO_WP;
+                    this->actor->current_command_arg = prog.arg;
                 }
             break;
             case OP_SET_OBJ_FLY_TO_AREA:
                 if (exec) {
                     this->actor->current_command_executed = this->actor->flyToArea(prog.arg);
+                    this->actor->current_command = OP_SET_OBJ_FLY_TO_AREA;
+                    this->actor->current_command_arg = prog.arg;
                 }
             break;
             case OP_SET_OBJ_DESTROY_TARGET:
                 if (exec) {
                     this->actor->current_command_executed = this->actor->destroyTarget(prog.arg);
+                    this->actor->current_command = OP_SET_OBJ_DESTROY_TARGET;
+                    this->actor->current_command_arg = prog.arg;
                 }
             break;
             case OP_SET_OBJ_DEFEND_TARGET:
                 if (exec) {
                     this->actor->current_command_executed = this->actor->defendTarget(prog.arg);
+                    this->actor->current_command = OP_SET_OBJ_DEFEND_TARGET;
+                    this->actor->current_command_arg = prog.arg;
                 }
             break;
             case OP_SET_MESSAGE:
@@ -160,6 +197,8 @@ void SCProg::execute() {
             case OP_SET_OBJ_FOLLOW_ALLY:
                 if (exec) {
                     this->actor->current_command_executed = this->actor->followAlly(prog.arg);
+                    this->actor->current_command = OP_SET_OBJ_DEFEND_TARGET;
+                    this->actor->current_command_arg = prog.arg;
                 }
             break;
             case OP_DEACTIVATE_OBJ:
@@ -171,14 +210,15 @@ void SCProg::execute() {
                 if (exec) {
                     this->actor->activateTarget(prog.arg);
                 }
+            break;
             case OP_MOVE_FLAG_TO_WORK_REGISTER:
                 if (exec) {
                     work_register = this->mission->mission->mission_data.flags[prog.arg];
                 }
             break;
-            case OP_SAVE_VALUE_TO_FLAG:
+            case OP_SAVE_VALUE_TO_GAMFLOW_REGISTER:
                 if (exec) {
-                    this->mission->mission->mission_data.flags[prog.arg] = work_register;
+                    this->mission->gameflow_registers[prog.arg] = work_register;
                 }
             break;
             case OP_MOVE_WORK_REGISTER_TO_FLAG:
@@ -233,6 +273,7 @@ void SCProg::execute() {
                         exec = false;
                     }
                 }
+            break;
             case OP_SELECT_FLAG_208:
                 if (exec) {
                     // je sais pas
@@ -241,6 +282,11 @@ void SCProg::execute() {
             case OP_DIST_TO_TARGET:
                 if (exec) {
                     work_register = this->actor->getDistanceToTarget(prog.arg);
+                }
+            break;
+            case OP_DIST_TO_SPOT:
+                if (exec) {
+                    work_register = this->actor->getDistanceToSpot(prog.arg);
                 }
             break;
             case OP_SET_FLAG_TO_TRUE:

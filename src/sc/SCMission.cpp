@@ -181,7 +181,10 @@ void SCMission::loadMission() {
             this->enemies.push_back(enemis);
         }
     }
-    
+    if (this->player->on_is_activated.size() > 0) {
+        SCProg *p = new SCProg(this->player, this->player->on_is_activated, this);
+        p->execute();
+    }
     if (this->player->on_mission_start.size() > 0 && this->player->prog_executed == false) {
         SCProg *p = new SCProg(this->player, this->player->on_mission_start, this);
         p->execute();

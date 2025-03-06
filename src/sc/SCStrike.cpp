@@ -126,6 +126,12 @@ void SCStrike::CheckKeyboard(void) {
             this->camera_mode = View::FRONT;
             break;
         case SDLK_F2:
+            if (this->camera_mode != View::FOLLOW) {
+                this->follow_dynamic = false;
+            }
+            if (this->camera_mode == View::FOLLOW) {
+                this->follow_dynamic = !this->follow_dynamic;
+            }
             this->camera_mode = View::FOLLOW;
             break;
         case SDLK_F3:
@@ -592,6 +598,17 @@ void SCStrike::Init(void) {
     this->pilote_lookat = {0, 0};
 }
 
+RSEntity * SCStrike::LoadWeapon(std::string name) {
+    std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + name + ".IFF";
+    RSEntity *objct = new RSEntity();
+    TreArchive *tre = new TreArchive();
+    tre->InitFromFile("OBJECTS.TRE");
+    TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
+    if (entry != nullptr) {
+        objct->InitFromRAM(entry->data, entry->size);
+        return objct;
+    }
+}
 /**
  * SetMission
  *
@@ -649,6 +666,11 @@ void SCStrike::SetMission(char const *missionName) {
         {GBU15, "GBU-15G"},
         {LAU3, "POD"}
     };
+    RSEntity::WEAPS *weap = new RSEntity::WEAPS();
+    weap->name = "20MM";
+    weap->nb_weap = 1000;
+    weap->objct = LoadWeapon(weap->name);
+    this->player_plane->object->entity->weaps.push_back(weap);
     for (auto weapon: GameState.weapon_load_out) {
         if (weapon.first < 5) {
             continue;
@@ -659,15 +681,7 @@ void SCStrike::SetMission(char const *missionName) {
         RSEntity::WEAPS *weap = new RSEntity::WEAPS();
         weap->name = weapon_names[weapon_type_id(weapon.first)];
         weap->nb_weap = weapon.second;
-        std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + weap->name + ".IFF";
-        RSEntity *objct = new RSEntity();
-        TreArchive *tre = new TreArchive();
-        tre->InitFromFile("OBJECTS.TRE");
-        TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
-        if (entry != nullptr) {
-            objct->InitFromRAM(entry->data, entry->size);
-            weap->objct = objct;
-        }
+        weap->objct = LoadWeapon(weap->name);
         this->player_plane->object->entity->weaps.push_back(weap);
     }
     this->player_plane->InitLoadout();
@@ -715,10 +729,11 @@ void SCStrike::RunFrame(void) {
         if (this->current_mission->mission_ended) {
             GameState.missions_flags.clear();
             GameState.missions_flags.shrink_to_fit();
-            for (auto flags: this->current_mission->mission->mission_data.flags) {
-                GameState.missions_flags.push_back(flags);
+            // @TODO Rework this part when we will be dealing with the mission funds bonus
+            for (auto flags: this->current_mission->gameflow_registers) {
+                GameState.missions_flags.push_back(flags.second);
             }
-            GameState.mission_flyed_success[GameState.mission_flyed] = this->current_mission->mission->mission_data.flags[0];
+            GameState.mission_flyed_success[GameState.mission_flyed] = this->current_mission->gameflow_registers[0];
             Game.StopTopActivity();
         }
     }
@@ -763,10 +778,32 @@ void SCStrike::RunFrame(void) {
                        (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
     } break;
     case View::FOLLOW: {
-        Vector3D pos = {this->newPosition.x + this->camera_pos.x, this->newPosition.y + this->camera_pos.y,
-                        this->newPosition.z + this->camera_pos.z};
-        camera->SetPosition(&pos);
-        camera->LookAt(&this->newPosition);
+        const float distanceBehind = -60.0f;
+        float r_azim = tenthOfDegreeToRad(this->player_plane->azimuthf);
+        float r_elev = tenthOfDegreeToRad(this->player_plane->elevationf-100.0f);
+        float r_twist = tenthOfDegreeToRad(this->player_plane->twist);
+        Vector3D camPos;
+        camPos.x = this->newPosition.x - distanceBehind * cos(r_elev) * sin(r_azim);
+        camPos.y = this->newPosition.y + distanceBehind * sin(r_elev);
+        camPos.z = this->newPosition.z - distanceBehind * cos(r_elev) * cos(r_azim);
+        camera->SetPosition(&camPos);
+
+        float cosT = cos(r_twist), sinT = sin(r_twist);
+        float cosE = cos(r_elev), sinE = sin(r_elev);
+        float cosA = cos(r_azim), sinA = sin(r_azim);
+
+        // Compute the up vector as the second column of the composite rotation matrix
+        // R = Ry(azim) * Rx(elev) * Rz(twist)
+        Vector3D up;
+        up.x = -cosA * sinT + sinA * sinE * cosT;
+        up.y = cosE * cosT;
+        up.z = sinA * sinT + cosA * sinE * cosT;
+        if (follow_dynamic) {
+            camera->LookAt(&this->newPosition, &up);
+        } else {
+            camera->LookAt(&this->newPosition);
+        }
+        
     } break;
     case View::RIGHT:
     case View::LEFT:
@@ -824,6 +861,11 @@ void SCStrike::RunFrame(void) {
         float cosE = cos(r_elev), sinE = sin(r_elev);
         float cosA = cos(r_azim), sinA = sin(r_azim);
 
+        Vector3D camPos;
+        camPos.x = this->newPosition.x;
+        camPos.y = this->newPosition.y;
+        camPos.z = this->newPosition.z;
+        
         // Compute the up vector as the second column of the composite rotation matrix
         // R = Ry(azim) * Rx(elev) * Rz(twist)
         Vector3D up;
@@ -832,7 +874,7 @@ void SCStrike::RunFrame(void) {
         up.z = sinA * sinT + cosA * sinE * cosT;
         
         Vector3D targetPos = {target->object->position.x, target->object->position.y,target->object->position.z };
-        camera->SetPosition(&pos);
+        camera->SetPosition(&camPos);
         camera->LookAt(&targetPos, &up);
     } break;
     case View::REAL:
@@ -876,9 +918,6 @@ void SCStrike::RunFrame(void) {
 
             glTranslatef(static_cast<GLfloat>(actor->object->position.x), static_cast<GLfloat>(actor->object->position.y),
                         static_cast<GLfloat>(actor->object->position.z));
-
-            float model_view_mat[4][4];
-            glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
             glRotatef((360.0f - (float)actor->object->azymuth + 90.0f), 0, 1, 0);
             glRotatef((float)actor->object->pitch, 0, 0, 1);
             glRotatef(-(float)actor->object->roll, 1, 0, 0);
@@ -913,20 +952,36 @@ void SCStrike::RunFrame(void) {
     case View::EYE_ON_TARGET:
     case View::REAL:
         glPushMatrix();
+        /**/
         Matrix cockpit_rotation;
         cockpit_rotation.Clear();
         cockpit_rotation.Identity();
-        cockpit_rotation.translateM(this->player_plane->x, this->player_plane->y,
-                                    this->player_plane->z);
+        
+        float r_twist = tenthOfDegreeToRad(this->player_plane->twist);
+        float r_elev  = tenthOfDegreeToRad(this->player_plane->elevationf);
+        float r_azim  = tenthOfDegreeToRad(this->player_plane->azimuthf);
+        float cosT = cos(r_twist), sinT = sin(r_twist);
+        float cosE = cos(r_elev), sinE = sin(r_elev);
+        float cosA = cos(r_azim), sinA = sin(r_azim);
+
+        Vector3D cockpit_pos;
+        cockpit_pos.x = this->newPosition.x;
+        cockpit_pos.y = this->newPosition.y;
+        cockpit_pos.z = this->newPosition.z;
+
+        cockpit_rotation.translateM(cockpit_pos.x, cockpit_pos.y, cockpit_pos.z);
+        cockpit_rotation.translateM(0.0f, -this->eye_y, 0.0f);
         cockpit_rotation.rotateM(tenthOfDegreeToRad(this->player_plane->azimuthf + 900), 0.0f, 1.0f,0.0f);
         cockpit_rotation.rotateM(tenthOfDegreeToRad(this->player_plane->elevationf), 0.0f, 0.0f, 1.0f);
         cockpit_rotation.rotateM(tenthOfDegreeToRad(-this->player_plane->twist), 1.0f, 0.0f, 0.0f);
 
         glMultMatrixf((float *)cockpit_rotation.v);
+        
         glDisable(GL_CULL_FACE);
         Renderer.DrawModel(&this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX);
-        glPopMatrix();
         glEnable(GL_CULL_FACE);
+        glPopMatrix();
+        
         break;
     }
     this->RenderMenu();

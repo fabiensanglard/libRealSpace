@@ -140,19 +140,19 @@ def parse_SPOT_chunk(chunk_data, chunk_size, dec):
         offset = offset + 1
         for j in range(2):
             print(' ' * dec, '0x{:02X}\t'.format(chunk_data[offset+j]), chunk_data[offset+j])
-        offset = offset + 3
+        offset = offset + 2
         XAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
         offset = offset + 4
         ZAxis = int.from_bytes(chunk_data[offset:offset+3], byteorder='little', signed=True)
         offset = offset + 4
         YAxis = int.from_bytes(chunk_data[offset:offset+2], byteorder='little', signed=True)
         offset = offset + 2
-        print (' ' * dec, f"AREA {areaid}, X: {XAxis}, Y: {YAxis}, Z: {ZAxis}")
+        print (' ' * dec, f"AREA {areaid}, X: {XAxis}, Y: {YAxis}, Z: {-ZAxis}")
         spot = {
             'area': areaid,
             'X': XAxis,
             'Y': YAxis,
-            'Z': ZAxis
+            'Z': -ZAxis
         }
         spots[i] = spot
         
@@ -193,7 +193,7 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             ubyte = chunk_data[offset+1:offset+4]
             offset += 3
             print(' ' * dec, f"ID {id}, {area_name}, Area type: {chr(area_type)})")
-            print(' ' * (dec+2), f"X: {XAxis}, Y: {YAxis}, Z: {ZAxis}, Width: {AreaWidth}")
+            print(' ' * (dec+2), f"X: {XAxis}, Y: {YAxis}, Z: {-ZAxis}, Width: {AreaWidth}")
             print(' ' * (dec+2), "remaining data", chunk_size-offset, offset, offset - check)
             for c in ubyte:
                 print(' ' * (dec+4), '0x{:02X}\t'.format(c), c)
@@ -201,7 +201,7 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
                 'name': area_name,
                 'X': XAxis,
                 'Y': YAxis,
-                'Z': ZAxis,
+                'Z': -ZAxis,
                 'width': AreaWidth,
                 'type': area_type
             }
@@ -227,13 +227,13 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             offset += 1
             u3 = chunk_data[offset]
             print(' ' * dec, f"ID: {id}, {area_name} Area type: {chr(area_type)})")
-            print(' ' * (dec+2), f"X: {XAxis}, Y: {YAxis}, Z: {ZAxis}, Width: {AreaWidth}, Height: {area_height}")
+            print(' ' * (dec+2), f"X: {XAxis}, Y: {YAxis}, Z: {-ZAxis}, Width: {AreaWidth}, Height: {area_height}")
             print(' ' * (dec+2), "remaining data", chunk_size-offset, offset, offset - check)
             area = {
                 'name': area_name,
                 'X': XAxis,
                 'Y': YAxis,
-                'Z': ZAxis,
+                'Z': -ZAxis,
                 'width': AreaWidth,
                 'height': area_height,
                 'type': area_type
@@ -264,7 +264,7 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
             ubytes2 = chunk_data[offset:offset+5]
             offset += 5
             print(' ' * dec, f"ID: {id}, {area_name} Area type: {chr(area_type)})")
-            print(' ' * (dec+2), f"X: {XAxis}, Y: {YAxis}, Z: {ZAxis}, Width: {AreaWidth}, Height: {area_height}")
+            print(' ' * (dec+2), f"X: {XAxis}, Y: {YAxis}, Z: {-ZAxis}, Width: {AreaWidth}, Height: {area_height}")
             print(' ' * (dec+2), f"Xrelativ (control): {Xrelative}, Zrelativ (control): {Yrelative}")
             print(' ' * (dec+2), "unknown bytes 1 : ")
             for c in ubyte:
@@ -278,7 +278,7 @@ def parse_AREA_chunk(chunk_data, chunk_size, dec):
                 'name': area_name,
                 'X': XAxis,
                 'Y': YAxis,
-                'Z': ZAxis,
+                'Z': -ZAxis,
                 'width': AreaWidth,
                 'height': area_height,
                 'type': area_type

@@ -10,7 +10,7 @@ enum prog_op {
     OP_INVERT_FLAG = 9,
     OP_MOVE_VALUE_TO_WORK_REGISTER = 16,
     OP_MOVE_FLAG_TO_WORK_REGISTER = 17,
-    OP_SAVE_VALUE_TO_FLAG = 20,
+    OP_SAVE_VALUE_TO_GAMFLOW_REGISTER = 20,
     OP_ADD_WORK_REGISTER_TO_FLAG = 35,
     OP_MUL_VALUE_WITH_WORK = 46, 
     OP_CMP_GREATER_EQUAL_THAN = 64,
@@ -29,6 +29,7 @@ enum prog_op {
     OP_IF_TARGET_IN_AREA = 146,
     OP_INSTANT_DESTROY_TARGET = 148,
     OP_DIST_TO_TARGET = 149,
+    OP_DIST_TO_SPOT = 151,
     OP_SET_OBJ_UNKNOWN = 160,
     OP_SET_OBJ_TAKE_OFF = 161,
     OP_SET_OBJ_LAND = 162,
@@ -69,7 +70,8 @@ public:
     bool prog_executed{false};
     int current_target{0};
     bool current_command_executed{false};
-
+    prog_op current_command;
+    uint8_t current_command_arg;
     virtual bool execute();
     virtual bool takeOff(uint8_t arg); 
     virtual bool land(uint8_t arg);
@@ -83,6 +85,7 @@ public:
     virtual bool ifTargetInSameArea(uint8_t arg);
     virtual bool activateTarget(uint8_t arg);
     virtual int getDistanceToTarget(uint8_t arg);
+    virtual int getDistanceToSpot(uint8_t arg);
 };
 
 class SCMissionActorsPlayer : public SCMissionActors {

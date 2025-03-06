@@ -122,7 +122,7 @@ void SCNavMap::RunFrame(void) {
         if (this->mission->friendlies.size() > 0) {
             leader = this->mission->friendlies[0]->profile->radi.info.callsign;
         }
-        std::string mission_name = this->mission->mission->mission_data.info;
+        std::string mission_name = this->mission->mission->mission_data.world_filename;
         std::transform(leader.begin(), leader.end(), leader.begin(), ::tolower);
         std::transform(mission_name.begin(), mission_name.end(), mission_name.begin(), ::tolower);
         int msg_newx = 257;

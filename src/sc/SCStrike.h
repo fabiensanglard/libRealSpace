@@ -144,7 +144,10 @@ private:
     SCMission *current_mission{nullptr};
     int radio_mission_timer{0};
     bool show_bbox{false};
+    bool follow_dynamic{false};
     int music{2};
+    RSEntity * LoadWeapon(std::string name);
+
 public:
     /**
      * @brief Constructor

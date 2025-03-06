@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "SCMissionActors.h"
 
 bool SCMissionActors::execute() {
     return true;
@@ -330,9 +331,15 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
 int SCMissionActors::getDistanceToTarget(uint8_t arg) {
     Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
     Vector3D diff = this->mission->actors[arg]->plane->position - position;
-    return (int) diff.Length();
+    return (int) diff.Length()/1000;
 }
 
+int SCMissionActors::getDistanceToSpot(uint8_t arg) { 
+    Vector3D position = this->mission->mission->mission_data.spots[arg]->position;
+    Vector3D plane_pos = {this->plane->x, this->plane->y, this->plane->z};
+    Vector3D diff = plane_pos - position;
+    return (int) diff.Length()/1000;
+}
 /**
  * SCMissionActorsPlayer::takeOff
  *
