@@ -973,7 +973,7 @@ void SCStrike::RunFrame(void) {
         cockpit_pos.z = this->newPosition.z;
 
         cockpit_rotation.translateM(cockpit_pos.x, cockpit_pos.y, cockpit_pos.z);
-        cockpit_rotation.translateM(0.0f, -this->eye_y, 0.0f);
+        cockpit_rotation.translateM(0.0f, (float) -this->eye_y, 0.0f);
         cockpit_rotation.rotateM(tenthOfDegreeToRad(this->player_plane->azimuthf + 900), 0.0f, 1.0f,0.0f);
         cockpit_rotation.rotateM(tenthOfDegreeToRad(this->player_plane->elevationf), 0.0f, 0.0f, 1.0f);
         cockpit_rotation.rotateM(tenthOfDegreeToRad(-this->player_plane->twist), 1.0f, 0.0f, 0.0f);

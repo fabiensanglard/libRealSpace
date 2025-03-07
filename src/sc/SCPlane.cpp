@@ -851,9 +851,9 @@ void SCPlane::SimplifiedSimulate() {
     this->z = rottm.v[3][2];
 
     this->airspeed = -(int)(this->fps_knots * this->vz);
-    this->azimuthf = (this->yaw * 180.0f / M_PI) * 10.0f;
-    this->elevationf = (this->pitch * 180.0f / M_PI) * 10.0f;
-    this->twist = (this->roll * 180.0f / M_PI) * 10.0f;
+    this->azimuthf = (this->yaw * 180.0f / (float) M_PI) * 10.0f;
+    this->elevationf = (this->pitch * 180.0f / (float) M_PI) * 10.0f;
+    this->twist = (this->roll * 180.0f / (float) M_PI) * 10.0f;
     this->tick_counter++;
 }
 /**

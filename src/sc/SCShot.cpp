@@ -291,8 +291,8 @@ void MapShot::SetPoints(std::vector<MAP_POINT *> *points) {
         (((*this->points)[next_point_counter]->x) - ((*this->points)[point_counter]->x)) / 100.0f;
     point_y_move =
         (((*this->points)[next_point_counter]->y) - ((*this->points)[point_counter]->y)) / 100.0f;
-    current_x = (*this->points)[point_counter]->x;
-    current_y = (*this->points)[point_counter]->y;
+    current_x = (float) (*this->points)[point_counter]->x;
+    current_y = (float) (*this->points)[point_counter]->y;
 }
 void MapShot::blit(uint8_t *srcBuffer, int x, int y, int width, int height) {
     int startRow = 0;
