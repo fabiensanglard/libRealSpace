@@ -37,7 +37,7 @@ public:
     bool success{false};
     bool failure{false};
     bool mission_ended{false};
-    
+    uint8_t current_area_id{0};
     SCMissionActors *player{nullptr};
     RSArea *area{nullptr};
     RSMission *mission{nullptr};

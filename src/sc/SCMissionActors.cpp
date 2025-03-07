@@ -304,20 +304,20 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
             actor->is_active = true;
-            actor->plane->on_ground = false;
-            if (actor->object->unknown2 == 1) {
-                Vector3D correction = {
-                    this->mission->player->plane->x,
-                    this->mission->player->plane->y,
-                    this->mission->player->plane->z
-                };
-                actor->object->position += correction;
-                if (actor->plane != nullptr) {
-                    actor->plane->x = actor->object->position.x;
-                    actor->plane->y = actor->object->position.y;
-                    actor->plane->z = actor->object->position.z;
-                }
+            
+            Vector3D correction = {
+                this->mission->player->plane->x,
+                this->mission->player->plane->y,
+                this->mission->player->plane->z
+            };
+            actor->object->position += correction;
+            if (actor->plane != nullptr) {
+                actor->plane->on_ground = false;
+                actor->plane->x = actor->object->position.x;
+                actor->plane->y = actor->object->position.y;
+                actor->plane->z = actor->object->position.z;
             }
+            
             if (actor->on_is_activated.size() > 0) {
                 SCProg *p = new SCProg(actor, actor->on_is_activated, this->mission);
                 p->execute();

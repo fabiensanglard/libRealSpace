@@ -212,7 +212,21 @@ RSEntity * SCMission::LoadEntity(std::string name) {
 }
 void SCMission::update() {
     uint8_t area_id = this->getAreaID({this->player->plane->x, this->player->plane->y, this->player->plane->z});
-
+    if (area_id != this->current_area_id) {
+        this->current_area_id = area_id;
+        for (auto scene: this->mission->mission_data.scenes) {
+            if (scene->area_id == area_id-1 && scene->on_leaving != -1) {
+                if (scene->on_leaving < this->mission->mission_data.prog.size()) {
+                    std::vector<PROG> prog;
+                    for (auto prg: *this->mission->mission_data.prog[scene->on_leaving]) {
+                        prog.push_back(prg);
+                    }
+                    SCProg *p = new SCProg(this->player, prog, this);
+                    p->execute();
+                }
+            }
+        }
+    }
     for (auto scene: this->mission->mission_data.scenes) {
         if (scene->area_id == area_id-1 || scene->area_id == -1) {
             if (scene->is_active == 0) {

@@ -9,6 +9,8 @@ def convertpak(filename):
     with open(filename, "rb") as f:
         data = f.read(2)
         size = int.from_bytes(data, byteorder='little')
+        if size == 0:
+            return
         SHP = f.read(size-2)
         with open(shpname, "wb") as fo:
             fo.write(data+SHP)
@@ -54,5 +56,5 @@ def convertpak(filename):
             os.system(f"WCToolsCmd.exe wcarm:pc:unmakeShape .\\{shpname} -palettefile:.\\{palname}.png")
 
 
-for filename in glob.iglob('DATA\GAMEFLOW\*.PCK'):
+for filename in glob.iglob('H:\\temp\\sc\\DATA\\MIDGAMES\\*.PCK'):
     convertpak(filename)

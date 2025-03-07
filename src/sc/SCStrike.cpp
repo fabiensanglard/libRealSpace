@@ -582,6 +582,7 @@ void SCStrike::CheckKeyboard(void) {
             break;
         }
     }
+    this->cockpit->mouse_control = this->mouse_control;
 }
 /**
  * SCStrike::Init
@@ -987,6 +988,7 @@ void SCStrike::RunFrame(void) {
         
         break;
     }
+    
     this->RenderMenu();
 }
 
@@ -999,6 +1001,11 @@ void SCStrike::RunFrame(void) {
  * different menu items dynamically based on the current game context.
  */
 void SCStrike::RenderMenu() {
+    if (this->mouse_control) {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+    } else {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
+    }
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();

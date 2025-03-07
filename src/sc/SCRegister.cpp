@@ -32,7 +32,7 @@ void SCRegister::CheckKeyboard(void){
                 baseLocation->Init();
                 Game.AddActivity(baseLocation);
                 
-                SCAnimationPlayer* anim = new SCAnimationPlayer(0,0);
+                SCAnimationPlayer* anim = new SCAnimationPlayer();
                 anim->Init();
                 Game.AddActivity(anim);
                 

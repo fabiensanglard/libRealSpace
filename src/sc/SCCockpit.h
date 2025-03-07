@@ -48,7 +48,7 @@ public:
     bool gear{false};
     bool flaps{false};
     bool airbrake{false};
-
+    bool mouse_control{false};
     bool show_radars{false};
     bool show_weapons{false};
     bool show_damage{false};

@@ -10,10 +10,14 @@
 #define __libRealSpace__SCAnimationPlayer__
 
 class SCAnimationPlayer: public IActivity {
+    PakArchive *midgames;
+    int current_img{0};
+    int palette_id{0};
+    int image_offset{0};
     public :
-    SCAnimationPlayer(int32_t animationID, int32_t backgroundID);
+    SCAnimationPlayer();
     ~SCAnimationPlayer();
-    
+    void CheckKeyboard(void);
     void Init( );
     
     void RunFrame(void);

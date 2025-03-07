@@ -137,6 +137,7 @@ void SCProg::execute() {
                     for (auto actor: this->mission->actors) {
                         if (actor->actor_id == prog.arg) {
                             actor->object->alive = false;
+                            actor->is_destroyed = false;
                             break;
                         }
                     }

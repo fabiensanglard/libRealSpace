@@ -694,6 +694,9 @@ void SCCockpit::Render(int face) {
                 this->radio_mission_timer = 0;
             }
         }
+        if (this->mouse_control) {
+            Mouse.Draw();
+        }
         VGA.VSync();
         VGA.SwithBuffers();
     }
