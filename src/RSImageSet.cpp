@@ -69,15 +69,20 @@ void RSImageSet::InitFromSubPakEntry(PakArchive *entry) {
 }
 
 void RSImageSet::InitFromPakArchive(PakArchive *entry) {
+    this->InitFromPakArchive(entry, 8);
+}
+
+void RSImageSet::InitFromPakArchive(PakArchive *entry, uint8_t data_offset) {
     for (int i = 0; i < entry->GetNumEntries(); i++) {
         RLEShape *shape = new RLEShape();
-        shape->Init(entry->GetEntry(i)->data+8, 0);
+        shape->Init(entry->GetEntry(i)->data + data_offset, 0);
         Point2D pos = {0, 0};
         shape->SetPosition(&pos);
         this->shapes.push_back(shape);
         this->sequence.push_back(i);
     }
 }
+
 
 RLEShape *RSImageSet::GetShape(size_t index) { return this->shapes[index]; }
 

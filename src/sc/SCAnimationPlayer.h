@@ -9,21 +9,27 @@
 #ifndef __libRealSpace__SCAnimationPlayer__
 #define __libRealSpace__SCAnimationPlayer__
 
+typedef struct MIDGAME_SHOT {
+    std::vector<RSImageSet *>background;
+    RSPalette *palette_bg;
+    RSImageSet *foreground;
+    RSPalette *palette_fg;
+} MIDGAME_SHOT;
+
 class SCAnimationPlayer: public IActivity {
-    PakArchive *midgames;
-    int current_img{0};
-    int palette_id{0};
-    int image_offset{0};
-    public :
+private:
+    PakArchive midgames;
+    PakArchive optShps;
+    PakArchive optPals;
+    std::vector<PakArchive*> mid;
+
+    std::map<uint8_t, std::vector<MIDGAME_SHOT *>> midgames_shots;
+public:
     SCAnimationPlayer();
     ~SCAnimationPlayer();
     void CheckKeyboard(void);
-    void Init( );
-    
+    void Init();
     void RunFrame(void);
-    
-private:
-    
 };
 
 #endif /* defined(__libRealSpace__SCAnimationPlayer__) */

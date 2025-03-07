@@ -41,126 +41,144 @@ void SCAnimationPlayer::CheckKeyboard(void) {
             Game.StopTopActivity();
             break;
         }
-        case SDLK_SPACE:
-            this->current_img = this->current_img+1;
-            printf("Current image: %d\n", this->current_img);
-            _flushall();
-            if (this->current_img > this->midgames->GetNumEntries()-1) {
-                this->current_img = 0;
-            }
-            break;
-        case SDLK_p:
-            this->palette_id = this->palette_id+1;
-            printf("Current palette: %d\n", this->palette_id);
-            if (this->palette_id > this->midgames->GetNumEntries()-1) {
-                this->palette_id = 0;
-            }
-            _flushall();
-            break;
-        case SDLK_o:
-            this->image_offset += 1;
-            if (this->image_offset > 9) {
-                this->image_offset = 0;
-            }
-            printf("Current image offset: %d\n", this->image_offset);
-            _flushall();
-            break;
-        case SDLK_a:
-            {
-                TreEntry *midgames_entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
-                PakArchive *midgames_arch = new PakArchive();
-                midgames_arch->InitFromRAM("MIDGAMES.PAK", midgames_entry->data, midgames_entry->size);
-                this->midgames = midgames_arch;
-                this->palette_id = 0;
-                this->current_img = 0;
-            }
-        break;
-        case SDLK_z:
-            {
-                TreEntry *midgames_entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID1.PAK");
-                PakArchive *midgames_arch = new PakArchive();
-                midgames_arch->InitFromRAM("MID1.PAK", midgames_entry->data, midgames_entry->size);
-                this->midgames = midgames_arch;
-                this->palette_id = 0;
-                this->current_img = 0;
-            }
-        break;
-        case SDLK_e:
-            {
-                TreEntry *midgames_entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MID2.PAK");
-                PakArchive *midgames_arch = new PakArchive();
-                midgames_arch->InitFromRAM("MID2.PAK", midgames_entry->data, midgames_entry->size);
-                this->midgames = midgames_arch;
-                this->palette_id = 0;
-                this->current_img = 0;
-            }
-        break;
         default:
             break;
         }
     }
 }
 void SCAnimationPlayer::Init(){
-    TreEntry *midgames_entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
+    TreEntry *midgames_entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(
+        "..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK"
+    );
     PakArchive *midgames_arch = new PakArchive();
-    midgames_arch->InitFromRAM("MIDGAMES.PAK", midgames_entry->data, midgames_entry->size);
-    this->midgames = midgames_arch;
+    this->midgames.InitFromRAM("MIDGAMES.PAK", midgames_entry->data, midgames_entry->size);
+    std::vector<std::string> midgames_files = {
+        "MID1",
+        "MID2",
+        "MID3",
+        "MID5",
+        "MID12",
+        "MID14",
+        "MID15",
+        "MID16",
+        "MID17",
+        "MID20",
+        "MID36"
+    };
+    for (int i = 0; i < midgames_files.size(); i++) {
+        std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + ".PAK";
+        TreEntry *entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(file_path.c_str());
+        PakArchive *arch = new PakArchive();
+        arch->InitFromRAM(midgames_files[i].c_str(), entry->data, entry->size);
+        this->mid.push_back(arch);
+    }
+    TreEntry *optShapEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(
+        "..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK"
+    );
+    this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
+    TreEntry *optPalettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(
+        "..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK"
+    );
+    this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
+
+    MIDGAME_SHOT *shot = new MIDGAME_SHOT();
+    RSImageSet *tmp_img = new RSImageSet();
+    PakArchive *pk = new PakArchive();
+    pk->InitFromRAM("toto", this->optShps.GetEntry(OptionShapeID::SKY)->data, this->optShps.GetEntry(OptionShapeID::SKY)->size);
+    tmp_img->InitFromPakArchive(pk,0);
+    shot->background.push_back(tmp_img);
+
+    
+    pk = new PakArchive();
+    tmp_img = new RSImageSet();
+    pk->InitFromRAM("toto", this->midgames.GetEntry(20)->data, this->midgames.GetEntry(20)->size);
+    tmp_img->InitFromPakArchive(pk,0);
+    shot->background.push_back(tmp_img);
+
+    pk = new PakArchive();
+    tmp_img = new RSImageSet();
+    pk->InitFromRAM("toto", this->mid[0]->GetEntry(3)->data, this->mid[0]->GetEntry(3)->size);
+    tmp_img->InitFromPakEntry(this->mid[0]->GetEntry(3));
+    shot->foreground = tmp_img;
+    this->midgames_shots[1].push_back(shot);
+
+    shot = new MIDGAME_SHOT();
+    tmp_img = new RSImageSet();
+    pk = new PakArchive();
+    pk->InitFromRAM("toto", this->optShps.GetEntry(OptionShapeID::SKY)->data, this->optShps.GetEntry(OptionShapeID::SKY)->size);
+    tmp_img->InitFromPakArchive(pk,0);
+    shot->background.push_back(tmp_img);
+
+    
+    pk = new PakArchive();
+    tmp_img = new RSImageSet();
+    pk->InitFromRAM("toto", this->midgames.GetEntry(20)->data, this->midgames.GetEntry(20)->size);
+    tmp_img->InitFromPakArchive(pk,0);
+    shot->background.push_back(tmp_img);
+
+
+    /*tmp_img = new RSImageSet();
+    pk = new PakArchive();
+    pk->InitFromRAM("toto", this->optShps.GetEntry(OptionShapeID::MOUTAINS_BG)->data, this->optShps.GetEntry(OptionShapeID::MOUTAINS_BG)->size);
+    tmp_img->InitFromPakArchive(pk,0);
+    shot->background.push_back(tmp_img);*/
+
+    
+    tmp_img = new RSImageSet();
+    tmp_img->InitFromPakEntry(this->midgames.GetEntry(19));
+    shot->background.push_back(tmp_img);
+
+
+    pk = new PakArchive();
+    tmp_img = new RSImageSet();
+    pk->InitFromRAM("toto", this->mid[0]->GetEntry(13)->data, this->mid[0]->GetEntry(3)->size);
+    tmp_img->InitFromPakEntry(this->mid[0]->GetEntry(13));
+    shot->foreground = tmp_img;
+
+    this->midgames_shots[1].push_back(shot);
+
+    VGAPalette *rendererPalette = VGA.GetPalette();
+    this->palette = *rendererPalette;
+    ByteStream paletteReader;
+    paletteReader.Set(this->optPals.GetEntry(OPTPALS_PAK_SKY_PALETTE_PATCH_ID)->data); // Sky Good but not mountains
+    this->palette.ReadPatch(&paletteReader);
 }
 
 void SCAnimationPlayer::RunFrame(void){
     static int fps_counter = 0;
-    static int sequence_counter = 0;
+    static int fps = 0;
+    static int shot_counter = 0;
     CheckKeyboard();
     VGA.Activate();
     VGA.Clear();
+    VGA.SetPalette(&this->palette);
     VGA.FillWithColor(0);
-    RSImageSet *img = new RSImageSet();
-    img->InitFromPakEntry(midgames->GetEntry(this->current_img));
-    if (img->palettes.size() > 0) {
-        VGA.SetPalette(img->palettes[0]->GetColorPalette());
-    } else {
-        img->InitFromPakEntry(midgames->GetEntry(this->palette_id));
-        if (img->palettes.size() > 0) {
-            VGA.SetPalette(img->palettes[0]->GetColorPalette());
-        }
-        img = nullptr;
-    }
-    if (img != nullptr && sequence_counter >= img->sequence.size()) {
-        sequence_counter = 0;
-    }
-    if (img != nullptr && img->sequence.size() > 0) {
-        VGA.DrawShape(img->GetShape(img->sequence[0]));
-        VGA.DrawShape(img->GetShape(img->sequence[sequence_counter]));
-    } else {
-        PakArchive *test = new PakArchive();
-        PakEntry *entry = midgames->GetEntry(this->current_img);
-        test->InitFromRAM("test", entry->data, entry->size);
-        if (test->GetNumEntries() != 0) {
-            RLEShape *shape = new RLEShape();
-            shape->Init(test->GetEntry(0)->data, test->GetEntry(0)->size);
-            bool error = VGA.DrawShape(shape);
-            if (error) {
-                printf("Error: %d\n", error);
-                _flushall();
-            }
-            
-        } else {
-            RLEShape *shape = new RLEShape();
-            shape->Init(entry->data, entry->size);
-            bool error = VGA.DrawShape(shape);
-            if (error) {
-                printf("Error: %d\n", error);
-                _flushall();
+
+    MIDGAME_SHOT *shot = this->midgames_shots[1][shot_counter];
+
+    for (auto bg : shot->background) {
+        if (bg->GetNumImages()>0) {
+            for (auto shp: bg->shapes) {
+                VGA.DrawShape(shp);
             }
         }
-        
     }
-    //VGA.DrawShape(img->GetShape(img->sequence[sequence_counter]));
-    if (fps_counter % 10 == 0) {
-        sequence_counter++;
+    if (shot->foreground != nullptr) {
+        VGA.DrawShape(shot->foreground->GetShape(fps));
     }
+
+    //VGA.DrawShape(shot->foreground->GetShape(0));
     fps_counter++;
+    if (fps_counter%5==0) {
+        fps++;
+        if (fps > shot->foreground->GetNumImages()-1) {
+            fps = 0;
+            shot_counter++;
+            if (shot_counter>this->midgames_shots.size()) {
+                Game.StopTopActivity();
+            }
+        }
+    } 
     Mouse.Draw();
     VGA.VSync();
-
 }
