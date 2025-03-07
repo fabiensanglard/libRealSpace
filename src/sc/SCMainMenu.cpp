@@ -31,7 +31,7 @@ void SCMainMenu::OnTrainingMission() {
 }
 
 void SCMainMenu::OnViewObject() {
-    SCObjectViewer *objViewer = new SCObjectViewer();
+    MapShot *objViewer = new MapShot();
     objViewer->Init();
     Game.AddActivity(objViewer);
 }

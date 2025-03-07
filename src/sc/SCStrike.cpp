@@ -608,6 +608,7 @@ RSEntity * SCStrike::LoadWeapon(std::string name) {
         objct->InitFromRAM(entry->data, entry->size);
         return objct;
     }
+    return nullptr;
 }
 
 /**

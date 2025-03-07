@@ -44,12 +44,39 @@ protected:
 };
 
 class EndMissionScene : public SCShot {
-    protected:
-        virtual void CheckKeyboard(void);
-        int part{0};
-    public:
-        EndMissionScene(PakArchive *optShps, PakArchive *optPals) : SCShot() {};
-        void Init();
-        void RunFrame(void);
-    };
+protected:
+    virtual void CheckKeyboard(void);
+    int part{0};
+public:
+    EndMissionScene(PakArchive *optShps, PakArchive *optPals) : SCShot() {};
+    void Init();
+    void RunFrame(void);
+};
+class MapShot : public SCShot {
+    std::vector<uint8_t*> mapics;
+    uint8_t *frameBuffer;
+    uint8_t *frameBufferA;
+    
+    int x{0};
+    int y{0};
+    int x_max{820};
+    int y_max{600};
+    int fp_counter{0};
+    std::vector<MAP_POINT *> *points{nullptr};
+    RSFont *font{nullptr};
+    int color{86};
+    int point_counter;
+    int next_point_counter;
+    float point_x_move;
+    float point_y_move;
+    float current_x;
+    float current_y;
+    void blit(uint8_t* srcBuffer, int x, int y, int width, int height);
+public:
+    MapShot() : SCShot() {};
+    void Init();
+    void SetPoints(std::vector<MAP_POINT *> *points);
+    void RunFrame(void);
+    void CheckKeyboard(void);
+};
 #endif

@@ -129,6 +129,8 @@ void RSVGA::VSync(void) {
 void RSVGA::FillLineColor(size_t lineIndex, uint8_t color) { memset(frameBuffer + lineIndex * 320, color, 320); }
 void RSVGA::plot_pixel(int x, int y, uint8_t color) {
     /*  y*320 = y*256 + y*64 = y*2^8 + y*2^6   */
+    if (x < 0 || x >= 320 || y < 0 || y >= 200)
+        return;
     frameBuffer[(y << 8) + (y << 6) + x] = color;
 }
 
@@ -285,5 +287,42 @@ void RSVGA::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, 
             coo->x += static_cast<int32_t>(spaceSize);
         else
             coo->x = static_cast<int32_t>(coo->x + shape->GetWidth() + interLetterSpace);
+    }
+}
+void RSVGA::blit(uint8_t* srcBuffer, int x, int y, int width, int height) {
+    for (int row = 0; row < height; ++row) {
+        int destRow = y + row;
+        if (destRow < 0 || destRow >= 200)
+            continue;
+        int destOffset = destRow * 320;
+        for (int col = 0; col < width; ++col) {
+            int destCol = x + col;
+            if (destCol < 0 || destCol >= 320)
+                continue;
+            frameBuffer[destOffset + destCol] = srcBuffer[row * width + col];
+        }
+    }
+}
+void RSVGA::blitLargeBuffer(uint8_t* srcBuffer, int srcWidth, int srcHeight, int srcX, int srcY, int destX, int destY, int width, int height) {
+
+    for (int row = 0; row < height; ++row) {
+        int srcRow = srcY + row;
+        int destRow = destY + row;
+        if (srcRow < 0 || srcRow >= srcHeight)
+            continue;
+        if (destRow < 0 || destRow >= 200)
+            continue;
+        int destOffset = destRow * 320;
+        for (int col = 0; col < width; ++col) {
+            int srcCol = srcX + col;
+            int destCol = destX + col;
+            if (srcCol < 0 || srcCol >= srcWidth)
+                continue;
+            if (destCol < 0 || destCol >= 320)
+                continue;
+            if (srcBuffer[srcRow * srcWidth + srcCol] == 255)
+                continue;
+            frameBuffer[destOffset + destCol] = srcBuffer[srcRow * srcWidth + srcCol];
+        }
     }
 }

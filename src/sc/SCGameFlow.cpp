@@ -209,6 +209,13 @@ void SCGameFlow::runEffect() {
             }
         }
         switch (instruction->opcode) {
+        case EFFCT_OPT_SHOW_MAP: {
+            printf("PLAYING MAP %d\n", instruction->value);
+            MapShot *map = new MapShot();
+            map->Init();
+            map->SetPoints(&this->gameFlowParser.game.wrld[instruction->value]->data->points);
+            this->cutsenes.push(map);
+        } break;
         case EFECT_OPT_CONV: {
             printf("PLAYING CONV %d\n", instruction->value);
             SCConvPlayer *conv = new SCConvPlayer();

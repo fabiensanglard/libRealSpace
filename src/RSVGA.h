@@ -52,6 +52,8 @@ public:
     
     void FillLineColor(size_t lineIndex, uint8_t color);
     void plot_pixel(int x, int y, uint8_t color);
+    void blit(uint8_t* srcBuffer, int x, int y, int width, int height);
+    void blitLargeBuffer(uint8_t* srcBuffer, int srcWidth, int srcHeight, int srcX, int srcY, int destX, int destY, int width, int height);
 private:
     
     VGAPalette palette;

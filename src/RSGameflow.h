@@ -39,8 +39,14 @@ struct MISS {
 struct SPED {
 	std::vector<uint8_t> unkown;
 };
+struct MAP_POINT {
+	int x;
+	int y;
+	std::string label;
+};
 struct MAP_DATA {
 	std::vector<uint8_t> unkown;
+	std::vector<MAP_POINT*> points;
 };
 struct MAP {
 	INFO info;

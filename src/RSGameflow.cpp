@@ -159,6 +159,18 @@ void RSGameFlow::parseWRLD_MAPS_DATA(uint8_t* data, size_t size) {
 	for (int i = 0; i < size; i++) {
 		tmpmapdata->unkown.push_back(data[i]);
 	}
+	int read = 0;
+	ByteStream bs(data);
+	int nbpoint = bs.ReadByte();
+	
+	while (read < nbpoint) {
+		MAP_POINT* tmp_point = new MAP_POINT();
+		tmp_point->x = bs.ReadUShort();
+		tmp_point->y = bs.ReadUShort();
+		tmp_point->label = bs.ReadStringNoSize(128);
+		tmpmapdata->points.push_back(tmp_point);
+		read++;
+	}
 	this->tmpmap->data = tmpmapdata;
 }
 
