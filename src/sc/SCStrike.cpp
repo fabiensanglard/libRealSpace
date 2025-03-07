@@ -702,6 +702,7 @@ void SCStrike::SetMission(char const *missionName) {
     this->cockpit->player_plane = this->player_plane;
     this->cockpit->current_mission = this->current_mission;
     this->cockpit->nav_point_id = &this->nav_point_id;
+    Mixer.StopMusic();
     Mixer.SwitchBank(2);
     Mixer.PlayMusic(this->current_mission->mission->mission_data.tune+1);
 }

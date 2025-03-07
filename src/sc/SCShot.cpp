@@ -172,3 +172,77 @@ void SCShot::RunFrame(void) {
         Game.StopTopActivity();
     }
 }
+
+void EndMissionScene::Init() {
+    // opt shp id 143
+    // opt shp id 141
+    SCShot::Init();
+    this->layers.clear();
+    shotBackground *tmpbg = new shotBackground();
+    tmpbg->img = this->getShape(143);
+    this->layers.push_back(tmpbg);
+    tmpbg = new shotBackground();
+    tmpbg->img = this->getShape(141);
+    this->layers.push_back(tmpbg);
+    this->rawPalette = this->optPals.GetEntry(20)->data;
+}
+
+void EndMissionScene::RunFrame() {
+    CheckKeyboard();
+    int fpsupdate = 0;
+    fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
+    if (fpsupdate) {
+        this->fps = (SDL_GetTicks() / 10);
+    }
+    Mixer.SwitchBank(0);
+    Mixer.PlayMusic(27,1);
+    ByteStream paletteReader;
+    paletteReader.Set((this->rawPalette));
+    this->palette.ReadPatch(&paletteReader);
+    VGA.Activate();
+    VGA.FillWithColor(0);
+    VGA.SetPalette(&this->palette);
+    shotBackground *layer = this->layers[this->part];
+    VGA.DrawShape(layer->img->GetShape(layer->img->sequence[0]));
+    VGA.DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
+    if (layer->img->sequence.size() > 1) {
+        layer->frameCounter = (uint8_t)(layer->frameCounter + fpsupdate) % layer->img->sequence.size();
+    }
+    Mouse.Draw();
+    VGA.VSync();
+}
+
+void EndMissionScene::CheckKeyboard(void) {
+    SDL_Event mouseEvents[5];
+    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
+    for (int i = 0; i < numMouseEvents; i++) {
+        SDL_Event *event = &mouseEvents[i];
+
+        switch (event->type) {
+        case SDL_MOUSEBUTTONUP:
+            if (this->part == 0) {
+                this->part = 1;
+                this->rawPalette = this->optPals.GetEntry(19)->data;
+            } else {
+                Game.StopTopActivity();
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    SDL_Event keybEvents[1];
+    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
+    for (int i = 0; i < numKeybEvents; i++) {
+        SDL_Event* event = &keybEvents[i];
+
+        switch (event->key.keysym.sym) {
+        case SDLK_ESCAPE: {
+            Game.StopTopActivity();
+            break;
+        }
+        default:
+            break;
+        }
+    }
+}

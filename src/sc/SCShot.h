@@ -26,10 +26,10 @@ public:
 
     void Init();
     void SetShotId(uint8_t shotid);
-    void RunFrame(void);
+    virtual void RunFrame(void);
 
 
-private:
+protected:
     RSOption optionParser;
     PakArchive optShps;
     PakArchive optPals;
@@ -39,8 +39,17 @@ private:
     uint8_t* forPalette;
     
     RSImageSet* getShape(uint8_t shpid);
-    void CheckKeyboard(void);
+    virtual void CheckKeyboard(void);
     int fps;
 };
 
+class EndMissionScene : public SCShot {
+    protected:
+        virtual void CheckKeyboard(void);
+        int part{0};
+    public:
+        EndMissionScene(PakArchive *optShps, PakArchive *optPals) : SCShot() {};
+        void Init();
+        void RunFrame(void);
+    };
 #endif

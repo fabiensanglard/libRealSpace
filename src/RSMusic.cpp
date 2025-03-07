@@ -88,6 +88,9 @@ void RSMusic::Init() {
 }
 
 void RSMusic::SwitchBank(uint8_t bank) {
+    if (this->bank == bank) {
+        return;
+    }
     this->bank = bank;
 }
 MemMusic *RSMusic::GetMusic(uint32_t index) { return musics[bank][index]; }

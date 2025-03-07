@@ -594,6 +594,9 @@ void SCGameFlow::RunFrame(void) {
         SCStrike *c = this->fly_mission.front();
         this->fly_mission.pop();
         Game.AddActivity(c);
+        EndMissionScene *end = new EndMissionScene(&this->optShps, &this->optPals);
+        end->Init();
+        this->cutsenes.push(end);
         return;
     }
     if (this->next_miss > 0) {
