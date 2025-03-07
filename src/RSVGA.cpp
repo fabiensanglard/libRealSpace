@@ -258,6 +258,14 @@ void RSVGA::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, 
     if (size <= 0)
         return;
     int startx = coo->x;
+    if (coo->y < 0)
+        return;
+    if (coo->y > 200)
+        return;
+    if (coo->x < 0)
+        return;
+    if (coo->x > 320)
+        return;
     for (size_t i = 0; i < size; i++) {
 
         char chartoDraw = text[start + i];
@@ -279,6 +287,14 @@ void RSVGA::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, 
             lineHeight = coo->y;
             coo->x = startx;
         }
+        if (coo->y < 0)
+            continue;
+        if (coo->y > 200)
+            continue;
+        if (coo->x < 0)
+            continue;
+        if (coo->x+static_cast<int32_t>(spaceSize) > 320)
+            continue;
         shape->SetPosition(coo);
         DrawShape(shape);
         coo->y = lineHeight;
