@@ -19,9 +19,19 @@
         optshp : 116
         midgame : 20
         optshp : 44
-        midgame : 19 (all frame)
+        midgame : 19 (all frame with paralax scroll effect)
 
     forground: 
 
     action: 
         scroll vers le bas
+
+### plan 4
+    background:
+        optshp : 116
+        midgame : 20
+        optshp : 44
+        midgame : 19
+
+    forground: 
+        mid1: 13
