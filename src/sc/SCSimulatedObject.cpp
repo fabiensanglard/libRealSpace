@@ -267,25 +267,13 @@ void GunSimulatedObject::Simulate(int tps) {
 
 void GunSimulatedObject::Render() {
     glPushMatrix();
-    /*Matrix rotation;
-    rotation.Clear();
-    rotation.Identity();
-    rotation.translateM(this->x, this->y, this->z);*/
-    /*rotation.rotateM(this->azimuthf, 0.0f, 1.0f, 0.0f);
-    rotation.rotateM(this->elevationf, 0.0f, 0.0f, 1.0f);
-    rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);*/
-    
-    //glMultMatrixf((float *)rotation.v);
     glTranslatef(this->x, this->y, this->z);
     if (this->obj->vertices.size() == 0) {
+        glLineWidth(1.2f);
         glBegin(GL_LINES);
-        
-        
         glColor3f(1.0f,1.0f,0.0f);
-
         glVertex3f(0.0f,0.0f,0.0f);
         glVertex3f(this->vx, this->vy, this->vz);
-        
         glEnd();
     } else {
         Renderer.DrawModel(this->obj, LOD_LEVEL_MAX);
