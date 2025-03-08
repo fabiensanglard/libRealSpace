@@ -547,7 +547,7 @@ void SCStrike::CheckKeyboard(void) {
         case SDLK_SPACE:
             {
                 if (target != nullptr) {
-                    this->player_plane->Shoot(this->player_plane->selected_weapon, target);
+                    this->player_plane->Shoot(this->player_plane->selected_weapon, target, this->current_mission);
                 }
             }
             break;
@@ -906,9 +906,9 @@ void SCStrike::RunFrame(void) {
         if (actor->plane != nullptr) {
             if (actor->plane != this->player_plane) {
                 actor->plane->Render();
-                BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
-                Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};
                 if (this->show_bbox) {
+                    BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
+                    Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};
                     Renderer.RenderBBox(position, bb->min, bb->max);
                     Renderer.RenderBBox(position+actor->formation_pos_offset, bb->min, bb->max);
                     Renderer.RenderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
@@ -927,6 +927,12 @@ void SCStrike::RunFrame(void) {
             glRotatef(-(float)actor->object->roll, 1, 0, 0);
             Renderer.DrawModel(actor->object->entity, LOD_LEVEL_MAX);
             glPopMatrix();
+            if (this->show_bbox) {
+                BoudingBox *bb = actor->object->entity->GetBoudingBpx();
+                Vector3D position = {actor->object->position.x, actor->object->position.y, actor->object->position.z};
+                Renderer.RenderBBox(position, bb->min, bb->max);
+            }
+            
         } else {
             printf("Actor has no plane or object\n");
         }

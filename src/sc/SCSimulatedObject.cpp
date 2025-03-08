@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "SCSimulatedObject.h"
 #define GRAVITY 32.174f
 #define DRAG_COEFFICIENT 0.10f  // Coefficient de traînée
 #define CROSS_SECTIONAL_AREA 0.1f  // Section transversale (m^2)
@@ -119,10 +120,10 @@ Vector3D SCSimulatedObject::calculate_lift(Vector3D velocity) {
     };
     return lift_direction;
 }
-void SCSimulatedObject::SimulateWithVector(int tps) {
+void SCSimulatedObject::Simulate(int tps) {
     this->tps = tps;
     float deltaTime = 1.0f / (float) tps;
-    float thrust = 1.0f;
+    float thrust = 10.0f;
     if (this->obj->dynn_miss != nullptr) {
         thrust = (float)this->obj->dynn_miss->velovity_m_per_sec*1000.0f;
     }
@@ -194,6 +195,129 @@ void SCSimulatedObject::SimulateWithVector(int tps) {
         this->alive = false;
     }
 }
-void SCSimulatedObject::Simulate(int tps) {
-    this->SimulateWithVector(tps);
+void GunSimulatedObject::Simulate(int tps) {
+    float deltaTime = 1.0f / static_cast<float>(tps);
+    Vector3D position = { this->x, this->y, this->z };
+    Vector3D velocity = { this->vx, this->vy, this->vz };
+
+    // Calcul de la force de gravité (en utilisant la constante GRAVITY et le poids de l'objet)
+    // 
+    if (this->weight == 0) {
+        this->weight = 1;
+    }
+    Vector3D gravity_force = { 0.0f, -this->weight * GRAVITY , 0.0f };
+
+    // Calcul de la force de frottement (drag) avec une densité d'air standard (1.225 kg/m^3)
+    float speed = velocity.Norm();
+    Vector3D drag_force = { 0.0f, 0.0f, 0.0f };
+    if (speed > EPSILON) {
+        float air_density = 1.225f;
+        float drag_magnitude = 0.005f * air_density * speed * speed * DRAG_COEFFICIENT * CROSS_SECTIONAL_AREA;
+        drag_force = velocity * (-drag_magnitude / speed);
+    }
+
+    // Calcul de l'accélération à partir des forces appliquées (a = F/m)
+    
+    Vector3D acceleration = (gravity_force + drag_force) * (1.0f / this->weight);
+
+    // Mise à jour de la vitesse et de la position en tenant compte du temps écoulé
+    velocity = velocity + acceleration * deltaTime;
+    position = position + velocity * deltaTime;
+
+    // Actualisation des attributs de l'objet
+    float azimut = 0.0f;
+    float elevation = 0.0f;
+    cartesianToPolar(velocity, &azimut, &elevation);
+    this->azimuthf = (float)(azimut - M_PI_2);
+    this->elevationf = (float)(M_PI_2-elevation);
+    this->smoke_positions.push_back(position);
+    if (this->smoke_positions.size() > 20) {
+        this->smoke_positions.erase(this->smoke_positions.begin());
+    }
+    this->vx = velocity.x;
+    this->vy = velocity.y;
+    this->vz = velocity.z;
+    this->x  = position.x;
+    this->y  = position.y;
+    this->z  = position.z;
+    for (auto entity: this->mission->actors) {
+        BoudingBox *bb{nullptr};
+        bb = entity->object->entity->GetBoudingBpx();
+        if (bb != nullptr) {
+            if (this->x >= entity->object->position.x + bb->min.x && this->x <= entity->object->position.x + bb->max.x &&
+                this->y >= entity->object->position.y+bb->min.y && this->y   <= entity->object->position.y + bb->max.y &&
+                this->z >= entity->object->position.z+bb->min.z && this->z <= entity->object->position.z + bb->max.z) {
+                // Collision detected: mark both objects as not alive and update score.
+                this->alive = false;
+                entity->object->alive = false;
+                this->shooter->score += 100;
+                if (entity->plane != nullptr) {
+                    this->shooter->plane_down += 1;
+                } else {
+                    this->shooter->ground_down += 1;
+                }
+            }
+        }
+    }
+    // Désactive l'objet s'il touche le sol
+    if (this->y < 0.0f) {
+        this->alive = false;
+    }
+}
+
+void GunSimulatedObject::Render() {
+    glPushMatrix();
+    /*Matrix rotation;
+    rotation.Clear();
+    rotation.Identity();
+    rotation.translateM(this->x, this->y, this->z);*/
+    /*rotation.rotateM(this->azimuthf, 0.0f, 1.0f, 0.0f);
+    rotation.rotateM(this->elevationf, 0.0f, 0.0f, 1.0f);
+    rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);*/
+    
+    //glMultMatrixf((float *)rotation.v);
+    glTranslatef(this->x, this->y, this->z);
+    if (this->obj->vertices.size() == 0) {
+        glBegin(GL_LINES);
+        
+        
+        glColor3f(1.0f,1.0f,0.0f);
+
+        glVertex3f(0.0f,0.0f,0.0f);
+        glVertex3f(this->vx, this->vy, this->vz);
+        
+        glEnd();
+    } else {
+        Renderer.DrawModel(this->obj, LOD_LEVEL_MAX);
+    }
+    glPopMatrix();
+    size_t cpt=this->smoke_positions.size();
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    for (auto pos: this->smoke_positions) {
+        float alpha = 0.6f * ((float) cpt / (1.0f*(float)this->smoke_positions.size()));
+        glPushMatrix();
+        Matrix smoke_rotation;
+        smoke_rotation.Clear();
+        smoke_rotation.Identity();
+        smoke_rotation.translateM(pos.x, pos.y, pos.z);
+        smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
+        glMultMatrixf((float *)smoke_rotation.v);
+        glBegin(GL_QUADS);
+        glColor4f(1.0f,1.0f,1.0f, alpha);
+        glVertex3f(1.0f,-1.0f,-1.0f);
+        glVertex3f(1.0f,1.0f,-1.0f);
+        glVertex3f(-1.0f,1.0f,-1.0f);
+        glVertex3f(-1.0f,-1.0f,1.0f);
+        glEnd();
+        glBegin(GL_QUADS);
+        glColor4f(1.0f,1.0f,1.0f, alpha);
+        glVertex3f(-1.0f,-1.0f,-1.0f);
+        glVertex3f(-1.0f,1.0f,-1.0f);
+        glVertex3f(1.0f,1.0f,1.0f);
+        glVertex3f(1.0f,-1.0f,1.0f);
+        glEnd();
+        glPopMatrix();
+    }
+    glDisable( GL_BLEND );
 }

@@ -47,6 +47,7 @@ static float ro[75] = {
 #define COORD_SCALE 1.0f
 
 class SCMissionActors;
+class SCMission;
 
 struct SCWeaponLoadoutHardPoint {
     RSEntity *objct;
@@ -282,7 +283,7 @@ public:
     void Render();
     void RenderSimulatedObject();
     void RenderSmoke(); 
-    void Shoot(int weapon_id, SCMissionActors *target);
+    void Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission *mission);
     void InitLoadout();
 };
 

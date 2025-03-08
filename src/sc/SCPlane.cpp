@@ -1101,8 +1101,29 @@ void SCPlane::RenderSimulatedObject() {
         sim_obj->Render();
     }
 }
-void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target) {
+void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission *mission) {
     SCSimulatedObject *weap = new SCSimulatedObject();
+    Vector3D initial_trust = {0,0,0};
+    float planeSpeed = sqrtf(this->vx * this->vx + this->vy * this->vy + this->vz * this->vz);
+    float thrustMagnitude = planeSpeed;
+    if (this->weaps_load[weapon_hard_point_id]->objct->wdat->radius == 0) {
+        weap = new GunSimulatedObject();
+        
+        // On définit la poussée initiale de la balle en proportion de la vélocité de l'avion.
+        thrustMagnitude = -planeSpeed * 100.0f; // coefficient ajustable
+    }
+    weap->mission = mission;
+    // Conversion des angles (azimuthf et elevationf, exprimés en dixièmes de degré) en radians.
+    float yawRad   = (this->azimuthf / 10.0f) * (M_PI / 180.0f);
+    float pitchRad = (-this->elevationf / 10.0f) * (M_PI / 180.0f);
+
+    // Calcul du vecteur de poussée initiale dans la direction avant de l'avion.
+    // On considère que le vecteur avant s'exprime en coordonnées :
+    // x = cos(pitch)*sin(yaw), y = sin(pitch), z = cos(pitch)*cos(yaw)
+    initial_trust.x = thrustMagnitude * cosf(pitchRad) * sinf(yawRad);
+    initial_trust.y = thrustMagnitude * sinf(pitchRad);
+    initial_trust.z = thrustMagnitude * cosf(pitchRad) * cosf(yawRad);
+
     weap->shooter = this->pilot;
     if (this->weaps_load[weapon_hard_point_id] == nullptr) {
         return;
@@ -1124,9 +1145,9 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target) {
     weap->z = this->z;
     weap->azimuthf = this->azimuthf;
     weap->elevationf = this->elevationf;
-    weap->vx = (this->x - this->last_px);
-    weap->vy = (this->y - this->last_py);
-    weap->vz = (this->z - this->last_pz);
+    weap->vx = initial_trust.x;
+    weap->vy = initial_trust.y;
+    weap->vz = initial_trust.z;
 
     weap->weight = this->weaps_load[weapon_hard_point_id]->objct->weight_in_kg*2.205f;
     weap->azimuthf = this->azimuthf;

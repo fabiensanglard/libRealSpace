@@ -2,8 +2,10 @@
 #include "precomp.h"
 
 class SCMissionActors;
-
+class SCMission;
 class SCSimulatedObject {
+
+protected:
 
     float last_px{0.0f};
     float last_py{0.0f};
@@ -30,10 +32,17 @@ public:
     RSEntity *obj;
     SCMissionActors *target{nullptr};
     SCMissionActors *shooter{nullptr};
+    SCMission *mission{nullptr};
     SCSimulatedObject();
     ~SCSimulatedObject();
-    void Simulate(int tps);
-    void SimulateWithVector(int tps);
+
     void GetPosition(Vector3D *position);
+    virtual void Simulate(int tps);
+    virtual void Render();
+};
+
+class GunSimulatedObject : public SCSimulatedObject {
+
+    void Simulate(int tps);
     void Render();
 };
