@@ -1102,19 +1102,33 @@ void SCPlane::RenderSimulatedObject() {
     }
 }
 void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission *mission) {
-    SCSimulatedObject *weap = new SCSimulatedObject();
+    if (this->weaps_load[weapon_hard_point_id] == nullptr) {
+        return;
+    }
+    SCSimulatedObject *weap{nullptr};
     Vector3D initial_trust = {0,0,0};
     float planeSpeed = sqrtf(this->vx * this->vx + this->vy * this->vy + this->vz * this->vz);
-    float thrustMagnitude = planeSpeed;
-    if (this->weaps_load[weapon_hard_point_id]->objct->wdat->radius == 0) {
-        weap = new GunSimulatedObject();
-        // On définit la poussée initiale de la balle en proportion de la vélocité de l'avion.
-        thrustMagnitude = -planeSpeed * 100.0f; // coefficient ajustable
+    float thrustMagnitude = -planeSpeed;
+    switch (this->weaps_load[weapon_hard_point_id]->objct->wdat->weapon_id) {
+        case 12:
+            weap = new GunSimulatedObject();
+            thrustMagnitude = -planeSpeed * 100.0f; // coefficient ajustable
+        break;
+        case 5:
+        case 6:
+            weap = new GunSimulatedObject();
+        break;
+        default:
+            weap = new SCSimulatedObject();
+        break;
+    }
+    if (this->weaps_load[weapon_hard_point_id]->objct->wdat->weapon_id == 12) {
+        
     }
     weap->mission = mission;
     // Conversion des angles (azimuthf et elevationf, exprimés en dixièmes de degré) en radians.
-    float yawRad   = (this->azimuthf / 10.0f) * (M_PI / 180.0f);
-    float pitchRad = (-this->elevationf / 10.0f) * (M_PI / 180.0f);
+    float yawRad   = (this->azimuthf / 10.0f) * ((float) M_PI / 180.0f);
+    float pitchRad = (-this->elevationf / 10.0f) * ((float) M_PI / 180.0f);
 
     // Calcul du vecteur de poussée initiale dans la direction avant de l'avion.
     // On considère que le vecteur avant s'exprime en coordonnées :
@@ -1125,15 +1139,16 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     initial_trust.z = thrustMagnitude * cosf(pitchRad) * cosf(yawRad);
 
     weap->shooter = this->pilot;
-    if (this->weaps_load[weapon_hard_point_id] == nullptr) {
-        return;
-    }
+    
     if (this->weaps_load[weapon_hard_point_id]->nb_weap <= 0) {
         weapon_hard_point_id = (int) this->object->entity->hpts.size()-weapon_hard_point_id;
         if (weapon_hard_point_id<=0) {
             return;
         }
-        if (this->weaps_load[weapon_hard_point_id] == nullptr) {
+        if (weapon_hard_point_id > this->weaps_load.size()) {
+            return;
+        }
+        if (this->weaps_load[weapon_hard_point_id] == NULL) {
             return;
         }
         if (this->weaps_load[weapon_hard_point_id]->nb_weap == 0) {

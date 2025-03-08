@@ -852,7 +852,15 @@ void SCStrike::RunFrame(void) {
             missil_pos.y+this->camera_pos.y,
             missil_pos.z+this->camera_pos.z
         };
-        camera->SetPosition(&mpos);
+        const float distanceBehind = -60.0f;
+        float r_azim = degreeToRad(missile->azimuthf);
+        float r_elev = degreeToRad(missile->elevationf);
+        float r_twist = 0.0f;
+        Vector3D camPos;
+        camPos.x = missil_pos.x - distanceBehind * cos(r_elev) * sin(r_azim);
+        camPos.y = missil_pos.y + distanceBehind * sin(r_elev);
+        camPos.z = missil_pos.z - distanceBehind * cos(r_elev) * cos(r_azim);
+        camera->SetPosition(&camPos);
         camera->LookAt(&missil_pos);
     }
     break;

@@ -1,0 +1,38 @@
+ Chunk: FORM, Taille: 200
+     TYPE: REAL
+     Chunk: FORM, Taille: 154
+         TYPE: OBJT
+         Chunk: EXTE, Taille: 16
+         Chunk: FORM, Taille: 118
+             TYPE: TRCR
+             Chunk: SIGN, Taille: 6
+               0x00	 0
+               0x00	 0
+               0x00	 0
+               0x00	 0
+               0x00	 0
+               0x00	 0
+             Chunk: TRGT, Taille: 2
+               0x00	 0
+               0x00	 0
+             Chunk: WDAT, Taille: 22
+               Damage: 3
+               Radius of effect: 0
+               flag 1: 13
+               weapon id: 12
+               weapon family: 0
+               air_or_ground: 2
+               aspect: 0
+               target lock: 10000
+               tracking cone: 45
+               effective range: 1000
+               flag 7: 0
+               flag 8: 0
+               flag 9: 0
+             Chunk: INFO, Taille: 32
+             Chunk: EXPL, Taille: 12
+     Chunk: FORM, Taille: 26
+         TYPE: APPR
+         Chunk: FORM, Taille: 14
+             TYPE: TRCR
+             Chunk: INFO, Taille: 2

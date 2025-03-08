@@ -242,6 +242,9 @@ void GunSimulatedObject::Simulate(int tps) {
     this->z  = position.z;
     for (auto entity: this->mission->actors) {
         BoudingBox *bb{nullptr};
+        if (entity == shooter) {
+            continue;
+        }
         bb = entity->object->entity->GetBoudingBpx();
         if (bb != nullptr) {
             if (this->x >= entity->object->position.x + bb->min.x && this->x <= entity->object->position.x + bb->max.x &&
@@ -260,25 +263,39 @@ void GunSimulatedObject::Simulate(int tps) {
         }
     }
     // Désactive l'objet s'il touche le sol
-    if (this->y < 0.0f) {
+    if (this->y < this->mission->area->getY(this->x, this->y)) {
         this->alive = false;
     }
 }
 
 void GunSimulatedObject::Render() {
-    glPushMatrix();
-    glTranslatef(this->x, this->y, this->z);
+    
+
     if (this->obj->vertices.size() == 0) {
+        glPushMatrix();
+        glTranslatef(this->x, this->y, this->z);
         glLineWidth(1.2f);
         glBegin(GL_LINES);
         glColor3f(1.0f,1.0f,0.0f);
         glVertex3f(0.0f,0.0f,0.0f);
         glVertex3f(this->vx, this->vy, this->vz);
         glEnd();
+        glPopMatrix();
     } else {
+        glPushMatrix();
+        Matrix rotation;
+        rotation.Clear();
+        rotation.Identity();
+        rotation.translateM(this->x, this->y, this->z);
+        rotation.rotateM(this->azimuthf, 0.0f, 1.0f, 0.0f);
+        rotation.rotateM(this->elevationf, 0.0f, 0.0f, 1.0f);
+        rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
+        
+        glMultMatrixf((float *)rotation.v);
         Renderer.DrawModel(this->obj, LOD_LEVEL_MAX);
+        glPopMatrix();
     }
-    glPopMatrix();
+    
     size_t cpt=this->smoke_positions.size();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
