@@ -274,7 +274,7 @@ SCZone *WeaponLoadoutScene::addExtraZone(uint8_t id) {
     return (z);
  }
 
- SCZone *WeaponLoadoutScene::addNoGfXZone(uint8_t id, std::string label, uint8_t weapon_type_id) { 
+ SCZone *WeaponLoadoutScene::addNoGfXZone(uint8_t id, std::string label, uint8_t weapon_type_shp_id) { 
     SCZone *z{nullptr};
     animatedSprites *sprt{nullptr};
     sprt = new animatedSprites();
@@ -320,7 +320,7 @@ SCZone *WeaponLoadoutScene::addExtraZone(uint8_t id) {
         z->quad = sprt->quad;
     }
     sprt->id = id;
-    z->id = weapon_type_id;
+    z->id = weapon_type_shp_id;
     z->sprite = nullptr;
     z->label = new std::string(label);
     z->onclick = std::bind(&WeaponLoadoutScene::removeWeapon, this, std::placeholders::_1, std::placeholders::_2);
@@ -451,7 +451,7 @@ void WeaponLoadoutScene::removeWeapon(std::vector<EFCT *> *script, uint8_t id) {
     this->extra_zones.shrink_to_fit();
     // L'opérateur [] crée l'entrée si elle n'existe pas et retourne 0 par défaut.
     int nbweap = GameState.weapon_load_out[id];
-    std::map<weapon_type_id, uint8_t> max_weapons = {
+    std::map<weapon_type_shp_id, uint8_t> max_weapons = {
         {AIM9J,6},
         {AIM9M,6},
         {AIM120,6},
@@ -471,7 +471,7 @@ void WeaponLoadoutScene::removeWeapon(std::vector<EFCT *> *script, uint8_t id) {
             nb_pylone++;
         }
     }
-    if ((GameState.weapon_load_out[id]<= max_weapons[weapon_type_id(id)]/nb_pylone && nb_pylone>1) || GameState.weapon_load_out[id] == 0) {
+    if ((GameState.weapon_load_out[id]<= max_weapons[weapon_type_shp_id(id)]/nb_pylone && nb_pylone>1) || GameState.weapon_load_out[id] == 0) {
         GameState.weapon_load_out[last_id] = 0;
     }
     this->updateWeaponDisplay();
@@ -542,7 +542,7 @@ void WeaponLoadoutScene::updateWeaponDisplay() {
                 {
                     wlabel = string_format("DURANDAL(%d)", GameState.weapon_load_out[DURANDAL]);
                     int nbweap=0;
-                    weapon_type_id pylid = weapon_type_id(GameState.weapon_load_out[i]);
+                    weapon_type_shp_id pylid = weapon_type_shp_id(GameState.weapon_load_out[i]);
                     if (i == 3) {
                         if (GameState.weapon_load_out[pylid] >= 6) {
                             nbweap = 2;
@@ -566,7 +566,7 @@ void WeaponLoadoutScene::updateWeaponDisplay() {
                 {
                     wlabel = string_format("MK20(%d)", GameState.weapon_load_out[MK20]);
                     int nbweap=0;
-                    weapon_type_id pylid = weapon_type_id(GameState.weapon_load_out[i]);
+                    weapon_type_shp_id pylid = weapon_type_shp_id(GameState.weapon_load_out[i]);
                     if (i == 3) {
                         if (GameState.weapon_load_out[pylid] >= 6) {
                             nbweap = 2;
@@ -590,7 +590,7 @@ void WeaponLoadoutScene::updateWeaponDisplay() {
                 {
                     wlabel = string_format("AGM65D(%d)", GameState.weapon_load_out[AGM65D]);
                     int nbweap=0;
-                    weapon_type_id pylid = weapon_type_id(GameState.weapon_load_out[i]);
+                    weapon_type_shp_id pylid = weapon_type_shp_id(GameState.weapon_load_out[i]);
                     if (i == 3) {
                         if (GameState.weapon_load_out[pylid] >= 6) {
                             nbweap = 2;
@@ -614,7 +614,7 @@ void WeaponLoadoutScene::updateWeaponDisplay() {
                 wlabel = string_format("MK82(%d)", GameState.weapon_load_out[MK82]);
                 {
                     int nbweap=0;
-                    weapon_type_id pylid = weapon_type_id(GameState.weapon_load_out[i]);
+                    weapon_type_shp_id pylid = weapon_type_shp_id(GameState.weapon_load_out[i]);
                     if (GameState.weapon_load_out[pylid]-6 > 0) {
                         nbweap = GameState.weapon_load_out[pylid]-6;
                     } else {

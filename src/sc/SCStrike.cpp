@@ -658,7 +658,7 @@ void SCStrike::SetMission(char const *missionName) {
         this->player_plane->Simulate();
     }
     this->player_plane->object->entity->weaps.clear();
-    std::map<weapon_type_id, std::string> weapon_names = {
+    std::map<weapon_type_shp_id, std::string> weapon_names = {
         {AIM9J, "SWINDERJ"},
         {AIM9M, "SWINDERM"},
         {AIM120, "AMRAAM"},
@@ -674,18 +674,17 @@ void SCStrike::SetMission(char const *missionName) {
     weap->nb_weap = 1000;
     weap->objct = LoadWeapon(weap->name);
     this->player_plane->object->entity->weaps.push_back(weap);
-    for (auto weapon: GameState.weapon_load_out) {
-        if (weapon.first < 5) {
-            continue;
-        }
-        if (weapon.second == 0) {
+    std::map<weapon_type_shp_id, bool> loaded;
+    for (int i=1; i<5; i++) {
+        if (loaded.find(weapon_type_shp_id(GameState.weapon_load_out[i])) != loaded.end()) {
             continue;
         }
         RSEntity::WEAPS *weap = new RSEntity::WEAPS();
-        weap->name = weapon_names[weapon_type_id(weapon.first)];
-        weap->nb_weap = weapon.second;
+        weap->name = weapon_names[weapon_type_shp_id(GameState.weapon_load_out[i])];
+        weap->nb_weap = GameState.weapon_load_out[GameState.weapon_load_out[i]];
         weap->objct = LoadWeapon(weap->name);
         this->player_plane->object->entity->weaps.push_back(weap);
+        loaded[weapon_type_shp_id(GameState.weapon_load_out[i])] = true;
     }
     this->player_plane->InitLoadout();
     this->player_prof = this->current_mission->player->profile;

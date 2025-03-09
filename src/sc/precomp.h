@@ -12,7 +12,7 @@
 //libspace include
 #include "../precomp.h"
 
-
+#include "SCenums.h"
 #include "PaletteIDs.h"
 #include "ShapeIDs.h"
 

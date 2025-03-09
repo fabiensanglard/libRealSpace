@@ -17,12 +17,6 @@ struct SCMissionWaypoint {
 class SCProg;
 
 class SCMission {
-    enum prog_opcode {
-        PROG_OP_SET_MESSAGE = 171,
-        PROG_OP_SET_SPOT = 165,
-        PROG_OP_SET_SPOT_2 = 166,
-        PROG_OP_SET_PRIMARY_TARGET = 167
-    };
 private:
     std::string mission_name;
     std::map<std::string, RSEntity *> *obj_cache{nullptr};

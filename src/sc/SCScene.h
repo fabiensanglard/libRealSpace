@@ -11,20 +11,6 @@ struct background {
     uint8_t frameCounter{0};
 };
 
-enum weapon_type_id {
-    AIM9J = 29,
-    AIM9M = 30, 
-    AIM120 = 116,
-    AGM65D = 31,
-    DURANDAL = 32,
-    MK20 = 33,
-    MK82 = 34,
-    GBU15 = 35,
-    LAU3 = 36
-};
-
-
-
 class SCScene {
 protected:
     std::vector<EFCT *> *efect;
@@ -55,13 +41,13 @@ class WeaponLoadoutScene : public SCScene {
     std::vector<SCZone *> extra_zones;
     std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick;
     SCZone *addExtraZone(uint8_t id);
-    SCZone *addNoGfXZone(uint8_t id, std::string label, uint8_t weapon_type_id);
+    SCZone *addNoGfXZone(uint8_t id, std::string label, uint8_t weapon_type_shp_id);
     void addWeapon(std::vector<EFCT *> *script, uint8_t id);
     void removeWeapon(std::vector<EFCT *> *script, uint8_t id);
     void updateWeaponDisplay();
 
-    std::vector<std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>> weapon_pylones = {
-        std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>{
+    std::vector<std::map<weapon_type_shp_id, std::vector<std::vector<uint8_t>>>> weapon_pylones = {
+        std::map<weapon_type_shp_id, std::vector<std::vector<uint8_t>>>{
             {AIM9J, std::vector<std::vector<uint8_t>>{
                 {4},
                 {117, 118}
@@ -71,7 +57,7 @@ class WeaponLoadoutScene : public SCScene {
                 {117, 118}
             }},
         },
-        std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>{
+        std::map<weapon_type_shp_id, std::vector<std::vector<uint8_t>>>{
             {AIM9J, std::vector<std::vector<uint8_t>>{
                 {5}, 
                 {119, 120}
@@ -85,7 +71,7 @@ class WeaponLoadoutScene : public SCScene {
                 {119, 120}
             }},
         },
-        std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>{
+        std::map<weapon_type_shp_id, std::vector<std::vector<uint8_t>>>{
             {AIM9J, std::vector<std::vector<uint8_t>>{
                 {40},
                 {121, 122}}
@@ -123,7 +109,7 @@ class WeaponLoadoutScene : public SCScene {
                 {121, 122}}
             },
         },
-        std::map<weapon_type_id, std::vector<std::vector<uint8_t>>>{
+        std::map<weapon_type_shp_id, std::vector<std::vector<uint8_t>>>{
             {DURANDAL, std::vector<std::vector<uint8_t>>{
                 {17, 18, 19},
                 {123, 124}}

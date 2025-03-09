@@ -1021,9 +1021,9 @@ void SCPlane::Render() {
                 {-decy,-decy,-2*decy}
             };
 
-            for (int i = 0; i < weaps->nb_weap; i++) {
+            for (auto p: path) {
                 glPushMatrix();
-                glTranslatef(position.z/250+path[i].z, position.y/250 + path[i].y, -position.x/250+path[i].x);
+                glTranslatef(position.z/250+p.z, position.y/250 + p.y, -position.x/250+p.x);
                 Renderer.DrawModel(weaps->objct, LOD_LEVEL_MAX);
                 glPopMatrix();
                 position.y -= 0.5f;
@@ -1176,20 +1176,23 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
 }
 void SCPlane::InitLoadout() {
     std::map<int, std::vector<std::tuple<std::string, int>>> weap_map = {
-        {12, {{"0", 1000}}},
-        {1, {{"4", 1}, {"1", 1}, {"2", 1}}},
-        {2, {{"4", 1}, {"1", 1}, {"2", 1}}},
-        {3, {{"2", 3}, {"3", 3}}},
-        {4, {{"2", 2}, {"3", 2}}},
-        {5, {{"2", 6}, {"3", 6}}},
-        {6, {{"2", 3}, {"3", 6}}},
-        {7, {{"2", 3}, {"3", 3}}},
-        {8, {{"2", 1}, {"3", 1}}},
-        {9, {{"1", 1}, {"2", 2}}}
+        {ID_20MM, {{"0", 1000}}},
+        {ID_AIM9J, {{"4", 1}, {"1", 1}, {"2", 1}}},
+        {ID_AIM9M, {{"4", 1}, {"1", 1}, {"2", 1}}},
+        {ID_AGM65D, {{"2", 3}, {"3", 3}}},
+        {ID_LAU3, {{"2", 2}, {"3", 2}}},
+        {ID_MK20, {{"2", 6}, {"3", 6}}},
+        {ID_MK82, {{"2", 3}, {"3", 3}}},
+        {ID_DURANDAL, {{"2", 3}, {"3", 3}}},
+        {ID_GBU15, {{"2", 1}, {"3", 1}}},
+        {ID_AIM120, {{"1", 1}, {"2", 2}}}
     };
     
     for (auto loadout: this->object->entity->weaps) {
         int plane_wp_loadout = loadout->nb_weap;
+        if (plane_wp_loadout == 0) {
+            break;
+        }
         for (auto hpts: weap_map.at(loadout->objct->wdat->weapon_id)) {
             int cpt=0;
             int next_hp = 0;
@@ -1203,7 +1206,7 @@ void SCPlane::InitLoadout() {
                     plane_wp_loadout = plane_wp_loadout - nb_weap;
                     SCWeaponLoadoutHardPoint *weap = new SCWeaponLoadoutHardPoint();
                     weap->objct = loadout->objct;
-                    weap->nb_weap = nb_weap;
+                    weap->nb_weap = std::get<1>(hpts);
                     weap->hpts_type = std::stoi(std::get<0>(hpts));
                     weap->name = loadout->name;
                     weap->position = {(float) plane_hpts->x, (float) plane_hpts->y, (float) plane_hpts->z};
