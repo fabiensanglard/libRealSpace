@@ -39,10 +39,14 @@ public:
     void GetPosition(Vector3D *position);
     virtual void Simulate(int tps);
     virtual void Render();
+    virtual std::tuple<Vector3D, Vector3D> ComputeTrajectory(int tps);
+    bool CheckCollision(SCMissionActors *entity);
 };
 
 class GunSimulatedObject : public SCSimulatedObject {
 
+public:
     void Simulate(int tps);
     void Render();
+    std::tuple<Vector3D, Vector3D> ComputeTrajectory(int tps);
 };

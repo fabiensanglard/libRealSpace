@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 #include "precomp.h"
+#include "SCCockpit.h"
 
 Point2D rotateAroundPoint(Vector2D point, Point2D center, float angle) {
     float x = point.x - center.x;
@@ -385,6 +386,64 @@ void SCCockpit::RenderTargetWithCam() {
         }
     }
 }
+void SCCockpit::RenderTargetingReticle() {
+
+    GunSimulatedObject *weap = new GunSimulatedObject();
+    float planeSpeed = sqrtf(this->player_plane->vx * this->player_plane->vx + this->player_plane->vy * this->player_plane->vy + this->player_plane->vz * this->player_plane->vz);
+    float thrustMagnitude = -planeSpeed;
+    thrustMagnitude = -planeSpeed * 150.0f; // coefficient ajustable
+
+    float yawRad   = tenthOfDegreeToRad(this->player_plane->azimuthf);
+    float pitchRad = tenthOfDegreeToRad(-this->player_plane->elevationf);
+    float rollRad  = tenthOfDegreeToRad(-this->player_plane->roll);
+    float cosRoll = cosf(rollRad);
+    float sinRoll = sinf(rollRad);
+    Vector3D initial_trust{0,0,0};
+    initial_trust.x = thrustMagnitude * (cosf(pitchRad) * sinf(yawRad) * cosRoll + sinf(pitchRad) * cosf(yawRad) * sinRoll);
+    initial_trust.y = thrustMagnitude * (sinf(pitchRad) * cosRoll - cosf(pitchRad) * sinf(yawRad) * sinRoll);
+    initial_trust.z = thrustMagnitude * cosf(pitchRad) * cosf(yawRad);
+
+    weap->obj = this->player_plane->weaps_load[0]->objct;
+    Vector3D campos = this->cam->GetPosition();
+    weap->x = campos.x;
+    weap->y = campos.y;
+    weap->z = campos.z;
+    weap->vx = initial_trust.x;
+    weap->vy = initial_trust.y;
+    weap->vz = initial_trust.z;
+
+    weap->weight = this->player_plane->weaps_load[0]->objct->weight_in_kg*2.205f;
+    weap->azimuthf = this->player_plane->azimuthf;
+    weap->elevationf = this->player_plane->elevationf;
+    weap->target = nullptr;
+    Vector3D target{0,0,0};
+    Vector3D velo{0,0,0};
+    for (int i=0; i<1000; i++) {
+        std::tie(target, velo) = weap->ComputeTrajectory(60);
+    }
+
+    Vector3DHomogeneous v = {target.x, target.y, target.z, 1.0f};
+
+    Matrix *mproj = this->cam->GetProjectionMatrix();
+    Matrix *mview = this->cam->GetViewMatrix();
+
+    Vector3DHomogeneous mcombined = mview->multiplyMatrixVector(v);
+    Vector3DHomogeneous result = mproj->multiplyMatrixVector(mcombined);
+
+    if (result.z > 0.0f) {
+        float x = result.x / result.w;
+        float y = result.y / result.w;
+
+        int Xhud = (int)((x + 1.0f) * 160.0f);
+        int Yhud = (int)((1.0f - y) * 100.0f) - 1;
+
+        if (Xhud > 0 && Xhud < 320 && Yhud > 0 && Yhud < 200) {
+            Point2D p = {Xhud, Yhud};
+            VGA.plot_pixel((int)p.x, (int)p.y, 223);
+            VGA.circle_slow((int)p.x, (int)p.y, 6, 90);
+        }
+    }
+}
 void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
     std::string txt;
     this->RenderMFDS(pmfd_right);
@@ -632,6 +691,9 @@ void SCCockpit::Render(int face) {
             this->RenderHeading();
             if (this->target != this->player) {
                 this->RenderTargetWithCam();
+            }
+            if (this->player_plane->selected_weapon == 0) {
+                this->RenderTargetingReticle();
             }
             VGA.plot_pixel(161, 50, 223);
 

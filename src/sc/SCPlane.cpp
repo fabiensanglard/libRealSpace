@@ -1112,7 +1112,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     switch (this->weaps_load[weapon_hard_point_id]->objct->wdat->weapon_id) {
         case 12:
             weap = new GunSimulatedObject();
-            thrustMagnitude = -planeSpeed * 100.0f; // coefficient ajustable
+            thrustMagnitude = -planeSpeed * 150.0f; // coefficient ajustable
         break;
         case 5:
         case 6:
@@ -1127,15 +1127,16 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     }
     weap->mission = mission;
     // Conversion des angles (azimuthf et elevationf, exprimés en dixièmes de degré) en radians.
-    float yawRad   = (this->azimuthf / 10.0f) * ((float) M_PI / 180.0f);
-    float pitchRad = (-this->elevationf / 10.0f) * ((float) M_PI / 180.0f);
-
+    float yawRad   = tenthOfDegreeToRad(this->azimuthf);
+    float pitchRad = tenthOfDegreeToRad(-this->elevationf);
+    float rollRad  = tenthOfDegreeToRad(this->roll);
     // Calcul du vecteur de poussée initiale dans la direction avant de l'avion.
     // On considère que le vecteur avant s'exprime en coordonnées :
     // x = cos(pitch)*sin(yaw), y = sin(pitch), z = cos(pitch)*cos(yaw)
-    
-    initial_trust.x = thrustMagnitude * cosf(pitchRad) * sinf(yawRad);
-    initial_trust.y = thrustMagnitude * sinf(pitchRad);
+    float cosRoll = cosf(rollRad);
+    float sinRoll = sinf(rollRad);
+    initial_trust.x = thrustMagnitude * (cosf(pitchRad) * sinf(yawRad) * cosRoll + sinf(pitchRad) * cosf(yawRad) * sinRoll);
+    initial_trust.y = thrustMagnitude * (sinf(pitchRad) * cosRoll - cosf(pitchRad) * sinf(yawRad) * sinRoll);
     initial_trust.z = thrustMagnitude * cosf(pitchRad) * cosf(yawRad);
 
     weap->shooter = this->pilot;
@@ -1160,7 +1161,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
 
     weap->x = this->x;
     weap->y = this->y;
-    weap->z = this->z - (2.0f* cosf(pitchRad) * cosf(yawRad));
+    weap->z = this->z;
     weap->azimuthf = this->azimuthf;
     weap->elevationf = this->elevationf;
     weap->vx = initial_trust.x;
@@ -1202,7 +1203,7 @@ void SCPlane::InitLoadout() {
                     plane_wp_loadout = plane_wp_loadout - nb_weap;
                     SCWeaponLoadoutHardPoint *weap = new SCWeaponLoadoutHardPoint();
                     weap->objct = loadout->objct;
-                    weap->nb_weap = std::get<1>(hpts);
+                    weap->nb_weap = nb_weap;
                     weap->hpts_type = std::stoi(std::get<0>(hpts));
                     weap->name = loadout->name;
                     weap->position = {(float) plane_hpts->x, (float) plane_hpts->y, (float) plane_hpts->z};

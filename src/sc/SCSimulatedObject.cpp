@@ -67,6 +67,7 @@ void SCSimulatedObject::Render() {
     }
     glDisable( GL_BLEND );
 }
+
 void SCSimulatedObject::GetPosition(Vector3D *position) {
     position->x = this->x;
     position->y = this->y;
@@ -120,7 +121,7 @@ Vector3D SCSimulatedObject::calculate_lift(Vector3D velocity) {
     };
     return lift_direction;
 }
-void SCSimulatedObject::Simulate(int tps) {
+std::tuple<Vector3D, Vector3D> SCSimulatedObject::ComputeTrajectory(int tps) {
     this->tps = tps;
     float deltaTime = 1.0f / (float) tps;
     float thrust = 10.0f;
@@ -153,19 +154,6 @@ void SCSimulatedObject::Simulate(int tps) {
     
     Vector3D error = (to_target - position);
     
-        
-    
-    if (this->target != nullptr && error.Norm() < 10.0f) {
-        this->alive = false;
-        this->target->object->alive = false;
-        this->shooter->score += 100;
-        if (this->target->plane != nullptr) {
-            this->shooter->plane_down += 1;
-        } else {
-            this->shooter->ground_down += 1;
-        }
-        return;
-    }
     // Force de poussée ajustée en fonction de la direction de l'erreur
     Vector3D thrust_force = error * (thrust / error.Norm());
     Vector3D other_way;
@@ -174,11 +162,48 @@ void SCSimulatedObject::Simulate(int tps) {
     Vector3D total_force = gravity_force + drag_force + lift_force + thrust_force;
     Vector3D acceleration = total_force * (1.0f/ this->weight);
     velocity = (velocity+(acceleration*deltaTime)).limit(MAX_VELOCITY*deltaTime);
+    position = position+velocity;
+    return { position, velocity };;
+}
+bool SCSimulatedObject::CheckCollision(SCMissionActors *entity) { 
+    BoudingBox *bb{nullptr};
+    if (entity == shooter) {
+        return false;
+    }
+    bb = entity->object->entity->GetBoudingBpx();
+    if (bb != nullptr) {
+        if (this->x >= entity->object->position.x + bb->min.x && this->x <= entity->object->position.x + bb->max.x &&
+            this->y >= entity->object->position.y+bb->min.y && this->y   <= entity->object->position.y + bb->max.y &&
+            this->z >= entity->object->position.z+bb->min.z && this->z <= entity->object->position.z + bb->max.z) {
+            // Collision detected: mark both objects as not alive and update score.
+            return true;
+        }
+    }
+    return false;
+}
+void SCSimulatedObject::Simulate(int tps) {
+    Vector3D position, velocity;
+    std::tie(position, velocity) = this->ComputeTrajectory(tps);
+
+    if (this->target != nullptr) {
+        if (this->CheckCollision(this->target)) {
+            this->alive = false;
+            this->target->object->alive = false;
+            this->shooter->score += 100;
+            if (this->target->plane != nullptr) {
+                this->shooter->plane_down += 1;
+            } else {
+                this->shooter->ground_down += 1;
+            }
+            return;
+        }
+        
+    }
     this->smoke_positions.push_back(position);
     if (this->smoke_positions.size() > 20) {
         this->smoke_positions.erase(this->smoke_positions.begin());
     }
-    position = position+velocity;
+    
     
     float azimut = 0.0f;
     float elevation = 0.0f;
@@ -195,7 +220,7 @@ void SCSimulatedObject::Simulate(int tps) {
         this->alive = false;
     }
 }
-void GunSimulatedObject::Simulate(int tps) {
+std::tuple<Vector3D, Vector3D> GunSimulatedObject::ComputeTrajectory(int tps) {
     float deltaTime = 1.0f / static_cast<float>(tps);
     Vector3D position = { this->x, this->y, this->z };
     Vector3D velocity = { this->vx, this->vy, this->vz };
@@ -224,7 +249,14 @@ void GunSimulatedObject::Simulate(int tps) {
     velocity = velocity + acceleration * deltaTime;
     position = position + velocity * deltaTime;
 
+    return { position, velocity };
+}
+void GunSimulatedObject::Simulate(int tps) {
+    
     // Actualisation des attributs de l'objet
+    Vector3D position;
+    Vector3D velocity;
+    std::tie(position, velocity) = this->ComputeTrajectory(tps);
     float azimut = 0.0f;
     float elevation = 0.0f;
     cartesianToPolar(velocity, &azimut, &elevation);
@@ -241,36 +273,25 @@ void GunSimulatedObject::Simulate(int tps) {
     this->y  = position.y;
     this->z  = position.z;
     for (auto entity: this->mission->actors) {
-        BoudingBox *bb{nullptr};
-        if (entity == shooter) {
-            continue;
-        }
-        bb = entity->object->entity->GetBoudingBpx();
-        if (bb != nullptr) {
-            if (this->x >= entity->object->position.x + bb->min.x && this->x <= entity->object->position.x + bb->max.x &&
-                this->y >= entity->object->position.y+bb->min.y && this->y   <= entity->object->position.y + bb->max.y &&
-                this->z >= entity->object->position.z+bb->min.z && this->z <= entity->object->position.z + bb->max.z) {
-                // Collision detected: mark both objects as not alive and update score.
-                this->alive = false;
-                entity->object->alive = false;
-                this->shooter->score += 100;
-                if (entity->plane != nullptr) {
-                    this->shooter->plane_down += 1;
-                } else {
-                    this->shooter->ground_down += 1;
-                }
+        if (this->CheckCollision(entity)) {
+            this->alive = false;
+            entity->object->alive = false;
+            this->shooter->score += 100;
+            if (entity->plane != nullptr) {
+                this->shooter->plane_down += 1;
+            } else {
+                this->shooter->ground_down += 1;
             }
+            break;
         }
     }
     // Désactive l'objet s'il touche le sol
-    if (this->y < this->mission->area->getY(this->x, this->y)) {
+    if (this->y < this->mission->area->getY(this->x, this->z)) {
         this->alive = false;
     }
 }
 
 void GunSimulatedObject::Render() {
-    
-
     if (this->obj->vertices.size() == 0) {
         glPushMatrix();
         glTranslatef(this->x, this->y, this->z);

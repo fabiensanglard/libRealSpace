@@ -230,17 +230,17 @@ void RSVGA::circle_slow(int x, int y, int radius, uint8_t color) {
     while (dx <= dy) {
         dxoffset = (dx << 8) + (dx << 6);
         dyoffset = (dy << 8) + (dy << 6);
-        frameBuffer[offset + dy - dxoffset] = color; /* octant 0 */
-        frameBuffer[offset + dx - dyoffset] = color; /* octant 1 */
-        frameBuffer[offset - dx - dyoffset] = color; /* octant 2 */
-        frameBuffer[offset - dy - dxoffset] = color; /* octant 3 */
-        frameBuffer[offset - dy + dxoffset] = color; /* octant 4 */
-        frameBuffer[offset - dx + dyoffset] = color; /* octant 5 */
-        frameBuffer[offset + dx + dyoffset] = color; /* octant 6 */
-        frameBuffer[offset + dy + dxoffset] = color; /* octant 7 */
+        frameBuffer[offset + dy - dxoffset] = color;
+        frameBuffer[offset + dx - dyoffset] = color;
+        frameBuffer[offset - dx - dyoffset] = color;
+        frameBuffer[offset - dy - dxoffset] = color;
+        frameBuffer[offset - dy + dxoffset] = color;
+        frameBuffer[offset - dx + dyoffset] = color;
+        frameBuffer[offset + dx + dyoffset] = color;
+        frameBuffer[offset + dy + dxoffset] = color;
         dx++;
         n += invradius;
-        dy = radius * (int)sinf(acosf(n));
+        dy = radius * sin(acos(n));
     }
 }
 void RSVGA::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,

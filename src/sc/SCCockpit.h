@@ -23,6 +23,7 @@ private:
     void RenderHudHorizonLinesSmall();
     void RenderAltitude();
     void RenderTargetWithCam();
+    void RenderTargetingReticle();
     void RenderHeading();
     void RenderSpeed();
     void RenderMFDS(Point2D mfds);

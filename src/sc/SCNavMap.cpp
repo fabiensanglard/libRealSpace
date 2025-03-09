@@ -191,13 +191,6 @@ void SCNavMap::RunFrame(void) {
                 0,
                 (int32_t)leader.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
         }
-        if (show_area) {
-            for (auto area: this->missionObj->mission_data.areas) {
-                this->showArea(area, center, map_width, w, h, t, l, 134);
-            }
-
-        }
-        
         if (show_waypoint) {
             int cpt = 0;
             for (auto wp: this->mission->waypoints) {
@@ -214,10 +207,7 @@ void SCNavMap::RunFrame(void) {
                 }
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
                     VGA.plot_pixel(newx, newy, 128);
-                    VGA.line(newx-5, newy-5, newx+5, newy-5, 128);
-                    VGA.line(newx-5, newy+5, newx+5, newy+5, 128);
-                    VGA.line(newx-5, newy-5, newx-5, newy+5, 128);
-                    VGA.line(newx+5, newy-5, newx+5, newy+5, 128);
+                    VGA.circle_slow(newx, newy, 3, 1);
                 }
                 if (cpt == *this->current_nav_point) {
                     int msg_newx = 252;
@@ -289,6 +279,11 @@ void SCNavMap::RunFrame(void) {
                 cpt++;
             }
         }
+        if (show_area) {
+            for (auto area: this->missionObj->mission_data.areas) {
+                this->showArea(area, center, map_width, w, h, t, l, 134);
+            }
+        }
 
         if (show_obj) {
             for (auto ob: this->missionObj->mission_data.parts) {
@@ -309,10 +304,7 @@ void SCNavMap::RunFrame(void) {
                 int newy = newy = (int) (((ob->position.z+center)/map_width)*h)+t;
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
                     VGA.plot_pixel(newx, newy, ob->id);
-                    VGA.line(newx-5, newy-5, newx+5, newy-5, ob->id);
-                    VGA.line(newx-5, newy+5, newx+5, newy+5, ob->id);
-                    VGA.line(newx-5, newy-5, newx-5, newy+5, ob->id);
-                    VGA.line(newx+5, newy-5, newx+5, newy+5, ob->id);
+                    VGA.circle_slow(newx, newy, 2, 1);
                     Point2D *obj_pos = new Point2D({newx, newy});
                     std::string name;
                     if (cast->profile != nullptr) {
@@ -352,10 +344,11 @@ void SCNavMap::showArea(AREA *area, float center, float map_width, int w, int h,
         Point2D *p1 = new Point2D({newx-(txtw/2)<0?newx:newx-(txtw/2), newy});
         switch (area->AreaType) {
             case 'S':
-                VGA.line(newx-neww, newy-neww, newx+neww, newy-neww, 1);
+                VGA.circle_slow(newx, newy, neww, 1);
+                /*VGA.line(newx-neww, newy-neww, newx+neww, newy-neww, 1);
                 VGA.line(newx-neww, newy+neww, newx+neww, newy+neww, 1);
                 VGA.line(newx-neww, newy-neww, newx-neww, newy+neww, 1);
-                VGA.line(newx+neww, newy-neww, newx+neww, newy+neww, 1);
+                VGA.line(newx+neww, newy-neww, newx+neww, newy+neww, 1);*/
                 break;
             case 'C':
                 VGA.circle_slow(newx, newy, neww, 1);
