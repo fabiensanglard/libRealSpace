@@ -1141,14 +1141,14 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     weap->shooter = this->pilot;
     
     if (this->weaps_load[weapon_hard_point_id]->nb_weap <= 0) {
-        weapon_hard_point_id = (int) this->object->entity->hpts.size()-weapon_hard_point_id;
+        weapon_hard_point_id = (int) this->object->entity->hpts.size()-1-weapon_hard_point_id;
         if (weapon_hard_point_id<=0) {
             return;
         }
-        if (weapon_hard_point_id > this->weaps_load.size()) {
+        if (weapon_hard_point_id > this->weaps_load.size()-1) {
             return;
         }
-        if (this->weaps_load[weapon_hard_point_id] == NULL) {
+        if (this->weaps_load[weapon_hard_point_id] == nullptr) {
             return;
         }
         if (this->weaps_load[weapon_hard_point_id]->nb_weap == 0) {
