@@ -249,14 +249,10 @@ void MapShot::Init() {
     SCShot::Init();
     x_max = 960;
     y_max = 600;
-    this->frameBuffer = new uint8_t[x_max * y_max];
-    for (int i = 0; i < x_max * y_max; i++) {
-        this->frameBuffer[i] = 0;
-    }
-    this->frameBufferA = new uint8_t[x_max * y_max];
-    for (int i = 0; i < x_max * y_max; i++) {
-        this->frameBufferA[i] = 255;
-    }
+    this->frameBuffer = new FrameBuffer(x_max, y_max);
+    this->frameBuffer->FillWithColor(0);
+    this->frameBufferA = new FrameBuffer(x_max, y_max);
+    this->frameBufferA->FillWithColor(255);
     this->layers.clear();
     this->rawPalette = this->optPals.GetEntry(23)->data;
     std::map<uint8_t, std::tuple<uint16_t, uint16_t>> map = {
@@ -278,7 +274,7 @@ void MapShot::Init() {
         size_t read = 0;
         tmpbg->img->GetShape(tmpbg->img->sequence[0])->Expand(tmp_fb, &read);
         this->mapics.push_back(tmp_fb);
-        this->blit(tmp_fb, std::get<0>(map[i]), std::get<1>(map[i]), 320, 200);
+        this->frameBuffer->blit(tmp_fb, std::get<0>(map[i]), std::get<1>(map[i]), 320, 200);
     }
     
     this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\OPTFONT.SHP");
@@ -294,35 +290,14 @@ void MapShot::SetPoints(std::vector<MAP_POINT *> *points) {
     current_x = (float) (*this->points)[point_counter]->x;
     current_y = (float) (*this->points)[point_counter]->y;
 }
-void MapShot::blit(uint8_t *srcBuffer, int x, int y, int width, int height) {
-    int startRow = 0;
-    int startCol = 0;
-    if (y < 0) {
-        startRow = -y;
-    }
-    if (x < 0) {
-        startCol = -x;
-    }
-    for (int row = startRow; row < height; ++row) {
-        int destRow = y + row;
-        if (destRow < 0 || destRow >= y_max)
-            continue;
-        int destOffset = destRow * x_max;
-        for (int col = startCol; col < width; ++col) {
-            int destCol = x + col;
-            if (destCol < 0 || destCol >= x_max)
-                continue;
-            frameBuffer[destOffset + destCol] = srcBuffer[row * width + col];
-        }
-    }
-}
+
 void MapShot::RunFrame(void) {
     CheckKeyboard();
     ByteStream paletteReader;
     paletteReader.Set((this->rawPalette));
     this->palette.ReadPatch(&paletteReader);
     VGA.Activate();
-    VGA.GetFrameBuffer()->FillWithColor(0);
+    VGA.GetFrameBuffer()->FillWithColor(255);
     VGA.SetPalette(&this->palette);
     static int nb_etapes = 100;
     this->fp_counter++;
@@ -354,12 +329,12 @@ void MapShot::RunFrame(void) {
     this->x = (int) current_x - 160;
     this->y = (int) current_y - 100;
     
-    frameBufferA[(int)current_y * x_max + (int)current_x] = 246;
-    VGA.GetFrameBuffer()->blitLargeBuffer(frameBuffer, x_max, y_max, this->x, this->y, 0, 0, 320, 200);
+    frameBufferA->framebuffer[(int)current_y * x_max + (int)current_x] = 246;
+    VGA.GetFrameBuffer()->blitLargeBuffer(frameBuffer->framebuffer, x_max, y_max, this->x, this->y, 0, 0, 320, 200);
     float rx = (this->x / (x_max / 320.0f));
     float ry = (this->y / (y_max / 200.0f)) + 100;
     
-    VGA.GetFrameBuffer()->blitLargeBuffer(frameBufferA, x_max, y_max, this->x, this->y, 0, 0, 320, 200);
+    VGA.GetFrameBuffer()->blitLargeBuffer(frameBufferA->framebuffer, x_max, y_max, this->x, this->y, 0, 0, 320, 200);
     Mouse.Draw();
     for (auto p: *this->points) {
         VGA.GetFrameBuffer()->plot_pixel((int)p->x, (int)p->y, 0);

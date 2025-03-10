@@ -54,8 +54,8 @@ public:
 };
 class MapShot : public SCShot {
     std::vector<uint8_t*> mapics;
-    uint8_t *frameBuffer;
-    uint8_t *frameBufferA;
+    FrameBuffer *frameBuffer;
+    FrameBuffer *frameBufferA;
     
     int x{0};
     int y{0};
@@ -71,7 +71,6 @@ class MapShot : public SCShot {
     float point_y_move;
     float current_x;
     float current_y;
-    void blit(uint8_t* srcBuffer, int x, int y, int width, int height);
 public:
     MapShot() : SCShot() {};
     void Init();

@@ -211,16 +211,24 @@ void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t c
     }
 }
 void FrameBuffer::blit(uint8_t* srcBuffer, int x, int y, int width, int height) {
-    for (int row = 0; row < height; ++row) {
+    int startRow = 0;
+    int startCol = 0;
+    if (y < 0) {
+        startRow = -y;
+    }
+    if (x < 0) {
+        startCol = -x;
+    }
+    for (int row = startRow; row < height; ++row) {
         int destRow = y + row;
-        if (destRow < 0 || destRow >= 200)
+        if (destRow < 0 || destRow >= this->height)
             continue;
-        int destOffset = destRow * 320;
-        for (int col = 0; col < width; ++col) {
+        int destOffset = destRow * this->width;
+        for (int col = startCol; col < width; ++col) {
             int destCol = x + col;
-            if (destCol < 0 || destCol >= 320)
+            if (destCol < 0 || destCol >= this->width)
                 continue;
-            this->framebuffer[destOffset + destCol] = srcBuffer[row * width + col];
+            framebuffer[destOffset + destCol] = srcBuffer[row * width + col];
         }
     }
 }
