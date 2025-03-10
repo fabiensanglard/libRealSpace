@@ -387,7 +387,6 @@ void SCCockpit::RenderTargetWithCam() {
     }
 }
 void SCCockpit::RenderTargetingReticle() {
-
     GunSimulatedObject *weap = new GunSimulatedObject();
     float planeSpeed = sqrtf(this->player_plane->vx * this->player_plane->vx + this->player_plane->vy * this->player_plane->vy + this->player_plane->vz * this->player_plane->vz);
     float thrustMagnitude = -planeSpeed;
@@ -418,8 +417,14 @@ void SCCockpit::RenderTargetingReticle() {
     weap->target = nullptr;
     Vector3D target{0,0,0};
     Vector3D velo{0,0,0};
-    for (int i=0; i<1000; i++) {
+    for (int i=0; i<10; i++) {
         std::tie(target, velo) = weap->ComputeTrajectory(60);
+        weap->x = target.x;
+        weap->y = target.y;
+        weap->z = target.z;
+        weap->vx = velo.x;
+        weap->vy = velo.y;
+        weap->vz = velo.z;
     }
 
     Vector3DHomogeneous v = {target.x, target.y, target.z, 1.0f};
@@ -437,6 +442,82 @@ void SCCockpit::RenderTargetingReticle() {
         int Xhud = (int)((x + 1.0f) * 160.0f);
         int Yhud = (int)((1.0f - y) * 100.0f) - 1;
 
+        if (Xhud > 0 && Xhud < 320 && Yhud > 0 && Yhud < 200) {
+            Point2D p = {Xhud, Yhud};
+            VGA.plot_pixel((int)p.x, (int)p.y, 223);
+            VGA.circle_slow((int)p.x, (int)p.y, 6, 90);
+        }
+    }
+}
+void SCCockpit::RenderBombSight() {
+    const Point2D center{160, 50};
+    const int width = 50;
+    const int height = 60;
+
+    int bx1 = center.x - width / 2;
+    int bx2 = center.x + width / 2;
+    int by1 = center.y - height / 2;
+    int by2 = center.y + height / 2;
+    GunSimulatedObject *weap = new GunSimulatedObject();
+    float planeSpeed = sqrtf(this->player_plane->vx * this->player_plane->vx + this->player_plane->vy * this->player_plane->vy + this->player_plane->vz * this->player_plane->vz);
+    float thrustMagnitude = -planeSpeed;
+    thrustMagnitude = -planeSpeed * 17.0f; // coefficient ajustable
+
+    float yawRad   = tenthOfDegreeToRad(this->player_plane->azimuthf);
+    float pitchRad = tenthOfDegreeToRad(-this->player_plane->elevationf);
+    float rollRad  = tenthOfDegreeToRad(-this->player_plane->roll);
+    float cosRoll = cosf(rollRad);
+    float sinRoll = sinf(rollRad);
+    Vector3D initial_trust{0,0,0};
+    initial_trust.x = thrustMagnitude * (cosf(pitchRad) * sinf(yawRad) * cosRoll + sinf(pitchRad) * cosf(yawRad) * sinRoll);
+    initial_trust.y = thrustMagnitude * (sinf(pitchRad) * cosRoll - cosf(pitchRad) * sinf(yawRad) * sinRoll);
+    initial_trust.z = thrustMagnitude * cosf(pitchRad) * cosf(yawRad);
+
+    weap->obj = this->player_plane->weaps_load[this->player_plane->selected_weapon]->objct;
+    Vector3D campos = this->cam->GetPosition();
+    weap->x = campos.x;
+    weap->y = campos.y;
+    weap->z = campos.z;
+    weap->vx = initial_trust.x;
+    weap->vy = initial_trust.y;
+    weap->vz = initial_trust.z;
+
+    weap->weight = this->player_plane->weaps_load[this->player_plane->selected_weapon]->objct->weight_in_kg*2.205f;
+    weap->azimuthf = this->player_plane->azimuthf;
+    weap->elevationf = this->player_plane->elevationf;
+    weap->target = nullptr;
+    weap->mission = this->current_mission;
+    Vector3D target{0,0,0};
+    Vector3D velo{0,0,0};
+    std::tie(target, velo) = weap->ComputeTrajectory(60);
+    int cpt_iteration=0;
+    while (target.y > this->current_mission->area->getY(target.x, target.z) == true && cpt_iteration<1000) {
+        std::tie(target, velo) = weap->ComputeTrajectory(60);
+        weap->x = target.x;
+        weap->y = target.y;
+        weap->z = target.z;
+        weap->vx = velo.x;
+        weap->vy = velo.y;
+        weap->vz = velo.z;
+        cpt_iteration++;
+    }
+    Vector3DHomogeneous v = {target.x, target.y, target.z, 1.0f};
+
+    Matrix *mproj = this->cam->GetProjectionMatrix();
+    Matrix *mview = this->cam->GetViewMatrix();
+
+    Vector3DHomogeneous mcombined = mview->multiplyMatrixVector(v);
+    Vector3DHomogeneous result = mproj->multiplyMatrixVector(mcombined);
+
+    if (result.z > 0.0f) {
+        float x = result.x / result.w;
+        float y = result.y / result.w;
+
+        int Xhud = (int)((x + 1.0f) * 160.0f);
+        int Yhud = (int)((1.0f - y) * 100.0f) - 1;
+
+        VGA.plot_pixel(center.x, center.y, 223);
+        VGA.lineWithBox(center.x, center.y, Xhud, Yhud, 223, bx1, bx2, by1, by2);
         if (Xhud > 0 && Xhud < 320 && Yhud > 0 && Yhud < 200) {
             Point2D p = {Xhud, Yhud};
             VGA.plot_pixel((int)p.x, (int)p.y, 223);
@@ -692,9 +773,19 @@ void SCCockpit::Render(int face) {
             if (this->target != this->player) {
                 this->RenderTargetWithCam();
             }
-            if (this->player_plane->selected_weapon == 0) {
-                this->RenderTargetingReticle();
+            if (this->player_plane->weaps_load[this->player_plane->selected_weapon] != nullptr) {
+                switch (this->player_plane->weaps_load[this->player_plane->selected_weapon]->objct->wdat->weapon_id) {
+                    case ID_20MM:
+                        this->RenderTargetingReticle();
+                    break;
+                    case ID_MK20:
+                    case ID_MK82:
+                    case ID_DURANDAL:
+                        this->RenderBombSight();
+                    break;
+                }
             }
+
             VGA.plot_pixel(161, 50, 223);
 
             Point2D pmfd_right = {0, 200 - this->cockpit->MONI.SHAP.GetHeight()};

@@ -49,4 +49,5 @@ public:
     void Simulate(int tps);
     void Render();
     std::tuple<Vector3D, Vector3D> ComputeTrajectory(int tps);
+    std::tuple<Vector3D, Vector3D> ComputeTrajectoryUntilGround(int tps);
 };

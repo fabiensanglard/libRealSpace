@@ -24,6 +24,7 @@ private:
     void RenderAltitude();
     void RenderTargetWithCam();
     void RenderTargetingReticle();
+    void RenderBombSight();
     void RenderHeading();
     void RenderSpeed();
     void RenderMFDS(Point2D mfds);

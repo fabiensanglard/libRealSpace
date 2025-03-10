@@ -251,6 +251,24 @@ std::tuple<Vector3D, Vector3D> GunSimulatedObject::ComputeTrajectory(int tps) {
 
     return { position, velocity };
 }
+std::tuple<Vector3D, Vector3D> GunSimulatedObject::ComputeTrajectoryUntilGround(int tps) {
+
+    Vector3D position{0,0,0};
+    Vector3D velocity{0,0,0};
+    Vector3D oldpos{0,0,0};
+    std::tie(position, velocity) = this->ComputeTrajectory(tps);
+    int cpt_iteration = 0;
+    while (position.y > this->mission->area->getY(position.x, position.z) == true && cpt_iteration<100000) {
+        oldpos = position;
+        std::tie(position, velocity) = this->ComputeTrajectory(tps);
+        if (oldpos.x == position.x && oldpos.y == position.y && oldpos.z == position.z && cpt_iteration>1000) {
+            printf("should not happen\n");
+            break;
+        }
+        cpt_iteration++;
+    }
+    return { position, velocity };
+}
 void GunSimulatedObject::Simulate(int tps) {
     
     // Actualisation des attributs de l'objet
