@@ -691,7 +691,7 @@ void SCStrike::SetMission(char const *missionName) {
     
     this->player_plane->InitLoadout();
     this->player_prof = this->current_mission->player->profile;
-    for (auto actor: this->current_mission->actors) {
+    /*for (auto actor: this->current_mission->actors) {
         SCAiPlane *aiPlane = new SCAiPlane();
         if (actor->actor_name == "PLAYER") {
             continue;
@@ -703,7 +703,7 @@ void SCStrike::SetMission(char const *missionName) {
             aiPlane->object = actor->object;
             this->ai_planes.push_back(aiPlane);
         }
-    }
+    }*/
     this->cockpit = new SCCockpit();
     this->cockpit->Init();
     this->cockpit->player_plane = this->player_plane;
