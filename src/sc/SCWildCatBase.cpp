@@ -87,13 +87,13 @@ void SCWildCatBase::RunFrame(void){
     CheckKeyboard();
     
     VGA.Activate();
-    VGA.Clear();
+    VGA.GetFrameBuffer()->Clear();
     
     VGA.SetPalette(&this->palette);
     
     //Draw static
-    VGA.DrawShape(&hangar);
-    VGA.DrawShape(&vehicule);
+    VGA.GetFrameBuffer()->DrawShape(&hangar);
+    VGA.GetFrameBuffer()->DrawShape(&vehicule);
     
     DrawButtons();
     

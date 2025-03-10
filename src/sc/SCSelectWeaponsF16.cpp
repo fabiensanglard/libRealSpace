@@ -50,12 +50,12 @@ void SCSelectWeaponF16::RunFrame(void){
     CheckButtons();
 
     VGA.Activate();
-    VGA.Clear();
+    VGA.GetFrameBuffer()->Clear();
 
     VGA.SetPalette(&this->palette);
 
     //Draw static
-    VGA.DrawShape(&background);
+    VGA.GetFrameBuffer()->DrawShape(&background);
     
 
     DrawButtons();

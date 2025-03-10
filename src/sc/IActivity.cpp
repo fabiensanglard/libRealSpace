@@ -82,6 +82,6 @@ void IActivity::DrawButtons(void) {
 
     for (auto button : buttons) {
         RLEShape ap = button->appearance[button->GetAppearance()];
-        VGA.DrawShape(&ap);
+        VGA.GetFrameBuffer()->DrawShape(&ap);
     }
 }

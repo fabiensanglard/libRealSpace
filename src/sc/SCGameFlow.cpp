@@ -138,7 +138,7 @@ SCZone *SCGameFlow::CheckZones(void) {
                     if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                         zone->OnAction();
                     Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
-                    VGA.PrintText(fnt, &p, (char *)zone->label->c_str(), color, 0,
+                    VGA.GetFrameBuffer()->PrintText(fnt, &p, (char *)zone->label->c_str(), color, 0,
                                   static_cast<uint32_t>(zone->label->length()), 3, 5);
                     return zone;
                 }
@@ -154,7 +154,7 @@ SCZone *SCGameFlow::CheckZones(void) {
                 if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                     zone->OnAction();
                 Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
-                VGA.PrintText(fnt, &p, (char *)zone->label->c_str(), color, 0,
+                VGA.GetFrameBuffer()->PrintText(fnt, &p, (char *)zone->label->c_str(), color, 0,
                               static_cast<uint32_t>(zone->label->length()), 3, 5);
 
                 return zone;
@@ -625,11 +625,11 @@ void SCGameFlow::RunFrame(void) {
     }
     CheckKeyboard();
     VGA.Activate();
-    VGA.FillWithColor(0);
+    VGA.GetFrameBuffer()->FillWithColor(0);
     if (this->scen != nullptr) {
         this->scen->Render();
         if (this->test_shape != nullptr) {
-            VGA.DrawShape(this->test_shape);
+            VGA.GetFrameBuffer()->DrawShape(this->test_shape);
         }
         this->CheckZones();
     }
@@ -637,7 +637,7 @@ void SCGameFlow::RunFrame(void) {
     this->RenderMenu();
     VGA.SwithBuffers();
     VGA.Activate();
-    VGA.Clear();
+    VGA.GetFrameBuffer()->Clear();
     Mouse.Draw();
     VGA.VSync();
     VGA.SwithBuffers();

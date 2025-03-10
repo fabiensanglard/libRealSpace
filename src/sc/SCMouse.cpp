@@ -53,12 +53,12 @@ void SCMouse::Draw(void){
     //If the mouse is over a clickable button, the current appearance has already been selected.
     if (mode == CURSOR){
         appearances[1]->SetPosition(&cursorPos);
-        VGA.DrawShape(appearances[1]);
+        VGA.GetFrameBuffer()->DrawShape(appearances[1]);
     }
     
     if (mode == VISOR){
         appearances[0]->SetPosition(&cursorPos);
-        VGA.DrawShape(appearances[0]);
+        VGA.GetFrameBuffer()->DrawShape(appearances[0]);
         
     }
 }

@@ -63,7 +63,7 @@ void SCMainMenu::Init(void) {
     TreArchive *gameFlow = Assets.tres[AssetManager::TRE_GAMEFLOW];
     TreEntry *entry = gameFlow->GetEntryByName(MAINMENU_PAK_PATH);
     mainMenupak.InitFromRAM("MAINMENU.PAK", entry->data, entry->size);
-
+    
     LoadPalette();
     LoadButtons();
     LoadBoard();
@@ -200,16 +200,16 @@ void SCMainMenu::RunFrame(void) {
     CheckButtons();
 
     VGA.Activate();
-    VGA.Clear();
+    VGA.GetFrameBuffer()->Clear();
 
     VGA.SetPalette(&this->palette);
 
     // Draw static
-    VGA.DrawShape(&sky);
-    VGA.DrawShape(&mountain);
-    VGA.DrawShape(&cloud);
+    VGA.GetFrameBuffer()->DrawShape(&sky);
+    VGA.GetFrameBuffer()->DrawShape(&mountain);
+    VGA.GetFrameBuffer()->DrawShape(&cloud);
 
-    VGA.DrawShape(&board);
+    VGA.GetFrameBuffer()->DrawShape(&board);
 
     DrawButtons();
 

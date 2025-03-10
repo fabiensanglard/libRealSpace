@@ -83,12 +83,12 @@ void SCRegister::RunFrame(void){
     CheckKeyboard();
     
     VGA.Activate();
-    VGA.Clear();
+    VGA.GetFrameBuffer()->Clear();
     
     VGA.SetPalette(&this->palette);
     
     //Draw static
-    VGA.DrawShape(&book);
+    VGA.GetFrameBuffer()->DrawShape(&book);
 
     
     DrawButtons();

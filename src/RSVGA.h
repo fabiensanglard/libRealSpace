@@ -11,9 +11,11 @@
 #include <Windows.h>
 #endif
 #include <GL/gl.h>
+
 #include "RLEShape.h"
 #include "RSFont.h"
 #include "Texture.h"
+#include "FrameBuffer.h"
 
 #define sgn(x) ((x<0)?-1:((x>0)?1:0))
 
@@ -32,34 +34,15 @@ public:
     void Activate(void);
     void SetPalette(VGAPalette* newPalette);
     VGAPalette* GetPalette(void);
-    
-    bool DrawShape(RLEShape* shape);
-    bool DrawShapeWithBox(RLEShape *shape, int bx1, int bx2, int by1, int by2);
-    void line(int x1, int y1, int x2, int y2, uint8_t color);
-    void lineWithSkip(int x1, int y1, int x2, int y2, uint8_t color, int skip);
-    void lineWithBox(int x1, int y1, int x2, int y2, uint8_t color, int bx1, int bx2, int by1, int by2);
-    void lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t color, int bx1, int bx2, int by1, int by2, int skip);
-    void rect_slow(int left, int top, int right, int bottom, uint8_t color);
-    void circle_slow(int x,int y, int radius, uint8_t color);
-    void PrintText(RSFont* font, Point2D* coo, char* text, uint8_t color,size_t start, uint32_t size,size_t interLetterSpace, size_t spaceSize);
-    void PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size, size_t interLetterSpace, size_t spaceSize, bool isSmall);
     void SwithBuffers();
     void VSync(void);
-    
-    void Clear(void);
-    void FillWithColor(uint8_t color);
-    inline uint8_t* GetFrameBuffer(void){ return frameBuffer;}
-    
-    void FillLineColor(size_t lineIndex, uint8_t color);
-    void plot_pixel(int x, int y, uint8_t color);
-    void blit(uint8_t* srcBuffer, int x, int y, int width, int height);
-    void blitLargeBuffer(uint8_t* srcBuffer, int srcWidth, int srcHeight, int srcX, int srcY, int destX, int destY, int width, int height);
+    FrameBuffer* GetFrameBuffer(void){ return frameBuffer;}
 private:
     
     VGAPalette palette;
-    uint8_t* frameBuffer;
-    uint8_t frameBufferA[320*200];
-    uint8_t frameBufferB[320*200];
+    FrameBuffer* frameBuffer;
+    FrameBuffer* frameBufferA;
+    FrameBuffer* frameBufferB;
     
     uint32_t textureID;
 };

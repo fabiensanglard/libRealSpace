@@ -287,13 +287,13 @@ void SCObjectViewer::RunFrame(void) {
     CheckButtons();
 
     VGA.Activate();
-    VGA.Clear();
+    VGA.GetFrameBuffer()->Clear();
     VGA.SetPalette(&this->palette);
 
     VGA.SetPalette(&this->palette);
 
     // Draw static
-    VGA.DrawShape(&bluePrint);
+    VGA.GetFrameBuffer()->DrawShape(&bluePrint);
 
     VGA.VSync();
 
@@ -341,10 +341,10 @@ void SCObjectViewer::RunFrame(void) {
 
     VGA.SwithBuffers();
     VGA.Activate();
-    VGA.Clear();
+    VGA.GetFrameBuffer()->Clear();
     VGA.SetPalette(&this->palette);
 
-    VGA.DrawShape(&title);
+    VGA.GetFrameBuffer()->DrawShape(&title);
 
     DrawButtons();
 

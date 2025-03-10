@@ -87,6 +87,7 @@ extern "C" {
     
     //VGA and Glide
     #include "RSScreen.h"
+    #include "FrameBuffer.h"
     #include "RSVGA.h"
     extern SCRenderer Renderer;
 #endif

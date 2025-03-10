@@ -110,13 +110,13 @@ void SCTrainingMenu::RunFrame(void) {
     CheckButtons();
 
     VGA.Activate();
-    VGA.Clear();
+    VGA.GetFrameBuffer()->Clear();
 
     VGA.SetPalette(&this->palette);
 
-    VGA.DrawShape(&background);
-    VGA.DrawShape(&title);
-    VGA.DrawShape(&board);
+    VGA.GetFrameBuffer()->DrawShape(&background);
+    VGA.GetFrameBuffer()->DrawShape(&title);
+    VGA.GetFrameBuffer()->DrawShape(&board);
 
     DrawButtons();
 

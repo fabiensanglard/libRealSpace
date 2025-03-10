@@ -69,9 +69,9 @@ void SCZone::Draw(void) {
         this->fps = (SDL_GetTicks() / 10);
     }
     if (this->sprite != nullptr) {
-        VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[0]));
+        VGA.GetFrameBuffer()->DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[0]));
         if (this->sprite->img->GetNumImages() > 1 && this->sprite->frames != nullptr) {
-            VGA.DrawShape(this->sprite->img->GetShape(this->sprite->frames->at(this->sprite->frameCounter)));
+            VGA.GetFrameBuffer()->DrawShape(this->sprite->img->GetShape(this->sprite->frames->at(this->sprite->frameCounter)));
             this->sprite->frameCounter =
                 (this->sprite->frameCounter + fpsupdate) % static_cast<uint8_t>(this->sprite->frames->size());
 
@@ -81,11 +81,11 @@ void SCZone::Draw(void) {
             if (this->sprite->frameCounter >= this->sprite->img->sequence.size()) {
                 this->sprite->frameCounter = 1;
             }
-            VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
+            VGA.GetFrameBuffer()->DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
             this->sprite->frameCounter += fpsupdate;
         } else if (this->sprite->img->sequence.size() > 1 && this->sprite->frames == nullptr &&
                     this->sprite->cliked == true && this->sprite->frameCounter < this->sprite->img->sequence.size()) {
-            VGA.DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
+            VGA.GetFrameBuffer()->DrawShape(this->sprite->img->GetShape(this->sprite->img->sequence[this->sprite->frameCounter]));
             if (this->sprite->active == true) {
                 this->sprite->frameCounter += fpsupdate;
                 if (this->sprite->frameCounter >= this->sprite->img->sequence.size()-1) {
@@ -99,21 +99,21 @@ void SCZone::Draw(void) {
 }
 void SCZone::drawQuad() {
     if (this->quad != nullptr) {
-        VGA.line(
+        VGA.GetFrameBuffer()->line(
             this->quad->at(0)->x,
             this->quad->at(0)->y,
             this->quad->at(1)->x,
             this->quad->at(1)->y,
             8
         );
-        VGA.line(
+        VGA.GetFrameBuffer()->line(
             this->quad->at(1)->x,
             this->quad->at(1)->y,
             this->quad->at(2)->x,
             this->quad->at(2)->y,
             8
         );
-        VGA.line(
+        VGA.GetFrameBuffer()->line(
             this->quad->at(2)->x,
             this->quad->at(2)->y,
             this->quad->at(3)->x,
@@ -121,7 +121,7 @@ void SCZone::drawQuad() {
             8
         );
 
-        VGA.line(
+        VGA.GetFrameBuffer()->line(
             this->quad->at(3)->x,
             this->quad->at(3)->y,
             this->quad->at(0)->x,
@@ -129,7 +129,7 @@ void SCZone::drawQuad() {
             25
         );
     } else {
-        VGA.rect_slow(
+        VGA.GetFrameBuffer()->rect_slow(
             this->position.x,
             this->position.y,
             this->position.x + this->dimension.x,

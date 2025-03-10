@@ -294,8 +294,8 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
     shape.Init(data, size);
     
     bool errorFound;
-    VGA.Clear();
-    errorFound = VGA.DrawShape(&shape);
+    VGA.GetFrameBuffer()->Clear();
+    errorFound = VGA.GetFrameBuffer()->DrawShape(&shape);
     if (!errorFound){
         VGA.VSync();
         Screen.Refresh();
@@ -323,8 +323,8 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
         shape.Init(data+nextImage, size);
         
         bool errorFound;
-        VGA.Clear();
-        errorFound = VGA.DrawShape(&shape);
+        VGA.GetFrameBuffer()->Clear();
+        errorFound = VGA.GetFrameBuffer()->DrawShape(&shape);
         if (!errorFound){
             VGA.VSync();
             Screen.Refresh();

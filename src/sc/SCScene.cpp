@@ -154,7 +154,7 @@ void SCScene::Render() {
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
     for (auto layer : this->layers) {
-        VGA.DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
+        VGA.GetFrameBuffer()->DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
         if (layer->img->sequence.size() > 1) {
             layer->frameCounter = (uint8_t)(layer->frameCounter + fpsupdate) % layer->img->sequence.size();
         }
@@ -702,7 +702,7 @@ void WeaponLoadoutScene::Render() {
     this->palette.ReadPatch(&paletteReader);
     VGA.SetPalette(&this->palette);
     for (auto layer : this->layers) {
-        VGA.DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
+        VGA.GetFrameBuffer()->DrawShape(layer->img->GetShape(layer->img->sequence[layer->frameCounter]));
         if (layer->img->sequence.size() > 1) {
             layer->frameCounter = (uint8_t)(layer->frameCounter + fpsupdate) % layer->img->sequence.size();
         }

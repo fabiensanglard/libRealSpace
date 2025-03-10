@@ -150,24 +150,24 @@ void SCAnimationPlayer::RunFrame(void){
     static int shot_counter = 0;
     CheckKeyboard();
     VGA.Activate();
-    VGA.Clear();
+    VGA.GetFrameBuffer()->Clear();
     VGA.SetPalette(&this->palette);
-    VGA.FillWithColor(0);
+    VGA.GetFrameBuffer()->FillWithColor(0);
 
     MIDGAME_SHOT *shot = this->midgames_shots[1][shot_counter];
 
     for (auto bg : shot->background) {
         if (bg->GetNumImages()>0) {
             for (auto shp: bg->shapes) {
-                VGA.DrawShape(shp);
+                VGA.GetFrameBuffer()->DrawShape(shp);
             }
         }
     }
     if (shot->foreground != nullptr) {
-        VGA.DrawShape(shot->foreground->GetShape(fps));
+        VGA.GetFrameBuffer()->DrawShape(shot->foreground->GetShape(fps));
     }
 
-    //VGA.DrawShape(shot->foreground->GetShape(0));
+    //VGA.GetFrameBuffer()->DrawShape(shot->foreground->GetShape(0));
     fps_counter++;
     if (fps_counter%5==0) {
         fps++;
