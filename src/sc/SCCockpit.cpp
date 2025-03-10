@@ -352,12 +352,12 @@ void SCCockpit::RenderHudHorizonLinesSmall() {
 }
 
 void SCCockpit::RenderMFDS(Point2D mfds) {
-
+    FrameBuffer *fb = VGA.GetFrameBuffer();
     this->cockpit->MONI.SHAP.SetPosition(&mfds);
     for (int i = 0; i < this->cockpit->MONI.SHAP.GetHeight(); i++) {
-        VGA.GetFrameBuffer()->line(mfds.x, mfds.y + i, mfds.x + this->cockpit->MONI.SHAP.GetWidth() - 1, mfds.y + i, 0);
+        fb->line(mfds.x, mfds.y + i, mfds.x+this->cockpit->MONI.SHAP.GetWidth(), mfds.y + i, 2);
     }
-    VGA.GetFrameBuffer()->DrawShape(&this->cockpit->MONI.SHAP);
+    fb->DrawShape(&this->cockpit->MONI.SHAP);
 }
 void SCCockpit::RenderTargetWithCam() {
     if (this->target != nullptr) {

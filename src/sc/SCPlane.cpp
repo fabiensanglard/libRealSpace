@@ -1115,7 +1115,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
         break;
         case 5:
         case 6:
-            thrustMagnitude = -planeSpeed * 17.0f;
+            thrustMagnitude = -planeSpeed * 20.0f;
             weap = new GunSimulatedObject();
         break;
         default:
@@ -1142,7 +1142,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     weap->shooter = this->pilot;
     
     if (this->weaps_load[weapon_hard_point_id]->nb_weap <= 0) {
-        weapon_hard_point_id = (int) this->object->entity->hpts.size()-1-weapon_hard_point_id;
+        weapon_hard_point_id = (int) this->object->entity->hpts.size()-weapon_hard_point_id;
         if (weapon_hard_point_id<=0) {
             return;
         }
@@ -1179,7 +1179,7 @@ void SCPlane::InitLoadout() {
         {ID_20MM, {0}},
         {ID_AIM9J, {4, 1, 2}},
         {ID_AIM9M, {4, 1, 2}},
-        {ID_AGM65D, {4, 1, 2}},
+        {ID_AGM65D, {2,3}},
         {ID_LAU3, {2,3}},
         {ID_MK20, {2,3}},
         {ID_MK82, {2,3}},
@@ -1306,7 +1306,7 @@ void SCPlane::InitLoadout() {
                         };
                         weap->hud_pos = {0, 0};
                         this->weaps_load[this->object->entity->hpts.size()-cpt_hpts] = weap;
-                        nbweap-=2;
+                        nbweap-=6;
                     }
                     cpt_hpts++;
                 }
@@ -1360,45 +1360,48 @@ void SCPlane::InitLoadout() {
                 nbweap = loadout->nb_weap;
                 while (nbweap>0) {
                     cpt_hpts = -1;
-                    for (int i=1;i<this->object->entity->hpts.size() && cpt_hpts == -1;i++) {
-                        auto hpt = this->object->entity->hpts[i];
-                        if (hpt->id == weap_map[loadout->objct->wdat->weapon_id][0]) {
-                            if (this->weaps_load[i] == nullptr) {
-                                cpt_hpts = i;
+                    int next_hpt = 0;
+                    for (int hpt_cpt_id=0; hpt_cpt_id < weap_map[loadout->objct->wdat->weapon_id].size(); hpt_cpt_id++) {
+                        next_hpt = 0;
+                        for (int i=1;i<this->object->entity->hpts.size() && cpt_hpts == -1;i++) {
+                            auto hpt = this->object->entity->hpts[i];
+                            if (hpt->id == weap_map[loadout->objct->wdat->weapon_id][hpt_cpt_id]) {
+                                if (this->weaps_load[i] == nullptr) {
+                                    cpt_hpts = i;
+                                }
                             }
                         }
+                        if (cpt_hpts == -1) {
+                            next_hpt = 1;
+                        }
+                        if (nbweap>0 && next_hpt == 0) {
+                            weap = new SCWeaponLoadoutHardPoint();
+                            weap->objct = loadout->objct;
+                            weap->nb_weap = 6;
+                            weap->hpts_type = this->object->entity->hpts[cpt_hpts]->id;
+                            weap->name = loadout->name;
+                            weap->position = {
+                                (float) this->object->entity->hpts[cpt_hpts]->x,
+                                (float) this->object->entity->hpts[cpt_hpts]->y,
+                                (float) this->object->entity->hpts[cpt_hpts]->z
+                            };
+                            weap->hud_pos = {0, 0};
+                            this->weaps_load[cpt_hpts] = weap;
+                            weap = new SCWeaponLoadoutHardPoint();
+                            weap->objct = loadout->objct;
+                            weap->nb_weap = 6;
+                            weap->hpts_type = this->object->entity->hpts[this->object->entity->hpts.size()-cpt_hpts]->id;
+                            weap->name = loadout->name;
+                            weap->position = {
+                                (float) this->object->entity->hpts[this->object->entity->hpts.size()-cpt_hpts]->x,
+                                (float) this->object->entity->hpts[this->object->entity->hpts.size()-cpt_hpts]->y,
+                                (float) this->object->entity->hpts[this->object->entity->hpts.size()-cpt_hpts]->z
+                            };
+                            weap->hud_pos = {0, 0};
+                            this->weaps_load[this->object->entity->hpts.size()-cpt_hpts] = weap;
+                            nbweap-=12;
+                        }
                     }
-                    if (cpt_hpts == -1) {
-                        nbweap = -1;
-                    }
-                    if (nbweap>0) {
-                        weap = new SCWeaponLoadoutHardPoint();
-                        weap->objct = loadout->objct;
-                        weap->nb_weap = 3;
-                        weap->hpts_type = this->object->entity->hpts[cpt_hpts]->id;
-                        weap->name = loadout->name;
-                        weap->position = {
-                            (float) this->object->entity->hpts[cpt_hpts]->x,
-                            (float) this->object->entity->hpts[cpt_hpts]->y,
-                            (float) this->object->entity->hpts[cpt_hpts]->z
-                        };
-                        weap->hud_pos = {0, 0};
-                        this->weaps_load[cpt_hpts] = weap;
-                        weap = new SCWeaponLoadoutHardPoint();
-                        weap->objct = loadout->objct;
-                        weap->nb_weap = 3;
-                        weap->hpts_type = this->object->entity->hpts[this->object->entity->hpts.size()-cpt_hpts]->id;
-                        weap->name = loadout->name;
-                        weap->position = {
-                            (float) this->object->entity->hpts[this->object->entity->hpts.size()-cpt_hpts]->x,
-                            (float) this->object->entity->hpts[this->object->entity->hpts.size()-cpt_hpts]->y,
-                            (float) this->object->entity->hpts[this->object->entity->hpts.size()-cpt_hpts]->z
-                        };
-                        weap->hud_pos = {0, 0};
-                        this->weaps_load[this->object->entity->hpts.size()-cpt_hpts] = weap;
-                        nbweap-=2;
-                    }
-                    cpt_hpts++;
                 }
             break;
             case ID_AIM120:

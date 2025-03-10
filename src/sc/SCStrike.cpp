@@ -657,39 +657,45 @@ void SCStrike::SetMission(char const *missionName) {
         this->player_plane->vz = -20;
         this->player_plane->Simulate();
     }
-    this->player_plane->object->entity->weaps.clear();
-    std::map<weapon_type_shp_id, std::string> weapon_names = {
-        {AIM9J, "SWINDERJ"},
-        {AIM9M, "SWINDERM"},
-        {AIM120, "AMRAAM"},
-        {AGM65D, "AGM-65D"},
-        {DURANDAL, "DURANDAL"},
-        {MK20, "MK20"},
-        {MK82, "MK82"},
-        {GBU15, "GBU-15G"},
-        {LAU3, "POD"}
-    };
-    RSEntity::WEAPS *weap = new RSEntity::WEAPS();
-    weap->name = "20MM";
-    weap->nb_weap = 1000;
-    weap->objct = LoadWeapon(weap->name);
-    this->player_plane->object->entity->weaps.push_back(weap);
-    std::map<weapon_type_shp_id, bool> loaded;
-    for (int i=1; i<5; i++) {
-        if (loaded.find(weapon_type_shp_id(GameState.weapon_load_out[i])) != loaded.end()) {
-            continue;
-        }
+    if (GameState.weapon_load_out.size()>1) {
+        this->player_plane->object->entity->weaps.clear();
+        std::map<weapon_type_shp_id, std::string> weapon_names = {
+            {AIM9J, "SWINDERJ"},
+            {AIM9M, "SWINDERM"},
+            {AIM120, "AMRAAM"},
+            {AGM65D, "AGM-65D"},
+            {DURANDAL, "DURANDAL"},
+            {MK20, "MK20"},
+            {MK82, "MK82"},
+            {GBU15, "GBU-15G"},
+            {LAU3, "POD"}
+        };
         RSEntity::WEAPS *weap = new RSEntity::WEAPS();
-        weap->name = weapon_names[weapon_type_shp_id(GameState.weapon_load_out[i])];
-        weap->nb_weap = GameState.weapon_load_out[GameState.weapon_load_out[i]];
+        weap->name = "20MM";
+        weap->nb_weap = 1000;
         weap->objct = LoadWeapon(weap->name);
         this->player_plane->object->entity->weaps.push_back(weap);
-        loaded[weapon_type_shp_id(GameState.weapon_load_out[i])] = true;
+        std::map<weapon_type_shp_id, bool> loaded;
+        for (int i=1; i<5; i++) {
+            if (loaded.find(weapon_type_shp_id(GameState.weapon_load_out[i])) != loaded.end()) {
+                continue;
+            }
+            RSEntity::WEAPS *weap = new RSEntity::WEAPS();
+            weap->name = weapon_names[weapon_type_shp_id(GameState.weapon_load_out[i])];
+            weap->nb_weap = GameState.weapon_load_out[GameState.weapon_load_out[i]];
+            weap->objct = LoadWeapon(weap->name);
+            this->player_plane->object->entity->weaps.push_back(weap);
+            loaded[weapon_type_shp_id(GameState.weapon_load_out[i])] = true;
+        }
     }
+    
     this->player_plane->InitLoadout();
     this->player_prof = this->current_mission->player->profile;
     for (auto actor: this->current_mission->actors) {
         SCAiPlane *aiPlane = new SCAiPlane();
+        if (actor->actor_name == "PLAYER") {
+            continue;
+        }
         if (actor->plane != nullptr) {
             aiPlane->plane = actor->plane;
             aiPlane->plane->InitLoadout();

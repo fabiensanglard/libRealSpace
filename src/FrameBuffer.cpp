@@ -34,7 +34,7 @@ bool FrameBuffer::DrawShapeWithBox(RLEShape *shape, int bx1, int bx2, int by1, i
 }
 void FrameBuffer::FillLineColor(size_t lineIndex, uint8_t color) { memset(this->framebuffer + lineIndex * 320, color, 320); }
 void FrameBuffer::plot_pixel(int x, int y, uint8_t color) {
-    if (x < 0 || x >= this->height || y < 0 || y >= this->height)
+    if (x < 0 || x >= this->width || y < 0 || y >= this->height)
         return;
     this->framebuffer[(y * this->width) + x] = color;
 }
@@ -73,9 +73,6 @@ void FrameBuffer::lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t co
     px = x1;
     py = y1;
 
-    if (px >= bx1 && px <= bx2 && py >= by1 && py <= by2) {
-        // this->framebuffer[(py << 8) + (py << 6) + px] = color;
-    }
 
     if (dxabs >= dyabs) /* the line is more horizontal than vertical */
     {
