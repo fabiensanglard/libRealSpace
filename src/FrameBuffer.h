@@ -25,6 +25,7 @@ public:
     void PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
                       size_t interLetterSpace, size_t spaceSize, bool isSmall);
     void blit(uint8_t *srcBuffer, int x, int y, int width, int height);
+    void blitWithMask(uint8_t *srcBuffer, int x, int y, int width, int height, uint8_t maxk);
     void blitLargeBuffer(uint8_t *srcBuffer, int srcWidth, int srcHeight, int srcX, int srcY, int destX, int destY,
                          int width, int height);
 };

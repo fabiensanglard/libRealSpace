@@ -9,8 +9,16 @@
 #ifndef __libRealSpace__SCAnimationPlayer__
 #define __libRealSpace__SCAnimationPlayer__
 
+typedef struct MIDGAME_SHOT_BG {
+    RSImageSet *image;
+    RSPalette *palette;
+    Point2D position_start;
+    Point2D position_end;
+    Point2D velocity;
+} MIDGAME_SHOT_BG;
+
 typedef struct MIDGAME_SHOT {
-    std::vector<RSImageSet *>background;
+    std::vector<MIDGAME_SHOT_BG *>background;
     RSPalette *palette_bg;
     RSImageSet *foreground;
     RSPalette *palette_fg;

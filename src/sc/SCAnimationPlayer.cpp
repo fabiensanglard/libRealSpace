@@ -82,18 +82,30 @@ void SCAnimationPlayer::Init(){
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
 
     MIDGAME_SHOT *shot = new MIDGAME_SHOT();
+    MIDGAME_SHOT_BG *bg;
+
     RSImageSet *tmp_img = new RSImageSet();
     PakArchive *pk = new PakArchive();
     pk->InitFromRAM("toto", this->optShps.GetEntry(OptionShapeID::SKY)->data, this->optShps.GetEntry(OptionShapeID::SKY)->size);
     tmp_img->InitFromPakArchive(pk,0);
-    shot->background.push_back(tmp_img);
+    bg = new MIDGAME_SHOT_BG();
+    bg->image = tmp_img;
+    bg->position_start = Point2D{0,-32};
+    bg->position_end = Point2D{0,0};
+    bg->velocity = Point2D{0,0};
+    shot->background.push_back(bg);
 
     
     pk = new PakArchive();
     tmp_img = new RSImageSet();
     pk->InitFromRAM("toto", this->midgames.GetEntry(20)->data, this->midgames.GetEntry(20)->size);
     tmp_img->InitFromPakArchive(pk,0);
-    shot->background.push_back(tmp_img);
+    bg = new MIDGAME_SHOT_BG();
+    bg->image = tmp_img;
+    bg->position_start = Point2D{0,-32};
+    bg->position_end = Point2D{0,0};
+    bg->velocity = Point2D{0,0};
+    shot->background.push_back(bg);
 
     pk = new PakArchive();
     tmp_img = new RSImageSet();
@@ -107,14 +119,24 @@ void SCAnimationPlayer::Init(){
     pk = new PakArchive();
     pk->InitFromRAM("toto", this->optShps.GetEntry(OptionShapeID::SKY)->data, this->optShps.GetEntry(OptionShapeID::SKY)->size);
     tmp_img->InitFromPakArchive(pk,0);
-    shot->background.push_back(tmp_img);
+    bg = new MIDGAME_SHOT_BG();
+    bg->image = tmp_img;
+    bg->position_start = Point2D{0,0};
+    bg->position_end = Point2D{0,0};
+    bg->velocity = Point2D{0,0};
+    shot->background.push_back(bg);
 
     
     pk = new PakArchive();
     tmp_img = new RSImageSet();
     pk->InitFromRAM("toto", this->midgames.GetEntry(20)->data, this->midgames.GetEntry(20)->size);
     tmp_img->InitFromPakArchive(pk,0);
-    shot->background.push_back(tmp_img);
+    bg = new MIDGAME_SHOT_BG();
+    bg->image = tmp_img;
+    bg->position_start = Point2D{0,64};
+    bg->position_end = Point2D{0,0};
+    bg->velocity = Point2D{0,0};
+    shot->background.push_back(bg);
 
 
     /*tmp_img = new RSImageSet();
@@ -126,7 +148,12 @@ void SCAnimationPlayer::Init(){
     
     tmp_img = new RSImageSet();
     tmp_img->InitFromPakEntry(this->midgames.GetEntry(19));
-    shot->background.push_back(tmp_img);
+    bg = new MIDGAME_SHOT_BG();
+    bg->image = tmp_img;
+    bg->position_start = Point2D{0,32};
+    bg->position_end = Point2D{0,0};
+    bg->velocity = Point2D{0,0};
+    shot->background.push_back(bg);
 
 
     pk = new PakArchive();
@@ -148,23 +175,32 @@ void SCAnimationPlayer::RunFrame(void){
     static int fps_counter = 0;
     static int fps = 0;
     static int shot_counter = 0;
+    
     CheckKeyboard();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
     VGA.SetPalette(&this->palette);
-    VGA.GetFrameBuffer()->FillWithColor(0);
+    FrameBuffer *fb = VGA.GetFrameBuffer();
+    fb->FillWithColor(0);
+    
 
     MIDGAME_SHOT *shot = this->midgames_shots[1][shot_counter];
 
     for (auto bg : shot->background) {
-        if (bg->GetNumImages()>0) {
-            for (auto shp: bg->shapes) {
-                VGA.GetFrameBuffer()->DrawShape(shp);
+        if (bg->image->GetNumImages()>0) {
+            for (auto shp: bg->image->shapes) {
+                FrameBuffer *texture = new FrameBuffer(320, 200);
+                texture->FillWithColor(255);
+                texture->DrawShape(shp);
+                fb->blitWithMask(texture->framebuffer, bg->position_start.x, bg->position_start.y, 320, 200,255);
             }
         }
     }
     if (shot->foreground != nullptr) {
-        VGA.GetFrameBuffer()->DrawShape(shot->foreground->GetShape(fps));
+        FrameBuffer *texture = new FrameBuffer(320, 200);
+        texture->FillWithColor(255);
+        texture->DrawShape(shot->foreground->GetShape(fps));
+        fb->blitWithMask(texture->framebuffer, 0, 0, 320, 200,255);
     }
 
     //VGA.GetFrameBuffer()->DrawShape(shot->foreground->GetShape(0));

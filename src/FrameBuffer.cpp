@@ -229,6 +229,30 @@ void FrameBuffer::blit(uint8_t* srcBuffer, int x, int y, int width, int height) 
         }
     }
 }
+void FrameBuffer::blitWithMask(uint8_t* srcBuffer, int x, int y, int width, int height, uint8_t maxk) {
+    int startRow = 0;
+    int startCol = 0;
+    if (y < 0) {
+        startRow = -y;
+    }
+    if (x < 0) {
+        startCol = -x;
+    }
+    for (int row = startRow; row < height; ++row) {
+        int destRow = y + row;
+        if (destRow < 0 || destRow >= this->height)
+            continue;
+        int destOffset = destRow * this->width;
+        for (int col = startCol; col < width; ++col) {
+            int destCol = x + col;
+            if (destCol < 0 || destCol >= this->width)
+                continue;
+            if (srcBuffer[row * width + col] == maxk) 
+                continue;
+            framebuffer[destOffset + destCol] = srcBuffer[row * width + col];
+        }
+    }
+}
 void FrameBuffer::blitLargeBuffer(uint8_t* srcBuffer, int srcWidth, int srcHeight, int srcX, int srcY, int destX, int destY, int width, int height) {
 
     for (int row = 0; row < height; ++row) {
