@@ -81,88 +81,82 @@ void SCAnimationPlayer::Init(){
     );
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
 
-    MIDGAME_SHOT *shot = new MIDGAME_SHOT();
-    MIDGAME_SHOT_BG *bg;
+    MIDGAME_DATA mid1Data = {
+        {
+            {   // Shot 1
+                {   // Background
+                    { &this->optShps, OptionShapeID::SKY, 255, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} },
+                    { &this->midgames, 20, 255, 0, {0,-32}, {0,0}, {0,0} }
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                }, 
+                {   // Forground
+                    { this->mid[0], 3, 255, 0, {0,-32}, {0,0}, {0,0} }
+                },
+                15
+            },
+            {   // Shot 2
+                {   // Background
+                    { &this->optShps, OptionShapeID::SKY, 255, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} },
+                    { &this->midgames, 20, 255, 0, {0,-32}, {0,0}, {0,0} },
+                    { &this->midgames, 19, 0, 0, {0,-32}, {0,0}, {0,0} },
+                    { &this->optShps, OptionShapeID::MOUTAINS_BG, 255, 0, {0,-32}, {0,0}, {0,0} },
+                    { &this->midgames, 19, 1, 0, {0,-32}, {0,0}, {0,0} },
+                    { &this->midgames, 19, 2, 0, {0,-32}, {0,0}, {0,0} }
+                },
+                {   // Middle (vide)
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                },
+                {   // Forground (vide)
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                },
+                15
+            },
+            {   // Shot 3
+                {   // Background
+                    { &this->optShps, SKY, 255, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} },
+                    { &this->midgames, 20, 255, 0, {0,-32}, {0,0}, {0,0} },
+                    { &this->midgames, 19, 0, 0, {0,-32}, {0,0}, {0,0} },
+                    { &this->optShps, MOUTAINS_BG, 255, 0, {0,-32}, {0,0}, {0,0} },
+                    { &this->midgames, 19, 1, 0, {0,-32}, {0,0}, {0,0} },
+                    { &this->midgames, 19, 2, 0, {0,-32}, {0,0}, {0,0} }
+                },
+                {   // Middle (vide)
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                },
+                {   // Forground
+                    { this->mid[0], 13, 255, 0, {0,-32}, {0,0}, {0,0} }
+                },
+                15
+            }
+        }
+    };
 
-    RSImageSet *tmp_img = new RSImageSet();
-    PakArchive *pk = new PakArchive();
-    pk->InitFromRAM("toto", this->optShps.GetEntry(OptionShapeID::SKY)->data, this->optShps.GetEntry(OptionShapeID::SKY)->size);
-    tmp_img->InitFromPakArchive(pk,0);
-    bg = new MIDGAME_SHOT_BG();
-    bg->image = tmp_img;
-    bg->position_start = Point2D{0,-32};
-    bg->position_end = Point2D{0,0};
-    bg->velocity = Point2D{0,0};
-    shot->background.push_back(bg);
-
+    for (auto sht: mid1Data.shots) {
+        MIDGAME_SHOT *shot = new MIDGAME_SHOT();
     
-    pk = new PakArchive();
-    tmp_img = new RSImageSet();
-    pk->InitFromRAM("toto", this->midgames.GetEntry(20)->data, this->midgames.GetEntry(20)->size);
-    tmp_img->InitFromPakArchive(pk,0);
-    bg = new MIDGAME_SHOT_BG();
-    bg->image = tmp_img;
-    bg->position_start = Point2D{0,-32};
-    bg->position_end = Point2D{0,0};
-    bg->velocity = Point2D{0,0};
-    shot->background.push_back(bg);
+        for (auto shot_bg: sht.background) {
+            MIDGAME_SHOT_BG *bg = new MIDGAME_SHOT_BG();
+            RSImageSet *tmp_img = new RSImageSet();
+            PakArchive *pk = new PakArchive();
+            PakEntry *pe = shot_bg.pak->GetEntry(shot_bg.shape_id);
+            pk->InitFromRAM("toto", pe->data, pe->size);
+            tmp_img->InitFromPakArchive(pk,0);
+            bg->image = tmp_img;
+            bg->position_start = shot_bg.start;
+            bg->position_end = shot_bg.end;
+            bg->velocity = shot_bg.velocity;
+            shot->background.push_back(bg);
+        }
+        if (sht.forground.size()>0 && sht.forground[0].pak != nullptr) {
+            RSImageSet *tmp_img = new RSImageSet();
+            tmp_img->InitFromPakEntry(sht.forground[0].pak->GetEntry(sht.forground[0].shape_id));
+            shot->foreground = tmp_img;
+        }
+        this->midgames_shots[1].push_back(shot);
+    }
 
-    pk = new PakArchive();
-    tmp_img = new RSImageSet();
-    pk->InitFromRAM("toto", this->mid[0]->GetEntry(3)->data, this->mid[0]->GetEntry(3)->size);
-    tmp_img->InitFromPakEntry(this->mid[0]->GetEntry(3));
-    shot->foreground = tmp_img;
-    this->midgames_shots[1].push_back(shot);
-
-    shot = new MIDGAME_SHOT();
-    tmp_img = new RSImageSet();
-    pk = new PakArchive();
-    pk->InitFromRAM("toto", this->optShps.GetEntry(OptionShapeID::SKY)->data, this->optShps.GetEntry(OptionShapeID::SKY)->size);
-    tmp_img->InitFromPakArchive(pk,0);
-    bg = new MIDGAME_SHOT_BG();
-    bg->image = tmp_img;
-    bg->position_start = Point2D{0,0};
-    bg->position_end = Point2D{0,0};
-    bg->velocity = Point2D{0,0};
-    shot->background.push_back(bg);
-
-    
-    pk = new PakArchive();
-    tmp_img = new RSImageSet();
-    pk->InitFromRAM("toto", this->midgames.GetEntry(20)->data, this->midgames.GetEntry(20)->size);
-    tmp_img->InitFromPakArchive(pk,0);
-    bg = new MIDGAME_SHOT_BG();
-    bg->image = tmp_img;
-    bg->position_start = Point2D{0,64};
-    bg->position_end = Point2D{0,0};
-    bg->velocity = Point2D{0,0};
-    shot->background.push_back(bg);
-
-
-    /*tmp_img = new RSImageSet();
-    pk = new PakArchive();
-    pk->InitFromRAM("toto", this->optShps.GetEntry(OptionShapeID::MOUTAINS_BG)->data, this->optShps.GetEntry(OptionShapeID::MOUTAINS_BG)->size);
-    tmp_img->InitFromPakArchive(pk,0);
-    shot->background.push_back(tmp_img);*/
-
-    
-    tmp_img = new RSImageSet();
-    tmp_img->InitFromPakEntry(this->midgames.GetEntry(19));
-    bg = new MIDGAME_SHOT_BG();
-    bg->image = tmp_img;
-    bg->position_start = Point2D{0,32};
-    bg->position_end = Point2D{0,0};
-    bg->velocity = Point2D{0,0};
-    shot->background.push_back(bg);
-
-
-    pk = new PakArchive();
-    tmp_img = new RSImageSet();
-    pk->InitFromRAM("toto", this->mid[0]->GetEntry(13)->data, this->mid[0]->GetEntry(3)->size);
-    tmp_img->InitFromPakEntry(this->mid[0]->GetEntry(13));
-    shot->foreground = tmp_img;
-
-    this->midgames_shots[1].push_back(shot);
 
     VGAPalette *rendererPalette = VGA.GetPalette();
     this->palette = *rendererPalette;
@@ -207,7 +201,7 @@ void SCAnimationPlayer::RunFrame(void){
     fps_counter++;
     if (fps_counter%5==0) {
         fps++;
-        if (fps > shot->foreground->GetNumImages()-1) {
+        if (shot->foreground==nullptr || fps > shot->foreground->GetNumImages()-1) {
             fps = 0;
             shot_counter++;
             if (shot_counter>this->midgames_shots.size()) {
