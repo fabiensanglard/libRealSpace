@@ -15,6 +15,7 @@ typedef struct MIDGAME_SHOT_BG {
     Point2D position_start;
     Point2D position_end;
     Point2D velocity;
+    int shapeid;
 } MIDGAME_SHOT_BG;
 
 typedef struct MIDGAME_SHAPE_DATA {
@@ -27,18 +28,25 @@ typedef struct MIDGAME_SHAPE_DATA {
     Point2D velocity;
 } MIDGAME_SHAPE_DATA;
 
+typedef struct MIDGAME_SHOT_SPRITE {
+    RSImageSet *image;
+    RSPalette *palette;
+    Point2D position_start;
+    Point2D position_end;
+    Point2D velocity;
+    int shapeid;
+} MIDGAME_SHOT_SPRITE;
+
 typedef struct MIDGAME_SHOT {
     std::vector<MIDGAME_SHOT_BG *>background;
-    RSPalette *palette_bg{nullptr};
-    RSImageSet *foreground{nullptr};
-    RSPalette *palette_fg{nullptr};
+    MIDGAME_SHOT_SPRITE *sprites{nullptr};
     int nbframe{0};
 } MIDGAME_SHOT;
 
 typedef struct MIDGAME_DATA_SHOT {
     std::vector<MIDGAME_SHAPE_DATA> background;
-    std::vector<MIDGAME_SHAPE_DATA> middle;
     std::vector<MIDGAME_SHAPE_DATA> forground;
+    std::vector<MIDGAME_SHAPE_DATA> sprites;
     int nbframe;
 } MIDGAME_DATA_SHOT;
 
