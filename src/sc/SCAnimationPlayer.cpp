@@ -154,6 +154,7 @@ void SCAnimationPlayer::Init(){
             tmp_img->InitFromPakEntry(sht.forground[0].pak->GetEntry(sht.forground[0].shape_id));
             shot->foreground = tmp_img;
         }
+        shot->nbframe = sht.nbframe;
         this->midgames_shots[1].push_back(shot);
     }
 
@@ -201,10 +202,19 @@ void SCAnimationPlayer::RunFrame(void){
     fps_counter++;
     if (fps_counter%5==0) {
         fps++;
-        if (shot->foreground==nullptr || fps > shot->foreground->GetNumImages()-1) {
+        
+        if (shot->foreground!=nullptr && fps > shot->foreground->GetNumImages()-1) {
             fps = 0;
             shot_counter++;
-            if (shot_counter>this->midgames_shots.size()) {
+            if (shot_counter>this->midgames_shots[1].size()-1) {
+                shot_counter = 0;
+                Game.StopTopActivity();
+            }
+        } else if (shot->foreground==nullptr && fps > shot->nbframe) {
+            fps = 0;
+            shot_counter++;
+            if (shot_counter>this->midgames_shots[1].size()-1) {
+                shot_counter = 0;
                 Game.StopTopActivity();
             }
         }

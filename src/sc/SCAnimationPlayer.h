@@ -32,6 +32,7 @@ typedef struct MIDGAME_SHOT {
     RSPalette *palette_bg{nullptr};
     RSImageSet *foreground{nullptr};
     RSPalette *palette_fg{nullptr};
+    int nbframe{0};
 } MIDGAME_SHOT;
 
 typedef struct MIDGAME_DATA_SHOT {
