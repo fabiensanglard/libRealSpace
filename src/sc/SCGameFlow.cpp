@@ -138,8 +138,16 @@ SCZone *SCGameFlow::CheckZones(void) {
                     if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                         zone->OnAction();
                     Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
-                    VGA.GetFrameBuffer()->PrintText(fnt, &p, (char *)zone->label->c_str(), color, 0,
-                                  static_cast<uint32_t>(zone->label->length()), 3, 5);
+                    VGA.GetFrameBuffer()->PrintText(
+                        fnt,
+                        &p,
+                        (char *)zone->label->c_str(),
+                        color,
+                        0,
+                        static_cast<uint32_t>(zone->label->length()),
+                        3,
+                        5
+                    );
                     return zone;
                 }
             }
@@ -154,8 +162,16 @@ SCZone *SCGameFlow::CheckZones(void) {
                 if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                     zone->OnAction();
                 Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
-                VGA.GetFrameBuffer()->PrintText(fnt, &p, (char *)zone->label->c_str(), color, 0,
-                              static_cast<uint32_t>(zone->label->length()), 3, 5);
+                VGA.GetFrameBuffer()->PrintText(
+                    fnt,
+                    &p, 
+                    (char *)zone->label->c_str(),
+                    color,
+                    0,
+                    static_cast<uint32_t>(zone->label->length()),
+                    3,
+                    5
+                );
 
                 return zone;
             }

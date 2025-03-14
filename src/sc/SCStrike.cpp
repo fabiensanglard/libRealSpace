@@ -1095,7 +1095,7 @@ void SCStrike::RenderMenu() {
         if (ImGui::BeginCombo("Music list", 0, 0)) {
             for (int i = 0; i < Mixer.music->musics[2].size(); i++) {
                 if (ImGui::Selectable(std::to_string(i).c_str(), false))
-                   Mixer.PlayMusic(i);
+                    Mixer.PlayMusic(i);
             }
             ImGui::EndCombo();
         }

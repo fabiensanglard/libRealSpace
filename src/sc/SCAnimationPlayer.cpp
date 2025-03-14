@@ -8,7 +8,9 @@
 
 #include "precomp.h"
 #include "SCAnimationPlayer.h"
-
+#include <imgui.h>
+#include <imgui_impl_opengl2.h>
+#include <imgui_impl_sdl2.h>
 
 SCAnimationPlayer::SCAnimationPlayer(){
     
@@ -148,7 +150,11 @@ void SCAnimationPlayer::Init(){
                 tmp_img = new RSImageSet();
                 tmp_img->InitFromPakEntry(pe);
             }
+            bg->palette = shot_bg.pal_id;
             bg->image = tmp_img;
+            if (tmp_img->palettes.size()>0) {
+                bg->pal = tmp_img->palettes[0];
+            }
             bg->shapeid = shot_bg.sub_shape_id;
             bg->position_start = shot_bg.start;
             bg->position_end = shot_bg.end;
@@ -160,6 +166,9 @@ void SCAnimationPlayer::Init(){
             RSImageSet *tmp_img = new RSImageSet();
             tmp_img->InitFromPakEntry(sht.sprites[0].pak->GetEntry(sht.sprites[0].shape_id));
             sprite->image = tmp_img;
+            if (tmp_img->palettes.size()>0) {
+                sprite->pal = tmp_img->palettes[0];
+            }
             sprite->position_start = sht.sprites[0].start;
             sprite->position_end = sht.sprites[0].end;
             sprite->velocity = sht.sprites[0].velocity;
@@ -170,17 +179,14 @@ void SCAnimationPlayer::Init(){
     }
 
 
-    VGAPalette *rendererPalette = VGA.GetPalette();
-    this->palette = *rendererPalette;
-    ByteStream paletteReader;
-    paletteReader.Set(this->optPals.GetEntry(OPTPALS_PAK_SKY_PALETTE_PATCH_ID)->data); // Sky Good but not mountains
-    this->palette.ReadPatch(&paletteReader);
+    this->palette = *VGA.GetPalette();
+    this->shot_counter = 0;
+    this->fps_counter = 0;
+    this->fps = 0;
 }
 
 void SCAnimationPlayer::RunFrame(void){
-    static int fps_counter = 0;
-    static int fps = 0;
-    static int shot_counter = 0;
+
     
     CheckKeyboard();
     VGA.Activate();
@@ -209,7 +215,16 @@ void SCAnimationPlayer::RunFrame(void){
                     bg->position_start.y += bg->velocity.y;
                 }
             }
-            
+            if (bg->palette != 0) {
+                ByteStream paletteReader;
+                paletteReader.Set(this->optPals.GetEntry(bg->palette)->data);
+                this->palette.ReadPatch(&paletteReader);
+                VGA.SetPalette(&this->palette);
+            }
+            if (bg->pal != nullptr) {
+                this->palette.ReadPatch(bg->pal->GetColorPalette());
+                VGA.SetPalette(&this->palette);
+            }
         }
     }
     if (shot->sprites != nullptr) {
@@ -217,9 +232,18 @@ void SCAnimationPlayer::RunFrame(void){
         texture->FillWithColor(255);
         texture->DrawShape(shot->sprites->image->GetShape(fps));
         fb->blitWithMask(texture->framebuffer, shot->sprites->position_start.x, shot->sprites->position_start.y, 320, 200,255);
+        if (shot->sprites->palette != 0) {
+            ByteStream paletteReader;
+            paletteReader.Set(this->optPals.GetEntry(shot->sprites->palette)->data);
+            this->palette.ReadPatch(&paletteReader);
+            VGA.SetPalette(&this->palette);
+        }
+        if (shot->sprites->pal != nullptr) {
+            this->palette.ReadPatch(shot->sprites->pal->GetColorPalette());
+            VGA.SetPalette(&this->palette);
+        }
     }
-
-    //VGA.GetFrameBuffer()->DrawShape(shot->foreground->GetShape(0));
+    
     fps_counter++;
     if (fps_counter%5==0) {
         fps++;
@@ -229,14 +253,14 @@ void SCAnimationPlayer::RunFrame(void){
             shot_counter++;
             if (shot_counter>this->midgames_shots[1].size()-1) {
                 shot_counter = 0;
-                Game.StopTopActivity();
+                //Game.StopTopActivity();
             }
         } else if (shot->sprites==nullptr && fps > shot->nbframe) {
             fps = 0;
             shot_counter++;
             if (shot_counter>this->midgames_shots[1].size()-1) {
                 shot_counter = 0;
-                Game.StopTopActivity();
+                //Game.StopTopActivity();
             }
         }
     }
@@ -245,6 +269,18 @@ void SCAnimationPlayer::RunFrame(void){
 
     for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
         VGA.GetFrameBuffer()->FillLineColor(199 - i, 0x00);
-    Mouse.Draw();
     VGA.VSync();
+    this->RenderMenu();
+}
+void SCAnimationPlayer::RenderMenu() {
+    ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
+    ImGui_ImplOpenGL2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+    if (ImGui::BeginMainMenuBar()) {
+        ImGui::Text("Animation Player frame: %d, fps: %d, shot: %d", this->fps_counter, this->fps, this->shot_counter);
+        ImGui::EndMainMenuBar();
+    }
+    ImGui::Render();
+    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }

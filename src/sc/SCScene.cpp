@@ -6,8 +6,7 @@
 
 #pragma warning(disable : 4996)
 template<typename ... Args>
-std::string string_format( const std::string& format, Args ... args )
-{
+std::string string_format( const std::string& format, Args ... args ) {
     int size_s = std::snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
     if( size_s <= 0 ){ throw std::runtime_error( "Error during formatting." ); }
     auto size = static_cast<size_t>( size_s );
@@ -272,7 +271,7 @@ SCZone *WeaponLoadoutScene::addExtraZone(uint8_t id) {
     sprt->id = extr->EXTR_ID;
     z->sprite = sprt;
     return (z);
- }
+}
 
  SCZone *WeaponLoadoutScene::addNoGfXZone(uint8_t id, std::string label, uint8_t weapon_type_shp_id) { 
     SCZone *z{nullptr};
@@ -325,7 +324,7 @@ SCZone *WeaponLoadoutScene::addExtraZone(uint8_t id) {
     z->label = new std::string(label);
     z->onclick = std::bind(&WeaponLoadoutScene::removeWeapon, this, std::placeholders::_1, std::placeholders::_2);
     return (z);
- }
+}
 
  void WeaponLoadoutScene::addWeapon(std::vector<EFCT *> *script, uint8_t id) {
     // Réinitialiser les zones supplémentaires

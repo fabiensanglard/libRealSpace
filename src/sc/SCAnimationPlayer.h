@@ -11,7 +11,8 @@
 
 typedef struct MIDGAME_SHOT_BG {
     RSImageSet *image;
-    RSPalette *palette;
+    uint8_t palette;
+    RSPalette *pal;
     Point2D position_start;
     Point2D position_end;
     Point2D velocity;
@@ -30,7 +31,8 @@ typedef struct MIDGAME_SHAPE_DATA {
 
 typedef struct MIDGAME_SHOT_SPRITE {
     RSImageSet *image;
-    RSPalette *palette;
+    RSPalette *pal;
+    uint8_t palette{0};
     Point2D position_start;
     Point2D position_end;
     Point2D velocity;
@@ -61,14 +63,17 @@ private:
     PakArchive optShps;
     PakArchive optPals;
     std::vector<PakArchive*> mid;
-
     std::map<uint8_t, std::vector<MIDGAME_SHOT *>> midgames_shots;
+    int shot_counter{0};
+    int fps_counter{0};
+    int fps{0};
 public:
     SCAnimationPlayer();
     ~SCAnimationPlayer();
     void CheckKeyboard(void);
     void Init();
     void RunFrame(void);
+    void RenderMenu();
 };
 
 #endif /* defined(__libRealSpace__SCAnimationPlayer__) */

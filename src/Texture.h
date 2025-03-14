@@ -20,6 +20,7 @@ extern "C" {
 #endif
 #include "ByteStream.h"
 
+class RSPalette;
 typedef struct {
     uint8_t r;
     uint8_t g;
@@ -79,6 +80,19 @@ typedef struct VGAPalette{
             colors[offset+i].a = 255 ;
         }
         
+    }
+    void ReadPatch(VGAPalette* other){
+        int i=-1;
+        for (auto c : other->colors){
+            i++;
+            if (c.r == 0 && c.g == 255 && c.b == 0){
+                continue;
+            }
+            if (c.r == 255 && c.g == 0 && c.b == 255){
+                continue;
+            }
+            colors[i] = c;
+        }
     }
     
 } VGAPalette ;

@@ -24,10 +24,6 @@ public:
     
     void InitFromIFF(IffLexer* lexer);
     
-    
-    
-    
-    
     VGAPalette* GetColorPalette(void);
     void SetColorFlag(uint32_t flag);
     
