@@ -94,9 +94,35 @@ void SCAnimationPlayer::Init(){
                     {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
                 }, 
                 {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                },
+                15
+            },
+            {   // Shot 1
+                {
+                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} },
+                    { &this->midgames, 20, 0, 0, {0,0}, {0,0}, {0,0} }
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                }, 
+                {
                     { this->mid[0], 3, 0, 0, {0,32}, {0,0}, {0,0} }
                 },
                 15
+            },
+            {   // Shot 1
+                {
+                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} },
+                    { &this->midgames, 20, 0, 0, {0,0}, {0,0}, {0,0} }
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                }, 
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                },
+                64
             },
             {   // Shot 2
                 {
@@ -104,8 +130,8 @@ void SCAnimationPlayer::Init(){
                     { &this->midgames, 20, 0, 0, {0,0}, {0,-32}, {0,-1} },
                     { &this->midgames, 19, 1, 0, {0,151}, {0,119}, {0,-1} },
                     { &this->optShps, OptionShapeID::MOUTAINS_BG, 0, 0, {0,16}, {0,-16}, {0,-1} },
-                    { &this->midgames, 19, 2, 0, {0,151}, {0,119}, {0,-2} },
-                    { &this->midgames, 19, 3, 0, {0,151}, {0,90}, {0,-3} }
+                    { &this->midgames, 19, 2, 0, {0,183}, {0,119}, {0,-2} },
+                    { &this->midgames, 19, 3, 0, {0,186}, {0,90}, {0,-3} }
                 },
                 {
                     {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
