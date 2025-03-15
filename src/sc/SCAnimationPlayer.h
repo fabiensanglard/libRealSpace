@@ -41,11 +41,18 @@ typedef struct MIDGAME_SHOT_SPRITE {
     uint8_t keep_first_frame;
 } MIDGAME_SHOT_SPRITE;
 
+typedef struct MIDGAME_SOUND {
+    uint8_t *data;
+    size_t size;
+} MIDGAME_SOUND;
+
 typedef struct MIDGAME_SHOT {
     std::vector<MIDGAME_SHOT_BG *>background;
-    MIDGAME_SHOT_SPRITE *sprites{nullptr};
+    std::vector<MIDGAME_SHOT_SPRITE *>sprites;
     int nbframe{0};
     int music{255};
+    MIDGAME_SOUND *sound{nullptr};
+    int sound_time_code{0};
 } MIDGAME_SHOT;
 
 typedef struct MIDGAME_DATA_SHOT {
@@ -54,6 +61,8 @@ typedef struct MIDGAME_DATA_SHOT {
     std::vector<MIDGAME_SHAPE_DATA> sprites;
     int nbframe;
     uint8_t music{255};
+    PakEntry *sound{nullptr};
+    int sound_time_code{0};
 } MIDGAME_DATA_SHOT;
 
 typedef struct MIDGAME_DATA {
@@ -67,6 +76,7 @@ private:
     PakArchive optShps;
     PakArchive optPals;
     std::vector<PakArchive*> mid;
+    std::vector<PakArchive*> midvoc;
     std::map<uint8_t, std::vector<MIDGAME_SHOT *>> midgames_shots;
     int shot_counter{0};
     int fps_counter{0};

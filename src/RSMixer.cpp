@@ -36,3 +36,15 @@ void RSMixer::StopMusic() {
     Mix_HaltMusic();
     this->isplaying = false;
 }
+void RSMixer::PlaySoundVoc(uint8_t *data, size_t vocSize) {
+    SDL_RWops* rw = SDL_RWFromConstMem(data, static_cast<int>(vocSize));
+    Mix_Chunk* chunk = Mix_LoadWAV_RW(rw, 1);
+    if (!chunk) {
+        printf("Error loading VOC sound: %s\n", Mix_GetError());
+        return;
+    }
+    int channel = Mix_PlayChannel(-1, chunk, 0);
+    if (channel == -1) {
+        printf("Error playing VOC sound: %s\n", Mix_GetError());
+    }
+}

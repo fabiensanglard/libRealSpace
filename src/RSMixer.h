@@ -22,5 +22,6 @@ public:
     void SwitchBank(uint8_t bank);
     void StopMusic();
     uint32_t GetMusicID() { return this->current_music; };
+    void PlaySoundVoc(uint8_t *data, size_t vocSize);
     RSMusic *music;
 };
