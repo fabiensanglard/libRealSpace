@@ -60,7 +60,7 @@ SCButton *IActivity::CheckButtons(void) {
             button->SetAppearance(SCButton::APR_UP);
             continue;
         }
-
+        this->timer = 4200;
         // HIT !
         Mouse.SetMode(SCMouse::VISOR);
 

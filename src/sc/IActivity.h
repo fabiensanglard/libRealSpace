@@ -18,7 +18,7 @@ private:
 protected:
     bool music_playing;
     bool focused;
-    
+    int timer{0};
     IActivity();
     SCButton* CheckButtons(void);
     std::vector<SCButton*> buttons;

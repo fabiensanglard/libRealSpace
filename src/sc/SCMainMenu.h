@@ -29,7 +29,6 @@ public:
     virtual void UnFocus(void);
     
 private:
-    
     void LoadButtons(void);
     void LoadBoard(void);
     void LoadBackgrounds(void);

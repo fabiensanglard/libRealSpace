@@ -70,6 +70,7 @@ void SCMainMenu::Init(void) {
     LoadBackgrounds();
 
     SetTitle("Neo Strike Commander");
+    timer = 4200;
 }
 
 void SCMainMenu::LoadButtons(void) {
@@ -196,7 +197,15 @@ void SCMainMenu::LoadBackgrounds(void) {
 }
 
 void SCMainMenu::RunFrame(void) {
-
+    timer --;
+    if (timer <= 0) {
+        SCAnimationPlayer *intro = new SCAnimationPlayer();
+        intro->Init();
+        timer = 4200;
+        Mixer.StopMusic();
+        Game.AddActivity(intro);
+        return;
+    }
     CheckButtons();
 
     VGA.Activate();
@@ -204,7 +213,6 @@ void SCMainMenu::RunFrame(void) {
 
     VGA.SetPalette(&this->palette);
 
-    // Draw static
     VGA.GetFrameBuffer()->DrawShape(&sky);
     VGA.GetFrameBuffer()->DrawShape(&mountain);
     VGA.GetFrameBuffer()->DrawShape(&cloud);
@@ -213,10 +221,6 @@ void SCMainMenu::RunFrame(void) {
 
     DrawButtons();
 
-    // Draw Mouse
     Mouse.Draw();
-
-    // Check Mouse state.
-
     VGA.VSync();
 }
