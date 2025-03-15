@@ -27,9 +27,13 @@ int main(int argc, char* argv[]) {
     Mixer.Init();
     Game.Init();
     //Add MainMenu activity on the game stack.
+    
     SCMainMenu* main = new SCMainMenu();
     main->Init();
     Game.AddActivity(main);
+    SCAnimationPlayer *intro = new SCAnimationPlayer();
+    intro->Init();
+    Game.AddActivity(intro);
     Game.Run();
 
     

@@ -85,79 +85,554 @@ void SCAnimationPlayer::Init(){
 
     MIDGAME_DATA mid1Data = {
         {
-            {   // Shot 1
+           
+            {
                 {
-                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} },
+                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0},
                     { &this->midgames, 20, 0, 0, {0,0}, {0,0}, {0,0} }
                 },
                 {
-                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
                 }, 
                 {
-                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
                 },
-                15
+                15,
+                0
             },
-            {   // Shot 1
+            {
                 {
-                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} },
-                    { &this->midgames, 20, 0, 0, {0,0}, {0,0}, {0,0} }
+                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,0}, {0,0}, {0,0} ,0 }
                 },
                 {
-                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
                 }, 
                 {
-                    { this->mid[0], 3, 0, 0, {0,32}, {0,0}, {0,0} }
+                    { this->mid[0], 3, 0, 0, {0,32}, {0,0}, {0,0} ,0 }
                 },
-                15
+                1
             },
-            {   // Shot 1
+            {
                 {
-                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} },
-                    { &this->midgames, 20, 0, 0, {0,0}, {0,0}, {0,0} }
+                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,0}, {0,0}, {0,0} ,0 }
                 },
                 {
-                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
                 }, 
                 {
-                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
                 },
-                64
+                330
             },
-            {   // Shot 2
+            {
                 {
-                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,-32}, {0,-1} },
-                    { &this->midgames, 20, 0, 0, {0,0}, {0,-32}, {0,-1} },
-                    { &this->midgames, 19, 1, 0, {0,151}, {0,119}, {0,-1} },
-                    { &this->optShps, OptionShapeID::MOUTAINS_BG, 0, 0, {0,16}, {0,-16}, {0,-1} },
-                    { &this->midgames, 19, 2, 0, {0,183}, {0,119}, {0,-2} },
-                    { &this->midgames, 19, 3, 0, {0,186}, {0,90}, {0,-3} }
+                    { &this->optShps, OptionShapeID::SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,-32}, {0,-1} ,0},
+                    { &this->midgames, 20, 0, 0, {0,0}, {0,-32}, {0,-1} ,0 },
+                    { &this->midgames, 19, 1, 0, {0,151}, {0,119}, {0,-1} ,0 },
+                    { &this->optShps, OptionShapeID::MOUTAINS_BG, 0, 0, {0,16}, {0,-16}, {0,-1} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,183}, {0,119}, {0,-2} ,0 },
+                    { &this->midgames, 19, 3, 0, {0,186}, {0,90}, {0,-3} ,0 }
                 },
                 {
-                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
                 },
                 {
-                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
                 },
                 32
             },
-            {   // Shot 3
+            {
                 {
-                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} },
-                    { &this->midgames, 20, 0, 0, {0,-32}, {0,0}, {0,0} },
-                    { &this->midgames, 19, 1, 0, {0,119}, {0,0}, {0,0} },
-                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,-16}, {0,0}, {0,0} },
-                    { &this->midgames, 19, 2, 0, {0,119}, {0,0}, {0,0} },
-                    { &this->midgames, 19, 3, 0, {0,90}, {0,0}, {0,0} }
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 1, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,-16}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 3, 0, {0,90}, {0,0}, {0,0} ,0 }
                 },
                 { 
-                    {nullptr, 0,0,0,{0,0},{0,0},{0,0}}
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
                 },
                 {
-                    { this->mid[0], 13, 0, 0, {0,-10}, {0,0}, {0,0} }
+                    { this->mid[0], 13, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
                 },
                 15
-            }
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 1, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 20, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 1, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 20, 0, 0, {0,-10}, {0,0}, {0,0}  ,0}
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 3, 0, {0,-15}, {0,0}, {0,0} ,0 },
+                    { this->mid[0],1, 1, 0, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0],1, 4, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                48
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 1, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,-16}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 3, 0, {0,90}, {0,0}, {0,0} ,0 }
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 22, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 1, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 23, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 1, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 23, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 4, 0, {0,-25}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 0, 1, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 2, 0, {0,-25}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 1, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 20, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 16, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                16
+            },
+            {
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 24, 0, 0, {0,36}, {0,0}, {0,0} ,1 }
+                },
+                1
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 18, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                16
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 15, 0, 0, {0,32}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 21, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 29, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 35, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 1, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,-16}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 3, 0, {0,90}, {0,0}, {0,0} ,0 }
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 17, 0, 0, {0,-10}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 30, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 1, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,-16}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 3, 0, {0,90}, {0,0}, {0,0} ,0 }
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 31, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 1, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,-16}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 3, 0, {0,90}, {0,0}, {0,0} ,0 }
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 32, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 4, 0, {0,-25}, {0,0}, {0,0} ,0 },
+                    
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 0, 0, 0, {0,0}, {0,0}, {0,0} ,1 },
+                },
+                1
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 3, 0, {0,-15}, {0,0}, {0,0} ,0 },
+                    { this->mid[0],1, 1, 0, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0],1, 4, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 2, 0, {0,-25}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    {&this->midgames, 0,0,0,{0,0},{0,0},{0,0} ,1}
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 1, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,-16}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 3, 0, {0,90}, {0,0}, {0,0} ,0 }
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 10, 0, 0, {0,32}, {0,0}, {0,0} ,1 }
+                },
+                1
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,110}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 2, 1, 0, {0,22}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 2, 2, 0, {0,22}, {0,0}, {0,0} ,0 }
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 19, 0, 0, {0,-10}, {0,0}, {0,0} ,0 }
+                },
+                1
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 4, 0, {0,-25}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 0, 1, 0, {0,0}, {0,0}, {0,0} , 0 },
+                    { this->mid[0], 0, 14, 0, {0,0}, {0,0}, {0,0} , 0 },
+                    
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 3, 0, {0,-15}, {0,0}, {0,0} ,0 },
+                    { this->mid[0],1, 1, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 6, 4, 0, {0,-25}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 0, 1, 0, {0,0}, {0,0}, {0,0} , 0 },
+                    { this->mid[0], 0, 14, 0, {0,0}, {0,0}, {0,0} , 0 },
+                    
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                15
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,-32}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 1, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,-16}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,119}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 19, 3, 0, {0,90}, {0,0}, {0,0} ,0 }
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 25, 0, 0, {0,36}, {0,0}, {0,0} ,0 }
+                },
+                1
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,-29}, {0,0}, {0,1} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,-19}, {0,10}, {0,1} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,-16}, {0,0}, {0,1} ,0 },
+                    { &this->midgames, 19, 2, 0, {0,119}, {0,160}, {0,3} ,0 },
+                    { &this->midgames, 19, 3, 0, {0,90}, {0,160}, {0,3} ,0 },
+                    { this->mid[0], 25, 7, 0, {0,36}, {0,80}, {0,3} ,0 }
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 33, 0, 0, {0,32}, {0,0}, {0,0} ,0 }
+                },
+                29
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,10}, {0,10}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 34, 0, 0, {0,32}, {0,0}, {0,0} ,0 }
+                },
+                1
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,10}, {0,10}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 9, 0, 0, {0,32}, {0,0}, {0,0} ,0 }
+                },
+                29,
+                23
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,10}, {0,10}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,0}, {0,0}, {0,0} ,0 },
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    { this->mid[0], 14, 0, 0, {0,32}, {0,0}, {0,0} ,0 }
+                },
+                29
+            },
+            {
+                {
+                    { &this->optShps, SKY, 0, OPTPALS_PAK_SKY_PALETTE_PATCH_ID, {0,0}, {0,0}, {0,0} ,0 },
+                    { &this->midgames, 20, 0, 0, {0,0}, {0,10}, {0,0} ,0 },
+                    { &this->optShps, MOUTAINS_BG, 0, 0, {0,0}, {0,0}, {0,0} ,0 },
+                    { this->mid[0], 14, 11, 0, {0,32}, {0,0}, {0,0} ,0 }
+                },
+                { 
+                    {nullptr, 0,0,0,{0,0},{0,0},{0,0} ,0}
+                },
+                {
+                    
+                },
+                64
+            },
         }
     };
 
@@ -165,6 +640,9 @@ void SCAnimationPlayer::Init(){
         MIDGAME_SHOT *shot = new MIDGAME_SHOT();
     
         for (auto shot_bg: sht.background) {
+            if (shot_bg.pak == nullptr) {
+                continue;
+            }
             MIDGAME_SHOT_BG *bg = new MIDGAME_SHOT_BG();
             RSImageSet *tmp_img = new RSImageSet();
             PakArchive *pk = new PakArchive();
@@ -198,9 +676,12 @@ void SCAnimationPlayer::Init(){
             sprite->position_start = sht.sprites[0].start;
             sprite->position_end = sht.sprites[0].end;
             sprite->velocity = sht.sprites[0].velocity;
+            sprite->keep_first_frame = sht.sprites[0].keep_first_frame;
             shot->sprites = sprite;
+
         }
         shot->nbframe = sht.nbframe;
+        shot->music = sht.music;
         this->midgames_shots[1].push_back(shot);
     }
 
@@ -208,7 +689,7 @@ void SCAnimationPlayer::Init(){
     this->palette = *VGA.GetPalette();
     this->shot_counter = 0;
     this->fps_counter = 0;
-    this->fps = 0;
+    this->fps = 1;
 }
 
 void SCAnimationPlayer::RunFrame(void){
@@ -223,7 +704,11 @@ void SCAnimationPlayer::RunFrame(void){
     
 
     MIDGAME_SHOT *shot = this->midgames_shots[1][shot_counter];
-
+    if (this->current_music != shot->music && shot->music != 255) {
+        Mixer.SwitchBank(0);
+        Mixer.PlayMusic(shot->music);
+        this->current_music = shot->music;
+    }
     for (auto bg : shot->background) {
         if (bg->image->GetNumImages()>0) {
             RLEShape *shp = bg->image->GetShape(bg->shapeid);
@@ -256,6 +741,9 @@ void SCAnimationPlayer::RunFrame(void){
     if (shot->sprites != nullptr) {
         FrameBuffer *texture = new FrameBuffer(320, 200);
         texture->FillWithColor(255);
+        if (shot->sprites->keep_first_frame) {
+            texture->DrawShape(shot->sprites->image->GetShape(1));
+        }
         texture->DrawShape(shot->sprites->image->GetShape(fps));
         fb->blitWithMask(texture->framebuffer, shot->sprites->position_start.x, shot->sprites->position_start.y, 320, 200,255);
         if (shot->sprites->palette != 0) {
@@ -275,18 +763,18 @@ void SCAnimationPlayer::RunFrame(void){
         fps++;
         
         if (shot->sprites!=nullptr && fps > shot->sprites->image->GetNumImages()-1) {
-            fps = 0;
             shot_counter++;
+            fps = 1;
             if (shot_counter>this->midgames_shots[1].size()-1) {
                 shot_counter = 0;
-                //Game.StopTopActivity();
+                Game.StopTopActivity();
             }
         } else if (shot->sprites==nullptr && fps > shot->nbframe) {
-            fps = 0;
+            fps = 1;
             shot_counter++;
             if (shot_counter>this->midgames_shots[1].size()-1) {
                 shot_counter = 0;
-                //Game.StopTopActivity();
+                Game.StopTopActivity();
             }
         }
     }
@@ -296,7 +784,7 @@ void SCAnimationPlayer::RunFrame(void){
     for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
         VGA.GetFrameBuffer()->FillLineColor(199 - i, 0x00);
     VGA.VSync();
-    this->RenderMenu();
+    //this->RenderMenu();
 }
 void SCAnimationPlayer::RenderMenu() {
     ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);

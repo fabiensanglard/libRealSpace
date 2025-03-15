@@ -27,6 +27,7 @@ typedef struct MIDGAME_SHAPE_DATA {
     Point2D start;
     Point2D end;
     Point2D velocity;
+    uint8_t keep_first_frame;
 } MIDGAME_SHAPE_DATA;
 
 typedef struct MIDGAME_SHOT_SPRITE {
@@ -37,12 +38,14 @@ typedef struct MIDGAME_SHOT_SPRITE {
     Point2D position_end;
     Point2D velocity;
     int shapeid;
+    uint8_t keep_first_frame;
 } MIDGAME_SHOT_SPRITE;
 
 typedef struct MIDGAME_SHOT {
     std::vector<MIDGAME_SHOT_BG *>background;
     MIDGAME_SHOT_SPRITE *sprites{nullptr};
     int nbframe{0};
+    int music{255};
 } MIDGAME_SHOT;
 
 typedef struct MIDGAME_DATA_SHOT {
@@ -50,6 +53,7 @@ typedef struct MIDGAME_DATA_SHOT {
     std::vector<MIDGAME_SHAPE_DATA> forground;
     std::vector<MIDGAME_SHAPE_DATA> sprites;
     int nbframe;
+    uint8_t music{255};
 } MIDGAME_DATA_SHOT;
 
 typedef struct MIDGAME_DATA {
@@ -66,7 +70,8 @@ private:
     std::map<uint8_t, std::vector<MIDGAME_SHOT *>> midgames_shots;
     int shot_counter{0};
     int fps_counter{0};
-    int fps{0};
+    int fps{1};
+    int current_music{255};
 public:
     SCAnimationPlayer();
     ~SCAnimationPlayer();

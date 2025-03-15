@@ -31,7 +31,7 @@ void SCMainMenu::OnTrainingMission() {
 }
 
 void SCMainMenu::OnViewObject() {
-    SCAnimationPlayer *objViewer = new SCAnimationPlayer();
+    SCObjectViewer *objViewer = new SCObjectViewer();
     objViewer->Init();
     Game.AddActivity(objViewer);
 }
