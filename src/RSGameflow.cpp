@@ -297,33 +297,54 @@ void RSGameFlow::parseSTAT_CHNG_INFO(uint8_t* data, size_t size) {
 }
 
 void RSGameFlow::parseSTAT_CHNG_PILT(uint8_t* data, size_t size) {
-	std::vector<uint8_t>* tpilt = new std::vector<uint8_t>();
-	for (int i = 0; i < size; i++) {
-		tpilt->push_back(data[i]);
+	std::vector<PILT_CHANGE *>* tpilt = new std::vector<PILT_CHANGE*>();
+	ByteStream bs;
+	bs.Set(data);
+	size_t to_read = size / 5;
+	for (size_t i = 0; i < to_read; i++) {
+		PILT_CHANGE *pil = new PILT_CHANGE();
+		pil->op = bs.ReadByte();
+		pil->pilot_id = bs.ReadByte();
+		pil->air = bs.ReadByte();
+		pil->value = bs.ReadByte();
+		bs.ReadByte();
+		tpilt->push_back(pil);
 	}
 	this->tmpstat->pilt = tpilt;
 }
 
 void RSGameFlow::parseSTAT_CHNG_CASH(uint8_t* data, size_t size) {
-	std::vector<uint8_t>* tcash = new std::vector<uint8_t>();
-	for (int i = 0; i < size; i++) {
-		tcash->push_back(data[i]);
-	}
-	this->tmpstat->cash = tcash;
+	CHNG_CASH *cash_op;
+	ByteStream bs;
+	bs.Set(data);
+	cash_op = new CHNG_CASH();
+	cash_op->op = bs.ReadByte();
+	cash_op->value = bs.ReadInt24LEByte3();
+	this->tmpstat->cash = cash_op;
 }
 
 void RSGameFlow::parseSTAT_CHNG_OVER(uint8_t* data, size_t size) {
-	std::vector<uint8_t>* tover = new std::vector<uint8_t>();
-	for (int i = 0; i < size; i++) {
-		tover->push_back(data[i]);
-	}
-	this->tmpstat->over = tover;
+	CHNG_CASH *cash_op;
+	ByteStream bs;
+	bs.Set(data);
+	cash_op = new CHNG_CASH();
+	cash_op->op = bs.ReadByte();
+	cash_op->value = bs.ReadInt24LEByte3();
+	this->tmpstat->over = cash_op;
 }
 
 void RSGameFlow::parseSTAT_CHNG_WEAP(uint8_t* data, size_t size) {
-	std::vector<uint8_t>* tweap = new std::vector<uint8_t>();
-	for (int i = 0; i < size; i++) {
-		tweap->push_back(data[i]);
+	std::vector<WEAP_CHANGE*>* tweap = new std::vector<WEAP_CHANGE*>();
+
+	size_t to_read = size / 4;
+	ByteStream bs;
+	bs.Set(data);
+	for (size_t i = 0; i < to_read; i++) {
+		WEAP_CHANGE *weap = new WEAP_CHANGE();
+		weap->op = bs.ReadByte();
+		weap->weap_id = bs.ReadByte();
+		weap->value = bs.ReadShort();
+		tweap->push_back(weap);
 	}
 	this->tmpstat->weap = tweap;
 }

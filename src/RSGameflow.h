@@ -64,13 +64,31 @@ struct WING {
 	INFO info;
 	std::vector<uint8_t> pilt;
 };
+struct CHNG_CASH {
+	uint8_t op;
+	uint32_t value;
+};
+struct PILT_CHANGE {
+	uint8_t op;
+	uint8_t air;
+	uint8_t pilot_id;
+	uint8_t value;
+};
+struct WEAP_CHANGE {
+	uint8_t op;
+	uint8_t weap_id;
+	uint16_t value;
+};
+
 struct CHNG {
 	INFO info;
-	std::vector<uint8_t> *pilt;
-	std::vector<uint8_t> *cash;
-	std::vector<uint8_t> *weap;
-	std::vector<uint8_t>* over;
+	std::vector<PILT_CHANGE *> *pilt;
+	CHNG_CASH *cash;
+	std::vector<WEAP_CHANGE *> *weap;
+	CHNG_CASH *over;
 };
+
+
 struct GAMEFLOW {
 	std::map<std::uint8_t, MISS*> game;
 	std::map<std::uint8_t, MAP*> wrld;

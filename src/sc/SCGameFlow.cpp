@@ -403,6 +403,67 @@ void SCGameFlow::runEffect() {
         case EFECT_OPT_TUNE_MODIFIER:
             GameState.tune_modifier = instruction->value;
         break;
+        case EFECT_OPT_APPLY_CHANGE:
+            if (this->gameFlowParser.game.stat[instruction->value] != nullptr) {
+                CHNG *chng = this->gameFlowParser.game.stat[instruction->value];
+                if (chng->cash != nullptr) {
+                    switch (chng->cash->op) {
+                        case 2:
+                            GameState.proj_cash = chng->cash->value;
+                        break;
+                        case 1:
+                            GameState.proj_cash += chng->cash->value;
+                        break;
+                        case 0:
+                            GameState.proj_cash -= chng->cash->value;
+                        break;
+                    }
+                }
+                if (chng->over != nullptr) {
+                    switch (chng->over->op) {
+                        case 2:
+                            GameState.over_head = chng->over->value;
+                        break;
+                        case 1:
+                            GameState.over_head += chng->over->value;
+                        break;
+                        case 0:
+                            GameState.over_head -= chng->over->value;
+                        break;
+                    }
+                }
+                if (chng->weap != nullptr) {
+                    for (auto weapon: *chng->weap) {
+                        switch (weapon->op) {
+                            case 2:
+                                GameState.weapon_inventory[weapon->weap_id] = weapon->value;
+                            break;
+                            case 1:
+                                GameState.weapon_inventory[weapon->weap_id] += weapon->value;
+                            break;
+                            case 0:
+                                GameState.weapon_inventory[weapon->weap_id] -= weapon->value;
+                            break;
+                        }
+                    }
+                }
+                if (chng->pilt != nullptr) {
+                    for (auto pil: *chng->pilt) {
+                        switch (pil->op) {
+                            case 2:
+                                GameState.kill_board[pil->pilot_id][pil->air] = pil->value;
+                            break;
+                            case 1:
+                                GameState.kill_board[pil->pilot_id][pil->air] += pil->value;
+                            break;
+                            case 0:
+                                GameState.kill_board[pil->pilot_id][pil->air] -= pil->value;
+                            break;
+                        }
+                    }
+                }
+            }
+        break;
         default:
             printf("Unkown opcode :%d, %d\n", instruction->opcode, instruction->value);
             break;
@@ -765,6 +826,14 @@ void SCGameFlow::RenderMenu() {
         ImGui::Text("Mission ID %d", GameState.mission_id);
         ImGui::Text("Mission Flyed %d", GameState.mission_flyed);
         ImGui::Text("Mission Accepted %d", GameState.mission_accepted);
+        ImGui::Text("Proj Cash %d", GameState.proj_cash);
+        ImGui::Text("Proj Overhead %d", GameState.over_head);
+        for (auto killboard: GameState.kill_board) {
+            ImGui::Text("Pilote %d, air[%d] ground[%d]", killboard.first, killboard.second[1], killboard.second[0]);
+        }
+        for (auto weapon: GameState.weapon_inventory) {
+            ImGui::Text("Weapon %d, count %d", weapon.first, weapon.second);
+        }
         ImGui::End();
     }
     if (show_scene_window) {
