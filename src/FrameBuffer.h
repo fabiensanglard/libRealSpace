@@ -22,6 +22,7 @@ public:
     void circle_slow(int x, int y, int radius, uint8_t color);
     void PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
                    size_t interLetterSpace, size_t spaceSize);
+    void PrintText(RSFont *font, Point2D coo, std::string text, uint8_t color);
     void PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
                       size_t interLetterSpace, size_t spaceSize, bool isSmall);
     void blit(uint8_t *srcBuffer, int x, int y, int width, int height);

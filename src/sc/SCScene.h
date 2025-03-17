@@ -144,9 +144,15 @@ public:
 };
 
 class LedgerScene : public SCScene {
+    RSFont *font;
+    int page{0};
+    std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick;
 public:
     LedgerScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
     std::vector<SCZone *> *Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    void CreateZones();
+    void Render();
+    void TurnPage(std::vector<EFCT *> *script, uint8_t sprite_id) { page = (page + 1) % 2; this->CreateZones(); };
 };
 
 class CatalogueScene : public SCScene {

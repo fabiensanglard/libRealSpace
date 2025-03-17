@@ -730,6 +730,7 @@ std::vector<SCZone *> *LedgerScene::Init(
 ) {
     this->gameflow_scene = gf;
     this->sceneOpts = sc_opts;
+    this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\LEDGFONT.SHP");
     this->zones.clear();
     for (auto bg : sceneOpts->background->images) {
         background *tmpbg = new background();
@@ -743,7 +744,13 @@ std::vector<SCZone *> *LedgerScene::Init(
     this->forPalette = this->optPals->GetEntry(forPalTID)->data;
 
     uint8_t optionScenID = gameflow_scene->info.ID;
-    
+    this->onclick = onclick;
+    this->CreateZones();
+    return (&this->zones);
+}
+void LedgerScene::CreateZones() {
+    this->zones.clear();
+    this->zones.shrink_to_fit();
     for (auto sprts : this->sceneOpts->foreground->sprites) {
         uint8_t sprtId = sprts.first;
         SPRT *sprite = sprts.second;
@@ -815,16 +822,55 @@ std::vector<SCZone *> *LedgerScene::Init(
             z->id = zone_id;
             zone_id++;
             if (this->gameflow_scene->info.ID == sprtId) {
-                z->onclick = onclick;
+                z->onclick = this->onclick;
                 z->active = true;
                 this->zones.push_back(z);
+            } else {
+                if (page == 0 && sprtId == 126) {
+                    z->active = true;
+                    z->onclick = std::bind(&LedgerScene::TurnPage, this, std::placeholders::_1, std::placeholders::_2);
+                    this->zones.push_back(z);
+                } else if (page == 1 && sprtId == 127) {
+                    z->active = true;
+                    z->onclick = std::bind(&LedgerScene::TurnPage, this, std::placeholders::_1, std::placeholders::_2);
+                    this->zones.push_back(z);
+                }
             }
             
         } else {
             printf("%d, ID Sprite not found !!\n", sprtId);
         }
     }
-    return (&this->zones);
+}
+void LedgerScene::Render() {
+    SCScene::Render();
+    FrameBuffer *fb = VGA.GetFrameBuffer();
+    std::map<weapon_ids, std::string> weapon_label = {
+        {ID_AIM9J, "AIM-9J"},
+        {ID_AIM9M, "AIM-9M"},
+        {ID_AGM65D, "AGM-65D"},
+        {ID_LAU3, "LAU-3"},
+        {ID_MK20, "MK-20"},
+        {ID_MK82, "MK-82"},
+        {ID_DURANDAL, "DURANDAL"},
+        {ID_GBU15, "GBU-15"},
+        {ID_AIM120, "AIM-120"},
+        {ID_20MM, "20MM"},
+    };
+    int color = 0;
+    if (page == 0) {
+        fb->PrintText(this->font, {67,64}, std::string("PREVIOUS CASH"), color);
+        fb->PrintText(this->font, {177,64}, std::to_string(GameState.proj_cash), color);   
+        fb->PrintText(this->font, {67,70}, std::string("PROJECT OVERHEAD"), color);
+        fb->PrintText(this->font, {177,70}, std::to_string(GameState.over_head), color);    
+    } else if (page == 1) {
+        int y = 64;
+        for (auto weap: GameState.weapon_inventory) {
+            fb->PrintText(this->font, {67,y}, weapon_label[weapon_ids(weap.first+1)], color);
+            fb->PrintText(this->font, {203,y}, std::to_string(weap.second), color);
+            y += 5+(y%2);
+        }
+    }
 }
 
 std::vector<SCZone *> *CatalogueScene::Init(
@@ -930,3 +976,4 @@ std::vector<SCZone *> *CatalogueScene::Init(
     }
     return (&this->zones);
 }
+

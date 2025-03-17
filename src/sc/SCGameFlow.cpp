@@ -904,11 +904,14 @@ void SCGameFlow::RenderMenu() {
             }
         }
         if (ImGui::TreeNode("Scene Info")) {
-            if (ImGui::TreeNode("Forground Sprites")) {
-                for (auto sprt : this->sceneOpts->foreground->sprites) {
-                    ImGui::Text("Sprite %d", sprt.second->sprite.SHP_ID);
+            this->sceneOpts = this->scen->sceneOpts;
+            if (this->sceneOpts->foreground != nullptr) {
+                if (ImGui::TreeNode("Forground Sprites")) {
+                    for (auto sprt : this->sceneOpts->foreground->sprites) {
+                        ImGui::Text("Sprite %d", sprt.second->sprite.SHP_ID);
+                    }
+                    ImGui::TreePop();
                 }
-                ImGui::TreePop();
             }
             if (ImGui::TreeNode("Background")) {
                 for (auto bg : this->sceneOpts->background->images) {

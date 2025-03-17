@@ -151,6 +151,10 @@ void FrameBuffer::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t colo
         this->PrintText_SM(font, coo, text, color, start, size, interLetterSpace, spaceSize, true);
 }
 
+void FrameBuffer::PrintText(RSFont *font, Point2D coo, std::string text, uint8_t color) {
+    this->PrintText(font, &coo, (char *)text.c_str(), color, 0, (uint32_t) text.size(), 2, font->GetShapeForChar('A')->GetWidth()); 
+}
+
 void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
                       size_t interLetterSpace, size_t spaceSize, bool isSmall) {
 
