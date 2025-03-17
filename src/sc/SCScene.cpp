@@ -860,9 +860,23 @@ void LedgerScene::Render() {
     int color = 0;
     if (page == 0) {
         fb->PrintText(this->font, {67,64}, std::string("PREVIOUS CASH"), color);
-        fb->PrintText(this->font, {177,64}, std::to_string(GameState.proj_cash), color);   
-        fb->PrintText(this->font, {67,70}, std::string("PROJECT OVERHEAD"), color);
-        fb->PrintText(this->font, {177,70}, std::to_string(GameState.over_head), color);    
+        fb->PrintText(this->font, {177,64}, std::to_string(GameState.proj_cash), color);
+        
+        fb->PrintText(this->font, {67,69}, std::string("F-16 REPLACEMENT"), color);
+        fb->PrintText(this->font, {177,69}, std::to_string(0), color);
+
+        fb->PrintText(this->font, {67,75}, std::string("WEAPONS"), color);
+        fb->PrintText(this->font, {177,75}, std::to_string(0), color);
+
+
+        fb->PrintText(this->font, {67,86}, std::string("CURRENT CASH"), color);
+        fb->PrintText(this->font, {177,86}, std::to_string(GameState.proj_cash), color);
+
+        fb->PrintText(this->font, {67,97}, std::string("PROJ OVERHEAD"), color);
+        fb->PrintText(this->font, {177,97}, std::to_string(GameState.over_head), color);
+
+        fb->PrintText(this->font, {67,103}, std::string("PROJ CASH"), color);
+        fb->PrintText(this->font, {177,103}, std::to_string(GameState.proj_cash - GameState.over_head), color);
     } else if (page == 1) {
         int y = 64;
         for (auto weap: GameState.weapon_inventory) {
