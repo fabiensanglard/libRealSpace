@@ -829,7 +829,7 @@ void SCGameFlow::RenderMenu() {
         ImGui::Text("Proj Cash %d", GameState.proj_cash);
         ImGui::Text("Proj Overhead %d", GameState.over_head);
         for (auto killboard: GameState.kill_board) {
-            ImGui::Text("Pilote %d, air[%d] ground[%d]", killboard.first, killboard.second[1], killboard.second[0]);
+            ImGui::Text("Pilote %d, ground[%d] air[%d]", killboard.first, killboard.second[1], killboard.second[0]);
         }
         for (auto weapon: GameState.weapon_inventory) {
             ImGui::Text("Weapon %d, count %d", weapon.first, weapon.second);
