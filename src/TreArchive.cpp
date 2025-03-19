@@ -146,6 +146,8 @@ void TreArchive::List(FILE* output){
 
 //Direct access to a TRE entry.
 TreEntry* TreArchive::GetEntryByName(const char* entryName){
+    if (mappedEntries.find(entryName) == mappedEntries.end())
+        return nullptr;
     return mappedEntries[entryName];
 }
 
