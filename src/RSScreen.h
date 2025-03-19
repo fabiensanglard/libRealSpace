@@ -29,7 +29,7 @@ public:
     RSScreen();
     ~RSScreen();
     
-    void Init(int32_t zoomFactor);
+    void Init(int width, int height);
     void SetTitle(const char* title);
     void Refresh(void);
     

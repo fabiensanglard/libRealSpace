@@ -43,7 +43,7 @@ public:
 
     void Prepare(void);
 
-    void Init(int32_t zoom);
+    void Init(int width, int height);
 
     void Clear(void);
 

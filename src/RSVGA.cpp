@@ -29,8 +29,9 @@ void RSVGA::SwithBuffers() {
         this->frameBuffer = this->frameBufferA;
     }
 }
-void RSVGA::Init(void) {
-
+void RSVGA::Init(int width, int height) {
+    this->width = width;
+    this->height = height;
     // Load the default palette
     IffLexer lexer;
     lexer.InitFromFile("PALETTE.IFF");
@@ -85,7 +86,9 @@ void RSVGA::VSync(void) {
         *dst = *rgba;
         dst++;
     }
-    glViewport(67,0,1066,800);			// Reset The Current Viewport
+    int w = this->height * (4.0f/3.0f);
+    int x = (this->width - w) /2;
+    glViewport(x,0,w,this->height);
 	
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

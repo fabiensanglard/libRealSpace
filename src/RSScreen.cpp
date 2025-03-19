@@ -27,18 +27,13 @@ void RSScreen::SetTitle(const char* title){
     SDL_SetWindowTitle(sdlWindow, title);
 }
 
-void RSScreen::Init(int32_t zoomFactor){
-    this->scale =zoomFactor;
+void RSScreen::Init(int width, int height){
     
-    int32_t width  = 320 * scale;
-    int32_t height = (int32_t) (width / (4.0f/3.0f));
-    
-    
-    /*this->width = 1920;
-    this->height = 1080;*/
+    this->width = 1920;
+    this->height = 1080;
 
-    this->width = 1200;
-    this->height = 800;
+    /*this->width = 1200;
+    this->height = 800;*/
     
     SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_HIDDEN, &sdlWindow, &sdlRenderer);
     
@@ -58,9 +53,9 @@ void RSScreen::Init(int32_t zoomFactor){
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    //SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
 
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    //SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     
     sdlWindow = SDL_CreateWindow("RealSpace OBJ Viewer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,this->width,this->height,SDL_WINDOW_OPENGL);
     

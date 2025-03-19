@@ -29,16 +29,17 @@ public:
     ~RSVGA();
     
     
-    void Init(void);
+    void Init(int width, int height);
     
     void Activate(void);
     void SetPalette(VGAPalette* newPalette);
     VGAPalette* GetPalette(void);
     void SwithBuffers();
     void VSync(void);
-    FrameBuffer* GetFrameBuffer(void){ return frameBuffer;}
+    FrameBuffer* GetFrameBuffer(void){ return frameBuffer;};
 private:
-    
+    int width;
+    int height;
     VGAPalette palette;
     FrameBuffer* frameBuffer;
     FrameBuffer* frameBufferA;

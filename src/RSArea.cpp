@@ -347,7 +347,6 @@ void RSArea::ParseTriFile(PakEntry *entry) {
 void RSArea::ParseTrigo() {
 
     PakEntry *entry;
-    Renderer.Init(2);
     entry = archive->GetEntry(4);
 
     PakArchive triFiles;

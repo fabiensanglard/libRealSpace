@@ -28,12 +28,9 @@ Camera *SCRenderer::GetCamera(void) { return &this->camera; }
 VGAPalette *SCRenderer::GetPalette(void) { return &this->palette; }
 
 void SCRenderer::setPlayerPosition(Point3D *position) { camera.SetPosition(position); }
-void SCRenderer::Init(int32_t zoomFactor) {
+void SCRenderer::Init(int width, int height) {
 
-    this->scale = zoomFactor;
     this->counter = 0;
-    int32_t width = 320 * scale;
-    int32_t height = 200 * scale;
 
     // Load the default palette
     IffLexer lexer;
@@ -716,7 +713,7 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     GLfloat fogColor[4] = {0.7f, 0.8f, 1.0f, 1.0f};
     float model_view_mat[4][4];
     Matrix *projectionMatrix = camera.GetProjectionMatrix();
-    glViewport(0,0,1200,800);			// Reset The Current Viewport
+    glViewport(0,0,1920,1080);			// Reset The Current Viewport
 	
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(projectionMatrix->ToGL());
