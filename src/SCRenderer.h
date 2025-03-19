@@ -71,7 +71,6 @@ public:
     void RenderObjects(RSArea *area, size_t blockID);
     void RenderLineCube(Vector3D position, int32_t size);
     void RenderBBox(Vector3D position, Point3D min, Point3D max);
-    
     Camera *GetCamera(void);
 
     void SetLight(Point3D *position);

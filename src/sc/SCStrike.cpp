@@ -119,7 +119,7 @@ void SCStrike::CheckKeyboard(void) {
         }
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
-            Game.StopTopActivity();
+            this->current_mission->mission_ended = true;
             break;
         }
         case SDLK_F1:
@@ -743,7 +743,11 @@ void SCStrike::RunFrame(void) {
                 GameState.missions_flags.push_back(flags.second);
             }
             GameState.mission_flyed_success[GameState.mission_flyed] = this->current_mission->gameflow_registers[0];
+            Renderer.Clear();
+            Screen.Refresh();
+            Renderer.Clear();
             Game.StopTopActivity();
+            return;
         }
     }
     this->player_plane->getPosition(&newPosition);
