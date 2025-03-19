@@ -287,10 +287,10 @@ void RSArea::ParseTriFile(PakEntry *entry) {
             v->u2 = stream.ReadByte();
             coo = stream.ReadInt24LE();
             read += 4;
-            v->x = coo * (int) BLOCK_COORD_SCALE;
+            v->x = coo * (int)(BLOCK_COORD_SCALE);
             coo = stream.ReadInt24LE();
             read += 4;
-            v->z = coo * (int) BLOCK_COORD_SCALE;
+            v->z = coo * (int)(BLOCK_COORD_SCALE);
             coo = stream.ReadShort();
             read += 2;
             v->y = coo * (int) HEIGH_MAP_SCALE;

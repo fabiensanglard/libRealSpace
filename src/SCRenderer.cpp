@@ -47,7 +47,7 @@ void SCRenderer::Init(int width, int height) {
     // glClearDepth(1.0f);								// Depth Buffer Setup
     glDisable(GL_DEPTH_TEST); // Disable Depth Testing
 
-    camera.SetPersective(45.0f, this->width / (float)this->height, 1.0f, BLOCK_WIDTH * BLOCK_PER_MAP_SIDE * 2);
+    camera.SetPersective(45.0f, this->width / (float)this->height, 1.0f, BLOCK_WIDTH * BLOCK_PER_MAP_SIDE * 4);
 
     light.SetWithCoo(300, 300, 300);
 
@@ -639,17 +639,25 @@ void SCRenderer::RenderBlock(RSArea *area, int LOD, int i, bool renderTexture) {
     }
 }
 void SCRenderer::RenderWorldSkyAndGround() {
-    static const float max_int = (BLOCK_WIDTH * BLOCK_PER_MAP_SIDE) / 2.0f;
-    static const float max_height = 70000.0f;
-    static const float min_height = -1000.0f;
+    static const float max_int = (BLOCK_WIDTH * BLOCK_PER_MAP_SIDE)*2;
+    static const float max_height = 60000.0f;
+    static const float min_height = -2000.0f;
 
     GLfloat skycolor[2][3] = {
         {150.0f / 255.0f, 150.0f / 255.0f, 250.0f / 255.0f},
-        {40.0f / 255.0f, 80.0f / 255.0f, 120.0f / 255.0f},
+        {100.0f / 255.0f, 100.0f / 255.0f, 200.0f / 255.0f},
     };
 
+    float ground_min{-1000.1f};
     glBegin(GL_QUADS);
-
+    glColor3f(0.0f,0.4f,0.0f);
+    glVertex3f(-max_int, ground_min, -max_int);
+    glVertex3f(max_int, ground_min, -max_int);
+    glVertex3f(max_int, ground_min, max_int);
+    glVertex3f(-max_int, ground_min, max_int);
+    glEnd();
+    /**/
+    glBegin(GL_QUADS);
     // sol
     glColor3f(skycolor[0][0], skycolor[0][1], skycolor[0][2]);
     glVertex3f(-max_int, min_height, -max_int);
@@ -710,7 +718,7 @@ void SCRenderer::RenderWorldSkyAndGround() {
 }
 
 void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
-    GLfloat fogColor[4] = {0.7f, 0.8f, 1.0f, 1.0f};
+    GLfloat fogColor[4] = {0.8f, 0.8f, 0.8f, 1.0f};
     float model_view_mat[4][4];
     Matrix *projectionMatrix = camera.GetProjectionMatrix();
     glViewport(0,0,1920,1080);			// Reset The Current Viewport
@@ -726,7 +734,7 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
     glFogi(GL_FOG_MODE, GL_EXP2);      // Fog Mode
     glFogfv(GL_FOG_COLOR, fogColor);   // Set Fog Color
-    glFogf(GL_FOG_DENSITY, 0.000009f); // How Dense Will The Fog Be
+    glFogf(GL_FOG_DENSITY, 0.0000015f); // How Dense Will The Fog Be
     glHint(GL_FOG_HINT, GL_DONT_CARE); // Fog Hint Value
     glFogf(GL_FOG_START, 5000.0f);     // Fog Start Depth
     glFogf(GL_FOG_END, 16000.0f);      // Fog End Depth
@@ -740,6 +748,7 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glLoadMatrixf(modelViewMatrix->ToGL());
 
     this->RenderWorldSkyAndGround();
+    /**/
     textureSortedVertex.clear();
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -777,6 +786,7 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glDisable(GL_TEXTURE_2D);
     RenderMapOverlay(area);
     glDisable(GL_FOG);
+    /**/
 }
 
 void SCRenderer::RenderObjects(RSArea *area, size_t blockID) {
