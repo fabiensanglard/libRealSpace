@@ -85,6 +85,8 @@ void RSVGA::VSync(void) {
         *dst = *rgba;
         dst++;
     }
+    glViewport(67,0,1066,800);			// Reset The Current Viewport
+	
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glBindTexture(GL_TEXTURE_2D, textureID);

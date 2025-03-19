@@ -206,6 +206,7 @@ void SCMainMenu::RunFrame(void) {
         Game.AddActivity(intro);
         return;
     }
+    CheckKeyboard();
     CheckButtons();
 
     VGA.Activate();

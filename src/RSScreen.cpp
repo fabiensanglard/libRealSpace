@@ -34,8 +34,11 @@ void RSScreen::Init(int32_t zoomFactor){
     int32_t height = (int32_t) (width / (4.0f/3.0f));
     
     
-    this->width = width;
-    this->height = height;
+    /*this->width = 1920;
+    this->height = 1080;*/
+
+    this->width = 1200;
+    this->height = 800;
     
     SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_HIDDEN, &sdlWindow, &sdlRenderer);
     
@@ -55,7 +58,10 @@ void RSScreen::Init(int32_t zoomFactor){
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    //SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
+
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    
     sdlWindow = SDL_CreateWindow("RealSpace OBJ Viewer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,this->width,this->height,SDL_WINDOW_OPENGL);
     
     // Create an OpenGL context associated with the window.
@@ -69,14 +75,14 @@ void RSScreen::Init(int32_t zoomFactor){
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    // ImGui::StyleColorsLight();
+    //ImGui::StyleColorsDark();
+    ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForOpenGL(sdlWindow, gl_context);
     ImGui_ImplOpenGL2_Init();
-    
-    glViewport(0,0,this->width,this->height);			// Reset The Current Viewport
+    int w = this->height * (4.0f/3.0f);
+    glViewport((this->width - w)/2.0,0,w,this->height);			// Reset The Current Viewport
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);				// Black Background
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     SDL_ShowWindow(sdlWindow);

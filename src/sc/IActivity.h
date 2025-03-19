@@ -36,6 +36,7 @@ public:
     virtual ~IActivity();
     virtual void Focus(void)  { this->focused = true;}
     virtual void UnFocus(void){ this->focused = false;}
+    void CheckKeyboard(void);
 };
 
 

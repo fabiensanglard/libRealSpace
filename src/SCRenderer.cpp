@@ -716,7 +716,8 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     GLfloat fogColor[4] = {0.7f, 0.8f, 1.0f, 1.0f};
     float model_view_mat[4][4];
     Matrix *projectionMatrix = camera.GetProjectionMatrix();
-
+    glViewport(0,0,1200,800);			// Reset The Current Viewport
+	
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(projectionMatrix->ToGL());
 

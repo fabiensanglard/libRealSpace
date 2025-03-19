@@ -13,7 +13,7 @@
 #include <imgui_impl_sdl2.h>
 
 SCAnimationPlayer::SCAnimationPlayer(){
-    
+    this->fps_timer = SDL_GetTicks() / 10;
 }
 
 SCAnimationPlayer::~SCAnimationPlayer(){
@@ -67,22 +67,30 @@ void SCAnimationPlayer::Init(){
         "MID20",
         "MID36"
     };
-    for (int i = 0; i < midgames_files.size(); i++) {
-        std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + ".PAK";
-        TreEntry *entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(file_path.c_str());
-        PakArchive *arch = new PakArchive();
-        arch->InitFromRAM(midgames_files[i].c_str(), entry->data, entry->size);
-        this->mid.push_back(arch);
-    }
-    for (int i = 0; i < midgames_files.size(); i++) {
-        std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + "VOC.PAK";
-        TreEntry *entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(file_path.c_str());
-        if (entry == nullptr) {
-            continue;
+    if (this->mid.size() == 0) {
+        for (int i = 0; i < midgames_files.size(); i++) {
+            std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + ".PAK";
+            TreEntry *entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(file_path.c_str());
+            if (entry == nullptr) {
+                continue;
+            }
+            PakArchive *arch = new PakArchive();
+            arch->InitFromRAM(midgames_files[i].c_str(), entry->data, entry->size);
+            this->mid.push_back(arch);
         }
-        PakArchive *arch = new PakArchive();
-        arch->InitFromRAM(midgames_files[i].c_str(), entry->data, entry->size);
-        this->midvoc.push_back(arch);
+    }
+    if (this->midvoc.size() == 0) {
+
+        for (int i = 0; i < midgames_files.size(); i++) {
+            std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + "VOC.PAK";
+            TreEntry *entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(file_path.c_str());
+            if (entry == nullptr) {
+                continue;
+            }
+            PakArchive *arch = new PakArchive();
+            arch->InitFromRAM(midgames_files[i].c_str(), entry->data, entry->size);
+            this->midvoc.push_back(arch);
+        }
     }
     TreEntry *optShapEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(
         "..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK"
@@ -798,6 +806,11 @@ void SCAnimationPlayer::RunFrame(void){
     VGA.SetPalette(&this->palette);
     FrameBuffer *fb = VGA.GetFrameBuffer();
     fb->FillWithColor(0);
+    int fpsupdate = 0;
+    fpsupdate = (SDL_GetTicks() / 10) - fps_timer > 6;
+    if (fpsupdate) {
+        fps_timer = (SDL_GetTicks() / 10);
+    }
     
 
     MIDGAME_SHOT *shot = this->midgames_shots[1][shot_counter];
@@ -817,7 +830,7 @@ void SCAnimationPlayer::RunFrame(void){
             texture->FillWithColor(255);
             texture->DrawShape(shp);
             fb->blitWithMask(texture->framebuffer, bg->position_start.x, bg->position_start.y, 320, 200,255);
-            if (fps_counter%5==0 && (bg->velocity.x != 0 || bg->velocity.y != 0)) {
+            if (fpsupdate && (bg->velocity.x != 0 || bg->velocity.y != 0)) {
                 if (bg->position_start.x != bg->position_end.x) {
                     bg->position_start.x += bg->velocity.x;
                 }  
@@ -866,16 +879,14 @@ void SCAnimationPlayer::RunFrame(void){
     }
     
     fps_counter++;
-    if (fps_counter%5==0) {
-        fps++;
-        
-        if (fps > shot->nbframe) {
-            fps = 1;
-            shot_counter++;
-            if (shot_counter>this->midgames_shots[1].size()-1) {
-                shot_counter = 0;
-                Game.StopTopActivity();
-            }
+    fps+=fpsupdate;
+    
+    if (fps > shot->nbframe) {
+        fps = 1;
+        shot_counter++;
+        if (shot_counter>this->midgames_shots[1].size()-1) {
+            shot_counter = 0;
+            Game.StopTopActivity();
         }
     }
     for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT; i++)

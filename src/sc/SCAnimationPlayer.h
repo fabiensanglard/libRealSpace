@@ -81,6 +81,7 @@ private:
     int shot_counter{0};
     int fps_counter{0};
     int fps{1};
+    int fps_timer{0};
     int current_music{255};
 public:
     SCAnimationPlayer();

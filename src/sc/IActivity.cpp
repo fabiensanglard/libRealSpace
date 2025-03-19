@@ -45,6 +45,24 @@ IActivity::~IActivity() {}
 
 void IActivity::SetTitle(const char *title) { Screen.SetTitle(title); }
 
+void IActivity::CheckKeyboard(void) {
+    // Keyboard
+    SDL_Event keybEvents[1];
+    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
+    for (int i = 0; i < numKeybEvents; i++) {
+        SDL_Event *event = &keybEvents[i];
+
+        switch (event->key.keysym.sym) {
+        case SDLK_ESCAPE: {
+            Game.StopTopActivity();
+            break;
+        }
+        default:
+            break;
+        }
+    }
+}
+
 SCButton *IActivity::CheckButtons(void) {
     for (size_t i = 0; i < buttons.size(); i++) {
 
