@@ -861,9 +861,6 @@ void SCAnimationPlayer::RunFrame(void){
         if (fps<sprt->image->GetNumImages()) {
             texture->DrawShape(sprt->image->GetShape(fps));
         }
-        if (fps == 23) {
-            printf("break");
-        }
         int color = texture->framebuffer[0];
         fb->blitWithMask(texture->framebuffer, sprt->position_start.x, sprt->position_start.y, 320, 200,color);
         if (sprt->palette != 0) {

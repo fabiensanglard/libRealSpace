@@ -62,12 +62,12 @@
  * @throws None
  */
 SCGameFlow::SCGameFlow() {
-    this->current_miss = 0;
-    this->current_scen = 0;
-    this->efect = nullptr;
+    this->current_miss   = 0;
+    this->current_scen   = 0;
+    this->efect          = nullptr;
     this->currentOptCode = 0;
-    this->fps = SDL_GetTicks() / 10;
-    this->zones = new std::vector<SCZone *>();
+    this->fps            = SDL_GetTicks() / 10;
+    this->zones          = new std::vector<SCZone *>();
 }
 
 SCGameFlow::~SCGameFlow() {}
@@ -80,9 +80,9 @@ SCGameFlow::~SCGameFlow() {}
  * @return None
  */
 void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
-    this->efect = script;
+    this->efect           = script;
     this->currentSpriteId = id;
-    this->currentOptCode = 0;
+    this->currentOptCode  = 0;
     if (this->scen->sceneOpts->foreground->sprites[id]->tune != nullptr) {
         Mixer.SwitchBank(1);
         Mixer.StopMusic();
@@ -105,30 +105,27 @@ void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
  * @throws None
  */
 
-void SCGameFlow::returnFromScene(std::vector<EFCT *> *script, uint8_t id) {
-    this->createScen();
-}
+void SCGameFlow::returnFromScene(std::vector<EFCT *> *script, uint8_t id) { this->createScen(); }
 void SCGameFlow::flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id) {
     switch (id) {
-        case 20:
-            this->createScen();
-            break;
-        default:
-            SCStrike *fly = new SCStrike();
-            fly->Init();
-            fly->SetMission(this->missionToFly);
-            this->missionToFly = nullptr;
-            fly_mission.push(fly);
-            this->next_miss = GameState.mission_id;
+    case 20:
+        this->createScen();
+        break;
+    default:
+        SCStrike *fly = new SCStrike();
+        fly->Init();
+        fly->SetMission(this->missionToFly);
+        this->missionToFly = nullptr;
+        fly_mission.push(fly);
+        this->next_miss = GameState.mission_id;
         break;
     }
-    
 }
 SCZone *SCGameFlow::CheckZones(void) {
     static uint8_t color = 0;
-    color=0;
-    RSFont *fnt = FontManager.GetFont("..\\..\\DATA\\FONTS\\OPTFONT.SHP");
-    for (auto zone: *this->zones) {
+    color                = 0;
+    RSFont *fnt          = FontManager.GetFont("..\\..\\DATA\\FONTS\\OPTFONT.SHP");
+    for (auto zone : *this->zones) {
         if (zone->active) {
             if (zone->quad != nullptr) {
                 if (isPointInQuad(Mouse.GetPosition(), zone->quad)) {
@@ -139,14 +136,8 @@ SCZone *SCGameFlow::CheckZones(void) {
                         zone->OnAction();
                     Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
                     VGA.GetFrameBuffer()->PrintText(
-                        fnt,
-                        &p,
-                        (char *)zone->label->c_str(),
-                        color,
-                        0,
-                        static_cast<uint32_t>(zone->label->length()),
-                        3,
-                        5
+                        fnt, &p, (char *)zone->label->c_str(), color, 0, static_cast<uint32_t>(zone->label->length()),
+                        3, 5
                     );
                     return zone;
                 }
@@ -163,14 +154,7 @@ SCZone *SCGameFlow::CheckZones(void) {
                     zone->OnAction();
                 Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
                 VGA.GetFrameBuffer()->PrintText(
-                    fnt,
-                    &p, 
-                    (char *)zone->label->c_str(),
-                    color,
-                    0,
-                    static_cast<uint32_t>(zone->label->length()),
-                    3,
-                    5
+                    fnt, &p, (char *)zone->label->c_str(), color, 0, static_cast<uint32_t>(zone->label->length()), 3, 5
                 );
 
                 return zone;
@@ -207,7 +191,7 @@ void SCGameFlow::runEffect() {
                 case EFECT_OPT_MISS_ELSE:
                     if (ifStack.size() > 0) {
                         uint8_t ifval = 0;
-                        ifval = ifStack.top();
+                        ifval         = ifStack.top();
                         ifStack.pop();
                         ifStack.push(!ifval);
                     }
@@ -242,10 +226,10 @@ void SCGameFlow::runEffect() {
         case EFECT_OPT_SCEN:
             for (int j = 0; j < this->gameFlowParser.game.game[this->current_miss]->scen.size(); j++) {
                 if (this->gameFlowParser.game.game[this->current_miss]->scen.at(j)->info.ID == instruction->value) {
-                    this->current_scen = j;
+                    this->current_scen    = j;
                     this->currentSpriteId = 0;
                     printf("PLAYING SCEN %d\n", this->current_scen);
-                    
+
                     this->createScen();
                 }
             }
@@ -284,7 +268,7 @@ void SCGameFlow::runEffect() {
             this->cutsenes.push(sht);
         } break;
         case EFECT_OPT_FLYM: {
-            uint8_t flymID = instruction->value;
+            uint8_t flymID          = instruction->value;
             GameState.mission_flyed = flymID;
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
@@ -294,7 +278,7 @@ void SCGameFlow::runEffect() {
             flymission = true;
         } break;
         case EFECT_OPT_FLYM2: {
-            uint8_t flymID = instruction->value;
+            uint8_t flymID          = instruction->value;
             GameState.mission_flyed = flymID;
             printf("PLAYING FLYM %d\n", flymID);
             printf("Mission Name %s\n", this->gameFlowParser.game.mlst->data[flymID]->c_str());
@@ -347,7 +331,7 @@ void SCGameFlow::runEffect() {
         case EFECT_OPT_MISS_ELSE:
             if (ifStack.size() > 0) {
                 uint8_t ifval = 0;
-                ifval = ifStack.top();
+                ifval         = ifStack.top();
                 ifStack.pop();
                 ifStack.push(!ifval);
             }
@@ -379,6 +363,19 @@ void SCGameFlow::runEffect() {
                 std::bind(&SCGameFlow::returnFromScene, this, std::placeholders::_1, std::placeholders::_2)
             );
             break;
+        case EFECT_OPT_LOOK_AT_KILLBOARD:
+            this->zones->clear();
+            if (this->scen != nullptr) {
+                delete this->scen;
+            }
+            this->scen = new KillBoardScene(&this->optShps, &this->optPals);
+
+            this->zones = this->scen->Init(
+                this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
+                this->optionParser.opts[30],
+                std::bind(&SCGameFlow::returnFromScene, this, std::placeholders::_1, std::placeholders::_2)
+            );
+            break;
         case EFECT_OPT_VIEW_CATALOG:
             this->zones->clear();
             if (this->scen != nullptr) {
@@ -402,68 +399,68 @@ void SCGameFlow::runEffect() {
             break;
         case EFECT_OPT_TUNE_MODIFIER:
             GameState.tune_modifier = instruction->value;
-        break;
+            break;
         case EFECT_OPT_APPLY_CHANGE:
             if (this->gameFlowParser.game.stat[instruction->value] != nullptr) {
                 CHNG *chng = this->gameFlowParser.game.stat[instruction->value];
                 if (chng->cash != nullptr) {
                     switch (chng->cash->op) {
-                        case 2:
-                            GameState.proj_cash = chng->cash->value;
+                    case 2:
+                        GameState.proj_cash = chng->cash->value;
                         break;
-                        case 1:
-                            GameState.proj_cash += chng->cash->value;
+                    case 1:
+                        GameState.proj_cash += chng->cash->value;
                         break;
-                        case 0:
-                            GameState.proj_cash -= chng->cash->value;
+                    case 0:
+                        GameState.proj_cash -= chng->cash->value;
                         break;
                     }
                 }
                 if (chng->over != nullptr) {
                     switch (chng->over->op) {
-                        case 2:
-                            GameState.over_head = chng->over->value;
+                    case 2:
+                        GameState.over_head = chng->over->value;
                         break;
-                        case 1:
-                            GameState.over_head += chng->over->value;
+                    case 1:
+                        GameState.over_head += chng->over->value;
                         break;
-                        case 0:
-                            GameState.over_head -= chng->over->value;
+                    case 0:
+                        GameState.over_head -= chng->over->value;
                         break;
                     }
                 }
                 if (chng->weap != nullptr) {
-                    for (auto weapon: *chng->weap) {
+                    for (auto weapon : *chng->weap) {
                         switch (weapon->op) {
-                            case 2:
-                                GameState.weapon_inventory[weapon->weap_id] = weapon->value;
+                        case 2:
+                            GameState.weapon_inventory[weapon->weap_id] = weapon->value;
                             break;
-                            case 1:
-                                GameState.weapon_inventory[weapon->weap_id] += weapon->value;
+                        case 1:
+                            GameState.weapon_inventory[weapon->weap_id] += weapon->value;
                             break;
-                            case 0:
-                                GameState.weapon_inventory[weapon->weap_id] -= weapon->value;
+                        case 0:
+                            GameState.weapon_inventory[weapon->weap_id] -= weapon->value;
                             break;
                         }
                     }
                 }
                 if (chng->pilt != nullptr) {
-                    for (auto pil: *chng->pilt) {
+                    for (auto pil : *chng->pilt) {
                         switch (pil->op) {
-                            case 2:
-                                GameState.kill_board[pil->pilot_id][pil->air] = pil->value;
+                        case 2:
+                            GameState.kill_board[pil->pilot_id][pil->air] = pil->value;
                             break;
-                            case 1:
-                                GameState.kill_board[pil->pilot_id][pil->air] += pil->value;
+                        case 1:
+                            GameState.kill_board[pil->pilot_id][pil->air] += pil->value;
                             break;
-                            case 0:
-                                GameState.kill_board[pil->pilot_id][pil->air] -= pil->value;
+                        case 0:
+                            GameState.kill_board[pil->pilot_id][pil->air] -= pil->value;
                             break;
                         }
                     }
                 }
             }
-        break;
+            break;
         default:
             printf("Unkown opcode :%d, %d\n", instruction->opcode, instruction->value);
             break;
@@ -475,14 +472,13 @@ void SCGameFlow::runEffect() {
             delete this->scen;
         }
         this->next_miss = 0;
-        this->scen = new WeaponLoadoutScene(&this->optShps, &this->optPals);
-        this->zones = this->scen->Init(
-            this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
-            this->optionParser.opts[15],
+        this->scen      = new WeaponLoadoutScene(&this->optShps, &this->optPals);
+        this->zones     = this->scen->Init(
+            this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen], this->optionParser.opts[15],
             std::bind(&SCGameFlow::flyOrReturnFromScene, this, std::placeholders::_1, std::placeholders::_2)
         );
     }
-    this->efect = nullptr;
+    this->efect          = nullptr;
     this->currentOptCode = 0;
 }
 /**
@@ -512,7 +508,7 @@ void SCGameFlow::CheckKeyboard(void) {
             if (this->current_miss >= this->gameFlowParser.game.game.size()) {
                 this->current_miss = 0;
             }
-            this->efect = nullptr;
+            this->efect          = nullptr;
             this->currentOptCode = 0;
             this->createMiss();
             break;
@@ -584,13 +580,13 @@ void SCGameFlow::Init() {
  */
 void SCGameFlow::createMiss() {
     this->missionToFly = nullptr;
-    this->next_miss = 0;
+    this->next_miss    = 0;
     if (this->zones != nullptr) {
         this->zones->clear();
     }
     this->layers.clear();
-    this->convs = std::queue<SCConvPlayer *>();
-    this->cutsenes = std::queue<SCShot *>();
+    this->convs       = std::queue<SCConvPlayer *>();
+    this->cutsenes    = std::queue<SCShot *>();
     this->fly_mission = std::queue<SCStrike *>();
     printf("current miss : %d, current_scen %d\n", this->current_miss, this->current_scen);
     if (this->gameFlowParser.game.game[this->current_miss]->efct != nullptr) {
@@ -600,7 +596,6 @@ void SCGameFlow::createMiss() {
     printf("efect size %zd\n", this->efect->size());
     this->runEffect();
     this->createScen();
-    
 }
 /**
  * Creates a new scene in the current miss.
@@ -617,9 +612,9 @@ void SCGameFlow::createScen() {
     if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
         uint8_t optionScenID = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
         if (this->scen != nullptr) {
-            //delete this->scen;
+            // delete this->scen;
         }
-        this->scen = new SCScene(&this->optShps, &this->optPals);
+        this->scen  = new SCScene(&this->optShps, &this->optPals);
         this->zones = this->scen->Init(
             this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
             this->optionParser.opts[optionScenID],
@@ -685,7 +680,7 @@ void SCGameFlow::RunFrame(void) {
     }
     if (this->next_miss > 0) {
         this->current_miss = this->next_miss;
-        this->next_miss = 0;
+        this->next_miss    = 0;
         this->current_scen = 0;
         this->createMiss();
         return;
@@ -696,7 +691,7 @@ void SCGameFlow::RunFrame(void) {
     }
 
     int fpsupdate = 0;
-    fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
+    fpsupdate     = (SDL_GetTicks() / 10) - this->fps > 12;
     if (fpsupdate) {
         this->fps = (SDL_GetTicks() / 10);
     }
@@ -739,13 +734,13 @@ void SCGameFlow::RenderMenu() {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
     static bool show_scene_window = false;
-    static bool show_load_miss = false;
-    static bool show_gamestate = false;
-    static bool show_shots = false;
-    static bool load_sprites = false;
-    static bool conv_player = false;
+    static bool show_load_miss    = false;
+    static bool show_gamestate    = false;
+    static bool show_shots        = false;
+    static bool load_sprites      = false;
+    static bool conv_player       = false;
     static bool show_music_player = false;
-    static int miss_selected = 0;
+    static int miss_selected      = 0;
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("GameFlow")) {
             ImGui::MenuItem("Load Miss", NULL, &show_load_miss);
@@ -791,7 +786,7 @@ void SCGameFlow::RenderMenu() {
     if (show_load_miss) {
         ImGui::Begin("Load Miss");
         static ImGuiComboFlags flags = 0;
-        static char **miss = new char *[this->gameFlowParser.game.game.size()];
+        static char **miss           = new char *[this->gameFlowParser.game.game.size()];
         for (int i = 0; i < this->gameFlowParser.game.game.size(); i++) {
             miss[i] = new char[10];
             sprintf(miss[i], "%d", i);
@@ -810,10 +805,10 @@ void SCGameFlow::RenderMenu() {
             ImGui::EndCombo();
         }
         if (ImGui::Button("Load Mission")) {
-            this->current_miss = miss_selected;
-            this->current_scen = 0;
+            this->current_miss    = miss_selected;
+            this->current_scen    = 0;
             this->currentSpriteId = 0;
-            this->efect = nullptr;
+            this->efect           = nullptr;
             this->createMiss();
         }
         ImGui::End();
@@ -828,10 +823,10 @@ void SCGameFlow::RenderMenu() {
         ImGui::Text("Mission Accepted %d", GameState.mission_accepted);
         ImGui::Text("Proj Cash %d", GameState.proj_cash);
         ImGui::Text("Proj Overhead %d", GameState.over_head);
-        for (auto killboard: GameState.kill_board) {
+        for (auto killboard : GameState.kill_board) {
             ImGui::Text("Pilote %d, ground[%d] air[%d]", killboard.first, killboard.second[1], killboard.second[0]);
         }
-        for (auto weapon: GameState.weapon_inventory) {
+        for (auto weapon : GameState.weapon_inventory) {
             ImGui::Text("Weapon %d, count %d", weapon.first, weapon.second);
         }
         ImGui::End();
@@ -867,8 +862,10 @@ void SCGameFlow::RenderMenu() {
                         if (zone->IsActive(&GameState.requierd_flags)) {
                             ImGui::Text("Active");
                         }
-                        if (ImGui::TreeNode((void *)(intptr_t)sprite->shapid, "Sprite, Frame %d, %d %d",
-                                            sprite->frameCounter, sprite->shapid, sprite->unkown)) {
+                        if (ImGui::TreeNode(
+                                (void *)(intptr_t)sprite->shapid, "Sprite, Frame %d, %d %d", sprite->frameCounter,
+                                sprite->shapid, sprite->unkown
+                            )) {
                             if (sprite->frames != nullptr) {
                                 ImGui::Text("Frames %d", sprite->frames->size());
                             }
@@ -970,7 +967,7 @@ void SCGameFlow::RenderMenu() {
             for (auto sprite : this->scen->sceneOpts->extr) {
                 if (ImGui::Selectable(std::to_string(cpt_sprite).c_str(), false)) {
                     RSImageSet *shp;
-                    shp = this->getShape(sprite->SHAPE_ID);
+                    shp              = this->getShape(sprite->SHAPE_ID);
                     this->test_shape = shp->GetShape(0);
                 }
                 cpt_sprite++;
@@ -982,7 +979,7 @@ void SCGameFlow::RenderMenu() {
             for (auto sprite : this->scen->sceneOpts->foreground->sprites) {
                 if (ImGui::Selectable(std::to_string(cpt_sprite).c_str(), false)) {
                     RSImageSet *shp;
-                    shp = this->getShape(sprite.second->sprite.SHP_ID);
+                    shp              = this->getShape(sprite.second->sprite.SHP_ID);
                     this->test_shape = shp->GetShape(0);
                 }
                 cpt_sprite++;
@@ -991,7 +988,6 @@ void SCGameFlow::RenderMenu() {
         }
         ImGui::End();
     }
-
 
     ImGui::Render();
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());

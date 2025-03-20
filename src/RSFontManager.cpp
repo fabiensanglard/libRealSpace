@@ -19,7 +19,7 @@ RSFontManager::~RSFontManager(){
 
 void RSFontManager::Init(void){
     
-    const char* font_index[31] = {
+    const char* font_index[32] = {
         "..\\..\\DATA\\FONTS\\CALCFONT.SHP",
         "..\\..\\DATA\\FONTS\\CAMROPT.SHP",
         "..\\..\\DATA\\FONTS\\CHKEXIT.SHP",
@@ -50,11 +50,11 @@ void RSFontManager::Init(void){
         "..\\..\\DATA\\FONTS\\TR2PLAT.SHP",
         "..\\..\\DATA\\FONTS\\3DSTUFON.SHP",
         "..\\..\\DATA\\FONTS\\AUDIOPT.SHP",
-        "..\\..\\DATA\\FONTS\\BOARDFNT.SH"
+        "..\\..\\DATA\\FONTS\\BOARDFNT.SHP"
     };
     
 
-    for (int i = 0; i < 30; i++){
+    for (int i = 0; i < 31; i++){
         const char* fontPath = font_index[i];
         const char* trePath = "MISC.TRE";
         TreArchive MISC;
