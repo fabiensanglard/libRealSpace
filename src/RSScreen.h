@@ -29,7 +29,7 @@ public:
     RSScreen();
     ~RSScreen();
     
-    void Init(int width, int height);
+    void Init(int width, int height, bool fullscreen);
     void SetTitle(const char* title);
     void Refresh(void);
     

@@ -27,10 +27,10 @@ void RSScreen::SetTitle(const char* title){
     SDL_SetWindowTitle(sdlWindow, title);
 }
 
-void RSScreen::Init(int width, int height){
+void RSScreen::Init(int width, int height, bool fullscreen){
     
-    this->width = 1920;
-    this->height = 1080;
+    this->width = width;
+    this->height = height;
 
     /*this->width = 1200;
     this->height = 800;*/
@@ -53,9 +53,11 @@ void RSScreen::Init(int width, int height){
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
-
-    //SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    if (fullscreen) {
+        SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
+    } else {
+        SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    }
     
     sdlWindow = SDL_CreateWindow("RealSpace OBJ Viewer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,this->width,this->height,SDL_WINDOW_OPENGL);
     

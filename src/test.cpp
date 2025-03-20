@@ -345,7 +345,7 @@ void ExploreImages(uint8_t* data, size_t size, int numTabs){
 void TestMouseCursor(void){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
-    Screen.Init(320,200);
+    Screen.Init(320,200,0);
     VGA.Init(320,200);
     VGA.Activate();
     
@@ -541,7 +541,7 @@ void TestMouseCursor(void){
 
 void ReverseOBKViewButton(){
     SetBase("/Users/fabiensanglard/SC/SC/");
-    Screen.Init(320,200);
+    Screen.Init(320,200,0);
     VGA.Init(320,200);
     VGA.Activate();
     
@@ -606,7 +606,7 @@ void ExploreMIDGAMES(void){
 void testoptions(void){
     
     SetBase("/Users/fabiensanglard/SC/SC/");
-    Screen.Init(320,200);
+    Screen.Init(320,200,0);
     VGA.Init(320,200);
     VGA.Activate();
     

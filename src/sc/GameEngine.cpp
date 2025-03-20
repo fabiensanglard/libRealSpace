@@ -26,11 +26,11 @@ void GameEngine::Init() {
     ConvAssets.Init();
 
     // Load Main Palette and Initialize the GL
-    Screen.Init(1920,1080);
+    Screen.Init(WIDTH,HEIGHT,FULLSCREEN);
 
-    VGA.Init(1920,1080);
+    VGA.Init(WIDTH,HEIGHT);
 
-    Renderer.Init(1920,1080);
+    Renderer.Init(WIDTH,HEIGHT);
 
     // Load the Mouse Cursor
     Mouse.Init();
