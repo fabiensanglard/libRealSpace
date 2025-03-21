@@ -22,11 +22,19 @@ public:
     
     AssetManager();
     ~AssetManager();
-    
+    bool ReadISOImage(const std::string& isoPath);
+    bool ReadFileFromISO(const std::string& fileName, std::vector<char>& fileData);
+    void ListFilesInDirectory(const std::string& directory, std::vector<std::string>& files);
+
 private:
-    TreArchive* LoadTRE(const char* name);
-    PakArchive* LoadPAK(const char* name);
+    struct FileEntry {
+        bool isDirectory;
+        std::vector<char> data;
+    };
+
+    bool ExtractFileIndex(std::ifstream& isoFile);
+
+    std::map<std::string, FileEntry> fileContents;
+
 };
-
-
 #endif /* defined(__libRealSpace__AssetManager__) */
