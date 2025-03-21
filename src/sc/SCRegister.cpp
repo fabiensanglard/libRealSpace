@@ -27,14 +27,6 @@ void SCRegister::CheckKeyboard(void){
                 
                 Stop();
                 
-                //Add both animation and next location on the stack.
-                SCWildCatBase* baseLocation = new SCWildCatBase();
-                baseLocation->Init();
-                Game.AddActivity(baseLocation);
-                
-                SCAnimationPlayer* anim = new SCAnimationPlayer();
-                anim->Init();
-                Game.AddActivity(anim);
                 
                 break;
             }

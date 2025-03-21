@@ -42,7 +42,6 @@
 #include "SCConvPlayer.h"
 #include "SCAnimationPlayer.h"
 #include "SCRegister.h"
-#include "SCWildCatBase.h"
 
 #include "SCNavMap.h"
 #include "SCCockpit.h"
@@ -50,7 +49,6 @@
 #include "SCObjectViewer.h"
 #include "SCDogFightMenu.h"
 #include "SCTrainingMenu.h"
-#include "SCSelectWeaponsF16.h"
 #include "SCMainMenu.h"
 #include "SCShot.h"
 #include "SCScene.h"
