@@ -1047,6 +1047,7 @@ std::vector<SCZone *> *KillBoardScene::Init(
     z->quad->push_back(p);
     this->zones.push_back(z);
     this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\BOARDFNT.SHP");
+    this->pilot_names[0] = GameState.player_callsign;
     return (&this->zones);
 }
 
@@ -1056,11 +1057,11 @@ void KillBoardScene::Render() {
     FrameBuffer *fb = VGA.GetFrameBuffer();
     fb->Clear();
     fb->DrawShape(this->layers[0]->img->shapes[1]);
-    Point2D position = Point2D({80, 40});
+    Point2D position = Point2D({80, 60});
     for (auto pil: GameState.kill_board) {
         position.x = 80;
-        fb->PrintText(this->font, position, std::to_string(pil.first), 0);
-        position.x += 60;
+        fb->PrintText(this->font, position, pilot_names[pil.first], 0);
+        position.x += 130;
         fb->PrintText(this->font, position, std::to_string(pil.second[1]), 0);
         position.x += 30;
         fb->PrintText(this->font, position, std::to_string(pil.second[0]), 0);
