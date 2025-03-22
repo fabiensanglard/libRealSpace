@@ -10,6 +10,9 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include <string>
+#include "AssetManager.h"
+
 typedef struct TreNameID{
     AssetManager::TreID id ;
     const char* filename;
@@ -66,93 +69,171 @@ bool AssetManager::ReadISOImage(const std::string& isoPath) {
         std::cerr << "Failed to open ISO file: " << isoPath << std::endl;
         return false;
     }
-
-    if (!ExtractFileIndex(isoFile)) {
+    PrimaryVolumeDescriptor pvd; 
+    if (!ExtractPrimaryVolumeDescriptor(isoFile, pvd)) {
         std::cerr << "Failed to extract file index from ISO file: " << isoPath << std::endl;
         return false;
     }
-
+    
+    if (!ExtractFileListFromRootDirectory(isoFile, pvd)) {
+        std::cerr << "Failed to extract file list from ISO file: " << isoPath << std::endl;
+        return false;
+    }
     isoFile.close();
     return true;
 }
 
-bool AssetManager::ExtractFileIndex(std::ifstream& isoFile) {
-    // Seek to the start of the primary volume descriptor
-    isoFile.seekg(16 * SECTOR_SIZE, std::ios::beg);
-    int pvds = 16 * SECTOR_SIZE;
-    // Read the primary volume descriptor
-    char volumeDescriptor[2048];
-    isoFile.read(volumeDescriptor, sizeof(volumeDescriptor));
 
-    // Check if it's a primary volume descriptor
-    if (volumeDescriptor[0] != 1) {
-        std::cerr << "Not a primary volume descriptor" << std::endl;
+// Structure pour stocker les informations du Primary Volume Descriptor ISO9660
+
+bool AssetManager::ExtractPrimaryVolumeDescriptor(std::ifstream &isoFile, PrimaryVolumeDescriptor &pvd) {
+    const int rawSectorSize = 2352;
+    const int headerSize = 16;
+    const int userDataSize = 2048; // Taille logique ISO9660
+    
+    // Positionner le flux sur le secteur 16 (16 * rawSectorSize)
+    isoFile.seekg(16 * rawSectorSize, std::ios::beg);
+    
+    // Lire le secteur RAW complet (2352 octets)
+    char rawSector[2352];
+    isoFile.read(rawSector, rawSectorSize);
+    if (isoFile.gcount() != rawSectorSize) {
+        std::cerr << "Erreur de lecture du secteur RAW du volume descriptor." << std::endl;
         return false;
     }
-
-    // Get the root directory record
-    int rootDirRecordOffset = 156;
-    // Compute start root sector from offset 156 (a word in little endian)
-    int rootDirRecordLocation = *reinterpret_cast<int*>(volumeDescriptor + rootDirRecordOffset + 2);
-    int rootDirRecordLength = *reinterpret_cast<int*>(volumeDescriptor + rootDirRecordOffset + 10);
-    if (rootDirRecordLength == 0) {
-        rootDirRecordLength = *reinterpret_cast<int*>(volumeDescriptor + 170);
+    
+    // Extraire la zone user data de 2048 octets (après les 16 octets d'en-tête)
+    char volumeData[2048];
+    memcpy(volumeData, rawSector + headerSize, userDataSize);
+    
+    // Remplissage des champs du Primary Volume Descriptor
+    pvd.volumeDescriptorType = static_cast<uint8_t>(volumeData[0]);
+    pvd.standardIdentifier = std::string(volumeData + 1, 5);
+    pvd.volumeDescriptorVersion = static_cast<uint8_t>(volumeData[6]);
+    
+    if (pvd.volumeDescriptorType != 1 || pvd.standardIdentifier != "CD001") {
+        std::cerr << "Ce n'est pas un Primary Volume Descriptor valide." << std::endl;
+        return false;
     }
+    
+    // Fonction lambda pour supprimer les espaces en début/fin de chaîne
+    auto trim = [](const std::string &s) -> std::string {
+        size_t start = s.find_first_not_of(' ');
+        size_t end = s.find_last_not_of(' ');
+        return (start == std::string::npos ? "" : s.substr(start, end - start + 1));
+    };
+    
+    pvd.systemIdentifier = trim(std::string(volumeData + 8, 32));
+    pvd.volumeIdentifier = trim(std::string(volumeData + 40, 32));
+    
+    memcpy(&pvd.volumeSpaceSize, volumeData + 80, 4);
+    memcpy(&pvd.volumeSetSize, volumeData + 88, 2);
+    memcpy(&pvd.volumeSequenceNumber, volumeData + 92, 2);
+    memcpy(&pvd.logicalBlockSize, volumeData + 96, 2);
+    memcpy(&pvd.pathTableSize, volumeData + 100, 4);
+    memcpy(&pvd.LPathTableLocation, volumeData + 108, 4);
+    
+    // Parsing du Root Directory Record situé à l'offset 156 dans volumeData
+    {
+        const char* rdr = volumeData + 156;
+        RootDirectoryRecord root;
+        root.recordLength = static_cast<uint8_t>(rdr[0]);
+        root.extAttrRecordLength = static_cast<uint8_t>(rdr[1]);
+        memcpy(&root.extentLocation, rdr + 2, 4);  // Position d'extent (LSB)
+        memcpy(&root.dataLength, rdr + 10, 4);       // Taille des données (LSB)
+        memcpy(root.recordingDate, rdr + 18, 7);
+        root.fileFlags = static_cast<uint8_t>(rdr[25]);
+        root.fileUnitSize = static_cast<uint8_t>(rdr[26]);
+        root.interleaveGapSize = static_cast<uint8_t>(rdr[27]);
+        memcpy(&root.volumeSequenceNumber, rdr + 28, 2);
+        root.fileIdentifierLength = static_cast<uint8_t>(rdr[32]);
+        root.fileIdentifier = std::string(rdr + 33, root.fileIdentifierLength);
+        
+        pvd.rootDirectoryRecord = root;
+    }
+    
+    pvd.volumeSetIdentifier = trim(std::string(volumeData + 190, 128));
+    pvd.publisherIdentifier = trim(std::string(volumeData + 318, 128));
+    pvd.dataPreparerIdentifier = trim(std::string(volumeData + 446, 128));
+    pvd.applicationIdentifier = trim(std::string(volumeData + 574, 128));
+    
+    return true;
+}
 
-    // Seek to the root directory record
-    isoFile.seekg(rootDirRecordLocation * SECTOR_SIZE, std::ios::beg);
-
-    // Read the root directory record
-    std::vector<char> rootDirRecord(rootDirRecordLength);
-    isoFile.read(rootDirRecord.data(), rootDirRecordLength);
-
-    // Extract the file index from the root directory record
-    int offset = 5;
-    while (offset < rootDirRecordLength) {
-        int recordLength = static_cast<unsigned char>(rootDirRecord[offset]);
-        if (recordLength == 0) {
-            break;
+bool AssetManager::ExtractFileListFromRootDirectory(std::ifstream &isoFile, const PrimaryVolumeDescriptor &pvd) {
+    // Constantes : secteur RAW de 2352 octets, header de 16 => données utiles de 2048 octets
+    const int rawSectorSize = 2352;
+    const int headerSize = 16;
+    const int userDataSize = 2048; // taille logique ISO9660
+    
+    // Le Root Directory Record du PVD indique la position (en blocs logiques) et la taille totale en octets de la zone user data
+    int rootSector = pvd.rootDirectoryRecord.extentLocation;
+    int dataLength = pvd.rootDirectoryRecord.dataLength;
+    
+    // Calcul du nombre de secteurs RAW à lire afin d'obtenir dataLength octets de données utiles
+    int numSectors = (dataLength + userDataSize - 1) / userDataSize;
+    
+    // Lire et assembler les données utilisateur de chacun des secteurs RAW
+    std::vector<char> rootDirData;
+    rootDirData.reserve(numSectors * userDataSize);
+    
+    // Positionner le flux sur le début du répertoire racine dans l'image RAW.
+    // Chaque secteur RAW est de 2352 octets.
+    isoFile.seekg(rootSector * rawSectorSize, std::ios::beg);
+    
+    for (int i = 0; i < numSectors; i++) {
+        char rawSector[2352];
+        isoFile.read(rawSector, rawSectorSize);
+        if (isoFile.gcount() != rawSectorSize) {
+            std::cerr << "Erreur lors de la lecture du secteur " << i << " du répertoire racine." << std::endl;
+            return false;
         }
-
-        int fileLocation = *reinterpret_cast<int*>(rootDirRecord.data() + offset + 2);
-        int fileSize = *reinterpret_cast<int*>(rootDirRecord.data() + offset + 10);
-        int fileFlags = static_cast<unsigned char>(rootDirRecord[offset + 25]);
-        int fileNameLength = static_cast<unsigned char>(rootDirRecord[offset + 32]);
-        std::string fileName(rootDirRecord.data() + offset + 33, fileNameLength);
-
+        // Ajouter la portion de données utiles (les 2048 octets après les 16 octets d'en-tête)
+        rootDirData.insert(rootDirData.end(), rawSector + headerSize, rawSector + headerSize + userDataSize);
+    }
+    
+    // Tronquer le buffer s'il dépasse dataLength octets
+    if (static_cast<int>(rootDirData.size()) > dataLength) {
+        rootDirData.resize(dataLength);
+    }
+    
+    // Parcours des enregistrements ISO9660 dans le buffer assemblé.
+    int offset = 0;
+    while (offset < dataLength) {
+        uint8_t recordLen = static_cast<uint8_t>(rootDirData[offset]);
+        if (recordLen == 0) {
+            // Un record de longueur nulle : passer à l'alignement du prochain bloc logique
+            offset = ((offset / userDataSize) + 1) * userDataSize;
+            continue;
+        }
+        if (offset + recordLen > static_cast<int>(rootDirData.size()))
+            break;
+        
+        // Extraction des informations essentielles selon ISO9660 :
+        // - Octets 2 à 5 : Extent Location (LBA) en little-endian
+        // - Octets 10 à 13 : Data Length (taille du fichier, little-endian)
+        // - Octet 25 : File Flags (bit 1 = répertoire)
+        // - Octet 32 : File Identifier Length
+        // - À partir de l'octet 33 : File Identifier (nom)
+        int fileLocation = *reinterpret_cast<const uint32_t*>(rootDirData.data() + offset + 2);
+        int fileSize = *reinterpret_cast<const uint32_t*>(rootDirData.data() + offset + 10);
+        uint8_t fileFlags = static_cast<uint8_t>(rootDirData[offset + 25]);
+        uint8_t fileNameLen = static_cast<uint8_t>(rootDirData[offset + 32]);
+        std::string fileName(rootDirData.data() + offset + 33, fileNameLen);
+        
         FileEntry entry;
         entry.isDirectory = (fileFlags & 0x02) != 0;
-        if (!entry.isDirectory) {
-            entry.data.resize(fileSize);
-            isoFile.seekg(fileLocation * SECTOR_SIZE, std::ios::beg);
-            isoFile.read(entry.data.data(), fileSize);
-        }
-
+        // La position est donnée en blocs logiques (2048 octets chacun)
+        entry.position = fileLocation;
+        entry.size = fileSize;
+        
         fileContents[fileName] = entry;
-
-        offset += recordLength;
+        
+        offset += recordLen;
     }
-
+    
     return true;
 }
 
-bool AssetManager::ReadFileFromISO(const std::string& fileName, std::vector<char>& fileData) {
-    auto it = fileContents.find(fileName);
-    if (it == fileContents.end() || it->second.isDirectory) {
-        std::cerr << "File not found in ISO or is a directory: " << fileName << std::endl;
-        return false;
-    }
-
-    fileData = it->second.data;
-    return true;
-}
-
-void AssetManager::ListFilesInDirectory(const std::string& directory, std::vector<std::string>& files) {
-    for (const auto& entry : fileContents) {
-        if (entry.first.find(directory) == 0 && entry.first != directory) {
-            files.push_back(entry.first);
-        }
-    }
-}
 
 

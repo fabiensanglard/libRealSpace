@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
 
     
     Assets.SetBase("./assets");
+    Assets.ReadISOImage("E:\\gog\\Strike Commander\\SC.dat");
     Mixer.Init();
     Game.Init();
     //Add MainMenu activity on the game stack.
