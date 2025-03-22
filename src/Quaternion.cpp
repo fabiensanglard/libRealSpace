@@ -130,10 +130,10 @@ float Quaternion::DotProduct(Quaternion *other) {
     return (this->w * other->w + this->x * other->x + this->y * other->y + this->z * other->z);
 }
 void Quaternion::fromEulerAngles(float pitch, float roll) {
-    float cy = std::cosf(roll * 0.5f);
-    float sy = std::sinf(roll * 0.5f);
-    float cp = std::cosf(pitch * 0.5f);
-    float sp = std::sinf(pitch * 0.5f);
+    float cy = std::cos(roll * 0.5f);
+    float sy = std::sin(roll * 0.5f);
+    float cp = std::cos(pitch * 0.5f);
+    float sp = std::sin(pitch * 0.5f);
     this->w =cy * cp;
     this->x =cy * sp;
     this->y =sy * cp;
