@@ -754,14 +754,42 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glBegin(GL_TRIANGLES);
-    for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-        RenderBlock(area, LOD, i, false);
+    Vector3D pos = camera.GetPosition();
+    int centerX = BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
+    int centerY = BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
+    int blocX = (int)(pos.x + centerX) / BLOCK_WIDTH;
+    int blocY = (int)(pos.z + centerY) / BLOCK_WIDTH;
+
+
+    int block_id = blocY * BLOCK_PER_MAP_SIDE + blocX;
+    std::map<uint8_t, Point2D> blockid_offset = {
+        {0, {-1,-1}},
+        {1, {-1,0}},
+        {2, {-1,1}},
+        {3, {0,-1}},
+        {4, {0,0}},
+        {5, {0,1}},
+        {6, {1,-1}},
+        {7, {1,0}},
+        {8, {1,1}}
+    };
+    for (int i=0; i<9; i++) {
+        int final_block_id = (blocX + blockid_offset[i].x) * BLOCK_PER_MAP_SIDE + (blocY+blockid_offset[i].y);
+        RenderBlock(area, LOD, final_block_id, false);
     }
+    
+    /*for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+        RenderBlock(area, LOD, i, false);
+    }*/
     glEnd();
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+    /*for (int i = 0; i < BLOCKS_PER_MAP; i++) {
         RenderBlock(area, LOD, i, true);
+    }*/
+    for (int i=0; i<9; i++) {
+        int final_block_id = (blocX + blockid_offset[i].x) * BLOCK_PER_MAP_SIDE + (blocY+blockid_offset[i].y);
+        RenderBlock(area, LOD, final_block_id, true);
     }
     for (auto const &x : textureSortedVertex) {
         RSImage *image = NULL;
