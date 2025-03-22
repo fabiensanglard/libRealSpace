@@ -18,11 +18,26 @@ SCRegister::~SCRegister(){
 
 void SCRegister::CheckKeyboard(void){
     //Keyboard
+    static bool shift = false;
     SDL_Event keybEvents[5];
-    int numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_PEEKEVENT,SDL_KEYDOWN, SDL_KEYDOWN);
+    int numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_GETEVENT,SDL_KEYUP,SDL_KEYUP);
+    for(int i= 0 ; i < numKeybEvents ; i++){
+        SDL_Event *ev = &keybEvents[i];
+        switch (ev->key.keysym.sym) {
+            case SDLK_LSHIFT:
+            case SDLK_RSHIFT:
+                shift = false;
+            break;
+        }
+    }
+    numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_PEEKEVENT,SDL_KEYDOWN, SDL_KEYDOWN);
     for(int i= 0 ; i < numKeybEvents ; i++){
         SDL_Event* event = &keybEvents[i];
         switch (event->key.keysym.sym) {
+            case SDLK_LSHIFT:
+            case SDLK_RSHIFT:
+                shift = true;
+            break;
             case SDLK_TAB:
                 if (this->current_entry == &GameState.player_callsign){
                     this->current_entry = &GameState.player_name;
@@ -39,6 +54,8 @@ void SCRegister::CheckKeyboard(void){
                 }
             break;
             case SDLK_SPACE:
+                *this->current_entry += ' ';
+            break;
             case SDLK_a:
             case SDLK_b:
             case SDLK_c:
@@ -65,6 +82,14 @@ void SCRegister::CheckKeyboard(void){
             case SDLK_x:
             case SDLK_y:
             case SDLK_z:
+            {
+                if (shift) {
+                    *this->current_entry += char(event->key.keysym.sym - 'a' + 'A');
+                } else {
+                    *this->current_entry += char(event->key.keysym.sym);
+                }
+                break;
+            }
             case SDLK_0:
             case SDLK_1:
             case SDLK_2:
@@ -128,7 +153,7 @@ void SCRegister::Init( ){
     paletteReader.Set(palettesPak.GetEntry(OPTPALS_PAK_STARTGAME_REGISTRATION)->data);
     this->palette.ReadPatch(&paletteReader);
 
-    this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\CONVFONT.SHP");
+    this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\SM-FONT.SHP");
     this->current_entry = &GameState.player_name;
     
 }
@@ -148,8 +173,16 @@ void SCRegister::RunFrame(void){
     fb->PrintText(this->font, {172, 104}, GameState.player_firstname, 0);
     fb->PrintText(this->font, {88, 104}, GameState.player_name, 0);
     fb->PrintText(this->font, {122, 110}, GameState.player_callsign, 0);
-    
-    
+    Point2D pos;
+    if (this->current_entry == &GameState.player_callsign){
+        pos = {122, 110};
+    } else if (this->current_entry == &GameState.player_firstname){
+        pos = {172, 104};
+    } else if (this->current_entry == &GameState.player_name){
+        pos = {88, 104};
+    }
+    pos.x = pos.x + ((this->current_entry->size())*5+2);
+    fb->PrintText(this->font, pos, "_", 0);
     //Draw Mouse
     Mouse.Draw();
     
