@@ -27,4 +27,7 @@ public:
     std::string player_name;
     std::string player_callsign;
     std::string player_firstname;
+
+    void Load(std::string filename);
+    void Save(std::string filename);
 };
