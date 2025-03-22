@@ -23,6 +23,8 @@ public:
     
 private:
     RLEShape book;
+    std::string *current_entry{nullptr};
+    RSFont *font{nullptr};
 };
 
 #endif /* defined(__libRealSpace__SCRegister__) */

@@ -20,7 +20,10 @@ void SCMainMenu::OnLoadGame() { printf("OnLoadGame\n"); }
 void SCMainMenu::OnStartNewGame() {
     SCGameFlow *gfl = new SCGameFlow();
     gfl->Init();
+    SCRegister *registerActivity = new SCRegister();
+    registerActivity->Init();
     Game.AddActivity(gfl);
+    Game.AddActivity(registerActivity);
 }
 
 void SCMainMenu::OnTrainingMission() {

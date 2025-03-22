@@ -19,15 +19,78 @@ SCRegister::~SCRegister(){
 void SCRegister::CheckKeyboard(void){
     //Keyboard
     SDL_Event keybEvents[5];
-    int numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_PEEKEVENT,SDL_KEYDOWN,SDL_KEYUP);
+    int numKeybEvents = SDL_PeepEvents(keybEvents,5,SDL_PEEKEVENT,SDL_KEYDOWN, SDL_KEYDOWN);
     for(int i= 0 ; i < numKeybEvents ; i++){
         SDL_Event* event = &keybEvents[i];
         switch (event->key.keysym.sym) {
+            case SDLK_TAB:
+                if (this->current_entry == &GameState.player_callsign){
+                    this->current_entry = &GameState.player_name;
+                } else if (this->current_entry == &GameState.player_firstname){
+                    this->current_entry = &GameState.player_callsign;
+                } else if (this->current_entry == &GameState.player_name){
+                    this->current_entry = &GameState.player_firstname;
+                }
+            break;
+            case SDLK_DELETE:
+            case SDLK_BACKSPACE:
+                if(this->current_entry->size() > 0){
+                    *this->current_entry = this->current_entry->substr(0,this->current_entry->size()-1);
+                }
+            break;
+            case SDLK_SPACE:
+            case SDLK_a:
+            case SDLK_b:
+            case SDLK_c:
+            case SDLK_d:
+            case SDLK_e:
+            case SDLK_f:
+            case SDLK_g:
+            case SDLK_h:
+            case SDLK_i:
+            case SDLK_j:
+            case SDLK_k:
+            case SDLK_l:
+            case SDLK_m:
+            case SDLK_n:
+            case SDLK_o:
+            case SDLK_p:
+            case SDLK_q:
+            case SDLK_r:
+            case SDLK_s:
+            case SDLK_t:
+            case SDLK_u:
+            case SDLK_v:
+            case SDLK_w:
+            case SDLK_x:
+            case SDLK_y:
+            case SDLK_z:
+            case SDLK_0:
+            case SDLK_1:
+            case SDLK_2:
+            case SDLK_3:
+            case SDLK_4:
+            case SDLK_5:
+            case SDLK_6:
+            case SDLK_7:
+            case SDLK_8:
+            case SDLK_9:
+            {
+                *this->current_entry += char(event->key.keysym.sym);
+                break;
+            }
             case SDLK_RETURN :{
-                
-                Stop();
-                
-                
+                if (GameState.player_callsign.size() > 0 && GameState.player_firstname.size() > 0 && GameState.player_name.size() > 0) {
+                    Stop();
+                } else {
+                    if (this->current_entry == &GameState.player_callsign){
+                        this->current_entry = &GameState.player_firstname;
+                    } else if (this->current_entry == &GameState.player_firstname){
+                        this->current_entry = &GameState.player_name;
+                    } else if (this->current_entry == &GameState.player_name){
+                        this->current_entry = &GameState.player_callsign;
+                    }
+                }
                 break;
             }
             
@@ -65,8 +128,8 @@ void SCRegister::Init( ){
     paletteReader.Set(palettesPak.GetEntry(OPTPALS_PAK_STARTGAME_REGISTRATION)->data);
     this->palette.ReadPatch(&paletteReader);
 
-    
-
+    this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\CONVFONT.SHP");
+    this->current_entry = &GameState.player_name;
     
 }
 
@@ -75,15 +138,17 @@ void SCRegister::RunFrame(void){
     CheckKeyboard();
     
     VGA.Activate();
-    VGA.GetFrameBuffer()->Clear();
+    FrameBuffer *fb = VGA.GetFrameBuffer();
+    fb->Clear();
     
     VGA.SetPalette(&this->palette);
     
     //Draw static
-    VGA.GetFrameBuffer()->DrawShape(&book);
-
+    fb->DrawShape(&book);
+    fb->PrintText(this->font, {172, 104}, GameState.player_firstname, 0);
+    fb->PrintText(this->font, {88, 104}, GameState.player_name, 0);
+    fb->PrintText(this->font, {122, 110}, GameState.player_callsign, 0);
     
-    DrawButtons();
     
     //Draw Mouse
     Mouse.Draw();

@@ -23,7 +23,6 @@ SCConvPlayer::~SCConvPlayer() {}
 #define UNKNOWN 0x0E
 #define CHOOSE_WINGMAN 0x0F
 
-
 // Taking animation
 // 03 mouth anim
 // 04 mouth anim
@@ -74,24 +73,22 @@ SCConvPlayer::~SCConvPlayer() {}
 // 40 pilot helmet visor (if drawing this draw 39 too
 
 std::map<uint8_t, std::vector<uint8_t>> faces_shape = {
-    {13, std::vector<uint8_t>{1,14,2,35}},
-    {14, std::vector<uint8_t>{1,21,28,2,35}},
-    {16, std::vector<uint8_t>{1,17,2,35}},
-    {17, std::vector<uint8_t>{1,18,2,35}},
-    {18, std::vector<uint8_t>{1,19,2,35}},
-    {19, std::vector<uint8_t>{1,2,35}},
-    {20, std::vector<uint8_t>{1,21,28,2,35}},
-    {22, std::vector<uint8_t>{1,23,2,35}},
-    {23, std::vector<uint8_t>{1,24,2,35}},
-    {24, std::vector<uint8_t>{1,25,2,35}},
-    {25, std::vector<uint8_t>{1,26,2,35}},
-    {31, std::vector<uint8_t>{1,2,35}},
-    {255, std::vector<uint8_t>{1,2,35}},
+    { 13,     std::vector<uint8_t>{1, 14, 2, 35}},
+    { 14, std::vector<uint8_t>{1, 21, 28, 2, 35}},
+    { 16,     std::vector<uint8_t>{1, 17, 2, 35}},
+    { 17,     std::vector<uint8_t>{1, 18, 2, 35}},
+    { 18,     std::vector<uint8_t>{1, 19, 2, 35}},
+    { 19,         std::vector<uint8_t>{1, 2, 35}},
+    { 20, std::vector<uint8_t>{1, 21, 28, 2, 35}},
+    { 22,     std::vector<uint8_t>{1, 23, 2, 35}},
+    { 23,     std::vector<uint8_t>{1, 24, 2, 35}},
+    { 24,     std::vector<uint8_t>{1, 25, 2, 35}},
+    { 25,     std::vector<uint8_t>{1, 26, 2, 35}},
+    { 31,         std::vector<uint8_t>{1, 2, 35}},
+    {255,         std::vector<uint8_t>{1, 2, 35}},
 };
 
-void SCConvPlayer::Focus(void) {
-    IActivity::Focus();
-}
+void SCConvPlayer::Focus(void) { IActivity::Focus(); }
 
 void SCConvPlayer::clicked(void *none, uint8_t id) {
     printf("clicked on %d\n", id);
@@ -120,8 +117,8 @@ void SCConvPlayer::ReadNextFrame(void) {
         return;
     }
 
-    currentFrame.creationTime = SDL_GetTicks();
-    currentFrame.text = nullptr;
+    currentFrame.creationTime  = SDL_GetTicks();
+    currentFrame.text          = nullptr;
     currentFrame.facePaletteID = 0;
     // currentFrame.face = nullptr;
 
@@ -136,7 +133,7 @@ void SCConvPlayer::ReadNextFrame(void) {
 
         currentFrame.mode = ConvFrame::CONV_WIDE;
         currentFrame.participants.clear();
-        currentFrame.bgLayers = &bg->layers;
+        currentFrame.bgLayers   = &bg->layers;
         currentFrame.bgPalettes = &bg->palettes;
 
         printf("ConvID: %d WIDEPLAN : LOCATION: '%s'\n", this->conversationID, location);
@@ -155,44 +152,65 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
     case CLOSEUP: // Person talking
     {
-        char *speakerName = (char *)conv.GetPosition();
-        currentFrame.face_expression = (uint8_t) *(conv.GetPosition() + 0x09);
-        char *setName = (char *)conv.GetPosition() + 0xA;
-        
+        char *speakerName            = (char *)conv.GetPosition();
+        currentFrame.face_expression = (uint8_t)*(conv.GetPosition() + 0x09);
+        char *setName                = (char *)conv.GetPosition() + 0xA;
+
         char *sentence = (char *)conv.GetPosition() + 0x17;
 
-        uint8_t pos = *(conv.GetPosition() + 0x13);
+        std::string *text = new std::string(sentence);
+        if (text->find("$N") != std::string::npos) {
+            text->replace(text->find("$N"), 2, GameState.player_firstname);
+        }
+        if (text->find("$S") != std::string::npos) {
+            text->replace(text->find("$S"), 2, GameState.player_name);
+        }
+        if (text->find("$C") != std::string::npos) {
+            text->replace(text->find("$C"), 2, GameState.player_callsign);
+        }
 
+        uint8_t pos               = *(conv.GetPosition() + 0x13);
         currentFrame.facePosition = static_cast<ConvFrame::FacePos>(pos);
-
-        currentFrame.text = sentence;
-
-        currentFrame.mode = ConvFrame::CONV_CLOSEUP;
-        currentFrame.face = ConvAssets.GetCharFace(speakerName);
-
-        ConvBackGround *bg = ConvAssets.GetBackGround(setName);
-        currentFrame.bgLayers = &bg->layers;
+        currentFrame.text         = (char *)text->c_str();
+        ;
+        currentFrame.mode       = ConvFrame::CONV_CLOSEUP;
+        currentFrame.face       = ConvAssets.GetCharFace(speakerName);
+        ConvBackGround *bg      = ConvAssets.GetBackGround(setName);
+        currentFrame.bgLayers   = &bg->layers;
         currentFrame.bgPalettes = &bg->palettes;
 
         conv.MoveForward(0x17 + strlen((char *)sentence) + 1);
-        uint8_t color = conv.ReadByte(); // Color ?
-        currentFrame.textColor = color;
-        const char *pszExt = "normal";
+        uint8_t color              = conv.ReadByte(); // Color ?
+        currentFrame.textColor     = color;
+        const char *pszExt         = "normal";
         currentFrame.facePaletteID = ConvAssets.GetFacePaletteID(const_cast<char *>(pszExt));
 
-        printf("ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X) pos %2X  face expression: '%d'\n", this->conversationID,
-               speakerName, setName, sentence, color, pos, currentFrame.face_expression);
+        printf(
+            "ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X) pos %2X  face expression: '%d'\n",
+            this->conversationID, speakerName, setName, sentence, color, pos, currentFrame.face_expression
+        );
         break;
     }
     case CLOSEUP_CONTINUATION: // Same person keep talking
     {
         char *sentence = (char *)conv.GetPosition();
 
-        currentFrame.text = sentence;
+        std::string *text = new std::string(sentence);
+        if (text->find("$N") != std::string::npos) {
+            text->replace(text->find("$N"), 2, GameState.player_firstname);
+        }
+        if (text->find("$S") != std::string::npos) {
+            text->replace(text->find("$S"), 2, GameState.player_name);
+        }
+        if (text->find("$C") != std::string::npos) {
+            text->replace(text->find("$C"), 2, GameState.player_callsign);
+        }
+        currentFrame.text = (char *)text->c_str();
 
         conv.MoveForward(strlen((char *)sentence) + 1);
-        printf("ConvID: %d MORETEX:                                       WHAT: '%s'\n", this->conversationID,
-               sentence);
+        printf(
+            "ConvID: %d MORETEX:                                       WHAT: '%s'\n", this->conversationID, sentence
+        );
         break;
     }
     case YESNOCHOICE_BRANCH1: // Choice Offsets are question
@@ -200,16 +218,16 @@ void SCConvPlayer::ReadNextFrame(void) {
         currentFrame.mode = ConvFrame::CONV_CONTRACT_CHOICE;
         printf("ConvID: %d CHOICE YES/NO : %d\n", this->conversationID, type);
         // Looks like first byte is the offset to skip if the answer is no.
-        this->noOffset = conv.ReadByte();
+        this->noOffset  = conv.ReadByte();
         this->yesOffset = conv.ReadByte();
         printf("Offsets: %d %d\n", this->noOffset, this->yesOffset);
         SCZone *zone = new SCZone();
-        zone->label = new std::string("yes");
-        zone->quad = new std::vector<Point2D *>();
-        Point2D *p1 = new Point2D{0, 100};
-        Point2D *p2 = new Point2D{120, 100};
-        Point2D *p3 = new Point2D{120, 199};
-        Point2D *p4 = new Point2D{0, 199};
+        zone->label  = new std::string("yes");
+        zone->quad   = new std::vector<Point2D *>();
+        Point2D *p1  = new Point2D{0, 100};
+        Point2D *p2  = new Point2D{120, 100};
+        Point2D *p3  = new Point2D{120, 199};
+        Point2D *p4  = new Point2D{0, 199};
 
         zone->id = 1;
         zone->quad->push_back(p1);
@@ -219,10 +237,10 @@ void SCConvPlayer::ReadNextFrame(void) {
         zone->onclick = std::bind(&SCConvPlayer::clicked, this, std::placeholders::_1, std::placeholders::_2);
         this->zones.push_back(zone);
 
-        zone = new SCZone();
-        zone->id = 2;
+        zone        = new SCZone();
+        zone->id    = 2;
         zone->label = new std::string("no");
-        zone->quad = new std::vector<Point2D *>();
+        zone->quad  = new std::vector<Point2D *>();
 
         Point2D *np1 = new Point2D{200, 100};
         Point2D *np2 = new Point2D{320, 100};
@@ -243,8 +261,8 @@ void SCConvPlayer::ReadNextFrame(void) {
         // currentFrame.mode = ConvFrame::CONV_CONTRACT_CHOICE;
         printf("ConvID: %d CHOICE YES/NO : %d\n", this->conversationID, type);
         // Looks like first byte is the offset to skip if the answer is no.
-        uint8_t t  = conv.ReadByte();
-        uint8_t b  = conv.ReadByte();
+        uint8_t t = conv.ReadByte();
+        uint8_t b = conv.ReadByte();
         if (GameState.mission_accepted) {
             conv.MoveForward(t);
         }
@@ -253,7 +271,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     case GROUP_SHOT_ADD_CHARCTER: // Add person to GROUP
     {
 
-        char *participantName = (char *)conv.GetPosition();
+        char *participantName   = (char *)conv.GetPosition();
         CharFigure *participant = ConvAssets.GetFigure(participantName);
         currentFrame.participants.push_back(participant);
 
@@ -272,7 +290,18 @@ void SCConvPlayer::ReadNextFrame(void) {
 
         char *who = (char *)conv.GetPosition();
         conv.MoveForward(0xE);
-        char *sentence = (char *)conv.GetPosition();
+        char *sentence    = (char *)conv.GetPosition();
+        std::string *text = new std::string(sentence);
+        if (text->find("$N") != std::string::npos) {
+            text->replace(text->find("$N"), 2, GameState.player_firstname);
+        }
+        if (text->find("$S") != std::string::npos) {
+            text->replace(text->find("$S"), 2, GameState.player_name);
+        }
+        if (text->find("$C") != std::string::npos) {
+            text->replace(text->find("$C"), 2, GameState.player_callsign);
+        }
+        currentFrame.text = (char *)text->c_str();
         conv.MoveForward(strlen(sentence) + 1);
         printf("ConvID: %d WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n", this->conversationID, who, sentence);
         CharFigure *participant = ConvAssets.GetFigure(who);
@@ -281,20 +310,30 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
     case SHOW_TEXT: // Show text
     {
-        int8_t color = conv.ReadByte();
-        char *sentence = (char *)conv.GetPosition();
-
+        int8_t color      = conv.ReadByte();
+        char *sentence    = (char *)conv.GetPosition();
+        std::string *text = new std::string(sentence);
+        if (text->find("$N") != std::string::npos) {
+            text->replace(text->find("$N"), 2, GameState.player_firstname);
+        }
+        if (text->find("$S") != std::string::npos) {
+            text->replace(text->find("$S"), 2, GameState.player_name);
+        }
+        if (text->find("$C") != std::string::npos) {
+            text->replace(text->find("$C"), 2, GameState.player_callsign);
+        }
         currentFrame.mode = ConvFrame::CONV_WIDE;
-        currentFrame.text = sentence;
+        currentFrame.text = (char *)text->c_str();
+        ;
         currentFrame.textColor = color;
-        currentFrame.face = nullptr;
+        currentFrame.face      = nullptr;
         printf("ConvID: %d Show Text: '%s' \n", this->conversationID, sentence);
         conv.MoveForward(strlen(sentence) + 1);
 
         break;
     }
     case 0xE: {
-        uint8_t unkn = conv.ReadByte();
+        uint8_t unkn  = conv.ReadByte();
         uint8_t unkn1 = conv.ReadByte();
         printf("ConvID: %d Unknown usage Flag 0xE: (0x%2X 0x%2X) \n", this->conversationID, unkn, unkn1);
         ReadNextFrame();
@@ -364,7 +403,7 @@ void SCConvPlayer::SetID(int32_t id) {
 
 void SCConvPlayer::Init() {
     VGAPalette *rendererPalette = VGA.GetPalette();
-    this->palette = *rendererPalette;
+    this->palette               = *rendererPalette;
 
     currentFrame.font = FontManager.GetFont("..\\..\\DATA\\FONTS\\CONVFONT.SHP");
 }
@@ -439,15 +478,15 @@ void SCConvPlayer::DrawText(void) {
     if (currentFrame.text == NULL)
         return;
 
-    size_t textSize = strlen(currentFrame.text);
+    size_t textSize    = strlen(currentFrame.text);
     const char *cursor = currentFrame.text;
-    const char *end = cursor + textSize;
+    const char *end    = cursor + textSize;
 
     uint8_t lineNumber = 0;
 
     while (cursor < end) {
 
-        const char *wordSearch = cursor;
+        const char *wordSearch  = cursor;
         const char *lastGoodPos = wordSearch;
 
         // How many pixels are avaiable for a line.
@@ -482,9 +521,11 @@ void SCConvPlayer::DrawText(void) {
         // Don't forget to center the text
         coo.x += pixelAvailable / 2;
 
-        VGA.GetFrameBuffer()->PrintText(currentFrame.font, &coo, currentFrame.text, static_cast<uint32_t>(currentFrame.textColor),
-                     static_cast<uint32_t>(cursor - currentFrame.text), static_cast<uint32_t>(lastGoodPos - cursor),
-                     CONV_INTERLETTER_SPACE, CONV_SPACE_SIZE);
+        VGA.GetFrameBuffer()->PrintText(
+            currentFrame.font, &coo, currentFrame.text, static_cast<uint32_t>(currentFrame.textColor),
+            static_cast<uint32_t>(cursor - currentFrame.text), static_cast<uint32_t>(lastGoodPos - cursor),
+            CONV_INTERLETTER_SPACE, CONV_SPACE_SIZE
+        );
 
         // Go to next line
         cursor = lastGoodPos + 1;
@@ -502,9 +543,11 @@ void SCConvPlayer::CheckZones() {
                     if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                         zone->OnAction();
                     Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
-                    VGA.GetFrameBuffer()->PrintText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
-                                 static_cast<uint32_t>(zone->label->length()), 3, 5);
-                    return ;
+                    VGA.GetFrameBuffer()->PrintText(
+                        FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                        static_cast<uint32_t>(zone->label->length()), 3, 5
+                    );
+                    return;
                 }
             }
             if (Mouse.GetPosition().x > zone->position.x &&
@@ -518,10 +561,12 @@ void SCConvPlayer::CheckZones() {
                 if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
                     zone->OnAction();
                 Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
-                VGA.GetFrameBuffer()->PrintText(FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
-                             static_cast<uint32_t>(zone->label->length()), 3, 5);
+                VGA.GetFrameBuffer()->PrintText(
+                    FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                    static_cast<uint32_t>(zone->label->length()), 3, 5
+                );
 
-                return ;
+                return;
             }
         }
     }
@@ -551,9 +596,9 @@ void SCConvPlayer::RunFrame(void) {
     if (currentFrame.mode != ConvFrame::CONV_CONTRACT_CHOICE) {
         CheckFrameExpired();
     }
-    
+
     if (currentFrame.IsExpired()) {
-        
+
         ReadNextFrame();
     }
 
@@ -582,7 +627,7 @@ void SCConvPlayer::RunFrame(void) {
 
     if (currentFrame.mode == ConvFrame::CONV_CLOSEUP) {
 
-        for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT+1; i++)
+        for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT + 1; i++)
             VGA.GetFrameBuffer()->FillLineColor(i, 0x00);
 
         for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
@@ -615,7 +660,9 @@ void SCConvPlayer::RunFrame(void) {
                     VGA.GetFrameBuffer()->DrawShape(s);
                 }
             }
-            for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP && currentFrame.text[0] != '\0' ; i++) {
+            for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP &&
+                                currentFrame.text != nullptr && currentFrame.text[0] != '\0';
+                 i++) {
                 RLEShape *s = currentFrame.face->appearances->GetShape(3 + (SDL_GetTicks() / 100) % 10);
                 s->SetPositionX(pos);
                 VGA.GetFrameBuffer()->DrawShape(s);
@@ -626,7 +673,6 @@ void SCConvPlayer::RunFrame(void) {
                 s->SetPositionX(pos);
                 VGA.GetFrameBuffer()->DrawShape(s);
             }
-
         }
     }
 
@@ -665,9 +711,8 @@ void SCConvPlayer::RunFrame(void) {
             position.x += s->GetWidth();
         }
     }
-    
-    
-    if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE)  {
+
+    if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
         CheckZones();
         Mouse.Draw();
     }
