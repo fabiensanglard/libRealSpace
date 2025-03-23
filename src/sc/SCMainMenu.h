@@ -34,8 +34,7 @@ private:
     void LoadBackgrounds(void);
     void LoadPalette(void);
     
-    
-    
+    SCFileRequester *frequest;
     RLEShape board;
     RLEShape sky;
     RLEShape mountain;

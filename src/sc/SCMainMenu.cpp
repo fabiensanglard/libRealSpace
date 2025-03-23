@@ -15,7 +15,10 @@
 
 void SCMainMenu::OnContinue(void) { printf("OnContinue\n"); }
 
-void SCMainMenu::OnLoadGame() { printf("OnLoadGame\n"); }
+void SCMainMenu::OnLoadGame() { 
+    printf("OnLoadGame\n");
+    this->frequest->opened = true;
+}
 
 void SCMainMenu::OnStartNewGame() {
     SCGameFlow *gfl = new SCGameFlow();
@@ -73,6 +76,7 @@ void SCMainMenu::Init(void) {
     LoadBackgrounds();
 
     SetTitle("Neo Strike Commander");
+    this->frequest = new SCFileRequester();
     timer = 4200;
 }
 
@@ -106,7 +110,7 @@ void SCMainMenu::LoadButtons(void) {
                                                           &loadGamePosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(6)->data, subPak.GetEntry(6)->size,
                                                             &loadGamePosition);
-    button->SetEnable(false);
+    button->SetEnable(true);
     buttons.push_back(button);
 
     button = new SCButton();
@@ -209,9 +213,13 @@ void SCMainMenu::RunFrame(void) {
         Game.AddActivity(intro);
         return;
     }
-    CheckKeyboard();
-    CheckButtons();
-
+    if (this->frequest->opened) {
+        this->frequest->checkevents();
+    } else {
+        CheckKeyboard();
+        CheckButtons();
+    }
+    
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
 
@@ -224,7 +232,9 @@ void SCMainMenu::RunFrame(void) {
     VGA.GetFrameBuffer()->DrawShape(&board);
 
     DrawButtons();
-
+    if (this->frequest->opened) {
+        this->frequest->draw(VGA.GetFrameBuffer());
+    }
     Mouse.Draw();
     VGA.VSync();
 }
