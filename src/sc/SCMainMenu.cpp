@@ -18,6 +18,7 @@ void SCMainMenu::OnContinue(void) { printf("OnContinue\n"); }
 void SCMainMenu::OnLoadGame() { 
     printf("OnLoadGame\n");
     this->frequest->opened = true;
+    this->frequest->loadFiles();
 }
 
 void SCMainMenu::OnStartNewGame() {

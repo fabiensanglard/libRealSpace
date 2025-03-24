@@ -57,6 +57,51 @@ void RSImageSet::InitFromPakEntry(PakEntry *entry) {
     }
 }
 
+void RSImageSet::InitFromTreEntry(TreEntry *entry) {
+
+    uint8_t *end = entry->data + entry->size;
+    ByteStream index(entry->data);
+
+    uint32_t nextImage = index.ReadUInt32LE();
+    nextImage = nextImage & 0x00FFFFFF;
+
+    uint32_t numImages = nextImage / 4;
+    for (size_t i = 0; i < numImages && (entry->data + nextImage < end); i++) {
+
+        uint8_t *currImage = entry->data + nextImage;
+
+        nextImage = index.ReadUInt32LE();
+        nextImage = nextImage & 0x00FFFFFF;
+
+        size_t size = 0;
+
+        if (*currImage != 'F') {
+            RLEShape *shape = new RLEShape();
+            shape->Init(currImage, size);
+            this->shapes.push_back(shape);
+            this->sequence.push_back((uint8_t)i);
+        } else {
+            RSPalette *palette = new RSPalette();
+            IffLexer paliff;
+            uint32_t pal_size = 0;
+            pal_size |= *(currImage+4) << 24;
+            pal_size |= *(currImage+5) << 16;
+            pal_size |= *(currImage+6) << 8;
+            pal_size |= *(currImage+7) << 0;
+            if (*(currImage+8)=='P') {
+                paliff.InitFromRAM(currImage, pal_size+8);
+                palette->InitFromIFF(&paliff);
+                
+                this->palettes.push_back(palette);
+                
+                RLEShape *shape = new RLEShape();
+                *shape = *RLEShape::GetEmptyShape();
+                this->shapes.push_back(shape);
+            }
+        }
+    }
+}
+
 void RSImageSet::InitFromSubPakEntry(PakArchive *entry) {
     for (int i = 0; i < entry->GetNumEntries(); i++) {
         RLEShape *shape = new RLEShape();

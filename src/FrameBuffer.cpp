@@ -1,5 +1,4 @@
 #include "precomp.h"
-#include "FrameBuffer.h"
 
 FrameBuffer::FrameBuffer(int w, int h) {
     this->framebuffer = new uint8_t[w * h]();
@@ -12,12 +11,8 @@ FrameBuffer::~FrameBuffer() {
     this->width = 0;
     this->height = 0;
 }
-void FrameBuffer::Clear() {
-    memset(this->framebuffer, 255, this->width * this->height);
-}
-void FrameBuffer::FillWithColor(uint8_t color) {
-    memset(this->framebuffer, color, this->width * this->height);
-}
+void FrameBuffer::Clear() { memset(this->framebuffer, 255, this->width * this->height); }
+void FrameBuffer::FillWithColor(uint8_t color) { memset(this->framebuffer, color, this->width * this->height); }
 bool FrameBuffer::DrawShape(RLEShape *shape) {
     if (shape != nullptr) {
         size_t byteRead = 0;
@@ -32,7 +27,9 @@ bool FrameBuffer::DrawShapeWithBox(RLEShape *shape, int bx1, int bx2, int by1, i
     }
     return (false);
 }
-void FrameBuffer::FillLineColor(size_t lineIndex, uint8_t color) { memset(this->framebuffer + lineIndex * 320, color, 320); }
+void FrameBuffer::FillLineColor(size_t lineIndex, uint8_t color) {
+    memset(this->framebuffer + lineIndex * 320, color, 320);
+}
 void FrameBuffer::plot_pixel(int x, int y, uint8_t color) {
     if (x < 0 || x >= this->width || y < 0 || y >= this->height)
         return;
@@ -57,7 +54,7 @@ void FrameBuffer::lineWithBox(int x1, int y1, int x2, int y2, uint8_t color, int
 }
 
 void FrameBuffer::lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t color, int bx1, int bx2, int by1, int by2,
-                                int skip) {
+                                      int skip) {
     if (x1 > 320 || x2 > 320 || y1 > 200 || y2 > 200)
         return;
     int i, dx, dy, sdx, sdy, dxabs, dyabs, x, y, px, py;
@@ -72,7 +69,6 @@ void FrameBuffer::lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t co
     y = dxabs >> 1;
     px = x1;
     py = y1;
-
 
     if (dxabs >= dyabs) /* the line is more horizontal than vertical */
     {
@@ -127,7 +123,7 @@ void FrameBuffer::rect_slow(int left, int top, int right, int bottom, uint8_t co
 void FrameBuffer::circle_slow(int x, int y, int radius, uint8_t color) {
     float n = 0, invradius = 1 / (float)radius;
     int dx = 0, dy = radius - 1;
-    uint16_t dxoffset, dyoffset, offset = y*this->width + x;
+    uint16_t dxoffset, dyoffset, offset = y * this->width + x;
 
     while (dx <= dy) {
         dxoffset = dx * this->width;
@@ -146,17 +142,17 @@ void FrameBuffer::circle_slow(int x, int y, int radius, uint8_t color) {
     }
 }
 void FrameBuffer::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
-                      size_t interLetterSpace, size_t spaceSize) 
-    {
-        this->PrintText_SM(font, coo, text, color, start, size, interLetterSpace, spaceSize, true);
+                            size_t interLetterSpace, size_t spaceSize) {
+    this->PrintText_SM(font, coo, text, color, start, size, interLetterSpace, spaceSize, true);
 }
 
 void FrameBuffer::PrintText(RSFont *font, Point2D coo, std::string text, uint8_t color) {
-    this->PrintText(font, &coo, (char *)text.c_str(), color, 0, (uint32_t) text.size(), 2, font->GetShapeForChar('A')->GetWidth()); 
+    this->PrintText(font, &coo, (char *)text.c_str(), color, 0, (uint32_t)text.size(), 2,
+                    font->GetShapeForChar('A')->GetWidth());
 }
 
 void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
-                      size_t interLetterSpace, size_t spaceSize, bool isSmall) {
+                               size_t interLetterSpace, size_t spaceSize, bool isSmall) {
 
     if (text == NULL)
         return;
@@ -185,7 +181,8 @@ void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t c
         int32_t lineHeight = coo->y;
         coo->y -= shape->GetHeight();
 
-        if (isSmall && (chartoDraw == 'p' || chartoDraw == 'y' || chartoDraw == 'g' || chartoDraw == 'q' || chartoDraw == 'j'))
+        if (isSmall &&
+            (chartoDraw == 'p' || chartoDraw == 'y' || chartoDraw == 'g' || chartoDraw == 'q' || chartoDraw == 'j'))
             coo->y += 1;
         if (chartoDraw == '\n') {
             RLEShape *sp = font->GetShapeForChar('A');
@@ -199,7 +196,7 @@ void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t c
             continue;
         if (coo->x < 0)
             continue;
-        if (coo->x+static_cast<int32_t>(spaceSize) > 320)
+        if (coo->x + static_cast<int32_t>(spaceSize) > 320)
             continue;
         shape->SetPosition(coo);
         DrawShape(shape);
@@ -211,7 +208,7 @@ void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t c
             coo->x = static_cast<int32_t>(coo->x + shape->GetWidth() + interLetterSpace);
     }
 }
-void FrameBuffer::blit(uint8_t* srcBuffer, int x, int y, int width, int height) {
+void FrameBuffer::blit(uint8_t *srcBuffer, int x, int y, int width, int height) {
     int startRow = 0;
     int startCol = 0;
     if (y < 0) {
@@ -233,7 +230,7 @@ void FrameBuffer::blit(uint8_t* srcBuffer, int x, int y, int width, int height) 
         }
     }
 }
-void FrameBuffer::blitWithMask(uint8_t* srcBuffer, int x, int y, int width, int height, uint8_t maxk) {
+void FrameBuffer::blitWithMask(uint8_t *srcBuffer, int x, int y, int width, int height, uint8_t maxk) {
     int startRow = 0;
     int startCol = 0;
     if (y < 0) {
@@ -251,13 +248,14 @@ void FrameBuffer::blitWithMask(uint8_t* srcBuffer, int x, int y, int width, int 
             int destCol = x + col;
             if (destCol < 0 || destCol >= this->width)
                 continue;
-            if (srcBuffer[row * width + col] == maxk) 
+            if (srcBuffer[row * width + col] == maxk)
                 continue;
             framebuffer[destOffset + destCol] = srcBuffer[row * width + col];
         }
     }
 }
-void FrameBuffer::blitLargeBuffer(uint8_t* srcBuffer, int srcWidth, int srcHeight, int srcX, int srcY, int destX, int destY, int width, int height) {
+void FrameBuffer::blitLargeBuffer(uint8_t *srcBuffer, int srcWidth, int srcHeight, int srcX, int srcY, int destX,
+                                  int destY, int width, int height) {
 
     for (int row = 0; row < height; ++row) {
         int srcRow = srcY + row;

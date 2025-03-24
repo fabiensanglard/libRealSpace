@@ -39,6 +39,7 @@
 #include "SCProg.h"
 
 #include "SCFileRequester.h"
+
 //Activities
 #include "SCConvPlayer.h"
 #include "SCAnimationPlayer.h"

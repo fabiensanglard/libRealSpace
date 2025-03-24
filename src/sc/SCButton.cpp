@@ -28,5 +28,6 @@ void SCButton::InitBehavior(std::function<void()> fct, Point2D position,Point2D 
 }
 
 void SCButton::OnAction(void){
-    this->onClick();
+    if (this->onClick != nullptr)
+        this->onClick();
 }

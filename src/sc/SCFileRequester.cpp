@@ -1,27 +1,103 @@
 #include "precomp.h"
-#include "SCFileRequester.h"
+#include <filesystem>
+
+
+void SCFileRequester::cancel() {
+    this->opened = false;
+}
 
 SCFileRequester::SCFileRequester() {
     RSImageSet *uiImageSet = new RSImageSet();
     TreEntry *tre = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\SAVELOAD.SHP");
     PakArchive *pak = new PakArchive();
     pak->InitFromRAM("SAVELOAD.SHP", tre->data, tre->size);
-    for (int i = 0; i < pak->GetNumEntries(); i++) {
-        RLEShape *shape = new RLEShape();
-        shape->Init(pak->GetEntry(i)->data+8, pak->GetEntry(i)->size);
-        uiImageSet->shapes.push_back(shape);
-    }
+    uiImageSet->InitFromPakArchive(pak,0);
     this->uiImageSet = uiImageSet;
+    SCButton *button;
+
+    Point2D frp = {(320-uiImageSet->GetShape(0)->GetWidth())/2, (200-uiImageSet->GetShape(0)->GetHeight())/2};
+    Point2D buttonDimension = {75, 12};
+    Point2D loadGamePosition = {frp.x+54, frp.y+97};
+    Point2D cancelPosition = {frp.x+10, frp.y+112};
+    Point2D quitToDosPosition = {frp.x+95, frp.y+112};
+
+    Point2D arrowDimentions = {20, 11};
+    Point2D fileUp = {frp.x+9, frp.y+41};
+    Point2D fileDown = {frp.x+9, frp.y+83};
+
+    Point2D loadTitlePosition = {frp.x+36, frp.y+6};
+    uiImageSet->GetShape(1)->position=loadTitlePosition;
+
+    button = new SCButton();
+    button->InitBehavior(nullptr, loadGamePosition, buttonDimension);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(4);
+    button->appearance[SCButton::APR_UP].position=loadGamePosition;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(5);
+    button->appearance[SCButton::APR_DOWN].position=loadGamePosition;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    button = new SCButton();
+    button->InitBehavior(std::bind(&SCFileRequester::cancel, this), cancelPosition, buttonDimension);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(6);
+    button->appearance[SCButton::APR_UP].position=cancelPosition;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(7);
+    button->appearance[SCButton::APR_DOWN].position=cancelPosition;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    button = new SCButton();
+    button->InitBehavior(nullptr, quitToDosPosition, buttonDimension);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(8);
+    button->appearance[SCButton::APR_UP].position=quitToDosPosition;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(9);
+    button->appearance[SCButton::APR_DOWN].position=quitToDosPosition;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    button = new SCButton();
+    button->InitBehavior(nullptr, fileUp, arrowDimentions);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(10);
+    button->appearance[SCButton::APR_UP].position=fileUp;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(11);
+    button->appearance[SCButton::APR_DOWN].position=fileUp;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    button = new SCButton();
+    button->InitBehavior(nullptr, fileDown, arrowDimentions);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(12);
+    button->appearance[SCButton::APR_UP].position=fileDown;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(13);
+    button->appearance[SCButton::APR_DOWN].position=fileDown;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\SM-FONT.SHP");
 }
 SCFileRequester::~SCFileRequester() {
     delete this->uiImageSet;
 }
 void SCFileRequester::draw(FrameBuffer *fb) {
-    // 182x131
-    FrameBuffer *fb2 = new FrameBuffer(182, 131);
-    fb2->DrawShape(this->uiImageSet->GetShape(0));
+    checkButtons();
+    FrameBuffer *fb2 = new FrameBuffer(320, 200);
+    fb2->FillWithColor(0);
+    RLEShape *shape = this->uiImageSet->GetShape(0);
+    fb2->DrawShape(shape);
     
-    fb->blit(fb2->framebuffer, (320-182)/2, (200-131)/2, fb2->width, fb2->height);
+    fb->blitLargeBuffer(fb2->framebuffer, 320, 200, shape->GetLeft(), shape->GetTop(), (320-shape->GetWidth())/2, (200-shape->GetHeight())/2, 182, 131);
+    fb->DrawShape(this->uiImageSet->GetShape(1));
+    for (auto btn: this->buttons) {
+        fb->DrawShape(&btn->appearance[btn->GetAppearance()]);
+    }
+    Point2D textPos = {
+        (320-shape->GetWidth())/2, 
+        (200-shape->GetHeight())/2
+    };
+    for (auto file: this->files) {
+        fb->PrintText(this->font, {textPos.x+32, textPos.y+48}, file, 0);
+        textPos.y+=8;
+    }
 }
 void SCFileRequester::checkevents() {
     SDL_Event keybEvents[1];
@@ -36,6 +112,50 @@ void SCFileRequester::checkevents() {
         }
         default:
             break;
+        }
+    }
+}
+
+SCButton *SCFileRequester::checkButtons(void) {
+    for (size_t i = 0; i < buttons.size(); i++) {
+
+        SCButton *button = buttons[i];
+
+        if (!button->IsEnabled())
+            continue;
+
+        if (Mouse.GetPosition().x < button->position.x ||
+            Mouse.GetPosition().x > button->position.x + button->dimension.x ||
+            Mouse.GetPosition().y < button->position.y ||
+            Mouse.GetPosition().y > button->position.y + button->dimension.y) {
+            button->SetAppearance(SCButton::APR_UP);
+            continue;
+        }
+        // HIT !
+        Mouse.SetMode(SCMouse::VISOR);
+
+        if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::PRESSED)
+            button->SetAppearance(SCButton::APR_DOWN);
+
+        // If the mouse button has just been released: trigger action.
+        if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+            button->OnAction();
+
+        return button;
+    }
+
+    Mouse.SetMode(SCMouse::CURSOR);
+    return NULL;
+}
+void SCFileRequester::loadFiles() {
+    files.clear();
+    files.shrink_to_fit();
+    for (const auto &entry : std::filesystem::directory_iterator(".")) {
+        if (entry.is_regular_file()) {
+            std::string fileName = entry.path().filename().string();
+            if (fileName.size() >= 4 && fileName.substr(fileName.size() - 4) == ".sav") {
+                files.push_back(fileName);
+            }
         }
     }
 }
