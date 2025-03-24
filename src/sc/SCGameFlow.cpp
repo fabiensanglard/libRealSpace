@@ -565,6 +565,8 @@ void SCGameFlow::Init() {
         Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     this->efect = nullptr;
+    this->current_miss = GameState.current_mission;
+    this->current_scen = GameState.current_scene;
     this->createMiss();
 }
 

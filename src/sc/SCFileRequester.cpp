@@ -29,7 +29,7 @@ SCFileRequester::SCFileRequester() {
     uiImageSet->GetShape(1)->position=loadTitlePosition;
 
     button = new SCButton();
-    button->InitBehavior(nullptr, loadGamePosition, buttonDimension);
+    button->InitBehavior(std::bind(&SCFileRequester::loadFile, this), loadGamePosition, buttonDimension);
     button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(4);
     button->appearance[SCButton::APR_UP].position=loadGamePosition;
     button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(5);
@@ -56,7 +56,7 @@ SCFileRequester::SCFileRequester() {
     buttons.push_back(button);
 
     button = new SCButton();
-    button->InitBehavior(nullptr, fileUp, arrowDimentions);
+    button->InitBehavior(std::bind(&SCFileRequester::fileUp, this), fileUp, arrowDimentions);
     button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(10);
     button->appearance[SCButton::APR_UP].position=fileUp;
     button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(11);
@@ -65,7 +65,7 @@ SCFileRequester::SCFileRequester() {
     buttons.push_back(button);
 
     button = new SCButton();
-    button->InitBehavior(nullptr, fileDown, arrowDimentions);
+    button->InitBehavior(std::bind(&SCFileRequester::fileDown, this), fileDown, arrowDimentions);
     button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(12);
     button->appearance[SCButton::APR_UP].position=fileDown;
     button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(13);
@@ -80,6 +80,7 @@ SCFileRequester::~SCFileRequester() {
 }
 void SCFileRequester::draw(FrameBuffer *fb) {
     checkButtons();
+    checkZones();
     FrameBuffer *fb2 = new FrameBuffer(320, 200);
     fb2->FillWithColor(0);
     RLEShape *shape = this->uiImageSet->GetShape(0);
@@ -91,12 +92,18 @@ void SCFileRequester::draw(FrameBuffer *fb) {
         fb->DrawShape(&btn->appearance[btn->GetAppearance()]);
     }
     Point2D textPos = {
-        (320-shape->GetWidth())/2, 
-        (200-shape->GetHeight())/2
+        (320-shape->GetWidth())/2+34, 
+        (200-shape->GetHeight())/2+48
     };
+    fb->PrintText(this->font, {textPos.x,textPos.y-15}, this->current_file, 0);
+    int min_y = textPos.y;
+    int max_y = textPos.y+4*8;
     for (auto file: this->files) {
-        fb->PrintText(this->font, {textPos.x+32, textPos.y+48}, file, 0);
         textPos.y+=8;
+        if (textPos.y+texte_x < min_y || textPos.y+texte_x > max_y) {
+            continue;
+        }
+        fb->PrintText(this->font, {textPos.x, textPos.y+texte_x}, file, 0);
     }
 }
 void SCFileRequester::checkevents() {
@@ -110,6 +117,58 @@ void SCFileRequester::checkevents() {
             this->opened = false;
             break;
         }
+        case SDLK_DELETE:
+            case SDLK_BACKSPACE:
+                if(this->current_file.size() > 0){
+                    this->current_file = this->current_file.substr(0,this->current_file.size()-1);
+                }
+            break;
+            case SDLK_a:
+            case SDLK_b:
+            case SDLK_c:
+            case SDLK_d:
+            case SDLK_e:
+            case SDLK_f:
+            case SDLK_g:
+            case SDLK_h:
+            case SDLK_i:
+            case SDLK_j:
+            case SDLK_k:
+            case SDLK_l:
+            case SDLK_m:
+            case SDLK_n:
+            case SDLK_o:
+            case SDLK_p:
+            case SDLK_q:
+            case SDLK_r:
+            case SDLK_s:
+            case SDLK_t:
+            case SDLK_u:
+            case SDLK_v:
+            case SDLK_w:
+            case SDLK_x:
+            case SDLK_y:
+            case SDLK_z:
+            {
+                this->current_file += char(event->key.keysym.sym - 'a' + 'A');
+                break;
+            }
+            case SDLK_0:
+            case SDLK_1:
+            case SDLK_2:
+            case SDLK_3:
+            case SDLK_4:
+            case SDLK_5:
+            case SDLK_6:
+            case SDLK_7:
+            case SDLK_8:
+            case SDLK_9:
+            case SDLK_PERIOD:
+            case SDLK_MINUS:
+            {
+                this->current_file += char(event->key.keysym.sym);
+                break;
+            }
         default:
             break;
         }
@@ -150,12 +209,74 @@ SCButton *SCFileRequester::checkButtons(void) {
 void SCFileRequester::loadFiles() {
     files.clear();
     files.shrink_to_fit();
+    zones.clear();
+    zones.shrink_to_fit();
+    RLEShape *shape = this->uiImageSet->GetShape(0);
+    Point2D textPos = {
+        (320-shape->GetWidth())/2+34, 
+        (200-shape->GetHeight())/2+48
+    };
+    int idx = 0;
     for (const auto &entry : std::filesystem::directory_iterator(".")) {
         if (entry.is_regular_file()) {
             std::string fileName = entry.path().filename().string();
-            if (fileName.size() >= 4 && fileName.substr(fileName.size() - 4) == ".sav") {
+            if (fileName.size() >= 4 && (fileName.substr(fileName.size() - 4) == ".sav" || fileName.substr(fileName.size() - 4) == ".SAV")) {
                 files.push_back(fileName);
+                SCZone *zone = new SCZone();
+                zone->id = idx;
+                zone->position = {textPos.x, textPos.y};
+                zone->dimension = {75, 8};
+                zone->active = true;
+                zone->onclick = std::bind(&SCFileRequester::selectFile, this, std::placeholders::_1, std::placeholders::_2);
+                zones.push_back(zone);
+                idx++;
+                textPos.y += 8;
             }
         }
     }
+}
+void SCFileRequester::fileUp() {
+    this->texte_x += 8;
+}
+void SCFileRequester::fileDown() {
+    this->texte_x -= 8;
+}
+SCZone * SCFileRequester::checkZones() {
+    RLEShape *shape = this->uiImageSet->GetShape(0);
+    Point2D textPos = {
+        (320-shape->GetWidth())/2+34, 
+        (200-shape->GetHeight())/2+48
+    };
+    int min_y = textPos.y;
+    int max_y = textPos.y+4*8;
+    if (Mouse.GetPosition().y+texte_x < min_y || Mouse.GetPosition().y+texte_x > max_y) {
+        return nullptr;
+    }
+    for (auto zone : this->zones) {
+        if (zone->active) {
+            if (Mouse.GetPosition().x > zone->position.x &&
+                Mouse.GetPosition().x < zone->position.x + zone->dimension.x &&
+                Mouse.GetPosition().y > zone->position.y+texte_x &&
+                Mouse.GetPosition().y < zone->position.y + zone->dimension.y +texte_x) {
+                // HIT !
+                Mouse.SetMode(SCMouse::VISOR);
+
+                // If the mouse button has just been released: trigger action.
+                if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                    zone->onclick(nullptr, zone->id);
+                
+                return zone;
+            }
+        }
+    }
+
+    Mouse.SetMode(SCMouse::CURSOR);
+    return nullptr;
+}
+void SCFileRequester::selectFile(void *unused, int index) {
+    current_file = files[index];
+}
+void SCFileRequester::loadFile() {
+    this->requested_file = this->current_file;    
+    this->opened = false;
 }

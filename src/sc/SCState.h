@@ -19,6 +19,8 @@ public:
     std::map<uint8_t, std::map<uint8_t, uint8_t>> kill_board;
     std::map<uint8_t, uint16_t> weapon_inventory;
     bool mission_accepted{false};
+    uint8_t current_mission{0};
+    uint8_t current_scene{0};
     uint8_t mission_id{0};
     uint8_t mission_flyed{0};
     uint8_t tune_modifier{0};
@@ -30,4 +32,5 @@ public:
 
     void Load(std::string filename);
     void Save(std::string filename);
+    void Reset();
 };

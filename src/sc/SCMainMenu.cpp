@@ -23,6 +23,7 @@ void SCMainMenu::OnLoadGame() {
 
 void SCMainMenu::OnStartNewGame() {
     SCGameFlow *gfl = new SCGameFlow();
+    GameState.Reset();
     gfl->Init();
     SCRegister *registerActivity = new SCRegister();
     registerActivity->Init();
@@ -216,6 +217,12 @@ void SCMainMenu::RunFrame(void) {
     }
     if (this->frequest->opened) {
         this->frequest->checkevents();
+    } else if (this->frequest->opened == false && this->frequest->requested_file != "") {
+        GameState.Load(this->frequest->requested_file);
+        SCGameFlow *gfl = new SCGameFlow();
+        gfl->Init();
+        Game.AddActivity(gfl);
+        this->frequest->requested_file = "";
     } else {
         CheckKeyboard();
         CheckButtons();
