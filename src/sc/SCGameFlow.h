@@ -60,7 +60,9 @@ public:
     ~SCGameFlow();
 
     void Init();
+    void InitFromGameState();
     void createMiss();
+    void loadMiss();
     void RunFrame(void);
 
 private:

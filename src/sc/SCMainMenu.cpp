@@ -84,7 +84,7 @@ void SCMainMenu::Init(void) {
 void SCMainMenu::LoadGame(std::string filename) {
     GameState.Load(filename);
     SCGameFlow *gfl = new SCGameFlow();
-    gfl->Init();
+    gfl->InitFromGameState();
     Game.AddActivity(gfl);
     this->frequest->requested_file = "";
 }
