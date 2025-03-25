@@ -78,10 +78,17 @@ void SCMainMenu::Init(void) {
     LoadBackgrounds();
 
     SetTitle("Neo Strike Commander");
-    this->frequest = new SCFileRequester();
+    this->frequest = new SCFileRequester(std::bind(&SCMainMenu::LoadGame, this, std::placeholders::_1));
     timer = 4200;
 }
-
+void SCMainMenu::LoadGame(std::string filename) {
+    GameState.Load(filename);
+    SCGameFlow *gfl = new SCGameFlow();
+    gfl->Init();
+    Game.AddActivity(gfl);
+    this->frequest->requested_file = "";
+}
+    
 void SCMainMenu::LoadButtons(void) {
 
     PakEntry *boardEntry = mainMenupak.GetEntry(MAINMENU_PAK_BUTTONS_INDICE);
@@ -217,12 +224,6 @@ void SCMainMenu::RunFrame(void) {
     }
     if (this->frequest->opened) {
         this->frequest->checkevents();
-    } else if (this->frequest->opened == false && this->frequest->requested_file != "") {
-        GameState.Load(this->frequest->requested_file);
-        SCGameFlow *gfl = new SCGameFlow();
-        gfl->Init();
-        Game.AddActivity(gfl);
-        this->frequest->requested_file = "";
     } else {
         CheckKeyboard();
         CheckButtons();

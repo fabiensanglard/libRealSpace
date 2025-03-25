@@ -33,6 +33,7 @@ private:
     void LoadBoard(void);
     void LoadBackgrounds(void);
     void LoadPalette(void);
+    void LoadGame(std::string filename);
     
     SCFileRequester *frequest;
     RLEShape board;

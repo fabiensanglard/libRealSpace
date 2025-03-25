@@ -13,10 +13,11 @@ private:
     int texte_x{0};
     std::string current_file{""};
     int selectd_file_index{0};
+    std::function<void(std::string)> callback;
 public:
     std::string requested_file{""};
     bool opened{false};
-    SCFileRequester();
+    SCFileRequester(std::function<void(std::string)> callback);
     ~SCFileRequester();
     void draw(FrameBuffer *fb);
     void checkevents();

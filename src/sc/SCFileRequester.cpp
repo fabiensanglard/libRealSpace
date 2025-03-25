@@ -6,7 +6,8 @@ void SCFileRequester::cancel() {
     this->opened = false;
 }
 
-SCFileRequester::SCFileRequester() {
+SCFileRequester::SCFileRequester(std::function<void(std::string)> callback) {
+    this->callback = callback;
     RSImageSet *uiImageSet = new RSImageSet();
     TreEntry *tre = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\SAVELOAD.SHP");
     PakArchive *pak = new PakArchive();
@@ -294,4 +295,5 @@ void SCFileRequester::selectFile(void *unused, int index) {
 void SCFileRequester::loadFile() {
     this->requested_file = this->current_file;    
     this->opened = false;
+    this->callback(this->requested_file);
 }
