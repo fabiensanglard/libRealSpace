@@ -43,7 +43,7 @@ void SCTrainingMenu::OnExitTraining(void) { Game.StopTopActivity(); }
 void SCTrainingMenu::Init() {
 
     TreEntry *objViewPAK =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
     PakArchive assets;
     assets.InitFromRAM("OBJVIEW.PAK", objViewPAK->data, objViewPAK->size);
     assets.List(stdout);
@@ -65,7 +65,7 @@ void SCTrainingMenu::Init() {
     title.SetPosition(&positionTitle);
 
     TreEntry *trButtonsEntry =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\TM.SHP");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\TM.SHP");
     PakArchive trButtonsPack;
     trButtonsPack.InitFromRAM("TM.SHP", trButtonsEntry->data, trButtonsEntry->size);
 

@@ -263,9 +263,9 @@ void SCObjectViewer::ParseAssets(PakArchive *archive) {
 void SCObjectViewer::Init(void) {
 
     TreEntry *objViewIFF =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
     TreEntry *objViewPAK =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
 
     PakArchive assets;
     assets.InitFromRAM("OBJVIEW.PAK", objViewPAK->data, objViewPAK->size);

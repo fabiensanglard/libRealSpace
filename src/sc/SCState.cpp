@@ -70,18 +70,19 @@ void SCState::Load(std::string filename) {
         this->kill_board[i+1][1] = air_kills;
     }
     this->weapon_inventory = {
-        {ID_AIM9J, buffer[0x16F]},
-        {ID_AIM9M, buffer[0x171]},
-        {ID_AGM65D, buffer[0x173]},
-        {ID_LAU3, buffer[0x17D]},
-        {ID_MK20, buffer[0x177]},
-        {ID_MK82, buffer[0x179]},
-        {ID_DURANDAL, buffer[0x175]},
-        {ID_GBU15, buffer[0x17B]},
-        {ID_AIM120, buffer[0x17F]}
+        {ID_AIM9J-1, buffer[0x16F]},
+        {ID_AIM9M-1, buffer[0x171]},
+        {ID_AGM65D-1, buffer[0x173]},
+        {ID_LAU3-1, buffer[0x17D]},
+        {ID_MK20-1, buffer[0x177]},
+        {ID_MK82-1, buffer[0x179]},
+        {ID_DURANDAL-1, buffer[0x175]},
+        {ID_GBU15-1, buffer[0x17B]},
+        {ID_AIM120-1, buffer[0x17F]}
     };
     this->current_mission = buffer[0x08];
     this->mission_flyed = buffer[0x09];
+    this->current_scene = buffer[0x0A];
 }
 
 void SCState::Save(std::string filename) {}

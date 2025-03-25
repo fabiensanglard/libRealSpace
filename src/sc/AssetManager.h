@@ -61,14 +61,13 @@ public:
     enum TreID {TRE_GAMEFLOW, TRE_OBJECTS, TRE_MISC, TRE_SOUND, TRE_MISSIONS,TRE_TEXTURES } ;
     
     std::vector<TreArchive*> tres;
-    
-    
+    TreEntry *GetEntryByName(std::string name);
     AssetManager();
     ~AssetManager();
     bool ReadISOImage(const std::string& isoPath);
 
 private:
-
+    std::map<std::string, TreEntry *> treEntries;
     std::map<std::string, FileEntry> fileContents;
     bool ExtractPrimaryVolumeDescriptor(std::ifstream &isoFile, PrimaryVolumeDescriptor &pvd);
     bool ExtractFileListFromRootDirectory(std::ifstream &isoFile, const PrimaryVolumeDescriptor &pvd);

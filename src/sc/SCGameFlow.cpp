@@ -552,17 +552,17 @@ void SCGameFlow::CheckKeyboard(void) {
 void SCGameFlow::Init() {
 
     TreEntry *gameflowIFF =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\GAMEFLOW.IFF");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\GAMEFLOW.IFF");
     TreEntry *optionIFF =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
     this->optionParser.InitFromRam(optionIFF->data, optionIFF->size);
     this->gameFlowParser.InitFromRam(gameflowIFF->data, gameflowIFF->size);
 
     TreEntry *optShapEntry =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
     this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
     TreEntry *optPalettesEntry =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     this->efect = nullptr;
     this->current_miss = GameState.current_mission;

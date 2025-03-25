@@ -33,7 +33,7 @@ void SCMission::cleanup() {
 void SCMission::loadMission() {
     std::string miss_file_name = "..\\..\\DATA\\MISSIONS\\" + this->mission_name; 
     
-    TreEntry *mission_tre = Assets.tres[AssetManager::TRE_MISSIONS]->GetEntryByName(miss_file_name.c_str());
+    TreEntry *mission_tre = Assets.GetEntryByName(miss_file_name.c_str());
 
     this->mission = new RSMission();
     this->mission->tre = Assets.tres[AssetManager::TRE_OBJECTS];

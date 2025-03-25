@@ -41,15 +41,23 @@ void AssetManager::Init(void){
         TreArchive* tre = new TreArchive();
         tre->InitFromFile(nameIds[i].filename);
         
-        if (tre->IsValid())
+        if (tre->IsValid()) {
             this->tres.push_back(tre);
-        else{
+            for (auto treEntry : tre->entries) {
+                treEntries[treEntry->name] = treEntry;
+            }
+        } else {
             Game.Terminate("Unable to load asset '%s' (Did you set the SC base folder ?).",nameIds[i].filename);
             
         }
     }
 }
-
+TreEntry * AssetManager::GetEntryByName(std::string name){
+    if (treEntries.find(name) == treEntries.end()) {
+        return nullptr;
+    }
+    return treEntries[name];
+}
 AssetManager::AssetManager(){
     
 }

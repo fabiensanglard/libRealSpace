@@ -128,7 +128,7 @@ void SCRegister::CheckKeyboard(void){
 void SCRegister::Init( ){
     
     //Load book
-    TreEntry* entryMountain = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
+    TreEntry* entryMountain = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
     PakArchive pak;
     pak.InitFromRAM("",entryMountain->data,entryMountain->size);
     
@@ -145,7 +145,7 @@ void SCRegister::Init( ){
     this->palette = *rendererPalette;
     
 
-    TreEntry* palettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
+    TreEntry* palettesEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     PakArchive palettesPak;
     palettesPak.InitFromRAM("OPTSHPS.PAK",palettesEntry->data,palettesEntry->size);
     

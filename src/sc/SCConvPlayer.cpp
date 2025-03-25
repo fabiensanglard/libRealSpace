@@ -386,7 +386,7 @@ void SCConvPlayer::SetID(int32_t id) {
 
     this->conversationID = id;
 
-    TreEntry *convEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
+    TreEntry *convEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
 
     PakArchive convPak;
     convPak.InitFromRAM("CONV.PAK", convEntry->data, convEntry->size);
@@ -607,7 +607,7 @@ void SCConvPlayer::RunFrame(void) {
     VGA.Activate();
     VGA.GetFrameBuffer()->FillWithColor(255);
     TreEntry *convPalettesEntry =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
     PakArchive convPals;
     convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
 

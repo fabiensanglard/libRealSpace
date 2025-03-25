@@ -8,7 +8,7 @@ void SCFileRequester::cancel() {
 
 SCFileRequester::SCFileRequester() {
     RSImageSet *uiImageSet = new RSImageSet();
-    TreEntry *tre = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\SAVELOAD.SHP");
+    TreEntry *tre = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\SAVELOAD.SHP");
     PakArchive *pak = new PakArchive();
     pak->InitFromRAM("SAVELOAD.SHP", tre->data, tre->size);
     uiImageSet->InitFromPakArchive(pak,0);

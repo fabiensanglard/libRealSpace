@@ -49,7 +49,7 @@ void SCAnimationPlayer::CheckKeyboard(void) {
     }
 }
 void SCAnimationPlayer::Init(){
-    TreEntry *midgames_entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(
+    TreEntry *midgames_entry = Assets.GetEntryByName(
         "..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK"
     );
     PakArchive *midgames_arch = new PakArchive();
@@ -70,7 +70,7 @@ void SCAnimationPlayer::Init(){
     if (this->mid.size() == 0) {
         for (int i = 0; i < midgames_files.size(); i++) {
             std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + ".PAK";
-            TreEntry *entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(file_path.c_str());
+            TreEntry *entry = Assets.GetEntryByName(file_path.c_str());
             if (entry == nullptr) {
                 continue;
             }
@@ -83,7 +83,7 @@ void SCAnimationPlayer::Init(){
 
         for (int i = 0; i < midgames_files.size(); i++) {
             std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + "VOC.PAK";
-            TreEntry *entry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(file_path.c_str());
+            TreEntry *entry = Assets.GetEntryByName(file_path.c_str());
             if (entry == nullptr) {
                 continue;
             }
@@ -92,11 +92,11 @@ void SCAnimationPlayer::Init(){
             this->midvoc.push_back(arch);
         }
     }
-    TreEntry *optShapEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(
+    TreEntry *optShapEntry = Assets.GetEntryByName(
         "..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK"
     );
     this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
-    TreEntry *optPalettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(
+    TreEntry *optPalettesEntry = Assets.GetEntryByName(
         "..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK"
     );
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);

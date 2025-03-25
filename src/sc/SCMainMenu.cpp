@@ -163,7 +163,7 @@ void SCMainMenu::LoadPalette(void) {
     this->palette = *rendererPalette;
     // Load the default palette
 
-    TreEntry *palettesEntry = Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName(OPTPALS_PAK_PATH);
+    TreEntry *palettesEntry = Assets.GetEntryByName(OPTPALS_PAK_PATH);
     PakArchive palettesPak;
     palettesPak.InitFromRAM("OPTSHPS.PAK", palettesEntry->data, palettesEntry->size);
     // palettesPak.List(stdout);
@@ -182,7 +182,7 @@ void SCMainMenu::LoadPalette(void) {
 void SCMainMenu::LoadBackgrounds(void) {
 
     TreEntry *entryMountain =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
     PakArchive pak;
     pak.InitFromRAM("", entryMountain->data, entryMountain->size);
 
@@ -197,7 +197,7 @@ void SCMainMenu::LoadBackgrounds(void) {
     sky.Init(skyPak.GetEntry(0)->data, skyPak.GetEntry(0)->size);
 
     TreEntry *entryCloud =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
     PakArchive subcloudPak;
     subcloudPak.InitFromRAM("cloud oak entry", entryCloud->data, entryCloud->size);
     PakArchive cloudPak;

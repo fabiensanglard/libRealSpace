@@ -352,31 +352,31 @@ void ConvAssetManager::BuildDB(void) {
 
     // This is were the background shapes are stored.
     TreEntry *convShapEntry =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVSHPS.PAK");
     convShps.InitFromRAM("CONVSHPS.PAK", convShapEntry->data, convShapEntry->size);
     // convShapeArchive.List(stdout);
 
     // This is were the palette patches are stored
     TreEntry *convPalettesEntry =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
     convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
     // convPalettePak.List(stdout);
 
     // This is were the background shapes are stored.
     TreEntry *optShapEntry =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
     optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
     // optShps(stdout);
 
     // This is were the palette patches are stored
     TreEntry *optPalettesEntry =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
     optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     // optPals(stdout);
 
     // Open the metadata
     TreEntry *convDataEntry =
-        Assets.tres[AssetManager::TRE_GAMEFLOW]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVDATA.IFF");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVDATA.IFF");
     IffLexer convDataLexer;
     convDataLexer.InitFromRAM(convDataEntry->data, convDataEntry->size);
     // convDataLexer.List(stdout);
