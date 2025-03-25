@@ -103,6 +103,20 @@ void SCFileRequester::draw(FrameBuffer *fb) {
         if (textPos.y+texte_x < min_y || textPos.y+texte_x > max_y) {
             continue;
         }
+        for (auto z: this->zones) {
+            if (z->id == this->selectd_file_index) {
+                if (z->position.y+texte_x > min_y && z->position.y+texte_x < max_y) {
+                    fb->rect_slow(
+                        z->position.x,
+                        z->position.y+texte_x,
+                        z->position.x+z->dimension.x,
+                        z->position.y+z->dimension.y+texte_x,
+                        0
+                    );
+                }
+                break;
+            }
+        }
         fb->PrintText(this->font, {textPos.x, textPos.y+texte_x}, file, 0);
     }
 }
@@ -213,7 +227,7 @@ void SCFileRequester::loadFiles() {
     zones.shrink_to_fit();
     RLEShape *shape = this->uiImageSet->GetShape(0);
     Point2D textPos = {
-        (320-shape->GetWidth())/2+34, 
+        (320-shape->GetWidth())/2+32, 
         (200-shape->GetHeight())/2+48
     };
     int idx = 0;
@@ -225,7 +239,7 @@ void SCFileRequester::loadFiles() {
                 SCZone *zone = new SCZone();
                 zone->id = idx;
                 zone->position = {textPos.x, textPos.y};
-                zone->dimension = {75, 8};
+                zone->dimension = {75, 9};
                 zone->active = true;
                 zone->onclick = std::bind(&SCFileRequester::selectFile, this, std::placeholders::_1, std::placeholders::_2);
                 zones.push_back(zone);
@@ -249,7 +263,7 @@ SCZone * SCFileRequester::checkZones() {
     };
     int min_y = textPos.y;
     int max_y = textPos.y+4*8;
-    if (Mouse.GetPosition().y+texte_x < min_y || Mouse.GetPosition().y+texte_x > max_y) {
+    if (Mouse.GetPosition().y < min_y || Mouse.GetPosition().y > max_y) {
         return nullptr;
     }
     for (auto zone : this->zones) {
@@ -275,6 +289,7 @@ SCZone * SCFileRequester::checkZones() {
 }
 void SCFileRequester::selectFile(void *unused, int index) {
     current_file = files[index];
+    this->selectd_file_index = index;
 }
 void SCFileRequester::loadFile() {
     this->requested_file = this->current_file;    

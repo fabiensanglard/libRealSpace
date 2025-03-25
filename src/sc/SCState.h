@@ -29,7 +29,10 @@ public:
     std::string player_name;
     std::string player_callsign;
     std::string player_firstname;
-
+    std::string wingman;
+    int32_t score{0};
+    int32_t ground_kills{0};
+    int32_t air_kills{0};
     void Load(std::string filename);
     void Save(std::string filename);
     void Reset();

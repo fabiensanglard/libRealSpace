@@ -12,7 +12,7 @@ private:
     RSFont *font;
     int texte_x{0};
     std::string current_file{""};
-    
+    int selectd_file_index{0};
 public:
     std::string requested_file{""};
     bool opened{false};
