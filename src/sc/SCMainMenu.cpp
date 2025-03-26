@@ -213,7 +213,13 @@ void SCMainMenu::LoadBackgrounds(void) {
 }
 
 void SCMainMenu::RunFrame(void) {
-    timer --;
+    if (this->frequest->opened) {
+        this->frequest->checkevents();
+    } else {
+        CheckKeyboard();
+        CheckButtons();
+        timer --;
+    }
     if (timer <= 0) {
         SCAnimationPlayer *intro = new SCAnimationPlayer();
         intro->Init();
@@ -222,12 +228,7 @@ void SCMainMenu::RunFrame(void) {
         Game.AddActivity(intro);
         return;
     }
-    if (this->frequest->opened) {
-        this->frequest->checkevents();
-    } else {
-        CheckKeyboard();
-        CheckButtons();
-    }
+    
     
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();

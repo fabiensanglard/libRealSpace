@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "FrameBuffer.h"
 
 FrameBuffer::FrameBuffer(int w, int h) {
     this->framebuffer = new uint8_t[w * h]();
@@ -208,7 +209,7 @@ void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t c
             coo->x = static_cast<int32_t>(coo->x + shape->GetWidth() + interLetterSpace);
     }
 }
-void FrameBuffer::blit(uint8_t *srcBuffer, int x, int y, int width, int height) {
+void FrameBuffer::blit(uint8_t *srcBuffer, int x, int y, int w, int h) {
     int startRow = 0;
     int startCol = 0;
     if (y < 0) {
@@ -217,16 +218,16 @@ void FrameBuffer::blit(uint8_t *srcBuffer, int x, int y, int width, int height) 
     if (x < 0) {
         startCol = -x;
     }
-    for (int row = startRow; row < height; ++row) {
+    for (int row = startRow; row < h; ++row) {
         int destRow = y + row;
         if (destRow < 0 || destRow >= this->height)
             continue;
         int destOffset = destRow * this->width;
-        for (int col = startCol; col < width; ++col) {
+        for (int col = startCol; col < w; ++col) {
             int destCol = x + col;
             if (destCol < 0 || destCol >= this->width)
                 continue;
-            framebuffer[destOffset + destCol] = srcBuffer[row * width + col];
+            framebuffer[destOffset + destCol] = srcBuffer[row * w + col];
         }
     }
 }
@@ -251,6 +252,30 @@ void FrameBuffer::blitWithMask(uint8_t *srcBuffer, int x, int y, int width, int 
             if (srcBuffer[row * width + col] == maxk)
                 continue;
             framebuffer[destOffset + destCol] = srcBuffer[row * width + col];
+        }
+    }
+}
+void FrameBuffer::blitWithMaskAndOffset(uint8_t *srcBuffer, int x, int y, int width, int height, uint8_t maxk, uint8_t offset) {
+    int startRow = 0;
+    int startCol = 0;
+    if (y < 0) {
+        startRow = -y;
+    }
+    if (x < 0) {
+        startCol = -x;
+    }
+    for (int row = startRow; row < height; ++row) {
+        int destRow = y + row;
+        if (destRow < 0 || destRow >= this->height)
+            continue;
+        int destOffset = destRow * this->width;
+        for (int col = startCol; col < width; ++col) {
+            int destCol = x + col;
+            if (destCol < 0 || destCol >= this->width)
+                continue;
+            if (srcBuffer[row * width + col] == maxk)
+                continue;
+            framebuffer[destOffset + destCol] = srcBuffer[row * width + col]+offset;
         }
     }
 }
