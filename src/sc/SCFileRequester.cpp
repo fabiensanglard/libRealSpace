@@ -113,7 +113,7 @@ void SCFileRequester::draw(FrameBuffer *fb) {
         (320-shape->GetWidth())/2+34, 
         (200-shape->GetHeight())/2+48
     };
-    fb->PrintText(this->font, {textPos.x,textPos.y-15}, this->current_file, 0);
+    fb->PrintText(this->font, {textPos.x,textPos.y-15}, this->current_file, this->color_offset);
     int min_y = textPos.y;
     int max_y = textPos.y+4*8;
     for (auto file: this->files) {
@@ -135,10 +135,8 @@ void SCFileRequester::draw(FrameBuffer *fb) {
                 break;
             }
         }
-        fb->PrintText(this->font, {textPos.x, textPos.y+texte_x}, file, 0);
+        fb->PrintText(this->font, {textPos.x, textPos.y+texte_x}, file, this->color_offset);
     }
-    //VGAPalette *p = VGA.GetPalette();
-    //p->ReadPatch(new ByteStream(this->optPals.GetEntry(this->palette_index)->data));
 }
 void SCFileRequester::checkevents() {
     SDL_Event keybEvents[1];

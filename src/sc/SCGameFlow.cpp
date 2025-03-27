@@ -376,7 +376,7 @@ void SCGameFlow::runEffect() {
             if (this->scen != nullptr) {
                 delete this->scen;
             }
-            this->scen = new LedgerScene(&this->optShps, &this->optPals);
+            this->scen = new CatalogueScene(&this->optShps, &this->optPals);
 
             this->zones = this->scen->Init(
                 this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
