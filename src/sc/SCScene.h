@@ -102,8 +102,23 @@ public:
         this->CreateZones();
     };
 };
+struct CatalogueShoppingCartItem {
+    uint8_t id;
+    uint8_t quantity;
+    std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick;
+}; 
 
 class CatalogueScene : public SCScene {
+    void turnPageForward(std::vector<EFCT *> *script, uint8_t sprite_id);
+    void turnPageBackward(std::vector<EFCT *> *script, uint8_t sprite_id);
+    void orderItem(std::vector<EFCT *> *script, uint8_t sprite_id);
+    void cancelItem(std::vector<EFCT *> *script, uint8_t sprite_id);
+    std::map<uint8_t, std::vector<std::pair<uint8_t, std::function<void(std::vector<EFCT *> *script, uint8_t id)>>>> pages;
+    std::map<uint8_t, CatalogueShoppingCartItem> shopping_cart;
+    int current_page{0};
+    std::vector<SCZone *> * UpdateZones();
+    std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick;
+
 public:
     CatalogueScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
     std::vector<SCZone *> *

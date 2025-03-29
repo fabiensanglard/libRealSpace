@@ -66,3 +66,19 @@ enum prog_op {
 };
 
 enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET, MISSILE_CAM, OBJECT, AUTO_PILOT };
+
+enum CatalogItems {
+    CAT_AIM9J = 73,
+    CAT_AIM9M = 74,
+    CAT_AIM120 = 75,
+    CAT_LAU3 = 76,
+    CAT_AGM65D = 77,
+    CAT_GBU15 = 78,
+    CAT_MK20 = 79,
+    CAT_MK82 = 80,
+    CAT_DURANDAL = 81,
+    CAT_PACK1 = 85,
+    CAT_PACK2 = 86,
+    CAT_PACK3 = 87,
+    CAT_PACK4 = 88
+};

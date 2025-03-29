@@ -923,13 +923,96 @@ std::vector<SCZone *> *CatalogueScene::Init(
     this->rawPalette = this->optPals->GetEntry(paltID)->data;
     this->forPalette = this->optPals->GetEntry(forPalTID)->data;
 
-    uint8_t optionScenID = gameflow_scene->info.ID;
-
+    this->onclick               = onclick;
+    this->current_page = 0;
+    this->pages = {
+        {0, {
+                {88, std::bind(&CatalogueScene::turnPageForward, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_AIM9J, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_AIM9M, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_AIM120, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_LAU3, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)}
+            }},
+        {1, {
+                {88, std::bind(&CatalogueScene::turnPageForward, this, std::placeholders::_1, std::placeholders::_2)},
+                {87, std::bind(&CatalogueScene::turnPageBackward, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_AGM65D, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_GBU15, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_MK20, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_MK82, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)}
+            }},
+        {2, {
+                {88, std::bind(&CatalogueScene::turnPageForward, this, std::placeholders::_1, std::placeholders::_2)},
+                {87, std::bind(&CatalogueScene::turnPageBackward, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_DURANDAL, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
+                {82, nullptr}
+            }},
+        {3, {
+                {88, std::bind(&CatalogueScene::turnPageForward, this, std::placeholders::_1, std::placeholders::_2)},
+                {87, std::bind(&CatalogueScene::turnPageBackward, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_PACK1, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_PACK2, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)}
+            }},
+        {4, {
+                {88, std::bind(&CatalogueScene::turnPageForward, this, std::placeholders::_1, std::placeholders::_2)},
+                {87, std::bind(&CatalogueScene::turnPageBackward, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_PACK3, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
+                {CatalogItems::CAT_PACK4, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)}
+            }}
+    };
+    this->shopping_cart = {
+        {CatalogItems::CAT_AIM9J, {89, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_AIM9M, {90, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_AIM120, {91, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_LAU3, {93, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_AGM65D, {92, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_GBU15, {97, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_MK20, {94, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_MK82, {95, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_DURANDAL, {96, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_PACK1, {99, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_PACK2, {100, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_PACK3, {101, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_PACK4, {102, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}}
+    };
+    return this->UpdateZones();
+}
+void CatalogueScene::turnPageForward(std::vector<EFCT *> *script, uint8_t sprite_id) {
+    this->current_page = this->current_page + 1;
+    if (this->current_page > this->pages.size() - 1) {
+        this->current_page = this->pages.size() - 1;
+    }
+    this->UpdateZones();
+}
+void CatalogueScene::turnPageBackward(std::vector<EFCT *> *script, uint8_t sprite_id) {
+    this->current_page = this->current_page - 1;
+    if (this->current_page < 0) {
+        this->current_page = 0;
+    }
+    this->UpdateZones();
+}
+void CatalogueScene::orderItem(std::vector<EFCT *> *script, uint8_t sprite_id) {
+    this->shopping_cart[sprite_id].quantity = this->shopping_cart[sprite_id].quantity + 1;
+    this->UpdateZones();
+}
+void CatalogueScene::cancelItem(std::vector<EFCT *> *script, uint8_t sprite_id) {
+    for (auto item : this->shopping_cart) {
+        if (item.second.id == sprite_id) {
+            this->shopping_cart[item.first].quantity = this->shopping_cart[item.first].quantity - 1;
+            if (this->shopping_cart[item.first].quantity < 0) {
+                this->shopping_cart[item.first].quantity = 0;
+            }
+            break;
+        }
+    }
+    this->UpdateZones();
+}
+std::vector<SCZone *> * CatalogueScene::UpdateZones() {
+    this->zones.clear();
+    this->zones.shrink_to_fit();
     for (auto sprts : this->sceneOpts->foreground->sprites) {
         uint8_t sprtId = sprts.first;
         SPRT *sprite   = sprts.second;
-        // le clck dans sprite semble indiquer qu'il faut jouer l'animation après avoir cliquer et donc executer le
-        // efect à la fin de l'animation.
         uint8_t zone_id = 0;
         if (this->sceneOpts->foreground->sprites.count(sprtId) > 0) {
             uint8_t optsprtId     = this->sceneOpts->foreground->sprites[sprtId]->sprite.SHP_ID;
@@ -984,30 +1067,43 @@ std::vector<SCZone *> *CatalogueScene::Init(
             sprt->shapid       = optsprtId;
             sprt->img          = this->getShape(optsprtId);
             sprt->frameCounter = 0;
-            if (this->sceneOpts->foreground->sprites[sprtId]->CLCK == 1) {
-                sprt->cliked       = true;
-                sprt->frameCounter = 1;
-            }
-            if (this->sceneOpts->foreground->sprites[sprtId]->SEQU != nullptr) {
-                sprt->frames       = this->sceneOpts->foreground->sprites[sprtId]->SEQU;
-                sprt->frameCounter = 0;
-            }
+            
             z->sprite = sprt;
             z->id     = zone_id;
+            
             zone_id++;
             if (this->gameflow_scene->info.ID == sprtId) {
-                z->onclick = onclick;
+                z->onclick = this->onclick;
                 z->active  = true;
                 this->zones.push_back(z);
+            } else {
+                for (auto current_page_sprite: this->pages[current_page]) {
+                    if (current_page_sprite.first == sprtId) {
+                        z->active = true;
+                        if (current_page_sprite.second != nullptr) {
+                            z->onclick = current_page_sprite.second;
+                        }
+                        this->zones.push_back(z);
+                        break;
+                    }
+                }
+                for (auto shopping_item: this->shopping_cart) {
+                    if (shopping_item.second.id == sprtId && shopping_item.second.quantity > 0) {
+                        z->active = true;
+                        if (shopping_item.second.onclick != nullptr) {
+                            z->onclick = shopping_item.second.onclick;
+                        }
+                        this->zones.push_back(z);
+                        break;
+                    }
+                }
             }
-
         } else {
             printf("%d, ID Sprite not found !!\n", sprtId);
         }
     }
     return (&this->zones);
 }
-
 std::vector<SCZone *> *KillBoardScene::Init(
     GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick
 ) {
