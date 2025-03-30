@@ -132,15 +132,6 @@ public:
 
 class KillBoardScene : public SCScene {
     RSFont *font;
-    std::map<uint8_t, std::string> pilot_names = {
-        {1, "STERN"},
-        {2, "PHOENIX"},
-        {3, "ZORRO"},
-        {4, "BASELINE"},
-        {5, "VIXEN"},
-        {6, "PRIME TIME"},
-        {7, "TEX"}
-    };
 public:
     KillBoardScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
     std::vector<SCZone *> * Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);

@@ -61,8 +61,8 @@ void SCState::Load(std::string filename) {
         208 - 21B - WingMan
     */
     this->wingman = std::string(buffer.begin() + 0x208, buffer.begin() + 0x21B);
-    this->ground_kills = buffer[0x19B];
-    this->air_kills = buffer[0x199];
+    this->ground_kills = buffer[0x199];
+    this->air_kills = buffer[0x19B];
     /* 19D - 1C5 killboard */
     for (int i=0; i<6; i++) {
         int alive = buffer[0x19D + i*0x06];
@@ -71,6 +71,9 @@ void SCState::Load(std::string filename) {
         this->kill_board[i+1][0] = ground_kills;
         this->kill_board[i+1][1] = air_kills;
     }
+    this->kill_board[0][0] = this->ground_kills;
+    this->kill_board[0][1] = this->air_kills;
+    
     this->weapon_inventory = {
         {ID_AIM9J, buffer[0x16F]},
         {ID_AIM9M, buffer[0x171]},

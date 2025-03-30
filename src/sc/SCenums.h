@@ -116,6 +116,25 @@ static std::map<prog_op, std::string> prog_op_names = {
     {OP_SELECT_FLAG_208, "OP_SELECT_FLAG_208"}
 };
 
+enum PilotsId {
+    PRIMETIME=1,
+    PHOENIX=2,
+    BASELINE=3,
+    ZORRO=4,
+    TEX=5,
+    VIXEN=6,
+    HAWK=7
+};
+
+static std::map<uint8_t, std::string> pilot_names = {
+    {1, "PRIMETIME"},
+    {2, "PHOENIX"},
+    {3, "BASELINE"},
+    {4, "ZORRO"},
+    {5, "TEX"},
+    {6, "VIXEN"},
+    {7, "HAWK"}
+};
 enum View { FRONT = 0, FOLLOW, RIGHT, LEFT, REAR, REAL, TARGET, EYE_ON_TARGET, MISSILE_CAM, OBJECT, AUTO_PILOT };
 
 enum CatalogItems {
