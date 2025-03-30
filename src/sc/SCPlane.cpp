@@ -1406,22 +1406,28 @@ void SCPlane::InitLoadout() {
             break;
             case ID_AIM120:
                 nbweap = loadout->nb_weap;
+                cpt_test = 0;
                 while (nbweap>0) {
                     cpt_hpts = -1;
+                    if (cpt_test > weap_map[loadout->objct->wdat->weapon_id].size()-1) {
+                        cpt_hpts = 0;
+                        nbweap = 0;
+                    }
                     int hpt_id = 0;
                     for (int i=1;i<this->object->entity->hpts.size() && cpt_hpts == -1;i++) {
                         auto hpt = this->object->entity->hpts[i];
-                        if (hpt->id == weap_map[loadout->objct->wdat->weapon_id][0]) {
+                        if (hpt->id == weap_map[loadout->objct->wdat->weapon_id][cpt_test]) {
                             if (this->weaps_load[i] == nullptr) {
                                 cpt_hpts = i;
                                 hpt_id = hpt->id;
                             }
                         }
                     }
+                    int noplace = 0;
                     if (cpt_hpts == -1) {
-                        nbweap = -1;
+                        noplace = 1;
                     }
-                    if (nbweap>0) {
+                    if (noplace == 0) {
                         int nbmax_wep = 1;
                         if (hpt_id == 2) {
                             nbmax_wep = 2;
@@ -1455,7 +1461,7 @@ void SCPlane::InitLoadout() {
                         this->weaps_load[this->object->entity->hpts.size()-cpt_hpts] = weap;
                         nbweap-=(nbmax_wep*2);
                     }
-                    cpt_hpts++;
+                    cpt_test++;
                 }
             break;
         }

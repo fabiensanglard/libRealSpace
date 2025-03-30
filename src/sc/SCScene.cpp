@@ -541,6 +541,10 @@ void WeaponLoadoutScene::updateWeaponDisplay() {
                     addWeaponZones(
                         AIM120, wlabel, weapon_pylones[i - 1][AIM120][0][1], weapon_pylones[i - 1][AIM120][1]
                     );
+                } if (GameState.weapon_load_out[AIM120] == 4 && GameState.weapon_load_out[i - 1] != AIM120) {
+                    addWeaponZones(
+                        AIM120, wlabel, weapon_pylones[i - 1][AIM120][0][1], weapon_pylones[i - 1][AIM120][1]
+                    );
                 } else {
                     addWeaponZones(
                         AIM120, wlabel, weapon_pylones[i - 1][AIM120][0][0], weapon_pylones[i - 1][AIM120][1]
@@ -1257,7 +1261,7 @@ std::vector<SCZone *> *KillBoardScene::Init(
     z->quad->push_back(p);
     this->zones.push_back(z);
     this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\BOARDFNT.SHP");
-    this->pilot_names[0] = GameState.player_callsign;
+    pilot_names[0] = GameState.player_callsign;
     return (&this->zones);
 }
 
