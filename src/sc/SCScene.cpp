@@ -2,6 +2,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include "SCScene.h"
 
 #pragma warning(disable : 4996)
 template <typename... Args> std::string string_format(const std::string &format, Args... args) {
@@ -503,35 +504,15 @@ void WeaponLoadoutScene::updateWeaponDisplay() {
     // Ajout des zones fixes
     createAndAddZone(this->gameflow_scene->info.ID, this->gameflow_scene->info.ID, this->onclick);
     createAndAddZone(12, 12, this->onclick);
-    createAndAddZone(
-        AIM9J, AIM9J, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2)
-    );
-    createAndAddZone(
-        AIM9M, AIM9M, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2)
-    );
-    createAndAddZone(
-        AIM120, AIM120, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2)
-    );
-    createAndAddZone(
-        DURANDAL, DURANDAL,
-        std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2)
-    );
-    createAndAddZone(
-        MK82, MK82, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2)
-    );
-    createAndAddZone(
-        AGM65D, AGM65D, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2)
-    );
-    createAndAddZone(
-        MK20, MK20, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2)
-    );
-    createAndAddZone(
-        GBU15, GBU15, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2)
-    );
-    createAndAddZone(
-        LAU3, LAU3, std::bind(&WeaponLoadoutScene::addWeapon, this, std::placeholders::_1, std::placeholders::_2)
-    );
-
+    for (auto weap: GameState.weapon_inventory) {
+        if (weap.second != 0) {
+            createAndAddZone(
+                weapon_inv_to_loadout[weapon_ids(weap.first)],
+                weapon_inv_to_loadout[weapon_ids(weap.first)],
+                std::bind(&WeaponLoadoutScene::addWeapon,this, std::placeholders::_1, std::placeholders::_2)
+            );
+        }
+    }
     // Lambda pour ajouter les zones de load-out (extra zones et zones "NoGfX")
     auto addWeaponZones =
         [this](uint8_t weaponType, const std::string &wlabel, uint8_t &extraIds, const std::vector<uint8_t> &noGfxIds) {
@@ -880,13 +861,13 @@ void LedgerScene::Render() {
     int color = 0;
     if (page == 0) {
         fb->PrintText(this->font, {67, 64}, std::string("PREVIOUS CASH"), color);
-        fb->PrintText(this->font, {177, 64}, std::to_string(GameState.proj_cash), color);
+        fb->PrintText(this->font, {177, 64}, std::to_string(GameState.cash), color);
 
         fb->PrintText(this->font, {67, 69}, std::string("F-16 REPLACEMENT"), color);
-        fb->PrintText(this->font, {177, 69}, std::to_string(0), color);
+        fb->PrintText(this->font, {177, 69}, std::to_string(GameState.f16_replacements), color);
 
         fb->PrintText(this->font, {67, 75}, std::string("WEAPONS"), color);
-        fb->PrintText(this->font, {177, 75}, std::to_string(0), color);
+        fb->PrintText(this->font, {177, 75}, std::to_string(GameState.weapons_costs), color);
 
         fb->PrintText(this->font, {67, 86}, std::string("CURRENT CASH"), color);
         fb->PrintText(this->font, {177, 86}, std::to_string(GameState.proj_cash), color);
@@ -895,13 +876,15 @@ void LedgerScene::Render() {
         fb->PrintText(this->font, {177, 97}, std::to_string(GameState.over_head), color);
 
         fb->PrintText(this->font, {67, 103}, std::string("PROJ CASH"), color);
-        fb->PrintText(this->font, {177, 103}, std::to_string(GameState.proj_cash - GameState.over_head), color);
+        fb->PrintText(this->font, {177, 103}, std::to_string(GameState.proj_cash - GameState.over_head - GameState.weapons_costs - GameState.f16_replacements), color);
     } else if (page == 1) {
         int y = 64;
         for (auto weap : GameState.weapon_inventory) {
-            fb->PrintText(this->font, {67, y}, weapon_label[weapon_ids(weap.first + 1)], color);
-            fb->PrintText(this->font, {203, y}, std::to_string(weap.second), color);
-            y += 5 + (y % 2);
+            if (weap.first > 0) {
+                fb->PrintText(this->font, {67, y}, weapon_label[weapon_ids(weap.first)], color);
+                fb->PrintText(this->font, {203, y}, std::to_string(weap.second), color);
+                y += 5 + (y % 2);
+            }
         }
     }
 }
@@ -952,29 +935,33 @@ std::vector<SCZone *> *CatalogueScene::Init(
                 {87, std::bind(&CatalogueScene::turnPageBackward, this, std::placeholders::_1, std::placeholders::_2)},
                 {CatalogItems::CAT_PACK1, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
                 {CatalogItems::CAT_PACK2, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)}
+                
             }},
         {4, {
-                {88, std::bind(&CatalogueScene::turnPageForward, this, std::placeholders::_1, std::placeholders::_2)},
                 {87, std::bind(&CatalogueScene::turnPageBackward, this, std::placeholders::_1, std::placeholders::_2)},
                 {CatalogItems::CAT_PACK3, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)},
                 {CatalogItems::CAT_PACK4, std::bind(&CatalogueScene::orderItem, this, std::placeholders::_1, std::placeholders::_2)}
             }}
     };
     this->shopping_cart = {
-        {CatalogItems::CAT_AIM9J, {89, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_AIM9M, {90, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_AIM120, {91, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_LAU3, {93, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_AGM65D, {92, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_GBU15, {97, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_MK20, {94, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_MK82, {95, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_DURANDAL, {96, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_PACK1, {99, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_PACK2, {100, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_PACK3, {101, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
-        {CatalogItems::CAT_PACK4, {102, 0, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}}
+        {CatalogItems::CAT_AIM9J, {89, 0, 30000, {35,192}, 155, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_AIM9M, {90, 0, 60000, {98,174}, 155,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_AIM120, {91, 0, 200000, {94,188}, 155,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_LAU3, {93, 0, 10000, {176,169}, 157,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_AGM65D, {92, 0,100000, {178,155}, 155, std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_GBU15, {97, 0, 100000, {258,148}, 155,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_MK20, {94, 0, 20000, {163,185}, 155,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_MK82, {95, 0, 10000, {260,129}, 155,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_DURANDAL, {96, 0, 30000, {259,137}, 155,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_PACK1, {99, 0, 250000, {255,94}, 156,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_PACK2, {100, 0, 450000, {238,88}, 157,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_PACK3, {101, 0, 800000, {245,78}, 157,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}},
+        {CatalogItems::CAT_PACK4, {102, 0, 300000, {235,67}, 157,std::bind(&CatalogueScene::cancelItem, this, std::placeholders::_1, std::placeholders::_2)}}
     };
+    this->calcfont = FontManager.GetFont("..\\..\\DATA\\FONTS\\CALCFONT.SHP");
+    PakEntry *entry = this->optShps->GetEntry(157);
+    this->order_font = new RSImageSet();
+    this->order_font->InitFromPakEntry(entry);
     return this->UpdateZones();
 }
 void CatalogueScene::turnPageForward(std::vector<EFCT *> *script, uint8_t sprite_id) {
@@ -1006,6 +993,57 @@ void CatalogueScene::cancelItem(std::vector<EFCT *> *script, uint8_t sprite_id) 
         }
     }
     this->UpdateZones();
+}
+void CatalogueScene::placeOrder(std::vector<EFCT *> *script, uint8_t sprite_id) {
+    int cost = 0;
+    for (auto item : this->shopping_cart) {
+        cost += item.second.price * item.second.quantity;
+        switch (CatalogItems(item.first)) {
+            case CatalogItems::CAT_AIM9J:
+                GameState.weapon_inventory[weapon_ids::ID_AIM9J] += item.second.quantity;
+            break;
+            case CatalogItems::CAT_AIM9M:
+                GameState.weapon_inventory[weapon_ids::ID_AIM9M] += item.second.quantity;
+            break;
+            case CatalogItems::CAT_AIM120:
+                GameState.weapon_inventory[weapon_ids::ID_AIM120] += item.second.quantity;
+            break;
+            case CatalogItems::CAT_LAU3:
+                GameState.weapon_inventory[weapon_ids::ID_LAU3] += item.second.quantity;
+            break;
+            case CatalogItems::CAT_AGM65D:
+                GameState.weapon_inventory[weapon_ids::ID_AGM65D] += item.second.quantity;
+            break;
+            case CatalogItems::CAT_GBU15:
+                GameState.weapon_inventory[weapon_ids::ID_GBU15] += item.second.quantity;
+            break;
+            case CatalogItems::CAT_MK20:
+                GameState.weapon_inventory[weapon_ids::ID_MK20] += item.second.quantity;
+            break;
+            case CatalogItems::CAT_MK82:
+                GameState.weapon_inventory[weapon_ids::ID_MK82] += item.second.quantity;
+            break;
+            case CatalogItems::CAT_DURANDAL:
+                GameState.weapon_inventory[weapon_ids::ID_DURANDAL] += item.second.quantity;
+            break;
+            case CatalogItems::CAT_PACK1:
+                GameState.weapon_inventory[weapon_ids::ID_GBU15] += item.second.quantity * 2;
+                GameState.weapon_inventory[weapon_ids::ID_MK82] += item.second.quantity * 24;
+            break;
+            case CatalogItems::CAT_PACK2:
+                GameState.weapon_inventory[weapon_ids::ID_AIM9J] += item.second.quantity * 6;
+                GameState.weapon_inventory[weapon_ids::ID_AIM9M] += item.second.quantity * 6;
+            break;
+            case CatalogItems::CAT_PACK3:
+                GameState.weapon_inventory[weapon_ids::ID_AGM65D] += item.second.quantity * 10;
+            break;
+            case CatalogItems::CAT_PACK4:
+                GameState.weapon_inventory[weapon_ids::ID_AIM9J] += item.second.quantity * 12;
+            break;
+        }
+    }
+    GameState.weapons_costs += cost;
+    this->onclick(nullptr, sprite_id);
 }
 std::vector<SCZone *> * CatalogueScene::UpdateZones() {
     this->zones.clear();
@@ -1073,7 +1111,7 @@ std::vector<SCZone *> * CatalogueScene::UpdateZones() {
             
             zone_id++;
             if (this->gameflow_scene->info.ID == sprtId) {
-                z->onclick = this->onclick;
+                z->onclick = std::bind(&CatalogueScene::placeOrder, this, std::placeholders::_1, std::placeholders::_2);
                 z->active  = true;
                 this->zones.push_back(z);
             } else {
@@ -1104,6 +1142,82 @@ std::vector<SCZone *> * CatalogueScene::UpdateZones() {
     }
     return (&this->zones);
 }
+void CatalogueScene::Render() {
+    SCScene::Render();
+    FrameBuffer *fb = VGA.GetFrameBuffer();
+    std::string current_cash = string_format("%08d", GameState.proj_cash);
+    fb->PrintTextFixedWidth(this->calcfont, Point2D({257, 33}), current_cash, 1);
+    int bascket_total = 0;
+    for (auto item: this->shopping_cart) {
+        if (item.second.quantity > 0) {
+            
+            RSImageSet *o_font = new RSImageSet();
+            FrameBuffer *fb2 = new FrameBuffer(
+                320,
+                200
+            );
+
+            bascket_total += item.second.price * item.second.quantity;
+            o_font->InitFromPakEntry(this->optShps->GetEntry(item.second.font_shape_id));
+            
+            if (item.second.quantity < 10) {
+                fb2->FillWithColor(255);
+                fb2->DrawShape(o_font->GetShape(item.second.quantity+1));
+                fb->blitLargeBuffer(
+                    fb2->framebuffer,
+                    320,
+                    200,
+                    0,
+                    0,
+                    item.second.position.x,
+                    item.second.position.y,
+                    o_font->GetShape(item.second.quantity+1)->GetWidth(),
+                    o_font->GetShape(item.second.quantity+1)->GetHeight()
+                );
+            } else {
+                fb2->FillWithColor(255);
+                int digit = item.second.quantity/10;
+                int digit2 = item.second.quantity%10;
+
+                fb2->DrawShape(o_font->GetShape(digit2+1));
+                fb->blitLargeBuffer(
+                    fb2->framebuffer,
+                    320,
+                    200,
+                    0,
+                    0,
+                    item.second.position.x,
+                    item.second.position.y,
+                    o_font->GetShape(10)->GetWidth(),
+                    o_font->GetShape(10)->GetHeight()
+                );
+                fb2->FillWithColor(255);
+                fb2->DrawShape(o_font->GetShape(digit+1));
+                fb->blitLargeBuffer(
+                    fb2->framebuffer,
+                    320,
+                    200,
+                    0,
+                    0,
+                    item.second.position.x-5,
+                    item.second.position.y+1,
+                    o_font->GetShape(10)->GetWidth(),
+                    o_font->GetShape(10)->GetHeight()
+                );
+            }
+            delete fb2;
+            delete o_font;
+        }
+    }
+    if (bascket_total > 0) {
+        std::string basket_total = string_format("%08d", bascket_total);
+        fb->PrintTextFixedWidth(this->calcfont, Point2D({257, 40}), basket_total, 1);
+        std::string cash_left = string_format("%08d", GameState.proj_cash-bascket_total);
+        fb->PrintTextFixedWidth(this->calcfont, Point2D({257, 47}), cash_left, 1);
+    }
+    
+}
+
 std::vector<SCZone *> *KillBoardScene::Init(
     GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick
 ) {
@@ -1163,6 +1277,4 @@ void KillBoardScene::Render() {
         fb->PrintText(this->font, position, std::to_string(pil.second[0]), 0);
         position.y += 15;
     }
-
-
 }

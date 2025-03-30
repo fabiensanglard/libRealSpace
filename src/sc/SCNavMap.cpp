@@ -136,7 +136,7 @@ void SCNavMap::RunFrame(void) {
             "mission",
             0,
             0,
-            7,1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
+            7,1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
         
         mission_name_pos.x = 260;
         mission_name_pos.y += this->navMap->font->GetShapeForChar('A')->GetHeight();
@@ -147,7 +147,7 @@ void SCNavMap::RunFrame(void) {
             (char*) mission_name.c_str(),
             0,
             0,
-            (int32_t)mission_name.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
+            (int32_t)mission_name.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
         leader_pos.y = mission_name_pos.y + this->navMap->font->GetShapeForChar('A')->GetHeight();
         VGA.GetFrameBuffer()->PrintText_SM(
             this->navMap->font,
@@ -155,7 +155,7 @@ void SCNavMap::RunFrame(void) {
             "leader",
             0,
             0,
-            6,1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
+            6,1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
         leader_pos.y += this->navMap->font->GetShapeForChar('A')->GetHeight();
         leader_pos.x = 260;
         VGA.GetFrameBuffer()->PrintText_SM(
@@ -164,7 +164,7 @@ void SCNavMap::RunFrame(void) {
             (char*) leader.c_str(),
             0,
             0,
-            (int32_t)leader.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
+            (int32_t)leader.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
         if (this->mission->friendlies.size() > 1) {
             if (this->mission->friendlies[1]->profile != nullptr) {
                 leader = this->mission->friendlies[1]->profile->radi.info.callsign;
@@ -180,7 +180,7 @@ void SCNavMap::RunFrame(void) {
                 "wingman",
                 0,
                 0,
-                7,1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
+                7,1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
             leader_pos.y += this->navMap->font->GetShapeForChar('A')->GetHeight();
             leader_pos.x = 260;
             VGA.GetFrameBuffer()->PrintText_SM(
@@ -189,7 +189,7 @@ void SCNavMap::RunFrame(void) {
                 (char*) leader.c_str(),
                 0,
                 0,
-                (int32_t)leader.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
+                (int32_t)leader.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
         }
         if (show_waypoint) {
             int cpt = 0;
@@ -222,7 +222,7 @@ void SCNavMap::RunFrame(void) {
                         9,
                         1,
                         this->navMap->font->GetShapeForChar('A')->GetWidth(),
-                        false
+                        false, false
                     );
                     msg_p1->y += this->navMap->font->GetShapeForChar('A')->GetHeight();
                     msg_p1->x = msg_newx+5;
@@ -237,7 +237,7 @@ void SCNavMap::RunFrame(void) {
                             (int32_t)wp->objective->size(),
                             1,
                             this->navMap->font->GetShapeForChar('A')->GetWidth(),
-                            false
+                            false, false
                         );
                     }
 
@@ -253,7 +253,7 @@ void SCNavMap::RunFrame(void) {
                         5,
                         1,
                         this->navMap->font->GetShapeForChar('A')->GetWidth(),
-                        false
+                        false, false
                     );
                     msg_p1->y += this->navMap->font->GetShapeForChar('A')->GetHeight();
                     msg_p1->x = msg_newx+3;
@@ -268,7 +268,7 @@ void SCNavMap::RunFrame(void) {
                             (int32_t)wp->message->size(),
                             1,
                             this->navMap->font->GetShapeForChar('A')->GetWidth(),
-                            false
+                            false, false
                         );
                     }
                     c = 255;
@@ -319,7 +319,7 @@ void SCNavMap::RunFrame(void) {
                         (char*) name.c_str(),
                         34,
                         0,
-                        (int32_t)name.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false);
+                        (int32_t)name.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
                 }
             }
         }

@@ -144,16 +144,30 @@ void FrameBuffer::circle_slow(int x, int y, int radius, uint8_t color) {
 }
 void FrameBuffer::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
                             size_t interLetterSpace, size_t spaceSize) {
-    this->PrintText_SM(font, coo, text, color, start, size, interLetterSpace, spaceSize, true);
+    this->PrintText_SM(font, coo, text, color, start, size, interLetterSpace, spaceSize, true, false);
+}
+void FrameBuffer::PrintTextFixedWidth(RSFont *font, Point2D coo, std::string text, uint8_t color) {
+    int32_t width;
+    RLEShape *shape = font->GetShapeForChar('A');
+    if (shape == nullptr) {
+        shape = font->GetShapeForChar('0');
+    }
+    width = shape->GetWidth();
+    this->PrintText_SM(font, &coo, (char *)text.c_str(), color, 0, (uint32_t)text.size(), 2, width, true, true);
 }
 
 void FrameBuffer::PrintText(RSFont *font, Point2D coo, std::string text, uint8_t color) {
-    this->PrintText(font, &coo, (char *)text.c_str(), color, 0, (uint32_t)text.size(), 2,
-                    font->GetShapeForChar('A')->GetWidth());
+    int32_t width;
+    RLEShape *shape = font->GetShapeForChar('A');
+    if (shape == nullptr) {
+        shape = font->GetShapeForChar('0');
+    }
+    width = shape->GetWidth();
+    this->PrintText(font, &coo, (char *)text.c_str(), color, 0, (uint32_t)text.size(), 2, width);
 }
 
 void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,
-                               size_t interLetterSpace, size_t spaceSize, bool isSmall) {
+                               size_t interLetterSpace, size_t spaceSize, bool isSmall, bool fixedWidth) {
 
     if (text == NULL)
         return;
@@ -203,10 +217,15 @@ void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t c
         DrawShape(shape);
         coo->y = lineHeight;
 
-        if (chartoDraw == ' ')
+        if (chartoDraw == ' ') {
             coo->x += static_cast<int32_t>(spaceSize);
-        else
-            coo->x = static_cast<int32_t>(coo->x + shape->GetWidth() + interLetterSpace);
+        } else {
+            if (!fixedWidth) {
+                coo->x = static_cast<int32_t>(coo->x + shape->GetWidth() + interLetterSpace);
+            } else {
+                coo->x = static_cast<int32_t>(coo->x + shape->GetHeight()+1);
+            }
+        }
     }
 }
 void FrameBuffer::blit(uint8_t *srcBuffer, int x, int y, int w, int h) {

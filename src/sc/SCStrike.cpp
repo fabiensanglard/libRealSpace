@@ -1510,7 +1510,7 @@ void SCStrike::RenderMenu() {
             for (auto prog : this->current_mission->mission->mission_data.prog) {
                 if (ImGui::TreeNode((void *)(intptr_t)prog, "Prog %d", id)) {
                     for (auto op : *prog) {
-                        ImGui::Text("opcode:[%d]\t\targ:[%d]", op.opcode, op.arg);
+                        ImGui::Text("opcode:[%d] %s \t\targ:[%d]", op.opcode, prog_op_names[prog_op(op.opcode)].c_str(), op.arg);
                     }
                     ImGui::TreePop();
                 }
@@ -1675,7 +1675,7 @@ void SCStrike::RenderMenu() {
                         if (actor->on_is_activated.size() > 0) {
                             if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_activated, "Prog %d", cpt)) {
                                 for (auto opcodes: actor->on_is_activated) {
-                                    ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
+                                    ImGui::Text("OPCODE [%d] %s\t\tARG [%d]", opcodes.opcode, prog_op_names[prog_op(opcodes.opcode)].c_str(), opcodes.arg);
                                 }
                                 ImGui::TreePop();
                             }

@@ -82,8 +82,7 @@ class WeaponLoadoutScene : public SCScene {
 public:
     void Render();
     WeaponLoadoutScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
-    std::vector<SCZone *> *
-    Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    std::vector<SCZone *> * Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
 };
 
 class LedgerScene : public SCScene {
@@ -105,24 +104,30 @@ public:
 struct CatalogueShoppingCartItem {
     uint8_t id;
     uint8_t quantity;
+    int price;
+    Point2D position;
+    int font_shape_id;
     std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick;
 }; 
 
 class CatalogueScene : public SCScene {
+    std::map<uint8_t, std::vector<std::pair<uint8_t, std::function<void(std::vector<EFCT *> *script, uint8_t id)>>>> pages;
+    std::map<uint8_t, CatalogueShoppingCartItem> shopping_cart;
+    int current_page{0};
+    RSFont *calcfont;
+    RSImageSet *order_font;
     void turnPageForward(std::vector<EFCT *> *script, uint8_t sprite_id);
     void turnPageBackward(std::vector<EFCT *> *script, uint8_t sprite_id);
     void orderItem(std::vector<EFCT *> *script, uint8_t sprite_id);
     void cancelItem(std::vector<EFCT *> *script, uint8_t sprite_id);
-    std::map<uint8_t, std::vector<std::pair<uint8_t, std::function<void(std::vector<EFCT *> *script, uint8_t id)>>>> pages;
-    std::map<uint8_t, CatalogueShoppingCartItem> shopping_cart;
-    int current_page{0};
+    void placeOrder(std::vector<EFCT *> *script, uint8_t sprite_id);
     std::vector<SCZone *> * UpdateZones();
     std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick;
 
 public:
     CatalogueScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
-    std::vector<SCZone *> *
-    Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    std::vector<SCZone *> * Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    void Render();
 };
 
 class KillBoardScene : public SCScene {
@@ -138,7 +143,6 @@ class KillBoardScene : public SCScene {
     };
 public:
     KillBoardScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
-    std::vector<SCZone *> *
-    Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    std::vector<SCZone *> * Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
     void Render();
 };

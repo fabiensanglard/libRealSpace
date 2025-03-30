@@ -400,26 +400,26 @@ void SCGameFlow::runEffect() {
                 if (chng->cash != nullptr) {
                     switch (chng->cash->op) {
                     case 2:
-                        GameState.proj_cash = chng->cash->value;
+                        GameState.proj_cash = chng->cash->value*1000;
                         break;
                     case 1:
-                        GameState.proj_cash += chng->cash->value;
+                        GameState.proj_cash += chng->cash->value*1000;
                         break;
                     case 0:
-                        GameState.proj_cash -= chng->cash->value;
+                        GameState.proj_cash -= chng->cash->value*1000;
                         break;
                     }
                 }
                 if (chng->over != nullptr) {
                     switch (chng->over->op) {
                     case 2:
-                        GameState.over_head = chng->over->value;
+                        GameState.over_head = chng->over->value*1000;
                         break;
                     case 1:
-                        GameState.over_head += chng->over->value;
+                        GameState.over_head += chng->over->value*1000;
                         break;
                     case 0:
-                        GameState.over_head -= chng->over->value;
+                        GameState.over_head -= chng->over->value*1000;
                         break;
                     }
                 }
@@ -427,13 +427,13 @@ void SCGameFlow::runEffect() {
                     for (auto weapon : *chng->weap) {
                         switch (weapon->op) {
                         case 2:
-                            GameState.weapon_inventory[weapon->weap_id] = weapon->value;
+                            GameState.weapon_inventory[weapon->weap_id+1] = weapon->value;
                             break;
                         case 1:
-                            GameState.weapon_inventory[weapon->weap_id] += weapon->value;
+                            GameState.weapon_inventory[weapon->weap_id+1] += weapon->value;
                             break;
                         case 0:
-                            GameState.weapon_inventory[weapon->weap_id] -= weapon->value;
+                            GameState.weapon_inventory[weapon->weap_id+1] -= weapon->value;
                             break;
                         }
                     }

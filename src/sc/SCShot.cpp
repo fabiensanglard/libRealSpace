@@ -347,7 +347,7 @@ void MapShot::RunFrame(void) {
             (uint32_t) p->label.size(),
             1,
             this->font->GetShapeForChar('A')->GetWidth(),
-            false
+            false, false
         );
     }
     VGA.VSync();

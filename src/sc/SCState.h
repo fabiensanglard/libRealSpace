@@ -24,8 +24,11 @@ public:
     uint8_t mission_id{0};
     uint8_t mission_flyed{0};
     uint8_t tune_modifier{0};
+    int32_t cash{0};
     int32_t proj_cash{0};
     int32_t over_head{0};
+    int32_t weapons_costs{0};
+    int32_t f16_replacements{0};
     std::string player_name;
     std::string player_callsign;
     std::string player_firstname;
