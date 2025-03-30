@@ -967,7 +967,7 @@ std::vector<SCZone *> *CatalogueScene::Init(
 void CatalogueScene::turnPageForward(std::vector<EFCT *> *script, uint8_t sprite_id) {
     this->current_page = this->current_page + 1;
     if (this->current_page > this->pages.size() - 1) {
-        this->current_page = this->pages.size() - 1;
+        this->current_page = (int) this->pages.size() - 1;
     }
     this->UpdateZones();
 }
