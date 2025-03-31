@@ -195,19 +195,19 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_UP:
             if (!this->mouse_control)
-                this->player_plane->control_stick_y = -100;
+                this->player_plane->control_stick_y = -125;
             break;
         case SDLK_DOWN:
             if (!this->mouse_control)
-                this->player_plane->control_stick_y = 100;
+                this->player_plane->control_stick_y = 125;
             break;
         case SDLK_LEFT:
             if (!this->mouse_control)
-                this->player_plane->control_stick_x = -50;
+                this->player_plane->control_stick_x = -110;
             break;
         case SDLK_RIGHT:
             if (!this->mouse_control)
-                this->player_plane->control_stick_x = 50;
+                this->player_plane->control_stick_x = 110;
             break;
         case SDLK_1:
             if (!this->cockpit->show_comm) {

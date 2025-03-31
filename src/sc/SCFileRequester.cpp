@@ -14,6 +14,7 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback) {
     pak->InitFromRAM("SAVELOAD.SHP", tre->data, tre->size);
     uiImageSet->InitFromPakArchive(pak,0);
     this->uiImageSet = uiImageSet;
+    this->color_offset = 49;
     SCButton *button;
 
     Point2D frp = {(320-uiImageSet->GetShape(0)->GetWidth())/2, (200-uiImageSet->GetShape(0)->GetHeight())/2};
@@ -111,31 +112,38 @@ void SCFileRequester::draw(FrameBuffer *fb) {
     }
     Point2D textPos = {
         (320-shape->GetWidth())/2+34, 
-        (200-shape->GetHeight())/2+48
+        (200-shape->GetHeight())/2+40
     };
-    fb->PrintText(this->font, {textPos.x,textPos.y-15}, this->current_file, this->color_offset);
+    fb->PrintText(this->font, {textPos.x,textPos.y-5}, this->current_file, this->color_offset);
     int min_y = textPos.y;
-    int max_y = textPos.y+4*8;
+    int max_y = textPos.y+6*8;
     for (auto file: this->files) {
         textPos.y+=8;
-        if (textPos.y+texte_x < min_y || textPos.y+texte_x > max_y) {
+        if (textPos.y+texte_x < min_y+6 || textPos.y+texte_x > max_y) {
             continue;
         }
-        for (auto z: this->zones) {
-            if (z->id == this->selectd_file_index) {
-                if (z->position.y+texte_x > min_y && z->position.y+texte_x < max_y) {
-                    fb->rect_slow(
+        fb->PrintText(this->font, {textPos.x, textPos.y+texte_x}, file, this->color_offset);
+    }
+    textPos.y = min_y;
+    int selected = 0;
+
+    for (auto z: this->zones) {
+        if (z->id == this->selectd_file_index) {
+            selected = -1;
+            if (z->position.y+texte_x >= min_y && z->position.y+texte_x < max_y) {
+                for (int i=0; i<z->dimension.y; i++) {
+                    fb->line(
                         z->position.x,
-                        z->position.y+texte_x,
+                        z->position.y+i+texte_x+2,
                         z->position.x+z->dimension.x,
-                        z->position.y+z->dimension.y+texte_x,
+                        z->position.y+i+texte_x+2,
                         0
                     );
                 }
-                break;
+                fb->PrintText(this->font, {textPos.x, z->position.y+texte_x+7}, this->files[z->id], this->color_offset+selected);
             }
+            break;
         }
-        fb->PrintText(this->font, {textPos.x, textPos.y+texte_x}, file, this->color_offset);
     }
 }
 void SCFileRequester::checkevents() {
@@ -257,7 +265,7 @@ void SCFileRequester::loadFiles() {
     RLEShape *shape = this->uiImageSet->GetShape(0);
     Point2D textPos = {
         (320-shape->GetWidth())/2+32, 
-        (200-shape->GetHeight())/2+48
+        (200-shape->GetHeight())/2+40
     };
     int idx = 0;
     for (const auto &entry : std::filesystem::directory_iterator(".")) {
@@ -268,7 +276,7 @@ void SCFileRequester::loadFiles() {
                 SCZone *zone = new SCZone();
                 zone->id = idx;
                 zone->position = {textPos.x, textPos.y};
-                zone->dimension = {75, 9};
+                zone->dimension = {120, 9};
                 zone->active = true;
                 zone->onclick = std::bind(&SCFileRequester::selectFile, this, std::placeholders::_1, std::placeholders::_2);
                 zones.push_back(zone);
@@ -288,10 +296,10 @@ SCZone * SCFileRequester::checkZones() {
     RLEShape *shape = this->uiImageSet->GetShape(0);
     Point2D textPos = {
         (320-shape->GetWidth())/2+34, 
-        (200-shape->GetHeight())/2+48
+        (200-shape->GetHeight())/2+40
     };
     int min_y = textPos.y;
-    int max_y = textPos.y+4*8;
+    int max_y = textPos.y+6*8;
     if (Mouse.GetPosition().y < min_y || Mouse.GetPosition().y > max_y) {
         return nullptr;
     }
