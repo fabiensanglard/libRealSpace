@@ -672,11 +672,10 @@ void WeaponLoadoutScene::updateWeaponDisplay() {
                     }
                     nbweap = nbweap / 2;
                     nbweap = nbweap - 1;
-                    if (nbweap < 0) {
-                        nbweap = 0;
-                    }
                 }
-                addWeaponZones(pylid, wlabel, weapon_pylones[i - 1][pylid][0][nbweap], weapon_pylones[i - 1][pylid][1]);
+                if (nbweap >= 0) {
+                    addWeaponZones(pylid, wlabel, weapon_pylones[i - 1][pylid][0][nbweap], weapon_pylones[i - 1][pylid][1]);    
+                }
             }
             break;
         }
