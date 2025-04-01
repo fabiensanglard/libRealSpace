@@ -30,35 +30,46 @@ void SCMission::cleanup() {
     this->waypoints.shrink_to_fit();
     
 }
+RSProf *SCMission::LoadProfile(std::string name) {
+    RSProf *profile = new RSProf();
+    std::string filename = "..\\..\\DATA\\INTEL\\"+ name + ".IFF";
+    TreEntry *profile_tre = Assets.GetEntryByName(name.c_str());
+    if (profile_tre != nullptr) {
+        profile->InitFromRAM(profile_tre->data, profile_tre->size);
+    } else {
+        printf("Unable to load profile %s\n", name.c_str());
+    }
+    return profile;
+}
 void SCMission::loadMission() {
     std::string miss_file_name = "..\\..\\DATA\\MISSIONS\\" + this->mission_name; 
     
     TreEntry *mission_tre = Assets.GetEntryByName(miss_file_name.c_str());
-
     this->mission = new RSMission();
-    this->mission->tre = Assets.tres[AssetManager::TRE_OBJECTS];
-    this->mission->objCache = this->obj_cache;
     this->mission->InitFromRAM(mission_tre->data, mission_tre->size);
 
 
     std::string area_filename = "..\\..\\DATA\\MISSIONS\\"+this->mission->mission_data.world_filename + ".IFF";
     std::transform(area_filename.begin(), area_filename.end(), area_filename.begin(), ::toupper);   
     this->world = new RSWorld();
-    TreArchive *tre = new TreArchive();
-    tre->InitFromFile("MISSIONS.TRE");
     TreEntry *treEntry = NULL;
-    treEntry = tre->GetEntryByName(area_filename.c_str());
+    treEntry = Assets.GetEntryByName(area_filename.c_str());
     if (treEntry != NULL) {
         this->world->InitFromRAM(treEntry->data, treEntry->size);
     }
     std::string area_fn = this->world->tera+".PAK";
     std::transform(area_fn.begin(), area_fn.end(), area_fn.begin(), ::toupper);
-    this->area = new RSArea();
+    this->area = new RSArea(&Assets);
     this->area->InitFromPAKFileName(area_fn.c_str());
-
+    for (auto &area_entity: this->area->objects) {
+        area_entity.entity = LoadEntity(area_entity.name);
+    }
     int cpt_actor=0;
     for (auto part : mission->mission_data.parts) {
         int search_id = 0;
+        if (part->entity == nullptr) {
+            part->entity = LoadEntity(part->member_name);
+        }
         for (auto cast : mission->mission_data.casting) {
             if (part->id == search_id) {
                 SCMissionActors *actor = new SCMissionActors();
@@ -68,7 +79,7 @@ void SCMission::loadMission() {
                 actor->actor_name = cast->actor;
                 actor->actor_id = part->id;
                 actor->object = part;
-                actor->profile = cast->profile;
+                actor->profile = this->LoadProfile(cast->actor);
                 actor->mission = this;
                 if (actor->object->on_is_activated != 255) {
                     for (auto op: *this->mission->mission_data.prog[actor->object->on_is_activated]) {
@@ -91,12 +102,12 @@ void SCMission::loadMission() {
                     }
                 }
                 
-                if (cast->profile != nullptr && cast->profile->ai.isAI) {
-                    if (cast->profile->ai.goal.size() > 0) {
+                if (actor->profile != nullptr && actor->profile->ai.isAI) {
+                    if (actor->profile->ai.goal.size() > 0) {
                         actor->pilot = new SCPilot();
                         actor->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
-                                                 23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
-                                                 part->position.y, part->position.z);
+                                                23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
+                                                part->position.y, part->position.z);
                         actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                         actor->plane->yaw = (360 - part->azymuth) * (float) M_PI / 180.0f;
                         actor->plane->object = part;
@@ -125,10 +136,10 @@ void SCMission::loadMission() {
                         actor->pilot->plane = actor->plane;
                     }
                     this->actors.push_back(actor);
-                } else if (cast->profile != nullptr && cast->actor == "PLAYER") {
+                } else if (actor->profile != nullptr && cast->actor == "PLAYER") {
                     actor->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
-                                                 23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
-                                                 part->position.y, part->position.z);
+                                                23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
+                                                part->position.y, part->position.z);
                     actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                     actor->plane->simple_simulation = false;
                     actor->plane->yaw = (360 - part->azymuth) * (float) M_PI / 180.0f;
@@ -201,14 +212,13 @@ void SCMission::loadMission() {
 }
 RSEntity * SCMission::LoadEntity(std::string name) {
     std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + name + ".IFF";
-    RSEntity *objct = new RSEntity();
-    TreArchive *tre = new TreArchive();
-    tre->InitFromFile("OBJECTS.TRE");
-    TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
+    RSEntity *objct = new RSEntity(&Assets);
+    TreEntry *entry = Assets.GetEntryByName((char *)tmpname.c_str());
     if (entry != nullptr) {
         objct->InitFromRAM(entry->data, entry->size);
         return objct;
     }
+    return nullptr;
 }
 void SCMission::update() {
     uint8_t area_id = this->getAreaID({this->player->plane->x, this->player->plane->y, this->player->plane->z});

@@ -601,7 +601,7 @@ void SCStrike::Init(void) {
 
 RSEntity * SCStrike::LoadWeapon(std::string name) {
     std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + name + ".IFF";
-    RSEntity *objct = new RSEntity();
+    RSEntity *objct = new RSEntity(&Assets);
     TreArchive *tre = new TreArchive();
     tre->InitFromFile("OBJECTS.TRE");
     TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
@@ -931,7 +931,7 @@ void SCStrike::RunFrame(void) {
                     Renderer.RenderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
                 }
                 if (actor->plane->object->alive == false) {
-                     actor->plane->RenderSmoke();
+                    actor->plane->RenderSmoke();
                 }
             }   
         } else if (actor->object->entity != nullptr) {
@@ -978,11 +978,9 @@ void SCStrike::RunFrame(void) {
         break;
     case View::EYE_ON_TARGET:
     case View::REAL:
-        glPushMatrix();
+        //glPushMatrix();
         /**/
-        Matrix cockpit_rotation;
-        cockpit_rotation.Clear();
-        cockpit_rotation.Identity();
+        
         
         float r_twist = tenthOfDegreeToRad(this->player_plane->twist);
         float r_elev  = tenthOfDegreeToRad(this->player_plane->elevationf);
@@ -992,22 +990,26 @@ void SCStrike::RunFrame(void) {
         float cosA = cos(r_azim), sinA = sin(r_azim);
 
         Vector3D cockpit_pos;
-        cockpit_pos.x = this->newPosition.x;
-        cockpit_pos.y = this->newPosition.y;
-        cockpit_pos.z = this->newPosition.z;
+        cockpit_pos.x = this->camera->GetPosition().x;
+        cockpit_pos.y = this->camera->GetPosition().y;
+        cockpit_pos.z = this->camera->GetPosition().z;
 
-        cockpit_rotation.translateM(cockpit_pos.x, cockpit_pos.y, cockpit_pos.z);
+        /*cockpit_rotation.translateM(cockpit_pos.x, cockpit_pos.y, cockpit_pos.z);
         cockpit_rotation.translateM(0.0f, (float) -this->eye_y, 0.0f);
         cockpit_rotation.rotateM(tenthOfDegreeToRad(this->player_plane->azimuthf + 900), 0.0f, 1.0f,0.0f);
         cockpit_rotation.rotateM(tenthOfDegreeToRad(this->player_plane->elevationf), 0.0f, 0.0f, 1.0f);
-        cockpit_rotation.rotateM(tenthOfDegreeToRad(-this->player_plane->twist), 1.0f, 0.0f, 0.0f);
+        cockpit_rotation.rotateM(tenthOfDegreeToRad(-this->player_plane->twist), 1.0f, 0.0f, 0.0f);*/
 
-        glMultMatrixf((float *)cockpit_rotation.v);
-        
+
+        glTranslatef(cockpit_pos.x, cockpit_pos.y, cockpit_pos.z);
+        glRotatef((this->player_plane->azimuthf+900)/10.0f, 0, 1, 0);
+        glRotatef(this->player_plane->elevationf/10.0f, 0, 0, 1);
+        glRotatef(-this->player_plane->twist/10.0f, 1, 0, 0);
+        glTranslatef(0, -3, 0);
         glDisable(GL_CULL_FACE);
-        Renderer.DrawModel(&this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX);
+        Renderer.DrawModel(this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX);
         glEnable(GL_CULL_FACE);
-        glPopMatrix();
+        //glPopMatrix();
         
         break;
     }

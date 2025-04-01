@@ -68,7 +68,7 @@ void SCObjectViewer::ParseObjList(IffLexer *lexer) {
             continue;
         }
 
-        showCase.entity = new RSEntity();
+        showCase.entity = new RSEntity(&Assets);
         showCase.entity->InitFromRAM(entry->data, entry->size);
 
         uint32_t fixedPointDist = stream.ReadInt32LE();
@@ -80,7 +80,7 @@ void SCObjectViewer::ParseObjList(IffLexer *lexer) {
     char *smoke = "..\\..\\DATA\\OBJECTS\\SMOKEGEN.IFF";
     TreEntry *smoke_entry = tre.GetEntryByName(smoke);
     RSShowCase smokeShowCase;
-    smokeShowCase.entity = new RSEntity();
+    smokeShowCase.entity = new RSEntity(&Assets);
     smokeShowCase.entity->InitFromRAM(smoke_entry->data, smoke_entry->size);
     smokeShowCase.cameraDist=10;
     showCases.push_back(smokeShowCase);

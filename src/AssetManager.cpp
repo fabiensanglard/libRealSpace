@@ -11,7 +11,6 @@
 #include <iostream>
 #include <cstring>
 #include <string>
-#include "AssetManager.h"
 
 typedef struct TreNameID{
     AssetManager::TreID id ;
@@ -47,8 +46,26 @@ void AssetManager::Init(void){
                 treEntries[treEntry->name] = treEntry;
             }
         } else {
-            Game.Terminate("Unable to load asset '%s' (Did you set the SC base folder ?).",nameIds[i].filename);
-            
+            printf("Unable to load asset '%s' (Did you set the SC base folder ?).",nameIds[i].filename);
+            exit(-1);
+        }
+    }
+}
+void AssetManager::Init(std::vector<std::string> nameIds){
+    
+    //Load all TRE in RAM and store them.
+    for (auto nameId : nameIds) {
+        TreArchive* tre = new TreArchive();
+        tre->InitFromFile(nameId.c_str());
+        
+        if (tre->IsValid()) {
+            this->tres.push_back(tre);
+            for (auto treEntry : tre->entries) {
+                treEntries[treEntry->name] = treEntry;
+            }
+        } else {
+            printf("Unable to load asset '%s' (Did you set the SC base folder ?).\n",nameId.c_str());
+            exit(-1);
         }
     }
 }

@@ -18,7 +18,15 @@ GameEngine::~GameEngine() {}
 void GameEngine::Init() {
 
     // Load all TREs and PAKs
-    Assets.Init();
+    std::vector<std::string> treFiles = {
+        "GAMEFLOW.TRE",
+        "OBJECTS.TRE",
+        "MISC.TRE",
+        "SOUND.TRE",
+        "MISSIONS.TRE",
+        "TEXTURES.TRE"
+    };
+    Assets.Init(treFiles);
 
     FontManager.Init();
 

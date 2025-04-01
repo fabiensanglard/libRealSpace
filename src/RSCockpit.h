@@ -61,7 +61,7 @@ struct InfoShape {
 };
 struct RealObjs {
     std::vector<uint8_t> INFO;
-    RSEntity OBJS;
+    RSEntity *OBJS;
 };
 
 /**
@@ -113,6 +113,7 @@ struct Moni {
 class RSCockpit {
 
 private:
+    AssetManager *asset_manager;
     std::vector<uint8_t> INFO;
     
     RLEShape VTMP;
@@ -184,7 +185,7 @@ public:
     RealObjs REAL;
     Moni MONI;
     
-    RSCockpit();
+    RSCockpit(AssetManager *amana);
     ~RSCockpit();
     void InitFromRam(uint8_t* data, size_t size);
 };

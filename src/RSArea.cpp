@@ -12,11 +12,11 @@
 extern SCRenderer Renderer;
 
 RSArea::RSArea() {
-    this->objCache = new std::map<std::string, RSEntity *>();
-    this->tre = new TreArchive();
-    tre->InitFromFile("OBJECTS.TRE");
-}
 
+}
+RSArea::RSArea(AssetManager *amanager) {
+    this->assetsManager = amanager;
+}
 RSArea::~RSArea() {
     delete archive;
 
@@ -28,11 +28,8 @@ RSArea::~RSArea() {
 }
 
 void RSArea::ParseMetadata() {
-
     // Meta are in the first PAK file.
-
     printf("Parsing file[0] (Metadatas)\n");
-
     PakEntry *entry = archive->GetEntry(0);
 
     IffLexer lexer;
@@ -54,13 +51,12 @@ void RSArea::ParseMetadata() {
     }
 
     /*
-     The content of the ELEV chunk is the same across ALL MAPS
-     Only RHODEI.ELV    RHODEI.AVG
-          RHODEI.MED    RHODEI.AVG
-          RHODEI.LOW    RHODEI.AVG
-
-     At the end change. RHODEI / CANYON / QUEBEC / MAURITAN etc.....
-     */
+        The content of the ELEV chunk is the same across ALL MAPS
+        Only    RHODEI.ELV    RHODEI.AVG
+                RHODEI.MED    RHODEI.AVG
+                RHODEI.LOW    RHODEI.AVG
+        At the end change. RHODEI / CANYON / QUEBEC / MAURITAN etc.....
+    */
 
     // Elevation format entry is 46 bytes long:
 
@@ -106,12 +102,12 @@ void RSArea::ParseMetadata() {
 
     // IffChunk* objs = lexer.GetChunkByID('OBJS');
     /*
-     OBJS format:
-      4 bytes unknown :
-      4 bytes unknown :
-      4 bytes unknown :
-      14 bytes OBJ file name
-     */
+        OBJS format:
+            4 bytes unknown :
+            4 bytes unknown :
+            4 bytes unknown :
+            14 bytes OBJ file name
+    */
 
     IffChunk *txms = lexer.GetChunkByID('TXMS');
     if (txms == NULL) {
@@ -153,11 +149,10 @@ void RSArea::ParseMetadata() {
         TXMS format:
             One INFO chunk
             X MAPS textures entries
-                    2 byte  : fast lookup ID (from TXM pack);
-                    8 bytes : Set Name (from TXM pack);
-                    1 byte  : unknown
-                    1 byte  : num textures in that set
-
+                2 byte  : fast lookup ID (from TXM pack);
+                8 bytes : Set Name (from TXM pack);
+                1 byte  : unknown
+                1 byte  : num textures in that set
      */
 }
 
@@ -165,22 +160,16 @@ void RSArea::ParseMetadata() {
 #define OBJ_ENTRY_NUM_OBJECTS_FIELD 0x2
 void RSArea::ParseObjects() {
     /*
-         The OBJ file seems to have a pattern:
-
-     It is a PAK archive
-
-     For each entry in the PAK
-
-        short: num records
-           X records of length 0x46
-
-               Record format :
-               7 bytes for name
-               1 bytes unknown (sometimes 0x00 sometimes 0xC3
-               4 bytes unknown
-               12 bytes for coordinates ?
-
-
+        The OBJ file seems to have a pattern:
+            It is a PAK archive
+            For each entry in the PAK
+            short: num records
+                X records of length 0x46
+            Record format :
+                7 bytes for name
+                1 bytes unknown (sometimes 0x00 sometimes 0xC3
+                4 bytes unknown
+                12 bytes for coordinates ?
     */
     PakEntry *objectsFilesLocation = archive->GetEntry(5);
     objectsFilesLocation = archive->GetEntry(5);
@@ -230,31 +219,7 @@ void RSArea::ParseObjects() {
             mapObject.progs_id.push_back(reader.ReadUShort());
             mapObject.progs_id.push_back(reader.ReadUShort());
             mapObject.progs_id.push_back(reader.ReadUShort());
-            
-            std::string hash = mapObject.name;
-            std::map<std::string, RSEntity *>::iterator it;
-            it = objCache->find(hash);
-            if (it == objCache->end()) {
-                char modelPath[512];
-                const char *OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
-                const char *OBJ_EXTENSION = ".IFF";
-
-                strcpy(modelPath, OBJ_PATH);
-                strcat(modelPath, mapObject.name);
-                strcat(modelPath, OBJ_EXTENSION);
-                TreEntry *entry = tre->GetEntryByName(modelPath);
-
-                if (entry == NULL) {
-                    printf("Object reference '%s' not found in TRE.\n", modelPath);
-                    continue;
-                }
-
-                RSEntity *entity = new RSEntity();
-                entity->InitFromRAM(entry->data, entry->size);
-
-                objCache->emplace(hash, entity);
-            }
-            mapObject.entity = objCache->at(hash);
+            mapObject.entity = nullptr;
             objects.push_back(mapObject);
         }
     }
@@ -532,34 +497,29 @@ void RSArea::InitFromPAKFileName(const char *pakFilename) {
 
     // Load the textures from the PAKs (TXMPACK.PAK and ACCPACK.PAK) within TEXTURES.TRE.
     /*
-          Note: This is the bruteforce approach and not very good:
+            Note: This is the bruteforce approach and not very good:
                 I feel like the right way would be to be able to parse the AREA info
                 (the first IFF entry which seems to contain textures references.)
                 And load only those from the TXM PACK. This is probably how they did
                 it on a machine with only 4MB of RAM.
 
     */
-    const char *trePath = "TEXTURES.TRE";
-    TreArchive treArchive;
-    treArchive.InitFromFile(trePath);
 
     // Find the texture PAKS.
     TreEntry *treEntry = NULL;
     RSMapTextureSet *set;
 
-    const char *txmPakName = "..\\..\\DATA\\TXM\\TXMPACK.PAK";
-    treEntry = treArchive.GetEntryByName(txmPakName);
+    treEntry = assetsManager->GetEntryByName("..\\..\\DATA\\TXM\\TXMPACK.PAK");
     PakArchive txmPakArchive;
-    txmPakArchive.InitFromRAM(txmPakName, treEntry->data, treEntry->size);
+    txmPakArchive.InitFromRAM("TXMPACK", treEntry->data, treEntry->size);
     set = new RSMapTextureSet();
     set->InitFromPAK(&txmPakArchive);
     textures.push_back(set);
 
     // ACCPACK.PAK seems to contain runway textures
-    const char *accPakName = "..\\..\\DATA\\TXM\\ACCPACK.PAK";
-    treEntry = treArchive.GetEntryByName(accPakName);
+    treEntry = assetsManager->GetEntryByName("..\\..\\DATA\\TXM\\ACCPACK.PAK");
     PakArchive accPakArchive;
-    accPakArchive.InitFromRAM(accPakName, treEntry->data, treEntry->size);
+    accPakArchive.InitFromRAM("ACCPACK.PAK", treEntry->data, treEntry->size);
     set = new RSMapTextureSet();
     set->InitFromPAK(&accPakArchive);
     textures.push_back(set);

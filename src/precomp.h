@@ -54,6 +54,8 @@ extern "C" {
     #include "PakArchive.h"
     #include "TreArchive.h"
 
+    #include "AssetManager.h"
+    
     #include "Camera.h"
     #include "Texture.h"
     #include "RSImage.h"

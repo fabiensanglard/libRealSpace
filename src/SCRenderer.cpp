@@ -827,11 +827,8 @@ void SCRenderer::RenderObjects(RSArea *area, size_t blockID) {
         glPushMatrix();
 
         glTranslatef(object.position.x, object.position.y, object.position.z);
-
-        std::map<std::string, RSEntity *>::iterator it;
-        it = area->objCache->find(object.name);
-        if (it != area->objCache->end()) {
-            DrawModel(it->second, BLOCK_LOD_MAX);
+        if (object.entity != nullptr) {
+            DrawModel(object.entity, BLOCK_LOD_MAX);
         } else {
             printf("OBJECT [%s] NOT FOUND\n", object.name);
             glBegin(GL_POINTS);

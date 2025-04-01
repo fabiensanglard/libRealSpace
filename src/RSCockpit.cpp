@@ -1,7 +1,7 @@
 #include "precomp.h"
 
-RSCockpit::RSCockpit(){
-
+RSCockpit::RSCockpit(AssetManager *amana) {
+    this->asset_manager = amana;
 }
 RSCockpit::~RSCockpit(){
 
@@ -113,12 +113,9 @@ void RSCockpit::parseREAL_INFO(uint8_t* data, size_t size) {
 void RSCockpit::parseREAL_OBJS(uint8_t* data, size_t size) {
     ByteStream* reader = new ByteStream(data);
     std::string name = reader->ReadString(size);
-    char modelPath[512];
-    sprintf(modelPath, "..\\..\\DATA\\OBJECTS\\%s.IFF", name.c_str());
-    TreArchive tre ;
-    tre.InitFromFile("OBJECTS.TRE");
-    TreEntry* entry = tre.GetEntryByName(modelPath);
-    REAL.OBJS.InitFromRAM(entry->data, entry->size);
+    TreEntry* entry = this->asset_manager->GetEntryByName("..\\..\\DATA\\OBJECTS\\" + name + ".IFF");
+    REAL.OBJS = new RSEntity(this->asset_manager);
+    REAL.OBJS->InitFromRAM(entry->data, entry->size);
 }
 void RSCockpit::parseCHUD(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;

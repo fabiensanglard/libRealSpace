@@ -59,7 +59,7 @@ void SCCockpit::Init() {
     RSPalette palette;
     palette.InitFromIFF(&lexer);
     this->palette = *palette.GetColorPalette();
-    cockpit = new RSCockpit();
+    cockpit = new RSCockpit(&Assets);
     TreEntry *cockpit_def =
         Assets.GetEntryByName("..\\..\\DATA\\OBJECTS\\F16-CKPT.IFF");
     cockpit->InitFromRam(cockpit_def->data, cockpit_def->size);

@@ -26,7 +26,6 @@
 #include "IActivity.h"
 #include "GameEngine.h"
 #include "ConvAssetManager.h"
-#include "AssetManager.h"
 #include "main.h"
 
 // Simulation

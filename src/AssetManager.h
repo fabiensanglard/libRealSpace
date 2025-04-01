@@ -5,9 +5,16 @@
 //  Created by Fabien Sanglard on 1/25/2014.
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
-
+#pragma once
 #ifndef __libRealSpace__AssetManager__
 #define __libRealSpace__AssetManager__
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+
+#include "TreArchive.h"
 // Structure pour stocker le Root Directory Record (selon ISO9660)
 struct RootDirectoryRecord {
     uint8_t recordLength;         // Longueur du record
@@ -57,7 +64,7 @@ class AssetManager{
 public:
     void SetBase(const char* base);
     void Init(void);
-    
+    void Init(std::vector<std::string> nameIds);
     enum TreID {TRE_GAMEFLOW, TRE_OBJECTS, TRE_MISC, TRE_SOUND, TRE_MISSIONS,TRE_TEXTURES } ;
     
     std::vector<TreArchive*> tres;

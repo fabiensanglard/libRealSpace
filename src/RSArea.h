@@ -74,6 +74,7 @@ class RSArea{
 public:
     
     RSArea();
+    RSArea(AssetManager *amanager);
     ~RSArea();
     
     void InitFromPAKFileName(const char* pakFilename);
@@ -87,13 +88,11 @@ public:
     }
     
     RSImage* GetImageByID(size_t ID);
-    
+    AssetManager *assetsManager{nullptr};
     //Per block objects list
     std::vector<MapObject> objects;
     std::vector<AreaOverlay> objectOverlay;
     float elevation[BLOCKS_PER_MAP];
-
-	std::map<std::string, RSEntity *> *objCache;
 	TreArchive *tre;
     float getGroundLevel(int BLOC, float x, float y);
     float getY(float x, float z);

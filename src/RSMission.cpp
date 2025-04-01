@@ -264,21 +264,10 @@ void RSMission::parseMISN_CAST(uint8_t *data, size_t size) {
     
     for (int i = 0; i < nbactor; i++) {
         CAST *tmpcast = new CAST();
-        
         std::string actor = stream.ReadString(8);
         stream.ReadByte();
         tmpcast->actor = actor;
-        TreArchive *tre = new TreArchive();	
-        tre->InitFromFile("MISSIONS.TRE");
-        TreEntry *treEntry = NULL;
-        char *prof_intel_filename = new char[512];
-        sprintf(prof_intel_filename, "..\\..\\DATA\\INTEL\\%s.IFF", actor.c_str());
-        treEntry = tre->GetEntryByName(prof_intel_filename);
-        RSProf * rsprof = new RSProf();
-        if (treEntry != NULL) {
-            rsprof->InitFromRAM(treEntry->data, treEntry->size);
-            tmpcast->profile = rsprof;
-        }
+        tmpcast->profile = nullptr;
         this->mission_data.casting.push_back(tmpcast);
     }
 }
@@ -345,35 +334,7 @@ void RSMission::parseMISN_PART(uint8_t *data, size_t size) {
         prt->on_mission_update = prt->progs_id[1];
         prt->on_is_destroyed = prt->progs_id[2];
         prt->on_missions_init = prt->progs_id[3];
-        
-        
-        std::string hash = prt->member_name;
-        std::map<std::string, RSEntity *>::iterator it;
-        it = objCache->find(hash);
-        RSEntity *entity = new RSEntity();
-        if (it == objCache->end()) {
-            char modelPath[512];
-            const char *OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
-            const char *OBJ_EXTENSION = ".IFF";
-
-            strcpy(modelPath, OBJ_PATH);
-            strcat(modelPath, prt->member_name.c_str());
-            strcat(modelPath, OBJ_EXTENSION);
-            missionstrtoupper(modelPath);
-            TreEntry *entry = tre->GetEntryByName(modelPath);
-
-            if (entry == NULL) {
-                printf("Object reference '%s' not found in TRE.\n", modelPath);
-                // continue;
-            } else {
-                entity->InitFromRAM(entry->data, entry->size);
-                objCache->emplace(hash, entity);
-            }
-        } else {
-            entity = it->second;
-        }
-
-        prt->entity = entity;
+        prt->entity = nullptr;
         this->mission_data.parts.push_back(prt);
     }
 }

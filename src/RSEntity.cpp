@@ -6,11 +6,14 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 
-#include "RSEntity.h"
+
 #include <cfloat>
 #include <algorithm>
+#include "RSEntity.h"
 
-RSEntity::RSEntity() {}
+RSEntity::RSEntity(AssetManager *amana) {
+    this->assetsManager = amana;
+}
 
 RSEntity::~RSEntity() {
     while (!images.empty()) {
@@ -317,10 +320,8 @@ void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
     tmpname = "..\\..\\DATA\\OBJECTS\\" + expl->name + ".IFF";
     expl->x = bs.ReadShort();
     expl->y = bs.ReadShort();
-    expl->objct = new RSEntity();
-    TreArchive *tre = new TreArchive();
-    tre->InitFromFile("OBJECTS.TRE");
-    TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
+    expl->objct = new RSEntity(this->assetsManager);
+    TreEntry *entry = assetsManager->GetEntryByName(tmpname);
     expl->objct->InitFromRAM(entry->data, entry->size);
 }
 void RSEntity::parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size) {}
@@ -342,10 +343,9 @@ void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {
         for (size_t j = 0; j < 12; j++) {
             chld->data.push_back(bs.ReadByte());
         }
-        RSEntity *objct = new RSEntity();
-        TreArchive *tre = new TreArchive();
-        tre->InitFromFile("OBJECTS.TRE");
-        TreEntry *entry = tre->GetEntryByName((char *)chld->name.c_str());
+        RSEntity *objct = new RSEntity(this->assetsManager);
+        
+        TreEntry *entry = assetsManager->GetEntryByName(chld->name);
         if (entry != nullptr) {
             objct->InitFromRAM(entry->data, entry->size);
             chld->objct = objct;
@@ -440,10 +440,8 @@ void RSEntity::parseREAL_OBJT_JETP_WEAP_WPNS(uint8_t *data, size_t size) {
         htps->name = bs.ReadString(8);
         std::transform(htps->name.begin(), htps->name.end(), htps->name.begin(), ::toupper);
         std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + htps->name + ".IFF";
-        RSEntity *objct = new RSEntity();
-        TreArchive *tre = new TreArchive();
-        tre->InitFromFile("OBJECTS.TRE");
-        TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
+        RSEntity *objct = new RSEntity(this->assetsManager);
+        TreEntry *entry = assetsManager->GetEntryByName(tmpname);
         if (entry != nullptr) {
             objct->InitFromRAM(entry->data, entry->size);
             htps->objct = objct;

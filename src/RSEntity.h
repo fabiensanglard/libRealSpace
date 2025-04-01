@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <vector>
 
+#include "AssetManager.h"
 #include "IFFSaxLexer.h"
 #include "IffLexer.h"
 #include "Maths.h"
@@ -155,8 +156,9 @@ public:
     // Has the entity been sent to te GPU and is ready to be renderer.
 
     bool prepared{false};
+    AssetManager *assetsManager{nullptr};
 
-    RSEntity();
+    RSEntity(AssetManager *amana);
     ~RSEntity();
 
     void InitFromRAM(uint8_t *data, size_t size);
