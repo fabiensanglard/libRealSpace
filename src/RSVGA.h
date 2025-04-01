@@ -29,7 +29,7 @@ public:
     ~RSVGA();
     
     
-    void Init(int width, int height);
+    void Init(int width, int height, AssetManager* amana);
     
     void Activate(void);
     void SetPalette(VGAPalette* newPalette);
@@ -40,6 +40,7 @@ public:
 private:
     int width;
     int height;
+    AssetManager* assets;
     VGAPalette palette;
     FrameBuffer* frameBuffer;
     FrameBuffer* frameBufferA;

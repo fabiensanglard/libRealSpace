@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include "AssetManager.h"
 #include "Camera.h"
 #include "RSMission.h"
 #include "Texture.h"
@@ -43,7 +44,7 @@ public:
 
     void Prepare(void);
 
-    void Init(int width, int height);
+    void Init(int width, int height, AssetManager *amana);
 
     void Clear(void);
 
@@ -88,7 +89,7 @@ public:
 
 private:
     bool initialized;
-
+    AssetManager *assets;
     void GetNormal(RSEntity *object, Triangle *triangle, Vector3D *normal);
     void RenderWorldSkyAndGround();
     int32_t width;

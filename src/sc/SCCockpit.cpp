@@ -55,7 +55,8 @@ SCCockpit::~SCCockpit() {}
  */
 void SCCockpit::Init() {
     IffLexer lexer;
-    lexer.InitFromFile("PALETTE.IFF");
+    FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");
+    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
     RSPalette palette;
     palette.InitFromIFF(&lexer);
     this->palette = *palette.GetColorPalette();

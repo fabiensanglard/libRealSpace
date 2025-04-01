@@ -474,8 +474,9 @@ void RSArea::InitFromPAKFileName(const char *pakFilename) {
     strcpy(name, pakFilename);
 
     // Check the PAK has 5 entries
+    FileData *fileData = assetsManager->GetFileData(pakFilename);
     this->archive = new PakArchive();
-    this->archive->InitFromFile(pakFilename);
+    this->archive->InitFromRAM(pakFilename, fileData->data, fileData->size);
     this->objects.clear();
     this->objects.shrink_to_fit();
 

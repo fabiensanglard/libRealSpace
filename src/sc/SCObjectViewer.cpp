@@ -27,10 +27,6 @@ void ConvertToUpperCase(char *sPtr) {
 
 void SCObjectViewer::ParseObjList(IffLexer *lexer) {
 
-    // The objects referenced are within this TRE archive
-    TreArchive tre;
-    tre.InitFromFile("OBJECTS.TRE");
-
     // The object all follow the same path:
     const char *OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
     const char *OBJ_EXTENSION = ".IFF";
@@ -61,7 +57,7 @@ void SCObjectViewer::ParseObjList(IffLexer *lexer) {
         strcpy(modelPath, OBJ_PATH);
         strcat(modelPath, objName);
         strcat(modelPath, OBJ_EXTENSION);
-        TreEntry *entry = tre.GetEntryByName(modelPath);
+        TreEntry *entry = Assets.GetEntryByName(modelPath);
 
         if (entry == NULL) {
             printf("Object reference '%s' not found in TRE.\n", modelPath);
@@ -78,7 +74,7 @@ void SCObjectViewer::ParseObjList(IffLexer *lexer) {
     }
 
     char *smoke = "..\\..\\DATA\\OBJECTS\\SMOKEGEN.IFF";
-    TreEntry *smoke_entry = tre.GetEntryByName(smoke);
+    TreEntry *smoke_entry = Assets.GetEntryByName(smoke);
     RSShowCase smokeShowCase;
     smokeShowCase.entity = new RSEntity(&Assets);
     smokeShowCase.entity->InitFromRAM(smoke_entry->data, smoke_entry->size);
@@ -253,7 +249,8 @@ void SCObjectViewer::ParseAssets(PakArchive *archive) {
     bluePrint.Init(file8.GetEntry(0)->data, file8.GetEntry(0)->size);
 
     IffLexer lexer;
-    lexer.InitFromFile("PALETTE.IFF");
+    FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");
+    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
 
     RSPalette palette;
     palette.InitFromIFF(&lexer);

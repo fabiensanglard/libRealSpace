@@ -23,11 +23,8 @@ SCDogFightMenu::~SCDogFightMenu(){
 
 void SCDogFightMenu::Init( ){
     
-    TreArchive tre ;
-    tre.InitFromFile("GAMEFLOW.TRE");
-    
-    TreEntry* objViewIFF = NULL;//Assets.tres[]->GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
-    TreEntry* objViewPAK = NULL;//tre.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
+    TreEntry* objViewIFF = nullptr;
+    TreEntry* objViewPAK = nullptr;
     
     
     IffLexer objToDisplay;
@@ -52,7 +49,4 @@ void SCDogFightMenu::Init( ){
 
 
 
-void SCDogFightMenu::RunFrame(void){
-    
- 
-}
+void SCDogFightMenu::RunFrame(void) {}

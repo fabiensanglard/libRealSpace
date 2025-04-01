@@ -58,6 +58,10 @@ struct FileEntry {
     // Vous pouvez ajouter d'autres champs si besoin (dates, attributs, etc.)
 };
 
+struct FileData {
+    uint8_t* data;
+    size_t size;
+};
 
 class AssetManager{
     
@@ -72,8 +76,10 @@ public:
     AssetManager();
     ~AssetManager();
     bool ReadISOImage(const std::string& isoPath);
+    FileData *GetFileData(const std::string fileName);
 
 private:
+    std::string *basePath;
     std::map<std::string, TreEntry *> treEntries;
     std::map<std::string, FileEntry> fileContents;
     bool ExtractPrimaryVolumeDescriptor(std::ifstream &isoFile, PrimaryVolumeDescriptor &pvd);

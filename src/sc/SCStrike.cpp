@@ -602,9 +602,7 @@ void SCStrike::Init(void) {
 RSEntity * SCStrike::LoadWeapon(std::string name) {
     std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + name + ".IFF";
     RSEntity *objct = new RSEntity(&Assets);
-    TreArchive *tre = new TreArchive();
-    tre->InitFromFile("OBJECTS.TRE");
-    TreEntry *entry = tre->GetEntryByName((char *)tmpname.c_str());
+    TreEntry *entry = Assets.GetEntryByName(tmpname);
     if (entry != nullptr) {
         objct->InitFromRAM(entry->data, entry->size);
         return objct;

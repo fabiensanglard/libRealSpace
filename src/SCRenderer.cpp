@@ -7,6 +7,7 @@
 //
 
 #include "SCRenderer.h"
+#include "AssetManager.h"
 #include "IffLexer.h"
 #include "RSArea.h"
 #include "RSEntity.h"
@@ -28,13 +29,15 @@ Camera *SCRenderer::GetCamera(void) { return &this->camera; }
 VGAPalette *SCRenderer::GetPalette(void) { return &this->palette; }
 
 void SCRenderer::setPlayerPosition(Point3D *position) { camera.SetPosition(position); }
-void SCRenderer::Init(int width, int height) {
+void SCRenderer::Init(int width, int height, AssetManager *amana) {
+    this->assets = amana;
 
     this->counter = 0;
 
     // Load the default palette
     IffLexer lexer;
-    lexer.InitFromFile("PALETTE.IFF");
+    FileData *paletteFile = this->assets->GetFileData("PALETTE.IFF");
+    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
 
     RSPalette palette;
     palette.InitFromIFF(&lexer);

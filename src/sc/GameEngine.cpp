@@ -36,9 +36,9 @@ void GameEngine::Init() {
     // Load Main Palette and Initialize the GL
     Screen.Init(WIDTH,HEIGHT,FULLSCREEN);
 
-    VGA.Init(WIDTH,HEIGHT);
+    VGA.Init(WIDTH,HEIGHT, &Assets);
 
-    Renderer.Init(WIDTH,HEIGHT);
+    Renderer.Init(WIDTH,HEIGHT, &Assets);
 
     // Load the Mouse Cursor
     Mouse.Init();

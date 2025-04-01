@@ -29,12 +29,14 @@ void RSVGA::SwithBuffers() {
         this->frameBuffer = this->frameBufferA;
     }
 }
-void RSVGA::Init(int width, int height) {
+void RSVGA::Init(int width, int height, AssetManager *amana) {
     this->width = width;
     this->height = height;
+    this->assets = amana;
     // Load the default palette
     IffLexer lexer;
-    lexer.InitFromFile("PALETTE.IFF");
+    FileData *paletteFile = this->assets->GetFileData("PALETTE.IFF");
+    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
 
     RSPalette palette;
     palette.InitFromIFF(&lexer);

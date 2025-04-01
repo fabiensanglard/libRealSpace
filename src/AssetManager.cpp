@@ -31,6 +31,7 @@ TreNameID nameIds[NUM_TRES] =
 
 void AssetManager::SetBase(const char* newBase){
     ::SetBase(newBase);
+    this->basePath = new std::string(newBase);
 }
 
 void AssetManager::Init(void){
@@ -260,5 +261,23 @@ bool AssetManager::ExtractFileListFromRootDirectory(std::ifstream &isoFile, cons
     return true;
 }
 
-
+FileData * AssetManager::GetFileData(std::string filename) {
+    FileData *fileData = new FileData();
+    fileData->data = nullptr;
+    fileData->size = 0;
+    FILE *file_descriptor;
+    std::string final_path_name = *this->basePath +"/"+ filename;
+    fopen_s(&file_descriptor, final_path_name.c_str(), "rb");
+    if (file_descriptor == nullptr) {
+        std::cerr << "Failed to open file: " << final_path_name << std::endl;
+        return nullptr;
+    }
+    fseek(file_descriptor, 0, SEEK_END);
+    fileData->size = ftell(file_descriptor);
+    fseek(file_descriptor, 0, SEEK_SET);
+    fileData->data = new uint8_t[fileData->size];
+    fread_s(fileData->data, fileData->size, 1, fileData->size, file_descriptor);
+    fclose(file_descriptor);
+    return fileData;
+}
 
