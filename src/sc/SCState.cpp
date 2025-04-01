@@ -21,9 +21,16 @@ void SCState::Load(std::string filename) {
 
     if (buffer.size() < 0x24E) {
         std::cerr << "File size is too small: " << filename << std::endl;
+        this->Reset();
         return;
     }
-    for (int i=0; i<120; i++) {
+    std::string header = std::string(buffer.begin(), buffer.begin() + 7);
+    if (header != "SCB1.22") {
+        std::cerr << "Invalid file header: " << header << std::endl;
+        this->Reset();
+        return;
+    }
+    for (int i=0; i<256; i++) {
         this->requierd_flags[i] = buffer[0x0B + i];
     }
     for (int i=0; i<46; i++) {
@@ -86,7 +93,7 @@ void SCState::Load(std::string filename) {
         {ID_AIM120, buffer[0x17F]}
     };
     this->current_mission = buffer[0x08];
-    this->mission_flyed = buffer[0x09];
+    this->next_mission = buffer[0x09];
     this->current_scene = buffer[0x0A];
 }
 
@@ -101,6 +108,7 @@ void SCState::Reset() {
     this->kill_board.clear();
     this->weapon_inventory.clear();
     this->current_mission = 0;
+    this->next_mission = 0;
     this->current_scene = 0;
     this->over_head = 0;
     this->proj_cash = 0;
