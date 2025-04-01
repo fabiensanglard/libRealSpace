@@ -17,9 +17,9 @@ RSFontManager::~RSFontManager(){
     
 }
 
-void RSFontManager::Init(void){
+void RSFontManager::Init(AssetManager* amana){
     
-    const char* font_index[32] = {
+    std::vector<std::string> fonts_index = {
         "..\\..\\DATA\\FONTS\\CALCFONT.SHP",
         "..\\..\\DATA\\FONTS\\CAMROPT.SHP",
         "..\\..\\DATA\\FONTS\\CHKEXIT.SHP",
@@ -54,17 +54,13 @@ void RSFontManager::Init(void){
     };
     
 
-    for (int i = 0; i < 31; i++){
-        const char* fontPath = font_index[i];
-        const char* trePath = "MISC.TRE";
-        TreArchive MISC;
-        MISC.InitFromFile(trePath);
-        TreEntry* convFontEntry = MISC.GetEntryByName(fontPath);
+    for (auto font_item : fonts_index) {
+        TreEntry* convFontEntry = amana->GetEntryByName(font_item);
         PakArchive fontArch;
-        fontArch.InitFromRAM(font_index[i],convFontEntry->data,convFontEntry->size);
+        fontArch.InitFromRAM(font_item.c_str(),convFontEntry->data,convFontEntry->size);
         RSFont *font = new RSFont();
         font->InitFromPAK(&fontArch);
-        fonts[fontPath] = font;
+        fonts[font_item] = font;
     }
 }
 

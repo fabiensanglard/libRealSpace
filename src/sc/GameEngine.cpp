@@ -27,8 +27,8 @@ void GameEngine::Init() {
         "TEXTURES.TRE"
     };
     Assets.Init(treFiles);
-
-    FontManager.Init();
+    Mixer.Init(&Assets);
+    FontManager.Init(&Assets);
 
     // Load assets needed for Conversations (char and background)
     ConvAssets.Init();

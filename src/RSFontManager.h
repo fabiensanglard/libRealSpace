@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "RSFont.h"
+#include "AssetManager.h"
 #include "TreArchive.h"
 
 class RSFontManager{
@@ -18,7 +19,7 @@ public:
     RSFontManager();
     ~RSFontManager();
     
-    void Init(void);
+    void Init(AssetManager* amana);
     RSFont* GetFont(const char* name);
     
 protected:
