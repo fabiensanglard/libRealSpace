@@ -262,22 +262,28 @@ bool AssetManager::ExtractFileListFromRootDirectory(std::ifstream &isoFile, cons
 }
 
 FileData * AssetManager::GetFileData(std::string filename) {
-    FileData *fileData = new FileData();
-    fileData->data = nullptr;
-    fileData->size = 0;
-    FILE *file_descriptor;
-    std::string final_path_name = *this->basePath +"/"+ filename;
-    fopen_s(&file_descriptor, final_path_name.c_str(), "rb");
-    if (file_descriptor == nullptr) {
-        std::cerr << "Failed to open file: " << final_path_name << std::endl;
-        return nullptr;
+    FileData *fileData;
+    if (cacheFileData.find(filename) == cacheFileData.end()) {
+        fileData = new FileData();
+        fileData->data = nullptr;
+        fileData->size = 0;
+        FILE *file_descriptor;
+        std::string final_path_name = *this->basePath +"/"+ filename;
+        fopen_s(&file_descriptor, final_path_name.c_str(), "rb");
+        if (file_descriptor == nullptr) {
+            std::cerr << "Failed to open file: " << final_path_name << std::endl;
+            return nullptr;
+        }
+        fseek(file_descriptor, 0, SEEK_END);
+        fileData->size = ftell(file_descriptor);
+        fseek(file_descriptor, 0, SEEK_SET);
+        fileData->data = new uint8_t[fileData->size];
+        fread_s(fileData->data, fileData->size, 1, fileData->size, file_descriptor);
+        fclose(file_descriptor);
+        cacheFileData[filename] = fileData;
+    } else {
+        fileData = cacheFileData[filename];
     }
-    fseek(file_descriptor, 0, SEEK_END);
-    fileData->size = ftell(file_descriptor);
-    fseek(file_descriptor, 0, SEEK_SET);
-    fileData->data = new uint8_t[fileData->size];
-    fread_s(fileData->data, fileData->size, 1, fileData->size, file_descriptor);
-    fclose(file_descriptor);
     return fileData;
 }
 

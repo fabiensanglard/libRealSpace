@@ -80,6 +80,7 @@ public:
 
 private:
     std::string *basePath;
+    std::map<std::string, FileData*> cacheFileData;
     std::map<std::string, TreEntry *> treEntries;
     std::map<std::string, FileEntry> fileContents;
     bool ExtractPrimaryVolumeDescriptor(std::ifstream &isoFile, PrimaryVolumeDescriptor &pvd);
