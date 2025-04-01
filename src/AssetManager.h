@@ -79,6 +79,7 @@ public:
     FileData *GetFileData(const std::string fileName);
 
 private:
+    bool isIsoImage{false};
     std::string *basePath;
     std::map<std::string, FileData*> cacheFileData;
     std::map<std::string, TreEntry *> treEntries;
