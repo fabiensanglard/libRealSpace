@@ -570,6 +570,7 @@ void SCGameFlow::InitFromGameState() {
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     this->efect = nullptr;
     this->current_miss = GameState.current_mission;
+    this->next_miss = GameState.next_mission;
     int i=0;
     for (auto sc: this->gameFlowParser.game.game[this->current_miss]->scen) {
         if (sc->info.ID == GameState.current_scene) {

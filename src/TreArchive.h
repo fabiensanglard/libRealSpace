@@ -43,11 +43,7 @@ public:
  
     bool InitFromFile(const char* filepath);
     void InitFromRAM(const char* name, uint8_t* data, size_t size);
-    
-    char* GetPath(void);
-    
     void List(FILE* output);
-    
     //Direct access to a TRE entry.
     TreEntry* GetEntryByName(const char* entryName);
     
@@ -66,29 +62,17 @@ public:
     }
     
     inline uint8_t* GetData(void){ return data; }
-    
     inline bool IsValid(void){ return this->valid;}
-    
     std::vector<TreEntry*> entries;
-
+    std::map<const char*,TreEntry*,Char_String_Comparator> mappedEntries;
 private:
     
     bool valid;
-    
-    
     void ReadEntry(ByteStream* stream, TreEntry* entry);
     void Parse(void);
-    
-    //
     char path[512];
     uint8_t* data;
     size_t   size;
-    
-    
-    
     // allows to know if we should free the TRE data
     bool initalizedFromFile ;
-    
-
-    std::map<const char*,TreEntry*,Char_String_Comparator> mappedEntries;
 };

@@ -93,7 +93,7 @@ void SCState::Load(std::string filename) {
         {ID_AIM120, buffer[0x17F]}
     };
     this->current_mission = buffer[0x08];
-    this->next_mission = buffer[0x09];
+    this->mission_id = buffer[0x09];
     this->current_scene = buffer[0x0A];
 }
 

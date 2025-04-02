@@ -18,7 +18,7 @@ RSArea::RSArea(AssetManager *amanager) {
     this->assetsManager = amanager;
 }
 RSArea::~RSArea() {
-    delete archive;
+    //delete archive;
 
     while (!textures.empty()) {
         RSMapTextureSet *set = textures.back();

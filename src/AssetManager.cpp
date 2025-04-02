@@ -68,8 +68,16 @@ void AssetManager::Init(std::vector<std::string> nameIds){
             this->tres.push_back(tre);
             for (auto treEntry : tre->entries) {
                 std::string *name = new std::string(treEntry->name);
-                treEntries[*name] = treEntry;
+                if (treEntries.find(*name) != treEntries.end()) {
+                    printf("Duplicate entry '%s' in TRE '%s'.\n",name->c_str(),nameId.c_str());
+                    exit(-1);
+                }
+                auto res = treEntries.insert(std::pair<std::string,TreEntry*>(*name,treEntry));
+                if (!res.second) {
+                    printf("ERROR INSERTING name %s", name->c_str());
+                }
             }
+
         } else {
             printf("Unable to load asset '%s' (Did you set the SC base folder ?).\n",nameId.c_str());
             exit(-1);

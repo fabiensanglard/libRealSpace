@@ -33,7 +33,7 @@ void SCMission::cleanup() {
 RSProf *SCMission::LoadProfile(std::string name) {
     RSProf *profile = new RSProf();
     std::string filename = "..\\..\\DATA\\INTEL\\"+ name + ".IFF";
-    TreEntry *profile_tre = Assets.GetEntryByName(name.c_str());
+    TreEntry *profile_tre = Assets.GetEntryByName(filename);
     if (profile_tre != nullptr) {
         profile->InitFromRAM(profile_tre->data, profile_tre->size);
     } else {
