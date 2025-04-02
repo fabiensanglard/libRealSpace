@@ -72,32 +72,28 @@ void TreArchive::InitFromRAM(const char* name,uint8_t* data, size_t size){
 
 void TreArchive::ReadEntry(ByteStream* stream, TreEntry* entry){
     /*The format of a TRE entry is (see doc/p1_tre_format.txt):
-     
-     data type    |     size      |       description
-     ------------------------------------------------------------------------------
-     byte        |       1       |  always 0x1, it's meaning is not fully
-     |               | understood.
-     ----------------|---------------|---------------------------------------------
-     string      |      65       |  The name of the file as the game reads it.
-     |               | Privateer's internal file structure demands
-     |               | that every file name starts with ..\..
-     ----------------|---------------|---------------------------------------------
-     dword       |       4       |  The offset on the TRE where the file starts.
-     ----------------|---------------|---------------------------------------------
-     dword       |       4       |  The size of the file.
-     ----------------|---------------|---------------------------------------------
-     
-
-     
-     */
+        data type       |     size      |       description
+        ------------------------------------------------------------------------------
+        byte            |       1       |  always 0x1, it's meaning is not fully
+                        |               | understood.
+        ----------------|---------------|---------------------------------------------
+        string          |      65       |  The name of the file as the game reads it.
+                        |               | Privateer's internal file structure demands
+                        |               | that every file name starts with ..\..
+        ----------------|---------------|---------------------------------------------
+        dword           |       4       |  The offset on the TRE where the file starts.
+        ----------------|---------------|---------------------------------------------
+        dword           |       4       |  The size of the file.
+        ----------------|---------------|---------------------------------------------     
+    */
     
     entry->unknownFlag = stream->ReadByte();
-    
-    for(int i=0 ; i < 65 ; i++)
+    int string_finished = 0;
+    for(int i=0 ; i < 65 ; i++) {
         entry->name[i] = stream->ReadByte();
+    }
     
     entry->data = this->data + stream->ReadUInt32LE();
-    
     entry->size = stream->ReadUInt32LE();
 }
 
@@ -108,9 +104,7 @@ void TreArchive::ReadEntry(ByteStream* stream, TreEntry* entry){
 void TreArchive::Parse(void){
 
     ByteStream stream(this->data);
-    
     size_t numEntries = stream.ReadUInt32LE() ;
-    
     //The pointer to the start of the data. We are not using it.
     stream.ReadUInt32LE() ;
     

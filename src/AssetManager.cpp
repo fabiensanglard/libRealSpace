@@ -57,12 +57,18 @@ void AssetManager::Init(std::vector<std::string> nameIds){
     //Load all TRE in RAM and store them.
     for (auto nameId : nameIds) {
         TreArchive* tre = new TreArchive();
-        tre->InitFromFile(nameId.c_str());
+        FileData *fileData = GetFileData(nameId);
+        if (fileData == nullptr) {
+            printf("Unable to load asset '%s' (Did you set the SC base folder ?).\n",nameId.c_str());
+            exit(-1);
+        }
+        tre->InitFromRAM(nameId.c_str(), fileData->data, fileData->size);
         
         if (tre->IsValid()) {
             this->tres.push_back(tre);
             for (auto treEntry : tre->entries) {
-                treEntries[treEntry->name] = treEntry;
+                std::string *name = new std::string(treEntry->name);
+                treEntries[*name] = treEntry;
             }
         } else {
             printf("Unable to load asset '%s' (Did you set the SC base folder ?).\n",nameId.c_str());
