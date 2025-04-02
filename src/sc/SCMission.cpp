@@ -38,6 +38,7 @@ RSProf *SCMission::LoadProfile(std::string name) {
         profile->InitFromRAM(profile_tre->data, profile_tre->size);
     } else {
         printf("Unable to load profile %s\n", name.c_str());
+        return nullptr;
     }
     return profile;
 }
