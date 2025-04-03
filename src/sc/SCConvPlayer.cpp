@@ -451,42 +451,42 @@ void SCConvPlayer::Init() {
  * current frame is also marked as expired.
  */
 void SCConvPlayer::CheckFrameExpired(void) {
-
-    // A frame expires either after a player press a key, click or 6 seconds elapse.
-    // Mouse
-    SDL_Event mouseEvents[5];
-    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
-    for (int i = 0; i < numMouseEvents; i++) {
-        SDL_Event *event = &mouseEvents[i];
-
-        switch (event->type) {
-        case SDL_MOUSEBUTTONUP:
-            this->currentFrame.SetExpired(true);
-            break;
-        default:
-            break;
-        }
-    }
-
-    // Keyboard
-    SDL_Event keybEvents[5];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 5, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-        switch (event->key.keysym.sym) {
-        case SDLK_SPACE:
-            this->currentFrame.SetExpired(true);
-            break;
-        case SDLK_ESCAPE:
-            Game.StopTopActivity();
-            break;
-        default:
-            this->currentFrame.SetExpired(true);
-            break;
-        }
-    }
-
     if (currentFrame.mode != ConvFrame::CONV_CONTRACT_CHOICE && currentFrame.mode != ConvFrame::CONV_WINGMAN_CHOICE) {
+        // A frame expires either after a player press a key, click or 6 seconds elapse.
+        // Mouse
+        SDL_Event mouseEvents[5];
+        int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
+        for (int i = 0; i < numMouseEvents; i++) {
+            SDL_Event *event = &mouseEvents[i];
+
+            switch (event->type) {
+            case SDL_MOUSEBUTTONUP:
+                this->currentFrame.SetExpired(true);
+                break;
+            default:
+                break;
+            }
+        }
+
+        // Keyboard
+        SDL_Event keybEvents[5];
+        int numKeybEvents = SDL_PeepEvents(keybEvents, 5, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
+        for (int i = 0; i < numKeybEvents; i++) {
+            SDL_Event *event = &keybEvents[i];
+            switch (event->key.keysym.sym) {
+            case SDLK_SPACE:
+                this->currentFrame.SetExpired(true);
+                break;
+            case SDLK_ESCAPE:
+                Game.StopTopActivity();
+                break;
+            default:
+                this->currentFrame.SetExpired(true);
+                break;
+            }
+        }
+
+    
         int32_t currentTime = SDL_GetTicks();
         if (currentTime - currentFrame.creationTime > 5000)
             this->currentFrame.SetExpired(true);
@@ -627,7 +627,7 @@ void SCConvPlayer::RunFrame(void) {
     }
 
     // If frame needs to be update
-    if (currentFrame.mode != ConvFrame::CONV_CONTRACT_CHOICE) {
+    if (currentFrame.mode != ConvFrame::CONV_CONTRACT_CHOICE && currentFrame.mode != ConvFrame::CONV_WINGMAN_CHOICE) {
         CheckFrameExpired();
     }
 
