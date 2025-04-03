@@ -56,6 +56,7 @@ private:
     void ReadtNextFrame(void);
     void CheckZones(void);
     void clicked(void *none, uint8_t id);
+    void selectWingMan(void *none, uint8_t id);
     void DrawText(void);
     
 public:

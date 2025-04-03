@@ -101,6 +101,10 @@ void SCConvPlayer::clicked(void *none, uint8_t id) {
     }
     currentFrame.SetExpired(true);
 }
+void SCConvPlayer::selectWingMan(void *none, uint8_t id) {
+    printf("clicked on %d\n", id);
+    currentFrame.SetExpired(true);
+}
 /**
  * @brief Read the next frame of the conversation from the data stream.
  *
@@ -172,12 +176,11 @@ void SCConvPlayer::ReadNextFrame(void) {
         uint8_t pos               = *(conv.GetPosition() + 0x13);
         currentFrame.facePosition = static_cast<ConvFrame::FacePos>(pos);
         currentFrame.text         = (char *)text->c_str();
-        ;
-        currentFrame.mode       = ConvFrame::CONV_CLOSEUP;
-        currentFrame.face       = ConvAssets.GetCharFace(speakerName);
-        ConvBackGround *bg      = ConvAssets.GetBackGround(setName);
-        currentFrame.bgLayers   = &bg->layers;
-        currentFrame.bgPalettes = &bg->palettes;
+        currentFrame.mode         = ConvFrame::CONV_CLOSEUP;
+        currentFrame.face         = ConvAssets.GetCharFace(speakerName);
+        ConvBackGround *bg        = ConvAssets.GetBackGround(setName);
+        currentFrame.bgLayers     = &bg->layers;
+        currentFrame.bgPalettes   = &bg->palettes;
 
         conv.MoveForward(0x17 + strlen((char *)sentence) + 1);
         uint8_t color              = conv.ReadByte(); // Color ?
@@ -341,13 +344,44 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
     case CHOOSE_WINGMAN: // Wingman selection trigger
     {
+        ConvBackGround *bg = ConvAssets.GetBackGround("s_wing");
+
+        currentFrame.participants.clear();
+        currentFrame.bgLayers   = &bg->layers;
+        currentFrame.bgPalettes = &bg->palettes;
+
         currentFrame.participants.clear();
         currentFrame.mode = ConvFrame::CONV_WINGMAN_CHOICE;
         printf("ConvID: %d Open pilot selection screen with current BG.\n", this->conversationID);
+        CharFigure *entry = ConvAssets.GetFigure("red1");
+        currentFrame.participants.push_back(entry);
         std::vector<std::string> airwing = {"billy2", "gwen2", "lyle2", "miguel2", "tex3"};
+        std::vector<std::string> airwing_names = {"Lyle", "Miguel", "Gwen", "Billy", "Tex"};
+        std::vector<std::vector<Point2D>> zonespos = {
+            { { 0, 80 }, { 60, 80 }, { 60, 200 }, { 0, 200 } },
+            { { 64, 80 }, { 110, 80 }, { 110, 200 }, { 64, 200 } },
+            { { 120, 80 }, { 170, 80 }, { 170, 200 }, { 120, 200 } },
+            { { 175, 80 }, { 218, 80 }, { 218, 200 }, { 175, 200 } },
+            { { 228, 80 }, { 268, 80 }, { 268, 200 }, { 228, 200 } }
+        };
+        this->zones.clear();
+        this->zones.shrink_to_fit();
+        int i = 0;
         for (auto pilot : airwing) {
             CharFigure *participant = ConvAssets.GetFigure((char *)pilot.c_str());
             currentFrame.participants.push_back(participant);
+            SCZone *zone = new SCZone();
+            zone->label  = new std::string("Select "+airwing_names[i]);
+            zone->quad   = new std::vector<Point2D *>();
+            for (auto zp: zonespos[i]) {
+                Point2D *p = new Point2D{zp.x, zp.y};
+                zone->quad->push_back(p);
+            }
+            zone->id = i;
+            zone->active = true;
+            zone->onclick = std::bind(&SCConvPlayer::selectWingMan, this, std::placeholders::_1, std::placeholders::_2);
+            this->zones.push_back(zone);
+            i++;
         }
 
         break;
@@ -544,7 +578,7 @@ void SCConvPlayer::CheckZones() {
                         zone->OnAction();
                     Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
                     VGA.GetFrameBuffer()->PrintText(
-                        FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,
+                        FontManager.GetFont("..\\..\\DATA\\FONTS\\OPTFONT.SHP"), &p, (char *)zone->label->c_str(), 64, 0,
                         static_cast<uint32_t>(zone->label->length()), 3, 5
                     );
                     return;
@@ -638,7 +672,7 @@ void SCConvPlayer::RunFrame(void) {
     if (currentFrame.mode == ConvFrame::CONV_CLOSEUP || currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
 
         ByteStream paletteReader;
-        paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data); // mountains Good but not sky
+        paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data);
         this->palette.ReadPatch(&paletteReader);
 
         int32_t pos = 0;
@@ -662,7 +696,7 @@ void SCConvPlayer::RunFrame(void) {
             }
             for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP &&
                                 currentFrame.text != nullptr && currentFrame.text[0] != '\0';
-                 i++) {
+                i++) {
                 RLEShape *s = currentFrame.face->appearances->GetShape(3 + (SDL_GetTicks() / 100) % 10);
                 s->SetPositionX(pos);
                 VGA.GetFrameBuffer()->DrawShape(s);
@@ -681,7 +715,7 @@ void SCConvPlayer::RunFrame(void) {
         for (size_t i = 0; i < currentFrame.participants.size(); i++) {
             CharFigure *participant = currentFrame.participants[i];
             ByteStream paletteReader;
-            paletteReader.Set(convPals.GetEntry(participant->paletteID)->data); // mountains Good but not sky
+            paletteReader.Set(convPals.GetEntry(participant->paletteID)->data);
             this->palette.ReadPatch(&paletteReader);
             RLEShape *s = participant->appearances->GetShape(0);
             s->SetPosition(&position);
@@ -700,16 +734,23 @@ void SCConvPlayer::RunFrame(void) {
         for (size_t i = 0; i < currentFrame.participants.size(); i++) {
             CharFigure *participant = currentFrame.participants[i];
             ByteStream paletteReader;
-            paletteReader.Set(convPals.GetEntry(participant->paletteID)->data); // mountains Good but not sky
+            paletteReader.Set(convPals.GetEntry(participant->paletteID)->data);
             this->palette.ReadPatch(&paletteReader);
             RLEShape *s = participant->appearances->GetShape(0);
             s->SetPosition(&position);
             VGA.GetFrameBuffer()->DrawShape(s);
-            s = participant->appearances->GetShape(1);
-            s->SetPosition(&position);
-            VGA.GetFrameBuffer()->DrawShape(s);
+            if (participant->appearances->GetNumImages() > 1) {
+                s = participant->appearances->GetShape(1);
+                s->SetPosition(&position);
+                VGA.GetFrameBuffer()->DrawShape(s);
+            }
             position.x += s->GetWidth();
         }
+        for (auto zone : zones) {
+            zone->drawQuad();
+        }
+        CheckZones();
+        Mouse.Draw();
     }
 
     if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
