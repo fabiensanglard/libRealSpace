@@ -727,8 +727,13 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     Matrix *projectionMatrix = camera.GetProjectionMatrix();
     glViewport(0,0,this->width,this->height);			// Reset The Current Viewport
 	
+    const float verticalOffset = 0.45f; // Move the horizon to the top third of the screen
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(projectionMatrix->ToGL());
+    glPushMatrix();
+    glLoadIdentity();
+    glTranslatef(0.0f, verticalOffset, 0.0f); // Apply the vertical offset
+    glMultMatrixf(projectionMatrix->ToGL()); // Apply the camera's projection matrix
+        
 
     glDisable(GL_CULL_FACE);
 

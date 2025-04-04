@@ -785,10 +785,11 @@ void SCStrike::RunFrame(void) {
         camera->SetPosition(&pos);
         camera->ResetRotate();
         camera->Rotate(
-            -tenthOfDegreeToRad(this->player_plane->elevationf-96),
+            -tenthOfDegreeToRad(this->player_plane->elevationf),
             -tenthOfDegreeToRad(this->player_plane->azimuthf),
             -tenthOfDegreeToRad(this->player_plane->twist)
         );
+         // Apply a vertical offset to the projection matrix
     } break;
     case View::FOLLOW: {
         const float distanceBehind = -60.0f;
