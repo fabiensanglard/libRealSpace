@@ -46,7 +46,7 @@ void SCProg::execute() {
     size_t call_to = 0;
     int flag_number = 0;
     int work_register = 0;
-    int compare_flag = 0;
+    int compare_flag = -2;
     bool exec = true;
     bool objective_flag = false;
     bool true_flag = false;
@@ -267,9 +267,12 @@ void SCProg::execute() {
                     }
                 }
             break;
-            case OP_GOTO_IF_FALSE_73:
+            case OP_GOTO_IF_GREATER_OR_EQUAL:
                 if (exec) {
-                    if (!true_flag) {
+                    if (compare_flag == 0 || compare_flag == 1) {
+                        jump_to = prog.arg;
+                        exec = false;
+                    } else if (compare_flag == -2 && !true_flag) {
                         jump_to = prog.arg;
                         exec = false;
                     }

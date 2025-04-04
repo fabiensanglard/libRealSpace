@@ -302,7 +302,7 @@ bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
  */
 bool SCMissionActors::activateTarget(uint8_t arg) {
     for (auto actor: this->mission->actors) {
-        if (actor->actor_id == arg) {
+        if (actor->actor_id == arg && actor->is_active == false && actor->is_destroyed == false) {
             actor->is_active = true;
             
             Vector3D correction = {
