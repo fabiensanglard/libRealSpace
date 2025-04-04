@@ -77,6 +77,9 @@ void SCMission::loadMission() {
                 if (cast->actor == "PLAYER") {
                     actor = new SCMissionActorsPlayer();
                 }
+                if (cast->actor == "TEAM0") {
+                    cast->actor = GameState.wingman;
+                }
                 actor->actor_name = cast->actor;
                 actor->actor_id = part->id;
                 actor->object = part;

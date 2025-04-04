@@ -103,7 +103,20 @@ void SCConvPlayer::clicked(void *none, uint8_t id) {
 }
 void SCConvPlayer::selectWingMan(void *none, uint8_t id) {
     printf("clicked on %d\n", id);
-    currentFrame.SetExpired(true);
+    std::map<uint8_t, std::string> wingman_map = {
+        {0,"LYLE"},
+        {1,"MIGUEL"},
+        {2,"GWEN"},
+        {3,"BILLY"},
+        {4,"TEX"}
+    };
+    if (wingman_map.find(id) == wingman_map.end()) {
+        return;
+    } else {
+        GameState.wingman = wingman_map[id];
+        currentFrame.SetExpired(true);
+    }
+    
 }
 /**
  * @brief Read the next frame of the conversation from the data stream.
@@ -172,6 +185,9 @@ void SCConvPlayer::ReadNextFrame(void) {
         if (text->find("$C") != std::string::npos) {
             text->replace(text->find("$C"), 2, GameState.player_callsign);
         }
+        if (text->find("$W") != std::string::npos) {
+            text->replace(text->find("$W"), 2, GameState.wingman);
+        }
 
         uint8_t pos               = *(conv.GetPosition() + 0x13);
         currentFrame.facePosition = static_cast<ConvFrame::FacePos>(pos);
@@ -207,6 +223,9 @@ void SCConvPlayer::ReadNextFrame(void) {
         }
         if (text->find("$C") != std::string::npos) {
             text->replace(text->find("$C"), 2, GameState.player_callsign);
+        }
+        if (text->find("$W") != std::string::npos) {
+            text->replace(text->find("$W"), 2, GameState.wingman);
         }
         currentFrame.text = (char *)text->c_str();
 
@@ -304,6 +323,9 @@ void SCConvPlayer::ReadNextFrame(void) {
         if (text->find("$C") != std::string::npos) {
             text->replace(text->find("$C"), 2, GameState.player_callsign);
         }
+        if (text->find("$W") != std::string::npos) {
+            text->replace(text->find("$W"), 2, GameState.wingman);
+        }
         currentFrame.text = (char *)text->c_str();
         conv.MoveForward(strlen(sentence) + 1);
         printf("ConvID: %d WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n", this->conversationID, who, sentence);
@@ -324,6 +346,9 @@ void SCConvPlayer::ReadNextFrame(void) {
         }
         if (text->find("$C") != std::string::npos) {
             text->replace(text->find("$C"), 2, GameState.player_callsign);
+        }
+        if (text->find("$W") != std::string::npos) {
+            text->replace(text->find("$W"), 2, GameState.wingman);
         }
         currentFrame.mode = ConvFrame::CONV_WIDE;
         currentFrame.text = (char *)text->c_str();
@@ -712,6 +737,7 @@ void SCConvPlayer::RunFrame(void) {
 
     if (currentFrame.mode == ConvFrame::CONV_WIDE) {
         Point2D position = {0, CONV_TOP_BAR_HEIGHT + 1};
+        position = {0, 0};
         for (size_t i = 0; i < currentFrame.participants.size(); i++) {
             CharFigure *participant = currentFrame.participants[i];
             ByteStream paletteReader;
@@ -720,7 +746,12 @@ void SCConvPlayer::RunFrame(void) {
             RLEShape *s = participant->appearances->GetShape(0);
             s->SetPosition(&position);
             VGA.GetFrameBuffer()->DrawShape(s);
-            position.x += s->GetWidth();
+            if (participant->appearances->GetNumImages() > 1) {
+                s = participant->appearances->GetShape(1);
+                s->SetPosition(&position);
+                VGA.GetFrameBuffer()->DrawShape(s);
+            }
+            //position.x += s->GetWidth();
         }
 
         for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT; i++)
