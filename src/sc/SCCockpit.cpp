@@ -418,7 +418,7 @@ void SCCockpit::RenderTargetingReticle() {
     weap->target = nullptr;
     Vector3D target{0,0,0};
     Vector3D velo{0,0,0};
-    for (int i=0; i<10; i++) {
+    for (int i=0; i<100; i++) {
         std::tie(target, velo) = weap->ComputeTrajectory(60);
         weap->x = target.x;
         weap->y = target.y;

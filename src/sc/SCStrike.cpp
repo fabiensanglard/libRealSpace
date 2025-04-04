@@ -781,12 +781,14 @@ void SCStrike::RunFrame(void) {
         }
     } break;
     case View::FRONT: {
-        Vector3D pos = {this->newPosition.x, this->newPosition.y, this->newPosition.z+10};
+        Vector3D pos = {this->newPosition.x, this->newPosition.y, this->newPosition.z};
         camera->SetPosition(&pos);
         camera->ResetRotate();
-        camera->Rotate((-0.1f * this->player_plane->elevationf + 10) * ((float)M_PI / 180.0f),
-                       (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
-                       (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
+        camera->Rotate(
+            -tenthOfDegreeToRad(this->player_plane->elevationf-96),
+            -tenthOfDegreeToRad(this->player_plane->azimuthf),
+            -tenthOfDegreeToRad(this->player_plane->twist)
+        );
     } break;
     case View::FOLLOW: {
         const float distanceBehind = -60.0f;
@@ -822,9 +824,11 @@ void SCStrike::RunFrame(void) {
         camera->SetPosition(&this->newPosition);
         camera->ResetRotate();
         camera->Rotate(0.0f, this->pilote_lookat.x * ((float)M_PI / 180.0f), 0.0f);
-        camera->Rotate((-0.1f * this->player_plane->elevationf) * ((float)M_PI / 180.0f),
-                       (-0.1f * this->player_plane->azimuthf) * ((float)M_PI / 180.0f),
-                       (-0.1f * (float)this->player_plane->twist) * ((float)M_PI / 180.0f));
+        camera->Rotate(
+            -tenthOfDegreeToRad(this->player_plane->elevationf),
+            -tenthOfDegreeToRad(this->player_plane->azimuthf),
+            -tenthOfDegreeToRad(this->player_plane->twist)
+        );
         break;
     case View::TARGET: {
         Vector3D pos = {target->object->position.x + this->camera_pos.x, target->object->position.y + this->camera_pos.y,
@@ -905,9 +909,11 @@ void SCStrike::RunFrame(void) {
         camera->Rotate(-this->pilote_lookat.y * ((float)M_PI / 180.0f), 0.0f, 0.0f);
         camera->Rotate(0.0f, this->pilote_lookat.x * ((float)M_PI / 180.0f), 0.0f);
 
-        camera->Rotate(((-this->player_plane->elevationf / 10.0f)) * ((float)M_PI / 180.0f),
-                       (-this->player_plane->azimuthf / 10.0f) * ((float)M_PI / 180.0f),
-                       (-(float)this->player_plane->twist / 10.0f) * ((float)M_PI / 180.0f));
+        camera->Rotate(
+            -tenthOfDegreeToRad(this->player_plane->elevationf),
+            -tenthOfDegreeToRad(this->player_plane->azimuthf),
+            -tenthOfDegreeToRad(this->player_plane->twist)
+        );
     } break;
     }
     Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
