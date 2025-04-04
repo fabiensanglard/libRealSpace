@@ -1,9 +1,9 @@
 #include "precomp.h"
 #include "SCSimulatedObject.h"
-#define GRAVITY 32.174f
-#define DRAG_COEFFICIENT 0.10f  // Coefficient de traînée
-#define CROSS_SECTIONAL_AREA 0.1f  // Section transversale (m^2)
-#define LIFT_COEFFICIENT  5.0f
+#define GRAVITY 9.8f
+#define DRAG_COEFFICIENT 0.010f  // Coefficient de traînée
+#define CROSS_SECTIONAL_AREA 0.10f  // Section transversale (m^2)
+#define LIFT_COEFFICIENT  50.0f
 #define MAX_VELOCITY 2000.0f  // Vitesse maximale autorisée en m/s
 
 SCSimulatedObject::SCSimulatedObject() {             

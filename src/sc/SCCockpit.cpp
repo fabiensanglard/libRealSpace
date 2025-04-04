@@ -418,7 +418,7 @@ void SCCockpit::RenderTargetingReticle() {
     weap->target = nullptr;
     Vector3D target{0,0,0};
     Vector3D velo{0,0,0};
-    for (int i=0; i<100; i++) {
+    for (int i=0; i<10; i++) {
         std::tie(target, velo) = weap->ComputeTrajectory(60);
         weap->x = target.x;
         weap->y = target.y;
@@ -462,7 +462,7 @@ void SCCockpit::RenderBombSight() {
     GunSimulatedObject *weap = new GunSimulatedObject();
     float planeSpeed = sqrtf(this->player_plane->vx * this->player_plane->vx + this->player_plane->vy * this->player_plane->vy + this->player_plane->vz * this->player_plane->vz);
     float thrustMagnitude = -planeSpeed;
-    thrustMagnitude = -planeSpeed * 17.0f; // coefficient ajustable
+    thrustMagnitude = -planeSpeed * 5.0f; // coefficient ajustable
 
     float yawRad   = tenthOfDegreeToRad(this->player_plane->azimuthf);
     float pitchRad = tenthOfDegreeToRad(-this->player_plane->elevationf);

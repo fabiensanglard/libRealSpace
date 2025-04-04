@@ -1115,7 +1115,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
         break;
         case 5:
         case 6:
-            thrustMagnitude = -planeSpeed * 20.0f;
+            thrustMagnitude = -planeSpeed * 5.0f;
             weap = new GunSimulatedObject();
         break;
         default:
