@@ -315,8 +315,9 @@ void ConvAssetManager::ReadPFigures(const IffChunk *root) {
     for (size_t i = 0; i < root->childs.size(); i++) {
         IffChunk *chunk = root->childs[i];
         ByteStream s(chunk->data);
-        char *figr = new char[8];
+        char *figr = new char[9];
         memcpy(figr, chunk->data, 8);
+        figr[8] = '\0';
         if (this->figures.find(figr) != this->figures.end()) {
             this->figures[figr]->paletteID = *(chunk->data + 8);
         }

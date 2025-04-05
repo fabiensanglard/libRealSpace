@@ -295,10 +295,13 @@ void SCConvPlayer::ReadNextFrame(void) {
 
         char *participantName   = (char *)conv.GetPosition();
         CharFigure *participant = ConvAssets.GetFigure(participantName);
-        currentFrame.participants.push_back(participant);
+        
 
         printf("ConvID: %d WIDEPLAN ADD PARTICIPANT: '%s'\n", this->conversationID, conv.GetPosition());
-        conv.MoveForward(12);
+        conv.MoveForward(8);
+        participant->x = conv.ReadUShortBE();
+        participant->y = conv.ReadUShortBE();
+        currentFrame.participants.push_back(participant);
         if (conv.PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
             conv.MoveForward(1);
             ReadNextFrame();
@@ -362,8 +365,8 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
     case 0xE: {
         topOffset = conv.ReadByte();
-        uint8_t unkn1 = conv.ReadByte();
-        printf("ConvID: %d Unknown usage Flag 0xE: (0x%2X 0x%2X) \n", this->conversationID, topOffset, unkn1);
+        first_palette = conv.ReadByte();
+        printf("ConvID: %d Unknown usage Flag 0xE: (0x%2X 0x%2X) \n", this->conversationID, topOffset, first_palette);
         ReadNextFrame();
         break;
     }
@@ -663,15 +666,13 @@ void SCConvPlayer::RunFrame(void) {
 
     VGA.Activate();
     VGA.GetFrameBuffer()->FillWithColor(255);
-
     // Update the palette for the current background
     for (size_t i = 0; i < currentFrame.bgLayers->size(); i++) {
         ByteStream paletteReader;
         paletteReader.Set((*currentFrame.bgPalettes)[i]);
         this->palette.ReadPatch(&paletteReader);
-        VGA.SetPalette(&this->palette);
     }
-
+    VGA.SetPalette(&this->palette);
     // Draw static
     for (size_t i = 0; i < currentFrame.bgLayers->size(); i++) {
         RLEShape *shape = (*currentFrame.bgLayers)[i];
@@ -687,6 +688,7 @@ void SCConvPlayer::RunFrame(void) {
             for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
                 VGA.GetFrameBuffer()->FillLineColor(199 - i, 0x00);
             ByteStream paletteReader;
+            
             paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data);
             this->palette.ReadPatch(&paletteReader);
 
@@ -727,13 +729,19 @@ void SCConvPlayer::RunFrame(void) {
         break;
         case ConvFrame::CONV_WIDE:
         {
-            Point2D position = {0, topOffset};
+            
             for (size_t i = 0; i < currentFrame.participants.size(); i++) {
                 CharFigure *participant = currentFrame.participants[i];
-                ByteStream paletteReader;
-                paletteReader.Set(convPals.GetEntry(participant->paletteID)->data);
-                this->palette.ReadPatch(&paletteReader);
+                
+                if (i == 0) {
+                    ByteStream paletteReader;
+                    paletteReader.Set(convPals.GetEntry(participant->paletteID)->data);
+                    this->palette.ReadPatch(&paletteReader);
+                    VGA.SetPalette(&this->palette);
+                }
+                
                 RLEShape *s = participant->appearances->GetShape(0);
+                Point2D position = {participant->x, participant->y};
                 s->SetPosition(&position);
                 VGA.GetFrameBuffer()->DrawShape(s);
                 if (participant->appearances->GetNumImages() > 1) {
@@ -822,5 +830,6 @@ void SCConvPlayer::RunFrame(void) {
     }
 
     DrawText();
+    
     VGA.VSync();
 }

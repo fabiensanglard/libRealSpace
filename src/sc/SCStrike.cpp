@@ -595,7 +595,6 @@ void SCStrike::CheckKeyboard(void) {
  */
 void SCStrike::Init(void) {
     this->mouse_control = false;
-    this->SetMission("TEMPLATE.IFF");
     this->pilote_lookat = {0, 0};
 }
 
@@ -649,7 +648,8 @@ void SCStrike::SetMission(char const *missionName) {
     this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
     this->player_plane->yaw = (360 - playerCoord->azymuth) * (float) M_PI / 180.0f;
     this->player_plane->object = playerCoord;
-    if (this->area.getY(newPosition.x, newPosition.z) < newPosition.y) {
+    float ground = this->area.getY(newPosition.x, newPosition.z);
+    if (ground < newPosition.y) {
         this->player_plane->SetThrottle(100);
         this->player_plane->SetWheel();
         this->player_plane->vz = -20;
@@ -689,19 +689,6 @@ void SCStrike::SetMission(char const *missionName) {
     
     this->player_plane->InitLoadout();
     this->player_prof = this->current_mission->player->profile;
-    /*for (auto actor: this->current_mission->actors) {
-        SCAiPlane *aiPlane = new SCAiPlane();
-        if (actor->actor_name == "PLAYER") {
-            continue;
-        }
-        if (actor->plane != nullptr) {
-            aiPlane->plane = actor->plane;
-            aiPlane->plane->InitLoadout();
-            aiPlane->pilot = actor->pilot;
-            aiPlane->object = actor->object;
-            this->ai_planes.push_back(aiPlane);
-        }
-    }*/
     this->cockpit = new SCCockpit();
     this->cockpit->Init();
     this->cockpit->player_plane = this->player_plane;

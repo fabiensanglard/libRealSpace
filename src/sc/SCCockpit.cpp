@@ -422,8 +422,8 @@ void SCCockpit::RenderTargetingReticle() {
     float pitchRad_update = pitchRad;
     float rollRad_update  = rollRad;
 
-    for (int i=0; i<550; i++) {
-        std::tie(target, velo) = weap->ComputeTrajectory(60);
+    for (int i=0; i<150; i++) {
+        std::tie(target, velo) = weap->ComputeTrajectory(this->player_plane->tps);
         weap->x = target.x;
         weap->y = target.y;
         weap->z = target.z;
@@ -431,6 +431,10 @@ void SCCockpit::RenderTargetingReticle() {
         yawRad_update   = yawRad_update+degreeToRad(this->yaw_speed);
         pitchRad_update = pitch_speed+degreeToRad(this->pitch_speed);
         rollRad_update  = rollRad_update+degreeToRad(this->roll_speed);
+        
+        float yawCorr   = degreeToRad(this->yaw_speed);
+        float pitchCorr = degreeToRad(this->pitch_speed);
+        float rollCorr  = degreeToRad(this->roll_speed);
         
         cosRoll = cosf(rollRad_update);
         sinRoll = sinf(rollRad_update);
@@ -507,10 +511,10 @@ void SCCockpit::RenderBombSight() {
     weap->mission = this->current_mission;
     Vector3D target{0,0,0};
     Vector3D velo{0,0,0};
-    std::tie(target, velo) = weap->ComputeTrajectory(60);
+    std::tie(target, velo) = weap->ComputeTrajectory(this->player_plane->tps);
     int cpt_iteration=0;
     while (target.y > this->current_mission->area->getY(target.x, target.z) == true && cpt_iteration<1000) {
-        std::tie(target, velo) = weap->ComputeTrajectory(60);
+        std::tie(target, velo) = weap->ComputeTrajectory(this->player_plane->tps);
         weap->x = target.x;
         weap->y = target.y;
         weap->z = target.z;

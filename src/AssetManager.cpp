@@ -101,7 +101,7 @@ AssetManager::~AssetManager(){
     }
     this->cacheFileData.clear();
     this->treEntries.clear();
-    this->tres.clear();
+    //this->tres.clear();
 
 }
 

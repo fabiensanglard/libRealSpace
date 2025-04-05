@@ -35,6 +35,7 @@ typedef struct CharFigure {
     char name[9];
     RSImageSet *appearances;
     size_t paletteID;
+    uint16_t x{0}, y{0};
 
 } CharFigure;
 

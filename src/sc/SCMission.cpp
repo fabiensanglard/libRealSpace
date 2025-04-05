@@ -116,7 +116,8 @@ void SCMission::loadMission() {
                         actor->plane->yaw = (360 - part->azymuth) * (float) M_PI / 180.0f;
                         actor->plane->object = part;
                         actor->plane->pilot = actor;
-                        if (this->area->getY(part->position.x, part->position.z) == part->position.y) {
+                        if (abs(this->area->getY(part->position.x, part->position.z)-part->position.y) <= 10 ) {
+                            part->position.y = this->area->getY(part->position.x, part->position.z);
                             actor->plane->on_ground = true;
                         } else {
                             actor->plane->on_ground = false;

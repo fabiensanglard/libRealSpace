@@ -49,6 +49,7 @@ private:
     size_t size;  // In bytes
     uint8_t *end; // In bytes
     uint8_t topOffset{0};
+    uint8_t first_palette{0};
     PakArchive convPak;
     PakArchive convPals;
     ConvFrame currentFrame;

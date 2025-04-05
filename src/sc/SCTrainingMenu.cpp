@@ -35,6 +35,7 @@ void SCTrainingMenu::UnFocus(void) {
 void SCTrainingMenu::OnSearchAndDestroy() {
     SCStrike *strike = new SCStrike();
     strike->Init();
+    strike->SetMission("TEMPLATE.IFF");
     Game.AddActivity(strike);
 }
 
