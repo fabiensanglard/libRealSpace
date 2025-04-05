@@ -361,9 +361,9 @@ void SCConvPlayer::ReadNextFrame(void) {
         break;
     }
     case 0xE: {
-        uint8_t unkn  = conv.ReadByte();
+        topOffset = conv.ReadByte();
         uint8_t unkn1 = conv.ReadByte();
-        printf("ConvID: %d Unknown usage Flag 0xE: (0x%2X 0x%2X) \n", this->conversationID, unkn, unkn1);
+        printf("ConvID: %d Unknown usage Flag 0xE: (0x%2X 0x%2X) \n", this->conversationID, topOffset, unkn1);
         ReadNextFrame();
         break;
     }
@@ -445,26 +445,25 @@ void SCConvPlayer::SetID(int32_t id) {
 
     this->conversationID = id;
 
-    TreEntry *convEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
-
-    PakArchive convPak;
-    convPak.InitFromRAM("CONV.PAK", convEntry->data, convEntry->size);
-    // convPak.List(stdout);
-
     if (convPak.GetNumEntries() <= id) {
         Stop();
         Game.Log("Cannot load conversation id (max convID is %lu).", convPak.GetNumEntries() - 1);
         return;
     }
-
+    topOffset = CONV_TOP_BAR_HEIGHT + 1;
     SetArchive(convPak.GetEntry(id));
 }
 
 void SCConvPlayer::Init() {
     VGAPalette *rendererPalette = VGA.GetPalette();
     this->palette               = *rendererPalette;
+    TreEntry *convEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
 
+    convPak.InitFromRAM("CONV.PAK", convEntry->data, convEntry->size);
     currentFrame.font = FontManager.GetFont("..\\..\\DATA\\FONTS\\CONVFONT.SHP");
+
+    TreEntry *convPalettesEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
+    convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
 }
 
 /**
@@ -657,7 +656,6 @@ void SCConvPlayer::RunFrame(void) {
     }
 
     if (currentFrame.IsExpired()) {
-
         ReadNextFrame();
     }
 
@@ -665,10 +663,6 @@ void SCConvPlayer::RunFrame(void) {
 
     VGA.Activate();
     VGA.GetFrameBuffer()->FillWithColor(255);
-    TreEntry *convPalettesEntry =
-        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
-    PakArchive convPals;
-    convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
 
     // Update the palette for the current background
     for (size_t i = 0; i < currentFrame.bgLayers->size(); i++) {
@@ -684,114 +678,149 @@ void SCConvPlayer::RunFrame(void) {
         VGA.GetFrameBuffer()->DrawShape(shape);
     }
 
-    if (currentFrame.mode == ConvFrame::CONV_CLOSEUP) {
-
-        for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT + 1; i++)
+    switch (currentFrame.mode) {
+        case ConvFrame::CONV_CLOSEUP:
+        {
+            for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT + 1; i++)
             VGA.GetFrameBuffer()->FillLineColor(i, 0x00);
 
-        for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
-            VGA.GetFrameBuffer()->FillLineColor(199 - i, 0x00);
-    }
+            for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
+                VGA.GetFrameBuffer()->FillLineColor(199 - i, 0x00);
+            ByteStream paletteReader;
+            paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data);
+            this->palette.ReadPatch(&paletteReader);
 
-    //
-    if (currentFrame.mode == ConvFrame::CONV_CLOSEUP || currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
+            int32_t pos = 0;
 
-        ByteStream paletteReader;
-        paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data);
-        this->palette.ReadPatch(&paletteReader);
+            if (currentFrame.mode == ConvFrame::CONV_CLOSEUP) {
+                if (currentFrame.facePosition == ConvFrame::FACE_LEFT)
+                    pos = -30;
 
-        int32_t pos = 0;
+                if (currentFrame.facePosition == ConvFrame::FACE_RIGHT)
+                    pos = 30;
+            }
 
-        if (currentFrame.mode == ConvFrame::CONV_CLOSEUP) {
-            if (currentFrame.facePosition == ConvFrame::FACE_LEFT)
-                pos = -30;
+            if (currentFrame.face != NULL) {
+                RLEShape *s = nullptr;
+                if (faces_shape.find(currentFrame.face_expression) != faces_shape.end()) {
+                    for (auto shape : faces_shape[currentFrame.face_expression]) {
+                        s = currentFrame.face->appearances->GetShape(shape);
+                        s->SetPositionX(pos);
+                        VGA.GetFrameBuffer()->DrawShape(s);
+                    }
+                }
+                for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP &&
+                                    currentFrame.text != nullptr && currentFrame.text[0] != '\0';
+                    i++) {
+                    RLEShape *s = currentFrame.face->appearances->GetShape(3 + (SDL_GetTicks() / 100) % 10);
+                    s->SetPositionX(pos);
+                    VGA.GetFrameBuffer()->DrawShape(s);
+                }
 
-            if (currentFrame.facePosition == ConvFrame::FACE_RIGHT)
-                pos = 30;
-        }
-
-        if (currentFrame.face != NULL) {
-            RLEShape *s = nullptr;
-            if (faces_shape.find(currentFrame.face_expression) != faces_shape.end()) {
-                for (auto shape : faces_shape[currentFrame.face_expression]) {
-                    s = currentFrame.face->appearances->GetShape(shape);
+                if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
+                    RLEShape *s = currentFrame.face->appearances->GetShape(54);
                     s->SetPositionX(pos);
                     VGA.GetFrameBuffer()->DrawShape(s);
                 }
             }
-            for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP &&
-                                currentFrame.text != nullptr && currentFrame.text[0] != '\0';
-                i++) {
-                RLEShape *s = currentFrame.face->appearances->GetShape(3 + (SDL_GetTicks() / 100) % 10);
-                s->SetPositionX(pos);
-                VGA.GetFrameBuffer()->DrawShape(s);
-            }
-
-            if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
-                RLEShape *s = currentFrame.face->appearances->GetShape(54);
-                s->SetPositionX(pos);
-                VGA.GetFrameBuffer()->DrawShape(s);
-            }
         }
-    }
-
-    if (currentFrame.mode == ConvFrame::CONV_WIDE) {
-        Point2D position = {0, CONV_TOP_BAR_HEIGHT + 1};
-        position = {0, 0};
-        for (size_t i = 0; i < currentFrame.participants.size(); i++) {
-            CharFigure *participant = currentFrame.participants[i];
-            ByteStream paletteReader;
-            paletteReader.Set(convPals.GetEntry(participant->paletteID)->data);
-            this->palette.ReadPatch(&paletteReader);
-            RLEShape *s = participant->appearances->GetShape(0);
-            s->SetPosition(&position);
-            VGA.GetFrameBuffer()->DrawShape(s);
-            if (participant->appearances->GetNumImages() > 1) {
-                s = participant->appearances->GetShape(1);
+        break;
+        case ConvFrame::CONV_WIDE:
+        {
+            Point2D position = {0, topOffset};
+            for (size_t i = 0; i < currentFrame.participants.size(); i++) {
+                CharFigure *participant = currentFrame.participants[i];
+                ByteStream paletteReader;
+                paletteReader.Set(convPals.GetEntry(participant->paletteID)->data);
+                this->palette.ReadPatch(&paletteReader);
+                RLEShape *s = participant->appearances->GetShape(0);
                 s->SetPosition(&position);
                 VGA.GetFrameBuffer()->DrawShape(s);
+                if (participant->appearances->GetNumImages() > 1) {
+                    s = participant->appearances->GetShape(1);
+                    s->SetPosition(&position);
+                    VGA.GetFrameBuffer()->DrawShape(s);
+                }
+                position.x += s->GetWidth();
             }
-            //position.x += s->GetWidth();
+
+            for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT; i++)
+                VGA.GetFrameBuffer()->FillLineColor(i, 0x00);
+
+            for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
+                VGA.GetFrameBuffer()->FillLineColor(199 - i, 0x00);
         }
-
-        for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT; i++)
-            VGA.GetFrameBuffer()->FillLineColor(i, 0x00);
-
-        for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
-            VGA.GetFrameBuffer()->FillLineColor(199 - i, 0x00);
-    }
-    if (currentFrame.mode == ConvFrame::CONV_WINGMAN_CHOICE) {
-        Point2D position = {0, 0};
-        for (size_t i = 0; i < currentFrame.participants.size(); i++) {
-            CharFigure *participant = currentFrame.participants[i];
-            ByteStream paletteReader;
-            paletteReader.Set(convPals.GetEntry(participant->paletteID)->data);
-            this->palette.ReadPatch(&paletteReader);
-            RLEShape *s = participant->appearances->GetShape(0);
-            s->SetPosition(&position);
-            VGA.GetFrameBuffer()->DrawShape(s);
-            if (participant->appearances->GetNumImages() > 1) {
-                s = participant->appearances->GetShape(1);
+        break;
+        case  ConvFrame::CONV_WINGMAN_CHOICE:
+        {
+            Point2D position = {0, 0};
+            for (size_t i = 0; i < currentFrame.participants.size(); i++) {
+                CharFigure *participant = currentFrame.participants[i];
+                ByteStream paletteReader;
+                paletteReader.Set(convPals.GetEntry(participant->paletteID)->data);
+                this->palette.ReadPatch(&paletteReader);
+                RLEShape *s = participant->appearances->GetShape(0);
                 s->SetPosition(&position);
                 VGA.GetFrameBuffer()->DrawShape(s);
+                if (participant->appearances->GetNumImages() > 1) {
+                    s = participant->appearances->GetShape(1);
+                    s->SetPosition(&position);
+                    VGA.GetFrameBuffer()->DrawShape(s);
+                }
+                position.x += s->GetWidth();
             }
-            position.x += s->GetWidth();
+            for (auto zone : zones) {
+                zone->drawQuad();
+            }
+            CheckZones();
+            Mouse.Draw();
         }
-        for (auto zone : zones) {
-            zone->drawQuad();
-        }
-        CheckZones();
-        Mouse.Draw();
+        break;
+        case ConvFrame::CONV_CONTRACT_CHOICE:
+        {
+            ByteStream paletteReader;
+            paletteReader.Set(convPals.GetEntry(currentFrame.facePaletteID)->data);
+            this->palette.ReadPatch(&paletteReader);
+
+            int32_t pos = 0;
+
+            if (currentFrame.mode == ConvFrame::CONV_CLOSEUP) {
+                if (currentFrame.facePosition == ConvFrame::FACE_LEFT)
+                    pos = -30;
+
+                if (currentFrame.facePosition == ConvFrame::FACE_RIGHT)
+                    pos = 30;
+            }
+
+            if (currentFrame.face != NULL) {
+                RLEShape *s = nullptr;
+                if (faces_shape.find(currentFrame.face_expression) != faces_shape.end()) {
+                    for (auto shape : faces_shape[currentFrame.face_expression]) {
+                        s = currentFrame.face->appearances->GetShape(shape);
+                        s->SetPositionX(pos);
+                        VGA.GetFrameBuffer()->DrawShape(s);
+                    }
+                }
+                for (size_t i = 03; i < 11 && currentFrame.mode == ConvFrame::CONV_CLOSEUP &&
+                                    currentFrame.text != nullptr && currentFrame.text[0] != '\0';
+                    i++) {
+                    RLEShape *s = currentFrame.face->appearances->GetShape(3 + (SDL_GetTicks() / 100) % 10);
+                    s->SetPositionX(pos);
+                    VGA.GetFrameBuffer()->DrawShape(s);
+                }
+
+                if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
+                    RLEShape *s = currentFrame.face->appearances->GetShape(54);
+                    s->SetPositionX(pos);
+                    VGA.GetFrameBuffer()->DrawShape(s);
+                }
+            }
+            CheckZones();
+            Mouse.Draw();
+        }   
+        break;
     }
 
-    if (currentFrame.mode == ConvFrame::CONV_CONTRACT_CHOICE) {
-        CheckZones();
-        Mouse.Draw();
-    }
-    // Draw text
     DrawText();
-
-    DrawButtons();
-
     VGA.VSync();
 }

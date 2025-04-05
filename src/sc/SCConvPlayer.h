@@ -48,12 +48,14 @@ private:
     ByteStream conv;
     size_t size;  // In bytes
     uint8_t *end; // In bytes
+    uint8_t topOffset{0};
+    PakArchive convPak;
+    PakArchive convPals;
     ConvFrame currentFrame;
 
     void CheckFrameExpired(void);
     void ReadNextFrame(void);
     void SetArchive(PakEntry *conv);
-    void ReadtNextFrame(void);
     void CheckZones(void);
     void clicked(void *none, uint8_t id);
     void selectWingMan(void *none, uint8_t id);
