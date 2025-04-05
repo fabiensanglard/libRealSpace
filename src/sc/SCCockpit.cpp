@@ -418,14 +418,30 @@ void SCCockpit::RenderTargetingReticle() {
     weap->target = nullptr;
     Vector3D target{0,0,0};
     Vector3D velo{0,0,0};
+    float yawRad_update   = yawRad;
+    float pitchRad_update = pitchRad;
+    float rollRad_update  = rollRad;
+
     for (int i=0; i<150; i++) {
         std::tie(target, velo) = weap->ComputeTrajectory(60);
         weap->x = target.x;
         weap->y = target.y;
         weap->z = target.z;
-        weap->vx = velo.x;
-        weap->vy = velo.y;
-        weap->vz = velo.z;
+
+        yawRad_update   = yawRad_update+degreeToRad(-this->yaw_speed);
+        pitchRad_update = pitch_speed+degreeToRad(-this->pitch_speed);
+        rollRad_update  = rollRad_update;
+        cosRoll = cosf(rollRad_update);
+        sinRoll = sinf(rollRad_update);
+
+        Vector3D plane_update{0,0,0};
+        plane_update.x = (cosf(pitchRad_update) * sinf(yawRad_update) * cosRoll + sinf(pitchRad) * cosf(yawRad_update) * sinRoll);
+        plane_update.y = (sinf(pitchRad_update) * cosRoll - cosf(pitchRad) * sinf(yawRad_update) * sinRoll);
+        plane_update.z = cosf(pitchRad_update) * cosf(yawRad_update);
+
+        weap->vx = velo.x+plane_update.x;
+        weap->vy = velo.y+plane_update.y;
+        weap->vz = velo.z+plane_update.z;
     }
 
     Vector3DHomogeneous v = {target.x, target.y, target.z, 1.0f};
@@ -856,6 +872,8 @@ void SCCockpit::Render(int face) {
     }
 }
 void SCCockpit::Update() {
+    this->yaw_speed = this->yaw - (this->player_plane->azimuthf/10.0f);
+    this->pitch_speed = this->pitch - (this->player_plane->elevationf/10.0f);
     this->pitch = this->player_plane->elevationf/10.0f;
     this->roll = this->player_plane->twist/10.0f;
     this->yaw = this->player_plane->azimuthf/10.0f;

@@ -47,6 +47,9 @@ public:
     float altitude{0.0f};
     float heading{0.0f};
 
+    float pitch_speed{0.0f};
+    float yaw_speed{0.0f};
+
     bool gear{false};
     bool flaps{false};
     bool airbrake{false};
