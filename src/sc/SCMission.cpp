@@ -360,6 +360,10 @@ void SCMission::update() {
         ai_actor->object->azymuth = 360 - (uint16_t)(ai_actor->plane->azimuthf / 10.0f);
         ai_actor->object->roll = (uint16_t)(ai_actor->plane->twist / 10.0f);
         ai_actor->object->pitch = (uint16_t)(ai_actor->plane->elevationf / 10.0f);
+        if (ai_actor->is_destroyed == true && ai_actor->object->position.y < 0) {
+            ai_actor->object->alive = false;
+            ai_actor->is_active = false;
+        }
     }
     if (this->player->plane->landed) {
         this->mission_ended = true;

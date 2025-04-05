@@ -777,7 +777,7 @@ void SCPlane::OrigSimulate() {
 
 
 void SCPlane::Simulate() {
-    if (simple_simulation && this->object->alive) {
+    if (simple_simulation) {
         this->SimplifiedSimulate();
     } else {
         this->OrigSimulate();
@@ -802,7 +802,14 @@ void SCPlane::SimplifiedSimulate() {
     
     float pitch_input = (this->control_stick_y / 100.0f) * deltaTime;
     float roll_input = (-this->control_stick_x / 100.0f) * deltaTime;
-    
+    if (this->object->alive == false) {
+        this->thrust = 0.0f;
+        this->vy -= +0.1f;
+        if (this->vz > 5.0f) {
+            this->vz = 5.0f;
+        }
+        
+    }
     Matrix rottm;
     rottm.Identity();
     rottm.translateM(this->x, this->y, this->z);
@@ -855,6 +862,12 @@ void SCPlane::SimplifiedSimulate() {
     this->elevationf = (this->pitch * 180.0f / (float) M_PI) * 10.0f;
     this->twist = (this->roll * 180.0f / (float) M_PI) * 10.0f;
     this->tick_counter++;
+    if (this->object->alive == false) {
+        this->smoke_positions.push_back({this->x, this->y, this->z});
+        if (this->smoke_positions.size() > 100) {
+            this->smoke_positions.erase(this->smoke_positions.begin());
+        }
+    }
 }
 /**
  * IN_BOX: Check if the plane is inside a box.
