@@ -1704,26 +1704,28 @@ void SCStrike::RenderMenu() {
         if (ImGui::TreeNode("Casting")) {
             for (auto cast : this->current_mission->mission->mission_data.casting) {
                 if (ImGui::TreeNode((void *)(intptr_t)cast, "Actor %s", cast->actor.c_str())) {
-                    ImGui::Text("Name %s", cast->profile->radi.info.name.c_str());
-                    ImGui::Text("CallSign %s", cast->profile->radi.info.callsign.c_str());
-                    ImGui::Text("Is AI %d", cast->profile->ai.isAI);
-                    if (ImGui::TreeNode("MSGS")) {
-                        for (auto msg : cast->profile->radi.msgs) {
-                            ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+                    if (cast->profile != nullptr) {
+                        ImGui::Text("Name %s", cast->profile->radi.info.name.c_str());
+                        ImGui::Text("CallSign %s", cast->profile->radi.info.callsign.c_str());
+                        ImGui::Text("Is AI %d", cast->profile->ai.isAI);
+                        if (ImGui::TreeNode("MSGS")) {
+                            for (auto msg : cast->profile->radi.msgs) {
+                                ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+                            }
+                            ImGui::TreePop();
                         }
-                        ImGui::TreePop();
-                    }
-                    if (ImGui::TreeNode("ASKS")) {
-                        for (auto msg : cast->profile->radi.asks) {
-                            ImGui::Text("- [%s]: %s", msg.first.c_str(), msg.second.c_str());
+                        if (ImGui::TreeNode("ASKS")) {
+                            for (auto msg : cast->profile->radi.asks) {
+                                ImGui::Text("- [%s]: %s", msg.first.c_str(), msg.second.c_str());
+                            }
+                            ImGui::TreePop();
                         }
-                        ImGui::TreePop();
-                    }
-                    if (ImGui::TreeNode("ASKS_VECTOR")) {
-                        for (auto msg : cast->profile->radi.asks_vector) {
-                            ImGui::Text("- %s", msg.c_str());
+                        if (ImGui::TreeNode("ASKS_VECTOR")) {
+                            for (auto msg : cast->profile->radi.asks_vector) {
+                                ImGui::Text("- %s", msg.c_str());
+                            }
+                            ImGui::TreePop();
                         }
-                        ImGui::TreePop();
                     }
                     ImGui::TreePop();
                 }

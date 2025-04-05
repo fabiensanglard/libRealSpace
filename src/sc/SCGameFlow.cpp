@@ -474,6 +474,26 @@ void SCGameFlow::runEffect() {
     this->efect = nullptr;
     this->currentOptCode = 0;
 }
+
+/**
+ * Runs the current effect based on the efect vector and currentOptCode.
+ *
+ * Iterates through the efect vector, executing different actions based on the opcode.
+ * Actions include playing conversations, scenes, and missions, as well as handling unknown opcodes.
+ *
+ * @return None
+ */
+void SCGameFlow::runEffectAfterLoad() {
+    for (auto instruction : *this->efect) {
+        switch (instruction->opcode) {
+        case EFECT_OPT_TUNE_MODIFIER:
+            GameState.tune_modifier = instruction->value;
+            break;
+        default:
+            break;
+        }
+    }
+}
 /**
  * Checks for keyboard events and updates the game state accordingly.
  *
@@ -579,6 +599,11 @@ void SCGameFlow::InitFromGameState() {
         }
         i++;
     }
+    if (this->gameFlowParser.game.game[this->current_miss]->efct != nullptr) {
+        this->efect = this->gameFlowParser.game.game[this->current_miss]->efct;
+    }
+    this->runEffectAfterLoad();
+    this->efect = nullptr;
     this->loadMiss();
 }
 /**

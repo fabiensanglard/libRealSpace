@@ -98,6 +98,7 @@ private:
     void returnFromScene(std::vector<EFCT *> *script, uint8_t id);
     void flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id);
     void runEffect();
+    void runEffectAfterLoad();
     void CheckKeyboard(void);
     SCZone *CheckZones(void);
     void createScen();
