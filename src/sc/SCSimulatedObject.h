@@ -15,6 +15,7 @@ protected:
     Vector3D calculate_lift(Vector3D velocity);
     int tps{30};
     std::vector<Vector3D> smoke_positions;
+    int run_iterations{0};
 public:
     float x{0.0f};
     float y{0.0f};

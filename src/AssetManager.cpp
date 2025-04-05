@@ -95,12 +95,14 @@ AssetManager::AssetManager(){
 }
 
 AssetManager::~AssetManager(){
-    
-    while(!tres.empty()){
-        TreArchive* tre = tres.back();
-        tres.pop_back();
-        delete tre;
+    for (auto file_cache: this->cacheFileData) {
+        delete file_cache.second;
+        file_cache.second = nullptr;
     }
+    this->cacheFileData.clear();
+    this->treEntries.clear();
+    this->tres.clear();
+
 }
 
 bool AssetManager::ReadISOImage(const std::string& isoPath) {

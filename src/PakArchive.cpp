@@ -16,8 +16,7 @@ PakArchive::PakArchive() :
 }
 
 PakArchive::~PakArchive(){
-    if (initalizedFromFile)
-        delete[] this->data;
+    //delete[] this->data;
 }
 
 

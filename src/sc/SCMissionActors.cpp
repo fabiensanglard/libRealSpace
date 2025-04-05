@@ -64,13 +64,15 @@ bool SCMissionActors::flyToWaypoint(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_FLY_TO_WP;
     if (arg < this->mission->mission->mission_data.spots.size()) {
         SPOT *wp = this->mission->mission->mission_data.spots[arg];
-        this->pilot->SetTargetWaypoint(wp->position);
-        this->pilot->target_speed = -10;
-        Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
-        Vector3D diff = wp->position - position;
-        float dist = diff.Length();
-        if (dist < 3000.0f) {
-            return true;
+        if (this->pilot != nullptr) {
+            this->pilot->SetTargetWaypoint(wp->position);
+            this->pilot->target_speed = -10;
+            Vector3D position = {this->plane->x, this->plane->y, this->plane->z};
+            Vector3D diff = wp->position - position;
+            float dist = diff.Length();
+            if (dist < 3000.0f) {
+                return true;
+            }
         }
     }
     

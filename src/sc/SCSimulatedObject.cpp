@@ -163,7 +163,8 @@ std::tuple<Vector3D, Vector3D> SCSimulatedObject::ComputeTrajectory(int tps) {
     Vector3D acceleration = total_force * (1.0f/ this->weight);
     velocity = (velocity+(acceleration*deltaTime)).limit(MAX_VELOCITY*deltaTime);
     position = position+velocity;
-    return { position, velocity };;
+    this->run_iterations++;
+    return { position, velocity };
 }
 bool SCSimulatedObject::CheckCollision(SCMissionActors *entity) { 
     BoudingBox *bb{nullptr};
@@ -196,6 +197,25 @@ void SCSimulatedObject::Simulate(int tps) {
                 this->shooter->ground_down += 1;
             }
             return;
+        } else {
+            const float distanceThreshold = 50.0f;
+            Vector3D targetPos = {
+                static_cast<float>(this->target->object->position.x),
+                static_cast<float>(this->target->object->position.y),
+                static_cast<float>(this->target->object->position.z)
+            };
+            float distance = (targetPos - position).Norm();
+            if (distance < distanceThreshold) {
+                this->alive = false;
+                this->target->object->alive = false;
+                this->shooter->score += 100;
+                if (this->target->plane != nullptr) {
+                    this->shooter->plane_down += 1;
+                } else {
+                    this->shooter->ground_down += 1;
+                }
+                return;
+            }
         }
         
     }
@@ -248,7 +268,7 @@ std::tuple<Vector3D, Vector3D> GunSimulatedObject::ComputeTrajectory(int tps) {
     // Mise à jour de la vitesse et de la position en tenant compte du temps écoulé
     velocity = velocity + acceleration * deltaTime;
     position = position + velocity * deltaTime;
-
+    this->run_iterations++;
     return { position, velocity };
 }
 std::tuple<Vector3D, Vector3D> GunSimulatedObject::ComputeTrajectoryUntilGround(int tps) {

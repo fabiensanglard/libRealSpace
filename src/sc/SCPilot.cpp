@@ -35,9 +35,6 @@ SCPilot::SCPilot() {
 SCPilot::~SCPilot() {}
 
 void SCPilot::SetTargetWaypoint(Vector3D waypoint) {
-    if (plane == nullptr) {
-        return;
-    }
     Vector2D weapoint_direction = {waypoint.x - plane->x,
                                    waypoint.z - plane->z};
     float az = (atan2f((float)weapoint_direction.y, (float)weapoint_direction.x) * 180.0f / (float)M_PI);

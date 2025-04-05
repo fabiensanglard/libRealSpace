@@ -18,13 +18,10 @@ TreArchive::TreArchive():
 }
 
 TreArchive::~TreArchive(){
-    
-    if (initalizedFromFile)
-        delete[] this->data;
-    
-    for(size_t i=0 ; i < entries.size() ; i++){
+    //delete[] this->data;
+    /*for(size_t i=0 ; i < entries.size() ; i++){
         delete entries[i];
-    }
+    }*/
 }
 
 bool TreArchive::InitFromFile(const char* filepath){
