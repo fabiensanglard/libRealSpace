@@ -293,6 +293,11 @@ void SCProg::execute() {
                     work_register = this->actor->getDistanceToSpot(prog.arg);
                 }
             break;
+            case OP_IS_TARGET_ALIVE:
+                if (exec) {
+                    true_flag = this->mission->actors[prog.arg]->is_active;
+                }
+            break;
             case OP_SET_FLAG_TO_TRUE:
                 if (exec) {
                     this->mission->mission->mission_data.flags[prog.arg] = 1;
