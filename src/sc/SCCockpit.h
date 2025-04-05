@@ -49,6 +49,7 @@ public:
 
     float pitch_speed{0.0f};
     float yaw_speed{0.0f};
+    float roll_speed{0.0f};
 
     bool gear{false};
     bool flaps{false};

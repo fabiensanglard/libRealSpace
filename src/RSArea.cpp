@@ -538,24 +538,23 @@ float RSArea::getGroundLevel(int BLOC, float x, float y) {
     if (BLOC < 0 || BLOC >= BLOCKS_PER_MAP)
         return 0;
 
-    int verticeIndex = 0;
-    int centerX = 0;
-    int centerY = 0;
-    int vX = static_cast<int>((x) + centerX);
-    int vY = static_cast<int>((y) + centerY);
-
-    vX = vX / 1000;
-    vY = vY / 1000;
-
-    vX = vX * 1000;
-    vY = vY * 1000;
+    // x et y correspondent respectivement à x et z des vertices
+    float bestDistance = (std::numeric_limits<float>::max)();
+    float resultY = 0;
 
     for (int i = 0; i < 400; i++) {
-        if ((blocks[0][BLOC].vertice[i].v.x >= vX) && (blocks[0][BLOC].vertice[i].v.z >= vY)) {
-            return (blocks[0][BLOC].vertice[i].v.y + 5);
+        const auto &vertex = blocks[0][BLOC].vertice[i].v;
+        float dx = x - vertex.x;
+        float dz = y - vertex.z;
+        float distanceSquared = dx * dx + dz * dz;
+
+        if (distanceSquared < bestDistance) {
+            bestDistance = distanceSquared;
+            resultY = vertex.y;
         }
     }
-    return (blocks[0][BLOC].vertice[0].v.y);
+    
+    return resultY;
 }
 
 float RSArea::getY(float x, float z) {
