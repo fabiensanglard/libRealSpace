@@ -772,34 +772,49 @@ void SCRenderer::RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     int block_id = blocY * BLOCK_PER_MAP_SIDE + blocX;
     std::map<uint8_t, Point2D> blockid_offset;
     int index = 0;
-    int distance = 6;
+    int distance = 1;
     for (int y = -distance; y <= distance; y++) {
         for (int x = -distance; x <= distance; x++) {
             blockid_offset[index] = {x, y};
             index++;
         }
     }
+    std::vector<int> blockid_rendered;
+    blockid_rendered.clear();
+    blockid_rendered.shrink_to_fit();
+
     for (int i=0; i<blockid_offset.size()-1; i++) {
         int final_block_id = (blocY + blockid_offset[i].y) * BLOCK_PER_MAP_SIDE + (blocX+blockid_offset[i].x);
         if (final_block_id<0)
             continue;
+        blockid_rendered.push_back(final_block_id);
         RenderBlock(area, LOD, final_block_id, false);
     }
     
-    /*for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-        RenderBlock(area, LOD, i, false);
-    }*/
+    for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+        if (std::find(blockid_rendered.begin(), blockid_rendered.end(), i) != blockid_rendered.end())
+            continue;
+        RenderBlock(area, LOD+1, i, false);
+    }
     glEnd();
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
     /*for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-        RenderBlock(area, LOD, i, true);
+        RenderBlock(area, LOD+1, i, true);
     }*/
+    blockid_rendered.clear();
+    blockid_rendered.shrink_to_fit();
     for (int i=0; i<blockid_offset.size()-1; i++) {
         int final_block_id = (blocY + blockid_offset[i].y) * BLOCK_PER_MAP_SIDE + (blocX+blockid_offset[i].x);
         if (final_block_id<0)
             continue;
+        blockid_rendered.push_back(final_block_id);
         RenderBlock(area, LOD, final_block_id, true);
+    }
+    for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+        if (std::find(blockid_rendered.begin(), blockid_rendered.end(), i) != blockid_rendered.end())
+            continue;
+        RenderBlock(area, LOD+1, i, true);
     }
     for (auto const &x : textureSortedVertex) {
         RSImage *image = NULL;

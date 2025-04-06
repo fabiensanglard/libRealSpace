@@ -50,6 +50,7 @@ extern "C" {
 
     // Reusable Realspace Classes
     #include "Base.h"
+    #include "LZBuffer.h"
     #include "ByteStream.h"
     #include "PakArchive.h"
     #include "TreArchive.h"

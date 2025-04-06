@@ -333,6 +333,15 @@ FileData* AssetManager::ReadFileEntry(const FileEntry &entry, const std::string 
     isoFile.close();
     return fileData;
 }
+void AssetManager::writeFileData(const std::string fileName, FileData *fileData) {
+    std::ofstream out(fileName, std::ios::binary);
+    if (!out.is_open()) {
+        std::cerr << "Failed to open file for writing: " << fileName << std::endl;
+        return;
+    }
+    out.write(reinterpret_cast<const char*>(fileData->data), fileData->size);
+    out.close();
+}
 
 FileData * AssetManager::GetFileData(std::string filename) {
     FileData *fileData;

@@ -77,7 +77,8 @@ public:
     ~AssetManager();
     bool ReadISOImage(const std::string& isoPath);
     FileData *GetFileData(const std::string fileName);
-
+    void writeFileData(const std::string fileName, FileData *fileData);
+    
 private:
     bool isIsoImage{false};
     std::string *basePath;
@@ -87,5 +88,6 @@ private:
     bool ExtractPrimaryVolumeDescriptor(std::ifstream &isoFile, PrimaryVolumeDescriptor &pvd);
     bool ExtractFileListFromRootDirectory(std::ifstream &isoFile, const PrimaryVolumeDescriptor &pvd);
     FileData *ReadFileEntry(const FileEntry &entry, const std::string &isoPath);
+    
 };
 #endif /* defined(__libRealSpace__AssetManager__) */

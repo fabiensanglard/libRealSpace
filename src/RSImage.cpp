@@ -37,10 +37,8 @@ void RSImage::Create(const char name[8],uint32_t width,uint32_t height, uint32_t
 }
 
 void RSImage::UpdateContent(uint8_t* src){
-    
     memcpy(this->data,src, width * height);
     this->dirty = true;
-    
 }
 
 void RSImage::SyncTexture(void){

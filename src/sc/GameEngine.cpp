@@ -11,6 +11,8 @@
 #include "imgui_impl_sdl2.h"
 #include "precomp.h"
 
+#define FLOPPY 1
+
 GameEngine::GameEngine() {}
 
 GameEngine::~GameEngine() {}
@@ -19,21 +21,33 @@ void GameEngine::Init() {
 
 
     // Load all TREs and PAKs
-    std::vector<std::string> treFiles = {
-        "GAMEFLOW.TRE",
-        "OBJECTS.TRE",
-        "MISC.TRE",
-        "SOUND.TRE",
-        "MISSIONS.TRE",
-        "TEXTURES.TRE"
-    };
-    std::vector<std::string> cdTreFiles = {
-        "BIGTRE.TRE",
-        "LILTRE.TRE"
-    };
-    /*Assets.ReadISOImage("./SC.DAT");
-    Assets.Init(cdTreFiles);*/
-    Assets.Init(treFiles);
+    if (FLOPPY) {
+        std::vector<std::string> treFiles = {
+            "GAMEFLOW.TRE",
+            "OBJECTS.TRE",
+            "MISC.TRE",
+            "SOUND.TRE",
+            "MISSIONS.TRE",
+            "TEXTURES.TRE"
+        };
+        std::vector<std::string> cdTreFiles = {
+            "BIGTRE.TRE",
+            "LILTRE.TRE"
+        };
+        Assets.Init(treFiles);
+    } else {
+        std::vector<std::string> cdTreFiles = {
+            "BIGTRE.TRE",
+            "LILTRE.TRE"
+        };
+        Assets.ReadISOImage("./SC.DAT");
+        Assets.Init(cdTreFiles);
+        FileData *fileData = Assets.GetFileData("BIGTRE.TRE");
+        Assets.writeFileData("E:/dump/BIGTRE.TRE", fileData);
+    }
+    
+    
+    
     Mixer.Init(&Assets);
     FontManager.Init(&Assets);
 

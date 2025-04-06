@@ -192,23 +192,13 @@ void SCMainMenu::LoadBackgrounds(void) {
     PakArchive pak;
     pak.InitFromRAM("", entryMountain->data, entryMountain->size);
 
-    // The board is within an other pak within MAINMENU.PAK !!!!
-    PakArchive mountainPak;
-    mountainPak.InitFromRAM("subPak board", pak.GetEntry(OptionShapeID::MOUTAINS_BG)->data,
-                            pak.GetEntry(OptionShapeID::MOUTAINS_BG)->size);
-    mountain.Init(mountainPak.GetEntry(0)->data, mountainPak.GetEntry(0)->size);
-
-    PakArchive skyPak;
-    skyPak.InitFromRAM("subPak sky", pak.GetEntry(OptionShapeID::SKY)->data, pak.GetEntry(OptionShapeID::SKY)->size);
-    sky.Init(skyPak.GetEntry(0)->data, skyPak.GetEntry(0)->size);
-
-    TreEntry *entryCloud =
-        Assets.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
+    mountain.InitFromPakEntry(pak.GetEntry(OptionShapeID::MOUTAINS_BG));
+    sky.InitFromPakEntry(pak.GetEntry(OptionShapeID::SKY));
+    TreEntry *entryCloud = Assets.GetEntryByName("..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK");
     PakArchive subcloudPak;
     subcloudPak.InitFromRAM("cloud oak entry", entryCloud->data, entryCloud->size);
-    PakArchive cloudPak;
-    cloudPak.InitFromRAM("subPak cloud", subcloudPak.GetEntry(20)->data, subcloudPak.GetEntry(20)->size);
-    cloud.Init(cloudPak.GetEntry(0)->data, cloudPak.GetEntry(0)->size);
+    cloud.InitFromPakEntry(subcloudPak.GetEntry(20));
+
 }
 
 void SCMainMenu::RunFrame(void) {

@@ -38,7 +38,15 @@ void RLEShape::ReadFragment(RLEFragment *frag) {
         frag->type = FRAG_RAW;
     }
 }
-
+void RLEShape::InitFromPakEntry(PakEntry *entry) {
+    if (entry->type == 224) {
+        PakArchive arc;
+        arc.InitFromRAM("id", entry->data, entry->size);
+        this->Init(arc.GetEntry(0)->data, arc.GetEntry(0)->size);
+    } else {
+        this->Init(entry->data, entry->size);
+    }
+}
 bool RLEShape::ExpandFragment(RLEFragment *frag, uint8_t *dst) {
 
     bool error;
@@ -155,6 +163,11 @@ void RLEShape::Init(uint8_t *idata, size_t isize) {
     /*rleCenter= dst->data + abs(leftDist) + abs(topDist) * dst->width;*/
 
     data = stream.GetPosition();
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data, isize-8);
+        idata = lzbuffer.GetData((rightDist-leftDist)*(botDist-topDist));
+    }
 }
 
 void RLEShape::InitWithPosition(uint8_t *idata, size_t isize, Point2D *position) {
