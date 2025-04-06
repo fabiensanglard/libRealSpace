@@ -47,7 +47,7 @@ void RLEShape::InitFromPakEntry(PakEntry *entry) {
         LZBuffer lzbuffer;
         lzbuffer.Init(entry->data, entry->size);
         size_t csize = 0;
-        entry->data = lzbuffer.UncompressLZWTextbook(entry->data, entry->size, csize);
+        entry->data = lzbuffer.UncompressLZWTextbook(entry->data+4, entry->size-4, csize);
         this->Init(entry->data, csize);
     }
 }

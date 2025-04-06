@@ -92,40 +92,38 @@ static int getNextCode(const uint8_t* data, size_t compSize, size_t &bitPos, int
 uint8_t* LZBuffer::UncompressLZWTextbook(const uint8_t* compData, size_t compSize, size_t &uncompSize) {
     // Constants.
     const int MAX_CODE_WIDTH = 12;
-    const int CLEAR_CODE = 256;  // Reset dictionary.
-    const int STOP_CODE  = 257;  // Terminator.
-    const int INITIAL_CODE_WIDTH = 9;
-    
-    // Initialize dictionary with entries 0 - 255.
+    const int CLEAR_CODE   = 256;  // Reset dictionary.
+    const int STOP_CODE    = 257;  // Terminator.
+    const int INITIAL_WIDTH = 9;
+
+    // Initialize dictionary with single-byte entries.
     std::vector< std::vector<uint8_t> > dictionary;
     dictionary.reserve(4096);
     for (int i = 0; i < 256; i++) {
         dictionary.push_back(std::vector<uint8_t>(1, static_cast<uint8_t>(i)));
     }
-    // Reserve the two special codes.
-    dictionary.push_back(std::vector<uint8_t>()); // 256: CLEAR_CODE (dummy).
-    dictionary.push_back(std::vector<uint8_t>()); // 257: STOP_CODE (dummy).
-    
-    int nextCode = 258;  // First new dictionary entry.
-    int curCodeWidth = INITIAL_CODE_WIDTH;
-    
+    // Reserve entries for CLEAR_CODE and STOP_CODE.
+    dictionary.push_back(std::vector<uint8_t>()); // Index 256: CLEAR_CODE.
+    dictionary.push_back(std::vector<uint8_t>()); // Index 257: STOP_CODE.
+
+    int nextCode = 258;  
+    int currentWidth = INITIAL_WIDTH;
     size_t bitPos = 0;
-    
     std::vector<uint8_t> output;
     std::vector<uint8_t> prevEntry;
-    
+
     while (true) {
-        int code = getNextCode(compData, compSize, bitPos, curCodeWidth);
+        int code = getNextCode(compData, compSize, bitPos, currentWidth);
         if (code < 0)
             break;
-        
+
         if (code == CLEAR_CODE) {
-            // Reset dictionary.
-            dictionary.resize(258);  // Keep initial 258 entries.
+            // Reset the dictionary to initial state.
+            dictionary.resize(258);
             nextCode = 258;
-            curCodeWidth = INITIAL_CODE_WIDTH;
-            // Read next code after clear.
-            code = getNextCode(compData, compSize, bitPos, curCodeWidth);
+            currentWidth = INITIAL_WIDTH;
+            // After clear, start with the next code.
+            code = getNextCode(compData, compSize, bitPos, currentWidth);
             if (code < 0)
                 break;
             if (code == STOP_CODE)
@@ -134,33 +132,138 @@ uint8_t* LZBuffer::UncompressLZWTextbook(const uint8_t* compData, size_t compSiz
             output.insert(output.end(), prevEntry.begin(), prevEntry.end());
             continue;
         }
-        
+
         if (code == STOP_CODE)
             break;
-        
+
         std::vector<uint8_t> currEntry;
         if (code < static_cast<int>(dictionary.size())) {
             currEntry = dictionary[code];
         } else {
-            dictionary[code] = std::vector<uint8_t>(1, static_cast<uint8_t>(code));
-            currEntry = dictionary[code];
+            // Special case: code not in dictionary yet.
+            if (!prevEntry.empty()) {
+                currEntry = prevEntry;
+                currEntry.push_back(prevEntry[0]);
+            } else {
+                break;
+            }
+        }
+
+        output.insert(output.end(), currEntry.begin(), currEntry.end());
+
+        // Add new entry to the dictionary.
+        if (!prevEntry.empty() && nextCode < 4096) {
+            std::vector<uint8_t> newEntry = prevEntry;
+            newEntry.push_back(currEntry[0]);
+            dictionary.push_back(newEntry);
+            nextCode++;
+
+            // Increase bit width if necessary.
+            if (nextCode == (1 << currentWidth) && currentWidth < MAX_CODE_WIDTH) {
+                currentWidth++;
+            }
+        }
+        prevEntry = currEntry;
+    }
+
+    uncompSize = output.size();
+    uint8_t* result = new uint8_t[uncompSize];
+    memcpy(result, output.data(), uncompSize);
+    return result;
+}
+
+// Décode un buffer compressé en LZW selon les consignes :
+//   - Mots de 9 bits au départ, passant à 10, 11 puis 12 bits au fur et à mesure que le dictionnaire grossit.
+//   - Le dictionnaire initial comporte 256 entrées (valeurs 8 bits).
+//   - Les nouvelles entrées commencent à 258.
+//   - Le code 257 indique la fin du flux.
+// Décode un buffer compressé en LZW selon les consignes :
+//   - Mots de 9 bits au départ, augmentant à 10, 11 puis 12 bits au fur et à mesure que
+//     le dictionnaire grossit (jusqu'à 4096 entrées maximum).
+//   - Le dictionnaire initial comporte 256 entrées (les valeurs d'un octet).
+//   - Les nouvelles entrées commencent à 258.
+//   - Le code 256 réinitialise le dictionnaire aux 256 premières entrées.
+//   - Le code 257 indique la fin du flux.
+uint8_t* LZBuffer::DecodeLZW(const uint8_t* compData, size_t compSize, size_t &uncompSize) {
+    const int MAX_CODE_WIDTH = 12;
+    const int INITIAL_WIDTH = 9;
+    const int CLEAR_CODE = 256; // Réinitialise le dictionnaire.
+    const int STOP_CODE  = 257; // Fin du flux.
+
+    // Initialiser le dictionnaire avec les 256 valeurs sur 8 bits.
+    std::vector< std::vector<uint8_t> > dictionary;
+    dictionary.reserve(4096);
+    for (int i = 0; i < 256; i++) {
+        dictionary.push_back(std::vector<uint8_t>(1, static_cast<uint8_t>(i)));
+    }
+    // Réserver deux emplacements (pour conserver la cohérence avec les codes de contrôle).
+    dictionary.push_back(std::vector<uint8_t>());
+    dictionary.push_back(std::vector<uint8_t>());
+
+    int nextCode = 258;  
+    int currentWidth = INITIAL_WIDTH;
+    size_t bitPos = 0;
+    std::vector<uint8_t> output;
+    std::vector<uint8_t> prevEntry;
+
+    // Lire le premier code (il doit être inférieur à 256).
+    int code = getNextCode(compData, compSize, bitPos, currentWidth);
+    if (code < 0 || code == STOP_CODE)
+        return nullptr;  // Erreur ou rien à décoder.
+    
+    prevEntry = dictionary[code];
+    output.insert(output.end(), prevEntry.begin(), prevEntry.end());
+    
+    // Lecture des codes suivants et décodage.
+    while (true) {
+        code = getNextCode(compData, compSize, bitPos, currentWidth);
+        if (code == STOP_CODE)
+            break;
+        
+        // Vérifier si le code demande une réinitialisation du dictionnaire.
+        if (code == CLEAR_CODE) {
+            // Réinitialise le dictionnaire aux 256 premières entrées.
+            dictionary.resize(256);
+            // Réinsère les deux emplacements réservés.
+            dictionary.push_back(std::vector<uint8_t>());
+            dictionary.push_back(std::vector<uint8_t>());
+            nextCode = 258;
+            currentWidth = INITIAL_WIDTH;
+            
+            // Lire le prochain code après la réinitialisation.
+            code = getNextCode(compData, compSize, bitPos, currentWidth);
+            if ( code == STOP_CODE)
+                break;
+            prevEntry = dictionary[code];
+            output.insert(output.end(), prevEntry.begin(), prevEntry.end());
+            continue;
         }
         
-        // Output current entry.
+        std::vector<uint8_t> currEntry;
+        if (code < static_cast<int>(dictionary.size())) {
+            currEntry = dictionary[code];
+        } else if (code == nextCode) {
+            // Cas particulier : le code n'est pas encore dans le dictionnaire.
+            currEntry = prevEntry;
+            currEntry.push_back(prevEntry[0]);
+        } else {
+            continue; // Code non valide.
+        }
+        
         output.insert(output.end(), currEntry.begin(), currEntry.end());
         
-        // Add new dictionary entry if possible.
+        // Ajouter une nouvelle entrée au dictionnaire, si possible.
         if (!prevEntry.empty() && nextCode < 4096) {
             std::vector<uint8_t> newEntry = prevEntry;
             newEntry.push_back(currEntry[0]);
             dictionary.push_back(newEntry);
             nextCode++;
             
-            // Increase code width if necessary.
-            if (nextCode == (1 << curCodeWidth) && curCodeWidth < MAX_CODE_WIDTH)
-                curCodeWidth++;
+            // Augmenter la largeur de lecture dès que le dictionnaire atteint une taille correspondante.
+            if (nextCode == (1 << currentWidth) && currentWidth < MAX_CODE_WIDTH) {
+                currentWidth++;
+            }
         }
-        
         prevEntry = currEntry;
     }
     
