@@ -30,10 +30,6 @@ void GameEngine::Init() {
             "MISSIONS.TRE",
             "TEXTURES.TRE"
         };
-        std::vector<std::string> cdTreFiles = {
-            "BIGTRE.TRE",
-            "LILTRE.TRE"
-        };
         Assets.Init(treFiles);
     } else {
         std::vector<std::string> cdTreFiles = {
@@ -42,8 +38,6 @@ void GameEngine::Init() {
         };
         Assets.ReadISOImage("./SC.DAT");
         Assets.Init(cdTreFiles);
-        FileData *fileData = Assets.GetFileData("BIGTRE.TRE");
-        Assets.writeFileData("E:/dump/BIGTRE.TRE", fileData);
     }
     
     
