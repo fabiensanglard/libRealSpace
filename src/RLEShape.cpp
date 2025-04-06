@@ -44,7 +44,11 @@ void RLEShape::InitFromPakEntry(PakEntry *entry) {
         arc.InitFromRAM("id", entry->data, entry->size);
         this->Init(arc.GetEntry(0)->data, arc.GetEntry(0)->size);
     } else {
-        this->Init(entry->data, entry->size);
+        LZBuffer lzbuffer;
+        lzbuffer.Init(entry->data, entry->size);
+        size_t csize = 0;
+        entry->data = lzbuffer.UncompressLZWTextbook(entry->data, entry->size, csize);
+        this->Init(entry->data, csize);
     }
 }
 bool RLEShape::ExpandFragment(RLEFragment *frag, uint8_t *dst) {
@@ -166,7 +170,8 @@ void RLEShape::Init(uint8_t *idata, size_t isize) {
     if (data[0] == 'L' && data[1] == 'Z') {
         LZBuffer lzbuffer;
         lzbuffer.Init(data, isize-8);
-        idata = lzbuffer.GetData((rightDist-leftDist)*(botDist-topDist));
+        uint32_t size = 0;
+        idata = lzbuffer.GetData(&size);
     }
 }
 

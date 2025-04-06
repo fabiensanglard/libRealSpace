@@ -614,13 +614,16 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size) {
 
     image->Create(name, width, height, 0);
     uint8_t *src = stream.GetPosition();
+    uint8_t *pic_data = nullptr;
+    size_t csize = 0;
     if (src[0]=='L' && src[1]=='Z'){
         LZBuffer lzbuffer;
-        lzbuffer.Init(src,size-16);
-        src = lzbuffer.GetData(width*height);
+        pic_data = lzbuffer.UncompressLZWTextbook(src+2,size-14,csize);
     }
-    image->UpdateContent(src);
-    AddImage(image);
+    if (pic_data != nullptr && csize>0) {
+        image->UpdateContent(pic_data);
+        AddImage(image);
+    }
 }
 void RSEntity::parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size) {
     ByteStream stream(data);

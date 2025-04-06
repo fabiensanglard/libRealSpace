@@ -38,38 +38,16 @@ void PakArchive::Parse(void){
     
     size_t numEntries = (offset-4)/4;
     
-    //Hashmap to keep track of duplicates
-    std::map<uint32_t,void*> uniqueOffsets;
-    
-    
     //First to read all the offsets
     for(int i =0 ; i < numEntries ; i ++){
-        
-        
         offset = stream.ReadUInt32LE();
-        
-        
         PakEntry* entry = new PakEntry();
-
         entry->type = (offset & 0xFF000000) >> 24;
-        
         offset &= 0x00FFFFFF ; //Remove the leading 0xE0 or 0xFF
-        
-        
-        
         entry->data = this->data + offset;
-        
-        //if (uniqueOffsets[offset] == NULL){
-            entries.push_back(entry);
-            uniqueOffsets[offset] = entry;
-        //}
-        
+        entries.push_back(entry);
     }
-    
-   
-    //numEntries = uniqueOffsets.size();
-    
-    
+
     //Second pass to calculate the sizes.
     int i =0;
     for( ; i < numEntries-1 ; i ++){
@@ -80,7 +58,6 @@ void PakArchive::Parse(void){
     PakEntry* entry = entries[i];
     entry->size = (this->data + this->size) - entries[i]->data;
     
-    //std::sort(entries.begin(), entries.end(),PakEntry::Compare);
 }
 
 bool PakArchive::InitFromFile(const char* filepath){

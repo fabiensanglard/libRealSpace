@@ -11,7 +11,7 @@
 #include "imgui_impl_sdl2.h"
 #include "precomp.h"
 
-#define FLOPPY 1
+#define FLOPPY 0
 
 GameEngine::GameEngine() {}
 
