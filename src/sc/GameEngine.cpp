@@ -17,6 +17,7 @@ GameEngine::~GameEngine() {}
 
 void GameEngine::Init() {
 
+
     // Load all TREs and PAKs
     std::vector<std::string> treFiles = {
         "GAMEFLOW.TRE",
@@ -26,6 +27,12 @@ void GameEngine::Init() {
         "MISSIONS.TRE",
         "TEXTURES.TRE"
     };
+    std::vector<std::string> cdTreFiles = {
+        "BIGTRE.TRE",
+        "LILTRE.TRE"
+    };
+    /*Assets.ReadISOImage("./SC.DAT");
+    Assets.Init(cdTreFiles);*/
     Assets.Init(treFiles);
     Mixer.Init(&Assets);
     FontManager.Init(&Assets);

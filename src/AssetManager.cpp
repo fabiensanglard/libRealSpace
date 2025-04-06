@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include "AssetManager.h"
 
 typedef struct TreNameID{
     AssetManager::TreID id ;
@@ -122,6 +123,14 @@ bool AssetManager::ReadISOImage(const std::string& isoPath) {
         return false;
     }
     isoFile.close();
+    for (auto entry : this->fileContents) {
+        if (!entry.second.isDirectory) {
+            FileData *fileData = ReadFileEntry(entry.second, isoPath);
+            if (fileData != nullptr) {
+                this->cacheFileData[entry.first] = fileData;
+            }
+        }
+    }
     return true;
 }
 
@@ -270,11 +279,59 @@ bool AssetManager::ExtractFileListFromRootDirectory(std::ifstream &isoFile, cons
         entry.size = fileSize;
         
         fileContents[fileName] = entry;
-        
         offset += recordLen;
     }
     
     return true;
+}
+
+FileData* AssetManager::ReadFileEntry(const FileEntry &entry, const std::string &isoPath) {
+    FileData* fileData = new FileData();
+    fileData->size = entry.size;
+    fileData->data = new uint8_t[fileData->size];
+
+    std::ifstream isoFile(isoPath, std::ios::binary);
+    if (!isoFile.is_open()) {
+        std::cerr << "Failed to open ISO file: " << isoPath << std::endl;
+        delete[] fileData->data;
+        delete fileData;
+        return nullptr;
+    }
+
+    const int sectorSize = 2352;
+    const int headerSize = 16;
+    const int userDataSize = 2048;
+
+    // Compute the number of sectors needed to cover the file data.
+    int numSectors = (fileData->size + userDataSize - 1) / userDataSize;
+    int bytesCopied = 0;
+
+    for (int i = 0; i < numSectors; i++) {
+        // The file position in the ISO is given in logical sectors.
+        // For a raw image, each logical sector occupies sectorSize bytes.
+        int sectorOffset = (entry.position + i) * sectorSize;
+        isoFile.seekg(sectorOffset, std::ios::beg);
+
+        char sectorBuffer[2352];
+        isoFile.read(sectorBuffer, sectorSize);
+        if (isoFile.gcount() != sectorSize) {
+            std::cerr << "Failed to read sector " << (entry.position + i) << " from ISO." << std::endl;
+            delete[] fileData->data;
+            delete fileData;
+            return nullptr;
+        }
+
+        // Determine how many bytes to copy from this sector.
+        int bytesToCopy = userDataSize;
+        if (bytesCopied + bytesToCopy > fileData->size) {
+            bytesToCopy = fileData->size - bytesCopied;
+        }
+        memcpy(fileData->data + bytesCopied, sectorBuffer + headerSize, bytesToCopy);
+        bytesCopied += bytesToCopy;
+    }
+
+    isoFile.close();
+    return fileData;
 }
 
 FileData * AssetManager::GetFileData(std::string filename) {

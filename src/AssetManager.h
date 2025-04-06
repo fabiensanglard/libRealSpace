@@ -86,5 +86,6 @@ private:
     std::map<std::string, FileEntry> fileContents;
     bool ExtractPrimaryVolumeDescriptor(std::ifstream &isoFile, PrimaryVolumeDescriptor &pvd);
     bool ExtractFileListFromRootDirectory(std::ifstream &isoFile, const PrimaryVolumeDescriptor &pvd);
+    FileData *ReadFileEntry(const FileEntry &entry, const std::string &isoPath);
 };
 #endif /* defined(__libRealSpace__AssetManager__) */

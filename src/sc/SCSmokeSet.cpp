@@ -18,8 +18,7 @@ void SCSmokeSet::Init(){
     this->palette = *palette.GetColorPalette();
 
     std::string path = "..\\..\\DATA\\OBJECTS\\SMOKESET.IFF";
-    TreArchive *tre = Assets.tres[AssetManager::TRE_OBJECTS];
-    TreEntry *smk = tre->GetEntryByName(path.c_str());
+    TreEntry *smk = Assets.GetEntryByName(path.c_str());
 
     RSSmokeSet *smoke_set = new RSSmokeSet();
     smoke_set->InitFromRam(smk->data, smk->size);

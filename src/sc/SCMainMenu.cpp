@@ -68,8 +68,7 @@ void SCMainMenu::UnFocus(void) {
 }
 void SCMainMenu::Init(void) {
 
-    TreArchive *gameFlow = Assets.tres[AssetManager::TRE_GAMEFLOW];
-    TreEntry *entry = gameFlow->GetEntryByName(MAINMENU_PAK_PATH);
+    TreEntry *entry = Assets.GetEntryByName(MAINMENU_PAK_PATH);
     mainMenupak.InitFromRAM("MAINMENU.PAK", entry->data, entry->size);
     
     LoadPalette();
