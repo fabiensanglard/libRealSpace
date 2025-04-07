@@ -239,5 +239,6 @@ private:
     void parseREAL_APPR_POLY_TRIS_TXMS(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_TXMS_INFO(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size);
 };

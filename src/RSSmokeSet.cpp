@@ -38,7 +38,7 @@ void RSSmokeSet::parseSMOK_TYPE_SHAP_SHAP(uint8_t* data, size_t size){
     PakArchive pak;
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
-    pak.InitFromRAM("SHAPE", data2, size-1);
+    pak.InitFromRAM("SHAPE", data2, size);
     img_set->InitFromSubPakEntry(&pak);
     this->images.push_back(img_set);
 }

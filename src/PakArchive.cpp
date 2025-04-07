@@ -105,6 +105,14 @@ bool PakArchive::InitFromFile(const char* filepath){
 
 void PakArchive::InitFromRAM(const char* name,uint8_t* data, size_t size){
     
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lz;
+        size_t csize = 0;
+        uint8_t *uncompressed_data = lz.DecodeLZW(data+2, size-2, csize);
+        data = uncompressed_data;
+        size = csize;        
+    }
+
     strcpy(this->path,name);
     
     this->data = data;
@@ -201,7 +209,6 @@ void PakArchive::List(FILE* output){
     fprintf(output,"Listing content of PAK archives '%s'\n",this->path);
     for(size_t i =0; i < GetNumEntries() ; i++){
         PakEntry* entry = entries[i];
-       
         if (entry->size != 0)
             fprintf(output,"    Entry [%3zu] offset[0x%8llX] size: %7llu bytes, type: %X.\n",i,entry->data-this->data, entry->size,entry->type);
         else

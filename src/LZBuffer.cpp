@@ -90,8 +90,7 @@ uint8_t* LZBuffer::DecodeLZW(const uint8_t* compData, size_t compSize, size_t &u
 
     // Lire le premier code (il doit être inférieur à 256).
     int code = getNextCodeLE(compData, compSize, bitPos, currentWidth);
-    if (code < 0 || code == STOP_CODE)
-        return nullptr;  // Erreur ou rien à décoder.
+    
     if (code == CLEAR_CODE) {
         // Réinitialiser le dictionnaire.
         dictionary.resize(258);
@@ -102,32 +101,29 @@ uint8_t* LZBuffer::DecodeLZW(const uint8_t* compData, size_t compSize, size_t &u
         if (code < 0 || code == STOP_CODE)
             return nullptr;  // Erreur ou rien à décoder.
     }
+    while (code > 256 && code >0) {
+        code = getNextCodeLE(compData, compSize, bitPos, currentWidth);
+    }
+    if (code < 0 || code == STOP_CODE)
+        return nullptr;  // Erreur ou rien à décoder.
     prevEntry = dictionary[code];
     output.insert(output.end(), prevEntry.begin(), prevEntry.end());
     
     // Lecture des codes suivants et décodage.
     while (true) {
         code = getNextCodeLE(compData, compSize, bitPos, currentWidth);
-        if (code == STOP_CODE)
+        if (code == STOP_CODE || code < 0)
             break;
         
         // Vérifier si le code demande une réinitialisation du dictionnaire.
         if (code == CLEAR_CODE) {
-            dictionary.clear();
-            dictionary.shrink_to_fit();
-            dictionary.reserve(256+2);
-            for (int i = 0; i < 256; i++) {
-                dictionary.push_back(std::vector<uint8_t>(1, static_cast<uint8_t>(i)));
-            }
-            // Réserver deux emplacements (pour conserver la cohérence avec les codes de contrôle).
-            dictionary.push_back(std::vector<uint8_t>());
-            dictionary.push_back(std::vector<uint8_t>());
+            dictionary.resize(258); // Réinitialiser le dictionnaire.
             nextCode = 258;
             currentWidth = INITIAL_WIDTH;
             
             // Lire le prochain code après la réinitialisation.
             code = getNextCodeLE(compData, compSize, bitPos, currentWidth);
-            if ( code == STOP_CODE)
+            if ( code == STOP_CODE || code < 0)
                 break;
             prevEntry = dictionary[code];
             output.insert(output.end(), prevEntry.begin(), prevEntry.end());
