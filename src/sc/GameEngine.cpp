@@ -38,18 +38,6 @@ void GameEngine::Init() {
         };
         Assets.ReadISOImage("./SC.DAT");
         Assets.Init(cdTreFiles);
-        TreEntry *entryMountain = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
-        PakArchive pak;
-        pak.InitFromRAM("", entryMountain->data, entryMountain->size);
-        PakEntry *ent = pak.GetEntry(OptionShapeID::MOUTAINS_BG);
-        LZBuffer lzbuffer;
-        lzbuffer.Init(ent->data+8, ent->size-8);
-        size_t csize = 0;
-        uint8_t *data = lzbuffer.DecodeLZW(ent->data+4, ent->size-4, csize);
-        FileData *fileData = new FileData();
-        fileData->data = ent->data+4;
-        fileData->size = ent->size-4;
-        Assets.writeFileData("e:/dump/mountains_raw.lzw",fileData);
     }
     
     

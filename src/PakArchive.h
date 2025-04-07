@@ -12,7 +12,7 @@
 
 #include "Base.h"
 #include "ByteStream.h"
-
+#include "LZBuffer.h"
 typedef struct PakEntry{
     
     uint8_t* data;

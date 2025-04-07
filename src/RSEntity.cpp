@@ -618,7 +618,7 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size) {
     size_t csize = 0;
     if (src[0]=='L' && src[1]=='Z'){
         LZBuffer lzbuffer;
-        pic_data = lzbuffer.UncompressLZWTextbook(src+2,size-14,csize);
+        pic_data = lzbuffer.DecodeLZW(src+2,size-14,csize);
     }
     if (pic_data != nullptr && csize>0 && csize == width * height) {
         image->UpdateContent(pic_data);
