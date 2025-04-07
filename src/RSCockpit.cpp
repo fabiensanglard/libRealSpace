@@ -55,17 +55,19 @@ void RSCockpit::parseINFO(uint8_t* data, size_t size) {
     this->INFO = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseARTP(uint8_t* data, size_t size) {
-    
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("ARTP", data2, size);
+    // size in chunk is one byte short, so minus one to be able to parse pak
+    //pak->InitFromRAM("ARTP", data2, size-1);
+    //this->ARTP.InitFromPakArchive(pak);
+    uint32_t tsize = data2[0] + (data2[1] << 8) + (data2[2] << 16) + (data2[3] << 24);
+    pak->InitFromRAM("ARTP", data2, tsize);
     if (pak->GetNumEntries() == 0) {
         this->ARTP.InitFromRam(data2, size);
     } else {
         this->ARTP.InitFromPakArchive(pak);
     }
-    
 }
 void RSCockpit::parseVTMP(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
@@ -76,7 +78,7 @@ void RSCockpit::parseEJEC(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("EJEC", data2, size);
+    pak->InitFromRAM("EJEC", data2, size-1);
     if (pak->GetNumEntries() == 0) {
         this->EJEC.InitFromRam(data2, size);
     } else {
@@ -87,7 +89,7 @@ void RSCockpit::parseGUNF(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("GUNF", data2, size);
+    pak->InitFromRAM("GUNF", data2, size-1);
     if (pak->GetNumEntries() == 0) {
         this->GUNF.InitFromRam(data2, size);
     } else {
@@ -98,7 +100,7 @@ void RSCockpit::parseGHUD(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("GHUD", data2, size);
+    pak->InitFromRAM("GHUD", data2, size-1);
     this->GHUD.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseREAL(uint8_t* data, size_t size) {
@@ -160,11 +162,20 @@ void RSCockpit::parseMONI_SPOT(uint8_t* data, size_t size) {
     this->MONI.SPOT = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseMONI_SHAP(uint8_t* data, size_t size) {
+    int offset = 20;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lz;
+        size_t csize=0;
+        uint8_t *uncompressed_data = lz.DecodeLZW(data+6, size-6, csize);
+        data = uncompressed_data;
+        size = csize;
+        offset = 8;
+    }
 	uint8_t *shape_data;
 	shape_data = (uint8_t*) malloc(size);
 	memcpy(shape_data, data, size);
     // shape 20 byte offset, don't know why
-    this->MONI.SHAP.Init(shape_data+20, 0);
+    this->MONI.SHAP.Init(shape_data+offset, 0);
 }
 void RSCockpit::parseMONI_DAMG(uint8_t* data, size_t size) {
 	uint8_t *data2;

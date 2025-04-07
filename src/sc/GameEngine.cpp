@@ -40,8 +40,6 @@ void GameEngine::Init() {
         Assets.Init(cdTreFiles);
     }
     
-    
-    
     Mixer.Init(&Assets);
     FontManager.Init(&Assets);
 
