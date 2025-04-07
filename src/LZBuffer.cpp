@@ -1,4 +1,12 @@
 #include "LZBuffer.h"
+#include <cstdint>
+#include <vector>
+#include <cstring>
+#include <map>
+#include <string>
+#include "md5.h"
+
+static std::map<std::string, std::pair<uint8_t*, size_t>> lz_buffers;
 
 LZBuffer::LZBuffer() {}
 
@@ -9,44 +17,162 @@ void LZBuffer::Init(uint8_t *data, size_t size) {
     this->size = size;
 }
 
-uint8_t *LZBuffer::GetData(uint32_t uncompressedSize) { 
-    if (!data || size < 4)
-        return nullptr;
+// Helper: read next "width" bits from the stream.
+static int getNextCode(const uint8_t* data, size_t compSize, size_t &bitPos, int width) {
+    if(bitPos + width > compSize * 8)
+        return -1;
+    size_t bytePos = bitPos / 8;
+    int bitOffset = bitPos % 8;
+    
+    // Read next 16 bits (at least) to have enough bits.
+    uint16_t val = 0;
+    if(bytePos < compSize)
+        val |= data[bytePos];
+    if(bytePos + 1 < compSize)
+        val |= data[bytePos+1] << 8;
+    
+    int code = (val >> bitOffset) & ((1 << width) - 1);
+    bitPos += width;
+    return code;
+}
 
-    uint8_t* output = new uint8_t[uncompressedSize];
+// Helper: read next "width" bits from the stream.
+static int getNextCodeLE(const uint8_t* data, size_t compSize, size_t &bitPos, int width) {
+    if(bitPos + width > compSize * 8)
+        return -1;
+    size_t bytePos = bitPos / 8;
+    int bitOffset = bitPos % 8;
     
-    size_t inPos = 6;
-    size_t outPos = 0;
+    // Read next 32 bits (at least) to have enough bits.
+    uint32_t val = 0;
+    if(bytePos < compSize)
+        val |= data[bytePos];
+    if(bytePos + 1 < compSize)
+        val |= data[bytePos+1] << 8;
+    if(bytePos + 2 < compSize)
+        val |= data[bytePos+2] << 16;
+    if(bytePos + 3 < compSize)
+        val |= data[bytePos+3] << 24;
     
-    while (inPos < size && outPos < uncompressedSize) {
-        // Read flag byte: each bit indicates literal (1) or back-reference (0)
-        uint8_t flag = data[inPos++];
-        for (int bit = 0; bit < 8 && outPos < uncompressedSize; bit++) {
-            if (flag & (1 << bit)) {
-                // Literal byte
-                if (inPos >= size)
-                    break;
-                output[outPos++] = data[inPos++];
-            } else {
-                // Back-reference token: 2 bytes containing offset and length info.
-                if (inPos + 1 >= size)
-                    break;
-                uint8_t b1 = data[inPos++];
-                uint8_t b2 = data[inPos++];
-                uint16_t token = (b1 << 8) | b2;
-                // Upper 4 bits: length (stored as value-3), lower 12 bits: offset.
-                uint16_t length = (token >> 12) + 3;
-                uint16_t offset = token & 0x0FFF;
-                for (uint16_t i = 0; i < length && outPos < uncompressedSize; i++) {
-                    // Make sure we don't read before beginning of output.
-                    if (outPos < offset + 1)
-                        break;
-                    output[outPos] = output[outPos - offset - 1];
-                    outPos++;
-                }
+    int code = (val >> bitOffset) & ((1 << width) - 1);
+    bitPos += width;
+    return code;
+}
+
+// Décode un buffer compressé en LZW selon les consignes :
+//   - Mots de 9 bits au départ, passant à 10, 11 puis 12 bits au fur et à mesure que le dictionnaire grossit.
+//   - Le dictionnaire initial comporte 256 entrées (valeurs 8 bits).
+//   - Les nouvelles entrées commencent à 258.
+//   - Le code 257 indique la fin du flux.
+// Décode un buffer compressé en LZW selon les consignes :
+//   - Mots de 9 bits au départ, augmentant à 10, 11 puis 12 bits au fur et à mesure que
+//     le dictionnaire grossit (jusqu'à 4096 entrées maximum).
+//   - Le dictionnaire initial comporte 256 entrées (les valeurs d'un octet).
+//   - Les nouvelles entrées commencent à 258.
+//   - Le code 256 réinitialise le dictionnaire aux 256 premières entrées.
+//   - Le code 257 indique la fin du flux.
+uint8_t* LZBuffer::DecodeLZW(const uint8_t* compData, size_t compSize, size_t &uncompSize) {
+    std::string hash = ComputeMD5(compData, compSize);
+
+    if (lz_buffers.find(hash) != lz_buffers.end()) {
+        uncompSize = lz_buffers[hash].second;
+        return lz_buffers[hash].first;
+    }
+    const int MAX_CODE_WIDTH = 12;
+    const int INITIAL_WIDTH = 9;
+    const int CLEAR_CODE = 256; // Réinitialise le dictionnaire.
+    const int STOP_CODE  = 257; // Fin du flux.
+
+    // Initialiser le dictionnaire avec les 256 valeurs sur 8 bits.
+    std::vector< std::vector<uint8_t> > dictionary;
+    dictionary.reserve(256+2);
+    for (int i = 0; i < 256; i++) {
+        dictionary.push_back(std::vector<uint8_t>(1, static_cast<uint8_t>(i)));
+    }
+    // Réserver deux emplacements (pour conserver la cohérence avec les codes de contrôle).
+    dictionary.push_back(std::vector<uint8_t>());
+    dictionary.push_back(std::vector<uint8_t>());
+
+    int nextCode = 258;  
+    int currentWidth = INITIAL_WIDTH;
+    size_t bitPos = 0;
+    std::vector<uint8_t> output;
+    std::vector<uint8_t> prevEntry;
+
+    // Lire le premier code (il doit être inférieur à 256).
+    int code = getNextCodeLE(compData, compSize, bitPos, currentWidth);
+    
+    if (code == CLEAR_CODE) {
+        // Réinitialiser le dictionnaire.
+        dictionary.resize(258);
+        nextCode = 258;
+        currentWidth = INITIAL_WIDTH;
+        // Après la réinitialisation, lire le prochain code.
+        code = getNextCodeLE(compData, compSize, bitPos, currentWidth);
+        if (code < 0 || code == STOP_CODE)
+            return nullptr;  // Erreur ou rien à décoder.
+    }
+    if (code < 0 || code == STOP_CODE)
+        return nullptr;  // Erreur ou rien à décoder.
+    prevEntry = dictionary[code];
+    output.insert(output.end(), prevEntry.begin(), prevEntry.end());
+    
+    // Lecture des codes suivants et décodage.
+    while (true) {
+        code = getNextCodeLE(compData, compSize, bitPos, currentWidth);
+        if (code == STOP_CODE || code < 0)
+            break;
+        
+        // Vérifier si le code demande une réinitialisation du dictionnaire.
+        if (code == CLEAR_CODE) {
+            dictionary.resize(258); // Réinitialiser le dictionnaire.
+            nextCode = 258;
+            currentWidth = INITIAL_WIDTH;
+            
+            // Lire le prochain code après la réinitialisation.
+            code = getNextCodeLE(compData, compSize, bitPos, currentWidth);
+            if ( code == STOP_CODE || code < 0)
+                break;
+            prevEntry = dictionary[code];
+            output.insert(output.end(), prevEntry.begin(), prevEntry.end());
+            continue;
+        }
+        
+        std::vector<uint8_t> currEntry;
+        if (code < static_cast<int>(dictionary.size())) {
+            currEntry = dictionary[code];
+        } else if (code == nextCode) {
+            // Cas particulier : le code n'est pas encore dans le dictionnaire.
+            currEntry = prevEntry;
+            currEntry.push_back(prevEntry[0]);
+        } else {
+            continue; // Code non valide.
+        }
+        
+        output.insert(output.end(), currEntry.begin(), currEntry.end());
+        
+        // Ajouter une nouvelle entrée au dictionnaire, si possible.
+        if (!prevEntry.empty() && nextCode < 4096) {
+            std::vector<uint8_t> newEntry = prevEntry;
+            newEntry.push_back(currEntry[0]);
+            dictionary.push_back(newEntry);
+            nextCode++;
+            
+            // Augmenter la largeur de lecture dès que le dictionnaire atteint une taille correspondante.
+            if (nextCode == (1 << currentWidth) && currentWidth < MAX_CODE_WIDTH) {
+                currentWidth++;
             }
+        }
+        prevEntry = currEntry;
+        if (output.size() == 0x595) {
+            printf("LZBuffer::DecodeLZW: output size is 0x594\n");
         }
     }
     
-    return output;
+    uncompSize = output.size();
+    uint8_t* result = new uint8_t[uncompSize];
+    memcpy(result, output.data(), uncompSize);
+    std::pair<uint8_t*, size_t> pair = std::make_pair(result, uncompSize);
+    lz_buffers[hash] = pair;
+    return result;
 }

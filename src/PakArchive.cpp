@@ -38,38 +38,16 @@ void PakArchive::Parse(void){
     
     size_t numEntries = (offset-4)/4;
     
-    //Hashmap to keep track of duplicates
-    std::map<uint32_t,void*> uniqueOffsets;
-    
-    
     //First to read all the offsets
     for(int i =0 ; i < numEntries ; i ++){
-        
-        
         offset = stream.ReadUInt32LE();
-        
-        
         PakEntry* entry = new PakEntry();
-
         entry->type = (offset & 0xFF000000) >> 24;
-        
         offset &= 0x00FFFFFF ; //Remove the leading 0xE0 or 0xFF
-        
-        
-        
         entry->data = this->data + offset;
-        
-        //if (uniqueOffsets[offset] == NULL){
-            entries.push_back(entry);
-            uniqueOffsets[offset] = entry;
-        //}
-        
+        entries.push_back(entry);
     }
-    
-   
-    //numEntries = uniqueOffsets.size();
-    
-    
+
     //Second pass to calculate the sizes.
     int i =0;
     for( ; i < numEntries-1 ; i ++){
@@ -79,8 +57,17 @@ void PakArchive::Parse(void){
     
     PakEntry* entry = entries[i];
     entry->size = (this->data + this->size) - entries[i]->data;
+
+    for (auto entry: this->entries) {
+        if (entry->type == 32) {
+            LZBuffer lzbuffer;
+            size_t csize = 0;
+            uint8_t *dt = lzbuffer.DecodeLZW(entry->data+4, entry->size-4, csize);
+            entry->data = dt;
+            entry->size = csize;
+        }
+    }   
     
-    //std::sort(entries.begin(), entries.end(),PakEntry::Compare);
 }
 
 bool PakArchive::InitFromFile(const char* filepath){
@@ -118,6 +105,14 @@ bool PakArchive::InitFromFile(const char* filepath){
 
 void PakArchive::InitFromRAM(const char* name,uint8_t* data, size_t size){
     
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lz;
+        size_t csize = 0;
+        uint8_t *uncompressed_data = lz.DecodeLZW(data+6, size-6, csize);
+        data = uncompressed_data;
+        size = csize;        
+    }
+
     strcpy(this->path,name);
     
     this->data = data;
@@ -214,7 +209,6 @@ void PakArchive::List(FILE* output){
     fprintf(output,"Listing content of PAK archives '%s'\n",this->path);
     for(size_t i =0; i < GetNumEntries() ; i++){
         PakEntry* entry = entries[i];
-       
         if (entry->size != 0)
             fprintf(output,"    Entry [%3zu] offset[0x%8llX] size: %7llu bytes, type: %X.\n",i,entry->data-this->data, entry->size,entry->type);
         else

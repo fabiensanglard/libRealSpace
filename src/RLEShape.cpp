@@ -39,13 +39,9 @@ void RLEShape::ReadFragment(RLEFragment *frag) {
     }
 }
 void RLEShape::InitFromPakEntry(PakEntry *entry) {
-    if (entry->type == 224) {
-        PakArchive arc;
-        arc.InitFromRAM("id", entry->data, entry->size);
-        this->Init(arc.GetEntry(0)->data, arc.GetEntry(0)->size);
-    } else {
-        this->Init(entry->data, entry->size);
-    }
+    PakArchive arc;
+    arc.InitFromRAM("id", entry->data, entry->size);
+    this->Init(arc.GetEntry(0)->data, arc.GetEntry(0)->size);
 }
 bool RLEShape::ExpandFragment(RLEFragment *frag, uint8_t *dst) {
 
@@ -152,22 +148,23 @@ bool RLEShape::ExpandFragmentWithBox(RLEFragment *frag, uint8_t *dst, int bx1, i
 }
 
 void RLEShape::Init(uint8_t *idata, size_t isize) {
-    stream.Set(idata);
     this->size = isize;
-    this->data = idata;
+    uint8_t *tmpdata = idata;
+    if (idata[0] == 'L' && idata[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(idata+2, isize-2);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(idata+2, isize-2, csize);
+        this->size = csize;
+    }
+    stream.Set(tmpdata);
+    
 
     this->rightDist = stream.ReadShort();
     this->leftDist = stream.ReadShort();
     this->topDist = stream.ReadShort();
     this->botDist = stream.ReadShort();
-    /*rleCenter= dst->data + abs(leftDist) + abs(topDist) * dst->width;*/
-
-    data = stream.GetPosition();
-    if (data[0] == 'L' && data[1] == 'Z') {
-        LZBuffer lzbuffer;
-        lzbuffer.Init(data, isize-8);
-        idata = lzbuffer.GetData((rightDist-leftDist)*(botDist-topDist));
-    }
+    this->data = stream.GetPosition();
 }
 
 void RLEShape::InitWithPosition(uint8_t *idata, size_t isize, Point2D *position) {

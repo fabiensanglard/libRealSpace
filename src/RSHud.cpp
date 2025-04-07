@@ -91,6 +91,15 @@ void RSHud::parseREAL_CHUD_LARG_ASPD_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_ASPD_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -112,6 +121,15 @@ void RSHud::parseREAL_CHUD_LARG_ALTI_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_ALTI_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -119,6 +137,15 @@ void RSHud::parseREAL_CHUD_LARG_ALTI_SHAP(uint8_t* data, size_t size){
     this->tmp_hud->ALTI->SHAP = shape;
 }
 void RSHud::parseREAL_CHUD_LARG_ALTI_SHP2(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -147,6 +174,15 @@ void RSHud::parseREAL_CHUD_LARG_LADD_VECT_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_LADD_VECT_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -179,6 +215,15 @@ void RSHud::parseREAL_CHUD_LARG_HEAD_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_HEAD_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -186,6 +231,15 @@ void RSHud::parseREAL_CHUD_LARG_HEAD_SHAP(uint8_t* data, size_t size){
     this->tmp_hud->HEAD->SHAP = shape;
 }
 void RSHud::parseREAL_CHUD_LARG_HEAD_SHP2(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -206,6 +260,15 @@ void RSHud::parseREAL_CHUD_LARG_COLL_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_COLL_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -226,6 +289,15 @@ void RSHud::parseREAL_CHUD_LARG_STAL_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_STAL_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -247,6 +319,15 @@ void RSHud::parseREAL_CHUD_LARG_FUEL_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_FUEL_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -267,6 +348,15 @@ void RSHud::parseREAL_CHUD_LARG_LCOS_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_LCOS_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -288,6 +378,15 @@ void RSHud::parseREAL_CHUD_LARG_TARG_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_TARG_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -308,6 +407,15 @@ void RSHud::parseREAL_CHUD_LARG_MISD_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_MISD_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -339,6 +447,15 @@ void RSHud::parseREAL_CHUD_LARG_CROS_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_CROS_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -359,6 +476,15 @@ void RSHud::parseREAL_CHUD_LARG_CCIP_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_CCIP_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -379,6 +505,15 @@ void RSHud::parseREAL_CHUD_LARG_CCRP_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_CCRP_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();
@@ -399,6 +534,15 @@ void RSHud::parseREAL_CHUD_LARG_STRF_INFO(uint8_t* data, size_t size){
     }
 }
 void RSHud::parseREAL_CHUD_LARG_STRF_SHAP(uint8_t* data, size_t size){
+    uint8_t *tmpdata = data;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(data+6, size-6);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(data+6, size-6, csize);
+        data = tmpdata;
+        size = csize;
+    }
     uint8_t* tmp = new uint8_t[size];
     memcpy(tmp, data+8, size-8);
     RLEShape* shape = new RLEShape();

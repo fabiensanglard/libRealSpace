@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <vector>
 #include "RSPalette.h"
-
+#include "LZBuffer.h"
 class RSImageSet {
 
 public:

@@ -11,7 +11,7 @@
 #include "imgui_impl_sdl2.h"
 #include "precomp.h"
 
-#define FLOPPY 1
+#define FLOPPY 0
 
 GameEngine::GameEngine() {}
 
@@ -39,8 +39,6 @@ void GameEngine::Init() {
         Assets.ReadISOImage("./SC.DAT");
         Assets.Init(cdTreFiles);
     }
-    
-    
     
     Mixer.Init(&Assets);
     FontManager.Init(&Assets);

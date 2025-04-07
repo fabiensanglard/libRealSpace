@@ -595,7 +595,7 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS(uint8_t *data, size_t size) {
     handlers["TXMP"] =
         std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMP, this, std::placeholders::_1, std::placeholders::_2);
     handlers["TXMA"] =
-        std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMP, this, std::placeholders::_1, std::placeholders::_2);
+        std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_INFO(uint8_t *data, size_t size) {}
@@ -614,13 +614,44 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size) {
 
     image->Create(name, width, height, 0);
     uint8_t *src = stream.GetPosition();
+    uint8_t *pic_data = nullptr;
+    size_t csize = 0;
     if (src[0]=='L' && src[1]=='Z'){
         LZBuffer lzbuffer;
-        lzbuffer.Init(src,size-16);
-        src = lzbuffer.GetData(width*height);
+        pic_data = lzbuffer.DecodeLZW(src+2,size-14,csize);
+        src = pic_data;
     }
+    
     image->UpdateContent(src);
     AddImage(image);
+}
+void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size) {
+    ByteStream stream(data);
+
+    RSImage *image = new RSImage();
+
+    char name[9];
+
+    for (int i = 0; i < 8; i++)
+        name[i] = stream.ReadByte();
+
+    uint32_t width = stream.ReadShort();
+    uint32_t height = stream.ReadShort();
+    uint16_t unknown = stream.ReadShort();
+    image->Create(name, width, height, 0);
+    uint8_t *src = stream.GetPosition();
+    uint8_t *pic_data = nullptr;
+    size_t csize = 0;
+    if (src[0]=='L' && src[1]=='Z'){
+        LZBuffer lzbuffer;
+        //pic_data = lzbuffer.DecodeLZW(src+2,size-16,csize);
+        //src = pic_data;
+    } else {
+        image->UpdateContent(src);
+        AddImage(image);
+    }
+    
+    
 }
 void RSEntity::parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size) {
     ByteStream stream(data);
