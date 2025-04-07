@@ -2,6 +2,11 @@
 #include <cstdint>
 #include <vector>
 #include <cstring>
+#include <map>
+#include <string>
+#include "md5.h"
+
+static std::map<std::string, std::pair<uint8_t*, size_t>> lz_buffers;
 
 LZBuffer::LZBuffer() {}
 
@@ -67,6 +72,12 @@ static int getNextCodeLE(const uint8_t* data, size_t compSize, size_t &bitPos, i
 //   - Le code 256 réinitialise le dictionnaire aux 256 premières entrées.
 //   - Le code 257 indique la fin du flux.
 uint8_t* LZBuffer::DecodeLZW(const uint8_t* compData, size_t compSize, size_t &uncompSize) {
+    std::string hash = ComputeMD5(compData, compSize);
+
+    if (lz_buffers.find(hash) != lz_buffers.end()) {
+        uncompSize = lz_buffers[hash].second;
+        return lz_buffers[hash].first;
+    }
     const int MAX_CODE_WIDTH = 12;
     const int INITIAL_WIDTH = 9;
     const int CLEAR_CODE = 256; // Réinitialise le dictionnaire.
@@ -161,5 +172,7 @@ uint8_t* LZBuffer::DecodeLZW(const uint8_t* compData, size_t compSize, size_t &u
     uncompSize = output.size();
     uint8_t* result = new uint8_t[uncompSize];
     memcpy(result, output.data(), uncompSize);
+    std::pair<uint8_t*, size_t> pair = std::make_pair(result, uncompSize);
+    lz_buffers[hash] = pair;
     return result;
 }
