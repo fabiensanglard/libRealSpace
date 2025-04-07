@@ -24,7 +24,6 @@ void SCSmokeSet::Init(){
     smoke_set->InitFromRam(smk->data, smk->size);
     this->smoke_set = smoke_set;
     int qsdf = 0;
-    RSImageSet *img_set = this->smoke_set->images[0];
     for (auto img_set: this->smoke_set->images) {
         size_t numimages = img_set->GetNumImages();
         for (size_t i=0; i<numimages; i++) {

@@ -148,22 +148,23 @@ bool RLEShape::ExpandFragmentWithBox(RLEFragment *frag, uint8_t *dst, int bx1, i
 }
 
 void RLEShape::Init(uint8_t *idata, size_t isize) {
-    stream.Set(idata);
     this->size = isize;
+    uint8_t *tmpdata = idata;
+    if (idata[0] == 'L' && idata[1] == 'Z') {
+        LZBuffer lzbuffer;
+        lzbuffer.Init(idata+2, isize-2);
+        size_t csize = 0;
+        tmpdata = lzbuffer.DecodeLZW(idata+2, isize-2, csize);
+        this->size = csize;
+    }
+    stream.Set(tmpdata);
+    
 
     this->rightDist = stream.ReadShort();
     this->leftDist = stream.ReadShort();
     this->topDist = stream.ReadShort();
     this->botDist = stream.ReadShort();
-    /*rleCenter= dst->data + abs(leftDist) + abs(topDist) * dst->width;*/
-
     this->data = stream.GetPosition();
-    if (data[0] == 'L' && data[1] == 'Z') {
-        LZBuffer lzbuffer;
-        lzbuffer.Init(data, isize-8);
-        size_t csize = 0;
-        this->data = lzbuffer.DecodeLZW(data+2, isize-10, csize);
-    }
 }
 
 void RLEShape::InitWithPosition(uint8_t *idata, size_t isize, Point2D *position) {

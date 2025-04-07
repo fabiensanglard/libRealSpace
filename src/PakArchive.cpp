@@ -108,7 +108,7 @@ void PakArchive::InitFromRAM(const char* name,uint8_t* data, size_t size){
     if (data[0] == 'L' && data[1] == 'Z') {
         LZBuffer lz;
         size_t csize = 0;
-        uint8_t *uncompressed_data = lz.DecodeLZW(data+2, size-2, csize);
+        uint8_t *uncompressed_data = lz.DecodeLZW(data+6, size-6, csize);
         data = uncompressed_data;
         size = csize;        
     }

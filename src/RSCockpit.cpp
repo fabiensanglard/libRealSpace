@@ -87,7 +87,7 @@ void RSCockpit::parseGUNF(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("GUNF", data2, size-1);
+    pak->InitFromRAM("GUNF", data2, size);
     if (pak->GetNumEntries() == 0) {
         this->GUNF.InitFromRam(data2, size);
     } else {
@@ -253,7 +253,7 @@ void RSCockpit::parseMONI_MFDS_GCAM_SHAP(uint8_t* data, size_t size) {
 	shape_data = (uint8_t*) malloc(size);
 	memcpy(shape_data, data, size);
     PakArchive* pak = new PakArchive();
-    pak->InitFromRAM("GCAM",shape_data, size-1);
+    pak->InitFromRAM("GCAM",shape_data, size);
     this->MONI.MFDS.GCAM.ARTS.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseMONI_MFDS_WEAP(uint8_t* data, size_t size) {

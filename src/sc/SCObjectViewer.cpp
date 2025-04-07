@@ -72,15 +72,6 @@ void SCObjectViewer::ParseObjList(IffLexer *lexer) {
         // showCase.cameraDist = 200000;
         showCases.push_back(showCase);
     }
-
-    char *smoke = "..\\..\\DATA\\OBJECTS\\SMOKEGEN.IFF";
-    TreEntry *smoke_entry = Assets.GetEntryByName(smoke);
-    RSShowCase smokeShowCase;
-    smokeShowCase.entity = new RSEntity(&Assets);
-    smokeShowCase.entity->InitFromRAM(smoke_entry->data, smoke_entry->size);
-    smokeShowCase.cameraDist=10;
-    showCases.push_back(smokeShowCase);
-
 }
 
 void SCObjectViewer::OnExit(void) { Game.StopTopActivity(); }

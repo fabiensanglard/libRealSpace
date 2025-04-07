@@ -101,9 +101,6 @@ uint8_t* LZBuffer::DecodeLZW(const uint8_t* compData, size_t compSize, size_t &u
         if (code < 0 || code == STOP_CODE)
             return nullptr;  // Erreur ou rien à décoder.
     }
-    while (code > 256 && code >0) {
-        code = getNextCodeLE(compData, compSize, bitPos, currentWidth);
-    }
     if (code < 0 || code == STOP_CODE)
         return nullptr;  // Erreur ou rien à décoder.
     prevEntry = dictionary[code];
