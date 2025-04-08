@@ -118,6 +118,48 @@ void SCConvPlayer::selectWingMan(void *none, uint8_t id) {
     }
     
 }
+bool isNextFrameIsConv(uint8_t type) {
+    switch (type) {
+        case GROUP_SHOT:
+        case GROUP_SHOT_ADD_CHARCTER:
+        case GROUP_SHOT_CHARCTR_TALK:
+        case CLOSEUP:
+        case CLOSEUP_CONTINUATION:
+        case SHOW_TEXT:
+        case YESNOCHOICE_BRANCH1:
+        case YESNOCHOICE_BRANCH2:
+        case CHOOSE_WINGMAN:
+            return true;
+        default:
+            return false;
+    }
+    return false;
+}
+int SCConvPlayer::SetSentenceFromConv(ByteStream *conv, int start_offset) {
+    char *sentence = (char *)conv->GetPosition() + start_offset;
+    int sound_offset = 0;
+    char *sentence_end = (char *)conv->GetPosition() + start_offset + strlen((char *)sentence) + 1;
+    if (!isNextFrameIsConv((uint8_t) sentence_end[0])) {
+        sound_offset = strlen((char *)sentence) + 1;
+        currentFrame.sound_file_name = new std::string(sentence);
+        sentence = sentence_end;
+    }
+    std::string *text = new std::string(sentence);
+    if (text->find("$N") != std::string::npos) {
+        text->replace(text->find("$N"), 2, GameState.player_firstname);
+    }
+    if (text->find("$S") != std::string::npos) {
+        text->replace(text->find("$S"), 2, GameState.player_name);
+    }
+    if (text->find("$C") != std::string::npos) {
+        text->replace(text->find("$C"), 2, GameState.player_callsign);
+    }
+    if (text->find("$W") != std::string::npos) {
+        text->replace(text->find("$W"), 2, GameState.wingman);
+    }
+    currentFrame.text         = (char *)text->c_str();
+    return sound_offset + start_offset + strlen((char *)sentence) + 1;
+}
 /**
  * @brief Read the next frame of the conversation from the data stream.
  *
@@ -174,33 +216,19 @@ void SCConvPlayer::ReadNextFrame(void) {
         currentFrame.face_expression = (uint8_t)*(conv.GetPosition() + 0x09);
         char *setName                = (char *)conv.GetPosition() + 0xA;
 
-        char *sentence = (char *)conv.GetPosition() + 0x17;
-
-        std::string *text = new std::string(sentence);
-        if (text->find("$N") != std::string::npos) {
-            text->replace(text->find("$N"), 2, GameState.player_firstname);
-        }
-        if (text->find("$S") != std::string::npos) {
-            text->replace(text->find("$S"), 2, GameState.player_name);
-        }
-        if (text->find("$C") != std::string::npos) {
-            text->replace(text->find("$C"), 2, GameState.player_callsign);
-        }
-        if (text->find("$W") != std::string::npos) {
-            text->replace(text->find("$W"), 2, GameState.wingman);
-        }
+        int next_frame_offset = SetSentenceFromConv(&conv,0x17);
         currentFrame.participants.clear();
         currentFrame.participants.shrink_to_fit();
         uint8_t pos               = *(conv.GetPosition() + 0x13);
         currentFrame.facePosition = static_cast<ConvFrame::FacePos>(pos);
-        currentFrame.text         = (char *)text->c_str();
+        
         currentFrame.mode         = ConvFrame::CONV_CLOSEUP;
         currentFrame.face         = ConvAssets.GetCharFace(speakerName);
         ConvBackGround *bg        = ConvAssets.GetBackGround(setName);
         currentFrame.bgLayers     = &bg->layers;
         currentFrame.bgPalettes   = &bg->palettes;
 
-        conv.MoveForward(0x17 + strlen((char *)sentence) + 1);
+        conv.MoveForward(next_frame_offset);
         uint8_t color              = conv.ReadByte(); // Color ?
         currentFrame.textColor     = color;
         const char *pszExt         = "normal";
@@ -208,32 +236,16 @@ void SCConvPlayer::ReadNextFrame(void) {
 
         printf(
             "ConvID: %d CLOSEUP: WHO: '%8s' WHERE: '%8s'     WHAT: '%s' (%2X) pos %2X  face expression: '%d'\n",
-            this->conversationID, speakerName, setName, sentence, color, pos, currentFrame.face_expression
+            this->conversationID, speakerName, setName, currentFrame.text, color, pos, currentFrame.face_expression
         );
         break;
     }
     case CLOSEUP_CONTINUATION: // Same person keep talking
     {
-        char *sentence = (char *)conv.GetPosition();
-
-        std::string *text = new std::string(sentence);
-        if (text->find("$N") != std::string::npos) {
-            text->replace(text->find("$N"), 2, GameState.player_firstname);
-        }
-        if (text->find("$S") != std::string::npos) {
-            text->replace(text->find("$S"), 2, GameState.player_name);
-        }
-        if (text->find("$C") != std::string::npos) {
-            text->replace(text->find("$C"), 2, GameState.player_callsign);
-        }
-        if (text->find("$W") != std::string::npos) {
-            text->replace(text->find("$W"), 2, GameState.wingman);
-        }
-        currentFrame.text = (char *)text->c_str();
-
-        conv.MoveForward(strlen((char *)sentence) + 1);
+        int next_frame_offset = SetSentenceFromConv(&conv,0);
+        conv.MoveForward(next_frame_offset);
         printf(
-            "ConvID: %d MORETEX:                                       WHAT: '%s'\n", this->conversationID, sentence
+            "ConvID: %d MORETEX:                                       WHAT: '%s'\n", this->conversationID, currentFrame.text
         );
         break;
     }
@@ -316,51 +328,23 @@ void SCConvPlayer::ReadNextFrame(void) {
     {
 
         char *who = (char *)conv.GetPosition();
-        conv.MoveForward(0xE);
-        char *sentence    = (char *)conv.GetPosition();
-        std::string *text = new std::string(sentence);
-        if (text->find("$N") != std::string::npos) {
-            text->replace(text->find("$N"), 2, GameState.player_firstname);
-        }
-        if (text->find("$S") != std::string::npos) {
-            text->replace(text->find("$S"), 2, GameState.player_name);
-        }
-        if (text->find("$C") != std::string::npos) {
-            text->replace(text->find("$C"), 2, GameState.player_callsign);
-        }
-        if (text->find("$W") != std::string::npos) {
-            text->replace(text->find("$W"), 2, GameState.wingman);
-        }
-        currentFrame.text = (char *)text->c_str();
-        conv.MoveForward(strlen(sentence) + 1);
-        printf("ConvID: %d WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n", this->conversationID, who, sentence);
+        int next_frame_offset = SetSentenceFromConv(&conv, 0xE);
+        conv.MoveForward(next_frame_offset);
+        printf("ConvID: %d WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n", this->conversationID, who, currentFrame.text);
         CharFigure *participant = ConvAssets.GetFigure(who);
         currentFrame.participants.push_back(participant);
         break;
     }
     case SHOW_TEXT: // Show text
     {
-        int8_t color      = conv.ReadByte();
-        char *sentence    = (char *)conv.GetPosition();
-        std::string *text = new std::string(sentence);
-        if (text->find("$N") != std::string::npos) {
-            text->replace(text->find("$N"), 2, GameState.player_firstname);
-        }
-        if (text->find("$S") != std::string::npos) {
-            text->replace(text->find("$S"), 2, GameState.player_name);
-        }
-        if (text->find("$C") != std::string::npos) {
-            text->replace(text->find("$C"), 2, GameState.player_callsign);
-        }
-        if (text->find("$W") != std::string::npos) {
-            text->replace(text->find("$W"), 2, GameState.wingman);
-        }
         currentFrame.mode = ConvFrame::CONV_SHOW_TEXT;
-        currentFrame.text = (char *)text->c_str();
+        int8_t color      = conv.ReadByte();
+        int next_frame_offset = SetSentenceFromConv(&conv, 0);
+        
         currentFrame.textColor = color;
-        printf("ConvID: %d Show Text: '%s' \n", this->conversationID, sentence);
-        conv.MoveForward(strlen(sentence) + 1);
-
+        printf("ConvID: %d Show Text: '%s' \n", this->conversationID, currentFrame.text);
+        conv.MoveForward(next_frame_offset);
+        conv.PeekByte();
         break;
     }
     case 0xE: {

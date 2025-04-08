@@ -24,7 +24,7 @@ public:
     uint8_t face_expression;
     // If we are in a wide of chose wingman mode
     std::vector<CharFigure *> participants;
-
+    std::string *sound_file_name{nullptr};
     // If we are in close up mode
     CharFace *face{nullptr};
     int8_t facePaletteID;
@@ -54,6 +54,7 @@ private:
     PakArchive convPals;
     ConvFrame currentFrame;
 
+    int SetSentenceFromConv(ByteStream *conv, int start_offset);
     void CheckFrameExpired(void);
     void ReadNextFrame(void);
     void SetArchive(PakEntry *conv);
