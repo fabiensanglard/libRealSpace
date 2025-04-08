@@ -176,9 +176,10 @@ void SCConvPlayer::ReadNextFrame(void) {
         return;
     }
 
-    currentFrame.creationTime  = SDL_GetTicks();
-    currentFrame.text          = nullptr;
-    currentFrame.facePaletteID = 0;
+    currentFrame.creationTime       = SDL_GetTicks();
+    currentFrame.text               = nullptr;
+    currentFrame.sound_file_name    = nullptr;
+    currentFrame.facePaletteID      = 0;
     // currentFrame.face = nullptr;
 
     uint8_t type = conv.ReadByte();
@@ -661,6 +662,14 @@ void SCConvPlayer::RunFrame(void) {
         RLEShape *shape = (*currentFrame.bgLayers)[i];
         VGA.GetFrameBuffer()->DrawShape(shape);
     }
+    if (currentFrame.sound_file_name != NULL) {
+        std::string filename = "F:"+*currentFrame.sound_file_name+".VOC";
+        std::transform(filename.begin(), filename.end(), filename.begin(), ::toupper);
+        TreEntry *sound_entry = Assets.GetEntryByName(filename.c_str());
+        if (sound_entry != nullptr) {
+            Mixer.PlaySoundVoc(sound_entry->data, sound_entry->size);
+        }
+    }
 
     switch (currentFrame.mode) {
         case ConvFrame::CONV_SHOW_TEXT:
@@ -846,7 +855,9 @@ void SCConvPlayer::RunFrame(void) {
         }   
         break;
     }
-
+    if (currentFrame.sound_file_name != nullptr && Mixer.IsSoundPlaying() == false) {
+        currentFrame.SetExpired(true);
+    }
     DrawText();
     
     VGA.VSync();

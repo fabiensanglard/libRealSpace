@@ -34,7 +34,8 @@ void GameEngine::Init() {
     } else {
         std::vector<std::string> cdTreFiles = {
             "BIGTRE.TRE",
-            "LILTRE.TRE"
+            "LILTRE.TRE",
+            "VOCLIST.TRE"
         };
         Assets.ReadISOImage("./SC.DAT");
         Assets.Init(cdTreFiles);

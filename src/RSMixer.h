@@ -14,6 +14,8 @@ class RSMixer {
     int initted;
     bool isplaying;
     uint32_t current_music{UINT32_MAX};
+    int channel{0};
+    uint8_t *voc_data{nullptr};
 public:
     RSMixer();
     ~RSMixer();
@@ -22,6 +24,8 @@ public:
     void SwitchBank(uint8_t bank);
     void StopMusic();
     uint32_t GetMusicID() { return this->current_music; };
+    void StopSound();
     void PlaySoundVoc(uint8_t *data, size_t vocSize);
+    bool IsSoundPlaying();
     RSMusic *music;
 };

@@ -71,7 +71,7 @@ void AssetManager::Init(std::vector<std::string> nameIds){
                 std::string *name = new std::string(treEntry->name);
                 if (treEntries.find(*name) != treEntries.end()) {
                     printf("Duplicate entry '%s' in TRE '%s'.\n",name->c_str(),nameId.c_str());
-                    exit(-1);
+                    //exit(-1);
                 }
                 auto res = treEntries.insert(std::pair<std::string,TreEntry*>(*name,treEntry));
                 if (!res.second) {
