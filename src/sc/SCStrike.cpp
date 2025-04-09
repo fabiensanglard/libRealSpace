@@ -1056,7 +1056,7 @@ void SCStrike::RenderMenu() {
                             360 - (ai_actor->plane->azimuthf / 10.0f));
                 ImGui::SameLine();
                 if (ai_actor->pilot != nullptr) {
-                    ImGui::Text("target heading %.0f", ai_actor->pilot->target_azimut);
+                    ImGui::Text("{TH %.0f TA %d}", ai_actor->pilot->target_azimut, ai_actor->pilot->target_climb);
                     ImGui::SameLine();
                     ImGui::Text("AI OBJ %d", ai_actor->current_objective);
                     ImGui::SameLine();
@@ -1064,6 +1064,8 @@ void SCStrike::RenderMenu() {
                 }
                 ImGui::SameLine();
                 ImGui::Text("X %.0f Y %.0f Z %.0f", ai_actor->plane->x, ai_actor->plane->y, ai_actor->plane->z);
+                ImGui::SameLine();
+                ImGui::Text("CX:[%d] CY:[%d]",ai_actor->plane->control_stick_x,ai_actor->plane->control_stick_y);
             }
         }
         ImGui::End();
