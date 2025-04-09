@@ -94,8 +94,6 @@ CharFigure *ConvAssetManager::GetFigure(char *name) {
         this->figures[name] = npc;
         return npc;
     }
-
-
 }
 
 /**

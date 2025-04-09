@@ -139,7 +139,7 @@ int SCConvPlayer::SetSentenceFromConv(ByteStream *conv, int start_offset) {
     char *sentence = (char *)conv->GetPosition() + start_offset;
     int sound_offset = 0;
     char *sentence_end = (char *)conv->GetPosition() + start_offset + strlen((char *)sentence) + 1;
-    if (!isNextFrameIsConv((uint8_t) sentence_end[0])) {
+    if (!isNextFrameIsConv((uint8_t) sentence_end[1])) {
         sound_offset = strlen((char *)sentence) + 1;
         currentFrame.sound_file_name = new std::string(sentence);
         sentence = sentence_end;
@@ -765,7 +765,6 @@ void SCConvPlayer::RunFrame(void) {
         break;
         case ConvFrame::CONV_WIDE:
         {
-            
             for (size_t i = 0; i < currentFrame.participants.size(); i++) {
                 CharFigure *participant = currentFrame.participants[i];
                 
