@@ -123,6 +123,7 @@ void SCRegister::CheckKeyboard(void){
                 break;
         }
     }
+    this->current_entry->shrink_to_fit();
 }
 
 void SCRegister::Init( ){

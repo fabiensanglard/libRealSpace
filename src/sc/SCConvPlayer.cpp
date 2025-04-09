@@ -171,6 +171,9 @@ int SCConvPlayer::SetSentenceFromConv(ByteStream *conv, int start_offset) {
  */
 void SCConvPlayer::ReadNextFrame(void) {
 
+    if (Mixer.IsSoundPlaying()) {
+        Mixer.StopSound();
+    }
     if (conv.GetPosition() == end) {
         Stop();
         return;
@@ -499,6 +502,9 @@ void SCConvPlayer::CheckFrameExpired(void) {
 
     
         int32_t currentTime = SDL_GetTicks();
+        if (currentFrame.text == nullptr || strlen(currentFrame.text) == 0) {
+            this->currentFrame.SetExpired(true);
+        }
         if (currentTime - currentFrame.creationTime > 5000)
             this->currentFrame.SetExpired(true);
     }
