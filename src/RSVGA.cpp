@@ -29,7 +29,7 @@ void RSVGA::SwithBuffers() {
         this->frameBuffer = this->frameBufferA;
     }
 }
-void RSVGA::Init(int width, int height, AssetManager *amana) {
+void RSVGA::init(int width, int height, AssetManager *amana) {
     this->width = width;
     this->height = height;
     this->assets = amana;

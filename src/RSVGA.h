@@ -29,7 +29,7 @@ public:
     ~RSVGA();
     
     
-    void Init(int width, int height, AssetManager* amana);
+    void init(int width, int height, AssetManager* amana);
     
     void Activate(void);
     void SetPalette(VGAPalette* newPalette);

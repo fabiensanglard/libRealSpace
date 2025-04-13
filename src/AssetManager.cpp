@@ -35,7 +35,7 @@ void AssetManager::SetBase(const char* newBase){
     this->basePath = new std::string(newBase);
 }
 
-void AssetManager::Init(void){
+void AssetManager::init(void){
     
     //Load all TRE in RAM and store them.
     for (size_t i =0 ; i < NUM_TRES; i++) {
@@ -53,7 +53,7 @@ void AssetManager::Init(void){
         }
     }
 }
-void AssetManager::Init(std::vector<std::string> nameIds){
+void AssetManager::init(std::vector<std::string> nameIds){
     
     //Load all TRE in RAM and store them.
     for (auto nameId : nameIds) {

@@ -42,7 +42,7 @@ Point2D rotate(Point2D point, float angle) {
 SCCockpit::SCCockpit() {}
 SCCockpit::~SCCockpit() {}
 /**
- * SCCockpit::Init
+ * SCCockpit::init
  *
  * Initialize the cockpit object from the standard SC cockpit assets.
  *
@@ -53,7 +53,7 @@ SCCockpit::~SCCockpit() {}
  * It also initializes the cockpit object from the F16 cockpit IFF file
  * and assigns the result to the SCCockpit::cockpit member variable.
  */
-void SCCockpit::Init() {
+void SCCockpit::init() {
     IffLexer lexer;
     FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");
     lexer.InitFromRAM(paletteFile->data, paletteFile->size);

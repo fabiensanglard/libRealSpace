@@ -22,7 +22,7 @@ SCShot::~SCShot() {}
  *
  * @return None
  */
-void SCShot::CheckKeyboard(void) {
+void SCShot::checkKeyboard(void) {
     SDL_Event mouseEvents[5];
     int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
     for (int i = 0; i < numMouseEvents; i++) {
@@ -59,7 +59,7 @@ void SCShot::CheckKeyboard(void) {
  *
  * @throws None
  */
-void SCShot::Init() {
+void SCShot::init() {
 
     TreEntry *optionIFF =
         Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
@@ -124,8 +124,8 @@ RSImageSet *SCShot::getShape(uint8_t shpid) {
  *
  * @throws None
  */
-void SCShot::RunFrame(void) {
-    CheckKeyboard();
+void SCShot::runFrame(void) {
+    checkKeyboard();
     VGA.Activate();
     VGA.GetFrameBuffer()->FillWithColor(0);
     ByteStream paletteReader;
@@ -172,10 +172,10 @@ void SCShot::RunFrame(void) {
     }
 }
 
-void EndMissionScene::Init() {
+void EndMissionScene::init() {
     // opt shp id 143
     // opt shp id 141
-    SCShot::Init();
+    SCShot::init();
     this->layers.clear();
     shotBackground *tmpbg = new shotBackground();
     tmpbg->img = this->getShape(143);
@@ -186,8 +186,8 @@ void EndMissionScene::Init() {
     this->rawPalette = this->optPals.GetEntry(20)->data;
 }
 
-void EndMissionScene::RunFrame() {
-    CheckKeyboard();
+void EndMissionScene::runFrame() {
+    checkKeyboard();
     int fpsupdate = 0;
     fpsupdate = (SDL_GetTicks() / 10) - this->fps > 12;
     if (fpsupdate) {
@@ -211,7 +211,7 @@ void EndMissionScene::RunFrame() {
     VGA.VSync();
 }
 
-void EndMissionScene::CheckKeyboard(void) {
+void EndMissionScene::checkKeyboard(void) {
     SDL_Event mouseEvents[5];
     int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
     for (int i = 0; i < numMouseEvents; i++) {
@@ -245,8 +245,8 @@ void EndMissionScene::CheckKeyboard(void) {
         }
     }
 }
-void MapShot::Init() {
-    SCShot::Init();
+void MapShot::init() {
+    SCShot::init();
     x_max = 960;
     y_max = 600;
     this->frameBuffer = new FrameBuffer(x_max, y_max);
@@ -291,8 +291,8 @@ void MapShot::SetPoints(std::vector<MAP_POINT *> *points) {
     current_y = (float) (*this->points)[point_counter]->y;
 }
 
-void MapShot::RunFrame(void) {
-    CheckKeyboard();
+void MapShot::runFrame(void) {
+    checkKeyboard();
     ByteStream paletteReader;
     paletteReader.Set((this->rawPalette));
     this->palette.ReadPatch(&paletteReader);
@@ -355,7 +355,7 @@ void MapShot::RunFrame(void) {
         Game.StopTopActivity();
     }
 }
-void MapShot::CheckKeyboard(void) {
+void MapShot::checkKeyboard(void) {
     SDL_Event mouseEvents[5];
     int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
     for (int i = 0; i < numMouseEvents; i++) {

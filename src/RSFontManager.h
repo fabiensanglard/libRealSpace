@@ -19,7 +19,7 @@ public:
     RSFontManager();
     ~RSFontManager();
     
-    void Init(AssetManager* amana);
+    void init(AssetManager* amana);
     RSFont* GetFont(const char* name);
     
 protected:

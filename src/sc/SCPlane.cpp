@@ -171,7 +171,7 @@ SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELE
     this->y = y;
     this->z = z;
     this->ro2 = .5f * ro[0];
-    Init();
+    init();
 }
 SCPlane::~SCPlane() {
     for (auto smoke: this->smoke_set->textures) {
@@ -182,7 +182,7 @@ SCPlane::~SCPlane() {
 /**
  * Initializes the SCPlane object by setting the default values for all its properties.
  */
-void SCPlane::Init() {
+void SCPlane::init() {
 
     this->twist = 0;
 
@@ -243,7 +243,7 @@ void SCPlane::Init() {
     this->ptw.Clear();
     this->incremental.Clear();
     this->smoke_set = new SCSmokeSet();
-    this->smoke_set->Init();
+    this->smoke_set->init();
 }
 /**
  * Simulate the plane's motion.

@@ -23,8 +23,8 @@ public:
     SCMainMenu();
     ~SCMainMenu();
     
-    virtual void Init(void);
-    virtual void RunFrame(void);
+    virtual void init(void);
+    virtual void runFrame(void);
     virtual void Focus(void);
     virtual void UnFocus(void);
     

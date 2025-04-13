@@ -15,11 +15,11 @@ public:
     SCRegister();
     ~SCRegister();
     
-    void CheckKeyboard(void);
+    void checkKeyboard(void);
     
-    void Init( );
+    void init( );
     
-    void RunFrame(void);
+    void runFrame(void);
     
 private:
     RLEShape book;

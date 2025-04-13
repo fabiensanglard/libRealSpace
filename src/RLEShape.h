@@ -51,7 +51,7 @@ public:
     RLEShape();
     ~RLEShape();
 
-    void Init(uint8_t *data, size_t size);
+    void init(uint8_t *data, size_t size);
     void InitWithPosition(uint8_t *data, size_t size, Point2D *position);
     void InitFromPakEntry(PakEntry *entry);
     bool Expand(uint8_t *dst, size_t *byteRead);

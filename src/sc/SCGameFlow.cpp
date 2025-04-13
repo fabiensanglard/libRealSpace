@@ -113,8 +113,8 @@ void SCGameFlow::flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id) {
         break;
     default:
         SCStrike *fly = new SCStrike();
-        fly->Init();
-        fly->SetMission(this->missionToFly);
+        fly->init();
+        fly->setMission(this->missionToFly);
         this->missionToFly = nullptr;
         fly_mission.push(fly);
         this->next_miss = GameState.mission_id;
@@ -209,14 +209,14 @@ void SCGameFlow::runEffect() {
         case EFFCT_OPT_SHOW_MAP: {
             printf("PLAYING MAP %d\n", instruction->value);
             MapShot *map = new MapShot();
-            map->Init();
+            map->init();
             map->SetPoints(&this->gameFlowParser.game.wrld[instruction->value]->data->points);
             this->cutsenes.push(map);
         } break;
         case EFECT_OPT_CONV: {
             printf("PLAYING CONV %d\n", instruction->value);
             SCConvPlayer *conv = new SCConvPlayer();
-            conv->Init();
+            conv->init();
             conv->SetID(instruction->value);
             this->convs.push(conv);
         } break;
@@ -260,7 +260,7 @@ void SCGameFlow::runEffect() {
         case EFECT_OPT_SHOT: {
             printf("PLAYING SHOT %d\n", instruction->value);
             SCShot *sht = new SCShot();
-            sht->Init();
+            sht->init();
             sht->SetShotId(instruction->value);
             this->cutsenes.push(sht);
         } break;
@@ -354,7 +354,7 @@ void SCGameFlow::runEffect() {
             }
             this->scen = new LedgerScene(&this->optShps, &this->optPals);
 
-            this->zones = this->scen->Init(
+            this->zones = this->scen->init(
                 this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
                 this->optionParser.opts[128],
                 std::bind(&SCGameFlow::returnFromScene, this, std::placeholders::_1, std::placeholders::_2));
@@ -366,7 +366,7 @@ void SCGameFlow::runEffect() {
             }
             this->scen = new KillBoardScene(&this->optShps, &this->optPals);
 
-            this->zones = this->scen->Init(
+            this->zones = this->scen->init(
                 this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
                 this->optionParser.opts[30],
                 std::bind(&SCGameFlow::returnFromScene, this, std::placeholders::_1, std::placeholders::_2));
@@ -378,7 +378,7 @@ void SCGameFlow::runEffect() {
             }
             this->scen = new CatalogueScene(&this->optShps, &this->optPals);
 
-            this->zones = this->scen->Init(
+            this->zones = this->scen->init(
                 this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
                 this->optionParser.opts[30],
                 std::bind(&SCGameFlow::returnFromScene, this, std::placeholders::_1, std::placeholders::_2));
@@ -467,7 +467,7 @@ void SCGameFlow::runEffect() {
         }
         this->next_miss = 0;
         this->scen = new WeaponLoadoutScene(&this->optShps, &this->optPals);
-        this->zones = this->scen->Init(
+        this->zones = this->scen->init(
             this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen], this->optionParser.opts[15],
             std::bind(&SCGameFlow::flyOrReturnFromScene, this, std::placeholders::_1, std::placeholders::_2));
     }
@@ -503,7 +503,7 @@ void SCGameFlow::runEffectAfterLoad() {
  *
  * @return None
  */
-void SCGameFlow::CheckKeyboard(void) {
+void SCGameFlow::checkKeyboard(void) {
     // Keyboard
     SDL_Event keybEvents[1];
     int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
@@ -562,7 +562,7 @@ void SCGameFlow::CheckKeyboard(void) {
  *
  * @throws None
  */
-void SCGameFlow::Init() {
+void SCGameFlow::init() {
 
     TreEntry *gameflowIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\GAMEFLOW.IFF");
     TreEntry *optionIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
@@ -669,7 +669,7 @@ void SCGameFlow::createScen() {
         }
         this->scen = new SCScene(&this->optShps, &this->optPals);
         this->zones =
-            this->scen->Init(this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
+            this->scen->init(this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen],
                              this->optionParser.opts[optionScenID],
                              std::bind(&SCGameFlow::clicked, this, std::placeholders::_1, std::placeholders::_2));
     }
@@ -707,7 +707,7 @@ RSImageSet *SCGameFlow::getShape(uint8_t shpid) {
  *
  * @throws None
  */
-void SCGameFlow::RunFrame(void) {
+void SCGameFlow::runFrame(void) {
 
     if (this->cutsenes.size() > 0) {
         SCShot *c = this->cutsenes.front();
@@ -726,7 +726,7 @@ void SCGameFlow::RunFrame(void) {
         this->fly_mission.pop();
         Game.AddActivity(c);
         EndMissionScene *end = new EndMissionScene(&this->optShps, &this->optPals);
-        end->Init();
+        end->init();
         this->cutsenes.push(end);
         return;
     }
@@ -747,7 +747,7 @@ void SCGameFlow::RunFrame(void) {
     if (fpsupdate) {
         this->fps = (SDL_GetTicks() / 10);
     }
-    CheckKeyboard();
+    checkKeyboard();
     VGA.Activate();
     VGA.GetFrameBuffer()->FillWithColor(0);
     if (this->scen != nullptr) {
@@ -758,7 +758,7 @@ void SCGameFlow::RunFrame(void) {
         this->CheckZones();
     }
     VGA.VSync();
-    this->RenderMenu();
+    this->renderMenu();
     VGA.SwithBuffers();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
@@ -780,7 +780,7 @@ void SCGameFlow::RunFrame(void) {
  * If the current mission has zones, it renders a subtree with the zones.
  * If a zone has a sprite, it renders a subtree with the sprite information.
  */
-void SCGameFlow::RenderMenu() {
+void SCGameFlow::renderMenu() {
     ImGui::SetMouseCursor(ImGuiMouseCursor_None);
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -984,7 +984,7 @@ void SCGameFlow::RenderMenu() {
             for (auto shot : this->optionParser.estb) {
                 if (ImGui::Selectable(std::to_string(shot.first).c_str(), false)) {
                     SCShot *sht = new SCShot();
-                    sht->Init();
+                    sht->init();
                     sht->SetShotId(shot.first);
                     this->cutsenes.push(sht);
                 }
@@ -1000,7 +1000,7 @@ void SCGameFlow::RenderMenu() {
             for (int i = 0; i < 256; i++) {
                 if (ImGui::Selectable(std::to_string(i).c_str(), false)) {
                     SCConvPlayer *conv = new SCConvPlayer();
-                    conv->Init();
+                    conv->init();
                     conv->SetID(i);
                     this->convs.push(conv);
                 }

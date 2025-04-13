@@ -14,6 +14,7 @@
 #include <tuple>
 #include <optional>
 #include <cmath>
+#include "SCStrike.h"
 #define SC_WORLD 1100
 #define AUTOPILOTE_TIMEOUT 1000
 #define AUTOPILOTE_SPEED 4
@@ -39,7 +40,7 @@ SCStrike::~SCStrike() {}
  *
  * @return None
  */
-void SCStrike::CheckKeyboard(void) {
+void SCStrike::checkKeyboard(void) {
     // Keyboard
     SDL_Event keybEvents[1];
 
@@ -372,7 +373,7 @@ void SCStrike::CheckKeyboard(void) {
             break;
         case SDLK_n: {
             SCNavMap *nav_screen = new SCNavMap();
-            nav_screen->Init();
+            nav_screen->init();
             nav_screen->SetName((char *)this->current_mission->world->tera.c_str());
             nav_screen->mission = this->current_mission;
             nav_screen->missionObj = this->current_mission->mission = this->current_mission->mission;
@@ -593,12 +594,12 @@ void SCStrike::CheckKeyboard(void) {
  * flag to false, setting the mission to "TEMPLATE.IFF", initializing the
  * cockpit object, and setting the pilot's lookat position to the origin.
  */
-void SCStrike::Init(void) {
+void SCStrike::init(void) {
     this->mouse_control = false;
     this->pilote_lookat = {0, 0};
 }
 
-RSEntity * SCStrike::LoadWeapon(std::string name) {
+RSEntity * SCStrike::loadWeapon(std::string name) {
     std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + name + ".IFF";
     RSEntity *objct = new RSEntity(&Assets);
     TreEntry *entry = Assets.GetEntryByName(tmpname);
@@ -622,25 +623,25 @@ RSEntity * SCStrike::LoadWeapon(std::string name) {
  *
  * @param[in] missionName The name of the mission file to load.
  */
-void SCStrike::SetMission(char const *missionName) {
+void SCStrike::setMission(char const *missionName) {
     if (this->current_mission != nullptr) {
         this->current_mission->cleanup();
         delete this->current_mission;
         this->current_mission = nullptr;
     } 
     this->miss_file_name = missionName;
-    this->current_mission = new SCMission(missionName, &objectCache);
+    this->current_mission = new SCMission(missionName, &object_cache);
     ai_planes.clear();
     ai_planes.shrink_to_fit();
     
     MISN_PART *playerCoord = this->current_mission->player->object;
     this->area = *this->current_mission->area;
-    newPosition.x = playerCoord->position.x;
-    newPosition.z = playerCoord->position.z;
-    newPosition.y = playerCoord->position.y;
+    new_position.x = playerCoord->position.x;
+    new_position.z = playerCoord->position.z;
+    new_position.y = playerCoord->position.y;
 
     camera = Renderer.getCamera();
-    camera->SetPosition(&newPosition);
+    camera->SetPosition(&new_position);
     this->current_target = 0;
     this->target = this->current_mission->enemies[this->current_target];
     this->nav_point_id = 0;
@@ -648,8 +649,8 @@ void SCStrike::SetMission(char const *missionName) {
     this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
     this->player_plane->yaw = (360 - playerCoord->azymuth) * (float) M_PI / 180.0f;
     this->player_plane->object = playerCoord;
-    float ground = this->area.getY(newPosition.x, newPosition.z);
-    if (ground < newPosition.y) {
+    float ground = this->area.getY(new_position.x, new_position.z);
+    if (ground < new_position.y) {
         this->player_plane->SetThrottle(100);
         this->player_plane->SetWheel();
         this->player_plane->vz = -20;
@@ -671,7 +672,7 @@ void SCStrike::SetMission(char const *missionName) {
         RSEntity::WEAPS *weap = new RSEntity::WEAPS();
         weap->name = "20MM";
         weap->nb_weap = 1000;
-        weap->objct = LoadWeapon(weap->name);
+        weap->objct = loadWeapon(weap->name);
         this->player_plane->object->entity->weaps.push_back(weap);
         std::map<weapon_type_shp_id, bool> loaded;
         for (int i=1; i<5; i++) {
@@ -681,7 +682,7 @@ void SCStrike::SetMission(char const *missionName) {
             RSEntity::WEAPS *weap = new RSEntity::WEAPS();
             weap->name = weapon_names[weapon_type_shp_id(GameState.weapon_load_out[i])];
             weap->nb_weap = GameState.weapon_load_out[GameState.weapon_load_out[i]];
-            weap->objct = LoadWeapon(weap->name);
+            weap->objct = loadWeapon(weap->name);
             this->player_plane->object->entity->weaps.push_back(weap);
             loaded[weapon_type_shp_id(GameState.weapon_load_out[i])] = true;
         }
@@ -690,13 +691,70 @@ void SCStrike::SetMission(char const *missionName) {
     this->player_plane->InitLoadout();
     this->player_prof = this->current_mission->player->profile;
     this->cockpit = new SCCockpit();
-    this->cockpit->Init();
+    this->cockpit->init();
     this->cockpit->player_plane = this->player_plane;
     this->cockpit->current_mission = this->current_mission;
     this->cockpit->nav_point_id = &this->nav_point_id;
     Mixer.StopMusic();
     Mixer.SwitchBank(2);
     Mixer.PlayMusic(this->current_mission->mission->mission_data.tune+1);
+}
+void SCStrike::setCameraFront() {
+    Vector3D pos = {this->new_position.x, this->new_position.y, this->new_position.z};
+    camera->SetPosition(&pos);
+    camera->ResetRotate();
+    camera->Rotate(
+        -tenthOfDegreeToRad(this->player_plane->elevationf),
+        -tenthOfDegreeToRad(this->player_plane->azimuthf),
+        -tenthOfDegreeToRad(this->player_plane->twist)
+    );
+}
+void SCStrike::setCameraFollow(SCPlane *plane) {
+    const float distanceBehind = -60.0f;
+    float r_azim = tenthOfDegreeToRad(plane->azimuthf);
+    float r_elev = tenthOfDegreeToRad(plane->elevationf-100.0f);
+    float r_twist = tenthOfDegreeToRad(plane->twist);
+    Vector3D camPos;
+    camPos.x = plane->x - distanceBehind * cos(r_elev) * sin(r_azim);
+    camPos.y = plane->y + distanceBehind * sin(r_elev);
+    camPos.z = plane->z - distanceBehind * cos(r_elev) * cos(r_azim);
+    camera->SetPosition(&camPos);
+
+    Vector3D camLookAt = {plane->x, plane->y, plane->z};
+    float cosT = cos(r_twist), sinT = sin(r_twist);
+    float cosE = cos(r_elev), sinE = sin(r_elev);
+    float cosA = cos(r_azim), sinA = sin(r_azim);
+
+    // Compute the up vector as the second column of the composite rotation matrix
+    // R = Ry(azim) * Rx(elev) * Rz(twist)
+    Vector3D up;
+    up.x = -cosA * sinT + sinA * sinE * cosT;
+    up.y = cosE * cosT;
+    up.z = sinA * sinT + cosA * sinE * cosT;
+    if (follow_dynamic) {
+        camera->LookAt(&camLookAt, &up);
+    } else {
+        camera->LookAt(&camLookAt);
+    }
+}
+void SCStrike::setCameraRLR() {
+    camera->SetPosition(&this->new_position);
+    camera->ResetRotate();
+    camera->Rotate(0.0f, this->pilote_lookat.x * ((float)M_PI / 180.0f), 0.0f);
+    camera->Rotate(
+        -tenthOfDegreeToRad(this->player_plane->elevationf),
+        -tenthOfDegreeToRad(this->player_plane->azimuthf),
+        -tenthOfDegreeToRad(this->player_plane->twist)
+    );
+}
+void SCStrike::setCameraLookat(Vector3D obj_pos) {
+    Vector3D pos = {
+        obj_pos.x + this->camera_pos.x,
+        obj_pos.y + this->camera_pos.y,
+        obj_pos.z + this->camera_pos.z
+    };
+    camera->SetPosition(&pos);
+    camera->LookAt(&obj_pos);
 }
 /**
  * @brief Executes a single frame of the game simulation.
@@ -714,8 +772,8 @@ void SCStrike::SetMission(char const *missionName) {
  * - Rendering the world, mission objects, and cockpit interface.
  * - Managing the display of cockpit elements like communication and weapons.
  */
-void SCStrike::RunFrame(void) {
-    this->CheckKeyboard();
+void SCStrike::runFrame(void) {
+    this->checkKeyboard();
     if (!this->pause_simu && this->camera_mode!=View::AUTO_PILOT) {
         this->mfd_timeout--;
         this->player_plane->Simulate();
@@ -735,11 +793,11 @@ void SCStrike::RunFrame(void) {
             return;
         }
     }
-    this->player_plane->getPosition(&newPosition);
+    this->player_plane->getPosition(&new_position);
     if (this->player_plane->object != nullptr) {
-        this->player_plane->object->position.x = newPosition.x;
-        this->player_plane->object->position.z = newPosition.z;
-        this->player_plane->object->position.y = newPosition.y;
+        this->player_plane->object->position.x = new_position.x;
+        this->player_plane->object->position.z = new_position.z;
+        this->player_plane->object->position.y = new_position.y;
     }
     this->cockpit->Update();
     if (this->mfd_timeout <= 0) {
@@ -754,10 +812,10 @@ void SCStrike::RunFrame(void) {
     case View::AUTO_PILOT: {
         if (this->autopilot_timeout > -AUTOPILOTE_TIMEOUT) {
             this->autopilot_timeout -= AUTOPILOTE_SPEED;
-            Vector3D pos = {this->newPosition.x +5, this->newPosition.y + 5, 
-                this->newPosition.z - (autopilot_timeout)};
+            Vector3D pos = {this->new_position.x +5, this->new_position.y + 5, 
+                this->new_position.z - (autopilot_timeout)};
             camera->SetPosition(&pos);
-            camera->LookAt(&this->newPosition);
+            camera->LookAt(&this->new_position);
         } else {
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
@@ -768,70 +826,23 @@ void SCStrike::RunFrame(void) {
         }
     } break;
     case View::FRONT: {
-        Vector3D pos = {this->newPosition.x, this->newPosition.y, this->newPosition.z};
-        camera->SetPosition(&pos);
-        camera->ResetRotate();
-        camera->Rotate(
-            -tenthOfDegreeToRad(this->player_plane->elevationf),
-            -tenthOfDegreeToRad(this->player_plane->azimuthf),
-            -tenthOfDegreeToRad(this->player_plane->twist)
-        );
+        this->setCameraFront();
          // Apply a vertical offset to the projection matrix
     } break;
     case View::FOLLOW: {
-        const float distanceBehind = -60.0f;
-        float r_azim = tenthOfDegreeToRad(this->player_plane->azimuthf);
-        float r_elev = tenthOfDegreeToRad(this->player_plane->elevationf-100.0f);
-        float r_twist = tenthOfDegreeToRad(this->player_plane->twist);
-        Vector3D camPos;
-        camPos.x = this->newPosition.x - distanceBehind * cos(r_elev) * sin(r_azim);
-        camPos.y = this->newPosition.y + distanceBehind * sin(r_elev);
-        camPos.z = this->newPosition.z - distanceBehind * cos(r_elev) * cos(r_azim);
-        camera->SetPosition(&camPos);
-
-        float cosT = cos(r_twist), sinT = sin(r_twist);
-        float cosE = cos(r_elev), sinE = sin(r_elev);
-        float cosA = cos(r_azim), sinA = sin(r_azim);
-
-        // Compute the up vector as the second column of the composite rotation matrix
-        // R = Ry(azim) * Rx(elev) * Rz(twist)
-        Vector3D up;
-        up.x = -cosA * sinT + sinA * sinE * cosT;
-        up.y = cosE * cosT;
-        up.z = sinA * sinT + cosA * sinE * cosT;
-        if (follow_dynamic) {
-            camera->LookAt(&this->newPosition, &up);
-        } else {
-            camera->LookAt(&this->newPosition);
-        }
-        
+        this->setCameraFollow(this->player_plane);
     } break;
     case View::RIGHT:
     case View::LEFT:
     case View::REAR:
-        camera->SetPosition(&this->newPosition);
-        camera->ResetRotate();
-        camera->Rotate(0.0f, this->pilote_lookat.x * ((float)M_PI / 180.0f), 0.0f);
-        camera->Rotate(
-            -tenthOfDegreeToRad(this->player_plane->elevationf),
-            -tenthOfDegreeToRad(this->player_plane->azimuthf),
-            -tenthOfDegreeToRad(this->player_plane->twist)
-        );
+        this->setCameraRLR();
         break;
     case View::TARGET: {
-        Vector3D pos = {target->object->position.x + this->camera_pos.x, target->object->position.y + this->camera_pos.y,
-                        target->object->position.z + this->camera_pos.z};
-        Vector3D targetPos = {target->object->position.x, target->object->position.y, target->object->position.z};
-        camera->SetPosition(&pos);
-        camera->LookAt(&targetPos);
+        setCameraLookat(this->target->object->position);
     }
     break;
     case View::OBJECT: {
-        Vector3D obj_pos = this->current_mission->actors[this->current_object_to_view]->object->position;
-        Vector3D pos = {obj_pos.x + this->camera_pos.x, obj_pos.y + this->camera_pos.y,
-                        obj_pos.z + this->camera_pos.z};
-        camera->SetPosition(&pos);
-        camera->LookAt(&obj_pos);
+        setCameraLookat(this->current_mission->actors[this->current_object_to_view]->object->position);
     }
     break;
     case View::MISSILE_CAM: {
@@ -864,7 +875,7 @@ void SCStrike::RunFrame(void) {
     }
     break;
     case View::EYE_ON_TARGET: {
-        Vector3D pos = {this->newPosition.x, this->newPosition.y + this->eye_y, this->newPosition.z};
+        Vector3D pos = {this->new_position.x, this->new_position.y + this->eye_y, this->new_position.z};
         float r_twist = tenthOfDegreeToRad(this->player_plane->twist);
         float r_elev  = tenthOfDegreeToRad(this->player_plane->elevationf);
         float r_azim  = tenthOfDegreeToRad(this->player_plane->azimuthf);
@@ -873,9 +884,9 @@ void SCStrike::RunFrame(void) {
         float cosA = cos(r_azim), sinA = sin(r_azim);
 
         Vector3D camPos;
-        camPos.x = this->newPosition.x;
-        camPos.y = this->newPosition.y;
-        camPos.z = this->newPosition.z;
+        camPos.x = this->new_position.x;
+        camPos.y = this->new_position.y;
+        camPos.z = this->new_position.z;
         
         // Compute the up vector as the second column of the composite rotation matrix
         // R = Ry(azim) * Rx(elev) * Rz(twist)
@@ -890,7 +901,7 @@ void SCStrike::RunFrame(void) {
     } break;
     case View::REAL:
     default: {
-        Vector3D pos = {this->newPosition.x, this->newPosition.y + this->eye_y, this->newPosition.z};
+        Vector3D pos = {this->new_position.x, this->new_position.y + this->eye_y, this->new_position.z};
         camera->SetPosition(&pos);
         camera->ResetRotate();
 
@@ -978,7 +989,7 @@ void SCStrike::RunFrame(void) {
         break;
     }
     
-    this->RenderMenu();
+    this->renderMenu();
 }
 
 
@@ -989,7 +1000,7 @@ void SCStrike::RunFrame(void) {
  * settings. It updates the menu states and handles user interactions with 
  * different menu items dynamically based on the current game context.
  */
-void SCStrike::RenderMenu() {
+void SCStrike::renderMenu() {
     if (this->mouse_control) {
         ImGui::SetMouseCursor(ImGuiMouseCursor_None);
     } else {
@@ -1035,14 +1046,15 @@ void SCStrike::RenderMenu() {
         Vector3D plane_player_pos = {this->player_plane->x, this->player_plane->y, this->player_plane->z};
         uint8_t area_id = this->current_mission->getAreaID(plane_player_pos);
         ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s\tArea ID: %d",
-                    this->player_plane->airspeed, this->newPosition.y,
+                    this->player_plane->airspeed, this->new_position.y,
                     360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
                     this->current_mission->mission->mission_data.name.c_str(), this->miss_file_name.c_str(),area_id);
         ImGui::EndMainMenuBar();
     }
     if (show_offcam) {
         ImGui::Begin("Offcam");
-        ImGui::Image((void*)(intptr_t)Renderer.texture, ImVec2(800, 600), {0, 1}, {1, 0});
+        ImVec2 avail_size = ImGui::GetContentRegionAvail();
+        ImGui::Image((void*)(intptr_t)Renderer.texture, avail_size, {0, 1}, {1, 0});
         ImGui::End();
     }
     if (show_ai) {
@@ -1257,7 +1269,7 @@ void SCStrike::RenderMenu() {
     }
     if (show_simulation) {
         ImGui::Begin("Simulation");
-        ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", this->player_plane->airspeed, this->newPosition.y,
+        ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", this->player_plane->airspeed, this->new_position.y,
                     this->player_plane->azimuthf);
         ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
         ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
@@ -1365,7 +1377,7 @@ void SCStrike::RenderMenu() {
         }
         ImGui::Text("Target %s", this->current_mission->actors[this->current_target]->actor_name.c_str());
         Vector3D targetPos = {this->target->object->position.x, this->target->object->position.y, this->target->object->position.z};
-        Vector3D playerPos = {this->newPosition.x, this->newPosition.y, this->newPosition.z};
+        Vector3D playerPos = {this->new_position.x, this->new_position.y, this->new_position.z};
 
         Camera totarget;
         totarget.SetPosition(&playerPos);
@@ -1423,7 +1435,7 @@ void SCStrike::RenderMenu() {
             ImGui::EndCombo();
         }
         if (ImGui::Button("Load Mission")) {
-            this->SetMission((char *)mission_list[mission_idx]);
+            this->setMission((char *)mission_list[mission_idx]);
         }
 
         ImGui::End();

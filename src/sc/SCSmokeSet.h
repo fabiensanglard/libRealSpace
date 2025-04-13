@@ -16,5 +16,5 @@ public:
     std::vector<texture *> textures;
     SCSmokeSet();
     ~SCSmokeSet();
-    void Init();
+    void init();
 };

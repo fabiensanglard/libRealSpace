@@ -24,7 +24,7 @@ SCScene::SCScene(PakArchive *optShps, PakArchive *optPals) {
 SCScene::~SCScene() {}
 
 std::vector<SCZone *> *
-SCScene::Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick) {
+SCScene::init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick) {
     this->gameflow_scene = gf;
     this->sceneOpts      = sc_opts;
 
@@ -682,7 +682,7 @@ void WeaponLoadoutScene::updateWeaponDisplay() {
     }
 }
 
-std::vector<SCZone *> *WeaponLoadoutScene::Init(
+std::vector<SCZone *> *WeaponLoadoutScene::init(
     GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick
 ) {
     this->gameflow_scene = gf;
@@ -754,7 +754,7 @@ void WeaponLoadoutScene::Render() {
     }
 }
 
-std::vector<SCZone *> *LedgerScene::Init(
+std::vector<SCZone *> *LedgerScene::init(
     GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick
 ) {
     this->gameflow_scene = gf;
@@ -917,7 +917,7 @@ void LedgerScene::Render() {
     }
 }
 
-std::vector<SCZone *> *CatalogueScene::Init(
+std::vector<SCZone *> *CatalogueScene::init(
     GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick
 ) {
     this->gameflow_scene = gf;
@@ -1246,7 +1246,7 @@ void CatalogueScene::Render() {
     
 }
 
-std::vector<SCZone *> *KillBoardScene::Init(
+std::vector<SCZone *> *KillBoardScene::init(
     GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick
 ) {
     this->sceneOpts  = sc_opts;

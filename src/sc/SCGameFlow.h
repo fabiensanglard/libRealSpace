@@ -45,10 +45,10 @@
  * It has a Init method which initializes the object.
  * It has a createMiss method which creates a new mission.
  * It has a RunFrame method which runs the game frame.
- * It has a RenderMenu method which renders the menu of the game.
+ * It has a renderMenu method which renders the menu of the game.
  * It has a clicked method which handles the clicking of a sprite.
  * It has a runEffect method which runs the effects of the game.
- * It has a CheckKeyboard method which checks the keyboard for input.
+ * It has a checkKeyboard method which checks the keyboard for input.
  * It has a CheckZones method which checks the zones of the game.
  * It has a createScen method which creates a new scenario.
  * It has a getShape method which gets a shape from the PakArchive.
@@ -59,11 +59,11 @@ public:
     SCGameFlow();
     ~SCGameFlow();
 
-    void Init();
+    void init();
     void InitFromGameState();
     void createMiss();
     void loadMiss();
-    void RunFrame(void);
+    void runFrame(void);
 
 private:
     RSGameFlow gameFlowParser;
@@ -93,13 +93,13 @@ private:
     
     RLEShape *test_shape{nullptr};
     SCScene *scen{nullptr};
-    void RenderMenu();
+    void renderMenu();
     void clicked(std::vector<EFCT *> *script, uint8_t id);
     void returnFromScene(std::vector<EFCT *> *script, uint8_t id);
     void flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id);
     void runEffect();
     void runEffectAfterLoad();
-    void CheckKeyboard(void);
+    void checkKeyboard(void);
     SCZone *CheckZones(void);
     void createScen();
     RSImageSet *getShape(uint8_t shpid);

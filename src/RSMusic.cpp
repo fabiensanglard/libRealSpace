@@ -7,7 +7,7 @@
 //
 
 #include "precomp.h"
-void RSMusic::Init(AssetManager *assetManager) {
+void RSMusic::init(AssetManager *assetManager) {
     PakArchive *pak = new PakArchive();
     TreEntry *entry = assetManager->GetEntryByName("..\\..\\DATA\\MIDGAMES\\AMUSIC.PAK");
     pak->InitFromRAM("..\\..\\DATA\\MIDGAMES\\AMUSIC.PAK", entry->data, entry->size);

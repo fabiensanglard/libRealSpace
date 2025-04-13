@@ -20,7 +20,7 @@ SCMouse::~SCMouse(){
     
 }
 
-void SCMouse::Init(void){
+void SCMouse::init(void){
     
     
     TreEntry* cursorShape   = Assets.GetEntryByName(CURSOR_SHAPE_PATH);
@@ -32,7 +32,7 @@ void SCMouse::Init(void){
     
     for (int i = 0 ; i < 4; i++) {
         shape = new RLEShape();
-        shape->Init(cursors.GetEntry(i)->data, cursors.GetEntry(i)->size);
+        shape->init(cursors.GetEntry(i)->data, cursors.GetEntry(i)->size);
         appearances[i] = shape;
     }
 }

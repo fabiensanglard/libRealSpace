@@ -16,7 +16,7 @@ SCRegister::~SCRegister(){
     
 }
 
-void SCRegister::CheckKeyboard(void){
+void SCRegister::checkKeyboard(void){
     //Keyboard
     static bool shift = false;
     SDL_Event keybEvents[5];
@@ -126,7 +126,7 @@ void SCRegister::CheckKeyboard(void){
     this->current_entry->shrink_to_fit();
 }
 
-void SCRegister::Init( ){
+void SCRegister::init( ){
     
     //Load book
     TreEntry* entryMountain = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
@@ -137,7 +137,7 @@ void SCRegister::Init( ){
     bookPak.InitFromRAM("subPak board",
                             pak.GetEntry(OptionShapeID::START_GAME_REGISTRATION)->data ,
                             pak.GetEntry(OptionShapeID::START_GAME_REGISTRATION)->size);
-    book.Init(bookPak.GetEntry(0)->data, bookPak.GetEntry(0)->size);
+    book.init(bookPak.GetEntry(0)->data, bookPak.GetEntry(0)->size);
 
     
     
@@ -159,9 +159,9 @@ void SCRegister::Init( ){
     
 }
 
-void SCRegister::RunFrame(void){
+void SCRegister::runFrame(void){
     CheckButtons();
-    CheckKeyboard();
+    checkKeyboard();
     
     VGA.Activate();
     FrameBuffer *fb = VGA.GetFrameBuffer();

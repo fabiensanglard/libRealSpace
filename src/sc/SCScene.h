@@ -35,7 +35,7 @@ public:
     void toggleMusic() { music = !music; };
     void stopMusic() { music = false; };
     virtual std::vector<SCZone *> *
-    Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
     virtual void Render();
 };
 
@@ -82,7 +82,7 @@ class WeaponLoadoutScene : public SCScene {
 public:
     void Render();
     WeaponLoadoutScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
-    std::vector<SCZone *> * Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    std::vector<SCZone *> * init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
 };
 
 class LedgerScene : public SCScene {
@@ -93,7 +93,7 @@ class LedgerScene : public SCScene {
 public:
     LedgerScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
     std::vector<SCZone *> *
-    Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
     void CreateZones();
     void Render();
     void TurnPage(std::vector<EFCT *> *script, uint8_t sprite_id) {
@@ -126,7 +126,7 @@ class CatalogueScene : public SCScene {
 
 public:
     CatalogueScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
-    std::vector<SCZone *> * Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    std::vector<SCZone *> * init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
     void Render();
 };
 
@@ -134,6 +134,6 @@ class KillBoardScene : public SCScene {
     RSFont *font;
 public:
     KillBoardScene(PakArchive *optShps, PakArchive *optPals) : SCScene(optShps, optPals) {};
-    std::vector<SCZone *> * Init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
+    std::vector<SCZone *> * init(GAMEFLOW_SCEN *gf, SCEN *sc_opts, std::function<void(std::vector<EFCT *> *script, uint8_t id)> onclick);
     void Render();
 };

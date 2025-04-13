@@ -67,8 +67,8 @@ class AssetManager{
     
 public:
     void SetBase(const char* base);
-    void Init(void);
-    void Init(std::vector<std::string> nameIds);
+    void init(void);
+    void init(std::vector<std::string> nameIds);
     enum TreID {TRE_GAMEFLOW, TRE_OBJECTS, TRE_MISC, TRE_SOUND, TRE_MISSIONS,TRE_TEXTURES } ;
     
     std::vector<TreArchive*> tres;

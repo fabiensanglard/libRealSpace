@@ -15,9 +15,9 @@ public:
     SCNavMap();
     ~SCNavMap();
     
-    void Init();
+    void init();
     void SetName(char *name);
-    void RunFrame(void);
+    void runFrame(void);
     RSMission *missionObj;
     SCMission *mission{nullptr};
     uint8_t *current_nav_point;
@@ -35,6 +35,6 @@ private:
     bool show_obj{true};
     bool show_waypoint{true};
 
-    void CheckKeyboard(void);
+    void checkKeyboard(void);
     void showArea(AREA *area, float center, float map_width, int w, int h, int t, int l, int c);
 };

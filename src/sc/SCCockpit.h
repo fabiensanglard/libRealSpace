@@ -77,7 +77,7 @@ public:
     uint8_t *nav_point_id{nullptr};
     SCCockpit();
     ~SCCockpit();
-    void Init( );
+    void init( );
     void Update();
     void Render(int face);
 };

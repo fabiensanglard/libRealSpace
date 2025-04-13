@@ -24,9 +24,9 @@ void SCMainMenu::OnLoadGame() {
 void SCMainMenu::OnStartNewGame() {
     SCGameFlow *gfl = new SCGameFlow();
     GameState.Reset();
-    gfl->Init();
+    gfl->init();
     SCRegister *registerActivity = new SCRegister();
-    registerActivity->Init();
+    registerActivity->init();
     Game.AddActivity(gfl);
     Game.AddActivity(registerActivity);
 }
@@ -34,13 +34,13 @@ void SCMainMenu::OnStartNewGame() {
 void SCMainMenu::OnTrainingMission() {
 
     SCTrainingMenu *trainingActivity = new SCTrainingMenu();
-    trainingActivity->Init();
+    trainingActivity->init();
     Game.AddActivity(trainingActivity);
 }
 
 void SCMainMenu::OnViewObject() {
     SCObjectViewer *objViewer = new SCObjectViewer();
-    objViewer->Init();
+    objViewer->init();
     Game.AddActivity(objViewer);
 }
 
@@ -66,7 +66,7 @@ void SCMainMenu::UnFocus(void) {
         this->music_playing = false;
     }
 }
-void SCMainMenu::Init(void) {
+void SCMainMenu::init(void) {
 
     TreEntry *entry = Assets.GetEntryByName(MAINMENU_PAK_PATH);
     mainMenupak.InitFromRAM("MAINMENU.PAK", entry->data, entry->size);
@@ -200,17 +200,17 @@ void SCMainMenu::LoadBackgrounds(void) {
 
 }
 
-void SCMainMenu::RunFrame(void) {
+void SCMainMenu::runFrame(void) {
     if (this->frequest->opened) {
         this->frequest->checkevents();
     } else {
-        CheckKeyboard();
+        checkKeyboard();
         CheckButtons();
         timer --;
     }
     if (timer <= 0) {
         SCAnimationPlayer *intro = new SCAnimationPlayer();
-        intro->Init();
+        intro->init();
         timer = 4200;
         Mixer.StopMusic();
         Game.AddActivity(intro);

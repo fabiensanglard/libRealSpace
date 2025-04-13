@@ -21,7 +21,7 @@ SCDogFightMenu::~SCDogFightMenu(){
     
 }
 
-void SCDogFightMenu::Init( ){
+void SCDogFightMenu::init( ){
     
     TreEntry* objViewIFF = nullptr;
     TreEntry* objViewPAK = nullptr;
@@ -49,4 +49,4 @@ void SCDogFightMenu::Init( ){
 
 
 
-void SCDogFightMenu::RunFrame(void) {}
+void SCDogFightMenu::runFrame(void) {}

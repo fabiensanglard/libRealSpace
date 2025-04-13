@@ -15,9 +15,9 @@ public:
     SCObjectViewer();
     ~SCObjectViewer();
     
-    void Init( );
+    void init( );
     
-    void RunFrame(void);
+    void runFrame(void);
     void Focus(void);
     void UnFocus(void);
     

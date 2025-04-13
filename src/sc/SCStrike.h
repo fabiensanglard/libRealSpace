@@ -67,7 +67,7 @@ private:
     /**
      * @brief The new position of the plane
      */
-    Point3D newPosition;
+    Point3D new_position;
     /**
      * @brief The current lookat position of the pilot
      */
@@ -76,7 +76,7 @@ private:
     /**
      * @brief The new orientation of the plane
      */
-    Quaternion newOrientation;
+    Quaternion new_orientation;
     /**
      * @brief The current area
      */
@@ -124,7 +124,7 @@ private:
     /**
      * @brief A cache of objects
      */
-    std::map<std::string, RSEntity *> objectCache;
+    std::map<std::string, RSEntity *> object_cache;
     /**
      * @brief The AI planes
      */
@@ -143,7 +143,7 @@ private:
     bool show_bbox{false};
     bool follow_dynamic{false};
     int music{2};
-    RSEntity * LoadWeapon(std::string name);
+    RSEntity * loadWeapon(std::string name);
 
 public:
     /**
@@ -157,24 +157,28 @@ public:
     /**
      * @brief Initializes the game
      */
-    void Init();
+    void init();
     /**
      * @brief Sets the current mission
      * @param missionName The name of the mission to load
      */
-    void SetMission(char const *missionName);
+    void setMission(char const *missionName);
+    void setCameraFront();
+    void setCameraFollow(SCPlane *plane);
+    void setCameraRLR();
+    void setCameraLookat(Vector3D obj_pos);
     /**
      * @brief Checks for keyboard input
      */
-    void CheckKeyboard(void);
+    void checkKeyboard(void);
     /**
      * @brief Runs the game simulation
      */
-    void RunFrame(void);
+    void runFrame(void);
     /**
      * @brief Renders the in-game menu
      */
-    void RenderMenu();
+    void renderMenu();
 };
 
 #endif /* defined(__libRealSpace__SCStrike__) */

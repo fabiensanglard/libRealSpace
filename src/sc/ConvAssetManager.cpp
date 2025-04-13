@@ -12,7 +12,7 @@ ConvAssetManager::ConvAssetManager() {}
 
 ConvAssetManager::~ConvAssetManager() { Game.Log("We are not freeing the RAM from all the RLEs !!!\n"); }
 
-void ConvAssetManager::Init(void) { BuildDB(); }
+void ConvAssetManager::init(void) { BuildDB(); }
 
 /**
  * Given a name, return the associated CharFace object.
@@ -173,7 +173,7 @@ void ConvAssetManager::ParseBGLayer(uint8_t *data, size_t layerID, ConvBackGroun
         *s = *RLEShape::GetEmptyShape();
         return;
     } else {
-        s->Init(subPAK.GetEntry(0)->data, subPAK.GetEntry(0)->size);
+        s->init(subPAK.GetEntry(0)->data, subPAK.GetEntry(0)->size);
         if (s->GetHeight() < 199) {                     //  If this is not a background, we need to move down
             Point2D pos = {0, CONV_TOP_BAR_HEIGHT + 1}; //  to allow the black band on top of the screen
             s->SetPosition(&pos);

@@ -86,10 +86,10 @@ private:
 public:
     SCAnimationPlayer();
     ~SCAnimationPlayer();
-    void CheckKeyboard(void);
-    void Init();
-    void RunFrame(void);
-    void RenderMenu();
+    void checkKeyboard(void);
+    void init();
+    void runFrame(void);
+    void renderMenu();
 };
 
 #endif /* defined(__libRealSpace__SCAnimationPlayer__) */

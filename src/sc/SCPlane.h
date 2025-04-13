@@ -264,7 +264,7 @@ public:
             float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED,
             RSArea *area, float x, float y, float z);
     ~SCPlane();
-    void Init();
+    void init();
     int isOnRunWay();
     void SetThrottle(int throttle);
     int GetThrottle();

@@ -444,7 +444,7 @@ void SCConvPlayer::SetID(int32_t id) {
     SetArchive(convPak.GetEntry(id));
 }
 
-void SCConvPlayer::Init() {
+void SCConvPlayer::init() {
     VGAPalette *rendererPalette = VGA.GetPalette();
     this->palette               = *rendererPalette;
     TreEntry *convEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
@@ -635,7 +635,7 @@ void SCConvPlayer::CheckZones() {
  * @return None
  *
  */
-void SCConvPlayer::RunFrame(void) {
+void SCConvPlayer::runFrame(void) {
 
     if (!initialized) {
         Stop();

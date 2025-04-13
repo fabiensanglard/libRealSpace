@@ -12,7 +12,7 @@ LZBuffer::LZBuffer() {}
 
 LZBuffer::~LZBuffer() {}
 
-void LZBuffer::Init(uint8_t *data, size_t size) {
+void LZBuffer::init(uint8_t *data, size_t size) {
     this->data = data;
     this->size = size;
 }

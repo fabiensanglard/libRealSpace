@@ -7,7 +7,7 @@ SCSmokeSet::SCSmokeSet(){
 SCSmokeSet::~SCSmokeSet(){
 
 }
-void SCSmokeSet::Init(){
+void SCSmokeSet::init(){
 
     IffLexer lexer;
     FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");

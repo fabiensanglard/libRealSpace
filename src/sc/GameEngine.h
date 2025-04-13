@@ -20,7 +20,7 @@ public:
     GameEngine();
     ~GameEngine();
     
-    void Init(void);
+    void init(void);
     void Run(void);
     void Terminate(const char* reason, ...);
     

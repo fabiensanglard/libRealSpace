@@ -32,7 +32,7 @@ void RSImageSet::InitFromPakEntry(PakEntry *entry) {
 
         if (*currImage != 'F') {
             RLEShape *shape = new RLEShape();
-            shape->Init(currImage, size);
+            shape->init(currImage, size);
             this->shapes.push_back(shape);
             this->sequence.push_back((uint8_t)i);
         } else {
@@ -86,7 +86,7 @@ void RSImageSet::InitFromRam(uint8_t *data, size_t size) {
 
         if (*currImage != 'F') {
             RLEShape *shape = new RLEShape();
-            shape->Init(currImage, size);
+            shape->init(currImage, size);
             this->shapes.push_back(shape);
             this->sequence.push_back((uint8_t)i);
         } else {
@@ -131,7 +131,7 @@ void RSImageSet::InitFromTreEntry(TreEntry *entry) {
 
         if (*currImage != 'F') {
             RLEShape *shape = new RLEShape();
-            shape->Init(currImage, size);
+            shape->init(currImage, size);
             this->shapes.push_back(shape);
             this->sequence.push_back((uint8_t)i);
         } else {
@@ -159,7 +159,7 @@ void RSImageSet::InitFromTreEntry(TreEntry *entry) {
 void RSImageSet::InitFromSubPakEntry(PakArchive *entry) {
     for (int i = 0; i < entry->GetNumEntries(); i++) {
         RLEShape *shape = new RLEShape();
-        shape->Init(entry->GetEntry(i)->data, 0);
+        shape->init(entry->GetEntry(i)->data, 0);
         Point2D pos = {0, 0};
         shape->SetPosition(&pos);
         this->shapes.push_back(shape);
@@ -174,7 +174,7 @@ void RSImageSet::InitFromPakArchive(PakArchive *entry) {
 void RSImageSet::InitFromPakArchive(PakArchive *entry, uint8_t data_offset) {
     for (int i = 0; i < entry->GetNumEntries(); i++) {
         RLEShape *shape = new RLEShape();
-        shape->Init(entry->GetEntry(i)->data + data_offset, 0);
+        shape->init(entry->GetEntry(i)->data + data_offset, 0);
         Point2D pos = {0, 0};
         shape->SetPosition(&pos);
         this->shapes.push_back(shape);

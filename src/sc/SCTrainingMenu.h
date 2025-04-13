@@ -15,10 +15,10 @@ public:
     SCTrainingMenu();
     ~SCTrainingMenu();
 
-    void Init();
+    void init();
     void UnFocus(void);
     void Focus(void);
-    void RunFrame(void);
+    void runFrame(void);
 
 private:
     RLEShape title;

@@ -139,7 +139,7 @@ void SCObjectViewer::ParseAssets(PakArchive *archive) {
     PakEntry *entry0 = archive->GetEntry(0);
     PakArchive file0;
     file0.InitFromRAM("OBJVIEW.PAK: file 0", entry0->data, entry0->size);
-    title.Init(file0.GetEntry(0)->data, file0.GetEntry(0)->size);
+    title.init(file0.GetEntry(0)->data, file0.GetEntry(0)->size);
 
     PakEntry *objButtonEntry = archive->GetEntry(4);
     PakArchive objButtons;
@@ -237,7 +237,7 @@ void SCObjectViewer::ParseAssets(PakArchive *archive) {
     PakEntry *entry8 = archive->GetEntry(8);
     PakArchive file8;
     file8.InitFromRAM("OBJVIEW.PAK: file 8", entry8->data, entry8->size);
-    bluePrint.Init(file8.GetEntry(0)->data, file8.GetEntry(0)->size);
+    bluePrint.init(file8.GetEntry(0)->data, file8.GetEntry(0)->size);
 
     IffLexer lexer;
     FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");
@@ -248,7 +248,7 @@ void SCObjectViewer::ParseAssets(PakArchive *archive) {
     this->palette = *palette.GetColorPalette();
 }
 
-void SCObjectViewer::Init(void) {
+void SCObjectViewer::init(void) {
 
     TreEntry *objViewIFF =
         Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.IFF");
@@ -270,7 +270,7 @@ void SCObjectViewer::Init(void) {
     startTime = SDL_GetTicks();
 }
 
-void SCObjectViewer::RunFrame(void) {
+void SCObjectViewer::runFrame(void) {
 
     CheckButtons();
 

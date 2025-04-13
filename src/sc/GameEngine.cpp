@@ -17,7 +17,7 @@ GameEngine::GameEngine() {}
 
 GameEngine::~GameEngine() {}
 
-void GameEngine::Init() {
+void GameEngine::init() {
 
 
     // Load all TREs and PAKs
@@ -30,7 +30,7 @@ void GameEngine::Init() {
             "MISSIONS.TRE",
             "TEXTURES.TRE"
         };
-        Assets.Init(treFiles);
+        Assets.init(treFiles);
     } else {
         std::vector<std::string> cdTreFiles = {
             "BIGTRE.TRE",
@@ -38,22 +38,22 @@ void GameEngine::Init() {
             "VOCLIST.TRE"
         };
         Assets.ReadISOImage("./SC.DAT");
-        Assets.Init(cdTreFiles);
+        Assets.init(cdTreFiles);
     }
     
-    Mixer.Init(&Assets);
-    FontManager.Init(&Assets);
+    Mixer.init(&Assets);
+    FontManager.init(&Assets);
 
     // Load assets needed for Conversations (char and background)
-    ConvAssets.Init();
+    ConvAssets.init();
 
     // Load Main Palette and Initialize the GL
-    Screen.Init(WIDTH,HEIGHT,FULLSCREEN);
-    VGA.Init(WIDTH,HEIGHT, &Assets);
+    Screen.init(WIDTH,HEIGHT,FULLSCREEN);
+    VGA.init(WIDTH,HEIGHT, &Assets);
     Renderer.init(WIDTH,HEIGHT, &Assets);
 
     // Load the Mouse Cursor
-    Mouse.Init();
+    Mouse.init();
 }
 
 void GameEngine::PumpEvents(void) {
@@ -152,7 +152,7 @@ void GameEngine::Run() {
 
         if (currentActivity->IsRunning()) {
             currentActivity->Focus();
-            currentActivity->RunFrame();
+            currentActivity->runFrame();
         } else {
             activities.pop();
             delete currentActivity;

@@ -41,7 +41,7 @@ void RLEShape::ReadFragment(RLEFragment *frag) {
 void RLEShape::InitFromPakEntry(PakEntry *entry) {
     PakArchive arc;
     arc.InitFromRAM("id", entry->data, entry->size);
-    this->Init(arc.GetEntry(0)->data, arc.GetEntry(0)->size);
+    this->init(arc.GetEntry(0)->data, arc.GetEntry(0)->size);
 }
 bool RLEShape::ExpandFragment(RLEFragment *frag, uint8_t *dst) {
 
@@ -147,12 +147,12 @@ bool RLEShape::ExpandFragmentWithBox(RLEFragment *frag, uint8_t *dst, int bx1, i
     return false;
 }
 
-void RLEShape::Init(uint8_t *idata, size_t isize) {
+void RLEShape::init(uint8_t *idata, size_t isize) {
     this->size = isize;
     uint8_t *tmpdata = idata;
     if (idata[0] == 'L' && idata[1] == 'Z') {
         LZBuffer lzbuffer;
-        lzbuffer.Init(idata+2, isize-2);
+        lzbuffer.init(idata+2, isize-2);
         size_t csize = 0;
         tmpdata = lzbuffer.DecodeLZW(idata+2, isize-2, csize);
         this->size = csize;
@@ -168,7 +168,7 @@ void RLEShape::Init(uint8_t *idata, size_t isize) {
 }
 
 void RLEShape::InitWithPosition(uint8_t *idata, size_t isize, Point2D *position) {
-    Init(idata, isize);
+    init(idata, isize);
     SetPosition(position);
 }
 
@@ -249,7 +249,7 @@ RLEShape *RLEShape::GetEmptyShape(void) {
 
     static RLEShape shape;
 
-    shape.Init(data, 9);
+    shape.init(data, 9);
 
     return &shape;
 }

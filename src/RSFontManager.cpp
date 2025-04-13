@@ -17,7 +17,7 @@ RSFontManager::~RSFontManager(){
     
 }
 
-void RSFontManager::Init(AssetManager* amana){
+void RSFontManager::init(AssetManager* amana){
     
     std::vector<std::string> fonts_index = {
         "..\\..\\DATA\\FONTS\\CALCFONT.SHP",

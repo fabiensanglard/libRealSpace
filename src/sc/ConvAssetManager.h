@@ -51,7 +51,7 @@ public:
     ConvAssetManager();
     ~ConvAssetManager();
 
-    void Init(void);
+    void init(void);
 
     CharFace *GetCharFace(char *name);
     ConvBackGround *GetBackGround(char *name);

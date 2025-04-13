@@ -27,7 +27,7 @@ void RSScreen::SetTitle(const char* title){
     SDL_SetWindowTitle(sdlWindow, title);
 }
 
-void RSScreen::Init(int width, int height, bool fullscreen){
+void RSScreen::init(int width, int height, bool fullscreen){
     
     this->width = width;
     this->height = height;

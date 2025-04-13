@@ -25,13 +25,13 @@ int main(int argc, char* argv[]) {
     
     Assets.SetBase("./assets");
     
-    Game.Init();
+    Game.init();
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();
-    main->Init();
+    main->init();
     Game.AddActivity(main);
     SCAnimationPlayer *intro = new SCAnimationPlayer();
-    intro->Init();
+    intro->init();
     Game.AddActivity(intro);
     Game.Run();
 

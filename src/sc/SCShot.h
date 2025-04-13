@@ -24,9 +24,9 @@ public:
     SCShot();
     ~SCShot();
 
-    void Init();
+    void init();
     void SetShotId(uint8_t shotid);
-    virtual void RunFrame(void);
+    virtual void runFrame(void);
 
 
 protected:
@@ -39,18 +39,18 @@ protected:
     uint8_t* forPalette;
     
     RSImageSet* getShape(uint8_t shpid);
-    virtual void CheckKeyboard(void);
+    virtual void checkKeyboard(void);
     int fps;
 };
 
 class EndMissionScene : public SCShot {
 protected:
-    virtual void CheckKeyboard(void);
+    virtual void checkKeyboard(void);
     int part{0};
 public:
     EndMissionScene(PakArchive *optShps, PakArchive *optPals) : SCShot() {};
-    void Init();
-    void RunFrame(void);
+    void init();
+    void runFrame(void);
 };
 class MapShot : public SCShot {
     std::vector<uint8_t*> mapics;
@@ -73,9 +73,9 @@ class MapShot : public SCShot {
     float current_y;
 public:
     MapShot() : SCShot() {};
-    void Init();
+    void init();
     void SetPoints(std::vector<MAP_POINT *> *points);
-    void RunFrame(void);
-    void CheckKeyboard(void);
+    void runFrame(void);
+    void checkKeyboard(void);
 };
 #endif

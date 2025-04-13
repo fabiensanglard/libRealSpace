@@ -71,8 +71,8 @@ public:
     SCConvPlayer();
     ~SCConvPlayer();
 
-    void Init();
-    void RunFrame(void);
+    void init();
+    void runFrame(void);
     void SetID(int32_t id);
     virtual void Focus(void);
 };

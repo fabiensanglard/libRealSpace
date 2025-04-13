@@ -30,14 +30,14 @@ void RSNavMap::parseNMAP_MAPS(uint8_t *data, size_t size) {
             size_t csize = 0;
             shape_data = lzbuffer.DecodeLZW(shape_data2 +6, shape_size - 6, csize);
             maps[name] = new RLEShape();
-            maps[name]->Init(shape_data+8, 0);
+            maps[name]->init(shape_data+8, 0);
             read += shape_size;
             stream.MoveForward(shape_size);      
         } else {
             shape_data = (uint8_t *)malloc(shape_size);
             memcpy(shape_data, stream.GetPosition() + 4, shape_size);
             maps[name] = new RLEShape();
-            maps[name]->Init(shape_data, 0);
+            maps[name]->init(shape_data, 0);
             stream.MoveForward(shape_size - 4);
             read += (shape_size - 4);
         }
@@ -61,13 +61,13 @@ void RSNavMap::parseNMAP_SHAP(uint8_t *data, size_t size) {
         data = uncompressed_data;
         size = csize;
         this->background = new RLEShape();
-        this->background->Init(data+8,0);
+        this->background->init(data+8,0);
     } else {
         this->background = new RLEShape();
         uint8_t *shape_data;
         shape_data = (uint8_t *)malloc(size);
         memcpy(shape_data, data + 8, size);
-        this->background->Init(shape_data, 0);
+        this->background->init(shape_data, 0);
     }
 }
 

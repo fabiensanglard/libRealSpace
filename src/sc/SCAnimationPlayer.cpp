@@ -19,7 +19,7 @@ SCAnimationPlayer::SCAnimationPlayer(){
 SCAnimationPlayer::~SCAnimationPlayer(){
 }
 
-void SCAnimationPlayer::CheckKeyboard(void) {
+void SCAnimationPlayer::checkKeyboard(void) {
     SDL_Event mouseEvents[5];
     int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
     for (int i = 0; i < numMouseEvents; i++) {
@@ -48,7 +48,7 @@ void SCAnimationPlayer::CheckKeyboard(void) {
         }
     }
 }
-void SCAnimationPlayer::Init(){
+void SCAnimationPlayer::init(){
     TreEntry *midgames_entry = Assets.GetEntryByName(
         "..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK"
     );
@@ -797,10 +797,10 @@ void SCAnimationPlayer::Init(){
     this->fps = 1;
 }
 
-void SCAnimationPlayer::RunFrame(void){
+void SCAnimationPlayer::runFrame(void){
 
     
-    CheckKeyboard();
+    checkKeyboard();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
     VGA.SetPalette(&this->palette);
@@ -892,9 +892,9 @@ void SCAnimationPlayer::RunFrame(void){
     for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
         VGA.GetFrameBuffer()->FillLineColor(199 - i, 0x00);
     VGA.VSync();
-    //this->RenderMenu();
+    //this->renderMenu();
 }
-void SCAnimationPlayer::RenderMenu() {
+void SCAnimationPlayer::renderMenu() {
     ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame();

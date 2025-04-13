@@ -27,16 +27,16 @@ protected:
 public:
     VGAPalette palette;
 
-    virtual void Init(void) = 0;
+    virtual void init(void) = 0;
     virtual void Start(void) { this->running = true;}
     void Stop(void) { this->running = false;}
-    virtual void RunFrame (void) = 0;
+    virtual void runFrame (void) = 0;
     void SetTitle(const char* title);
     inline bool IsRunning(void){ return this->running; }
     virtual ~IActivity();
     virtual void Focus(void)  { this->focused = true;}
     virtual void UnFocus(void){ this->focused = false;}
-    void CheckKeyboard(void);
+    void checkKeyboard(void);
 };
 
 

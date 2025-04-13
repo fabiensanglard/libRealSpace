@@ -22,7 +22,7 @@ SCNavMap::~SCNavMap(){
  *
  * @return None
  */
-void SCNavMap::CheckKeyboard(void) {
+void SCNavMap::checkKeyboard(void) {
     //Keyboard
     SDL_Event keybEvents[1];
     int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
@@ -62,7 +62,7 @@ void SCNavMap::CheckKeyboard(void) {
  *
  * @return None
  */
-void SCNavMap::Init(){
+void SCNavMap::init(){
     IffLexer lexer;
     FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");
     lexer.InitFromRAM(paletteFile->data, paletteFile->size);
@@ -100,8 +100,8 @@ void SCNavMap::SetName(char *name) {
  *
  * @return None
  */
-void SCNavMap::RunFrame(void) {
-    this->CheckKeyboard();
+void SCNavMap::runFrame(void) {
+    this->checkKeyboard();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
     

@@ -34,14 +34,14 @@ void SCTrainingMenu::UnFocus(void) {
 
 void SCTrainingMenu::OnSearchAndDestroy() {
     SCStrike *strike = new SCStrike();
-    strike->Init();
-    strike->SetMission("TEMPLATE.IFF");
+    strike->init();
+    strike->setMission("TEMPLATE.IFF");
     Game.AddActivity(strike);
 }
 
 void SCTrainingMenu::OnExitTraining(void) { Game.StopTopActivity(); }
 
-void SCTrainingMenu::Init() {
+void SCTrainingMenu::init() {
 
     TreEntry *objViewPAK =
         Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OBJVIEW.PAK");
@@ -56,12 +56,12 @@ void SCTrainingMenu::Init() {
     PakEntry *backgroundPakEntry = assets.GetEntry(6);
     PakArchive bgPack;
     bgPack.InitFromRAM("OBJVIEW.PAK: file 6", backgroundPakEntry->data, backgroundPakEntry->size);
-    background.Init(bgPack.GetEntry(0)->data, bgPack.GetEntry(0)->size);
+    background.init(bgPack.GetEntry(0)->data, bgPack.GetEntry(0)->size);
 
     PakEntry *titlePackEntry = assets.GetEntry(1);
     PakArchive titlePack;
     titlePack.InitFromRAM("", titlePackEntry->data, titlePackEntry->size);
-    title.Init(titlePack.GetEntry(0)->data, titlePack.GetEntry(0)->size);
+    title.init(titlePack.GetEntry(0)->data, titlePack.GetEntry(0)->size);
     Point2D positionTitle = {4, 0};
     title.SetPosition(&positionTitle);
 
@@ -71,7 +71,7 @@ void SCTrainingMenu::Init() {
     trButtonsPack.InitFromRAM("TM.SHP", trButtonsEntry->data, trButtonsEntry->size);
 
     Point2D positionBoard = {6, 150};
-    board.Init(trButtonsPack.GetEntry(0)->data, trButtonsPack.GetEntry(0)->size);
+    board.init(trButtonsPack.GetEntry(0)->data, trButtonsPack.GetEntry(0)->size);
     board.SetPosition(&positionBoard);
     PakEntry *pak = nullptr;
     SCButton *button;
@@ -107,7 +107,7 @@ void SCTrainingMenu::Init() {
     buttons.push_back(button);
 }
 
-void SCTrainingMenu::RunFrame(void) {
+void SCTrainingMenu::runFrame(void) {
     CheckButtons();
 
     VGA.Activate();

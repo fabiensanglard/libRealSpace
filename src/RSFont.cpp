@@ -25,7 +25,7 @@ void RSFont::InitFromPAK(PakArchive* fontArchive){
     for (size_t i = 0 ; i < fontArchive->GetNumEntries(); i++) {
         PakEntry* entry = fontArchive->GetEntry(i);
         RLEShape* s = new RLEShape();
-        s->Init(entry->data,entry->size);
+        s->init(entry->data,entry->size);
         letters.push_back(s);
     }
 }
