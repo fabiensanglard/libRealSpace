@@ -987,12 +987,22 @@ void SCPlane::Render() {
         rotation.Clear();
         rotation.Identity();
         rotation.translateM(this->x, this->y, this->z);
-        rotation.rotateM(((this->azimuthf + 900) / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 1.0f, 0.0f);
-        rotation.rotateM((this->elevationf / 10.0f) * ((float)M_PI / 180.0f), 0.0f, 0.0f, 1.0f);
-        rotation.rotateM(-(this->twist / 10.0f) * ((float)M_PI / 180.0f), 1.0f, 0.0f, 0.0f);
+        rotation.rotateM(tenthOfDegreeToRad(this->azimuthf + 900), 0.0f, 1.0f, 0.0f);
+        rotation.rotateM(tenthOfDegreeToRad(this->elevationf), 0.0f, 0.0f, 1.0f);
+        rotation.rotateM(-tenthOfDegreeToRad(this->twist), 1.0f, 0.0f, 0.0f);
 
         glMultMatrixf((float *)rotation.v);
         
+        /*Vector3D pos = {
+            this->x, this->y, this->z
+        };
+        Vector3D orientation = {
+            tenthOfDegreeToRad(this->azimuthf + 900),
+            tenthOfDegreeToRad(this->elevationf),
+            -tenthOfDegreeToRad(this->twist)
+        };
+
+        Renderer.drawModel(this->object->entity, LOD_LEVEL_MAX, pos, orientation);*/
         Renderer.drawModel(this->object->entity, LOD_LEVEL_MAX);
         if (wheel_index) {
             if (this->object->entity->chld.size() > wheel_index) {
