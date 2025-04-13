@@ -639,7 +639,7 @@ void SCStrike::SetMission(char const *missionName) {
     newPosition.z = playerCoord->position.z;
     newPosition.y = playerCoord->position.y;
 
-    camera = Renderer.GetCamera();
+    camera = Renderer.getCamera();
     camera->SetPosition(&newPosition);
     this->current_target = 0;
     this->target = this->current_mission->enemies[this->current_target];
@@ -728,9 +728,9 @@ void SCStrike::RunFrame(void) {
                 GameState.missions_flags.push_back(flags.second);
             }
             GameState.mission_flyed_success[GameState.mission_flyed] = this->current_mission->gameflow_registers[0];
-            Renderer.Clear();
+            Renderer.clear();
             Screen.Refresh();
-            Renderer.Clear();
+            Renderer.clear();
             Game.StopTopActivity();
             return;
         }
@@ -904,10 +904,10 @@ void SCStrike::RunFrame(void) {
         );
     } break;
     }
-    Renderer.RenderWorldSolid(&area, BLOCK_LOD_MAX, 400);
+    Renderer.renderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     if (this->show_bbox) {
         for (auto rrarea: this->current_mission->mission->mission_data.areas) {
-            Renderer.RenderLineCube(rrarea->position, rrarea->AreaWidth);
+            Renderer.renderLineCube(rrarea->position, rrarea->AreaWidth);
         }
     }
     
@@ -918,28 +918,22 @@ void SCStrike::RunFrame(void) {
                 if (this->show_bbox) {
                     BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
                     Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};
-                    Renderer.RenderBBox(position, bb->min, bb->max);
-                    Renderer.RenderBBox(position+actor->formation_pos_offset, bb->min, bb->max);
-                    Renderer.RenderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
+                    Renderer.renderBBox(position, bb->min, bb->max);
+                    Renderer.renderBBox(position+actor->formation_pos_offset, bb->min, bb->max);
+                    Renderer.renderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
                 }
                 if (actor->plane->object->alive == false) {
                     actor->plane->RenderSmoke();
                 }
             }   
         } else if (actor->object->entity != nullptr) {
-            glPushMatrix();
-
-            glTranslatef(static_cast<GLfloat>(actor->object->position.x), static_cast<GLfloat>(actor->object->position.y),
-                        static_cast<GLfloat>(actor->object->position.z));
-            glRotatef((360.0f - (float)actor->object->azymuth + 90.0f), 0, 1, 0);
-            glRotatef((float)actor->object->pitch, 0, 0, 1);
-            glRotatef(-(float)actor->object->roll, 1, 0, 0);
-            Renderer.DrawModel(actor->object->entity, LOD_LEVEL_MAX);
-            glPopMatrix();
+            Vector3D actor_position = {actor->object->position.x, actor->object->position.y, actor->object->position.z};
+            Vector3D actor_orientation = {360.0f - (static_cast<float>(actor->object->azymuth) + 90.0f), static_cast<float>(actor->object->pitch), -static_cast<float>(actor->object->roll)};
+            Renderer.drawModel(actor->object->entity, LOD_LEVEL_MAX, actor_position, actor_orientation);
             if (this->show_bbox) {
                 BoudingBox *bb = actor->object->entity->GetBoudingBpx();
                 Vector3D position = {actor->object->position.x, actor->object->position.y, actor->object->position.z};
-                Renderer.RenderBBox(position, bb->min, bb->max);
+                Renderer.renderBBox(position, bb->min, bb->max);
             }
             
         } else {
@@ -976,12 +970,10 @@ void SCStrike::RunFrame(void) {
         cockpit_pos.y = this->camera->GetPosition().y;
         cockpit_pos.z = this->camera->GetPosition().z;
 
-        glTranslatef(cockpit_pos.x, cockpit_pos.y, cockpit_pos.z);
-        glRotatef((this->player_plane->azimuthf+900)/10.0f, 0, 1, 0);
-        glRotatef(this->player_plane->elevationf/10.0f, 0, 0, 1);
-        glRotatef(-this->player_plane->twist/10.0f, 1, 0, 0);
-        glTranslatef(0, -3, 0);
-        Renderer.DrawModel(this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX);
+        Vector3D cockpit_rot = {(this->player_plane->azimuthf+900)/10.0f, this->player_plane->elevationf/10.0f, -this->player_plane->twist/10.0f};
+        Vector3D cockpit_ajustement = { 0.0f,-3.0f,0.0f};
+
+        Renderer.drawModel(this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX, cockpit_pos, cockpit_rot, cockpit_ajustement);
 
         break;
     }
@@ -1016,6 +1008,7 @@ void SCStrike::RenderMenu() {
     static bool show_music_player = false;
     static bool show_ai = false;
     static bool go_to_nav = false;
+    static bool show_offcam = false;
     static int altitude = 0;
     static int azimuth = 0;
     static int throttle = 0;
@@ -1035,6 +1028,7 @@ void SCStrike::RenderMenu() {
             ImGui::MenuItem("Cockpit", NULL, &show_cockpit);
             ImGui::MenuItem("Show BBox", NULL, &this->show_bbox);
             ImGui::MenuItem("Ai pilot", NULL, &show_ai);
+            ImGui::MenuItem("Off camera", NULL, &show_offcam);
             ImGui::EndMenu();
         }
         int sceneid = -1;
@@ -1045,6 +1039,11 @@ void SCStrike::RenderMenu() {
                     360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
                     this->current_mission->mission->mission_data.name.c_str(), this->miss_file_name.c_str(),area_id);
         ImGui::EndMainMenuBar();
+    }
+    if (show_offcam) {
+        ImGui::Begin("Offcam");
+        ImGui::Image((void*)(intptr_t)Renderer.texture, ImVec2(800, 600), {0, 1}, {1, 0});
+        ImGui::End();
     }
     if (show_ai) {
         ImGui::Begin("AI");

@@ -37,7 +37,7 @@ void SCDogFightMenu::Init( ){
     
 
     
-    this->palette.Diff(Renderer.GetPalette());
+    this->palette.Diff(Renderer.getPalette());
     
     PakEntry* entry0 = assets.GetEntry(PAK_ID_BACKGROUND);
     PakArchive file0;

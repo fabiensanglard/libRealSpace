@@ -993,10 +993,10 @@ void SCPlane::Render() {
 
         glMultMatrixf((float *)rotation.v);
         
-        Renderer.DrawModel(this->object->entity, LOD_LEVEL_MAX);
+        Renderer.drawModel(this->object->entity, LOD_LEVEL_MAX);
         if (wheel_index) {
             if (this->object->entity->chld.size() > wheel_index) {
-                Renderer.DrawModel(this->object->entity->chld[wheel_index]->objct, LOD_LEVEL_MAX);
+                Renderer.drawModel(this->object->entity->chld[wheel_index]->objct, LOD_LEVEL_MAX);
             }
         }
         if (this->thrust > 50) {
@@ -1009,7 +1009,7 @@ void SCPlane::Render() {
                 };
                 glTranslatef(pos.z/250 , pos.y /250 , pos.x /250);
                 glScalef(1+this->thrust/100.0f,1,1);
-                Renderer.DrawModel(this->object->entity->chld[0]->objct, LOD_LEVEL_MAX);
+                Renderer.drawModel(this->object->entity->chld[0]->objct, LOD_LEVEL_MAX);
                 glPopMatrix();
             }
         }
@@ -1037,7 +1037,7 @@ void SCPlane::Render() {
             for (int i = 0; i < weaps->nb_weap; i++) {
                 glPushMatrix();
                 glTranslatef(position.z/250+path[i].z, position.y/250 + path[i].y, -position.x/250+path[i].x);
-                Renderer.DrawModel(weaps->objct, LOD_LEVEL_MAX);
+                Renderer.drawModel(weaps->objct, LOD_LEVEL_MAX);
                 glPopMatrix();
                 position.y -= 0.5f;
             }

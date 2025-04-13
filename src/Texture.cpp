@@ -24,7 +24,7 @@ Texture::Texture()
 Texture::~Texture(){
     
     if (id)
-        Renderer.DeleteTextureInGPU(this);
+        Renderer.deleteTextureInGPU(this);
     if (data)
         free(data);
 }

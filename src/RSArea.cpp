@@ -408,7 +408,7 @@ void RSArea::ParseBlocks(size_t lod, PakEntry *entry, size_t blockDim) {
             vertex->upperImageID = vertStream.ReadByte();
             vertex->lowerImageID = vertStream.ReadByte();
 
-            Texel *t = Renderer.GetPalette()->GetRGBColor(paletteColor * 16 + shade);
+            Texel *t = Renderer.getPalette()->GetRGBColor(paletteColor * 16 + shade);
 
             // Texel* t = renderer.GetDefaultPalette()->GetRGBColor(vertex->text);
             /*

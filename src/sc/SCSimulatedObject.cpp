@@ -35,7 +35,7 @@ void SCSimulatedObject::Render() {
     rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
     
     glMultMatrixf((float *)rotation.v);
-    Renderer.DrawModel(this->obj, LOD_LEVEL_MAX);
+    Renderer.drawModel(this->obj, LOD_LEVEL_MAX);
     glPopMatrix();
     size_t cpt=this->smoke_positions.size();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -351,7 +351,7 @@ void GunSimulatedObject::Render() {
         rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
         
         glMultMatrixf((float *)rotation.v);
-        Renderer.DrawModel(this->obj, LOD_LEVEL_MAX);
+        Renderer.drawModel(this->obj, LOD_LEVEL_MAX);
         glPopMatrix();
     }
     

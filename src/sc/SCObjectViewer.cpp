@@ -299,22 +299,22 @@ void SCObjectViewer::RunFrame(void) {
     newPosition.y = showCase.cameraDist / 350;
     newPosition.z = showCase.cameraDist / 150 * sinf(totalTime / 2000.0f);
 
-    Renderer.GetCamera()->SetPosition(&newPosition);
+    Renderer.getCamera()->SetPosition(&newPosition);
     Point3D lookAt = {0, 0, 0};
-    Renderer.GetCamera()->LookAt(&lookAt);
+    Renderer.getCamera()->LookAt(&lookAt);
 
     Point3D light;
     light.x = 4 * cosf(-1 * totalTime / 20000.0f);
     light.y = 4;
     light.z = 4 * sinf(-1 * totalTime / 20000.0f);
-    Renderer.SetLight(&light);
+    Renderer.setLight(&light);
 
     glMatrixMode(GL_PROJECTION);
-    Matrix *projection = Renderer.GetCamera()->GetProjectionMatrix();
+    Matrix *projection = Renderer.getCamera()->GetProjectionMatrix();
     glLoadMatrixf(projection->ToGL());
 
     glMatrixMode(GL_MODELVIEW);
-    Matrix *view = Renderer.GetCamera()->GetViewMatrix();
+    Matrix *view = Renderer.getCamera()->GetViewMatrix();
     glLoadMatrixf(view->ToGL());
     glPushMatrix();
     glRotatef(this->rotateLeftRightAngle, 1, 0, 0);
@@ -322,7 +322,7 @@ void SCObjectViewer::RunFrame(void) {
     glRotatef(this->rotateUpDownAngle, 0, 0, 1);
 
     glScalef(1 / this->zoomFactor, 1 / this->zoomFactor, 1 / this->zoomFactor);
-    Renderer.DrawModel(showCases[currentObject].entity, LOD_LEVEL_MAX);
+    Renderer.drawModel(showCases[currentObject].entity, LOD_LEVEL_MAX);
     glPopMatrix();
     glPushMatrix();
     glDisable(GL_DEPTH_TEST);

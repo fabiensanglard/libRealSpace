@@ -7,15 +7,19 @@
 //
 
 #pragma once
+#define GL_GLEXT_PROTOTYPES
 #include "AssetManager.h"
 #include "Camera.h"
 #include "RSMission.h"
 #include "Texture.h"
 #ifdef _WIN32
+#define GL_GLEXT_PROTOTYPES
 #include <GL/GL.h>
 #include <Windows.h>
 #include <algorithm>
 #endif
+#include <SDL_opengl.h>
+#include <SDL_opengl_glext.h>
 #define MAP_SIZE 200000
 class RSArea;
 class Texture;
@@ -39,59 +43,58 @@ typedef std::map<int, VertexVector> TextureVertexMap;
 class SCRenderer {
 
 public:
+    GLuint texture;
     SCRenderer();
     ~SCRenderer();
 
-    void Prepare(void);
+    void init(int width, int height, AssetManager *amana);
 
-    void Init(int width, int height, AssetManager *amana);
+    void clear(void);
 
-    void Clear(void);
+    void drawModel(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation, Vector3D ajustement);
 
-    void DrawModel(RSEntity *object, size_t lodLevel);
-    void DisplayModel(RSEntity *object, size_t lodLevel);
+    void drawModel(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation);
 
-    void CreateTextureInGPU(Texture *texture);
-    void UploadTextureContentToGPU(Texture *texture);
-    void DeleteTextureInGPU(Texture *texture);
+    void drawModel(RSEntity *object, size_t lodLevel);
+    void displayModel(RSEntity *object, size_t lodLevel);
 
-    VGAPalette *GetPalette(void);
+    void createTextureInGPU(Texture *texture);
+    void uploadTextureContentToGPU(Texture *texture);
+    void deleteTextureInGPU(Texture *texture);
+
+    VGAPalette *getPalette(void);
 
     // Map Rendering
 
-    void RenderTexturedTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, RSArea *area, int triangleType,
+    void renderTexturedTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, RSArea *area, int triangleType,
                                 RSImage *image);
-    void RenderColoredTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
-    bool IsTextured(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
-    void RenderQuad(MapVertex *currentVertex, MapVertex *rightVertex, MapVertex *bottomRightVertex,
+    void renderColoredTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
+    bool isTextured(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
+    void renderQuad(MapVertex *currentVertex, MapVertex *rightVertex, MapVertex *bottomRightVertex,
                     MapVertex *bottomVertex, RSArea *area, bool renderTexture);
 
-    void RenderBlock(RSArea *area, int LOD, int blockID, bool renderTexture);
-    void RenderWorldSolid(RSArea *area, int LOD, int verticesPerBlock);
-    void RenderWorldByID(RSArea *area, int LOD, int verticesPerBlock, int blockId);
-    void RenderObjects(RSArea *area, size_t blockID);
-    void RenderLineCube(Vector3D position, int32_t size);
-    void RenderBBox(Vector3D position, Point3D min, Point3D max);
-    Camera *GetCamera(void);
+    void renderBlock(RSArea *area, int LOD, int blockID, bool renderTexture);
+    void renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock);
+    void renderWorldByID(RSArea *area, int LOD, int verticesPerBlock, int blockId);
+    void renderObjects(RSArea *area, size_t blockID);
+    void renderLineCube(Vector3D position, int32_t size);
+    void renderBBox(Vector3D position, Point3D min, Point3D max);
+    Camera *getCamera(void);
 
-    void SetLight(Point3D *position);
+    void setLight(Point3D *position);
 
-    inline bool IsPaused(void) { return this->paused; }
+    void setClearColor(uint8_t red, uint8_t green, uint8_t blue);
 
-    inline void Pause(void) { this->paused = true; }
-
-    void SetClearColor(uint8_t red, uint8_t green, uint8_t blue);
-
-    void Prepare(RSEntity *object);
-    void RenderMissionObjects(RSMission *mission);
-    void RenderMapOverlay(RSArea *area);
+    void prepare(RSEntity *object);
+    void renderMissionObjects(RSMission *mission);
+    void renderMapOverlay(RSArea *area);
     void setPlayerPosition(Point3D *position);
-
+    void renderWorldToTexture(RSArea *area);
 private:
     bool initialized;
     AssetManager *assets;
-    void GetNormal(RSEntity *object, Triangle *triangle, Vector3D *normal);
-    void RenderWorldSkyAndGround();
+    void getNormal(RSEntity *object, Triangle *triangle, Vector3D *normal);
+    void renderWorldSkyAndGround();
     int32_t width;
     int32_t height;
     int scale;
@@ -104,4 +107,6 @@ private:
     Point3D light;
     Point3D playerPosition;
     TextureVertexMap textureSortedVertex;
+    GLuint framebuffer;
+    
 };
