@@ -808,6 +808,25 @@ void SCStrike::runFrame(void) {
             this->cockpit->show_weapons = false;
         }
     }
+
+    if (this->target != nullptr) {
+        if (this->target->plane != nullptr) {
+           
+            this->setCameraFollow(this->target->plane);
+            Renderer.initRenderToTexture();
+            Renderer.initRenderCameraView();
+            Renderer.renderWorldToTexture(&area);
+            Vector3D target_position = {
+                this->target->plane->x,
+                this->target->plane->y,
+                this->target->plane->z
+            };
+            this->player_plane->Render();
+            this->target->plane->Render();
+            Renderer.getRenderToTexture();
+        }
+    }
+    
     switch (this->camera_mode) {
     case View::AUTO_PILOT: {
         if (this->autopilot_timeout > -AUTOPILOTE_TIMEOUT) {
@@ -915,6 +934,8 @@ void SCStrike::runFrame(void) {
         );
     } break;
     }
+
+    
     Renderer.renderWorldSolid(&area, BLOCK_LOD_MAX, 400);
     if (this->show_bbox) {
         for (auto rrarea: this->current_mission->mission->mission_data.areas) {

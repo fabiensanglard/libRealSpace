@@ -891,36 +891,18 @@ void SCRenderer::renderObjects(RSArea *area, size_t blockID) {
     }
 }
 void SCRenderer::renderWorldToTexture(RSArea *area) {
-    int width = 800, height = 600;
+    
 
-    // Create texture
-    const float verticalOffset = 0.45f;
-    // Create texture
     Vector3D pos = camera.GetPosition();
     int centerX = BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
     int centerY = BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
     int blocX = (int)(pos.x + centerX) / BLOCK_WIDTH;
     int blocY = (int)(pos.z + centerY) / BLOCK_WIDTH;
 
-    glViewport(0, 0, width, height);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     int block_id = blocY * BLOCK_PER_MAP_SIDE + blocX;
-    Matrix *projectionMatrix = camera.GetProjectionMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glTranslatef(0.0f, verticalOffset, 0.0f); // Apply the vertical offset
-    glMultMatrixf(projectionMatrix->ToGL()); // Apply the camera's projection matrix
     
-    // Set viewport and render
-    
-    glMatrixMode(GL_MODELVIEW);
-
-    Matrix *modelViewMatrix = camera.GetViewMatrix();
-    glLoadMatrixf(modelViewMatrix->ToGL());
-
     glDisable(GL_CULL_FACE);
-
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
@@ -958,8 +940,27 @@ void SCRenderer::renderWorldToTexture(RSArea *area) {
     glDisable(GL_TEXTURE_2D);
 
     
+    
+}
+void SCRenderer::initRenderToTexture() {
+    glViewport(0, 0, 800, 600);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+void SCRenderer::getRenderToTexture() {
     glBindTexture(GL_TEXTURE_2D, texture);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, width, height, 0);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 800, 600, 0);
+}
+void SCRenderer::initRenderCameraView(){ 
+    const float verticalOffset = 0.45f;
+    Matrix *projectionMatrix = camera.GetProjectionMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glTranslatef(0.0f, verticalOffset, 0.0f);
+    glMultMatrixf(projectionMatrix->ToGL());
+    glMatrixMode(GL_MODELVIEW);
+    Matrix *modelViewMatrix = camera.GetViewMatrix();
+    glLoadMatrixf(modelViewMatrix->ToGL());
 }
 void SCRenderer::renderMissionObjects(RSMission *mission) {
 

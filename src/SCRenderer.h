@@ -52,9 +52,7 @@ public:
     void clear(void);
 
     void drawModel(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation, Vector3D ajustement);
-
     void drawModel(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation);
-
     void drawModel(RSEntity *object, size_t lodLevel);
     void displayModel(RSEntity *object, size_t lodLevel);
 
@@ -90,6 +88,11 @@ public:
     void renderMapOverlay(RSArea *area);
     void setPlayerPosition(Point3D *position);
     void renderWorldToTexture(RSArea *area);
+
+    void initRenderToTexture();
+    void getRenderToTexture();
+    void initRenderCameraView();
+
 private:
     bool initialized;
     AssetManager *assets;

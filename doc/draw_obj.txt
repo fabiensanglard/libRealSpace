@@ -1,0 +1,8 @@
+glTranslatef(
+    static_cast<GLfloat>(actor->object->position.x),
+    static_cast<GLfloat>(actor->object->position.y),
+    static_cast<GLfloat>(actor->object->position.z)
+);
+glRotatef((360.0f - (float)actor->object->azymuth + 90.0f), 0, 1, 0);
+glRotatef((float)actor->object->pitch, 0, 0, 1);
+glRotatef(-(float)actor->object->roll, 1, 0, 0);
