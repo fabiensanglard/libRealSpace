@@ -7,13 +7,11 @@
 //
 
 #pragma once
-#define GL_GLEXT_PROTOTYPES
-#include "AssetManager.h"
+#include "../realspace/AssetManager.h"
 #include "Camera.h"
-#include "RSMission.h"
+#include "../realspace/RSImage.h"
 #include "Texture.h"
 #ifdef _WIN32
-#define GL_GLEXT_PROTOTYPES
 #include <GL/GL.h>
 #include <Windows.h>
 #include <algorithm>

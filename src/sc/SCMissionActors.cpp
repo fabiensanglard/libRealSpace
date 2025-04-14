@@ -128,6 +128,17 @@ bool SCMissionActors::destroyTarget(uint8_t arg) {
             wp.y = actor->plane->y;
             wp.z = actor->plane->z;
             wp = wp + actor->attack_pos_offset;
+            if (target_position.Length() == 0.0f) {
+                target_position = wp;
+                target_position_update = 2000;
+            }
+            Vector3D target_position_diff = target_position - wp;
+            if (target_position_diff.Length() > 0.0f && target_position_update == 0) {
+                target_position = wp;
+                target_position_update = 2000;
+            } else if (target_position_diff.Length() > 0.0f) {
+                target_position_update -= 1;
+            }
             this->pilot->SetTargetWaypoint(wp);
             Vector3D diff = wp - position;
             float dist = diff.Length();

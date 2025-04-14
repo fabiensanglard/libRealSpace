@@ -10,8 +10,8 @@
 #define libRealSpace_precomp_h
 
 //libspace include
-#include "../precomp.h"
-
+#include "../engine/precomp.h"
+#include "../realspace/precomp.h"
 #include "SCenums.h"
 #include "PaletteIDs.h"
 #include "ShapeIDs.h"

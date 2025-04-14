@@ -15,7 +15,7 @@
 #include <string>
 #include <map>
 
-#include "../src/ByteStream.h"
+#include "ByteStream.h"
 
 
 class IFFSaxLexer {

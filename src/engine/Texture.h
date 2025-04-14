@@ -18,7 +18,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#include "ByteStream.h"
+#include "../realspace/ByteStream.h"
 
 class RSPalette;
 typedef struct {
