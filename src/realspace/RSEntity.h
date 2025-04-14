@@ -11,14 +11,14 @@
 #include <vector>
 
 #include "AssetManager.h"
-#include "IFFSaxLexer.h"
-#include "IffLexer.h"
-#include "Maths.h"
-#include "Matrix.h"
-#include "Quaternion.h"
+#include "../commons/IFFSaxLexer.h"
+#include "../commons/IffLexer.h"
+#include "../commons/Maths.h"
+#include "../commons/Matrix.h"
+#include "../commons/Quaternion.h"
 #include "RSImage.h"
 #include "TreArchive.h"
-#include "LZBuffer.h"
+#include "../commons/LZBuffer.h"
 #define LOD_LEVEL_MAX 0
 #define LOD_LEVEL_MED 1
 #define LOD_LEVEL_MIN 2

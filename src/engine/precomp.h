@@ -32,13 +32,18 @@ extern "C" {
     #include <GL/gl.h>
     #include <GL/glu.h>
 
-    #include "Maths.h"
-    #include "Matrix.h"
-    #include "Quaternion.h"
+    #include "../commons/Maths.h"
+    #include "../commons/Matrix.h"
+    #include "../commons/Quaternion.h"
     #include "Camera.h"
     #include "Texture.h"
     #include "RSMixer.h"
+
     
+    #include "../realspace/RLEShape.h"
+    #include "../realspace/RSFont.h"
+
+
     //VGA and Glide
     #include "RSScreen.h"
     #include "FrameBuffer.h"

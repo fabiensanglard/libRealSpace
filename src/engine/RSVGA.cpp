@@ -7,9 +7,9 @@
 //
 
 #include "RSVGA.h"
-#include "IffLexer.h"
-#include "RSImage.h"
-#include "RSPalette.h"
+#include "../commons/IffLexer.h"
+#include "../realspace/RSImage.h"
+#include "../realspace/RSPalette.h"
 #include "SDL2/SDL_opengl_glext.h"
 
 RSVGA::RSVGA() {

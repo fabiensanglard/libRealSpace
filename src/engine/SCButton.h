@@ -9,7 +9,7 @@
 #ifndef __libRealSpace__Button__
 #define __libRealSpace__Button__
 #include <functional>
-
+#include "../realspace/RLEShape.h"
 
 class SCButton{
     
@@ -28,10 +28,6 @@ public:
     void OnAction(void);
     
     enum Appearance { APR_UP, APR_DOWN};
-    
-    
-    
-    
     RLEShape appearance[2];
     
     inline bool IsEnabled(void){ return this->enabled; }

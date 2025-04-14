@@ -9,9 +9,9 @@
 #pragma once
 #include <math.h>
 
-#include "Maths.h"
-#include "Matrix.h"
-#include "Quaternion.h"
+#include "../commons/Maths.h"
+#include "../commons/Matrix.h"
+#include "../commons/Quaternion.h"
 
 
 class Camera{

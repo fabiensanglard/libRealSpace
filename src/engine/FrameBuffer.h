@@ -1,5 +1,6 @@
 #pragma once
 #include "precomp.h"
+#include "../realspace/RLEShape.h"
 class FrameBuffer {
 public:
     uint8_t *framebuffer{nullptr};

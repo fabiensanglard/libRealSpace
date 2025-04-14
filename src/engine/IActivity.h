@@ -8,6 +8,20 @@
 
 #ifndef __libRealSpace__IActivity__
 #define __libRealSpace__IActivity__
+#include <vector>
+#include "../commons/Maths.h"
+#include "SCButton.h"
+#include "RSVGA.h"
+#include "RSScreen.h"
+#include "../sc/GameEngine.h"
+#include "../sc/SCMouse.h"
+
+
+extern RSScreen Screen;
+extern GameEngine Game;
+extern SCMouse Mouse;
+extern RSVGA VGA;
+
 char* strtoupper(char* dest, const char* src);
 bool isPointInQuad(const Point2D &p, const std::vector<Point2D *> *quad);
 

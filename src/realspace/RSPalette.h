@@ -9,8 +9,8 @@
 
 #include <stdint.h>
 
-#include "IffLexer.h"
-#include "Texture.h"
+#include "../commons/IFFLexer.h"
+#include "../engine/Texture.h"
 #include "RSEntity.h"
 
 struct VGAPalette;

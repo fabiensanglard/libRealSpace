@@ -10,10 +10,10 @@
 #include <stdint.h>
 
 #include "Base.h"
-#include "ByteStream.h"
-#include "../engine/Maths.h"
+#include "../commons/ByteStream.h"
+#include "../commons/Maths.h"
 #include "PakArchive.h"
-#include "LZBuffer.h"
+#include "../commons/LZBuffer.h"
 
 class RLEShape {
 private:

@@ -9,8 +9,8 @@
 #pragma once
 
 #include <stdint.h>
-#include "Maths.h"
-#include "Texture.h"
+#include "../commons/Maths.h"
+#include "../engine/Texture.h"
 
 
 class RSPalette;

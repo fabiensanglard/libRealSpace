@@ -12,8 +12,9 @@
 #endif
 #include <GL/gl.h>
 
-#include "RLEShape.h"
-#include "RSFont.h"
+#include "../realspace/AssetManager.h"
+#include "../realspace/RLEShape.h"
+#include "../realspace/RSFont.h"
 #include "Texture.h"
 #include "FrameBuffer.h"
 

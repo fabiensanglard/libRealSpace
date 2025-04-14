@@ -1,5 +1,4 @@
 #include "precomp.h"
-#include "FrameBuffer.h"
 
 FrameBuffer::FrameBuffer(int w, int h) {
     this->framebuffer = new uint8_t[w * h]();

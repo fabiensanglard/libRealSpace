@@ -12,7 +12,7 @@
 #include <vector>
 #include <map>
 #include "Base.h"
-#include "ByteStream.h"
+#include "../commons/ByteStream.h"
 #include "PakArchive.h"
 
 struct Char_String_Comparator

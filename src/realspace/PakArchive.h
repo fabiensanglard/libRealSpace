@@ -11,8 +11,9 @@
 #include <stdint.h>
 
 #include "Base.h"
-#include "ByteStream.h"
-#include "LZBuffer.h"
+#include "../commons/ByteStream.h"
+#include "../commons/LZBuffer.h"
+
 typedef struct PakEntry{
     
     uint8_t* data;
