@@ -10,7 +10,7 @@
 
 #include <cstring>
 
-#include "Base.h"
+#include "../realspace/Base.h"
 
 char textIDs[5];
 char* GetChunkTextID(uint32_t id) {
