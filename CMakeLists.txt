@@ -11,6 +11,7 @@ set (OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
 
 add_subdirectory(src/sc)
+add_subdirectory(src/to)
 add_subdirectory(src/engine)
 add_subdirectory(src/realspace)
 add_subdirectory(src/commons)
