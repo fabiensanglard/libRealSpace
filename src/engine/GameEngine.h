@@ -16,8 +16,13 @@
 #include <vector>
 #include <string>
 #include <SDL.h>
+#include "../commons/Maths.h"
+#include "../sc/SCMouse.h"
+#include "RSScreen.h"
+#include "RSVGA.h"
+#include "SCRenderer.h"
+#include "IActivity.h"
 
-class IActivity;
 class GameEngine{
     
 public:

@@ -7,6 +7,7 @@
 //
 
 #include "IActivity.h"
+#include "GameEngine.h"
 
 char *strtoupper(char *dest, const char *src) {
     char *result = dest;

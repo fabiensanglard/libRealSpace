@@ -10,42 +10,19 @@
 #include "imgui_impl_opengl2.h"
 #include "imgui_impl_sdl2.h"
 #include "GameEngine.h"
-#include "precomp.h"
-#define FLOPPY 0
+
+extern RSScreen Screen;
+extern GameEngine Game;
+extern SCMouse Mouse;
+extern AssetManager Assets;
+extern SCRenderer Renderer;
+extern RSVGA VGA;
 
 GameEngine::GameEngine() {}
 
 GameEngine::~GameEngine() {}
 
 void GameEngine::init() {
-
-
-    // Load all TREs and PAKs
-    if (FLOPPY) {
-        std::vector<std::string> treFiles = {
-            "GAMEFLOW.TRE",
-            "OBJECTS.TRE",
-            "MISC.TRE",
-            "SOUND.TRE",
-            "MISSIONS.TRE",
-            "TEXTURES.TRE"
-        };
-        Assets.init(treFiles);
-    } else {
-        std::vector<std::string> cdTreFiles = {
-            "BIGTRE.TRE",
-            "LILTRE.TRE",
-            "VOCLIST.TRE"
-        };
-        Assets.ReadISOImage("./SC.DAT");
-        Assets.init(cdTreFiles);
-    }
-    
-    Mixer.init(&Assets);
-    FontManager.init(&Assets);
-
-    // Load assets needed for Conversations (char and background)
-    ConvAssets.init();
 
     // Load Main Palette and Initialize the GL
     Screen.init(WIDTH,HEIGHT,FULLSCREEN);

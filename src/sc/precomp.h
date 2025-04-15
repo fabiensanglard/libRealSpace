@@ -28,7 +28,7 @@
 #include "../engine/SCButton.h"
 #include "../engine/SCZone.h"
 #include "../engine/IActivity.h"
-#include "GameEngine.h"
+#include "../engine/GameEngine.h"
 #include "ConvAssetManager.h"
 #include "main.h"
 

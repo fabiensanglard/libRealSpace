@@ -8,7 +8,7 @@
 
 #ifndef __libRealSpace__SCMouse__
 #define __libRealSpace__SCMouse__
-
+#include "../realspace/RLEShape.h"
 
 
 typedef struct MouseButton{

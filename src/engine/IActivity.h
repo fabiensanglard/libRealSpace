@@ -13,9 +13,9 @@
 #include "SCButton.h"
 #include "RSVGA.h"
 #include "RSScreen.h"
-#include "../sc/GameEngine.h"
 #include "../sc/SCMouse.h"
 
+class GameEngine;
 
 extern RSScreen Screen;
 extern GameEngine Game;

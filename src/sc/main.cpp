@@ -7,7 +7,7 @@
 //
 
 #include "precomp.h"
-
+#define FLOPPY 0
 //Here are all the mean subsystems interacting together
 SCState         GameState;
 GameEngine      Game;
@@ -24,7 +24,32 @@ int main(int argc, char* argv[]) {
 
     
     Assets.SetBase("./assets");
+    // Load all TREs and PAKs
+    if (FLOPPY) {
+        std::vector<std::string> treFiles = {
+            "GAMEFLOW.TRE",
+            "OBJECTS.TRE",
+            "MISC.TRE",
+            "SOUND.TRE",
+            "MISSIONS.TRE",
+            "TEXTURES.TRE"
+        };
+        Assets.init(treFiles);
+    } else {
+        std::vector<std::string> cdTreFiles = {
+            "BIGTRE.TRE",
+            "LILTRE.TRE",
+            "VOCLIST.TRE"
+        };
+        Assets.ReadISOImage("./SC.DAT");
+        Assets.init(cdTreFiles);
+    }
     
+    Mixer.init(&Assets);
+    FontManager.init(&Assets);
+
+    // Load assets needed for Conversations (char and background)
+    ConvAssets.init();
     Game.init();
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();
