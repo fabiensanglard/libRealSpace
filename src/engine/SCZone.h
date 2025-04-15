@@ -9,7 +9,15 @@
 #ifndef __libRealSpace__Zone__
 #define __libRealSpace__Zone__
 #include <functional>
+#include "../realspace/RLEShape.h"
+#include "../realspace/RSImageSet.h"
+#include "../realspace/RSGameflow.h"
+#include "RSVGA.h"
+#include <SDL.h>
+#include <vector>
+#include <string>
 
+extern RSVGA VGA;
 /**
  * Structure representing a bounding box for a sprite.
  *

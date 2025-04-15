@@ -7,8 +7,9 @@
 //
 
 #pragma once
-#include "../realspace/AssetManager.h"
 #include "Camera.h"
+#include "../realspace/AssetManager.h"
+#include "../realspace/RSMission.h"
 #include "../realspace/RSImage.h"
 #include "Texture.h"
 #ifdef _WIN32

@@ -7,7 +7,7 @@
 //
 #pragma once
 
-#include "IFFSaxLexer.h"
+#include "../commons/IFFSaxLexer.h"
 
 struct RADI_INFO {
     uint16_t id;

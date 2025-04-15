@@ -14,7 +14,7 @@ class Quaternion{
     
     public:
     
-     Quaternion();
+    Quaternion();
     ~Quaternion();
     
     void Multiply(Quaternion* other);

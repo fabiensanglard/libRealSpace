@@ -7,11 +7,12 @@
 //
 
 #include "SCRenderer.h"
-#include "AssetManager.h"
-#include "IffLexer.h"
-#include "RSArea.h"
-#include "RSEntity.h"
-#include "RSPalette.h"
+#include "../realspace/AssetManager.h"
+#include "../commons/IffLexer.h"
+#include "../realspace/RSArea.h"
+#include "../realspace/RSEntity.h"
+#include "../realspace/RSPalette.h"
+
 #include "RSVGA.h"
 #include "Texture.h"
 #include <SDL_opengl_glext.h>

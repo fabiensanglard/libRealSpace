@@ -7,11 +7,10 @@
 //
 
 #pragma once
-
     // Reusable Realspace Classes
     #include "Base.h"
-    #include "LZBuffer.h"
-    #include "ByteStream.h"
+    #include "../commons/LZBuffer.h"
+    #include "../commons/ByteStream.h"
     #include "PakArchive.h"
     #include "TreArchive.h"
 
@@ -21,8 +20,8 @@
     #include "RSFont.h"
     #include "RSFontManager.h"
     #include "RSImageSet.h"
-    #include "SCRenderer.h"
-    #include "IffLexer.h"
+    #include "../engine/SCRenderer.h"
+    #include "../commons/IffLexer.h"
     #include "RSPalette.h"
     #include "RSSmokeSet.h"
     #include "RSEntity.h"
@@ -41,5 +40,4 @@
     
     // Music Stuff
     #include "RSMusic.h"
-    #include "RSMixer.h"
     

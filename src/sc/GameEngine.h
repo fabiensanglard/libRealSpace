@@ -15,6 +15,7 @@
 #include <stack>
 #include <vector>
 #include <string>
+#include <SDL.h>
 
 class IActivity;
 class GameEngine{

@@ -37,14 +37,14 @@ extern "C" {
     #include "../commons/Quaternion.h"
     #include "Camera.h"
     #include "Texture.h"
-    #include "RSMixer.h"
-
     
+
+    #include "../realspace/AssetManager.h"
     #include "../realspace/RLEShape.h"
     #include "../realspace/RSFont.h"
+    #include "../realspace/RSMusic.h"
 
-
-    //VGA and Glide
+    #include "RSMixer.h"
     #include "RSScreen.h"
     #include "FrameBuffer.h"
     #include "RSVGA.h"

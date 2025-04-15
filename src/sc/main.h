@@ -9,7 +9,6 @@
 #ifndef libRealSpace_main_h
 #define libRealSpace_main_h
 
-
 extern GameEngine Game;
 extern SCMouse Mouse;
 extern RSScreen Screen;

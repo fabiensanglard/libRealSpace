@@ -7,7 +7,7 @@
 //
 
 #include "Texture.h"
-#include "RSImage.h"
+#include "../realspace/RSImage.h"
 #include "SCRenderer.h"
 #include <cassert>
 

@@ -7,7 +7,8 @@
 //
 
 #pragma once
-
+#include "../realspace/AssetManager.h"
+#include "../realspace/RSMusic.h"
 #include <SDL2/SDL_mixer_ext.h>
 
 class RSMixer {

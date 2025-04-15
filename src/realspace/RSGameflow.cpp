@@ -1,6 +1,6 @@
 #include "RSGameflow.h"
 #include "RSGameflow.h"
-#include "IFFSaxLexer.h"
+#include "../commons/IFFSaxLexer.h"
 #include <map>
 #include <string>
 #include <functional>

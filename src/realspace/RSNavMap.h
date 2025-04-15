@@ -4,9 +4,9 @@
 #include <vector>
 #include <cstring>
 
-#include "IFFSaxLexer.h"
+#include "../commons/IFFSaxLexer.h"
 #include "RLEShape.h"
-#include "ByteStream.h"
+#include "../commons/ByteStream.h"
 #include "RSFont.h"
 #include "PakArchive.h"
 

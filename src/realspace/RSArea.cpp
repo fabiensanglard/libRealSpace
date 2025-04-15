@@ -7,7 +7,7 @@
 //
 
 #include "RSArea.h"
-#include "SCRenderer.h"
+#include "../engine/SCRenderer.h"
 
 extern SCRenderer Renderer;
 

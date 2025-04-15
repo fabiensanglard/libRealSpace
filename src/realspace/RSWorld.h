@@ -7,7 +7,7 @@
 //
 #pragma once
 
-#include "IFFSaxLexer.h"
+#include "../commons/IFFSaxLexer.h"
 
 class RSWorld {
 private:

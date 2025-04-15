@@ -8,7 +8,7 @@
 
 #pragma once
 #include "precomp.h"
-
+#include "block_def.h"
 
 typedef struct MapObject{
     
