@@ -9,6 +9,7 @@
 #pragma once
 #include "precomp.h"
 #include "block_def.h"
+#include "../commons/IFFSaxLexer.h"
 
 typedef struct MapObject{
     
@@ -99,7 +100,6 @@ public:
     
 private:
     
-    void ParseMetadata(void );
     void ParseObjects(void );
     
     void ParseTrigo(void );
@@ -120,7 +120,17 @@ private:
     // Level 0 blocks are  5* 5;
     AreaBlock blocks[NUM_LODS][BLOCKS_PER_MAP];
     
-    
+    void parseTERA(uint8_t *data, size_t size);
+    void parseTERA_VERS(uint8_t *data, size_t size);
+    void parseTERA_INFO(uint8_t *data, size_t size);
+    void parseTERA_BLOX(uint8_t *data, size_t size);
+    void parseTERA_BLOX_ELEV(uint8_t *data, size_t size);
+    void parseTERA_BLOX_ATRI(uint8_t *data, size_t size);
+    void parseTERA_BLOX_OBJS(uint8_t *data, size_t size);
+    void parseTERA_TXML(uint8_t *data, size_t size);
+    void parseTERA_TXML_INFO(uint8_t *data, size_t size);
+    void parseTERA_TXMS_MAPS(uint8_t *data, size_t size);
+
     char name[16];
     
 };

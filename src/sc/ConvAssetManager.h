@@ -16,6 +16,9 @@
 #define CONV_INTERLETTER_SPACE 3
 #define CONV_SPACE_SIZE 5
 
+#include "../realspace/RSImageSet.h"
+#include "../commons/IFFSaxLexer.h"
+
 typedef struct CharFace {
 
     char name[9];
@@ -80,6 +83,21 @@ private:
     PakArchive optShps;
     PakArchive optPals;
     void ParseBGLayer(uint8_t *data, size_t layerID, ConvBackGround *back);
+    void parseIFF(uint8_t *data, size_t size);
+    void parseBCKS(uint8_t *data, size_t size);
+    void parseBCKS_BACK(uint8_t *data, size_t size);
+    void parseBCKS_BACK_INFO(uint8_t *data, size_t size);
+    void parseBCKS_BACK_DATA(uint8_t *data, size_t size);
+    void parseFACE(uint8_t *data, size_t size);
+    void parseFACE_DATA(uint8_t *data, size_t size);
+    void parseFIGR(uint8_t *data, size_t size);
+    void parseFIGR_DATA(uint8_t *data, size_t size);
+    void parsePFIG(uint8_t *data, size_t size);
+    void parsePFIG_DATA(uint8_t *data, size_t size);
+    void parseFCPL(uint8_t *data, size_t size);
+    void parseFCPL_DATA(uint8_t *data, size_t size);
+    void parseFGPL(uint8_t *data, size_t size);
+    void parseFGPL_DATA(uint8_t *data, size_t size);
 };
 
 #endif /* defined(__libRealSpace__ConAssetManager__) */

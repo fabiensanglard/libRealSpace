@@ -17,7 +17,7 @@
 #include <string>
 #include <SDL.h>
 #include "../commons/Maths.h"
-#include "../sc/SCMouse.h"
+#include "SCMouse.h"
 #include "RSScreen.h"
 #include "RSVGA.h"
 #include "SCRenderer.h"

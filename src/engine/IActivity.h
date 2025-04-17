@@ -13,7 +13,7 @@
 #include "SCButton.h"
 #include "RSVGA.h"
 #include "RSScreen.h"
-#include "../sc/SCMouse.h"
+#include "SCMouse.h"
 
 class GameEngine;
 

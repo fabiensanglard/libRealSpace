@@ -24,7 +24,7 @@
 
 // Core of the game
 #include "SCState.h"
-#include "SCMouse.h"
+#include "../engine/SCMouse.h"
 #include "../engine/SCButton.h"
 #include "../engine/SCZone.h"
 #include "../engine/IActivity.h"

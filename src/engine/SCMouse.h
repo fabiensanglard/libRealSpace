@@ -9,7 +9,12 @@
 #ifndef __libRealSpace__SCMouse__
 #define __libRealSpace__SCMouse__
 #include "../realspace/RLEShape.h"
+#include "../realspace/TreArchive.h"
+#include "RSVGA.h"
+#include "../realspace/AssetManager.h"
 
+extern AssetManager Assets;
+extern RSVGA VGA;
 
 typedef struct MouseButton{
     

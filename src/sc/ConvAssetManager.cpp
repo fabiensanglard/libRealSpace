@@ -394,3 +394,93 @@ void ConvAssetManager::BuildDB(void) {
     // I have no idea what is in there.
     ReadFGPL(convDataLexer.GetChunkByID('FGPL')); // Face Game palette normal
 }
+void ConvAssetManager::parseIFF(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["BCKS"] = std::bind(&ConvAssetManager::parseBCKS, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["FACE"] = std::bind(&ConvAssetManager::parseFACE, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["FIGR"] = std::bind(&ConvAssetManager::parseFIGR, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["PFIG"] = std::bind(&ConvAssetManager::parsePFIG, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["FGPL"] = std::bind(&ConvAssetManager::parseFGPL, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void ConvAssetManager::parseBCKS(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["BACK"] = std::bind(&ConvAssetManager::parseBCKS_BACK, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void ConvAssetManager::parseBCKS_BACK(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&ConvAssetManager::parseBCKS_BACK_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DATA"] = std::bind(&ConvAssetManager::parseBCKS_BACK_DATA, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void ConvAssetManager::parseBCKS_BACK_INFO(uint8_t *data, size_t size) {
+    
+}
+void ConvAssetManager::parseBCKS_BACK_DATA(uint8_t *data, size_t size) {
+    
+}
+void ConvAssetManager::parseFACE(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["DATA"] = std::bind(&ConvAssetManager::parseFACE_DATA, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void ConvAssetManager::parseFACE_DATA(uint8_t *data, size_t size) {
+    
+}
+void ConvAssetManager::parseFIGR(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["DATA"] = std::bind(&ConvAssetManager::parseFIGR_DATA, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void ConvAssetManager::parseFIGR_DATA(uint8_t *data, size_t size) {
+    
+}
+void ConvAssetManager::parsePFIG(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["DATA"] = std::bind(&ConvAssetManager::parsePFIG_DATA, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void ConvAssetManager::parsePFIG_DATA(uint8_t *data, size_t size) {
+    
+}
+void ConvAssetManager::parseFCPL(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["DATA"] = std::bind(&ConvAssetManager::parseFCPL_DATA, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void ConvAssetManager::parseFCPL_DATA(uint8_t *data, size_t size) {
+    
+}
+void ConvAssetManager::parseFGPL(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["DATA"] = std::bind(&ConvAssetManager::parseFGPL_DATA, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void ConvAssetManager::parseFGPL_DATA(uint8_t *data, size_t size) {
+    
+}

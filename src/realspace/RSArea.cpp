@@ -27,135 +27,6 @@ RSArea::~RSArea() {
     }
 }
 
-void RSArea::ParseMetadata() {
-    // Meta are in the first PAK file.
-    printf("Parsing file[0] (Metadatas)\n");
-    PakEntry *entry = archive->GetEntry(0);
-
-    IffLexer lexer;
-    lexer.InitFromRAM(entry->data, entry->size);
-    // lexer.List(stdout);
-
-    IffChunk *tera = lexer.GetChunkByID('TERA');
-    if (tera == NULL) {
-        printf(
-            "Error while parsing Metadata: Cannot find a TERA chunk in first file: Is this really an AREA PAK ?!?!?\n");
-        return;
-    }
-
-    // Parse BLOX containing the Elevation, Triangles and OBJS.
-    IffChunk *blox = lexer.GetChunkByID('BLOX');
-    if (blox == NULL) {
-        printf("Error while parsing Metadata: Cannot find a BLOX chunk.\n");
-        return;
-    }
-
-    /*
-        The content of the ELEV chunk is the same across ALL MAPS
-        Only    RHODEI.ELV    RHODEI.AVG
-                RHODEI.MED    RHODEI.AVG
-                RHODEI.LOW    RHODEI.AVG
-        At the end change. RHODEI / CANYON / QUEBEC / MAURITAN etc.....
-    */
-
-    // Elevation format entry is 46 bytes long:
-
-    // 2 bytes 0F 00
-    // 2 bytes
-    // 4 bytes 08 00 00 00
-    // 2 bytes
-    // 4 bytes 00 00 12 00
-    // 1 byte
-    // 4 bytes 00 20 4e 00 00
-
-    // 13 bytes: A filename
-    // 13 bytes: An other filename
-
-    IffChunk *elev = lexer.GetChunkByID('ELEV');
-    printf("Content of elevation chunk:\n");
-    size_t numEleRecords = elev->size / 46;
-    ByteStream elevStream(elev->data);
-    for (size_t e = 0; e < numEleRecords; e++) {
-
-        uint8_t unknownsElev[20];
-        for (int i = 0; i < 20; i++)
-            unknownsElev[i] = elevStream.ReadByte();
-
-        char elevName[14];
-        for (int i = 0; i < 13; i++)
-            elevName[i] = elevStream.ReadByte();
-        elevName[13] = 0;
-
-        char elevOtherName[14];
-        for (int i = 0; i < 13; i++)
-            elevOtherName[i] = elevStream.ReadByte();
-        elevOtherName[13] = 0;
-    }
-
-    IffChunk *atri = lexer.GetChunkByID('ATRI');
-
-    ByteStream triStream(atri->data);
-
-    char triFileName[13];
-    for (int i = 0; i < 13; i++)
-        triFileName[i] = triStream.ReadByte();
-
-    // IffChunk* objs = lexer.GetChunkByID('OBJS');
-    /*
-        OBJS format:
-            4 bytes unknown :
-            4 bytes unknown :
-            4 bytes unknown :
-            14 bytes OBJ file name
-    */
-
-    IffChunk *txms = lexer.GetChunkByID('TXMS');
-    if (txms == NULL) {
-        printf("Error while parsing Metadata: Cannot find a TXMS chunk.\n");
-        return;
-    }
-
-    IffChunk *txmsInfo = txms->childs[0];
-    if (txmsInfo->id != 'INFO') {
-        printf("Error: First child in TXMS is not an INFO chunk ?!\n");
-        return;
-    }
-
-    IffChunk *txmsMaps = txms->childs[1];
-    if (txmsMaps->id != 'MAPS') {
-        printf("Error: Second child in TXMS is not an MAP chunk ?!\n");
-        return;
-    }
-
-    // Num texture sets
-    size_t numTexturesSets = txmsMaps->size / 12;
-    printf("This area features %llu textureSets references.\n", numTexturesSets);
-
-    ByteStream textureRefStrean(txmsMaps->data);
-
-    for (size_t i = 0; i < numTexturesSets; i++) {
-        uint16_t fastID = textureRefStrean.ReadUShort();
-        char setName[9];
-        for (int n = 0; n < 8; n++) {
-            setName[n] = textureRefStrean.ReadByte();
-        }
-        uint8_t unknown = textureRefStrean.ReadByte();
-        uint8_t numImages = textureRefStrean.ReadByte();
-
-        printf("Texture Set Ref [%3llu] 0x0x%X[%-8s] %02X (%2u files).\n", i, fastID, setName, unknown, numImages);
-    }
-
-    /*
-        TXMS format:
-            One INFO chunk
-            X MAPS textures entries
-                2 byte  : fast lookup ID (from TXM pack);
-                8 bytes : Set Name (from TXM pack);
-                1 byte  : unknown
-                1 byte  : num textures in that set
-     */
-}
-
 #define OBJ_ENTRY_SIZE 0x46
 #define OBJ_ENTRY_NUM_OBJECTS_FIELD 0x2
 void RSArea::ParseObjects() {
@@ -527,7 +398,11 @@ void RSArea::InitFromPAKFileName(const char *pakFilename) {
 
     // Parse the meta datas.
     ParseElevations();
-    ParseMetadata();
+    //ParseMetadata();
+    PakEntry *entry = archive->GetEntry(0);
+
+    parseTERA(entry->data, entry->size);
+
     ParseObjects();
     ParseTrigo();
 
@@ -592,4 +467,90 @@ float RSArea::getY(float x, float z) {
     int blocY = (int)(z + centerY) / BLOCK_WIDTH;
 
     return (this->getGroundLevel(blocY * BLOCK_PER_MAP_SIDE + blocX, x, z));
+}
+
+void RSArea::parseTERA(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["VERS"] = std::bind(&RSArea::parseTERA_VERS, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["INFO"] = std::bind(&RSArea::parseTERA_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    
+    lexer.InitFromRAM(data, size, handlers);
+}
+
+void RSArea::parseTERA_VERS(uint8_t *data, size_t size) {}
+
+void RSArea::parseTERA_INFO(uint8_t *data, size_t size) {}
+
+void RSArea::parseTERA_BLOX(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["ELEV"] = std::bind(&RSArea::parseTERA_BLOX_ELEV, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["ATRI"] = std::bind(&RSArea::parseTERA_BLOX_ATRI, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["OBJS"] = std::bind(&RSArea::parseTERA_BLOX_OBJS, this, std::placeholders::_1, std::placeholders::_2);
+    
+    lexer.InitFromRAM(data, size, handlers);
+}
+
+void RSArea::parseTERA_BLOX_ELEV(uint8_t *data, size_t size) {
+    printf("Content of elevation chunk:\n");
+    size_t numEleRecords = size / 46;
+    ByteStream elevStream(data);
+    for (size_t e = 0; e < numEleRecords; e++) {
+
+        uint8_t unknownsElev[20];
+        for (int i = 0; i < 20; i++)
+            unknownsElev[i] = elevStream.ReadByte();
+
+        char elevName[14];
+        for (int i = 0; i < 13; i++)
+            elevName[i] = elevStream.ReadByte();
+        elevName[13] = 0;
+
+        char elevOtherName[14];
+        for (int i = 0; i < 13; i++)
+            elevOtherName[i] = elevStream.ReadByte();
+        elevOtherName[13] = 0;
+    }
+
+}
+
+void RSArea::parseTERA_BLOX_ATRI(uint8_t *data, size_t size) {
+    ByteStream triStream(data);
+
+    char triFileName[13];
+    for (int i = 0; i < 13; i++)
+        triFileName[i] = triStream.ReadByte();
+}
+
+void RSArea::parseTERA_BLOX_OBJS(uint8_t *data, size_t size) {}
+
+void RSArea::parseTERA_TXML(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSArea::parseTERA_TXML_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["MAPS"] = std::bind(&RSArea::parseTERA_TXMS_MAPS, this, std::placeholders::_1, std::placeholders::_2);
+    
+    lexer.InitFromRAM(data, size, handlers);
+}
+
+void RSArea::parseTERA_TXML_INFO(uint8_t *data, size_t size) {}
+
+void RSArea::parseTERA_TXMS_MAPS(uint8_t *data, size_t size) {
+    ByteStream textureRefStrean(data);
+    size_t numTexturesSets = size / 12;
+    for (size_t i = 0; i < numTexturesSets; i++) {
+        uint16_t fastID = textureRefStrean.ReadUShort();
+        char setName[9];
+        for (int n = 0; n < 8; n++) {
+            setName[n] = textureRefStrean.ReadByte();
+        }
+        uint8_t unknown = textureRefStrean.ReadByte();
+        uint8_t numImages = textureRefStrean.ReadByte();
+
+        printf("Texture Set Ref [%3llu] 0x0x%X[%-8s] %02X (%2u files).\n", i, fastID, setName, unknown, numImages);
+    }
 }
