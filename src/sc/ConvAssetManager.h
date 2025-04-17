@@ -82,6 +82,8 @@ private:
     PakArchive convPals;
     PakArchive optShps;
     PakArchive optPals;
+    ConvBackGround *tmp_conv_bg{nullptr};
+    
     void ParseBGLayer(uint8_t *data, size_t layerID, ConvBackGround *back);
     void parseIFF(uint8_t *data, size_t size);
     void parseBCKS(uint8_t *data, size_t size);

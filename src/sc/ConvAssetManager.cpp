@@ -376,23 +376,7 @@ void ConvAssetManager::BuildDB(void) {
     // Open the metadata
     TreEntry *convDataEntry =
         Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVDATA.IFF");
-    IffLexer convDataLexer;
-    convDataLexer.InitFromRAM(convDataEntry->data, convDataEntry->size);
-    // convDataLexer.List(stdout);
-
-    ReadBackGrounds(convDataLexer.GetChunkByID('BCKS'));
-
-    ReadFaces(convDataLexer.GetChunkByID('FACE')); // PAK id for Face image collection
-
-    ReadFigures(convDataLexer.GetChunkByID('FIGR')); // PAK id for Figures image
-
-    ReadPFigures(convDataLexer.GetChunkByID('PFIG')); // ??!? Maybe Palette figure ???!?!
-
-    // I have no idea what is in there.
-    ReadFCPL(convDataLexer.GetChunkByID('FCPL')); // Face Conv Palette normal and night
-
-    // I have no idea what is in there.
-    ReadFGPL(convDataLexer.GetChunkByID('FGPL')); // Face Game palette normal
+    this->parseIFF(convDataEntry->data, convDataEntry->size);
 }
 void ConvAssetManager::parseIFF(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
@@ -402,6 +386,7 @@ void ConvAssetManager::parseIFF(uint8_t *data, size_t size) {
     handlers["FACE"] = std::bind(&ConvAssetManager::parseFACE, this, std::placeholders::_1, std::placeholders::_2);
     handlers["FIGR"] = std::bind(&ConvAssetManager::parseFIGR, this, std::placeholders::_1, std::placeholders::_2);
     handlers["PFIG"] = std::bind(&ConvAssetManager::parsePFIG, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["FCPL"] = std::bind(&ConvAssetManager::parseFCPL, this, std::placeholders::_1, std::placeholders::_2);
     handlers["FGPL"] = std::bind(&ConvAssetManager::parseFGPL, this, std::placeholders::_1, std::placeholders::_2);
 
     lexer.InitFromRAM(data, size, handlers);
@@ -416,20 +401,26 @@ void ConvAssetManager::parseBCKS(uint8_t *data, size_t size) {
 }
 void ConvAssetManager::parseBCKS_BACK(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
-
+    this->tmp_conv_bg = new ConvBackGround();
     std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
     handlers["INFO"] = std::bind(&ConvAssetManager::parseBCKS_BACK_INFO, this, std::placeholders::_1, std::placeholders::_2);
     handlers["DATA"] = std::bind(&ConvAssetManager::parseBCKS_BACK_DATA, this, std::placeholders::_1, std::placeholders::_2);
 
     lexer.InitFromRAM(data, size, handlers);
+    this->backgrounds[this->tmp_conv_bg->name] = this->tmp_conv_bg;
+
 }
 void ConvAssetManager::parseBCKS_BACK_INFO(uint8_t *data, size_t size) {
-    
+    memset(this->tmp_conv_bg->name, 0, 9);
+    memcpy(this->tmp_conv_bg->name, data, size);
 }
 void ConvAssetManager::parseBCKS_BACK_DATA(uint8_t *data, size_t size) {
-    
+    size_t numLayers = size / 5; // A layer entry is 5 bytes wide
+    for (size_t layerID = 0; layerID < numLayers; layerID++)
+        ParseBGLayer(data, layerID, tmp_conv_bg);
 }
 void ConvAssetManager::parseFACE(uint8_t *data, size_t size) {
+
     IFFSaxLexer lexer;
 
     std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
@@ -438,7 +429,30 @@ void ConvAssetManager::parseFACE(uint8_t *data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 void ConvAssetManager::parseFACE_DATA(uint8_t *data, size_t size) {
-    
+    ByteStream s(data);
+
+    CharFace *tmp_face = new CharFace();
+    memcpy(tmp_face->name, data, 8);
+    tmp_face->name[8] = '\0';
+
+    s.MoveForward(8);
+
+    uint8_t pakID = s.ReadByte();
+
+    RSImageSet *imageSet = new RSImageSet();
+    imageSet->InitFromPakEntry(convShps.GetEntry(pakID));
+    tmp_face->appearances = imageSet;
+    for (size_t fid = 0; fid < imageSet->GetNumImages(); fid++) {
+        RLEShape *s = imageSet->GetShape(fid);
+
+        int height = s->GetHeight();
+        if (height < 198) {
+            Point2D pos = {0, CONV_TOP_BAR_HEIGHT + 1}; //  to allow the black band on top of the screen
+            s->SetPosition(&pos);
+        }
+    }
+
+    this->faces[tmp_face->name] = tmp_face;
 }
 void ConvAssetManager::parseFIGR(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
@@ -449,7 +463,29 @@ void ConvAssetManager::parseFIGR(uint8_t *data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 void ConvAssetManager::parseFIGR_DATA(uint8_t *data, size_t size) {
-    
+    ByteStream s(data);
+
+    CharFigure *figr = new CharFigure();
+    memcpy(figr->name, data, 8);
+    figr->name[8] = '\0';
+
+    s.MoveForward(8);
+
+    uint8_t pakID = s.ReadByte();
+
+    RSImageSet *shape = new RSImageSet();
+    PakEntry *entry = convShps.GetEntry(pakID);
+    PakArchive *pak = new PakArchive();
+    pak->InitFromRAM("FIGR", entry->data, entry->size);
+    if (pak->GetNumEntries()>0) {
+        shape->InitFromSubPakEntry(pak);
+    } else {
+        shape->InitFromPakEntry(entry);
+    }
+
+    Point2D pos = {0, CONV_TOP_BAR_HEIGHT + 1}; //  to allow the black band on top of the screen
+    figr->appearances = shape;
+    this->figures[figr->name] = figr;
 }
 void ConvAssetManager::parsePFIG(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
@@ -460,7 +496,13 @@ void ConvAssetManager::parsePFIG(uint8_t *data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 void ConvAssetManager::parsePFIG_DATA(uint8_t *data, size_t size) {
-    
+    ByteStream s(data);
+    char *figr = new char[9];
+    memcpy(figr, data, 8);
+    figr[8] = '\0';
+    if (this->figures.find(figr) != this->figures.end()) {
+        this->figures[figr]->paletteID = *(data + 8);
+    }
 }
 void ConvAssetManager::parseFCPL(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
@@ -471,7 +513,11 @@ void ConvAssetManager::parseFCPL(uint8_t *data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 void ConvAssetManager::parseFCPL_DATA(uint8_t *data, size_t size) {
-    
+    FacePalette *pal = new FacePalette();
+    memcpy(pal->name, data, 8);
+    pal->name[8] = '\0';
+    pal->index = *(data + 8);
+    this->facePalettes[pal->name] = pal;
 }
 void ConvAssetManager::parseFGPL(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
