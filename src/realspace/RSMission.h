@@ -10,7 +10,6 @@ extern "C" {
 #endif
 
 #include "../commons/IFFSaxLexer.h"
-#include "../commons/IffLexer.h"
 #include "RSEntity.h"
 #include "TreArchive.h"
 #include "RSProf.h"

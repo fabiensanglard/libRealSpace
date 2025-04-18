@@ -54,11 +54,8 @@ SCCockpit::~SCCockpit() {}
  * and assigns the result to the SCCockpit::cockpit member variable.
  */
 void SCCockpit::init() {
-    IffLexer lexer;
-    FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");
-    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
     RSPalette palette;
-    palette.InitFromIFF(&lexer);
+    palette.initFromFileData(Assets.GetFileData("PALETTE.IFF"));
     this->palette = *palette.GetColorPalette();
     cockpit = new RSCockpit(&Assets);
     TreEntry *cockpit_def =

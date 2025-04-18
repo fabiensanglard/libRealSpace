@@ -63,11 +63,8 @@ void SCNavMap::checkKeyboard(void) {
  * @return None
  */
 void SCNavMap::init(){
-    IffLexer lexer;
-    FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");
-    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
     RSPalette palette;
-    palette.InitFromIFF(&lexer);
+    palette.initFromFileData(Assets.GetFileData("PALETTE.IFF"));
     this->palette = *palette.GetColorPalette();
     for (uint8_t i=0; i<255; i++) {
         Texel *c = new Texel({i,0,0,255});

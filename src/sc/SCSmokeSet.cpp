@@ -9,12 +9,8 @@ SCSmokeSet::~SCSmokeSet(){
 }
 void SCSmokeSet::init(){
 
-    IffLexer lexer;
-    FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");
-    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
-
     RSPalette palette;
-    palette.InitFromIFF(&lexer);
+    palette.initFromFileData(Assets.GetFileData("PALETTE.IFF"));
     this->palette = *palette.GetColorPalette();
 
     std::string path = "..\\..\\DATA\\OBJECTS\\SMOKESET.IFF";

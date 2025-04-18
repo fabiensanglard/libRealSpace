@@ -66,14 +66,7 @@ public:
 
 private:
     void BuildDB(void);
-    void ReadBackGrounds(const IffChunk *chunk);
-    void ReadFaces(const IffChunk *chunk);
-    void ReadFigures(const IffChunk *chunk);
-    void ReadPFigures(const IffChunk *chunk);
-    // I have no idea what is in there.
-    void ReadFCPL(const IffChunk *chunk);
-    // I have no idea what is in there.
-    void ReadFGPL(const IffChunk *chunk);
+
 
     std::map<char *, CharFace *, Char_String_Comparator> faces;
     std::map<char *, FacePalette *, Char_String_Comparator> facePalettes;

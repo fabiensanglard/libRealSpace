@@ -8,7 +8,6 @@
 
 #include "SCRenderer.h"
 #include "../realspace/AssetManager.h"
-#include "../commons/IffLexer.h"
 #include "../realspace/RSArea.h"
 #include "../realspace/RSEntity.h"
 #include "../realspace/RSPalette.h"
@@ -38,13 +37,8 @@ void SCRenderer::init(int width, int height, AssetManager *amana) {
 
     this->counter = 0;
 
-    // Load the default palette
-    IffLexer lexer;
-    FileData *paletteFile = this->assets->GetFileData("PALETTE.IFF");
-    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
-
     RSPalette palette;
-    palette.InitFromIFF(&lexer);
+    palette.initFromFileData(this->assets->GetFileData("PALETTE.IFF"));
     this->palette = *palette.GetColorPalette();
 
     this->width = width;

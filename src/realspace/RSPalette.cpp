@@ -33,9 +33,68 @@ void RSPalette::SetBWFlag(uint32_t flag){
     this->bwFlag  =flag;
 }
 
-void RSPalette::ParsePALT(IffChunk* chunk){
+void RSPalette::copyFrom(VGAPalette* other){
+    for (int i=0; i< 256; i++) {
+        if (this->colors.colors[i].r == 0 && this->colors.colors[i].g == 252 && this->colors.colors[i].b == 0) {
+            this->colors.colors[i] = other->colors[i];
+        }
+    }
+}
+
+void RSPalette::initFromFileData(FileData* fileData) {
+    this->initFromFileRam(fileData->data, fileData->size);
+}
+void RSPalette::initFromFileRam(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["PALT"] = std::bind(&RSPalette::parsePALT, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["PAL "] = std::bind(&RSPalette::parsePAL, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSPalette::parsePAL(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["CMAP"] = std::bind(&RSPalette::parsePAL_CMAP, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSPalette::parsePAL_CMAP(uint8_t *data, size_t size){
+    ByteStream stream(data);
     
-    ByteStream stream(chunk->data);
+    Texel texel;
+    
+    for(int i = 0 ; i < 256 ; i++){
+        texel.r = stream.ReadByte();
+        texel.g = stream.ReadByte();
+        texel.b = stream.ReadByte();
+        texel.a = 255;
+        colors.SetColor(i, &texel);
+    }
+}
+void RSPalette::parsePALT(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSPalette::parsePALT_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["PALT"] = std::bind(&RSPalette::parsePALT_PALT, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["BLWH"] = std::bind(&RSPalette::parsePALT_BLWH, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SKYC"] = std::bind(&RSPalette::parsePALT_SKYC, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["RANG"] = std::bind(&RSPalette::parsePALT_RANG, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["TABL"] = std::bind(&RSPalette::parsePALT_TABL, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["BILD"] = std::bind(&RSPalette::parsePALT_BILD, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSPalette::parsePALT_INFO(uint8_t *data, size_t size){
+    
+}
+void RSPalette::parsePALT_TABL(uint8_t *data, size_t size){
+    
+}
+
+void RSPalette::parsePALT_PALT(uint8_t *data, size_t size){
+    ByteStream stream(data);
     
     this->colorFlag = stream.ReadUInt32LE();
 
@@ -63,12 +122,9 @@ void RSPalette::ParsePALT(IffChunk* chunk){
         
         colors.SetColor(i, &texel);
     }
-    
 }
-
-void RSPalette::ParseBLWH(IffChunk* chunk){
-    
-    ByteStream stream(chunk->data);
+void RSPalette::parsePALT_BLWH(uint8_t *data, size_t size){
+    ByteStream stream(data);
     
     this->bwFlag = stream.ReadUInt32LE();
 
@@ -92,54 +148,24 @@ void RSPalette::ParseBLWH(IffChunk* chunk){
         bwColors.SetColor(i, &texel);
     }
 }
-
-void RSPalette::ParseCMAP(IffChunk* chunk){
+void RSPalette::parsePALT_SKYC(uint8_t *data, size_t size){
     
-    ByteStream stream(chunk->data);
-    
-    Texel texel;
-    
-    for(int i = 0 ; i < 256 ; i++){
-        texel.r = stream.ReadByte();
-        texel.g = stream.ReadByte();
-        texel.b = stream.ReadByte();
-        texel.a = 255;
-        colors.SetColor(i, &texel);
-    }
 }
-void RSPalette::copyFrom(VGAPalette* other){
-    for (int i=0; i< 256; i++) {
-        if (this->colors.colors[i].r == 0 && this->colors.colors[i].g == 252 && this->colors.colors[i].b == 0) {
-            this->colors.colors[i] = other->colors[i];
-        }
-    }
+void RSPalette::parsePALT_RANG(uint8_t *data, size_t size){
+    
 }
+void RSPalette::parsePALT_BILD(uint8_t *data, size_t size){
+    IFFSaxLexer lexer;
 
-void RSPalette::InitFromIFF(IffLexer* lexer){
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["INFO"] = std::bind(&RSPalette::parsePALT_BILD_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["TABL"] = std::bind(&RSPalette::parsePALT_BILD_TABL, this, std::placeholders::_1, std::placeholders::_2);
     
-    bool foundPalette = false;
-    IffChunk* chunk = NULL;
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSPalette::parsePALT_BILD_INFO(uint8_t *data, size_t size){
     
-    chunk = lexer->GetChunkByID('PALT');
-    if (chunk != NULL){
-        foundPalette = true;
-        this->ParsePALT(chunk);
-    }
-    
-    chunk = lexer->GetChunkByID('BLWH');
-    if (chunk != NULL){
-        foundPalette = true;
-        this->ParseBLWH(chunk);
-    }
-    
-    chunk = lexer->GetChunkByID('CMAP');
-    if (chunk != NULL){
-        foundPalette = true;
-        this->ParseCMAP(chunk);
-    }
-    
-    if (!foundPalette){
-        printf("Error: Unable to find palette with lexer '%s'\n",lexer->GetName());
-    }
+}
+void RSPalette::parsePALT_BILD_TABL(uint8_t *data, size_t size){
     
 }

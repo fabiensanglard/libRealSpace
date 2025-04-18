@@ -21,7 +21,6 @@
     #include "RSFontManager.h"
     #include "RSImageSet.h"
     #include "../engine/SCRenderer.h"
-    #include "../commons/IffLexer.h"
     #include "RSPalette.h"
     #include "RSSmokeSet.h"
     #include "RSEntity.h"

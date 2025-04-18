@@ -8,7 +8,7 @@
 
 #ifndef __libRealSpace__NSObjectViewer__
 #define __libRealSpace__NSObjectViewer__
-
+#include "../commons/IffLexer.h"
 class SCObjectViewer : public IActivity{
     
 public:

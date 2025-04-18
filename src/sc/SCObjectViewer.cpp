@@ -7,6 +7,7 @@
 //
 
 #include "precomp.h"
+#include "../commons/IffLexer.h"
 
 SCObjectViewer::SCObjectViewer() {
     this->rotateUpDownAngle = 0;
@@ -239,12 +240,8 @@ void SCObjectViewer::ParseAssets(PakArchive *archive) {
     file8.InitFromRAM("OBJVIEW.PAK: file 8", entry8->data, entry8->size);
     bluePrint.init(file8.GetEntry(0)->data, file8.GetEntry(0)->size);
 
-    IffLexer lexer;
-    FileData *paletteFile = Assets.GetFileData("PALETTE.IFF");
-    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
-
     RSPalette palette;
-    palette.InitFromIFF(&lexer);
+    palette.initFromFileData(Assets.GetFileData("PALETTE.IFF"));
     this->palette = *palette.GetColorPalette();
 }
 

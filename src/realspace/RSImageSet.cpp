@@ -37,15 +37,13 @@ void RSImageSet::InitFromPakEntry(PakEntry *entry) {
             this->sequence.push_back((uint8_t)i);
         } else {
             RSPalette *palette = new RSPalette();
-            IffLexer paliff;
             uint32_t pal_size = 0;
             pal_size |= *(currImage+4) << 24;
             pal_size |= *(currImage+5) << 16;
             pal_size |= *(currImage+6) << 8;
             pal_size |= *(currImage+7) << 0;
             if (*(currImage+8)=='P') {
-                paliff.InitFromRAM(currImage, pal_size+8);
-                palette->InitFromIFF(&paliff);
+                palette->initFromFileRam(currImage, pal_size+8);
                 
                 this->palettes.push_back(palette);
                 
@@ -91,16 +89,13 @@ void RSImageSet::InitFromRam(uint8_t *data, size_t size) {
             this->sequence.push_back((uint8_t)i);
         } else {
             RSPalette *palette = new RSPalette();
-            IffLexer paliff;
             uint32_t pal_size = 0;
             pal_size |= *(currImage+4) << 24;
             pal_size |= *(currImage+5) << 16;
             pal_size |= *(currImage+6) << 8;
             pal_size |= *(currImage+7) << 0;
             if (*(currImage+8)=='P') {
-                paliff.InitFromRAM(currImage, pal_size+8);
-                palette->InitFromIFF(&paliff);
-                
+                palette->initFromFileRam(currImage, pal_size+8);
                 this->palettes.push_back(palette);
                 
                 RLEShape *shape = new RLEShape();
@@ -136,15 +131,13 @@ void RSImageSet::InitFromTreEntry(TreEntry *entry) {
             this->sequence.push_back((uint8_t)i);
         } else {
             RSPalette *palette = new RSPalette();
-            IffLexer paliff;
             uint32_t pal_size = 0;
             pal_size |= *(currImage+4) << 24;
             pal_size |= *(currImage+5) << 16;
             pal_size |= *(currImage+6) << 8;
             pal_size |= *(currImage+7) << 0;
             if (*(currImage+8)=='P') {
-                paliff.InitFromRAM(currImage, pal_size+8);
-                palette->InitFromIFF(&paliff);
+                palette->initFromFileRam(currImage, pal_size+8);
                 
                 this->palettes.push_back(palette);
                 

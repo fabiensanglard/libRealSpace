@@ -12,7 +12,6 @@
 
 #include "AssetManager.h"
 #include "../commons/IFFSaxLexer.h"
-#include "../commons/IffLexer.h"
 #include "../commons/Maths.h"
 #include "../commons/Matrix.h"
 #include "../commons/Quaternion.h"

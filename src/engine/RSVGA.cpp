@@ -7,7 +7,6 @@
 //
 
 #include "RSVGA.h"
-#include "../commons/IffLexer.h"
 #include "../realspace/RSImage.h"
 #include "../realspace/RSPalette.h"
 #include "SDL2/SDL_opengl_glext.h"
@@ -33,13 +32,9 @@ void RSVGA::init(int width, int height, AssetManager *amana) {
     this->width = width;
     this->height = height;
     this->assets = amana;
-    // Load the default palette
-    IffLexer lexer;
-    FileData *paletteFile = this->assets->GetFileData("PALETTE.IFF");
-    lexer.InitFromRAM(paletteFile->data, paletteFile->size);
 
     RSPalette palette;
-    palette.InitFromIFF(&lexer);
+    palette.initFromFileData(this->assets->GetFileData("PALETTE.IFF"));
     this->palette = *palette.GetColorPalette();
 
     glGenTextures(1, &textureID);
