@@ -967,13 +967,6 @@ void SCStrike::runFrame(void) {
                 Vector3D position = {actor->object->position.x, actor->object->position.y, actor->object->position.z};
                 Renderer.renderBBox(position, bb->min, bb->max);
             }
-
-
-            if (this->show_bbox) {
-                BoudingBox *bb = actor->object->entity->GetBoudingBpx();
-                Vector3D position = {actor->object->position.x, actor->object->position.y, actor->object->position.z};
-                Renderer.renderBBox(position, bb->min, bb->max);
-            }
             
         } else {
             printf("Actor has no plane or object\n");
