@@ -29,7 +29,7 @@
 #include "../engine/SCZone.h"
 #include "../engine/IActivity.h"
 #include "../engine/GameEngine.h"
-#include "ConvAssetManager.h"
+#include "../realspace/ConvAssetManager.h"
 #include "main.h"
 
 // Simulation

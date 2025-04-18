@@ -10,7 +10,7 @@
 
 ConvAssetManager::ConvAssetManager() {}
 
-ConvAssetManager::~ConvAssetManager() { Game.Log("We are not freeing the RAM from all the RLEs !!!\n"); }
+ConvAssetManager::~ConvAssetManager() { printf("We are not freeing the RAM from all the RLEs !!!\n"); }
 
 void ConvAssetManager::init(void) { BuildDB(); }
 
@@ -36,7 +36,7 @@ CharFace *ConvAssetManager::GetCharFace(char *name) {
         set->Add(RLEShape::GetEmptyShape());
         dummy.appearances = set;
         npc = &dummy;
-        Game.Log("ConvAssetManager: Cannot find npc '%s', returning dummy npc instead.\n", name);
+        printf("ConvAssetManager: Cannot find npc '%s', returning dummy npc instead.\n", name);
         this->faces[name] = npc;
     }
 
@@ -58,7 +58,7 @@ ConvBackGround *ConvAssetManager::GetBackGround(char *name) {
     ConvBackGround *shape = this->backgrounds[name];
 
     if (shape == NULL) {
-        Game.Log("ConvAssetManager: Cannot find loc '%s', returning dummy loc instead.\n", name);
+        printf("ConvAssetManager: Cannot find loc '%s', returning dummy loc instead.\n", name);
         static ConvBackGround dummy;
         uint8_t dummyPalettePatch[5] = {0, 0, 0, 0, 0};
         dummy.palettes.push_back(dummyPalettePatch);
@@ -90,7 +90,7 @@ CharFigure *ConvAssetManager::GetFigure(char *name) {
         set->Add(RLEShape::GetEmptyShape());
         dummy.appearances = set;
         npc = &dummy;
-        Game.Log("ConvAssetManager: Cannot find npc '%s', returning dummy npc instead.\n", name);
+        printf("ConvAssetManager: Cannot find npc '%s', returning dummy npc instead.\n", name);
         this->figures[name] = npc;
         return npc;
     }
@@ -167,7 +167,7 @@ void ConvAssetManager::ParseBGLayer(uint8_t *data, size_t layerID, ConvBackGroun
     if (!subPAK.IsReady()) {
 
         // Sometimes the image is not in a PAK but as raw data.
-        Game.Log("Error on Pak %d for layer %d in loc %8s => Using dummy instead\n", shapeID, layerID, back->name);
+        printf("Error on Pak %d for layer %d in loc %8s => Using dummy instead\n", shapeID, layerID, back->name);
 
         // Using an empty shape for now...
         *s = *RLEShape::GetEmptyShape();
@@ -209,8 +209,7 @@ void ConvAssetManager::ReadBackGrounds(const IffChunk *chunkRoot) {
     for (size_t i = 0; i < chunkRoot->childs.size(); i++) {
         IffChunk *chunk = chunkRoot->childs[i];
         if (chunk->id != 'FORM') {
-            Game.Log("ConvAssetManager::ReadBackGrounds => Unexpected chunk (%s).\n", chunk->GetName());
-            Game.Terminate("Unable to build CONV database.\n");
+            printf("ConvAssetManager::ReadBackGrounds => Unexpected chunk (%s).\n", chunk->GetName());
         }
 
         IffChunk *info = chunk->childs[0];
@@ -227,7 +226,7 @@ void ConvAssetManager::ReadBackGrounds(const IffChunk *chunkRoot) {
             ParseBGLayer(chunk->childs[1]->data, layerID, back);
 
         this->backgrounds[back->name] = back;
-        // Game.Log("  Able to reach shape in CONVSHPS.PAK entry %d from background '%s'.\n",shapeID,back->name);
+        // printf("  Able to reach shape in CONVSHPS.PAK entry %d from background '%s'.\n",shapeID,back->name);
     }
 }
 

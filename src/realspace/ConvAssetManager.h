@@ -16,9 +16,11 @@
 #define CONV_INTERLETTER_SPACE 3
 #define CONV_SPACE_SIZE 5
 
-#include "../realspace/RSImageSet.h"
+#include "AssetManager.h"
+#include "RSImageSet.h"
 #include "../commons/IFFSaxLexer.h"
 
+extern AssetManager Assets;
 typedef struct CharFace {
 
     char name[9];
