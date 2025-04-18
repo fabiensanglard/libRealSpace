@@ -640,12 +640,16 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size) {
     uint16_t unknown = stream.ReadShort();
     image->Create(name, width, height, 0);
     uint8_t *src = stream.GetPosition();
+    
     uint8_t *pic_data = nullptr;
     size_t csize = 0;
     if (src[0]=='L' && src[1]=='Z'){
         LZBuffer lzbuffer;
-        //pic_data = lzbuffer.DecodeLZW(src+2,size-16,csize);
-        //src = pic_data;
+        size_t remain = size - ((src+4) - data);
+        pic_data = lzbuffer.DecodeLZW(src+4,remain,csize);
+        src = pic_data;
+        image->UpdateContent(src);
+        AddImage(image);
     } else {
         image->UpdateContent(src);
         AddImage(image);
