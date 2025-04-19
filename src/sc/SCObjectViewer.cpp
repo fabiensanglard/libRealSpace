@@ -7,7 +7,7 @@
 //
 
 #include "precomp.h"
-#include "../commons/IffLexer.h"
+
 
 SCObjectViewer::SCObjectViewer() {
     this->rotateUpDownAngle = 0;
@@ -17,63 +17,6 @@ SCObjectViewer::SCObjectViewer() {
 }
 
 SCObjectViewer::~SCObjectViewer() {}
-
-void ConvertToUpperCase(char *sPtr) {
-    while (*sPtr != '\0') {
-        if (islower(*sPtr))
-            *sPtr = toupper(*sPtr);
-        sPtr++;
-    }
-}
-
-void SCObjectViewer::ParseObjList(IffLexer *lexer) {
-
-    // The object all follow the same path:
-    const char *OBJ_PATH = "..\\..\\DATA\\OBJECTS\\";
-    const char *OBJ_EXTENSION = ".IFF";
-
-    IffChunk *chunk = lexer->GetChunkByID('OBJS');
-    if (chunk == NULL) {
-        printf("**Error: Cannot parse Object List (Missing OBJS chunk).\n");
-        return;
-    }
-
-    ByteStream stream(chunk->data);
-
-    size_t numObjectInList = chunk->size / 33;
-
-    for (int objIndex = 0; objIndex < numObjectInList; objIndex++) {
-
-        RSShowCase showCase;
-
-        char objName[9];
-        for (int k = 0; k < 9; k++)
-            objName[k] = stream.ReadByte();
-        ConvertToUpperCase(objName);
-
-        for (int k = 0; k < 20; k++)
-            showCase.displayName[k] = stream.ReadByte();
-
-        char modelPath[512];
-        strcpy(modelPath, OBJ_PATH);
-        strcat(modelPath, objName);
-        strcat(modelPath, OBJ_EXTENSION);
-        TreEntry *entry = Assets.GetEntryByName(modelPath);
-
-        if (entry == NULL) {
-            printf("Object reference '%s' not found in TRE.\n", modelPath);
-            continue;
-        }
-
-        showCase.entity = new RSEntity(&Assets);
-        showCase.entity->InitFromRAM(entry->data, entry->size);
-
-        uint32_t fixedPointDist = stream.ReadInt32LE();
-        showCase.cameraDist = (fixedPointDist >> 8) + (fixedPointDist & 0xFF) / 255.0f;
-        // showCase.cameraDist = 200000;
-        showCases.push_back(showCase);
-    }
-}
 
 void SCObjectViewer::OnExit(void) { Game.StopTopActivity(); }
 
@@ -117,7 +60,7 @@ void SCObjectViewer::OnRotateDown(void) {
     that->rotateUpDownAngle -= 10.0f;
 }
 
-void SCObjectViewer::NextObject(void) { currentObject = (currentObject + 1) % showCases.size(); }
+void SCObjectViewer::NextObject(void) { currentObject = (currentObject + 1) % objs.showCases.size(); }
 
 void SCObjectViewer::Focus(void) {
     this->focused = true;
@@ -256,10 +199,7 @@ void SCObjectViewer::init(void) {
     assets.InitFromRAM("OBJVIEW.PAK", objViewPAK->data, objViewPAK->size);
     ParseAssets(&assets);
 
-    IffLexer objToDisplay;
-    objToDisplay.InitFromRAM(objViewIFF->data, objViewIFF->size);
-
-    ParseObjList(&objToDisplay);
+    objs.initFromRam(objViewIFF->data, objViewIFF->size);
 
 
     currentObject = 0;
@@ -289,7 +229,7 @@ void SCObjectViewer::runFrame(void) {
     uint32_t currentTime = SDL_GetTicks();
     uint32_t totalTime = currentTime - startTime;
 
-    RSShowCase showCase = showCases[currentObject];
+    RSShowCase showCase = objs.showCases[currentObject];
 
     Point3D newPosition;
     newPosition.x = showCase.cameraDist / 150 * cosf(totalTime / 2000.0f);
@@ -319,7 +259,7 @@ void SCObjectViewer::runFrame(void) {
     glRotatef(this->rotateUpDownAngle, 0, 0, 1);
 
     glScalef(1 / this->zoomFactor, 1 / this->zoomFactor, 1 / this->zoomFactor);
-    Renderer.drawModel(showCases[currentObject].entity, LOD_LEVEL_MAX);
+    Renderer.drawModel(objs.showCases[currentObject].entity, LOD_LEVEL_MAX);
     glPopMatrix();
     glPushMatrix();
     glDisable(GL_DEPTH_TEST);

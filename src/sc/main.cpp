@@ -7,7 +7,7 @@
 //
 
 #include "precomp.h"
-#define FLOPPY 0
+#define FLOPPY 1
 //Here are all the mean subsystems interacting together
 SCState         GameState;
 GameEngine      Game;
