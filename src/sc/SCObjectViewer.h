@@ -9,6 +9,8 @@
 #ifndef __libRealSpace__NSObjectViewer__
 #define __libRealSpace__NSObjectViewer__
 
+#include "../realspace/RSObjviewer.h"
+
 class SCObjectViewer : public IActivity{
     
 public:
@@ -27,20 +29,8 @@ public:
     float zoomFactor;
 private:
 
+    RSObjViewer objs;
     
-    typedef struct RSShowCase{
-        
-        float cameraDist;
-        RSEntity* entity;
-        
-        char displayName[20];
-        
-    } RSShowCase;
-    
-    std::vector<RSShowCase> showCases;
-    
-    
-    void ParseObjList(IffLexer* lexer);
     void ParseAssets(PakArchive* archive);
     
     RLEShape bluePrint;

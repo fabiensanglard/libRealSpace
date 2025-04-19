@@ -27,10 +27,6 @@ void SCDogFightMenu::init( ){
     TreEntry* objViewPAK = nullptr;
     
     
-    IffLexer objToDisplay;
-    objToDisplay.InitFromRAM(objViewIFF->data, objViewIFF->size);
-    objToDisplay.List(stdout);
-    
     PakArchive assets;
     assets.InitFromRAM("OBJVIEW.PAK",objViewPAK->data, objViewPAK->size);
     assets.List(stdout);

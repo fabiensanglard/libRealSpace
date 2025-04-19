@@ -66,7 +66,6 @@ extern "C" {
     #include "RSFontManager.h"
     #include "RSImageSet.h"
     #include "SCRenderer.h"
-    #include "IffLexer.h"
     #include "RSPalette.h"
     #include "RSSmokeSet.h"
     #include "RSEntity.h"

@@ -10,8 +10,12 @@
 #define libRealSpace_precomp_h
 
 //libspace include
-#include "../precomp.h"
+#include "../engine/precomp.h"
+#include "../realspace/precomp.h"
 
+
+
+#include "../realspace/AssetManager.h"
 #include "SCenums.h"
 #include "PaletteIDs.h"
 #include "ShapeIDs.h"
@@ -20,12 +24,12 @@
 
 // Core of the game
 #include "SCState.h"
-#include "SCMouse.h"
-#include "SCButton.h"
-#include "SCZone.h"
-#include "IActivity.h"
-#include "GameEngine.h"
-#include "ConvAssetManager.h"
+#include "../engine/SCMouse.h"
+#include "../engine/SCButton.h"
+#include "../engine/SCZone.h"
+#include "../engine/IActivity.h"
+#include "../engine/GameEngine.h"
+#include "../realspace/ConvAssetManager.h"
 #include "main.h"
 
 // Simulation

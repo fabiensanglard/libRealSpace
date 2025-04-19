@@ -46,6 +46,9 @@ public:
     virtual bool activateTarget(uint8_t arg);
     virtual int getDistanceToTarget(uint8_t arg);
     virtual int getDistanceToSpot(uint8_t arg);
+private:
+    Vector3D target_position{0.0f, 0.0f, 0.0f};
+    int target_position_update{0};
 };
 
 class SCMissionActorsPlayer : public SCMissionActors {

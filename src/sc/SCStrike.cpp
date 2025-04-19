@@ -960,7 +960,7 @@ void SCStrike::runFrame(void) {
             }   
         } else if (actor->object->entity != nullptr) {
             Vector3D actor_position = {actor->object->position.x, actor->object->position.y, actor->object->position.z};
-            Vector3D actor_orientation = {360.0f - (static_cast<float>(actor->object->azymuth) + 90.0f), static_cast<float>(actor->object->pitch), -static_cast<float>(actor->object->roll)};
+            Vector3D actor_orientation = {(360.0f - static_cast<float>(actor->object->azymuth) + 90.0f), static_cast<float>(actor->object->pitch), -static_cast<float>(actor->object->roll)};
             Renderer.drawModel(actor->object->entity, LOD_LEVEL_MAX, actor_position, actor_orientation);
             if (this->show_bbox) {
                 BoudingBox *bb = actor->object->entity->GetBoudingBpx();
