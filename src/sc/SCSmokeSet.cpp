@@ -24,7 +24,7 @@ void SCSmokeSet::init(){
         size_t numimages = img_set->GetNumImages();
         for (size_t i=0; i<numimages; i++) {
             RLEShape *img = img_set->GetShape(i);
-            texture *tex = new texture();
+            Texture *tex = new Texture();
             tex->height = img->GetHeight();
             tex->width = img->GetWidth();
             img->position.x = 0;

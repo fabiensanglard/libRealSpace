@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 #include "precomp.h"
-#include "SDL2/SDL_opengl_glext.h"
+
 
 // Définition des constantes physiques
 const float GRAVITY = 9.81f; // m/s^2
@@ -175,7 +175,7 @@ SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELE
 }
 SCPlane::~SCPlane() {
     for (auto smoke: this->smoke_set->textures) {
-        glDeleteTextures(1, &smoke->texture_id);
+        glDeleteTextures(1, &smoke->id);
         smoke->initialized = false;
     }
 }
@@ -982,18 +982,8 @@ void SCPlane::getPosition(Point3D *position) {
  */
 void SCPlane::Render() {
     if (this->object != nullptr) {
-        glPushMatrix();
-        Matrix rotation;
-        rotation.Clear();
-        rotation.Identity();
-        rotation.translateM(this->x, this->y, this->z);
-        rotation.rotateM(tenthOfDegreeToRad(this->azimuthf + 900), 0.0f, 1.0f, 0.0f);
-        rotation.rotateM(tenthOfDegreeToRad(this->elevationf), 0.0f, 0.0f, 1.0f);
-        rotation.rotateM(-tenthOfDegreeToRad(this->twist), 1.0f, 0.0f, 0.0f);
-
-        glMultMatrixf((float *)rotation.v);
         
-        /*Vector3D pos = {
+        Vector3D pos = {
             this->x, this->y, this->z
         };
         Vector3D orientation = {
@@ -1001,28 +991,7 @@ void SCPlane::Render() {
             tenthOfDegreeToRad(this->elevationf),
             -tenthOfDegreeToRad(this->twist)
         };
-
-        Renderer.drawModel(this->object->entity, LOD_LEVEL_MAX, pos, orientation);*/
-        Renderer.drawModel(this->object->entity, LOD_LEVEL_MAX);
-        if (wheel_index) {
-            if (this->object->entity->chld.size() > wheel_index) {
-                Renderer.drawModel(this->object->entity->chld[wheel_index]->objct, LOD_LEVEL_MAX);
-            }
-        }
-        if (this->thrust > 50) {
-            if (this->object->entity->chld.size() > 0) {
-                glPushMatrix();
-                Vector3D pos = {
-                    (float) this->object->entity->chld[0]->x,
-                    (float) this->object->entity->chld[0]->y,
-                    (float) this->object->entity->chld[0]->z
-                };
-                glTranslatef(pos.z/250 , pos.y /250 , pos.x /250);
-                glScalef(1+this->thrust/100.0f,1,1);
-                Renderer.drawModel(this->object->entity->chld[0]->objct, LOD_LEVEL_MAX);
-                glPopMatrix();
-            }
-        }
+        std::vector<std::tuple<Vector3D, RSEntity*>> weapons;
         for (auto weaps:this->weaps_load) {
             float decy=0.5f;
             if (weaps == nullptr) {
@@ -1045,78 +1014,21 @@ void SCPlane::Render() {
             };
 
             for (int i = 0; i < weaps->nb_weap; i++) {
-                glPushMatrix();
-                glTranslatef(position.z/250+path[i].z, position.y/250 + path[i].y, -position.x/250+path[i].x);
-                Renderer.drawModel(weaps->objct, LOD_LEVEL_MAX);
-                glPopMatrix();
+                Vector3D weap_pos = {position.z/250+path[i].z, position.y/250 + path[i].y, -position.x/250+path[i].x};
+                std::tuple<Vector3D, RSEntity*> weapon = std::make_tuple(weap_pos, weaps->objct);
+                weapons.push_back(weapon);
                 position.y -= 0.5f;
             }
         }
-        glPopMatrix();
+        Renderer.drawModelWithChilds(this->object->entity, LOD_LEVEL_MAX, pos, orientation, wheel_index, thrust, weapons);
     }
 }
 void SCPlane::RenderSmoke() {
-    size_t cpt=0;
-    
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
-    glEnable(GL_BLEND);
+    int cpt = 0;
     for (auto pos: this->smoke_positions) {
-        glPushMatrix();
-        Matrix smoke_rotation;
-        smoke_rotation.Clear();
-        smoke_rotation.Identity();
-        smoke_rotation.translateM(pos.x, pos.y, pos.z);
-        smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
-
-        glMultMatrixf((float *)smoke_rotation.v);
-        if (this->smoke_set->textures[0]->initialized == false) {
-            glGenTextures(1, &smoke_set->textures[0]->texture_id);
-            glBindTexture(GL_TEXTURE_2D, smoke_set->textures[cpt]->texture_id);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-            // Upload pixels into texture
-            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->smoke_set->textures[0]->width, this->smoke_set->textures[cpt]->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                    smoke_set->textures[0]->data);
-            
-            this->smoke_set->textures[0]->initialized = true;
-        } else {
-            glBindTexture(GL_TEXTURE_2D, smoke_set->textures[0]->texture_id);
-        }
-        float smoke_size = 4.0f * ((this->smoke_positions.size()-cpt)/(1.0f*this->smoke_positions.size())) + 1.0f;
-        glBegin(GL_QUADS);
-        glColor4f(1.0f,1.0f,1.0f,0.0f);
-        glTexCoord2f (0.0, 0.0);
-        glVertex3f(smoke_size,-smoke_size,-smoke_size);
-        glTexCoord2f (1.0, 0.0);
-        glVertex3f(smoke_size,smoke_size,-smoke_size);
-        glTexCoord2f (1.0, 1.0);
-        glVertex3f(-smoke_size,smoke_size,-smoke_size);
-        glTexCoord2f (0.0, 1.0);
-        glVertex3f(-smoke_size,-smoke_size,smoke_size);
-        glEnd();
-        glBegin(GL_QUADS);
-        glColor4f(1.0f,1.0f,1.0f,0.0f);
-        glTexCoord2f (0.0, 0.0);
-        glVertex3f(-smoke_size,-smoke_size,-smoke_size);
-        glTexCoord2f (1.0, 0.0);
-        glVertex3f(-smoke_size,smoke_size,-smoke_size);
-        glTexCoord2f (1.0, 1.0);
-        glVertex3f(smoke_size,smoke_size,smoke_size);
-        glTexCoord2f (0.0, 1.0);
-        glVertex3f(smoke_size,-smoke_size,smoke_size);
-        glEnd();
-        glPopMatrix();
+        Renderer.drawSprite(pos, this->smoke_set->textures[cpt%(this->smoke_set->textures.size()-1)], (this->smoke_positions.size()-cpt)/(1.0f*this->smoke_positions.size()));
         cpt++;
     }
-    glDisable( GL_BLEND );
-    glDisable(GL_TEXTURE_2D);
 }
 void SCPlane::RenderSimulatedObject() {
     for (auto sim_obj: this->weaps_object) {

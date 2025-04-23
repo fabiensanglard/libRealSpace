@@ -166,6 +166,124 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel, Vector3D position,
     drawModel(object, 0);
     glPopMatrix();
 }
+void SCRenderer::drawSprite(Vector3D pos, Texture *tex, float zoom) {
+    size_t cpt=0;
+    
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
+    glEnable(GL_BLEND);
+    
+    glPushMatrix();
+    Matrix smoke_rotation;
+    smoke_rotation.Clear();
+    smoke_rotation.Identity();
+    smoke_rotation.translateM(pos.x, pos.y, pos.z);
+    smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
+
+    glMultMatrixf((float *)smoke_rotation.v);
+    if (tex->initialized == false) {
+        glGenTextures(1, &tex->id);
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        // Upload pixels into texture
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->width, tex->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            tex->data);
+        
+        tex->initialized = true;
+    } else {
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+    }
+    float smoke_size = 4.0f * zoom + 1.0f;
+    glBegin(GL_QUADS);
+    glColor4f(1.0f,1.0f,1.0f,0.0f);
+    glTexCoord2f (0.0, 0.0);
+    glVertex3f(smoke_size,-smoke_size,-smoke_size);
+    glTexCoord2f (1.0, 0.0);
+    glVertex3f(smoke_size,smoke_size,-smoke_size);
+    glTexCoord2f (1.0, 1.0);
+    glVertex3f(-smoke_size,smoke_size,-smoke_size);
+    glTexCoord2f (0.0, 1.0);
+    glVertex3f(-smoke_size,-smoke_size,smoke_size);
+    glEnd();
+    glBegin(GL_QUADS);
+    glColor4f(1.0f,1.0f,1.0f,0.0f);
+    glTexCoord2f (0.0, 0.0);
+    glVertex3f(-smoke_size,-smoke_size,-smoke_size);
+    glTexCoord2f (1.0, 0.0);
+    glVertex3f(-smoke_size,smoke_size,-smoke_size);
+    glTexCoord2f (1.0, 1.0);
+    glVertex3f(smoke_size,smoke_size,smoke_size);
+    glTexCoord2f (0.0, 1.0);
+    glVertex3f(smoke_size,-smoke_size,smoke_size);
+    glEnd();
+    glPopMatrix();
+    glDisable( GL_BLEND );
+    glDisable(GL_TEXTURE_2D);
+}
+void SCRenderer::drawModelWithChilds(
+    RSEntity *object,
+    size_t lodLevel, 
+    Vector3D position,
+    Vector3D orientation, 
+    int wheel_index, 
+    int thrust, 
+    std::vector<std::tuple<Vector3D, RSEntity *>> weaps_load
+) {
+    if (object != nullptr) {
+        glPushMatrix();
+        Matrix rotation;
+        rotation.Clear();
+        rotation.Identity();
+        rotation.translateM(position.x, position.y, position.z);
+        rotation.rotateM(orientation.x, 0.0f, 1.0f, 0.0f);
+        rotation.rotateM(orientation.y, 0.0f, 0.0f, 1.0f);
+        rotation.rotateM(orientation.z, 1.0f, 0.0f, 0.0f);
+
+        glMultMatrixf((float *)rotation.v);
+        
+        Renderer.drawModel(object, LOD_LEVEL_MAX);
+        if (wheel_index) {
+            if (object->chld.size() > wheel_index) {
+                Renderer.drawModel(object->chld[wheel_index]->objct, LOD_LEVEL_MAX);
+            }
+        }
+        if (thrust > 50) {
+            if (object->chld.size() > 0) {
+                glPushMatrix();
+                Vector3D pos = {
+                    (float) object->chld[0]->x,
+                    (float) object->chld[0]->y,
+                    (float) object->chld[0]->z
+                };
+                glTranslatef(pos.z/250 , pos.y /250 , pos.x /250);
+                glScalef(1+thrust/100.0f,1,1);
+                Renderer.drawModel(object->chld[0]->objct, LOD_LEVEL_MAX);
+                glPopMatrix();
+            }
+        }
+        for (auto weaps_it: weaps_load) {
+            float decy=0.5f;
+            Vector3D weaps_pos = std::get<0>(weaps_it);
+            RSEntity *weaps = std::get<1>(weaps_it);
+            if (weaps == nullptr) {
+                continue;  
+            }
+            
+            glPushMatrix();
+            glTranslatef(weaps_pos.x, weaps_pos.y, weaps_pos.z);
+            Renderer.drawModel(weaps, LOD_LEVEL_MAX);
+            glPopMatrix();            
+        }
+        glPopMatrix();
+    }
+}
 void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     if (!initialized)
         return;

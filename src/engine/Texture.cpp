@@ -36,8 +36,6 @@ void Texture::Set(RSImage* image){
     this->height = image->height;
     this->data = (uint8_t*)malloc(width*height*4);
     locFlag = RAM;
-    
-    //UpdateContent(image);
 }
 
 uint32_t Texture::GetTextureID(void){

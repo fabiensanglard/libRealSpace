@@ -867,9 +867,32 @@ void SCGameFlow::renderMenu() {
     }
     if (show_gamestate) {
         ImGui::Begin("GameState");
-        for (auto flag : GameState.requierd_flags) {
-            ImGui::Text("Flag %d, Value %d", flag.first, flag.second);
+        
+        int nb_flags = GameState.requierd_flags.size();
+        int nb_rows = nb_flags / 8;
+        static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+        if (ImGui::BeginTable("Flags", 8, flags)) {    
+            auto it = GameState.requierd_flags.begin();
+            for (int i = 0; i < nb_rows; i++) {
+                ImGui::TableNextRow();
+                for (int j = 0; j < 8; j++) {
+                    if (it != GameState.requierd_flags.end()) {
+                        ImGui::TableSetColumnIndex(j);
+                        ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
+                        if (it->second) {
+                            cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
+                        } else {
+                            cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
+                        }
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
+                        ImGui::Text("[%03d]=%d", it->first, it->second);
+                        ++it;
+                    }
+                }
+            }
+            ImGui::EndTable();
         }
+        
         ImGui::Text("Mission ID %d", GameState.mission_id);
         ImGui::Text("Mission Flyed %d", GameState.mission_flyed);
         ImGui::Text("Mission Accepted %d", GameState.mission_accepted);
@@ -899,9 +922,21 @@ void SCGameFlow::renderMenu() {
             }
         }
         if (ImGui::TreeNode("Required Flags")) {
-            for (auto req_flag : GameState.requierd_flags) {
-                
-                ImGui::Text("FLAG %03d\tVALUE %03d", req_flag.first, req_flag.second);
+            int nb_flags = GameState.requierd_flags.size();
+            int nb_rows = nb_flags / 8;
+            if (ImGui::BeginTable("Flags", 8)) {    
+                auto it = GameState.requierd_flags.begin();
+                for (int i = 0; i < nb_rows; i++) {
+                    ImGui::TableNextRow();
+                    for (int j = 0; j < 8; j++) {
+                        if (it != GameState.requierd_flags.end()) {
+                            ImGui::TableSetColumnIndex(j);
+                            ImGui::Text("[%03d]=%d", it->first, it->second);
+                            ++it;
+                        }
+                    }
+                }
+                ImGui::EndTable();
             }
             ImGui::TreePop();
         }

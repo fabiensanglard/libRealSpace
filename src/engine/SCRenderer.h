@@ -21,9 +21,7 @@
 #include <SDL_opengl_glext.h>
 #define MAP_SIZE 200000
 class RSArea;
-class Texture;
 class RSEntity;
-// struct VGAPalette;
 struct MapVertex;
 struct Triangle;
 typedef struct VertexCache {
@@ -35,6 +33,7 @@ typedef struct VertexCache {
     MapVertex *uv3;
 
 } VertexCache;
+
 
 typedef std::vector<VertexCache> VertexVector;
 typedef std::map<int, VertexVector> TextureVertexMap;
@@ -52,6 +51,9 @@ public:
 
     void drawModel(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation, Vector3D ajustement);
     void drawModel(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation);
+    void drawSprite(Vector3D pos, Texture *tex, float zoom);
+    void drawModelWithChilds(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation,
+                             int wheel_index, int thrust, std::vector<std::tuple<Vector3D, RSEntity *>> weaps_load);
     void drawModel(RSEntity *object, size_t lodLevel);
     void displayModel(RSEntity *object, size_t lodLevel);
 
