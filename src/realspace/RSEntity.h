@@ -169,6 +169,8 @@ public:
     inline bool IsPrepared(void) { return this->prepared; }
     BoudingBox *GetBoudingBpx(void);
     EntityType entity_type;
+    void parseREAL_OBJT_JETP(uint8_t *data, size_t size);
+    void parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size);
 private:
     BoudingBox bb;
     void CalcBoundingBox(void);
@@ -182,7 +184,6 @@ private:
     void parseREAL(uint8_t *data, size_t size);
     void parseREAL_OBJT(uint8_t *data, size_t size);
     void parseREAL_OBJT_INFO(uint8_t *data, size_t size);
-    void parseREAL_OBJT_JETP(uint8_t *data, size_t size);
     void parseREAL_OBJT_GRND(uint8_t *data, size_t size);
     void parseREAL_OBJT_ORNT(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS(uint8_t *data, size_t size);
@@ -220,7 +221,6 @@ private:
     void parseREAL_OBJT_JETP_DYNM_GRAV(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_DYNM_JDYN(uint8_t *data, size_t size);
-    void parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_WEAP_INFO(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_WEAP_DCOY(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_WEAP_WPNS(uint8_t *data, size_t size);

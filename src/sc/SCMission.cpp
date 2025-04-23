@@ -114,7 +114,18 @@ void SCMission::loadMission() {
                                                 part->position.y, part->position.z);
                         actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
                         actor->plane->yaw = (360 - part->azymuth) * (float) M_PI / 180.0f;
+                        
+                        part->weapon_load.shrink_to_fit();
+                        if (part->weapon_load.size() > 0) {
+                            std::string weapon_path_name = "..\\..\\DATA\\OBJECTS\\" + part->weapon_load + ".IFF";
+                            std::transform(weapon_path_name.begin(), weapon_path_name.end(), weapon_path_name.begin(), ::toupper);
+                            TreEntry *weapon_entry = Assets.GetEntryByName(weapon_path_name.c_str());
+                            part->entity->weaps.clear();
+                            part->entity->weaps.shrink_to_fit();
+                            part->entity->parseREAL_OBJT_JETP(weapon_entry->data, weapon_entry->size);   
+                        }
                         actor->plane->object = part;
+                        actor->plane->InitLoadout();
                         actor->plane->pilot = actor;
                         if (abs(this->area->getY(part->position.x, part->position.z)-part->position.y) <= 10 ) {
                             part->position.y = this->area->getY(part->position.x, part->position.z);

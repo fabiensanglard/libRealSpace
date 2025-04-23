@@ -900,6 +900,7 @@ void SCGameFlow::renderMenu() {
         }
         if (ImGui::TreeNode("Required Flags")) {
             for (auto req_flag : GameState.requierd_flags) {
+                
                 ImGui::Text("FLAG %03d\tVALUE %03d", req_flag.first, req_flag.second);
             }
             ImGui::TreePop();
