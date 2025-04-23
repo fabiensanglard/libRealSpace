@@ -10,7 +10,12 @@
 //  Created by Rémi LEONARD on 09/09/2024.
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
+SCState::SCState() {
+    
+}
 void SCState::Load(std::string filename) {
+
+    
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
         std::cerr << "Failed to open file: " << filename << std::endl;

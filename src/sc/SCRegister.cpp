@@ -106,6 +106,9 @@ void SCRegister::checkKeyboard(void){
             }
             case SDLK_RETURN :{
                 if (GameState.player_callsign.size() > 0 && GameState.player_firstname.size() > 0 && GameState.player_name.size() > 0) {
+                    for (int i=0; i<256; i++) {
+                        GameState.requierd_flags[i] = false;
+                    }
                     Stop();
                 } else {
                     if (this->current_entry == &GameState.player_callsign){
@@ -116,6 +119,7 @@ void SCRegister::checkKeyboard(void){
                         this->current_entry = &GameState.player_callsign;
                     }
                 }
+                
                 break;
             }
             
@@ -150,7 +154,7 @@ void SCRegister::init( ){
     PakArchive palettesPak;
     palettesPak.InitFromRAM("OPTSHPS.PAK",palettesEntry->data,palettesEntry->size);
     
-     ByteStream paletteReader;
+    ByteStream paletteReader;
     paletteReader.Set(palettesPak.GetEntry(OPTPALS_PAK_STARTGAME_REGISTRATION)->data);
     this->palette.ReadPatch(&paletteReader);
 
