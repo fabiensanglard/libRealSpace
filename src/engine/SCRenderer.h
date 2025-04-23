@@ -49,8 +49,12 @@ public:
 
     void clear(void);
 
+    void drawParticle(Vector3D pos, float alpha);
+
     void drawModel(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation, Vector3D ajustement);
     void drawModel(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation);
+    void drawModel(RSEntity *object, Vector3D position, Vector3D orientation);
+    void drawLine(Vector3D start, Vector3D end, Vector3D color);
     void drawSprite(Vector3D pos, Texture *tex, float zoom);
     void drawModelWithChilds(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation,
                              int wheel_index, int thrust, std::vector<std::tuple<Vector3D, RSEntity *>> weaps_load);

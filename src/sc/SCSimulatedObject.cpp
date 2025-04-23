@@ -25,47 +25,18 @@ SCSimulatedObject::~SCSimulatedObject() {
 }
 
 void SCSimulatedObject::Render() {
-    glPushMatrix();
-    Matrix rotation;
-    rotation.Clear();
-    rotation.Identity();
-    rotation.translateM(this->x, this->y, this->z);
-    rotation.rotateM(this->azimuthf, 0.0f, 1.0f, 0.0f);
-    rotation.rotateM(this->elevationf, 0.0f, 0.0f, 1.0f);
-    rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
+
+    Vector3D position = { this->x, this->y, this->z };
+    Vector3D orientaton = { this->azimuthf, this->elevationf, 0.0f };
+
+    Renderer.drawModel(this->obj, position, orientaton);
     
-    glMultMatrixf((float *)rotation.v);
-    Renderer.drawModel(this->obj, LOD_LEVEL_MAX);
-    glPopMatrix();
     size_t cpt=this->smoke_positions.size();
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
+    
     for (auto pos: this->smoke_positions) {
         float alpha = 0.6f * ((float) cpt / (1.0f*(float)this->smoke_positions.size()));
-        glPushMatrix();
-        Matrix smoke_rotation;
-        smoke_rotation.Clear();
-        smoke_rotation.Identity();
-        smoke_rotation.translateM(pos.x, pos.y, pos.z);
-        smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
-        glMultMatrixf((float *)smoke_rotation.v);
-        glBegin(GL_QUADS);
-        glColor4f(1.0f,1.0f,1.0f, alpha);
-        glVertex3f(1.0f,-1.0f,-1.0f);
-        glVertex3f(1.0f,1.0f,-1.0f);
-        glVertex3f(-1.0f,1.0f,-1.0f);
-        glVertex3f(-1.0f,-1.0f,1.0f);
-        glEnd();
-        glBegin(GL_QUADS);
-        glColor4f(1.0f,1.0f,1.0f, alpha);
-        glVertex3f(-1.0f,-1.0f,-1.0f);
-        glVertex3f(-1.0f,1.0f,-1.0f);
-        glVertex3f(1.0f,1.0f,1.0f);
-        glVertex3f(1.0f,-1.0f,1.0f);
-        glEnd();
-        glPopMatrix();
+        Renderer.drawParticle(pos, alpha);
     }
-    glDisable( GL_BLEND );
 }
 
 void SCSimulatedObject::GetPosition(Vector3D *position) {
@@ -331,57 +302,18 @@ void GunSimulatedObject::Simulate(int tps) {
 
 void GunSimulatedObject::Render() {
     if (this->obj->vertices.size() == 0) {
-        glPushMatrix();
-        glTranslatef(this->x, this->y, this->z);
-        glLineWidth(1.2f);
-        glBegin(GL_LINES);
-        glColor3f(1.0f,1.0f,0.0f);
-        glVertex3f(0.0f,0.0f,0.0f);
-        glVertex3f(this->vx, this->vy, this->vz);
-        glEnd();
-        glPopMatrix();
+        Vector3D pos = {this->x, this->y, this->z};
+        Vector3D end = {this->vx, this->vy, this->vz};
+        Vector3D color = {1.0f, 1.0f, 0.0f};
+        Renderer.drawLine(pos, end, color);
     } else {
-        glPushMatrix();
-        Matrix rotation;
-        rotation.Clear();
-        rotation.Identity();
-        rotation.translateM(this->x, this->y, this->z);
-        rotation.rotateM(this->azimuthf, 0.0f, 1.0f, 0.0f);
-        rotation.rotateM(this->elevationf, 0.0f, 0.0f, 1.0f);
-        rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
-        
-        glMultMatrixf((float *)rotation.v);
-        Renderer.drawModel(this->obj, LOD_LEVEL_MAX);
-        glPopMatrix();
+        Vector3D pos = {this->x, this->y, this->z};
+        Vector3D orient = {this->azimuthf, this->elevationf, 0.0f};
+        Renderer.drawModel(this->obj, pos, orient);
     }
     
     size_t cpt=this->smoke_positions.size();
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
     for (auto pos: this->smoke_positions) {
-        float alpha = 0.6f * ((float) cpt / (1.0f*(float)this->smoke_positions.size()));
-        glPushMatrix();
-        Matrix smoke_rotation;
-        smoke_rotation.Clear();
-        smoke_rotation.Identity();
-        smoke_rotation.translateM(pos.x, pos.y, pos.z);
-        smoke_rotation.rotateM(0.0f, 1.0f, 0.0f, 0.0f);
-        glMultMatrixf((float *)smoke_rotation.v);
-        glBegin(GL_QUADS);
-        glColor4f(1.0f,1.0f,1.0f, alpha);
-        glVertex3f(1.0f,-1.0f,-1.0f);
-        glVertex3f(1.0f,1.0f,-1.0f);
-        glVertex3f(-1.0f,1.0f,-1.0f);
-        glVertex3f(-1.0f,-1.0f,1.0f);
-        glEnd();
-        glBegin(GL_QUADS);
-        glColor4f(1.0f,1.0f,1.0f, alpha);
-        glVertex3f(-1.0f,-1.0f,-1.0f);
-        glVertex3f(-1.0f,1.0f,-1.0f);
-        glVertex3f(1.0f,1.0f,1.0f);
-        glVertex3f(1.0f,-1.0f,1.0f);
-        glEnd();
-        glPopMatrix();
+        Renderer.drawParticle(pos, 0.6f * ((float) cpt / (1.0f*(float)this->smoke_positions.size())));
     }
-    glDisable( GL_BLEND );
 }

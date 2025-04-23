@@ -145,6 +145,32 @@ void SCRenderer::getNormal(RSEntity *object, Triangle *triangle, Vector3D *norma
     }
 }
 
+void SCRenderer::drawParticle(Vector3D pos, float alpha) {
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glPushMatrix();
+    Matrix smoke_rotation;
+    smoke_rotation.Clear();
+    smoke_rotation.Identity();
+    smoke_rotation.translateM(pos.x, pos.y, pos.z);
+    glMultMatrixf((float *)smoke_rotation.v);
+    glBegin(GL_QUADS);
+    glColor4f(1.0f,1.0f,1.0f, alpha);
+    glVertex3f(1.0f,-1.0f,-1.0f);
+    glVertex3f(1.0f,1.0f,-1.0f);
+    glVertex3f(-1.0f,1.0f,-1.0f);
+    glVertex3f(-1.0f,-1.0f,1.0f);
+    glEnd();
+    glBegin(GL_QUADS);
+    glColor4f(1.0f,1.0f,1.0f, alpha);
+    glVertex3f(-1.0f,-1.0f,-1.0f);
+    glVertex3f(-1.0f,1.0f,-1.0f);
+    glVertex3f(1.0f,1.0f,1.0f);
+    glVertex3f(1.0f,-1.0f,1.0f);
+    glEnd();
+    glPopMatrix();
+    glDisable( GL_BLEND );
+}
 void SCRenderer::drawModel(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation, Vector3D ajustement) { 
     glPushMatrix();
     glTranslatef(static_cast<GLfloat>(position.x), static_cast<GLfloat>(position.y),
@@ -164,6 +190,32 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel, Vector3D position,
     glRotatef(orientation.y, 0, 0, 1);
     glRotatef(orientation.z, 1, 0, 0);
     drawModel(object, 0);
+    glPopMatrix();
+}
+
+void SCRenderer::drawModel(RSEntity *object, Vector3D position, Vector3D orientation) {
+    glPushMatrix();
+    Matrix rotation;
+    rotation.Clear();
+    rotation.Identity();
+    rotation.translateM(position.x, position.y, position.z);
+    rotation.rotateM(orientation.x, 0.0f, 1.0f, 0.0f);
+    rotation.rotateM(orientation.y, 0.0f, 0.0f, 1.0f);
+    rotation.rotateM(orientation.z, 1.0f, 0.0f, 0.0f);
+    
+    glMultMatrixf((float *)rotation.v);
+    drawModel(object, 0);
+    glPopMatrix();
+}
+void SCRenderer::drawLine(Vector3D start, Vector3D end, Vector3D color) {
+    glPushMatrix();
+    glTranslatef(start.x, start.y, start.z);
+    glLineWidth(1.2f);
+    glBegin(GL_LINES);
+    glColor3f(1.0f,1.0f,0.0f);
+    glVertex3f(0.0f,0.0f,0.0f);
+    glVertex3f(end.x, end.y, end.z);
+    glEnd();
     glPopMatrix();
 }
 void SCRenderer::drawSprite(Vector3D pos, Texture *tex, float zoom) {
