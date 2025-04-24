@@ -10,7 +10,7 @@
 #define FLOPPY 1
 //Here are all the mean subsystems interacting together
 SCState         GameState;
-GameEngine      Game;
+GameEngine      *Game;
 RSScreen        Screen;
 RSVGA           VGA;
 SCMouse         Mouse;
@@ -22,7 +22,7 @@ RSMixer Mixer;
 
 int main(int argc, char* argv[]) {
 
-    
+    Game = new GameEngine();
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     if (FLOPPY) {
@@ -50,15 +50,15 @@ int main(int argc, char* argv[]) {
 
     // Load assets needed for Conversations (char and background)
     ConvAssets.init();
-    Game.init();
+    Game->init();
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();
     main->init();
-    Game.AddActivity(main);
+    Game->AddActivity(main);
     SCAnimationPlayer *intro = new SCAnimationPlayer();
     intro->init();
-    Game.AddActivity(intro);
-    Game.Run();
+    Game->AddActivity(intro);
+    Game->Run();
 
     
     return EXIT_SUCCESS;

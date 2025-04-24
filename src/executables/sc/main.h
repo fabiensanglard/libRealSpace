@@ -10,7 +10,7 @@
 #define libRealSpace_main_h
 #include "../strike_commander/precomp.h"
 
-extern GameEngine Game;
+extern GameEngine *Game;
 extern SCMouse Mouse;
 extern RSScreen Screen;
 extern RSVGA    VGA;

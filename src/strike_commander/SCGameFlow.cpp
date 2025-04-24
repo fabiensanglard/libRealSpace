@@ -294,7 +294,7 @@ void SCGameFlow::runEffect() {
             if (this->convs.size() > 0) {
                 SCConvPlayer *conv = this->convs.front();
                 this->convs.pop();
-                Game.AddActivity(conv);
+                Game->AddActivity(conv);
                 this->currentOptCode = i;
                 return;
             }
@@ -308,7 +308,7 @@ void SCGameFlow::runEffect() {
             if (this->convs.size() > 0) {
                 SCConvPlayer *conv = this->convs.front();
                 this->convs.pop();
-                Game.AddActivity(conv);
+                Game->AddActivity(conv);
                 this->currentOptCode = i;
                 return;
             }
@@ -512,7 +512,7 @@ void SCGameFlow::checkKeyboard(void) {
 
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
-            Game.StopTopActivity();
+            Game->StopTopActivity();
             break;
         }
         case SDLK_SPACE:
@@ -712,19 +712,19 @@ void SCGameFlow::runFrame(void) {
     if (this->cutsenes.size() > 0) {
         SCShot *c = this->cutsenes.front();
         this->cutsenes.pop();
-        Game.AddActivity(c);
+        Game->AddActivity(c);
         return;
     }
     if (this->convs.size() > 0) {
         SCConvPlayer *c = this->convs.front();
         this->convs.pop();
-        Game.AddActivity(c);
+        Game->AddActivity(c);
         return;
     }
     if (this->fly_mission.size() > 0) {
         SCStrike *c = this->fly_mission.front();
         this->fly_mission.pop();
-        Game.AddActivity(c);
+        Game->AddActivity(c);
         EndMissionScene *end = new EndMissionScene(&this->optShps, &this->optPals);
         end->init();
         this->cutsenes.push(end);

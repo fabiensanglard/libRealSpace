@@ -30,19 +30,19 @@ public:
     GameEngine();
     ~GameEngine();
     
-    void init(void);
-    void Run(void);
-    void Terminate(const char* reason, ...);
+    virtual void init(void);
+    virtual void Run(void);
+    virtual void Terminate(const char* reason, ...);
     
-    void Log(const char* text, ...);
-    void LogError(const char* text, ...);
+    virtual void Log(const char* text, ...);
+    virtual void LogError(const char* text, ...);
     
     //Add an activity on the top of the stack.
-    void AddActivity(IActivity* activity);
-    void StopTopActivity(void);
-    IActivity* GetCurrentActivity(void);
+    virtual void AddActivity(IActivity* activity);
+    virtual void StopTopActivity(void);
+    virtual IActivity* GetCurrentActivity(void);
     
-    void PumpEvents(void);
+    virtual void PumpEvents(void);
     
 private:
     

@@ -378,7 +378,7 @@ void SCStrike::checkKeyboard(void) {
             nav_screen->mission = this->current_mission;
             nav_screen->missionObj = this->current_mission->mission = this->current_mission->mission;
             nav_screen->current_nav_point = &this->nav_point_id;
-            Game.AddActivity(nav_screen);
+            Game->AddActivity(nav_screen);
         } break;
         case SDLK_a:
         {
@@ -789,7 +789,7 @@ void SCStrike::runFrame(void) {
             Renderer.clear();
             Screen.Refresh();
             Renderer.clear();
-            Game.StopTopActivity();
+            Game->StopTopActivity();
             return;
         }
     }

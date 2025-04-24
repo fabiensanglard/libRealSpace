@@ -27,7 +27,7 @@ void SCAnimationPlayer::checkKeyboard(void) {
 
         switch (event->type) {
         case SDL_MOUSEBUTTONUP:
-            Game.StopTopActivity();
+            Game->StopTopActivity();
             break;
         default:
             break;
@@ -40,7 +40,7 @@ void SCAnimationPlayer::checkKeyboard(void) {
 
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
-            Game.StopTopActivity();
+            Game->StopTopActivity();
             break;
         }
         default:
@@ -883,7 +883,7 @@ void SCAnimationPlayer::runFrame(void){
         shot_counter++;
         if (shot_counter>this->midgames_shots[1].size()-1) {
             shot_counter = 0;
-            Game.StopTopActivity();
+            Game->StopTopActivity();
         }
     }
     for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT; i++)

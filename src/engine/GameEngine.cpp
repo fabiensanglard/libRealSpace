@@ -12,7 +12,7 @@
 #include "GameEngine.h"
 
 extern RSScreen Screen;
-extern GameEngine Game;
+extern GameEngine *Game;
 extern SCMouse Mouse;
 extern AssetManager Assets;
 extern SCRenderer Renderer;

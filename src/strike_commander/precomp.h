@@ -31,7 +31,7 @@
 #include "../engine/GameEngine.h"
 #include "../realspace/ConvAssetManager.h"
 
-extern GameEngine Game;
+extern GameEngine *Game;
 extern SCMouse Mouse;
 extern RSScreen Screen;
 extern RSVGA    VGA;

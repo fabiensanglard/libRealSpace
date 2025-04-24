@@ -414,7 +414,7 @@ void SCConvPlayer::ReadNextFrame(void) {
 void SCConvPlayer::SetArchive(PakEntry *convPakEntry) {
 
     if (convPakEntry->size == 0) {
-        Game.Log("Conversation entry is empty: Unable to load it.\n");
+        Game->Log("Conversation entry is empty: Unable to load it.\n");
         Stop();
         return;
     }
@@ -437,7 +437,7 @@ void SCConvPlayer::SetID(int32_t id) {
 
     if (convPak.GetNumEntries() <= id) {
         Stop();
-        Game.Log("Cannot load conversation id (max convID is %lu).", convPak.GetNumEntries() - 1);
+        Game->Log("Cannot load conversation id (max convID is %lu).", convPak.GetNumEntries() - 1);
         return;
     }
     topOffset = CONV_TOP_BAR_HEIGHT + 1;
@@ -492,7 +492,7 @@ void SCConvPlayer::CheckFrameExpired(void) {
                 this->currentFrame.SetExpired(true);
                 break;
             case SDLK_ESCAPE:
-                Game.StopTopActivity();
+                Game->StopTopActivity();
                 break;
             default:
                 this->currentFrame.SetExpired(true);
@@ -639,7 +639,7 @@ void SCConvPlayer::runFrame(void) {
 
     if (!initialized) {
         Stop();
-        Game.Log("Conv ID %d was not initialized: Stopping.\n", this->conversationID);
+        Game->Log("Conv ID %d was not initialized: Stopping.\n", this->conversationID);
         return;
     }
 

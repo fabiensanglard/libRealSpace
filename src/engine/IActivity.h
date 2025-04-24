@@ -18,7 +18,7 @@
 class GameEngine;
 
 extern RSScreen Screen;
-extern GameEngine Game;
+extern GameEngine *Game;
 extern SCMouse Mouse;
 extern RSVGA VGA;
 

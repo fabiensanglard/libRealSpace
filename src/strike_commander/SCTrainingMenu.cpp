@@ -36,10 +36,10 @@ void SCTrainingMenu::OnSearchAndDestroy() {
     SCStrike *strike = new SCStrike();
     strike->init();
     strike->setMission("TEMPLATE.IFF");
-    Game.AddActivity(strike);
+    Game->AddActivity(strike);
 }
 
-void SCTrainingMenu::OnExitTraining(void) { Game.StopTopActivity(); }
+void SCTrainingMenu::OnExitTraining(void) { Game->StopTopActivity(); }
 
 void SCTrainingMenu::init() {
 
