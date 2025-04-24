@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Fabien Sanglard. All rights reserved.
 //
 
-#include "precomp.h"
+#include "../../strike_commander/precomp.h"
 #define FLOPPY 1
 //Here are all the mean subsystems interacting together
 SCState         GameState;

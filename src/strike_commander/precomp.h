@@ -30,7 +30,17 @@
 #include "../engine/IActivity.h"
 #include "../engine/GameEngine.h"
 #include "../realspace/ConvAssetManager.h"
-#include "main.h"
+
+extern GameEngine Game;
+extern SCMouse Mouse;
+extern RSScreen Screen;
+extern RSVGA    VGA;
+extern AssetManager Assets;
+extern SCRenderer Renderer;
+extern ConvAssetManager ConvAssets;
+extern RSFontManager FontManager;
+extern RSMixer Mixer;
+extern SCState GameState;
 
 // Simulation
 #include "SCSmokeSet.h"
