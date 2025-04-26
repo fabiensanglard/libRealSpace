@@ -1,5 +1,5 @@
 //
-//  Screen.h
+//  Screen->h
 //  libRealSpace
 //
 //  Created by Fabien Sanglard on 1/27/2014.
@@ -29,9 +29,9 @@ public:
     RSScreen();
     ~RSScreen();
     
-    void init(int width, int height, bool fullscreen);
-    void SetTitle(const char* title);
-    void Refresh(void);
+    virtual void init(int width, int height, bool fullscreen);
+    virtual void SetTitle(const char* title);
+    virtual void Refresh(void);
     
     int32_t width;
     int32_t height;

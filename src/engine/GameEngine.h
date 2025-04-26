@@ -9,9 +9,9 @@
 #ifndef __libRealSpace__Game__
 #define __libRealSpace__Game__
 
-#define HEIGHT 800
-#define WIDTH 1200
-#define FULLSCREEN 0
+#define HEIGHT 1080
+#define WIDTH 1920
+#define FULLSCREEN 1
 #include <stack>
 #include <vector>
 #include <string>

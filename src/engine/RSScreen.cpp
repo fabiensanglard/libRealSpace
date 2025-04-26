@@ -1,5 +1,5 @@
 //
-//  Screen.cpp
+//  Screen->cpp
 //  libRealSpace
 //
 //  Created by Fabien Sanglard on 1/27/2014.
@@ -32,8 +32,6 @@ void RSScreen::init(int width, int height, bool fullscreen){
     this->width = width;
     this->height = height;
 
-    /*this->width = 1200;
-    this->height = 800;*/
     
     SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_HIDDEN, &sdlWindow, &sdlRenderer);
     

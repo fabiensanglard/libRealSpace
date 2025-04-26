@@ -11,7 +11,7 @@
 //Here are all the mean subsystems interacting together
 SCState         GameState;
 GameEngine      *Game;
-RSScreen        Screen;
+RSScreen        *Screen;
 RSVGA           VGA;
 SCMouse         Mouse;
 AssetManager    Assets;
@@ -23,6 +23,7 @@ RSMixer Mixer;
 int main(int argc, char* argv[]) {
 
     Game = new GameEngine();
+    Screen = new RSScreen();
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     if (FLOPPY) {

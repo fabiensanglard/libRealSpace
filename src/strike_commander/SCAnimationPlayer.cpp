@@ -892,17 +892,8 @@ void SCAnimationPlayer::runFrame(void){
     for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++)
         VGA.GetFrameBuffer()->FillLineColor(199 - i, 0x00);
     VGA.VSync();
-    //this->renderMenu();
 }
 void SCAnimationPlayer::renderMenu() {
     ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
-    ImGui_ImplOpenGL2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
-    if (ImGui::BeginMainMenuBar()) {
-        ImGui::Text("Animation Player frame: %d, fps: %d, shot: %d", this->fps_counter, this->fps, this->shot_counter);
-        ImGui::EndMainMenuBar();
-    }
-    ImGui::Render();
-    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+    ImGui::Text("Animation Player frame: %d, fps: %d, shot: %d", this->fps_counter, this->fps, this->shot_counter);
 }

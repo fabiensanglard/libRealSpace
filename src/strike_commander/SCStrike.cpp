@@ -49,8 +49,8 @@ void SCStrike::checkKeyboard(void) {
     int msx = 0;
     int msy = 0;
     SDL_GetMouseState(&msx, &msy);
-    msy = msy - (Screen.height / 2);
-    msx = msx - (Screen.width / 2);
+    msy = msy - (Screen->height / 2);
+    msx = msx - (Screen->width / 2);
     if (this->camera_mode == View::AUTO_PILOT) {
         return;
     }
@@ -59,8 +59,8 @@ void SCStrike::checkKeyboard(void) {
         this->player_plane->control_stick_y = msy;
     }
     if (this->camera_mode == 5) {
-        this->pilote_lookat.x = ((Screen.width / 360) * msx) / 6;
-        this->pilote_lookat.y = ((Screen.height / 360) * msy) / 6;
+        this->pilote_lookat.x = ((Screen->width / 360) * msx) / 6;
+        this->pilote_lookat.y = ((Screen->height / 360) * msy) / 6;
     }
     for (int i = 0; i < upEvents; i++) {
         SDL_Event *event = &keybEvents[i];
@@ -787,7 +787,7 @@ void SCStrike::runFrame(void) {
             }
             GameState.mission_flyed_success[GameState.mission_flyed] = this->current_mission->gameflow_registers[0];
             Renderer.clear();
-            Screen.Refresh();
+            Screen->Refresh();
             Renderer.clear();
             Game->StopTopActivity();
             return;
@@ -1010,7 +1010,7 @@ void SCStrike::runFrame(void) {
         break;
     }
     
-    this->renderMenu();
+    //this->renderMenu();
 }
 
 
@@ -1022,14 +1022,6 @@ void SCStrike::runFrame(void) {
  * different menu items dynamically based on the current game context.
  */
 void SCStrike::renderMenu() {
-    if (this->mouse_control) {
-        ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-    } else {
-        ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
-    }
-    ImGui_ImplOpenGL2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
     static bool show_simulation = false;
     static bool show_camera = false;
     static bool show_cockpit = false;
@@ -1046,32 +1038,31 @@ void SCStrike::renderMenu() {
     static int throttle = 0;
     static int speed = 0;
 
-    if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("SCStrike")) {
-            ImGui::MenuItem("Mission", NULL, &show_mission);
-            ImGui::MenuItem("Mission part and Area", NULL, &show_mission_parts_and_areas);
-            ImGui::MenuItem("Music", NULL, &show_music_player);
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Debug")) {
-            ImGui::MenuItem("Simulation", NULL, &show_simulation);
-            ImGui::MenuItem("Simulation config", NULL, &show_simulation_config);
-            ImGui::MenuItem("Camera", NULL, &show_camera);
-            ImGui::MenuItem("Cockpit", NULL, &show_cockpit);
-            ImGui::MenuItem("Show BBox", NULL, &this->show_bbox);
-            ImGui::MenuItem("Ai pilot", NULL, &show_ai);
-            ImGui::MenuItem("Off camera", NULL, &show_offcam);
-            ImGui::EndMenu();
-        }
-        int sceneid = -1;
-        Vector3D plane_player_pos = {this->player_plane->x, this->player_plane->y, this->player_plane->z};
-        uint8_t area_id = this->current_mission->getAreaID(plane_player_pos);
-        ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s\tArea ID: %d",
-                    this->player_plane->airspeed, this->new_position.y,
-                    360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
-                    this->current_mission->mission->mission_data.name.c_str(), this->miss_file_name.c_str(),area_id);
-        ImGui::EndMainMenuBar();
+    
+    if (ImGui::BeginMenu("SCStrike")) {
+        ImGui::MenuItem("Mission", NULL, &show_mission);
+        ImGui::MenuItem("Mission part and Area", NULL, &show_mission_parts_and_areas);
+        ImGui::MenuItem("Music", NULL, &show_music_player);
+        ImGui::EndMenu();
     }
+    if (ImGui::BeginMenu("Debug")) {
+        ImGui::MenuItem("Simulation", NULL, &show_simulation);
+        ImGui::MenuItem("Simulation config", NULL, &show_simulation_config);
+        ImGui::MenuItem("Camera", NULL, &show_camera);
+        ImGui::MenuItem("Cockpit", NULL, &show_cockpit);
+        ImGui::MenuItem("Show BBox", NULL, &this->show_bbox);
+        ImGui::MenuItem("Ai pilot", NULL, &show_ai);
+        ImGui::MenuItem("Off camera", NULL, &show_offcam);
+        ImGui::EndMenu();
+    }
+    int sceneid = -1;
+    Vector3D plane_player_pos = {this->player_plane->x, this->player_plane->y, this->player_plane->z};
+    uint8_t area_id = this->current_mission->getAreaID(plane_player_pos);
+    ImGui::Text("Speed %d\tAltitude %.0f\tHeading %.0f\tTPS: %03d\tArea %s\tfilename: %s\tArea ID: %d",
+                this->player_plane->airspeed, this->new_position.y,
+                360 - (this->player_plane->azimuthf / 10.0f), this->player_plane->tps,
+                this->current_mission->mission->mission_data.name.c_str(), this->miss_file_name.c_str(),area_id);
+
     if (show_offcam) {
         ImGui::Begin("Offcam");
         ImVec2 avail_size = ImGui::GetContentRegionAvail();
@@ -1769,6 +1760,4 @@ void SCStrike::renderMenu() {
 
         ImGui::End();
     }
-    ImGui::Render();
-    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }

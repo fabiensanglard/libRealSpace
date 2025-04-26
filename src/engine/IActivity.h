@@ -17,7 +17,7 @@
 
 class GameEngine;
 
-extern RSScreen Screen;
+extern RSScreen *Screen;
 extern GameEngine *Game;
 extern SCMouse Mouse;
 extern RSVGA VGA;
@@ -50,6 +50,7 @@ public:
     virtual ~IActivity();
     virtual void Focus(void)  { this->focused = true;}
     virtual void UnFocus(void){ this->focused = false;}
+    virtual void renderMenu(void) {}
     void checkKeyboard(void);
 };
 

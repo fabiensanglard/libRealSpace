@@ -44,7 +44,7 @@ IActivity::IActivity() {}
 
 IActivity::~IActivity() {}
 
-void IActivity::SetTitle(const char *title) { Screen.SetTitle(title); }
+void IActivity::SetTitle(const char *title) { Screen->SetTitle(title); }
 
 void IActivity::checkKeyboard(void) {
     // Keyboard

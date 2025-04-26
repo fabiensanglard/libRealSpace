@@ -8,12 +8,14 @@
 
 #include "../../strike_commander/precomp.h"
 #include "DebugGame.h"
+#include "DebugScreen.h"
 #define FLOPPY 1
 //Here are all the mean subsystems interacting together
 static DebugGame debugGameInstance;
 SCState         GameState;
 GameEngine      *Game = &debugGameInstance;
-RSScreen        Screen;
+static DebugScreen     debugScreen;
+RSScreen        *Screen = &debugScreen;
 RSVGA           VGA;
 SCMouse         Mouse;
 AssetManager    Assets;
@@ -44,7 +46,6 @@ int main(int argc, char* argv[]) {
         Assets.ReadISOImage("./SC.DAT");
         Assets.init(cdTreFiles);
     }
-    
     Mixer.init(&Assets);
     FontManager.init(&Assets);
 

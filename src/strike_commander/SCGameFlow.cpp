@@ -758,7 +758,6 @@ void SCGameFlow::runFrame(void) {
         this->CheckZones();
     }
     VGA.VSync();
-    this->renderMenu();
     VGA.SwithBuffers();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
@@ -781,10 +780,6 @@ void SCGameFlow::runFrame(void) {
  * If a zone has a sprite, it renders a subtree with the sprite information.
  */
 void SCGameFlow::renderMenu() {
-    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-    ImGui_ImplOpenGL2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
     static bool show_scene_window = false;
     static bool show_load_miss = false;
     static bool show_gamestate = false;
@@ -793,24 +788,21 @@ void SCGameFlow::renderMenu() {
     static bool conv_player = false;
     static bool show_music_player = false;
     static int miss_selected = 0;
-    if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("GameFlow")) {
-            ImGui::MenuItem("Load Miss", NULL, &show_load_miss);
-            ImGui::MenuItem("Load shots", NULL, &show_shots);
-            ImGui::MenuItem("Convert player", NULL, &conv_player);
-            ImGui::MenuItem("load sprites from current scene", NULL, &load_sprites);
-            ImGui::MenuItem("Info", NULL, &show_scene_window);
-            ImGui::MenuItem("GameState", NULL, &show_gamestate);
-            ImGui::MenuItem("Music Player", NULL, &show_music_player);
-            ImGui::EndMenu();
-        }
-        int sceneid = -1;
-        if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
-            sceneid = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
-        }
-        ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, sceneid);
-        ImGui::EndMainMenuBar();
+    if (ImGui::BeginMenu("GameFlow")) {
+        ImGui::MenuItem("Load Miss", NULL, &show_load_miss);
+        ImGui::MenuItem("Load shots", NULL, &show_shots);
+        ImGui::MenuItem("Convert player", NULL, &conv_player);
+        ImGui::MenuItem("load sprites from current scene", NULL, &load_sprites);
+        ImGui::MenuItem("Info", NULL, &show_scene_window);
+        ImGui::MenuItem("GameState", NULL, &show_gamestate);
+        ImGui::MenuItem("Music Player", NULL, &show_music_player);
+        ImGui::EndMenu();
     }
+    int sceneid = -1;
+    if (this->gameFlowParser.game.game[this->current_miss]->scen.size() > 0) {
+        sceneid = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
+    }
+    ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, sceneid);
     if (show_music_player) {
         ImGui::Begin("Music Player");
         if (ImGui::BeginCombo("Music list Bank 1", 0, 0)) {
@@ -1074,7 +1066,4 @@ void SCGameFlow::renderMenu() {
         }
         ImGui::End();
     }
-
-    ImGui::Render();
-    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }

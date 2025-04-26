@@ -11,7 +11,7 @@
 #include "imgui_impl_sdl2.h"
 #include "GameEngine.h"
 
-extern RSScreen Screen;
+extern RSScreen *Screen;
 extern GameEngine *Game;
 extern SCMouse Mouse;
 extern AssetManager Assets;
@@ -25,7 +25,7 @@ GameEngine::~GameEngine() {}
 void GameEngine::init() {
 
     // Load Main Palette and Initialize the GL
-    Screen.init(WIDTH,HEIGHT,FULLSCREEN);
+    Screen->init(WIDTH,HEIGHT,FULLSCREEN);
     VGA.init(WIDTH,HEIGHT, &Assets);
     Renderer.init(WIDTH,HEIGHT, &Assets);
 
@@ -51,8 +51,8 @@ void GameEngine::PumpEvents(void) {
             newPosition.x = event->motion.x;
             newPosition.y = event->motion.y;
 
-            newPosition.x = static_cast<int>(newPosition.x * 320 / Screen.width);
-            newPosition.y = static_cast<int>(newPosition.y * 200 / Screen.height);
+            newPosition.x = static_cast<int>(newPosition.x * 320 / Screen->width);
+            newPosition.y = static_cast<int>(newPosition.y * 200 / Screen->height);
 
             Mouse.SetPosition(newPosition);
 
@@ -136,7 +136,7 @@ void GameEngine::Run() {
         }
 
         // Swap GL buffer
-        Screen.Refresh();
+        Screen->Refresh();
 
         // Flush all events since they should all have been interpreted.
         SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);

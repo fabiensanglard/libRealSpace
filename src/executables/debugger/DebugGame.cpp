@@ -11,7 +11,7 @@
 #include "imgui_impl_sdl2.h"
 #include "DebugGame.h"
 
-extern RSScreen Screen;
+extern RSScreen *Screen;
 extern SCMouse Mouse;
 extern AssetManager Assets;
 extern SCRenderer Renderer;
@@ -26,9 +26,9 @@ DebugGame::~DebugGame() {}
 void DebugGame::init() {
 
     // Load Main Palette and Initialize the GL
-    Screen.init(WIDTH,HEIGHT,FULLSCREEN);
-    VGA.init(WIDTH,HEIGHT, &Assets);
-    Renderer.init(WIDTH,HEIGHT, &Assets);
+    Screen->init(1200,800,0);
+    VGA.init(1200,800, &Assets);
+    Renderer.init(1200,800, &Assets);
 
     // Load the Mouse Cursor
     Mouse.init();
@@ -52,8 +52,8 @@ void DebugGame::PumpEvents(void) {
             newPosition.x = event->motion.x;
             newPosition.y = event->motion.y;
 
-            newPosition.x = static_cast<int>(newPosition.x * 320 / Screen.width);
-            newPosition.y = static_cast<int>(newPosition.y * 200 / Screen.height);
+            newPosition.x = static_cast<int>(newPosition.x * 320 / Screen->width);
+            newPosition.y = static_cast<int>(newPosition.y * 200 / Screen->height);
 
             Mouse.SetPosition(newPosition);
 
@@ -106,7 +106,7 @@ void DebugGame::PumpEvents(void) {
                 Terminate("System request.");
                 break;
             }
-
+            
             break;
         default:
             break;
@@ -137,7 +137,7 @@ void DebugGame::Run() {
         }
 
         // Swap GL buffer
-        Screen.Refresh();
+        Screen->Refresh();
 
         // Flush all events since they should all have been interpreted.
         SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
