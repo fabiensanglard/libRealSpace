@@ -1508,9 +1508,26 @@ void SCStrike::renderMenu() {
             int id=1;
             for (auto prog : this->current_mission->mission->mission_data.prog) {
                 if (ImGui::TreeNode((void *)(intptr_t)prog, "Prog %d", id)) {
-                    for (auto op : *prog) {
-                        ImGui::Text("opcode:[%d] %s \t\targ:[%d]", op.opcode, prog_op_names[prog_op(op.opcode)].c_str(), op.arg);
+                    static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+                    if (ImGui::BeginTable("Flags", 2, flags)) {    
+                        auto it = GameState.requierd_flags.begin();
+                        for (auto op : *prog) {
+                            ImGui::TableNextRow();
+                            /*ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
+                            if (it->second) {
+                                cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
+                            } else {
+                                cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
+                            }
+                            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);*/
+                            ImGui::TableSetColumnIndex(0);
+                            ImGui::Text("opcode:[%03d] %s ", op.opcode, prog_op_names[prog_op(op.opcode)].c_str());
+                            ImGui::TableSetColumnIndex(1);
+                            ImGui::Text("arg:[%d]", op.arg);
+                        }
+                        ImGui::EndTable();
                     }
+
                     ImGui::TreePop();
                 }
                 id++;
@@ -1686,8 +1703,35 @@ void SCStrike::renderMenu() {
                         int cpt=0;
                         if (actor->on_update.size() > 0) {
                             if (ImGui::TreeNode((void *)(intptr_t)&actor->on_update, "Prog %d", cpt)) {
-                                for (auto opcodes: actor->on_update) {
-                                    ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
+                                static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+                                if (ImGui::BeginTable("Flags", 2, flags)) {    
+                                    auto it = GameState.requierd_flags.begin();
+                                    int cpt = 0;
+                                    for (auto op : actor->on_update) {
+                                        ImGui::TableNextRow();
+                                        bool executed = false;
+                                        for (auto opt_traced: actor->executed_opcodes) {
+                                            if (opt_traced == cpt) {
+                                                executed = true;
+                                                break;
+                                            }
+                                        }
+                                        ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
+                                        if (executed) {
+                                            cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
+                                        } else {
+                                            cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
+                                        }
+                                        
+                                        ImGui::TableSetColumnIndex(0);
+                                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
+                                        ImGui::Text("opcode:[%03d] %s ", op.opcode, prog_op_names[prog_op(op.opcode)].c_str());
+                                        ImGui::TableSetColumnIndex(1);
+                                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
+                                        ImGui::Text("arg:[%d]", op.arg);
+                                        cpt++;
+                                    }
+                                    ImGui::EndTable();
                                 }
                                 ImGui::TreePop();
                             }

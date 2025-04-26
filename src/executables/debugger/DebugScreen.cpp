@@ -109,7 +109,7 @@ void DebugScreen::Refresh(void){
                 debugGameInstance.loadTO();   
             }
             if (ImGui::MenuItem("Exit")) {
-                SDL_Quit();
+                exit(0);
             }
             ImGui::EndMenu();
         }

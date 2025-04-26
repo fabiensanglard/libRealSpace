@@ -41,7 +41,7 @@
  * - `OP_EXECUTE_CALL`: Executes a call to a label.
  */
 void SCProg::execute() {
-    size_t i = 0;
+    uint8_t i = 0;
     size_t jump_to = 0;
     size_t call_to = 0;
     int flag_number = 0;
@@ -50,10 +50,13 @@ void SCProg::execute() {
     bool exec = true;
     bool objective_flag = false;
     bool true_flag = false;
+    this->actor->executed_opcodes.clear();
+    this->actor->executed_opcodes.shrink_to_fit();
     for (auto prog : this->prog) {
         switch (prog.opcode) {
             case OP_EXIT_PROG:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     if (true_flag) {
                         true_flag = false;
                     } else {
@@ -63,16 +66,19 @@ void SCProg::execute() {
             break;
             case OP_INVERT_FLAG:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     //this->mission->mission->mission_data.flags[prog.arg] = !this->mission->mission->mission_data.flags[prog.arg];
                 }
             break;
             case OP_SET_LABEL:
                 if (jump_to == prog.arg) {
                     exec = true;
+                    this->actor->executed_opcodes.push_back(i);
                 }
             break;
             case OP_MOVE_VALUE_TO_WORK_REGISTER:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     work_register = prog.arg;
                 }
             break;
@@ -81,6 +87,7 @@ void SCProg::execute() {
                     if (true_flag) {
                         jump_to = prog.arg;
                         exec = false;
+                        this->actor->executed_opcodes.push_back(i);
                     }
                 }
             break;
@@ -115,25 +122,30 @@ void SCProg::execute() {
                         jump_to = prog.arg;
                         exec = false;
                     }
+                    this->actor->executed_opcodes.push_back(i);
                 }
             break;
             case OP_IF_TARGET_IN_AREA:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     true_flag = this->actor->ifTargetInSameArea(prog.arg);
                 }
             break;
             case OP_ADD_1_TO_FLAG:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->mission->mission->mission_data.flags[prog.arg]++;
                 }
             break;
             case OP_ADD_WORK_REGISTER_TO_FLAG:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->mission->mission->mission_data.flags[prog.arg] += work_register;
                 }
             break;
             case OP_INSTANT_DESTROY_TARGET:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     for (auto actor: this->mission->actors) {
                         if (actor->actor_id == prog.arg) {
                             actor->object->alive = false;
@@ -145,18 +157,21 @@ void SCProg::execute() {
             break;
             case OP_SET_OBJ_UNKNOWN:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->flyToWaypoint(prog.arg);
                     this->actor->current_command_executed = true;
                 }
             break;
             case OP_SET_OBJ_TAKE_OFF:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->current_command_executed = this->actor->takeOff(prog.arg);
                     this->actor->current_command = OP_SET_OBJ_TAKE_OFF;
                 }
             break;
             case OP_SET_OBJ_LAND:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->current_command_executed = this->actor->land(prog.arg);
                     this->actor->current_command = OP_SET_OBJ_LAND;
                     this->actor->current_command_arg = prog.arg;
@@ -164,6 +179,7 @@ void SCProg::execute() {
             break;
             case OP_SET_OBJ_FLY_TO_WP:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->current_command_executed = this->actor->flyToWaypoint(prog.arg);
                     this->actor->current_command = OP_SET_OBJ_FLY_TO_WP;
                     this->actor->current_command_arg = prog.arg;
@@ -171,6 +187,7 @@ void SCProg::execute() {
             break;
             case OP_SET_OBJ_FLY_TO_AREA:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->current_command_executed = this->actor->flyToArea(prog.arg);
                     this->actor->current_command = OP_SET_OBJ_FLY_TO_AREA;
                     this->actor->current_command_arg = prog.arg;
@@ -178,6 +195,7 @@ void SCProg::execute() {
             break;
             case OP_SET_OBJ_DESTROY_TARGET:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->current_command_executed = this->actor->destroyTarget(prog.arg);
                     this->actor->current_command = OP_SET_OBJ_DESTROY_TARGET;
                     this->actor->current_command_arg = prog.arg;
@@ -185,6 +203,7 @@ void SCProg::execute() {
             break;
             case OP_SET_OBJ_DEFEND_TARGET:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->current_command_executed = this->actor->defendTarget(prog.arg);
                     this->actor->current_command = OP_SET_OBJ_DEFEND_TARGET;
                     this->actor->current_command_arg = prog.arg;
@@ -192,11 +211,13 @@ void SCProg::execute() {
             break;
             case OP_SET_MESSAGE:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->setMessage(prog.arg);
                 }
             break;
             case OP_SET_OBJ_FOLLOW_ALLY:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->current_command_executed = this->actor->followAlly(prog.arg);
                     this->actor->current_command = OP_SET_OBJ_DEFEND_TARGET;
                     this->actor->current_command_arg = prog.arg;
@@ -204,37 +225,44 @@ void SCProg::execute() {
             break;
             case OP_DEACTIVATE_OBJ:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->deactivate(prog.arg);
                 }
             break;
             case OP_ACTIVATE_OBJ:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->actor->activateTarget(prog.arg);
                 }
             break;
             case OP_MOVE_FLAG_TO_WORK_REGISTER:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     work_register = this->mission->mission->mission_data.flags[prog.arg];
                 }
             break;
             case OP_SAVE_VALUE_TO_GAMFLOW_REGISTER:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->mission->gameflow_registers[prog.arg] = work_register;
                 }
             break;
             case OP_MOVE_WORK_REGISTER_TO_FLAG:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->mission->mission->mission_data.flags[prog.arg] = (uint8_t) work_register;
                 }
             break;
             case OP_EXECUTE_CALL:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     jump_to = work_register;
                     exec = false;
                 }
             break;
             case OP_EXEC_SUB_PROG:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     std::vector<PROG> *sub_prog = this->mission->mission->mission_data.prog[prog.arg];
                     SCProg *sub_prog_obj = new SCProg(this->actor, *sub_prog, this->mission);
                     sub_prog_obj->execute();
@@ -242,6 +270,7 @@ void SCProg::execute() {
             break;
             case OP_CMP_GREATER_EQUAL_THAN:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     if (work_register == prog.arg) {
                         compare_flag = 0;
                     } else if (work_register > prog.arg) {
@@ -253,7 +282,9 @@ void SCProg::execute() {
             break;
             case OP_IF_LESS_THAN_GOTO:
                 if (exec) {
+                    
                     if (compare_flag == -1) {
+                        this->actor->executed_opcodes.push_back(i);
                         jump_to = prog.arg;
                         exec = false;
                     }
@@ -261,7 +292,9 @@ void SCProg::execute() {
             break;
             case OP_IF_GREATER_THAN_GOTO:
                 if (exec) {
+                    
                     if (compare_flag == 1) {
+                        this->actor->executed_opcodes.push_back(i);
                         jump_to = prog.arg;
                         exec = false;
                     }
@@ -269,57 +302,69 @@ void SCProg::execute() {
             break;
             case OP_GOTO_IF_GREATER_OR_EQUAL:
                 if (exec) {
+                    
                     if (compare_flag == 0 || compare_flag == 1) {
                         jump_to = prog.arg;
                         exec = false;
+                        this->actor->executed_opcodes.push_back(i);
                     } else if (compare_flag == -2 && !true_flag) {
                         jump_to = prog.arg;
                         exec = false;
+                        this->actor->executed_opcodes.push_back(i);
                     }
                 }
             break;
             case OP_SELECT_FLAG_208:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     // je sais pas
                 }
             break;
             case OP_DIST_TO_TARGET:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     work_register = this->actor->getDistanceToTarget(prog.arg);
                 }
             break;
             case OP_DIST_TO_SPOT:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     work_register = this->actor->getDistanceToSpot(prog.arg);
                 }
             break;
             case OP_IS_TARGET_ALIVE:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     true_flag = this->mission->actors[prog.arg]->object->alive == true;
                 }
             break;
             case OP_IS_TARGET_ACTIVE:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     true_flag = this->mission->actors[prog.arg]->is_active == true;
                 }
             break;
             case OP_SET_FLAG_TO_TRUE:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     this->mission->mission->mission_data.flags[prog.arg] = 1;
                 }
             break;
             case OP_GET_FLAG_ID:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     true_flag = this->mission->mission->mission_data.flags[prog.arg] > 0;
                 }
             break;
             case OP_MUL_VALUE_WITH_WORK:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     work_register *= prog.arg;
                 }
             break;
             case OP_ACTIVATE_SCENE:
                 if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
                     for (auto scen: this->mission->mission->mission_data.scenes) {
                         if (scen->area_id == prog.arg) {
                             scen->is_active = 1;
@@ -330,5 +375,6 @@ void SCProg::execute() {
             default:
             break;
         }
+        i++;
     }
 }

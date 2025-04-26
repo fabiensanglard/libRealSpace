@@ -46,6 +46,7 @@ public:
     virtual bool activateTarget(uint8_t arg);
     virtual int getDistanceToTarget(uint8_t arg);
     virtual int getDistanceToSpot(uint8_t arg);
+    std::vector<uint8_t> executed_opcodes;
 private:
     Vector3D target_position{0.0f, 0.0f, 0.0f};
     int target_position_update{0};
