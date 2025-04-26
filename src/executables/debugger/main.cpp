@@ -11,10 +11,10 @@
 #include "DebugScreen.h"
 #define FLOPPY 1
 //Here are all the mean subsystems interacting together
-static DebugGame debugGameInstance;
+DebugGame debugGameInstance;
 SCState         GameState;
 GameEngine      *Game = &debugGameInstance;
-static DebugScreen     debugScreen;
+DebugScreen     debugScreen;
 RSScreen        *Screen = &debugScreen;
 RSVGA           VGA;
 SCMouse         Mouse;

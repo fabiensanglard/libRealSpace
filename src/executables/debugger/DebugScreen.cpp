@@ -7,14 +7,14 @@
 //
 
 #include "DebugScreen.h"
-#include "../../engine/GameEngine.h"
+#include "DebugGame.h"
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl2.h"
 
 static SDL_Window *sdlWindow;
 static SDL_Renderer *sdlRenderer;
-extern GameEngine *Game;
+extern DebugGame debugGameInstance;
 
 DebugScreen::DebugScreen(){
     
@@ -102,12 +102,21 @@ void DebugScreen::Refresh(void){
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Strike Commander")) {
+                debugGameInstance.loadSC();
+            }
+            if (ImGui::MenuItem("Tactical Operations")) {
+                debugGameInstance.loadTO();   
+            }
             if (ImGui::MenuItem("Exit")) {
                 SDL_Quit();
             }
             ImGui::EndMenu();
         }
-        Game->GetCurrentActivity()->renderMenu();
+        IActivity* act = Game->GetCurrentActivity();
+        if (act != nullptr) {
+            act->renderMenu();    
+        }
         ImGui::EndMainMenuBar();
     }
     if (ImGui::Begin("Game")) {

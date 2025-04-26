@@ -59,7 +59,7 @@ void PakArchive::Parse(void){
     entry->size = (this->data + this->size) - entries[i]->data;
 
     for (auto entry: this->entries) {
-        if (entry->type == 32) {
+        if (entry->type == 32 && entry->size > 4) {
             LZBuffer lzbuffer;
             size_t csize = 0;
             uint8_t *dt = lzbuffer.DecodeLZW(entry->data+4, entry->size-4, csize);

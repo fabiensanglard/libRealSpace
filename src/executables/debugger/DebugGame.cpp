@@ -10,7 +10,7 @@
 #include "imgui_impl_opengl2.h"
 #include "imgui_impl_sdl2.h"
 #include "DebugGame.h"
-
+#include "../../strike_commander/precomp.h"
 extern RSScreen *Screen;
 extern SCMouse Mouse;
 extern AssetManager Assets;
@@ -112,6 +112,59 @@ void DebugGame::PumpEvents(void) {
             break;
         }
     }
+}
+
+void DebugGame::loadSC() {
+    Assets.SetBase("./assets");
+    // Load all TREs and PAKs
+    
+    std::vector<std::string> cdTreFiles = {
+        "BIGTRE.TRE",
+        "LILTRE.TRE",
+        "VOCLIST.TRE"
+    };
+    Assets.ReadISOImage("./SC.DAT");
+    Assets.init(cdTreFiles);
+    
+    FontManager.init(&Assets);
+
+    // Load assets needed for Conversations (char and background)
+    ConvAssets.init();
+
+    //Add MainMenu activity on the game stack.
+    SCMainMenu* main = new SCMainMenu();
+    main->init();
+    Game->AddActivity(main);
+    SCAnimationPlayer *intro = new SCAnimationPlayer();
+    intro->init();
+    Game->AddActivity(intro);
+    Game->Run();
+}
+
+void DebugGame::loadTO() {
+    Game->StopTopActivity();
+    Assets.SetBase("./assets");
+    // Load all TREs and PAKs
+    
+    std::vector<std::string> cdTreFiles = {
+        "TOBIGTRE.TRE",
+        "LILTRE.TRE",
+        "VOCLIST.TRE"
+    };
+    Assets.ReadISOImage("./SC.DAT");
+    Assets.init(cdTreFiles);
+    FontManager.init(&Assets);
+    // Load assets needed for Conversations (char and background)
+    ConvAssets.init();
+
+    //Add MainMenu activity on the game stack.
+    SCMainMenu* main = new SCMainMenu();
+    main->init();
+
+    Game->AddActivity(main);
+    SCAnimationPlayer *intro = new SCAnimationPlayer();
+    intro->init();
+    Game->AddActivity(intro);
 }
 
 void DebugGame::Run() {

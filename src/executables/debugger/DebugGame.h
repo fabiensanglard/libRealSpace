@@ -1,8 +1,6 @@
 #pragma once
 
-#define HEIGHT 800
-#define WIDTH 1200
-#define FULLSCREEN 0
+
 #include <stack>
 #include <vector>
 #include <string>
@@ -33,9 +31,9 @@ public:
     void AddActivity(IActivity* activity);
     void StopTopActivity(void);
     IActivity* GetCurrentActivity(void);
-    
     void PumpEvents(void);
-    
+    void loadSC();
+    void loadTO();
 private:
     
     std::stack<IActivity*> activities;

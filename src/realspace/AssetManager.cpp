@@ -54,7 +54,11 @@ void AssetManager::init(void){
     }
 }
 void AssetManager::init(std::vector<std::string> nameIds){
-    
+    this->tres.clear();
+    this->tres.shrink_to_fit();
+    this->treEntries.clear();
+    this->fileContents.clear();
+
     //Load all TRE in RAM and store them.
     for (auto nameId : nameIds) {
         TreArchive* tre = new TreArchive();
@@ -107,6 +111,7 @@ AssetManager::~AssetManager(){
 }
 
 bool AssetManager::ReadISOImage(const std::string& isoPath) {
+    this->cacheFileData.clear();
     std::ifstream isoFile(isoPath, std::ios::binary);
     if (!isoFile.is_open()) {
         std::cerr << "Failed to open ISO file: " << isoPath << std::endl;
