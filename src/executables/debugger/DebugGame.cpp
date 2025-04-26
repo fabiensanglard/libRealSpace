@@ -149,22 +149,19 @@ void DebugGame::loadTO() {
     std::vector<std::string> cdTreFiles = {
         "TOBIGTRE.TRE",
         "LILTRE.TRE",
-        "VOCLIST.TRE"
+        "TOVOCLST.TRE"
     };
     Assets.ReadISOImage("./SC.DAT");
     Assets.init(cdTreFiles);
     FontManager.init(&Assets);
     // Load assets needed for Conversations (char and background)
+    ConvAssets.conv_file_name = "CONVDAT2.IFF";
     ConvAssets.init();
 
-    //Add MainMenu activity on the game stack.
-    SCMainMenu* main = new SCMainMenu();
-    main->init();
-
-    Game->AddActivity(main);
-    SCAnimationPlayer *intro = new SCAnimationPlayer();
-    intro->init();
-    Game->AddActivity(intro);
+    SCGameFlow *to_gf = new SCGameFlow();
+    to_gf->gameflow_file = "GAMEFLO2.IFF";
+    to_gf->init();
+    Game->AddActivity(to_gf);
 }
 
 void DebugGame::Run() {

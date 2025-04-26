@@ -8,7 +8,9 @@
 
 #include "precomp.h"
 
-ConvAssetManager::ConvAssetManager() {}
+ConvAssetManager::ConvAssetManager() {
+    this->conv_file_name = "CONVDATA.IFF";
+}
 
 ConvAssetManager::~ConvAssetManager() { printf("We are not freeing the RAM from all the RLEs !!!\n"); }
 
@@ -218,7 +220,7 @@ void ConvAssetManager::BuildDB(void) {
 
     // Open the metadata
     TreEntry *convDataEntry =
-        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVDATA.IFF");
+        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\"+this->conv_file_name);
     this->parseIFF(convDataEntry->data, convDataEntry->size);
 }
 void ConvAssetManager::parseIFF(uint8_t *data, size_t size) {

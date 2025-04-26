@@ -63,7 +63,7 @@ public:
     CharFigure *GetFigure(char *name);
 
     uint8_t GetFacePaletteID(char *name);
-
+    std::string conv_file_name;
 private:
     void BuildDB(void);
 

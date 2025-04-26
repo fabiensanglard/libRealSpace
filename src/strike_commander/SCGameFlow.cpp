@@ -68,6 +68,7 @@ SCGameFlow::SCGameFlow() {
     this->currentOptCode = 0;
     this->fps = SDL_GetTicks() / 10;
     this->zones = new std::vector<SCZone *>();
+    this->gameflow_file = "GAMEFLOW.IFF";
 }
 
 SCGameFlow::~SCGameFlow() {}
@@ -564,7 +565,7 @@ void SCGameFlow::checkKeyboard(void) {
  */
 void SCGameFlow::init() {
 
-    TreEntry *gameflowIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\GAMEFLOW.IFF");
+    TreEntry *gameflowIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\"+this->gameflow_file);
     TreEntry *optionIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
     this->optionParser.InitFromRam(optionIFF->data, optionIFF->size);
     this->gameFlowParser.InitFromRam(gameflowIFF->data, gameflowIFF->size);
@@ -579,7 +580,7 @@ void SCGameFlow::init() {
 
 void SCGameFlow::InitFromGameState() {
 
-    TreEntry *gameflowIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\GAMEFLOW.IFF");
+    TreEntry *gameflowIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\"+this->gameflow_file);
     TreEntry *optionIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
     this->optionParser.InitFromRam(optionIFF->data, optionIFF->size);
     this->gameFlowParser.InitFromRam(gameflowIFF->data, gameflowIFF->size);

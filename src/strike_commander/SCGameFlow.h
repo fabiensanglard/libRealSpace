@@ -64,7 +64,7 @@ public:
     void createMiss();
     void loadMiss();
     void runFrame(void);
-
+    std::string gameflow_file;
 private:
     RSGameFlow gameFlowParser;
     RSOption optionParser;
