@@ -46,8 +46,8 @@ typedef struct UV {
 
 typedef struct uvxyEntry {
 
-    uint8_t triangleID;
-    uint8_t textureID;
+    uint16_t triangleID;
+    uint16_t textureID;
     UV uvs[3];
 } uvxyEntry;
 
@@ -61,12 +61,30 @@ typedef struct Triangle {
 
 } Triangle;
 
+typedef struct Quads {
+
+    uint8_t property;
+    uint16_t ids[4];
+
+    uint8_t color;
+    uint8_t flags[3];
+
+} Quads;
+
 typedef struct Lod {
 
     uint32_t dist;
     uint16_t numTriangles;
-    uint16_t triangleIDs[256];
+    uint16_t triangleIDs[16336];
 } Lod;
+
+typedef struct Attr {
+    uint16_t id;
+    char type;
+    uint8_t props1;
+    uint8_t props2;
+} Attr;
+
 enum EntityType {
     ground = 1,
     jet = 2,
@@ -134,7 +152,9 @@ public:
     std::vector<Point3D> vertices;
     std::vector<uvxyEntry> uvs;
     std::vector<Lod> lods;
+    std::map<uint16_t, Attr *> attrs;
     std::vector<Triangle> triangles;
+    std::vector<Quads *> quads;
     std::vector<WEAPS *> weaps;
     std::vector<HPTS *> hpts;
     std::vector<CHLD *> chld;
@@ -233,6 +253,7 @@ private:
     void parseREAL_APPR_POLY_VERT(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_DETA(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_DETA_LVLX(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_ATTR(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_VTRI(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_FACE(uint8_t *data, size_t size);
@@ -241,6 +262,7 @@ private:
     void parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_TRIS_MAPS(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_QUAD(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_QUAD_FACE(uint8_t *data, size_t size);
 };

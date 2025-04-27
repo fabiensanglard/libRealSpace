@@ -10,6 +10,7 @@
 #include <cfloat>
 #include <algorithm>
 #include "RSEntity.h"
+#include "../commons/RLEBuffer.h"
 
 RSEntity::RSEntity(AssetManager *amana) {
     this->assetsManager = amana;
@@ -503,6 +504,11 @@ void RSEntity::parseREAL_APPR_POLY(uint8_t *data, size_t size) {
         std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS, this, std::placeholders::_1, std::placeholders::_2);
     handlers["QUAD"] =
         std::bind(&RSEntity::parseREAL_APPR_POLY_QUAD, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["ATTR"] =
+        std::bind(&RSEntity::parseREAL_APPR_POLY_ATTR, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["TXMS"] =
+        std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_TXMS, this, std::placeholders::_1, std::placeholders::_2);
+    
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSEntity::parseREAL_APPR_POLY_INFO(uint8_t *data, size_t size) {}
@@ -553,6 +559,24 @@ void RSEntity::parseREAL_APPR_POLY_DETA_LVLX(uint8_t *data, size_t size) {
 
     AddLod(&lod);
 }
+void RSEntity::parseREAL_APPR_POLY_ATTR(uint8_t *data, size_t size) {
+    size_t num_attr = size / 9;
+    ByteStream stream(data);
+    std::map<char, uint16_t> compteurs = {{'L', 0}, {'T', 0}, {'Q', 0}};
+    for (size_t i = 0; i < num_attr; i++) {
+        Attr *attr = new Attr();
+        uint16_t id = stream.ReadUShort();
+        attr->type = stream.ReadByte();
+        attr->id = compteurs[attr->type]++;
+        attr->props1 = stream.ReadByte();
+        attr->props2 = stream.ReadByte();
+        this->attrs[id] = attr;
+        stream.ReadByte();
+        stream.ReadByte();
+        stream.ReadByte();
+        stream.ReadByte();
+    }
+}
 void RSEntity::parseREAL_APPR_POLY_TRIS(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
 
@@ -565,6 +589,8 @@ void RSEntity::parseREAL_APPR_POLY_TRIS(uint8_t *data, size_t size) {
         std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_TXMS, this, std::placeholders::_1, std::placeholders::_2);
     handlers["UVXY"] =
         std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_UVXY, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["MAPS"] =
+        std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_MAPS, this, std::placeholders::_1, std::placeholders::_2);
 
     lexer.InitFromRAM(data, size, handlers);
 }
@@ -600,7 +626,6 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_FACE(uint8_t *data, size_t size) {
     Triangle triangle;
     for (int i = 0; i < numTriangle; i++) {
         triangle.property = stream.ReadByte();
-        triangle.property = 1;
         triangle.color = stream.ReadByte();
         triangle.ids[0] = stream.ReadUShort();
         triangle.ids[1] = stream.ReadUShort();
@@ -648,6 +673,13 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size) {
         LZBuffer lzbuffer;
         pic_data = lzbuffer.DecodeLZW(src+2,size-14,csize);
         src = pic_data;
+    }
+    if (src[0]=='P' && src[1]=='+'){
+        RLEBuffer img;
+        src = img.Decompress(src+4, size-16, csize);
+        if (csize < width * height) {
+            return;
+        }
     }
     
     image->UpdateContent(src);
@@ -708,7 +740,34 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size) {
         AddUV(&uvEntry);
     }
 }
+void RSEntity::parseREAL_APPR_POLY_TRIS_MAPS(uint8_t *data, size_t size) {
+    ByteStream stream(data);
 
+    size_t numEntries = size / 16;
+
+    uvxyEntry uvEntry;
+    for (size_t i = 0; i < numEntries; i++) {
+
+        uvEntry.triangleID = stream.ReadUShort();
+        uvEntry.textureID = stream.ReadUShort();
+
+        uvEntry.uvs[0].u = stream.ReadByte();
+        stream.ReadByte();
+        uvEntry.uvs[0].v = stream.ReadByte();
+        stream.ReadByte();
+        uvEntry.uvs[1].u = stream.ReadByte();
+        stream.ReadByte();
+        uvEntry.uvs[1].v = stream.ReadByte();
+        stream.ReadByte();
+
+        uvEntry.uvs[2].u = stream.ReadByte();
+        stream.ReadByte();
+        uvEntry.uvs[2].v = stream.ReadByte();
+        stream.ReadByte();
+
+        AddUV(&uvEntry);
+    }
+}
 void RSEntity::parseREAL_APPR_POLY_QUAD(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
 
@@ -724,8 +783,8 @@ void RSEntity::parseREAL_APPR_POLY_QUAD_FACE(uint8_t *data, size_t size) {
 
     size_t numQuad = size / 10;
     ByteStream stream(data);
-
-    Triangle *triangle;
+    
+    Quads *q;
     for (int i = 0; i < numQuad; i++) {
         uint8_t property = stream.ReadByte();
         uint8_t color = stream.ReadByte();
@@ -735,21 +794,13 @@ void RSEntity::parseREAL_APPR_POLY_QUAD_FACE(uint8_t *data, size_t size) {
         verts[2] = stream.ReadUShort();
         verts[3] = stream.ReadUShort();
 
-        triangle = new Triangle();
-        triangle->property = 1;
-        triangle->color = color;
-        triangle->ids[0] = verts[0];
-        triangle->ids[1] = verts[1];
-        triangle->ids[2] = verts[2];
-        AddTriangle(triangle);
-
-        triangle = new Triangle();
-        triangle->property = 1;
-        triangle->color = color;
-        triangle->ids[0] = verts[0];
-        triangle->ids[1] = verts[2];
-        triangle->ids[2] = verts[3];
-        AddTriangle(triangle);
-
+        q = new Quads();
+        q->property = property;
+        q->color = color;
+        q->ids[0] = verts[0];
+        q->ids[1] = verts[1];
+        q->ids[2] = verts[2];
+        q->ids[3] = verts[3];
+        quads.push_back(q);
     }
 }

@@ -452,8 +452,16 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     glBlendEquation(GL_FUNC_ADD);
 #endif
     for (int i = 0; i < lod->numTriangles; i++) {
-
         uint16_t triangleID = lod->triangleIDs[i];
+        if (object->attrs.size() > 0) {
+            if (object->attrs[triangleID]->type == 'Q') {
+                continue;
+            }
+            if (object->attrs[triangleID]->type == 'L') {
+                continue;
+            }
+            triangleID = object->attrs[triangleID]->id;
+        }
         if (triangleID >= object->triangles.size()) {
             continue;
         }
@@ -492,6 +500,62 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         glEnd();
     }
 
+    if (object->quads.size() > 0) {
+        for (int i = 0; i < lod->numTriangles; i++) {
+            uint16_t triangleID = lod->triangleIDs[i];
+            if (object->attrs.size() > 0) {
+                if (object->attrs[triangleID]->type == 'T') {
+                    continue;
+                }
+                if (object->attrs[triangleID]->type == 'L') {
+                    continue;
+                }
+                triangleID = object->attrs[triangleID]->id;
+            }
+            if (triangleID >= object->triangles.size()) {
+                continue;
+            }
+            Quads *triangle = object->quads[triangleID];
+    
+            if (triangle->property != RSEntity::SC_TRANSPARENT)
+                continue;
+    
+            Vector3D normal;
+            Triangle *tri = new Triangle();
+            tri->ids[0] = triangle->ids[0];
+            tri->ids[1] = triangle->ids[1];
+            tri->ids[2] = triangle->ids[2];
+    
+            getNormal(object, tri, &normal);
+    
+            glBegin(GL_QUADS);
+            for (int j = 0; j < 4; j++) {
+    
+                Point3D vertice = object->vertices[triangle->ids[j]];
+    
+                Vector3D sunDirection;
+                sunDirection = light;
+                sunDirection.Substract(&vertice);
+                sunDirection.Normalize();
+    
+                float lambertianFactor = sunDirection.DotProduct(&normal);
+                if (lambertianFactor < 0)
+                    lambertianFactor = 0;
+    
+                lambertianFactor = 0.2f;
+    
+                // int8_t gouraud = 255 * lambertianFactor;
+    
+                // gouraud = 255;
+    
+                glColor4f(lambertianFactor, lambertianFactor, lambertianFactor, 1);
+    
+                glVertex3f(vertice.x, vertice.y, vertice.z);
+            }
+            glEnd();
+        }    
+    }
+    
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
 
@@ -500,8 +564,17 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     // Pass 1, draw color
     for (int i = 0; i < lod->numTriangles; i++) {
         // for(int i = 60 ; i < 62 ; i++){  //Debug purpose only back governal of F-16 is 60-62
-
+        
         uint16_t triangleID = lod->triangleIDs[i];
+        if (object->attrs.size() > 0) {
+            if (object->attrs[triangleID]->type == 'Q') {
+                continue;
+            }
+            if (object->attrs[triangleID]->type == 'L') {
+                continue;
+            }
+            triangleID = object->attrs[triangleID]->id;
+        }
         if (triangleID >= object->triangles.size()) {
             continue;
         }
@@ -553,6 +626,75 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         }
         glEnd();
     }
+    if (object->quads.size() > 0) {
+        for (int i = 0; i < lod->numTriangles; i++) {
+            uint16_t triangleID = lod->triangleIDs[i];
+            if (object->attrs.size() > 0) {
+                if (object->attrs[triangleID]->type == 'T') {
+                    continue;
+                }
+                if (object->attrs[triangleID]->type == 'L') {
+                    continue;
+                }
+                triangleID = object->attrs[triangleID]->id;
+            }
+            if (triangleID >= object->quads.size()) {
+                continue;
+            }
+            Quads *triangle = object->quads[triangleID];
+    
+            if (triangle->property == RSEntity::SC_TRANSPARENT)
+                continue;
+            if (triangle->property == 6) {
+                continue;
+            }
+            if (triangle->property == 7) {
+                continue;
+            }
+            if (triangle->property == 8) {
+                continue;
+            }
+            if (triangle->property == 9) {
+                continue;
+            }
+            Vector3D normal;
+            Triangle *tri = new Triangle();
+            tri->ids[0] = triangle->ids[0];
+            tri->ids[1] = triangle->ids[1];
+            tri->ids[2] = triangle->ids[2];
+    
+            getNormal(object, tri, &normal);
+    
+            glBegin(GL_QUADS);
+            for (int j = 0; j < 4; j++) {
+    
+                Vector3D vertice = object->vertices[triangle->ids[j]];
+    
+                Vector3D lighDirection;
+                lighDirection = light;
+                lighDirection.Substract(&vertice);
+                lighDirection.Normalize();
+    
+                float lambertianFactor = lighDirection.DotProduct(&normal);
+                if (lambertianFactor < 0)
+                    lambertianFactor = 0;
+    
+                lambertianFactor += ambientLamber;
+                if (lambertianFactor > 1)
+                    lambertianFactor = 1;
+    
+                const Texel *texel = palette.GetRGBColor(triangle->color);
+    
+                glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
+                          texel->b / 255.0f * lambertianFactor, texel->a);
+    
+                glVertex3f(vertice.x, vertice.y,
+                    vertice.z);
+            }
+            glEnd();
+        }
+    }
+    
 
     glDisable(GL_BLEND);
 }
