@@ -51,6 +51,12 @@ typedef struct uvxyEntry {
     UV uvs[3];
 } uvxyEntry;
 
+typedef struct qmapuvxyEntry {
+    uint16_t triangleID;
+    uint16_t textureID;
+    UV uvs[4];
+} qmapuvxyEntry;
+
 typedef struct Triangle {
 
     uint8_t property;
@@ -151,6 +157,7 @@ public:
     std::vector<RSImage *> images;
     std::vector<Point3D> vertices;
     std::vector<uvxyEntry> uvs;
+    std::vector<qmapuvxyEntry *> qmapuvs;
     std::vector<Lod> lods;
     std::map<uint16_t, Attr *> attrs;
     std::vector<Triangle> triangles;
@@ -265,4 +272,5 @@ private:
     void parseREAL_APPR_POLY_TRIS_MAPS(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_QUAD(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_QUAD_FACE(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_QUAD_MAPS(uint8_t *data, size_t size);
 };

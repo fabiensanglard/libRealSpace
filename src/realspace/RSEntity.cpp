@@ -775,6 +775,8 @@ void RSEntity::parseREAL_APPR_POLY_QUAD(uint8_t *data, size_t size) {
     
     handlers["FACE"] =
         std::bind(&RSEntity::parseREAL_APPR_POLY_QUAD_FACE, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["MAPS"] =
+        std::bind(&RSEntity::parseREAL_APPR_POLY_QUAD_MAPS, this, std::placeholders::_1, std::placeholders::_2);
 
     lexer.InitFromRAM(data, size, handlers);
 }
@@ -802,5 +804,37 @@ void RSEntity::parseREAL_APPR_POLY_QUAD_FACE(uint8_t *data, size_t size) {
         q->ids[2] = verts[2];
         q->ids[3] = verts[3];
         quads.push_back(q);
+    }
+}
+void RSEntity::parseREAL_APPR_POLY_QUAD_MAPS(uint8_t *data, size_t size) {
+    ByteStream stream(data);
+
+    size_t numEntries = size / 20;
+
+    qmapuvxyEntry *uvEntry;
+    for (size_t i = 0; i < numEntries; i++) {
+        uvEntry = new qmapuvxyEntry();
+        uvEntry->triangleID = stream.ReadUShort();
+        uvEntry->textureID = stream.ReadUShort();
+
+        uvEntry->uvs[0].u = stream.ReadByte();
+        stream.ReadByte();
+        uvEntry->uvs[0].v = stream.ReadByte();
+        stream.ReadByte();
+        uvEntry->uvs[1].u = stream.ReadByte();
+        stream.ReadByte();
+        uvEntry->uvs[1].v = stream.ReadByte();
+        stream.ReadByte();
+
+        uvEntry->uvs[2].u = stream.ReadByte();
+        stream.ReadByte();
+        uvEntry->uvs[2].v = stream.ReadByte();
+        stream.ReadByte();
+
+        uvEntry->uvs[3].u = stream.ReadByte();
+        stream.ReadByte();
+        uvEntry->uvs[3].v = stream.ReadByte();
+        stream.ReadByte();
+        this->qmapuvs.push_back(uvEntry);
     }
 }

@@ -435,6 +435,76 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             }
             glEnd();
         }
+
+        for (auto quv: object->qmapuvs) {
+            if (quv->textureID >= object->images.size())
+                continue;
+
+            RSImage *image = object->images[quv->textureID];
+
+            Texture *texture = image->GetTexture();
+            Quads *triangle = object->quads[quv->triangleID];
+            float alpha = 1.0f;
+            int colored = 0;
+            if (triangle->property == 6) {
+                alpha = 0.0f;
+            }
+            if (triangle->property == 7) {
+                alpha = 1.0f;
+                colored = 1;
+            }
+            if (triangle->property == 8) {
+                alpha = 1.0f;
+                colored = 1;
+            }
+            if (triangle->property == 9) {
+                alpha = 0.0f;
+            }
+
+            glBindTexture(GL_TEXTURE_2D, texture->id);
+            Vector3D normal;
+            Triangle *tri = new Triangle();
+            tri->ids[0] = triangle->ids[0];
+            tri->ids[1] = triangle->ids[1];
+            tri->ids[2] = triangle->ids[2];
+
+            getNormal(object, tri, &normal);
+
+            glBegin(GL_QUADS);
+            for (int j = 0; j < 4; j++) {
+
+                Point3D vertice = object->vertices[triangle->ids[j]];
+
+                Vector3D lighDirection;
+                lighDirection = light;
+                lighDirection.Substract(&vertice);
+                lighDirection.Normalize();
+
+                float lambertianFactor = lighDirection.DotProduct(&normal);
+                if (lambertianFactor < 0)
+                    lambertianFactor = 0;
+
+                lambertianFactor += ambientLamber;
+                if (lambertianFactor > 1)
+                    lambertianFactor = 1;
+
+                const Texel *texel = palette.GetRGBColor(triangle->color);
+
+                //
+                // glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,alpha);
+                // glColor4f(0, 0, 0,1);
+                if (colored) {
+                    glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
+                              texel->b / 255.0f * lambertianFactor, alpha);
+                } else {
+                    glColor4f(lambertianFactor, lambertianFactor, lambertianFactor, alpha);
+                }
+                glTexCoord2f(quv->uvs[j].u / (float)texture->width, quv->uvs[j].v / (float)texture->height);
+                glVertex3f(object->vertices[triangle->ids[j]].x, object->vertices[triangle->ids[j]].y,
+                           object->vertices[triangle->ids[j]].z);
+            }
+            glEnd();
+        }
         glDisable(GL_BLEND);
         glDisable(GL_TEXTURE_2D);
     }
