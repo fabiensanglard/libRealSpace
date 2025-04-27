@@ -284,8 +284,11 @@ void SCObjectViewer::runFrame(void) {
 }
 void SCObjectViewer::renderMenu() {
     static bool load_object = false;
+    static bool view_textures = false;
+
     if (ImGui::BeginMenu("Object Viewer")) {
         ImGui::MenuItem("Load Object", nullptr, &load_object);
+        ImGui::MenuItem("view Textures", nullptr, &view_textures);
         ImGui::EndMenu();
     }
     if (load_object) {
@@ -310,5 +313,21 @@ void SCObjectViewer::renderMenu() {
         }
         ImGui::End();
     }
-    
+    if (view_textures) {
+        ImGui::Begin("List Of Textures");
+        static ImGuiComboFlags shtsflags = 0;
+        static RSImage *currentTexture = nullptr;
+        if (ImGui::BeginCombo("List des textures", nullptr, shtsflags)) {
+            for (auto tex: objs.showCases[currentObject].entity->images) {
+                if (ImGui::Selectable(tex->name, false)) {
+                    currentTexture = tex;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        if (currentTexture != nullptr) {
+            ImGui::Image((void*)(intptr_t)currentTexture->GetTexture()->GetTextureID(), ImVec2(256, 256), {0, 1}, {1, 0});
+        }           
+        ImGui::End();
+    }
 }
