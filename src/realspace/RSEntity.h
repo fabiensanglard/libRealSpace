@@ -54,7 +54,7 @@ typedef struct uvxyEntry {
 typedef struct Triangle {
 
     uint8_t property;
-    uint8_t ids[3];
+    uint16_t ids[3];
 
     uint8_t color;
     uint8_t flags[3];
@@ -235,9 +235,12 @@ private:
     void parseREAL_APPR_POLY_DETA_LVLX(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_VTRI(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_TRIS_FACE(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_TXMS(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_TXMS_INFO(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_QUAD(uint8_t *data, size_t size);
+    void parseREAL_APPR_POLY_QUAD_FACE(uint8_t *data, size_t size);
 };

@@ -320,9 +320,12 @@ void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
     tmpname = "..\\..\\DATA\\OBJECTS\\" + expl->name + ".IFF";
     expl->x = bs.ReadShort();
     expl->y = bs.ReadShort();
+    std::transform (tmpname.begin(), tmpname.end(), tmpname.begin(), ::toupper);
     expl->objct = new RSEntity(this->assetsManager);
     TreEntry *entry = assetsManager->GetEntryByName(tmpname);
-    expl->objct->InitFromRAM(entry->data, entry->size);
+    if (entry != nullptr) {
+        expl->objct->InitFromRAM(entry->data, entry->size);
+    }
 }
 void RSEntity::parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size) {}
@@ -498,14 +501,14 @@ void RSEntity::parseREAL_APPR_POLY(uint8_t *data, size_t size) {
         std::bind(&RSEntity::parseREAL_APPR_POLY_DETA, this, std::placeholders::_1, std::placeholders::_2);
     handlers["TRIS"] =
         std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS, this, std::placeholders::_1, std::placeholders::_2);
-
+    handlers["QUAD"] =
+        std::bind(&RSEntity::parseREAL_APPR_POLY_QUAD, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSEntity::parseREAL_APPR_POLY_INFO(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_APPR_POLY_VERT(uint8_t *data, size_t size) {
     ByteStream stream(data);
     size_t numVertice = size / 12;
-
     for (int i = 0; i < numVertice; i++) {
         int32_t coo;
         Point3D vertex;
@@ -556,6 +559,8 @@ void RSEntity::parseREAL_APPR_POLY_TRIS(uint8_t *data, size_t size) {
     std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
     handlers["VTRI"] =
         std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_VTRI, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["FACE"] =
+        std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_FACE, this, std::placeholders::_1, std::placeholders::_2);
     handlers["TXMS"] =
         std::bind(&RSEntity::parseREAL_APPR_POLY_TRIS_TXMS, this, std::placeholders::_1, std::placeholders::_2);
     handlers["UVXY"] =
@@ -563,6 +568,7 @@ void RSEntity::parseREAL_APPR_POLY_TRIS(uint8_t *data, size_t size) {
 
     lexer.InitFromRAM(data, size, handlers);
 }
+
 void RSEntity::parseREAL_APPR_POLY_TRIS_VTRI(uint8_t *data, size_t size) {
 
     size_t numTriangle = size / 8;
@@ -582,6 +588,28 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_VTRI(uint8_t *data, size_t size) {
         triangle.flags[0] = stream.ReadByte();
         triangle.flags[1] = stream.ReadByte();
         triangle.flags[2] = stream.ReadByte();
+
+        AddTriangle(&triangle);
+    }
+}
+void RSEntity::parseREAL_APPR_POLY_TRIS_FACE(uint8_t *data, size_t size) {
+
+    size_t numTriangle = size / 8;
+    ByteStream stream(data);
+
+    Triangle triangle;
+    for (int i = 0; i < numTriangle; i++) {
+        triangle.property = stream.ReadByte();
+        triangle.property = 1;
+        triangle.color = stream.ReadByte();
+        triangle.ids[0] = stream.ReadUShort();
+        triangle.ids[1] = stream.ReadUShort();
+        triangle.ids[2] = stream.ReadUShort();
+        
+
+        //triangle.flags[0] = stream.ReadByte();
+        //triangle.flags[1] = stream.ReadByte();
+        //triangle.flags[2] = stream.ReadByte();
 
         AddTriangle(&triangle);
     }
@@ -678,5 +706,50 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_UVXY(uint8_t *data, size_t size) {
         uvEntry.uvs[2].v = stream.ReadByte();
 
         AddUV(&uvEntry);
+    }
+}
+
+void RSEntity::parseREAL_APPR_POLY_QUAD(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    
+    handlers["FACE"] =
+        std::bind(&RSEntity::parseREAL_APPR_POLY_QUAD_FACE, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
+
+void RSEntity::parseREAL_APPR_POLY_QUAD_FACE(uint8_t *data, size_t size) {
+
+    size_t numQuad = size / 10;
+    ByteStream stream(data);
+
+    Triangle *triangle;
+    for (int i = 0; i < numQuad; i++) {
+        uint8_t property = stream.ReadByte();
+        uint8_t color = stream.ReadByte();
+        uint16_t verts[4];
+        verts[0] = stream.ReadUShort();
+        verts[1] = stream.ReadUShort();
+        verts[2] = stream.ReadUShort();
+        verts[3] = stream.ReadUShort();
+
+        triangle = new Triangle();
+        triangle->property = 1;
+        triangle->color = color;
+        triangle->ids[0] = verts[0];
+        triangle->ids[1] = verts[1];
+        triangle->ids[2] = verts[2];
+        AddTriangle(triangle);
+
+        triangle = new Triangle();
+        triangle->property = 1;
+        triangle->color = color;
+        triangle->ids[0] = verts[0];
+        triangle->ids[1] = verts[2];
+        triangle->ids[2] = verts[3];
+        AddTriangle(triangle);
+
     }
 }

@@ -108,6 +108,9 @@ void DebugScreen::Refresh(void){
             if (ImGui::MenuItem("Tactical Operations")) {
                 debugGameInstance.loadTO();   
             }
+            if (ImGui::MenuItem("Pacific Strike")) {
+                debugGameInstance.loadPacific();   
+            }
             if (ImGui::MenuItem("Exit")) {
                 exit(0);
             }
@@ -125,7 +128,10 @@ void DebugScreen::Refresh(void){
         ImGui::End();
     }
     ImGui::Render();
-    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+    ImDrawData *dt=ImGui::GetDrawData();
+    if (dt != nullptr) {
+        ImGui_ImplOpenGL2_RenderDrawData(dt);
+    }
     SDL_GL_SwapWindow(sdlWindow);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);				// Black Background
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);

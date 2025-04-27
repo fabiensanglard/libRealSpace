@@ -7,7 +7,9 @@
 //
 
 #include "precomp.h"
-
+#include <imgui.h>
+#include <imgui_impl_opengl2.h>
+#include <imgui_impl_sdl2.h>
 
 SCObjectViewer::SCObjectViewer() {
     this->rotateUpDownAngle = 0;
@@ -279,4 +281,34 @@ void SCObjectViewer::runFrame(void) {
     VGA.VSync();
     VGA.SwithBuffers();
     /**/
+}
+void SCObjectViewer::renderMenu() {
+    static bool load_object = false;
+    if (ImGui::BeginMenu("Object Viewer")) {
+        ImGui::MenuItem("Load Object", nullptr, &load_object);
+        ImGui::EndMenu();
+    }
+    if (load_object) {
+        ImGui::Begin("List Of Objects");
+        static ImGuiComboFlags shtsflags = 0;
+        if (ImGui::BeginCombo("List des objets", nullptr, shtsflags)) {
+            for (auto tre :Assets.tres) {
+                for (auto entry : tre->entries) {
+                    if (std::string(entry->name).find("OBJECT") != std::string::npos) {
+                        // Your logic here if entry->name contains "OBJECT"
+                        if (ImGui::Selectable(entry->name, false)) {
+                            printf("load object");
+                            RSEntity *obj = new RSEntity(&Assets);
+                            obj->InitFromRAM(entry->data, entry->size);
+                            objs.showCases[0].entity = obj;
+                            currentObject = 0; 
+                        }
+                    }
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::End();
+    }
+    
 }

@@ -34,8 +34,9 @@ public:
     void PumpEvents(void);
     void loadSC();
     void loadTO();
+    void loadPacific();
+
 private:
-    
     std::stack<IActivity*> activities;
     
     

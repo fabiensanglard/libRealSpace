@@ -27,6 +27,7 @@ public:
     float rotateUpDownAngle;
     float rotateLeftRightAngle;
     float zoomFactor;
+    void renderMenu();
 private:
 
     RSObjViewer objs;

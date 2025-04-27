@@ -352,7 +352,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     float ambientLamber = 0.4f;
 
     Lod *lod = &object->lods[lodLevel];
-
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -454,7 +454,9 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     for (int i = 0; i < lod->numTriangles; i++) {
 
         uint16_t triangleID = lod->triangleIDs[i];
-
+        if (triangleID >= object->triangles.size()) {
+            continue;
+        }
         Triangle *triangle = &object->triangles[triangleID];
 
         if (triangle->property != RSEntity::SC_TRANSPARENT)
@@ -500,7 +502,9 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         // for(int i = 60 ; i < 62 ; i++){  //Debug purpose only back governal of F-16 is 60-62
 
         uint16_t triangleID = lod->triangleIDs[i];
-
+        if (triangleID >= object->triangles.size()) {
+            continue;
+        }
         Triangle *triangle = &object->triangles[triangleID];
 
         if (triangle->property == RSEntity::SC_TRANSPARENT)

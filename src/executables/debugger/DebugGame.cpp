@@ -115,6 +115,7 @@ void DebugGame::PumpEvents(void) {
 }
 
 void DebugGame::loadSC() {
+    Game->StopTopActivity();
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     
@@ -138,7 +139,6 @@ void DebugGame::loadSC() {
     SCAnimationPlayer *intro = new SCAnimationPlayer();
     intro->init();
     Game->AddActivity(intro);
-    Game->Run();
 }
 
 void DebugGame::loadTO() {
@@ -162,6 +162,27 @@ void DebugGame::loadTO() {
     to_gf->gameflow_file = "GAMEFLO2.IFF";
     to_gf->init();
     Game->AddActivity(to_gf);
+}
+
+void DebugGame::loadPacific() {
+    Game->StopTopActivity();
+    Assets.SetBase("./assets");
+    // Load all TREs and PAKs
+    
+    std::vector<std::string> cdTreFiles = {
+        "PACIFIC.DAT",
+    };
+    Assets.init(cdTreFiles);
+    
+    FontManager.init(&Assets);
+
+    // Load assets needed for Conversations (char and background)
+    ConvAssets.init();
+
+    //Add MainMenu activity on the game stack.
+    SCObjectViewer* main = new SCObjectViewer();
+    main->init();
+    Game->AddActivity(main);
 }
 
 void DebugGame::Run() {
