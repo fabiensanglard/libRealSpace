@@ -10,6 +10,7 @@
 #include <cfloat>
 #include <algorithm>
 #include "RSEntity.h"
+#include "RLEShape.h"
 #include "../commons/RLEBuffer.h"
 
 RSEntity::RSEntity(AssetManager *amana) {
@@ -675,9 +676,13 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size) {
         src = pic_data;
     }
     if (src[0]=='P' && src[1]=='+'){
-        RLEBuffer img;
-        src = img.Decompress(src+4, size-16, csize);
+        LZBuffer lzbuffer;
+        pic_data = lzbuffer.DecodeLZ77(src+4,size-16,csize);
+        src = pic_data;
         if (csize < width * height) {
+            return;
+        }
+        if (src == nullptr) {
             return;
         }
     }
