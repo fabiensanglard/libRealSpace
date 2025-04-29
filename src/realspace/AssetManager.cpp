@@ -13,6 +13,37 @@
 #include <string>
 #include "AssetManager.h"
 
+#ifndef _WIN32
+size_t fread_s(void *buffer, size_t bufferSize, size_t elementSize, size_t elementCount, FILE *stream) {
+    if (buffer == NULL || stream == NULL) {
+        fprintf(stderr, "Invalid buffer or stream.\n");
+        return 0;
+    }
+
+    if (bufferSize < elementSize * elementCount) {
+        fprintf(stderr, "Buffer size is too small.\n");
+        return 0;
+    }
+
+    return fread(buffer, elementSize, elementCount, stream);
+}
+int fopen_s(FILE **file, const char *filename, const char *mode) {
+    if (file == NULL || filename == NULL || mode == NULL) {
+        fprintf(stderr, "Invalid arguments to fopen_s.\n");
+        return EINVAL; // Invalid argument error code
+    }
+
+    *file = fopen(filename, mode);
+    if (*file == NULL) {
+        perror("Failed to open file");
+        return errno; // Return the error code from errno
+    }
+
+    return 0; // Success
+}
+#endif
+
+
 typedef struct TreNameID{
     AssetManager::TreID id ;
     const char* filename;

@@ -2,6 +2,7 @@
 #define RLE_BUFFER_H
 
 #include <vector>
+#include <cstddef>
 #include <cstdint>
 
 class RLEBuffer {

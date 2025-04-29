@@ -133,9 +133,6 @@ uint8_t * RLEBuffer::DecompressPacketBit(uint8_t * compressedBuffer, size_t size
             i += count;
         }
     }
-    if (decompressed_size != decompressed.size()) {
-        printf("Error decompressing RLE buffer\n");
-    }
     uint8_t * result = new uint8_t[decompressed_size]; // On alloue un tableau de taille exacte
     size_t pos = 0;
     for (auto d: decompressed) {
