@@ -139,6 +139,7 @@ int SCConvPlayer::SetSentenceFromConv(ByteStream *conv, int start_offset) {
     char *sentence = (char *)conv->GetPosition() + start_offset;
     int sound_offset = 0;
     char *sentence_end = (char *)conv->GetPosition() + start_offset + strlen((char *)sentence) + 1;
+    currentFrame.sound_file_name = nullptr;
     if (!isNextFrameIsConv((uint8_t) sentence_end[1])) {
         sound_offset = strlen((char *)sentence) + 1;
         currentFrame.sound_file_name = new std::string(sentence);
@@ -246,7 +247,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
     case CLOSEUP_CONTINUATION: // Same person keep talking
     {
-        int next_frame_offset = SetSentenceFromConv(&conv,0);
+        int next_frame_offset = SetSentenceFromConv(&conv,0x0);
         conv.MoveForward(next_frame_offset);
         printf(
             "ConvID: %d MORETEX:                                       WHAT: '%s'\n", this->conversationID, currentFrame.text

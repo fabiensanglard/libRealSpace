@@ -61,18 +61,25 @@ void SCState::Load(std::string filename) {
         01C9 - 01DC - Player Last Name
     */
     this->player_name = std::string(buffer.begin() + 0x1C9, buffer.begin() + 0x1DC);
+    this->player_name = this->player_name.substr(0, this->player_name.find('\0'));
+    this->player_name.shrink_to_fit();
     /*
         01DD - 01F0 - Player First Name
     */
     this->player_firstname = std::string(buffer.begin() + 0x1DD, buffer.begin() + 0x1F0);
+    this->player_firstname = this->player_firstname.substr(0, this->player_firstname.find('\0'));
+    this->player_firstname.shrink_to_fit();
     /*
         01F1 - 0204 - Player Callsign
     */
     this->player_callsign = std::string(buffer.begin() + 0x1F1, buffer.begin() + 0x204);
+    this->player_callsign = this->player_callsign.substr(0, this->player_callsign.find('\0'));
+    this->player_callsign.shrink_to_fit();
     /*
         208 - 21B - WingMan
     */
     this->wingman = std::string(buffer.begin() + 0x208, buffer.begin() + 0x21B);
+    this->wingman.shrink_to_fit();
     this->ground_kills = buffer[0x199];
     this->air_kills = buffer[0x19B];
     /* 19D - 1C5 killboard */
