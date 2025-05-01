@@ -600,7 +600,7 @@ void SCStrike::init(void) {
 }
 
 RSEntity * SCStrike::loadWeapon(std::string name) {
-    std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + name + ".IFF";
+    std::string tmpname = Assets.object_root_path + name + ".IFF";
     RSEntity *objct = new RSEntity(&Assets);
     TreEntry *entry = Assets.GetEntryByName(tmpname);
     if (entry != nullptr) {

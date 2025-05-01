@@ -32,7 +32,7 @@ void SCMission::cleanup() {
 }
 RSProf *SCMission::LoadProfile(std::string name) {
     RSProf *profile = new RSProf();
-    std::string filename = "..\\..\\DATA\\INTEL\\"+ name + ".IFF";
+    std::string filename = Assets.intel_root_path+ name + ".IFF";
     TreEntry *profile_tre = Assets.GetEntryByName(filename);
     if (profile_tre != nullptr) {
         profile->InitFromRAM(profile_tre->data, profile_tre->size);
@@ -43,14 +43,14 @@ RSProf *SCMission::LoadProfile(std::string name) {
     return profile;
 }
 void SCMission::loadMission() {
-    std::string miss_file_name = "..\\..\\DATA\\MISSIONS\\" + this->mission_name; 
+    std::string miss_file_name = Assets.mission_root_path + this->mission_name; 
     
     TreEntry *mission_tre = Assets.GetEntryByName(miss_file_name.c_str());
     this->mission = new RSMission();
     this->mission->InitFromRAM(mission_tre->data, mission_tre->size);
 
 
-    std::string area_filename = "..\\..\\DATA\\MISSIONS\\"+this->mission->mission_data.world_filename + ".IFF";
+    std::string area_filename = Assets.mission_root_path+this->mission->mission_data.world_filename + ".IFF";
     std::transform(area_filename.begin(), area_filename.end(), area_filename.begin(), ::toupper);   
     this->world = new RSWorld();
     TreEntry *treEntry = NULL;
@@ -117,7 +117,7 @@ void SCMission::loadMission() {
                         
                         part->weapon_load.shrink_to_fit();
                         if (part->weapon_load.size() > 0) {
-                            std::string weapon_path_name = "..\\..\\DATA\\OBJECTS\\" + part->weapon_load + ".IFF";
+                            std::string weapon_path_name = Assets.object_root_path + part->weapon_load + ".IFF";
                             std::transform(weapon_path_name.begin(), weapon_path_name.end(), weapon_path_name.begin(), ::toupper);
                             TreEntry *weapon_entry = Assets.GetEntryByName(weapon_path_name.c_str());
                             part->entity->weaps.clear();
@@ -227,7 +227,7 @@ void SCMission::loadMission() {
     
 }
 RSEntity * SCMission::LoadEntity(std::string name) {
-    std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + name + ".IFF";
+    std::string tmpname = Assets.object_root_path + name + ".IFF";
     RSEntity *objct = new RSEntity(&Assets);
     TreEntry *entry = Assets.GetEntryByName((char *)tmpname.c_str());
     if (entry != nullptr) {
