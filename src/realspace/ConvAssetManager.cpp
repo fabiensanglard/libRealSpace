@@ -202,7 +202,7 @@ void ConvAssetManager::BuildDB(void) {
 
     // This is were the palette patches are stored
     TreEntry *convPalettesEntry =
-        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
+        Assets.GetEntryByName(Assets.conv_pal_filename);
     convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
     // convPalettePak.List(stdout);
 

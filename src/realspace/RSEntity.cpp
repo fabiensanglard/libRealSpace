@@ -319,7 +319,7 @@ void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
     std::string tmpname;
     ByteStream bs(data);
     expl->name = bs.ReadString(8);
-    tmpname = "..\\..\\DATA\\OBJECTS\\" + expl->name + ".IFF";
+    tmpname = assetsManager->object_root_path + expl->name + ".IFF";
     expl->x = bs.ReadShort();
     expl->y = bs.ReadShort();
     std::transform (tmpname.begin(), tmpname.end(), tmpname.begin(), ::toupper);
@@ -340,7 +340,7 @@ void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {
         
         std::string tmpname = bs.ReadString(8);
         std::transform(tmpname.begin(), tmpname.end(), tmpname.begin(), ::toupper);
-        chld->name ="..\\..\\DATA\\OBJECTS\\"+tmpname+".IFF";
+        chld->name = assetsManager->object_root_path+tmpname+".IFF";
         chld->x = bs.ReadInt32LE();
         chld->z = bs.ReadInt32LE();
         chld->y = bs.ReadInt32LE();
@@ -444,7 +444,7 @@ void RSEntity::parseREAL_OBJT_JETP_WEAP_WPNS(uint8_t *data, size_t size) {
         htps->nb_weap = bs.ReadShort();
         htps->name = bs.ReadString(8);
         std::transform(htps->name.begin(), htps->name.end(), htps->name.begin(), ::toupper);
-        std::string tmpname = "..\\..\\DATA\\OBJECTS\\" + htps->name + ".IFF";
+        std::string tmpname = assetsManager->object_root_path + htps->name + ".IFF";
         RSEntity *objct = new RSEntity(this->assetsManager);
         TreEntry *entry = assetsManager->GetEntryByName(tmpname);
         if (entry != nullptr) {

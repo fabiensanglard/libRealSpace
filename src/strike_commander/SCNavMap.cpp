@@ -71,7 +71,7 @@ void SCNavMap::init(){
         this->objpal.SetColor(i, c);
     }
     
-    TreEntry *nav_map = Assets.GetEntryByName("..\\..\\DATA\\COCKPITS\\NAVMAP.IFF");
+    TreEntry *nav_map = Assets.GetEntryByName(Assets.navmap_filename);
     this->navMap = new RSNavMap();
     this->navMap->InitFromRam(nav_map->data, nav_map->size);
 }

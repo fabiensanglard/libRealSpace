@@ -135,14 +135,18 @@ void DebugGame::loadSC() {
     Assets.gameflow_root_path = "..\\..\\DATA\\GAMEFLOW\\";
 
     Assets.gameflow_filename = Assets.gameflow_root_path+"GAMEFLOW.IFF";
-    Assets.optshps_filename = Assets.gameflow_root_path+"OPTSHPS.IFF";
-    Assets.optpals_filename = Assets.gameflow_root_path+"OPTPALS.IFF";
+    Assets.optshps_filename = Assets.gameflow_root_path+"OPTSHPS.PAK";
+    Assets.optpals_filename = Assets.gameflow_root_path+"OPTPALS.PAK";
     Assets.optfont_filename = Assets.gameflow_root_path+"OPTFONT.IFF";
-    Assets.navmap_filename = Assets.gameflow_root_path+"NAVMAP.IFF";
+    Assets.navmap_filename = "..\\..\\DATA\\COCKPITS\\NAVMAP.IFF";
     Assets.conv_pak_filename = Assets.gameflow_root_path+"CONVSHPS.PAK";
     Assets.option_filename = Assets.gameflow_root_path+"OPTIONS.IFF";
     Assets.conv_data_filename = Assets.gameflow_root_path+"CONVDATA.IFF";
-
+    Assets.conv_pal_filename = Assets.gameflow_root_path+"CONVPALS.PAK";
+    Assets.txm_filename = Assets.texture_root_path+"TXMPACK.PAK";
+    Assets.acc_filename = Assets.texture_root_path+"ACCPACK.PAK";
+    Assets.convpak_filename = Assets.gameflow_root_path+"CONV.PAK";
+    
     FontManager.init(&Assets);
 
     // Load assets needed for Conversations (char and background)
@@ -170,6 +174,26 @@ void DebugGame::loadTO() {
     };
     Assets.ReadISOImage("./SC.DAT");
     Assets.init(cdTreFiles);
+    Assets.intel_root_path = "..\\..\\DATA\\INTEL\\";
+    Assets.mission_root_path = "..\\..\\DATA\\MISSIONS\\";
+    Assets.object_root_path = "..\\..\\DATA\\OBJECTS\\";
+    Assets.sound_root_path = "..\\..\\DATA\\SOUNDS\\";
+    Assets.texture_root_path = "..\\..\\DATA\\TXM\\";
+    Assets.gameflow_root_path = "..\\..\\DATA\\GAMEFLOW\\";
+
+    Assets.gameflow_filename = Assets.gameflow_root_path+"GAMEFLO2.IFF";
+    Assets.optshps_filename = Assets.gameflow_root_path+"OPTSHPS.PAK";
+    Assets.optpals_filename = Assets.gameflow_root_path+"OPTPALS.PAK";
+    Assets.optfont_filename = Assets.gameflow_root_path+"OPTFONT.IFF";
+    Assets.navmap_filename = "..\\..\\DATA\\COCKPITS\\NAVMAP2.IFF";
+    Assets.conv_pak_filename = Assets.gameflow_root_path+"CONVSHPS.PAK";
+    Assets.option_filename = Assets.gameflow_root_path+"OPTIONS.IFF";
+    Assets.conv_data_filename = Assets.gameflow_root_path+"CONVDATA.IFF";
+    Assets.conv_pal_filename = Assets.gameflow_root_path+"CONVPALS.PAK";
+    Assets.txm_filename = Assets.texture_root_path+"TXMPACK.PAK";
+    Assets.acc_filename = Assets.texture_root_path+"ACCPACK.PAK";
+    Assets.convpak_filename = Assets.gameflow_root_path+"CONV2.PAK";
+    
     FontManager.init(&Assets);
     // Load assets needed for Conversations (char and background)
     ConvAssets.init();

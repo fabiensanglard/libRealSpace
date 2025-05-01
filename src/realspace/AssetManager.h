@@ -87,6 +87,11 @@ public:
     std::string optfont_filename;
     std::string navmap_filename;
     std::string conv_data_filename;
+    std::string convpak_filename;
+    std::string conv_pal_filename;
+    std::string txm_filename;
+    std::string acc_filename;
+    
 
     std::string object_root_path;
     std::string mission_root_path;

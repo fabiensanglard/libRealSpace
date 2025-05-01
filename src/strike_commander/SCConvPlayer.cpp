@@ -454,12 +454,12 @@ void SCConvPlayer::SetID(int32_t id) {
 void SCConvPlayer::init() {
     VGAPalette *rendererPalette = VGA.GetPalette();
     this->palette               = *rendererPalette;
-    TreEntry *convEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONV.PAK");
+    TreEntry *convEntry = Assets.GetEntryByName(Assets.convpak_filename);
 
     convPak.InitFromRAM("CONV.PAK", convEntry->data, convEntry->size);
     currentFrame.font = FontManager.GetFont("..\\..\\DATA\\FONTS\\CONVFONT.SHP");
 
-    TreEntry *convPalettesEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\CONVPALS.PAK");
+    TreEntry *convPalettesEntry = Assets.GetEntryByName(Assets.conv_pal_filename);
     convPals.InitFromRAM("CONVPALS.PAK", convPalettesEntry->data, convPalettesEntry->size);
 }
 

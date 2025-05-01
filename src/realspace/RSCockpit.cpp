@@ -128,7 +128,7 @@ void RSCockpit::parseREAL_INFO(uint8_t* data, size_t size) {
 void RSCockpit::parseREAL_OBJS(uint8_t* data, size_t size) {
     ByteStream* reader = new ByteStream(data);
     std::string name = reader->ReadString(size);
-    TreEntry* entry = this->asset_manager->GetEntryByName("..\\..\\DATA\\OBJECTS\\" + name + ".IFF");
+    TreEntry* entry = this->asset_manager->GetEntryByName(this->asset_manager->object_root_path + name + ".IFF");
     REAL.OBJS = new RSEntity(this->asset_manager);
     REAL.OBJS->InitFromRAM(entry->data, entry->size);
 }

@@ -381,7 +381,7 @@ void RSArea::InitFromPAKFileName(const char *pakFilename) {
     TreEntry *treEntry = NULL;
     RSMapTextureSet *set;
 
-    treEntry = assetsManager->GetEntryByName("..\\..\\DATA\\TXM\\TXMPACK.PAK");
+    treEntry = assetsManager->GetEntryByName(Assets.txm_filename);
     PakArchive txmPakArchive;
     txmPakArchive.InitFromRAM("TXMPACK", treEntry->data, treEntry->size);
     set = new RSMapTextureSet();
@@ -389,7 +389,7 @@ void RSArea::InitFromPAKFileName(const char *pakFilename) {
     textures.push_back(set);
 
     // ACCPACK.PAK seems to contain runway textures
-    treEntry = assetsManager->GetEntryByName("..\\..\\DATA\\TXM\\ACCPACK.PAK");
+    treEntry = assetsManager->GetEntryByName(Assets.acc_filename);
     PakArchive accPakArchive;
     accPakArchive.InitFromRAM("ACCPACK.PAK", treEntry->data, treEntry->size);
     set = new RSMapTextureSet();

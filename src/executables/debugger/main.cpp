@@ -59,10 +59,15 @@ int main(int argc, char* argv[]) {
     Assets.optshps_filename = Assets.gameflow_root_path+"OPTSHPS.PAK";
     Assets.optpals_filename = Assets.gameflow_root_path+"OPTPALS.PAK";
     Assets.optfont_filename = Assets.gameflow_root_path+"OPTFONT.IFF";
-    Assets.navmap_filename = Assets.gameflow_root_path+"NAVMAP.IFF";
+    
+    Assets.navmap_filename = "..\\..\\DATA\\COCKPITS\\NAVMAP.IFF";
     Assets.conv_pak_filename = Assets.gameflow_root_path+"CONVSHPS.PAK";
     Assets.option_filename = Assets.gameflow_root_path+"OPTIONS.IFF";
     Assets.conv_data_filename = Assets.gameflow_root_path+"CONVDATA.IFF";
+    Assets.conv_pal_filename = Assets.gameflow_root_path+"CONVPALS.PAK";
+    Assets.txm_filename = Assets.texture_root_path+"TXMPACK.PAK";
+    Assets.acc_filename = Assets.texture_root_path+"ACCPACK.PAK";
+    Assets.convpak_filename = Assets.gameflow_root_path+"CONV.PAK";
     // Load assets needed for Conversations (char and background)
     ConvAssets.init();
     Game->init();

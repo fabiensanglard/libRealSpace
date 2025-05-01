@@ -41,7 +41,7 @@ void RSObjViewer::parseVIEW_OBJS(uint8_t *data, size_t size) {
         showCase.filename.shrink_to_fit();
 
         std::transform(showCase.filename.begin(), showCase.filename.end(), showCase.filename.begin(), ::toupper);
-        std::string model_path = "..\\..\\DATA\\OBJECTS\\" + showCase.filename +".IFF";
+        std::string model_path = Assets.object_root_path + showCase.filename +".IFF";
         
         TreEntry *entry = Assets.GetEntryByName(model_path);
 
