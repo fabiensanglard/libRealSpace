@@ -62,13 +62,13 @@ void SCShot::checkKeyboard(void) {
 void SCShot::init() {
 
     TreEntry *optionIFF =
-        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
+        Assets.GetEntryByName(Assets.option_filename);
     this->optionParser.InitFromRam(optionIFF->data, optionIFF->size);
     TreEntry *optShapEntry =
-        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
+        Assets.GetEntryByName(Assets.optshps_filename);
     this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
     TreEntry *optPalettesEntry =
-        Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
+        Assets.GetEntryByName(Assets.optpals_filename);
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
 }
 

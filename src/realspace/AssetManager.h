@@ -79,7 +79,21 @@ public:
     bool ReadISOImage(const std::string& isoPath);
     FileData *GetFileData(const std::string fileName);
     void writeFileData(const std::string fileName, FileData *fileData);
-    
+    std::string conv_pak_filename;
+    std::string option_filename;
+    std::string gameflow_filename;
+    std::string optshps_filename;
+    std::string optpals_filename;
+    std::string optfont_filename;
+    std::string navmap_filename;
+    std::string conv_data_filename;
+
+    std::string object_root_path;
+    std::string mission_root_path;
+    std::string intel_root_path;
+    std::string sound_root_path;
+    std::string texture_root_path;
+    std::string gameflow_root_path;
 private:
     bool isIsoImage{false};
     std::string *basePath;

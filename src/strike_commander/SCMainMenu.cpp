@@ -187,7 +187,7 @@ void SCMainMenu::LoadPalette(void) {
 
 void SCMainMenu::LoadBackgrounds(void) {
 
-    TreEntry *entryMountain = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
+    TreEntry *entryMountain = Assets.GetEntryByName(Assets.optshps_filename);
     PakArchive pak;
     pak.InitFromRAM("", entryMountain->data, entryMountain->size);
 

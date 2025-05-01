@@ -68,7 +68,6 @@ SCGameFlow::SCGameFlow() {
     this->currentOptCode = 0;
     this->fps = SDL_GetTicks() / 10;
     this->zones = new std::vector<SCZone *>();
-    this->gameflow_file = "GAMEFLOW.IFF";
 }
 
 SCGameFlow::~SCGameFlow() {}
@@ -565,14 +564,14 @@ void SCGameFlow::checkKeyboard(void) {
  */
 void SCGameFlow::init() {
 
-    TreEntry *gameflowIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\"+this->gameflow_file);
-    TreEntry *optionIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
+    TreEntry *gameflowIFF = Assets.GetEntryByName(Assets.gameflow_filename);
+    TreEntry *optionIFF = Assets.GetEntryByName(Assets.option_filename);
     this->optionParser.InitFromRam(optionIFF->data, optionIFF->size);
     this->gameFlowParser.InitFromRam(gameflowIFF->data, gameflowIFF->size);
 
-    TreEntry *optShapEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
+    TreEntry *optShapEntry = Assets.GetEntryByName(Assets.optshps_filename);
     this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
-    TreEntry *optPalettesEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
+    TreEntry *optPalettesEntry = Assets.GetEntryByName(Assets.optpals_filename);
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     this->efect = nullptr;
     this->createMiss();
@@ -580,14 +579,14 @@ void SCGameFlow::init() {
 
 void SCGameFlow::InitFromGameState() {
 
-    TreEntry *gameflowIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\"+this->gameflow_file);
-    TreEntry *optionIFF = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTIONS.IFF");
+    TreEntry *gameflowIFF = Assets.GetEntryByName(Assets.gameflow_filename);
+    TreEntry *optionIFF = Assets.GetEntryByName(Assets.option_filename);
     this->optionParser.InitFromRam(optionIFF->data, optionIFF->size);
     this->gameFlowParser.InitFromRam(gameflowIFF->data, gameflowIFF->size);
 
-    TreEntry *optShapEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK");
+    TreEntry *optShapEntry = Assets.GetEntryByName(Assets.optshps_filename);
     this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
-    TreEntry *optPalettesEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
+    TreEntry *optPalettesEntry = Assets.GetEntryByName(Assets.optpals_filename);
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     this->efect = nullptr;
     this->current_miss = GameState.current_mission;

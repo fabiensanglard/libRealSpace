@@ -76,7 +76,7 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback) {
     buttons.push_back(button);
 
     this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\SM-FONT.SHP");
-    TreEntry *optPalettesEntry = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK");
+    TreEntry *optPalettesEntry = Assets.GetEntryByName(Assets.optpals_filename);
     
     optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     rawpal = optPals.GetEntry(4)->data;

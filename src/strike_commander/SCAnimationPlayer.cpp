@@ -93,11 +93,11 @@ void SCAnimationPlayer::init(){
         }
     }
     TreEntry *optShapEntry = Assets.GetEntryByName(
-        "..\\..\\DATA\\GAMEFLOW\\OPTSHPS.PAK"
+        Assets.optshps_filename
     );
     this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
     TreEntry *optPalettesEntry = Assets.GetEntryByName(
-        "..\\..\\DATA\\GAMEFLOW\\OPTPALS.PAK"
+        Assets.optpals_filename
     );
     this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
 

@@ -127,6 +127,22 @@ void DebugGame::loadSC() {
     Assets.ReadISOImage("./SC.DAT");
     Assets.init(cdTreFiles);
     
+    Assets.intel_root_path = "..\\..\\DATA\\INTEL\\";
+    Assets.mission_root_path = "..\\..\\DATA\\MISSIONS\\";
+    Assets.object_root_path = "..\\..\\DATA\\OBJECTS\\";
+    Assets.sound_root_path = "..\\..\\DATA\\SOUNDS\\";
+    Assets.texture_root_path = "..\\..\\DATA\\TXM\\";
+    Assets.gameflow_root_path = "..\\..\\DATA\\GAMEFLOW\\";
+
+    Assets.gameflow_filename = Assets.gameflow_root_path+"GAMEFLOW.IFF";
+    Assets.optshps_filename = Assets.gameflow_root_path+"OPTSHPS.IFF";
+    Assets.optpals_filename = Assets.gameflow_root_path+"OPTPALS.IFF";
+    Assets.optfont_filename = Assets.gameflow_root_path+"OPTFONT.IFF";
+    Assets.navmap_filename = Assets.gameflow_root_path+"NAVMAP.IFF";
+    Assets.conv_pak_filename = Assets.gameflow_root_path+"CONVSHPS.PAK";
+    Assets.option_filename = Assets.gameflow_root_path+"OPTIONS.IFF";
+    Assets.conv_data_filename = Assets.gameflow_root_path+"CONVDATA.IFF";
+
     FontManager.init(&Assets);
 
     // Load assets needed for Conversations (char and background)
@@ -156,11 +172,9 @@ void DebugGame::loadTO() {
     Assets.init(cdTreFiles);
     FontManager.init(&Assets);
     // Load assets needed for Conversations (char and background)
-    ConvAssets.conv_file_name = "CONVDAT2.IFF";
     ConvAssets.init();
 
     SCGameFlow *to_gf = new SCGameFlow();
-    to_gf->gameflow_file = "GAMEFLO2.IFF";
     to_gf->init();
     Game->AddActivity(to_gf);
 }

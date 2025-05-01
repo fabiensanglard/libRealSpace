@@ -141,10 +141,10 @@ int SCConvPlayer::SetSentenceFromConv(ByteStream *conv, int start_offset) {
     int sound_offset = 0;
     char *sentence_end = (char *)conv->GetPosition() + start_offset + strlen((char *)sentence) + 1;
     currentFrame.sound_file_name = nullptr;
-    int decalage = 0;
+    int decalage = 1;
     if ((int8_t)sentence_end[0] < 0) {
         sentence_end += 1;
-        decalage = 1;
+        decalage = 2;
     }
     if (!isNextFrameIsConv((uint8_t) sentence_end[0])) {
         sound_offset = strlen((char *)sentence) + decalage;
@@ -367,7 +367,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
     case CHOOSE_WINGMAN: // Wingman selection trigger
     {
-        ConvBackGround *bg = ConvAssets.GetBackGround("s_wing");
+        ConvBackGround *bg = ConvAssets.GetBackGround(const_cast<char*>("s_wing"));
 
         currentFrame.bgLayers   = &bg->layers;
         currentFrame.bgPalettes = &bg->palettes;
@@ -375,7 +375,7 @@ void SCConvPlayer::ReadNextFrame(void) {
         currentFrame.participants.clear();
         currentFrame.mode = ConvFrame::CONV_WINGMAN_CHOICE;
         printf("ConvID: %d Open pilot selection screen with current BG.\n", this->conversationID);
-        CharFigure *entry = ConvAssets.GetFigure("red1");
+        CharFigure *entry = ConvAssets.GetFigure(const_cast<char*>("red1"));
         currentFrame.participants.push_back(entry);
         std::vector<std::string> airwing = {"billy2", "gwen2", "lyle2", "miguel2", "tex3"};
         std::vector<std::string> airwing_names = {"Lyle", "Miguel", "Gwen", "Billy", "Tex"};
