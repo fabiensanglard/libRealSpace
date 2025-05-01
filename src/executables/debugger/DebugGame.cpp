@@ -198,7 +198,7 @@ void DebugGame::loadTO() {
     // Load assets needed for Conversations (char and background)
     ConvAssets.init();
 
-    SCGameFlow *to_gf = new SCGameFlow();
+    SCMainMenu *to_gf = new SCMainMenu();
     to_gf->init();
     Game->AddActivity(to_gf);
 }
