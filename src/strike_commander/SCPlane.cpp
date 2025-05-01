@@ -1139,6 +1139,9 @@ void SCPlane::InitLoadout() {
         if (loadout->nb_weap == 0) {
             continue;
         }
+        if (loadout->objct->wdat == nullptr) {
+            continue;
+        }
         std::vector<int> hpt_ids = weap_map[loadout->objct->wdat->weapon_id];
         int nbwep = loadout->nb_weap / 2;
         if (loadout->objct->wdat->weapon_id == ID_20MM) {
