@@ -115,7 +115,7 @@ void DebugGame::PumpEvents(void) {
 }
 
 void DebugGame::loadSC() {
-    Game->StopTopActivity();
+    
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     
@@ -139,6 +139,7 @@ void DebugGame::loadSC() {
     SCAnimationPlayer *intro = new SCAnimationPlayer();
     intro->init();
     Game->AddActivity(intro);
+    Game->StopTopActivity();
 }
 
 void DebugGame::loadTO() {

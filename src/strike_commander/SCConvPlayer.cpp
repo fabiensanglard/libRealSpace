@@ -129,6 +129,7 @@ bool isNextFrameIsConv(uint8_t type) {
         case YESNOCHOICE_BRANCH1:
         case YESNOCHOICE_BRANCH2:
         case CHOOSE_WINGMAN:
+        case 0xE0:
             return true;
         default:
             return false;
@@ -140,8 +141,13 @@ int SCConvPlayer::SetSentenceFromConv(ByteStream *conv, int start_offset) {
     int sound_offset = 0;
     char *sentence_end = (char *)conv->GetPosition() + start_offset + strlen((char *)sentence) + 1;
     currentFrame.sound_file_name = nullptr;
-    if (!isNextFrameIsConv((uint8_t) sentence_end[1])) {
-        sound_offset = strlen((char *)sentence) + 1;
+    int decalage = 0;
+    if ((int8_t)sentence_end[0] < 0) {
+        sentence_end += 1;
+        decalage = 1;
+    }
+    if (!isNextFrameIsConv((uint8_t) sentence_end[0])) {
+        sound_offset = strlen((char *)sentence) + decalage;
         currentFrame.sound_file_name = new std::string(sentence);
         sentence = sentence_end;
     }
