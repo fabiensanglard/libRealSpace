@@ -131,7 +131,7 @@ void SCNavMap::runFrame(void) {
         VGA.GetFrameBuffer()->PrintText_SM(
             this->navMap->font,
             &mission_name_pos,
-            "mission",
+            const_cast<char*>("mission"),
             0,
             0,
             7,1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
@@ -150,7 +150,7 @@ void SCNavMap::runFrame(void) {
         VGA.GetFrameBuffer()->PrintText_SM(
             this->navMap->font,
             &leader_pos,
-            "leader",
+            const_cast<char*>("leader"),
             0,
             0,
             6,1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
@@ -175,7 +175,7 @@ void SCNavMap::runFrame(void) {
             VGA.GetFrameBuffer()->PrintText_SM(
                 this->navMap->font,
                 &leader_pos,
-                "wingman",
+                const_cast<char*>("wingman"),
                 0,
                 0,
                 7,1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
@@ -214,7 +214,7 @@ void SCNavMap::runFrame(void) {
                     VGA.GetFrameBuffer()->PrintText_SM(
                         this->navMap->font,
                         msg_p1,
-                        "objective",
+                        const_cast<char*>("objective"),
                         0,
                         0,
                         9,
@@ -245,7 +245,7 @@ void SCNavMap::runFrame(void) {
                     VGA.GetFrameBuffer()->PrintText_SM(
                         this->navMap->font,
                         msg_p1,
-                        "notes",
+                        const_cast<char*>("notes"),
                         0,
                         0,
                         5,

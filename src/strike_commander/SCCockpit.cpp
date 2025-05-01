@@ -124,11 +124,11 @@ void SCCockpit::RenderAltitude() {
 
     Point2D gear = {160 + 25, alti_text.y + 5};
     if (this->gear) {
-        VGA.GetFrameBuffer()->PrintText(this->font, &gear, "GEARS", 0, 0, 5, 2, 2);
+        VGA.GetFrameBuffer()->PrintText(this->font, &gear, const_cast<char*>("GEARS"), 0, 0, 5, 2, 2);
     }
     Point2D break_text = {160 + 25, gear.y + 5};
     if (this->airbrake) {
-        VGA.GetFrameBuffer()->PrintText(this->font, &break_text, "BREAKS", 0, 0, 6, 2, 2);
+        VGA.GetFrameBuffer()->PrintText(this->font, &break_text, const_cast<char*>("BREAKS"), 0, 0, 6, 2, 2);
     }
 }
 /**
@@ -251,7 +251,7 @@ void SCCockpit::RenderSpeed() {
     VGA.GetFrameBuffer()->PrintText(this->font, &throttle_text, (char *)txt.c_str(), 0, 0, (uint32_t) txt.length(), 2, 2);
     Point2D flaps = {125, throttle_text.y + 5};
     if (this->flaps) {
-        VGA.GetFrameBuffer()->PrintText(this->font, &flaps, "FLAPS", 0, 0, 5, 2, 2);
+        VGA.GetFrameBuffer()->PrintText(this->font, &flaps, const_cast<char*>("FLAPS"), 0, 0, 5, 2, 2);
     }
 }
 /**
@@ -636,7 +636,7 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
     VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_right_weapon_gun, (char *)txt.c_str(), 0, 0, (uint32_t) txt.length(), 2, 2);
 
     Point2D pmfd_right_weapon_radar{pmfd_right_weapon.x, pmfd_right_weapon.y + 5};
-    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_right_weapon_radar, "NORM", 0, 0, 4, 2, 2);
+    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_right_weapon_radar, const_cast<char*>("NORM"), 0, 0, 4, 2, 2);
 
     Point2D pmfd_right_weapon_selected{pmfd_right_weapon.x + 12 +
                                            this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
@@ -646,12 +646,12 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
     Point2D pmfd_right_weapon_chaff{pmfd_right_weapon.x - 7 +
                                         this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
                                     pmfd_right_weapon.y + 4 * 9};
-    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_right_weapon_chaff, "C:30", 0, 0, 4, 2, 2);
+    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_right_weapon_chaff, const_cast<char*>("C:30"), 0, 0, 4, 2, 2);
 
     Point2D pmfd_right_weapon_flare{pmfd_right_weapon.x - 7 +
                                         this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(0)->GetWidth() / 2,
                                     pmfd_right_weapon.y + 5 * 9};
-    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_right_weapon_flare, "F:30", 0, 0, 4, 2, 2);
+    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_right_weapon_flare, const_cast<char*>("F:30"), 0, 0, 4, 2, 2);
 }
 void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode) {
     Point2D pmfd_center = {
@@ -671,8 +671,8 @@ void SCCockpit::RenderMFDSRadar(Point2D pmfd_left, float range, int mode) {
         pmfd_left.y+2,
     };
     VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_text, (char *)std::to_string(80*((float)this->radar_zoom/4.0f)).c_str(), 0, 0, 2, 2, 2);
-    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_text, " AIR ", 0, 0, 5, 2, 2);
-    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_text, "360", 0, 0, 3, 2, 2);
+    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_text, const_cast<char*>(" AIR "), 0, 0, 5, 2, 2);
+    VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_text, const_cast<char*>("360"), 0, 0, 3, 2, 2);
     Vector2D center = {this->player->position.x, this->player->position.z};
     
     for (auto parts : this->parts) {
@@ -722,10 +722,10 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode) {
         pmfd_left.y + 20
     };
     Point2D pfmd_title = {pmfd_text.x+12, pmfd_text.y};
-    VGA.GetFrameBuffer()->PrintText(this->big_font, &pfmd_title, "Comm mode:", 120, 0, 10, 2, 2);
+    VGA.GetFrameBuffer()->PrintText(this->big_font, &pfmd_title, const_cast<char*>("Comm mode:"), 120, 0, 10, 2, 2);
     pfmd_title.y += 10;
     pfmd_title.x = pmfd_left.x + 20;
-    VGA.GetFrameBuffer()->PrintText(this->big_font, &pfmd_title, "Select frequency", 0, 0, 16, 2, 2);
+    VGA.GetFrameBuffer()->PrintText(this->big_font, &pfmd_title, const_cast<char*>("Select frequency"), 0, 0, 16, 2, 2);
     pmfd_text.y += 20;
     if (mode == 0) {
         int cpt=1;
@@ -745,7 +745,7 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode) {
         if (cpt==1) {
             pfmd_title.y += 25;
             pfmd_title.x = pmfd_left.x + 32;
-            VGA.GetFrameBuffer()->PrintText(this->big_font, &pfmd_title, "NO RECIVER", 120, 0, 10, 2, 2);
+            VGA.GetFrameBuffer()->PrintText(this->big_font, &pfmd_title, const_cast<char*>("NO RECIVER"), 120, 0, 10, 2, 2);
         }
     } else if (mode > 0) {
         int cpt=1;
