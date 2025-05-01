@@ -29,8 +29,8 @@ void SCSmokeSet::init(){
             tex->width = img->GetWidth();
             img->position.x = 0;
             img->position.y = 0;
-            img->buffer_size.x = tex->width;
-            img->buffer_size.y = tex->height;
+            img->buffer_size.x = (int32_t) tex->width;
+            img->buffer_size.y = (int32_t) tex->height;
             size_t imgsize = tex->width*tex->height;
             uint8_t *imgdata = (uint8_t *)malloc(imgsize);
             size_t byteRead = 0;

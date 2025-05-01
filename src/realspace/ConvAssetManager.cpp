@@ -169,7 +169,7 @@ void ConvAssetManager::ParseBGLayer(uint8_t *data, size_t layerID, ConvBackGroun
     if (!subPAK.IsReady()) {
 
         // Sometimes the image is not in a PAK but as raw data.
-        printf("Error on Pak %d for layer %d in loc %8s => Using dummy instead\n", shapeID, layerID, back->name);
+        printf("Error on Pak %d for layer %d in loc %8s => Using dummy instead\n", shapeID, (int)layerID, back->name);
 
         // Using an empty shape for now...
         *s = *RLEShape::GetEmptyShape();

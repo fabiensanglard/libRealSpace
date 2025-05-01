@@ -860,7 +860,7 @@ void SCGameFlow::renderMenu() {
     if (show_gamestate) {
         ImGui::Begin("GameState");
         
-        int nb_flags = GameState.requierd_flags.size();
+        int nb_flags = (int) GameState.requierd_flags.size();
         int nb_rows = nb_flags / 8;
         static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
         if (ImGui::BeginTable("Flags", 8, flags)) {    
@@ -914,7 +914,7 @@ void SCGameFlow::renderMenu() {
             }
         }
         if (ImGui::TreeNode("Required Flags")) {
-            int nb_flags = GameState.requierd_flags.size();
+            int nb_flags = (int) GameState.requierd_flags.size();
             int nb_rows = nb_flags / 8;
             if (ImGui::BeginTable("Flags", 8)) {    
                 auto it = GameState.requierd_flags.begin();

@@ -83,7 +83,7 @@ void RSVGA::VSync(void) {
         *dst = *rgba;
         dst++;
     }
-    int w = this->height * (4.0f/3.0f);
+    int w = (int) ((float) this->height * (4.0f/3.0f));
     int x = (this->width - w) /2;
     glViewport(x,0,w,this->height);
 	

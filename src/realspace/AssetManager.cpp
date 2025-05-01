@@ -339,7 +339,7 @@ FileData* AssetManager::ReadFileEntry(const FileEntry &entry, const std::string 
     const int userDataSize = 2048;
 
     // Compute the number of sectors needed to cover the file data.
-    int numSectors = (fileData->size + userDataSize - 1) / userDataSize;
+    int numSectors = ((int)fileData->size + userDataSize - 1) / userDataSize;
     int bytesCopied = 0;
 
     for (int i = 0; i < numSectors; i++) {
@@ -360,7 +360,7 @@ FileData* AssetManager::ReadFileEntry(const FileEntry &entry, const std::string 
         // Determine how many bytes to copy from this sector.
         int bytesToCopy = userDataSize;
         if (bytesCopied + bytesToCopy > fileData->size) {
-            bytesToCopy = fileData->size - bytesCopied;
+            bytesToCopy = (int)fileData->size - bytesCopied;
         }
         memcpy(fileData->data + bytesCopied, sectorBuffer + headerSize, bytesToCopy);
         bytesCopied += bytesToCopy;

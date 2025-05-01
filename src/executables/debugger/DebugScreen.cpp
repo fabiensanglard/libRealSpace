@@ -76,7 +76,7 @@ void DebugScreen::init(int w, int h, bool fullscreen){
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForOpenGL(sdlWindow, gl_context);
     ImGui_ImplOpenGL2_Init();
-    int wi = this->height * (4.0f/3.0f);
+    int wi = (int)((float)this->height * (4.0f/3.0f));
 
     glGenTextures(1, &this->screen_texture);
     glBindTexture(GL_TEXTURE_2D, this->screen_texture);
@@ -84,7 +84,7 @@ void DebugScreen::init(int w, int h, bool fullscreen){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glViewport((this->width - w)/2.0,0,wi,this->height);			// Reset The Current Viewport
+    glViewport((int)((float)(this->width - w)/2.0f),0,wi,this->height);			// Reset The Current Viewport
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);				// Black Background
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     SDL_ShowWindow(sdlWindow);

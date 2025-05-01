@@ -147,7 +147,7 @@ int SCConvPlayer::SetSentenceFromConv(ByteStream *conv, int start_offset) {
         decalage = 2;
     }
     if (!isNextFrameIsConv((uint8_t) sentence_end[0])) {
-        sound_offset = strlen((char *)sentence) + decalage;
+        sound_offset = (int) strlen((char *)sentence) + decalage;
         currentFrame.sound_file_name = new std::string(sentence);
         sentence = sentence_end;
     }
@@ -165,7 +165,7 @@ int SCConvPlayer::SetSentenceFromConv(ByteStream *conv, int start_offset) {
         text->replace(text->find("$W"), 2, GameState.wingman);
     }
     currentFrame.text         = (char *)text->c_str();
-    return sound_offset + start_offset + strlen((char *)sentence) + 1;
+    return (int) (sound_offset + start_offset + strlen((char *)sentence) + 1);
 }
 /**
  * @brief Read the next frame of the conversation from the data stream.

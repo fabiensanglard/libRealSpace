@@ -116,7 +116,6 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
 
         tmparea->id = ++cpt;
         tmparea->AreaType = '\0';
-        uint8_t Blank0;
         switch (buffer) {
         case 'S':
             tmparea->AreaType = 'S';
@@ -143,7 +142,7 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             tmparea->position.y = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
 
             
-            tmparea->AreaWidth = stream.ReadUShort() * (int) BLOCK_COORD_SCALE;
+            tmparea->AreaWidth = stream.ReadUShort() * (uint16_t)(BLOCK_COORD_SCALE);
 
             // unsigned int Blank0; // off 48-49
             tmparea->unknown_bytes.push_back(stream.ReadByte());
@@ -163,7 +162,7 @@ void RSMission::parseMISN_AREA(uint8_t *data, size_t size) {
             tmparea->position.z = -stream.ReadInt24LE() * BLOCK_COORD_SCALE;
             tmparea->position.y = stream.ReadInt24LE() * HEIGH_MAP_SCALE;
 
-            tmparea->AreaWidth = stream.ReadUShort() * (int) BLOCK_COORD_SCALE;
+            tmparea->AreaWidth = stream.ReadUShort() * (uint16_t)(BLOCK_COORD_SCALE);
 
             // unsigned char Blank0[10]; // off 48-59
             for (int k = 0; k < 10; k++) {

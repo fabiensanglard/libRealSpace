@@ -138,7 +138,7 @@ void FrameBuffer::circle_slow(int x, int y, int radius, uint8_t color) {
         this->framebuffer[offset + dy + dxoffset] = color;
         dx++;
         n += invradius;
-        dy = radius * sin(acos(n));
+        dy = (int)((float) radius * sin(acos(n)));
     }
 }
 void FrameBuffer::PrintText(RSFont *font, Point2D *coo, char *text, uint8_t color, size_t start, uint32_t size,

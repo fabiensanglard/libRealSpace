@@ -186,7 +186,7 @@ void SCRegister::runFrame(void){
     } else if (this->current_entry == &GameState.player_name){
         pos = {88, 104};
     }
-    pos.x = pos.x + ((this->current_entry->size())*5+2);
+    pos.x = pos.x + ((int32_t)(this->current_entry->size())*5+2);
     fb->PrintText(this->font, pos, "_", 0);
     //Draw Mouse
     Mouse.Draw();

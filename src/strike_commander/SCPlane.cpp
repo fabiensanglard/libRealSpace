@@ -803,7 +803,7 @@ void SCPlane::SimplifiedSimulate() {
     float pitch_input = (this->control_stick_y / 100.0f) * deltaTime;
     float roll_input = (-this->control_stick_x / 100.0f) * deltaTime;
     if (this->object->alive == false) {
-        this->thrust = 0.0f;
+        this->thrust = 0;
         this->vy -= +0.1f;
         if (this->vz > 5.0f) {
             this->vz = 5.0f;

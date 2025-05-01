@@ -28,7 +28,7 @@ bool SCMissionActors::takeOff(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_TAKE_OFF;
     if (this->pilot->target_climb == 0) {
         this->pilot->target_speed = -15;
-        this->pilot->target_climb = this->plane->y + 300.0f;
+        this->pilot->target_climb = (int) (this->plane->y + 300.0f);
     }
     if (std::abs(this->plane->y-this->pilot->target_climb) < 10.0f) {
         this->taken_off = true;

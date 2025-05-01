@@ -245,7 +245,7 @@ void SCRenderer::drawSprite(Vector3D pos, Texture *tex, float zoom) {
 
         // Upload pixels into texture
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->width, tex->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)tex->width, (GLsizei)tex->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
             tex->data);
         
         tex->initialized = true;
