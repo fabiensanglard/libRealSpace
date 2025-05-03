@@ -35,6 +35,7 @@ public:
     void loadSC();
     void loadTO();
     void loadPacific();
+    void testMissionSC();
 
 private:
     std::stack<IActivity*> activities;

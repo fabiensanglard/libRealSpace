@@ -119,7 +119,7 @@ void SCPilot::AutoPilot() {
     float target_yaw = (float) ((360.0f - this->target_azimut) * M_PI / 180.0f);
     float target_roll = 0.0f;
     if (this->plane->yaw > target_yaw) {
-        this->plane->roll = 5.78f;
+        this->plane->roll = -0.5f;
         if (std::abs(this->plane->yaw-target_yaw) > 0.01f) {
             this->plane->yaw -= 0.01f;
         } else {

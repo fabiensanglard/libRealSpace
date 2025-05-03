@@ -111,6 +111,9 @@ void DebugScreen::Refresh(void){
             if (ImGui::MenuItem("Pacific Strike")) {
                 debugGameInstance.loadPacific();   
             }
+            if (ImGui::MenuItem("Test mission SC")) {
+                debugGameInstance.testMissionSC();
+            }
             if (ImGui::MenuItem("Exit")) {
                 exit(0);
             }

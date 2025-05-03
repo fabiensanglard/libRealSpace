@@ -1033,6 +1033,7 @@ void SCStrike::renderMenu() {
     static bool show_ai = false;
     static bool go_to_nav = false;
     static bool show_offcam = false;
+    static bool show_load_plane = false;
     static int altitude = 0;
     static int azimuth = 0;
     static int throttle = 0;
@@ -1053,6 +1054,7 @@ void SCStrike::renderMenu() {
         ImGui::MenuItem("Show BBox", NULL, &this->show_bbox);
         ImGui::MenuItem("Ai pilot", NULL, &show_ai);
         ImGui::MenuItem("Off camera", NULL, &show_offcam);
+        ImGui::MenuItem("Load plane", NULL, &show_load_plane);
         ImGui::EndMenu();
     }
     int sceneid = -1;
@@ -1067,6 +1069,62 @@ void SCStrike::renderMenu() {
         ImGui::Begin("Offcam");
         ImVec2 avail_size = ImGui::GetContentRegionAvail();
         ImGui::Image((void*)(intptr_t)Renderer.texture, avail_size, {0, 1}, {1, 0});
+        ImGui::End();
+    }
+    if (show_load_plane) {
+        ImGui::Begin("Load plane");
+        std::vector<std::string> planes;
+        planes = {
+            "F-16DES",
+            "F-15",
+            "F-18",
+            "C130DES",
+            "F-22",
+            "MIG21",
+            "MIG29",
+            "MIRAGE",
+            "SU27",
+            "TORNCG",
+            "TU-20",
+            "YF23",
+            "747",
+            "A-10"
+        };
+        if (ImGui::BeginCombo("Plane", nullptr, 0)) {
+            for (auto plane : planes) {
+                if (ImGui::Selectable(plane.c_str(), false)) {
+                    //this->plane_to_load = planes.indexOf(plane);
+                    RSEntity *plane_to_load = new RSEntity(&Assets);
+                    TreEntry *entry = Assets.GetEntryByName(Assets.object_root_path + plane + ".IFF");
+                    plane_to_load->InitFromRAM(entry->data, entry->size);
+                    SCPlane *new_plane = new SCPlane(
+                        10.0f,
+                        -7.0f,
+                        40.0f,
+                        40.0f,
+                        30.0f,
+                        100.0f,
+                        390.0f,
+                        18000.0f,
+                        8000.0f,
+                        23000.0f,
+                        32.0f,
+                        .93f,
+                        120,
+                        this->current_mission->area,
+                        player_plane->x,
+                        player_plane->y,
+                        player_plane->z
+                    );
+                    new_plane->simple_simulation = false;
+                    new_plane->object = player_plane->object;
+                    new_plane->object->entity = plane_to_load;
+                    this->player_plane = new_plane;
+                    this->cockpit->player_plane = this->player_plane;
+                }
+            }
+            ImGui::EndCombo();
+        }
         ImGui::End();
     }
     if (show_ai) {
