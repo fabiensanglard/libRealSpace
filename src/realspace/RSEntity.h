@@ -169,7 +169,8 @@ public:
     EXPL *explos{nullptr};
     int32_t thrust_in_newton{0};
     int32_t weight_in_kg{0};
-    int16_t surface{0};
+    uint16_t surface{0};
+    uint16_t drag{0};
     WDAT *wdat{nullptr};
     DYNN_MISS *dynn_miss{nullptr};
     bool gravity{false};

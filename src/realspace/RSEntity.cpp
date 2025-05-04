@@ -405,7 +405,10 @@ void RSEntity::parseREAL_OBJT_JETP_DYNM_DYNM(uint8_t *data, size_t size) {
 }
 void RSEntity::parseREAL_OBJT_JETP_DYNM_ORDY(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_DYNM_STBL(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_DYNM_ATMO(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_DYNM_ATMO(uint8_t *data, size_t size) {
+    ByteStream bs(data);
+    this->drag = bs.ReadUShort();
+}
 void RSEntity::parseREAL_OBJT_JETP_DYNM_GRAV(uint8_t *data, size_t size) {
     this->gravity = true;
 }
@@ -418,7 +421,7 @@ void RSEntity::parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size) {
 void RSEntity::parseREAL_OBJT_JETP_DYNM_JDYN(uint8_t *data, size_t size) {
     ByteStream bs(data);
     bs.ReadByte();
-    this->surface = bs.ReadShort();
+    this->surface = bs.ReadUShort();
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;

@@ -1090,13 +1090,28 @@ void SCStrike::renderMenu() {
             "747",
             "A-10"
         };
+        static float envergure = 0.0f;
+        static float thrust = 0.0f;
+        static float weight = 0.0f;
+        static float surface = 0.0f;
+        static float wing_aspec_ratio = 0.0f;
+        static float ie_pi_AR = 0.0f;
+        static std::string plane_name = "";
         if (ImGui::BeginCombo("Plane", nullptr, 0)) {
             for (auto plane : planes) {
                 if (ImGui::Selectable(plane.c_str(), false)) {
+                    plane_name = plane;
                     //this->plane_to_load = planes.indexOf(plane);
                     RSEntity *plane_to_load = new RSEntity(&Assets);
                     TreEntry *entry = Assets.GetEntryByName(Assets.object_root_path + plane + ".IFF");
                     plane_to_load->InitFromRAM(entry->data, entry->size);
+                    BoudingBox *bb = plane_to_load->GetBoudingBpx();
+                    envergure = ((bb->max.x - bb->min.x) * 3.2808399f) /2.0f;
+                    thrust = plane_to_load->thrust_in_newton * 0.153333333f;
+                    weight = plane_to_load->weight_in_kg * 2.208588957f;
+                    surface = plane_to_load->surface/10.7639104f;
+                    wing_aspec_ratio = (envergure * envergure) / surface ;
+                    ie_pi_AR = (0.83f) + (0.1/(1+(std::pow((plane_to_load->drag-358),5.56f))/112.0f));
                     SCPlane *new_plane = new SCPlane(
                         10.0f,
                         -7.0f,
@@ -1104,12 +1119,12 @@ void SCStrike::renderMenu() {
                         40.0f,
                         30.0f,
                         100.0f,
-                        390.0f,
-                        18000.0f,
+                        surface,
+                        weight,
                         8000.0f,
-                        23000.0f,
-                        32.0f,
-                        .93f,
+                        thrust,
+                        envergure,
+                        ie_pi_AR,
                         120,
                         this->current_mission->area,
                         player_plane->x,
@@ -1119,12 +1134,21 @@ void SCStrike::renderMenu() {
                     new_plane->simple_simulation = false;
                     new_plane->object = player_plane->object;
                     new_plane->object->entity = plane_to_load;
+                    new_plane->azimuthf = player_plane->azimuthf;
+                    new_plane->yaw = player_plane->yaw;
                     this->player_plane = new_plane;
                     this->cockpit->player_plane = this->player_plane;
                 }
             }
             ImGui::EndCombo();
         }
+        ImGui::Text("Plane name: %s", plane_name.c_str());
+        ImGui::Text("Envergure: %.2f", envergure);
+        ImGui::Text("Thrust: %.2f", thrust);
+        ImGui::Text("Weight: %.2f", weight);
+        ImGui::Text("Surface: %.2f", surface);
+        ImGui::Text("Wing aspect ratio: %.2f", wing_aspec_ratio);
+        ImGui::Text("Induced efficiency: %.2f", ie_pi_AR);
         ImGui::End();
     }
     if (show_ai) {
