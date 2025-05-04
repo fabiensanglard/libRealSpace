@@ -1111,7 +1111,7 @@ void SCStrike::renderMenu() {
                     weight = plane_to_load->weight_in_kg * 2.208588957f;
                     surface = plane_to_load->surface/10.7639104f;
                     wing_aspec_ratio = (envergure * envergure) / surface ;
-                    ie_pi_AR = (0.83f) + (0.1/(1+(std::pow((plane_to_load->drag-358),5.56f))/112.0f));
+                    ie_pi_AR = (0.83f) + (0.1f/(1.0f+(std::powf((plane_to_load->drag-358.0f),5.56f))/112.0f));
                     SCPlane *new_plane = new SCPlane(
                         10.0f,
                         -7.0f,
