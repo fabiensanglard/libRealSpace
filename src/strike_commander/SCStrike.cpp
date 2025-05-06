@@ -1096,6 +1096,8 @@ void SCStrike::renderMenu() {
         static float surface = 0.0f;
         static float wing_aspec_ratio = 0.0f;
         static float ie_pi_AR = 0.0f;
+        static float roll_rate_max = 0.0f;
+        static float pitch_rate_max = 0.0f;
         static std::string plane_name = "";
         if (ImGui::BeginCombo("Plane", nullptr, 0)) {
             for (auto plane : planes) {
@@ -1112,13 +1114,30 @@ void SCStrike::renderMenu() {
                     surface = plane_to_load->surface/10.7639104f;
                     wing_aspec_ratio = (envergure * envergure) / surface ;
                     ie_pi_AR = (0.83f) + (0.1f/(1.0f+(std::powf((plane_to_load->drag-358.0f),5.56f))/112.0f));
+                    
+                    // Coefficients empiriques (à ajuster selon les données réelles)
+                    const float k_roll = 18.0f;
+                    const float k_pitch = 12.0f;
+
+                    // Efficacité des gouvernes (simplifiée, à affiner selon le type d'appareil)
+                    float aileron_efficiency = 0.8f;
+                    float elevator_efficiency = 0.7f;
+
+                    // Calcul des vitesses angulaires maximales (en radians/seconde)
+                    roll_rate_max = k_roll * (thrust / weight) * (surface / (envergure * envergure)) * aileron_efficiency;
+                    pitch_rate_max = k_pitch * (thrust / weight) * (surface / (envergure * envergure)) * elevator_efficiency;
+
+                    // Conversion en degrés/seconde si nécessaire
+                    roll_rate_max = roll_rate_max * (180.0f / M_PI);
+                    pitch_rate_max = pitch_rate_max * (180.0f / M_PI);
+                    
                     SCPlane *new_plane = new SCPlane(
                         10.0f,
                         -7.0f,
                         40.0f,
                         40.0f,
-                        30.0f,
-                        100.0f,
+                        pitch_rate_max,
+                        roll_rate_max,
                         surface,
                         weight,
                         8000.0f,
@@ -1149,6 +1168,8 @@ void SCStrike::renderMenu() {
         ImGui::Text("Surface: %.2f", surface);
         ImGui::Text("Wing aspect ratio: %.2f", wing_aspec_ratio);
         ImGui::Text("Induced efficiency: %.2f", ie_pi_AR);
+        ImGui::Text("Roll rate max: %.2f", roll_rate_max);
+        ImGui::Text("Pitch rate max: %.2f", pitch_rate_max);
         ImGui::End();
     }
     if (show_ai) {

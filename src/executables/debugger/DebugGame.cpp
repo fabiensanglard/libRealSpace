@@ -168,13 +168,15 @@ void DebugGame::testMissionSC() {
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     
-    std::vector<std::string> cdTreFiles = {
-        "BIGTRE.TRE",
-        "LILTRE.TRE",
-        "VOCLIST.TRE"
+    std::vector<std::string> treFiles = {
+        "GAMEFLOW.TRE",
+        "OBJECTS.TRE",
+        "MISC.TRE",
+        "SOUND.TRE",
+        "MISSIONS.TRE",
+        "TEXTURES.TRE"
     };
-    Assets.ReadISOImage("./SC.DAT");
-    Assets.init(cdTreFiles);
+    Assets.init(treFiles);
     
     Assets.intel_root_path = "..\\..\\DATA\\INTEL\\";
     Assets.mission_root_path = "..\\..\\DATA\\MISSIONS\\";
