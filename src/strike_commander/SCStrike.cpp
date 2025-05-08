@@ -1093,6 +1093,7 @@ void SCStrike::renderMenu() {
         static float envergure = 0.0f;
         static float thrust = 0.0f;
         static float weight = 0.0f;
+        static float fuel = 0.0f;
         static float surface = 0.0f;
         static float wing_aspec_ratio = 0.0f;
         static float ie_pi_AR = 0.0f;
@@ -1111,9 +1112,10 @@ void SCStrike::renderMenu() {
                     envergure = ((bb->max.x - bb->min.x) * 3.2808399f) /2.0f;
                     thrust = plane_to_load->thrust_in_newton * 0.153333333f;
                     weight = plane_to_load->weight_in_kg * 2.208588957f;
-                    surface = plane_to_load->surface/10.7639104f;
+                    fuel = plane_to_load->fuel_load * 2.208588957f;
+                    surface = plane_to_load->drag;
                     wing_aspec_ratio = (envergure * envergure) / surface ;
-                    ie_pi_AR = (0.83f) + (0.1f/(1.0f+(std::powf((plane_to_load->drag-358.0f),5.56f))/112.0f));
+                    ie_pi_AR = 4000.0f/plane_to_load->drag;
                     
                     // Coefficients empiriques (à ajuster selon les données réelles)
                     const float k_roll = 18.0f;
@@ -1140,7 +1142,7 @@ void SCStrike::renderMenu() {
                         roll_rate_max,
                         surface,
                         weight,
-                        8000.0f,
+                        fuel,
                         thrust,
                         envergure,
                         ie_pi_AR,
@@ -1165,6 +1167,7 @@ void SCStrike::renderMenu() {
         ImGui::Text("Envergure: %.2f", envergure);
         ImGui::Text("Thrust: %.2f", thrust);
         ImGui::Text("Weight: %.2f", weight);
+        ImGui::Text("Fuel: %.2f", fuel);
         ImGui::Text("Surface: %.2f", surface);
         ImGui::Text("Wing aspect ratio: %.2f", wing_aspec_ratio);
         ImGui::Text("Induced efficiency: %.2f", ie_pi_AR);

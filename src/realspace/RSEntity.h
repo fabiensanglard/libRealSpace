@@ -169,6 +169,7 @@ public:
     EXPL *explos{nullptr};
     int32_t thrust_in_newton{0};
     int32_t weight_in_kg{0};
+    int32_t fuel_load{0};
     uint16_t surface{0};
     uint16_t drag{0};
     WDAT *wdat{nullptr};

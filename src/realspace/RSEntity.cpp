@@ -421,6 +421,7 @@ void RSEntity::parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size) {
 void RSEntity::parseREAL_OBJT_JETP_DYNM_JDYN(uint8_t *data, size_t size) {
     ByteStream bs(data);
     bs.ReadByte();
+    this->fuel_load = bs.ReadInt24LEByte3();
     this->surface = bs.ReadUShort();
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size) {
