@@ -1109,43 +1109,31 @@ void SCStrike::renderMenu() {
                     TreEntry *entry = Assets.GetEntryByName(Assets.object_root_path + plane + ".IFF");
                     plane_to_load->InitFromRAM(entry->data, entry->size);
                     BoudingBox *bb = plane_to_load->GetBoudingBpx();
-                    envergure = ((bb->max.x - bb->min.x) * 3.2808399f) /2.0f;
+                    envergure = (bb->max.x - bb->min.x);
+                    surface = (envergure * 2.0f)* 3.2808399f;
+                    //surface = surface * 3.2808399f;
                     thrust = plane_to_load->thrust_in_newton * 0.153333333f;
                     weight = plane_to_load->weight_in_kg * 2.208588957f;
-                    fuel = plane_to_load->fuel_load * 2.208588957f;
-                    surface = plane_to_load->drag;
+                    fuel = plane_to_load->jdyn->FUEL * 2.208588957f;
+                    //surface = plane_to_load->jdyn->LIFT;
                     wing_aspec_ratio = (envergure * envergure) / surface ;
                     ie_pi_AR = 4000.0f/plane_to_load->drag;
-                    
-                    // Coefficients empiriques (à ajuster selon les données réelles)
-                    const float k_roll = 18.0f;
-                    const float k_pitch = 12.0f;
-
-                    // Efficacité des gouvernes (simplifiée, à affiner selon le type d'appareil)
-                    float aileron_efficiency = 0.8f;
-                    float elevator_efficiency = 0.7f;
-
-                    // Calcul des vitesses angulaires maximales (en radians/seconde)
-                    roll_rate_max = k_roll * (thrust / weight) * (surface / (envergure * envergure)) * aileron_efficiency;
-                    pitch_rate_max = k_pitch * (thrust / weight) * (surface / (envergure * envergure)) * elevator_efficiency;
-
-                    // Conversion en degrés/seconde si nécessaire
-                    roll_rate_max = roll_rate_max * (180.0f / M_PI);
-                    pitch_rate_max = pitch_rate_max * (180.0f / M_PI);
+                    roll_rate_max = plane_to_load->jdyn->ROLL_RATE;
+                    pitch_rate_max = plane_to_load->jdyn->TWIST_RATE;
                     
                     SCPlane *new_plane = new SCPlane(
                         10.0f,
                         -7.0f,
                         40.0f,
                         40.0f,
-                        pitch_rate_max,
-                        roll_rate_max,
+                        plane_to_load->jdyn->TWIST_RATE,
+                        plane_to_load->jdyn->ROLL_RATE,
                         surface,
                         weight,
                         fuel,
                         thrust,
                         envergure,
-                        ie_pi_AR,
+                        0.83f,
                         120,
                         this->current_mission->area,
                         player_plane->x,

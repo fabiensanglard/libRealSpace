@@ -108,7 +108,33 @@ struct HPTS {
     int32_t z;
 };
 
-
+typedef struct JDYN {
+    uint32_t FUEL;
+    uint16_t U1;
+    uint16_t C1;
+    uint16_t C2;
+    uint32_t U2;
+    uint32_t U3;
+    uint16_t ROLL_RATE;
+    uint16_t ROLL_RATE_MAX;
+    uint16_t CS3_qqch_lift;
+    uint16_t CS4;
+    uint32_t U5;
+    uint32_t U6;
+    uint16_t U7;
+    uint16_t U8;
+    uint32_t LIFT_SPD;
+    uint32_t DRAG;
+    uint32_t LIFT;
+    uint8_t aileron;
+    uint8_t gouverne;
+    uint8_t MAX_G;
+    uint16_t U13;
+    uint16_t TWIST_RATE;
+    uint16_t TWIST_RATE_MAX;
+    uint32_t U16;
+    uint16_t U17;
+} JDYN;
 
 class RSEntity {
 
@@ -169,12 +195,11 @@ public:
     EXPL *explos{nullptr};
     int32_t thrust_in_newton{0};
     int32_t weight_in_kg{0};
-    int32_t fuel_load{0};
-    uint16_t surface{0};
-    uint16_t drag{0};
+    int32_t drag{0};
     WDAT *wdat{nullptr};
     DYNN_MISS *dynn_miss{nullptr};
     bool gravity{false};
+    JDYN *jdyn{nullptr};
 
     uint16_t life{0};
     std::map<std::string, std::map<std::string, uint16_t>> sysm;

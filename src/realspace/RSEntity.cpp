@@ -421,8 +421,35 @@ void RSEntity::parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size) {
 void RSEntity::parseREAL_OBJT_JETP_DYNM_JDYN(uint8_t *data, size_t size) {
     ByteStream bs(data);
     bs.ReadByte();
-    this->fuel_load = bs.ReadInt24LEByte3();
-    this->surface = bs.ReadUShort();
+    JDYN *dyn = new JDYN();
+    
+    dyn->FUEL = bs.ReadInt24LEByte3();
+    dyn->U1 = bs.ReadInt24LE();
+    dyn->C1 = bs.ReadInt24LE();
+    dyn->C2 = bs.ReadInt24LE();
+    dyn->U2 = bs.ReadInt24LE();
+    dyn->U3 = bs.ReadInt24LE();
+    bs.ReadByte();
+    dyn->ROLL_RATE = bs.ReadInt24LEByte3();
+    dyn->ROLL_RATE_MAX = bs.ReadInt24LEByte3();
+    dyn->CS3_qqch_lift = bs.ReadUShort();
+    dyn->CS4 = bs.ReadUShort();
+    dyn->U5 = bs.ReadInt24LE();
+    dyn->U6 = bs.ReadInt24LEByte3();
+    dyn->U7 = bs.ReadUShort();
+    dyn->U8 = bs.ReadUShort();
+    dyn->LIFT_SPD = bs.ReadInt24LE();
+    dyn->DRAG = bs.ReadInt24LE();
+    dyn->LIFT = bs.ReadInt24LE();
+    dyn->aileron = bs.ReadByte();
+    dyn->gouverne = bs.ReadByte();
+    dyn->MAX_G = bs.ReadByte();
+    dyn->U13 = bs.ReadUShort();
+    dyn->TWIST_RATE = bs.ReadUShort();
+    dyn->TWIST_RATE_MAX = bs.ReadUShort();
+    dyn->U16 = bs.ReadInt24LE();
+    dyn->U17 = bs.ReadInt24LE();
+    this->jdyn = dyn;
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
