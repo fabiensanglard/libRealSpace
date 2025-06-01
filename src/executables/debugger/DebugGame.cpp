@@ -10,6 +10,8 @@
 #include "imgui_impl_opengl2.h"
 #include "imgui_impl_sdl2.h"
 #include "DebugGame.h"
+#include "DebugStrike.h"
+
 #include "../../strike_commander/precomp.h"
 extern RSScreen *Screen;
 extern SCMouse Mouse;
@@ -204,7 +206,7 @@ void DebugGame::testMissionSC() {
     ConvAssets.init();
 
     //Add MainMenu activity on the game stack.
-    SCStrike* main = new SCStrike();
+    DebugStrike * main = new DebugStrike();
     main->init();
     main->setMission("MISN-1A.IFF");
     Game->AddActivity(main);

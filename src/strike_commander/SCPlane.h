@@ -60,7 +60,7 @@ struct SCWeaponLoadoutHardPoint {
 
 class SCPlane {
 
-private:
+protected:
     long planeid;
     /* flight version	*/
     char version;
@@ -264,7 +264,7 @@ public:
             float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED,
             RSArea *area, float x, float y, float z);
     ~SCPlane();
-    void init();
+    virtual void init();
     int isOnRunWay();
     void SetThrottle(int throttle);
     int GetThrottle();
@@ -276,15 +276,15 @@ public:
     int GetSpoilers();
 
     void SetControlStick(int x, int y);
-    void Simulate();
+    virtual void Simulate();
     void OrigSimulate();
     void SimplifiedSimulate();
-    void getPosition(Point3D *position);
-    void Render();
-    void RenderSimulatedObject();
-    void RenderSmoke(); 
-    void Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission *mission);
-    void InitLoadout();
+    virtual void getPosition(Point3D *position);
+    virtual void Render();
+    virtual void RenderSimulatedObject();
+    virtual void RenderSmoke(); 
+    virtual void Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission *mission);
+    virtual void InitLoadout();
 };
 
 #endif

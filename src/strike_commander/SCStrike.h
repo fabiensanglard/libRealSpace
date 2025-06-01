@@ -31,7 +31,7 @@ static int mission_idx = 0;
  * mission selection, keyboard input, game simulation, and rendering.
  */
 class SCStrike : public IActivity {
-private:
+protected:
     /**
      * @brief Path to current mission file
      */
@@ -175,10 +175,6 @@ public:
      * @brief Runs the game simulation
      */
     void runFrame(void);
-    /**
-     * @brief Renders the in-game menu
-     */
-    void renderMenu();
 };
 
 #endif /* defined(__libRealSpace__SCStrike__) */
