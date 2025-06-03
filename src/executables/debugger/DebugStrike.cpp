@@ -187,7 +187,7 @@ void DebugStrike::renderMenu() {
                 if (actor && actor->plane) {
                     // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
                     float world_x = actor->plane->x;
-                    float world_z = actor->plane->z;
+                    float world_z = -actor->plane->z;
                     ImVec2 actor_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
                                                     canvas_center.y - world_z * scale_z);
                     
@@ -201,6 +201,27 @@ void DebugStrike::renderMenu() {
                                                 actor_canvas_pos.y + square_size * 0.5f);
                     
                     draw_list->AddRect(top_left, bottom_right, IM_COL32(255, 0, 0, 255));
+                    
+                    // Optionally, display the actor id near the square.
+                    draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(0, 0, 0, 255),
+                                        actor->actor_name.c_str());
+                } else if (actor) {
+                    // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
+                    float world_x = actor->object->position.x;
+                    float world_z = -actor->object->position.z;
+                    ImVec2 actor_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
+                                                    canvas_center.y - world_z * scale_z);
+                    
+                    // Define square size.
+                    float square_size = 10.0f;
+                    
+                    // Draw a square centered at the actor's computed canvas position.
+                    ImVec2 top_left = ImVec2(actor_canvas_pos.x - square_size * 0.5f,
+                                            actor_canvas_pos.y - square_size * 0.5f);
+                    ImVec2 bottom_right = ImVec2(actor_canvas_pos.x + square_size * 0.5f,
+                                                actor_canvas_pos.y + square_size * 0.5f);
+                    
+                    draw_list->AddCircle(top_left, square_size, IM_COL32(255, 255, 0, 255));
                     
                     // Optionally, display the actor id near the square.
                     draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(0, 0, 0, 255),
