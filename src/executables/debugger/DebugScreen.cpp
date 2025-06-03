@@ -100,34 +100,49 @@ void DebugScreen::Refresh(void){
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Strike Commander")) {
-                debugGameInstance.loadSC();
+    
+    ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    bool p_open = true;
+    if (ImGui::Begin("##Fullscreen window", &p_open, flags)) {
+        if (ImGui::BeginMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("Strike Commander")) {
+                    debugGameInstance.loadSC();
+                }
+                if (ImGui::MenuItem("Tactical Operations")) {
+                    debugGameInstance.loadTO();   
+                }
+                if (ImGui::MenuItem("Pacific Strike")) {
+                    debugGameInstance.loadPacific();   
+                }
+                if (ImGui::MenuItem("Test mission SC")) {
+                    debugGameInstance.testMissionSC();
+                }
+                if (ImGui::MenuItem("Exit")) {
+                    exit(0);
+                }
+                ImGui::EndMenu();
             }
-            if (ImGui::MenuItem("Tactical Operations")) {
-                debugGameInstance.loadTO();   
+            IActivity* act = Game->GetCurrentActivity();
+            if (act != nullptr) {
+                act->renderMenu();    
             }
-            if (ImGui::MenuItem("Pacific Strike")) {
-                debugGameInstance.loadPacific();   
-            }
-            if (ImGui::MenuItem("Test mission SC")) {
-                debugGameInstance.testMissionSC();
-            }
-            if (ImGui::MenuItem("Exit")) {
-                exit(0);
-            }
-            ImGui::EndMenu();
+            ImGui::EndMenuBar();
         }
-        IActivity* act = Game->GetCurrentActivity();
-        if (act != nullptr) {
-            act->renderMenu();    
-        }
-        ImGui::EndMainMenuBar();
-    }
-    if (ImGui::Begin("Game")) {
+        ImGui::BeginChild("Game", ImVec2(800, 0), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
         ImVec2 avail_size = ImGui::GetContentRegionAvail();
         ImGui::Image((void*)(intptr_t)this->screen_texture, avail_size, {0, 1}, {1, 0});
+        ImGui::EndChild();
+        ImGui::SameLine();
+        ImGui::BeginChild("Console", ImVec2(400, 0), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
+        ImGui::Text("Console");
+        ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+        ImGui::Text("Mouse Position: (%d, %d)", Mouse.GetPosition().x, Mouse.GetPosition().y);
+        ImGui::Text("Mouse Buttons: %d %d %d", Mouse.buttons[0].event, Mouse.buttons[1].event, Mouse.buttons[2].event);
+        ImGui::EndChild();
         ImGui::End();
     }
     ImGui::Render();

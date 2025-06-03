@@ -35,6 +35,7 @@ void DebugStrike::renderMenu() {
     static bool go_to_nav = false;
     static bool show_offcam = false;
     static bool show_load_plane = false;
+    static bool show_radar = false;
     static int altitude = 0;
     static int azimuth = 0;
     static int throttle = 0;
@@ -56,6 +57,7 @@ void DebugStrike::renderMenu() {
         ImGui::MenuItem("Ai pilot", NULL, &show_ai);
         ImGui::MenuItem("Off camera", NULL, &show_offcam);
         ImGui::MenuItem("Load plane", NULL, &show_load_plane);
+        ImGui::MenuItem("Radar", NULL, &show_radar);
         ImGui::EndMenu();
     }
     int sceneid = -1;
@@ -163,6 +165,52 @@ void DebugStrike::renderMenu() {
         ImGui::Text("Roll rate max: %.2f", roll_rate_max);
         ImGui::Text("Pitch rate max: %.2f", pitch_rate_max);
         ImGui::End();
+    }
+    if (show_radar) {
+        if (ImGui::Begin("Actors Position")) {
+            // Get the canvas parameters for converting world-coordinates to canvas coordinates.
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+            ImVec2 canvas_size = ImGui::GetContentRegionAvail();
+
+            // Set a scale factor to map actor positions to the child window size.
+            // You may need to adjust this value depending on your world-to-canvas mapping.
+
+            float scale_x = canvas_size.x / (BLOCK_WIDTH * 18.0f);
+            float scale_z = canvas_size.y / (BLOCK_WIDTH * 18.0f);
+
+            // Optionally, center the drawing within the canvas.
+            ImVec2 canvas_center = ImVec2(canvas_pos.x + canvas_size.x * 0.5f,
+                                        canvas_pos.y + canvas_size.y * 0.5f);
+
+            for (auto actor : this->current_mission->actors) {
+                if (actor && actor->plane) {
+                    // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
+                    float world_x = actor->plane->x;
+                    float world_z = actor->plane->z;
+                    ImVec2 actor_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
+                                                    canvas_center.y - world_z * scale_z);
+                    
+                    // Define square size.
+                    float square_size = 10.0f;
+                    
+                    // Draw a square centered at the actor's computed canvas position.
+                    ImVec2 top_left = ImVec2(actor_canvas_pos.x - square_size * 0.5f,
+                                            actor_canvas_pos.y - square_size * 0.5f);
+                    ImVec2 bottom_right = ImVec2(actor_canvas_pos.x + square_size * 0.5f,
+                                                actor_canvas_pos.y + square_size * 0.5f);
+                    
+                    draw_list->AddRect(top_left, bottom_right, IM_COL32(255, 0, 0, 255));
+                    
+                    // Optionally, display the actor id near the square.
+                    draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(0, 0, 0, 255),
+                                        actor->actor_name.c_str());
+                }
+            }
+
+            ImGui::End();
+        }
+    
     }
     if (show_ai) {
         ImGui::Begin("AI");
