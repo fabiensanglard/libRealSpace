@@ -132,12 +132,17 @@ void DebugScreen::Refresh(void){
             }
             ImGui::EndMenuBar();
         }
+        // Begin the Game child with a fixed width of 800
         ImGui::BeginChild("Game", ImVec2(800, 0), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
+        // [Render the game content here if needed]
+
         ImVec2 avail_size = ImGui::GetContentRegionAvail();
         ImGui::Image((void*)(intptr_t)this->screen_texture, avail_size, {0, 1}, {1, 0});
         ImGui::EndChild();
         ImGui::SameLine();
-        ImGui::BeginChild("Console", ImVec2(400, 0), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
+        // Calculate the remaining width for the Console child
+        float remainingWidth = ImGui::GetContentRegionAvail().x;
+        ImGui::BeginChild("Console", ImVec2(remainingWidth, 0), ImGuiChildFlags_Border | ImGuiWindowFlags_NoSavedSettings);
         IActivity* act = Game->GetCurrentActivity();
         if (act != nullptr) {
             act->renderUI();    
