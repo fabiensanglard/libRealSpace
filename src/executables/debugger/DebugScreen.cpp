@@ -138,10 +138,10 @@ void DebugScreen::Refresh(void){
         ImGui::EndChild();
         ImGui::SameLine();
         ImGui::BeginChild("Console", ImVec2(400, 0), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
-        ImGui::Text("Console");
-        ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
-        ImGui::Text("Mouse Position: (%d, %d)", Mouse.GetPosition().x, Mouse.GetPosition().y);
-        ImGui::Text("Mouse Buttons: %d %d %d", Mouse.buttons[0].event, Mouse.buttons[1].event, Mouse.buttons[2].event);
+        IActivity* act = Game->GetCurrentActivity();
+        if (act != nullptr) {
+            act->renderUI();    
+        }
         ImGui::EndChild();
         ImGui::End();
     }

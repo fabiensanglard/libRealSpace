@@ -51,6 +51,7 @@ public:
     virtual void Focus(void)  { this->focused = true;}
     virtual void UnFocus(void){ this->focused = false;}
     virtual void renderMenu(void) {}
+    virtual void renderUI(void) {}
     void checkKeyboard(void);
 };
 
