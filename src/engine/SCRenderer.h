@@ -97,14 +97,14 @@ public:
     void initRenderToTexture();
     void getRenderToTexture();
     void initRenderCameraView();
-
+    int32_t width;
+    int32_t height;
 private:
     bool initialized;
     AssetManager *assets;
     void getNormal(RSEntity *object, Triangle *triangle, Vector3D *normal);
     void renderWorldSkyAndGround();
-    int32_t width;
-    int32_t height;
+    
     int scale;
 
     VGAPalette palette;

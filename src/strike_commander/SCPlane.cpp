@@ -434,7 +434,6 @@ void SCPlane::OrigSimulate() {
             this->azimuthf = asinf(sincosas) / (float)M_PI * 1800.0f;
             if (this->ptw.v[2][2] < 0.0) {
                 /* if heading into z	*/
-
                 this->azimuthf = 1800 - this->azimuthf;
             }
             if (this->azimuthf < 0) {

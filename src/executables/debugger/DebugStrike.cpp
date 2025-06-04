@@ -426,7 +426,23 @@ void DebugStrike::radar() {
                                         actor_canvas_pos.y + square_size * 0.5f);
             
             draw_list->AddRect(top_left, bottom_right, IM_COL32(255, 0, 0, 255));
-            
+            for (auto wp: actor->plane->weaps_object) {
+                if (wp) {
+                    // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
+                    float wp_world_x = wp->x;
+                    float wp_world_z = -wp->z;
+                    ImVec2 wp_canvas_pos = ImVec2(canvas_center.x + wp_world_x * scale_x,
+                                                canvas_center.y - wp_world_z * scale_z);
+                    
+                    // Draw a square centered at the weapon's computed canvas position.
+                    ImVec2 wp_top_left = ImVec2(wp_canvas_pos.x - 5.0f * 0.5f,
+                                                wp_canvas_pos.y - 5.0f * 0.5f);
+                    ImVec2 wp_bottom_right = ImVec2(wp_canvas_pos.x + 5.0f * 0.5f,
+                                                    wp_canvas_pos.y + 5.0f * 0.5f);
+                    
+                    draw_list->AddRect(wp_top_left, wp_bottom_right, IM_COL32(255, 255, 0, 255));
+                }
+            }
             // Optionally, display the actor id near the square.
             draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y),  IM_COL32(255, 255, 255, 255),
                                 actor->actor_name.c_str());
