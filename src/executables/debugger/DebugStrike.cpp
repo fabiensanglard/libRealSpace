@@ -22,6 +22,154 @@ void DebugStrike::init() {
     SCStrike::init();
 }
 
+void DebugStrike::radar() {
+    // Get the canvas parameters for converting world-coordinates to canvas coordinates.
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+    ImVec2 canvas_size = ImGui::GetContentRegionAvail();
+    static float zoom = 1.0f;
+    static ImVec2 pan_offset = ImVec2(0, 0);
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Update zoom factor based on mouse wheel and adjust pan so that the zoom centers on the mouse.
+
+    if (ImGui::IsWindowFocused() && io.MouseWheel != 0.0f) {
+        float prev_zoom = zoom;
+        zoom += io.MouseWheel * 0.1f;
+        if (zoom < 0.1f)
+            zoom = 0.1f;
+        ImVec2 mouse_pos = io.MousePos;
+        pan_offset.x = pan_offset.x * (zoom / prev_zoom) + (mouse_pos.x - canvas_pos.x) * (1 - (zoom / prev_zoom));
+        pan_offset.y = pan_offset.y * (zoom / prev_zoom) + (mouse_pos.y - canvas_pos.y) * (1 - (zoom / prev_zoom));
+    }
+
+    // Update panning based on right mouse button drag.
+    if (ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
+        pan_offset.x += io.MouseDelta.x;
+        pan_offset.y += io.MouseDelta.y;
+    }
+
+    // Adjust the canvas position and size using the pan and zoom.
+    canvas_pos.x += pan_offset.x;
+    canvas_pos.y += pan_offset.y;
+    canvas_size.x *= zoom;
+    canvas_size.y *= zoom;
+    // Set a scale factor to map actor positions to the child window size.
+    // You may need to adjust this value depending on your world-to-canvas mapping.
+
+    float scale_x = canvas_size.x / (BLOCK_WIDTH * 18.0f);
+    float scale_z = canvas_size.y / (BLOCK_WIDTH * 18.0f);
+
+    // Draw a rectangle to represent the canvas area.
+    draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), IM_COL32(6, 57, 112, 255));
+    // Optionally, center the drawing within the canvas.
+    ImVec2 canvas_center = ImVec2(canvas_pos.x + canvas_size.x * 0.5f,
+                                canvas_pos.y + canvas_size.y * 0.5f);
+    // Draw a grid for better visualization.
+    for (int i = -9; i <= 9; ++i) {
+        // Vertical lines
+        ImVec2 line_start = ImVec2(canvas_center.x + i * BLOCK_WIDTH * scale_x, canvas_pos.y);
+        ImVec2 line_end = ImVec2(line_start.x, canvas_pos.y + canvas_size.y);
+        draw_list->AddLine(line_start, line_end, IM_COL32(200, 200, 200, 255));
+
+        // Horizontal lines
+        line_start = ImVec2(canvas_pos.x, canvas_center.y + i * BLOCK_WIDTH * scale_z);
+        line_end = ImVec2(canvas_pos.x + canvas_size.x, line_start.y);
+        draw_list->AddLine(line_start, line_end, IM_COL32(200, 200, 200, 255));
+    }
+    for (auto area : this->current_mission->mission->mission_data.areas) {
+        if (area) {
+            // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
+            float world_x = area->position.x;
+            float world_z = -area->position.z;
+            ImVec2 area_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
+                                            canvas_center.y - world_z * scale_z);
+            
+            
+            // Draw a square centered at the area's computed canvas position.
+            ImVec2 top_left = ImVec2(area_canvas_pos.x - area->AreaWidth*scale_x *0.5f,
+                                    area_canvas_pos.y - area->AreaWidth*scale_z * 0.5f);
+            ImVec2 bottom_right = ImVec2(area_canvas_pos.x + area->AreaWidth*scale_x * 0.5f,
+                                        area_canvas_pos.y + area->AreaWidth*scale_z * 0.5f);
+            
+            draw_list->AddRect(top_left, bottom_right, IM_COL32(0, 255, 0, 255));
+            
+            // Optionally, display the area id near the square.
+            draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(255, 255, 255, 255),
+                                area->AreaName);
+        }
+    }
+    for (auto actor : this->current_mission->actors) {
+        if (actor && actor->plane) {
+            // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
+            float world_x = actor->plane->x;
+            float world_z = -actor->plane->z;
+            ImVec2 actor_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
+                                            canvas_center.y - world_z * scale_z);
+            
+            // Define square size.
+            float square_size = 10.0f;
+            
+            // Draw a square centered at the actor's computed canvas position.
+            ImVec2 top_left = ImVec2(actor_canvas_pos.x - square_size * 0.5f,
+                                    actor_canvas_pos.y - square_size * 0.5f);
+            ImVec2 bottom_right = ImVec2(actor_canvas_pos.x + square_size * 0.5f,
+                                        actor_canvas_pos.y + square_size * 0.5f);
+            
+            draw_list->AddRect(top_left, bottom_right, IM_COL32(255, 0, 0, 255));
+            
+            // Optionally, display the actor id near the square.
+            draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y),  IM_COL32(255, 255, 255, 255),
+                                actor->actor_name.c_str());
+            // if clicked, open a window with actor details
+            if (ImGui::IsMouseHoveringRect(top_left, bottom_right)) {
+                ImGui::OpenPopup("Actor Details");
+                if (ImGui::BeginPopup("Actor Details")) {
+                    ImGui::Text("Actor: %s", actor->actor_name.c_str());
+                    if (actor->plane) {
+                        ImGui::Text("Air Speed: %d", actor->plane->airspeed);
+                        ImGui::Text("Altitude: %.0f", actor->plane->y);
+                        ImGui::Text("Heading: %.0f", 360 - (actor->plane->azimuthf / 10.0f));
+                        ImGui::Text("Position: (%.2f, %.2f, %.2f)", actor->plane->x, actor->plane->y, actor->plane->z);
+                    } else {
+                        ImGui::Text("Position: (%.2f, %.2f, %.2f)", actor->object->position.x, actor->object->position.y, actor->object->position.z);
+                    }
+                    
+                    ImGui::EndPopup();
+                }
+            }
+        } else if (actor) {
+            // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
+            float world_x = actor->object->position.x;
+            float world_z = -actor->object->position.z;
+            ImVec2 actor_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
+                                            canvas_center.y - world_z * scale_z);
+            
+            // Define square size.
+            float square_size = 10.0f;
+            
+            // Draw a square centered at the actor's computed canvas position.
+            ImVec2 top_left = ImVec2(actor_canvas_pos.x - square_size * 0.5f,
+                                    actor_canvas_pos.y - square_size * 0.5f);
+            ImVec2 bottom_right = ImVec2(actor_canvas_pos.x + square_size * 0.5f,
+                                        actor_canvas_pos.y + square_size * 0.5f);
+            ImVec2 circle_center = ImVec2(actor_canvas_pos.x, actor_canvas_pos.y);
+            draw_list->AddCircle(circle_center, square_size, IM_COL32(255, 255, 0, 255));
+            draw_list->AddRect(top_left, bottom_right, IM_COL32(255, 255, 0, 255));
+            if (ImGui::IsMouseHoveringRect(top_left, bottom_right)) {
+                ImGui::OpenPopup("Actor Details");
+                if (ImGui::BeginPopup("Actor Details")) {
+                    ImGui::Text("Actor: %s", actor->actor_name.c_str());
+                    ImGui::Text("Position: (%.2f, %.2f, %.2f)", actor->object->position.x, actor->object->position.y, actor->object->position.z);
+                    ImGui::EndPopup();
+                }
+            }
+            // Optionally, display the actor id near the square.
+            draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y),  IM_COL32(255, 255, 255, 255),
+                                actor->actor_name.c_str());
+        }
+    }
+}
 void DebugStrike::renderMenu() {
     static bool show_simulation = false;
     static bool show_camera = false;
@@ -168,67 +316,7 @@ void DebugStrike::renderMenu() {
     }
     if (show_radar) {
         if (ImGui::Begin("Actors Position")) {
-            // Get the canvas parameters for converting world-coordinates to canvas coordinates.
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
-            ImVec2 canvas_size = ImGui::GetContentRegionAvail();
-
-            // Set a scale factor to map actor positions to the child window size.
-            // You may need to adjust this value depending on your world-to-canvas mapping.
-
-            float scale_x = canvas_size.x / (BLOCK_WIDTH * 18.0f);
-            float scale_z = canvas_size.y / (BLOCK_WIDTH * 18.0f);
-
-            // Optionally, center the drawing within the canvas.
-            ImVec2 canvas_center = ImVec2(canvas_pos.x + canvas_size.x * 0.5f,
-                                        canvas_pos.y + canvas_size.y * 0.5f);
-
-            for (auto actor : this->current_mission->actors) {
-                if (actor && actor->plane) {
-                    // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
-                    float world_x = actor->plane->x;
-                    float world_z = -actor->plane->z;
-                    ImVec2 actor_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
-                                                    canvas_center.y - world_z * scale_z);
-                    
-                    // Define square size.
-                    float square_size = 10.0f;
-                    
-                    // Draw a square centered at the actor's computed canvas position.
-                    ImVec2 top_left = ImVec2(actor_canvas_pos.x - square_size * 0.5f,
-                                            actor_canvas_pos.y - square_size * 0.5f);
-                    ImVec2 bottom_right = ImVec2(actor_canvas_pos.x + square_size * 0.5f,
-                                                actor_canvas_pos.y + square_size * 0.5f);
-                    
-                    draw_list->AddRect(top_left, bottom_right, IM_COL32(255, 0, 0, 255));
-                    
-                    // Optionally, display the actor id near the square.
-                    draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(0, 0, 0, 255),
-                                        actor->actor_name.c_str());
-                } else if (actor) {
-                    // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
-                    float world_x = actor->object->position.x;
-                    float world_z = -actor->object->position.z;
-                    ImVec2 actor_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
-                                                    canvas_center.y - world_z * scale_z);
-                    
-                    // Define square size.
-                    float square_size = 10.0f;
-                    
-                    // Draw a square centered at the actor's computed canvas position.
-                    ImVec2 top_left = ImVec2(actor_canvas_pos.x - square_size * 0.5f,
-                                            actor_canvas_pos.y - square_size * 0.5f);
-                    ImVec2 bottom_right = ImVec2(actor_canvas_pos.x + square_size * 0.5f,
-                                                actor_canvas_pos.y + square_size * 0.5f);
-                    
-                    draw_list->AddCircle(top_left, square_size, IM_COL32(255, 255, 0, 255));
-                    
-                    // Optionally, display the actor id near the square.
-                    draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(0, 0, 0, 255),
-                                        actor->actor_name.c_str());
-                }
-            }
-
+            radar();
             ImGui::End();
         }
     

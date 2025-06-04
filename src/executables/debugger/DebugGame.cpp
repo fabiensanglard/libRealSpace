@@ -34,6 +34,7 @@ void DebugGame::init() {
 
     // Load the Mouse Cursor
     Mouse.init();
+    testMissionSC();
 }
 
 void DebugGame::PumpEvents(void) {

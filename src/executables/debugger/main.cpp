@@ -71,13 +71,6 @@ int main(int argc, char* argv[]) {
     // Load assets needed for Conversations (char and background)
     ConvAssets.init();
     Game->init();
-    //Add MainMenu activity on the game stack.
-    SCMainMenu* main = new SCMainMenu();
-    main->init();
-    Game->AddActivity(main);
-    SCAnimationPlayer *intro = new SCAnimationPlayer();
-    intro->init();
-    Game->AddActivity(intro);
     Game->Run();
 
     
