@@ -3,6 +3,9 @@
 class DebugStrike : public SCStrike {
 private:
     void radar();
+    void simInfo();
+    void simConfig();
+    void loadPlane();
 public:
     DebugStrike();
     ~DebugStrike();

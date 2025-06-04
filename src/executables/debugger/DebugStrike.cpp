@@ -21,7 +21,312 @@ void DebugStrike::setMission(std::string mission_name) {
 void DebugStrike::init() {
     SCStrike::init();
 }
+void DebugStrike::simInfo() {
+    ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", this->player_plane->airspeed, this->new_position.y,
+        this->player_plane->azimuthf);
+    ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
+    ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
+    float twist_diff = 360 - this->player_plane->twist / 10.0f;
+    if (twist_diff > 180.0f) {
+    twist_diff -= 360.0f;
+    } else if (twist_diff < -180.0f) {
+    twist_diff += 360.0f;
+    }
 
+    ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf, twist_diff,
+            this->player_plane->roll_speed);
+    ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
+    ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", this->player_plane->rollers,
+            this->player_plane->elevator, this->player_plane->rudder);
+    ImGui::Text("Acceleration (vx,vy,vz) [%.3f ,%.3f ,%.3f ]", this->player_plane->vx, this->player_plane->vy,
+            this->player_plane->vz);
+    ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]", this->player_plane->ax, this->player_plane->ay,
+            this->player_plane->az);
+    ImGui::Text("Lift %.3f", this->player_plane->lift);
+    ImGui::Text("%.3f %.3f %.3f %.3f %.3f %.3f", this->player_plane->uCl, this->player_plane->Cl,
+            this->player_plane->Cd, this->player_plane->Cdc, this->player_plane->kl, this->player_plane->qs);
+    ImGui::Text("Gravity %.3f", this->player_plane->gravity);
+    ImGui::Text("ptw");
+    for (int o = 0; o < 4; o++) {
+    ImGui::Text("PTW[%d]=[%f,%f,%f,%f]", o, this->player_plane->ptw.v[o][0], this->player_plane->ptw.v[o][1],
+                this->player_plane->ptw.v[o][2], this->player_plane->ptw.v[o][3]);
+    }
+    ImGui::Text("incremental");
+    for (int o = 0; o < 4; o++) {
+    ImGui::Text("INC[%d]=[%f,%f,%f,%f]", o, this->player_plane->incremental.v[o][0],
+                this->player_plane->incremental.v[o][1], this->player_plane->incremental.v[o][2],
+                this->player_plane->incremental.v[o][3]);
+    }
+}
+void DebugStrike::loadPlane() {
+    std::vector<std::string> planes;
+    planes = {
+        "F-16DES",
+        "F-15",
+        "F-18",
+        "C130DES",
+        "F-22",
+        "MIG21",
+        "MIG29",
+        "MIRAGE",
+        "SU27",
+        "TORNCG",
+        "TU-20",
+        "YF23",
+        "747",
+        "A-10"
+    };
+    static float envergure = 0.0f;
+    static float thrust = 0.0f;
+    static float weight = 0.0f;
+    static float fuel = 0.0f;
+    static float surface = 0.0f;
+    static float wing_aspec_ratio = 0.0f;
+    static float ie_pi_AR = 0.0f;
+    static float roll_rate_max = 0.0f;
+    static float pitch_rate_max = 0.0f;
+    static std::string plane_name = "";
+    if (ImGui::BeginCombo("Plane", nullptr, 0)) {
+        for (auto plane : planes) {
+            if (ImGui::Selectable(plane.c_str(), false)) {
+                plane_name = plane;
+                //this->plane_to_load = planes.indexOf(plane);
+                RSEntity *plane_to_load = new RSEntity(&Assets);
+                TreEntry *entry = Assets.GetEntryByName(Assets.object_root_path + plane + ".IFF");
+                plane_to_load->InitFromRAM(entry->data, entry->size);
+                BoudingBox *bb = plane_to_load->GetBoudingBpx();
+                envergure = (bb->max.x - bb->min.x);
+                surface = (envergure * 2.0f)* 3.2808399f;
+                //surface = surface * 3.2808399f;
+                thrust = plane_to_load->thrust_in_newton * 0.153333333f;
+                weight = plane_to_load->weight_in_kg * 2.208588957f;
+                fuel = plane_to_load->jdyn->FUEL * 2.208588957f;
+                //surface = plane_to_load->jdyn->LIFT;
+                wing_aspec_ratio = (envergure * envergure) / surface ;
+                ie_pi_AR = 4000.0f/plane_to_load->drag;
+                roll_rate_max = plane_to_load->jdyn->ROLL_RATE;
+                pitch_rate_max = plane_to_load->jdyn->TWIST_RATE;
+                
+                SCJdynPlane *new_plane = new SCJdynPlane(
+                    10.0f,
+                    -7.0f,
+                    40.0f,
+                    40.0f,
+                    plane_to_load->jdyn->TWIST_RATE,
+                    plane_to_load->jdyn->ROLL_RATE,
+                    surface,
+                    weight,
+                    fuel,
+                    thrust,
+                    envergure,
+                    0.83f,
+                    120,
+                    this->current_mission->area,
+                    player_plane->x,
+                    player_plane->y,
+                    player_plane->z
+                );
+                new_plane->simple_simulation = false;
+                new_plane->object = player_plane->object;
+                new_plane->object->entity = plane_to_load;
+                new_plane->azimuthf = player_plane->azimuthf;
+                new_plane->yaw = player_plane->yaw;
+                this->player_plane = new_plane;
+                this->cockpit->player_plane = this->player_plane;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::Text("Plane name: %s", plane_name.c_str());
+    ImGui::Text("Envergure: %.2f", envergure);
+    ImGui::Text("Thrust: %.2f", thrust);
+    ImGui::Text("Weight: %.2f", weight);
+    ImGui::Text("Fuel: %.2f", fuel);
+    ImGui::Text("Surface: %.2f", surface);
+    ImGui::Text("Wing aspect ratio: %.2f", wing_aspec_ratio);
+    ImGui::Text("Induced efficiency: %.2f", ie_pi_AR);
+    ImGui::Text("Roll rate max: %.2f", roll_rate_max);
+    ImGui::Text("Pitch rate max: %.2f", pitch_rate_max);
+}
+void DebugStrike::simConfig() {
+    static bool azymuth_control = false;
+    static int altitude = 0;
+    static int azimuth = 0;
+    static int throttle = 0;
+    static int speed = 0;
+    static bool go_to_nav = false;
+    ImGui::DragInt("set altitude", &altitude, 100, 0, 30000);
+    ImGui::DragInt("set throttle", &throttle, 10, 0, 100);
+    ImGui::DragInt("set azimuth", &azimuth, 1, 0, 360);
+    ImGui::DragInt("set speed", &speed, 2, 0, 30);
+    if (ImGui::Button("set")) {
+        this->player_plane->vz = (float) -speed;
+        this->player_plane->y = (float) altitude;
+        this->player_plane->last_py = this->player_plane->y;
+        this->player_plane->rollers = 0;
+        this->player_plane->roll_speed = 0;
+        this->player_plane->elevation_speedf = 0;
+        this->player_plane->elevator = 0;
+        this->player_plane->SetThrottle(throttle);
+        this->player_plane->ptw.Identity();
+        this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
+
+        this->player_plane->ptw.rotateM(tenthOfDegreeToRad(azimuth * 10.0f), 0, 1, 0);
+        this->player_plane->ptw.rotateM(tenthOfDegreeToRad(this->player_plane->elevationf), 1, 0, 0);
+        this->player_plane->ptw.rotateM(tenthOfDegreeToRad(this->player_plane->twist), 0, 0, 1);
+        this->player_plane->Simulate();
+
+        this->pause_simu = true;
+    }
+    ImGui::SameLine();
+    ImGui::PushID(1);
+    if (this->autopilot) {
+        this->pilot.target_speed = -speed;
+        this->pilot.target_climb = altitude;
+        this->pilot.target_azimut = (float) azimuth;
+        this->pilot.AutoPilot();
+        ImGui::PushStyleColor(ImGuiCol_Button,
+                                (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 1.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
+    }
+    if (ImGui::Button("Autopilot")) {
+        this->pilot.plane = this->player_plane;
+        this->autopilot = !this->autopilot;
+        go_to_nav = false;
+    }
+    if (go_to_nav) {
+        this->pilot.plane = this->player_plane;
+        this->pilot.target_speed = -speed;
+        this->pilot.SetTargetWaypoint(this->current_mission->waypoints[this->nav_point_id]->spot->position);
+        this->pilot.AutoPilot();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Go To Waypoint")) {
+        this->pilot.plane = this->player_plane;
+        this->pilot.SetTargetWaypoint(this->current_mission->waypoints[this->nav_point_id]->spot->position);
+        go_to_nav = !go_to_nav;
+        this->autopilot = false;
+    }
+    
+    ImGui::PopStyleColor(3);
+    ImGui::PopID();
+
+    float azimut_diff = azimuth - (360 - (this->player_plane->azimuthf / 10.0f));
+
+    if (azimut_diff > 180.0f) {
+        azimut_diff -= 360.0f;
+    } else if (azimut_diff < -180.0f) {
+        azimut_diff += 360.0f;
+    }
+
+    const float max_twist_angle = 80.0f;
+    const float Kp = 3.0f;
+
+    float target_twist_angle = Kp * azimut_diff;
+    float current_twist = 360 - this->player_plane->twist / 10.0f;
+
+    if (current_twist > 180.0f) {
+        current_twist -= 360.0f;
+    } else if (current_twist < -180.0f) {
+        current_twist += 360.0f;
+    }
+
+    if (target_twist_angle > 180.0f) {
+        target_twist_angle -= 360.0f;
+    } else if (target_twist_angle < -180.0f) {
+        target_twist_angle += 360.0f;
+    }
+
+    if (target_twist_angle > max_twist_angle) {
+        target_twist_angle = max_twist_angle;
+    } else if (target_twist_angle < -max_twist_angle) {
+        target_twist_angle = -max_twist_angle;
+    }
+
+    ImGui::Text("Current diff %f ", current_twist);
+    ImGui::Text("azymuth diff %f", azimut_diff);
+    ImGui::Text("target twist %f", target_twist_angle);
+    ImGui::Text("Twist to go %f", current_twist - target_twist_angle);
+
+    if (azimut_diff > 0) {
+        ImGui::Text("Go right");
+
+        if (current_twist - target_twist_angle < 0) {
+            ImGui::SameLine();
+            ImGui::Text("Push RIGHT");
+        } else {
+            ImGui::SameLine();
+            ImGui::Text("Let go the stick");
+        }
+        if (azymuth_control) {
+            if (current_twist - target_twist_angle < 0) {
+                this->player_plane->control_stick_x = 50;
+            } else {
+                this->player_plane->control_stick_x = 0;
+            }
+        }
+    } else {
+
+        ImGui::Text("Go left");
+        if (current_twist - target_twist_angle > 0) {
+            ImGui::SameLine();
+            ImGui::Text("Push LEFT");
+        } else {
+            ImGui::SameLine();
+            ImGui::Text("Let go the stick");
+        }
+        if (azymuth_control) {
+            if (current_twist - target_twist_angle > 0) {
+                this->player_plane->control_stick_x = -50;
+            } else {
+                this->player_plane->control_stick_x = 0;
+            }
+        }
+    }
+
+    ImGui::PushID(1);
+    if (azymuth_control) {
+        if (azimut_diff > 0) {
+
+        } else {
+        }
+        ImGui::PushStyleColor(ImGuiCol_Button,
+                                (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 1.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
+    }
+    if (ImGui::Button("Azymuth control")) {
+        azymuth_control = !azymuth_control;
+    }
+    ImGui::PopStyleColor(3);
+    ImGui::PopID();
+
+    Vector3D target = {this->player_plane->x, (float) altitude, (this->player_plane->z + 60 * this->player_plane->vz)};
+    Vector3D current_position = {this->player_plane->x, this->player_plane->y, this->player_plane->z};
+
+    float target_elevation = atan2(this->player_plane->z - (this->player_plane->z + (60 * this->player_plane->vz)),
+                                    this->player_plane->y - altitude);
+    target_elevation = target_elevation * 180.0f / (float)M_PI;
+
+    if (target_elevation > 180.0f) {
+        target_elevation -= 360.0f;
+    } else if (target_elevation < -180.0f) {
+        target_elevation += 360.0f;
+    }
+    target_elevation = target_elevation - 90.0f;
+
+    ImGui::Text("Current elevation %.3f, target elevation %.3f", this->player_plane->elevationf / 10.0f,
+                target_elevation);
+}
 void DebugStrike::radar() {
     // Get the canvas parameters for converting world-coordinates to canvas coordinates.
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -177,17 +482,14 @@ void DebugStrike::renderMenu() {
     static bool show_mission = false;
     static bool show_mission_parts_and_areas = false;
     static bool show_simulation_config = false;
-    static bool azymuth_control = false;
+    
     static bool show_music_player = false;
     static bool show_ai = false;
-    static bool go_to_nav = false;
+    
     static bool show_offcam = false;
     static bool show_load_plane = false;
     static bool show_radar = false;
-    static int altitude = 0;
-    static int azimuth = 0;
-    static int throttle = 0;
-    static int speed = 0;
+    
 
     
     if (ImGui::BeginMenu("SCStrike")) {
@@ -224,94 +526,7 @@ void DebugStrike::renderMenu() {
     }
     if (show_load_plane) {
         ImGui::Begin("Load plane");
-        std::vector<std::string> planes;
-        planes = {
-            "F-16DES",
-            "F-15",
-            "F-18",
-            "C130DES",
-            "F-22",
-            "MIG21",
-            "MIG29",
-            "MIRAGE",
-            "SU27",
-            "TORNCG",
-            "TU-20",
-            "YF23",
-            "747",
-            "A-10"
-        };
-        static float envergure = 0.0f;
-        static float thrust = 0.0f;
-        static float weight = 0.0f;
-        static float fuel = 0.0f;
-        static float surface = 0.0f;
-        static float wing_aspec_ratio = 0.0f;
-        static float ie_pi_AR = 0.0f;
-        static float roll_rate_max = 0.0f;
-        static float pitch_rate_max = 0.0f;
-        static std::string plane_name = "";
-        if (ImGui::BeginCombo("Plane", nullptr, 0)) {
-            for (auto plane : planes) {
-                if (ImGui::Selectable(plane.c_str(), false)) {
-                    plane_name = plane;
-                    //this->plane_to_load = planes.indexOf(plane);
-                    RSEntity *plane_to_load = new RSEntity(&Assets);
-                    TreEntry *entry = Assets.GetEntryByName(Assets.object_root_path + plane + ".IFF");
-                    plane_to_load->InitFromRAM(entry->data, entry->size);
-                    BoudingBox *bb = plane_to_load->GetBoudingBpx();
-                    envergure = (bb->max.x - bb->min.x);
-                    surface = (envergure * 2.0f)* 3.2808399f;
-                    //surface = surface * 3.2808399f;
-                    thrust = plane_to_load->thrust_in_newton * 0.153333333f;
-                    weight = plane_to_load->weight_in_kg * 2.208588957f;
-                    fuel = plane_to_load->jdyn->FUEL * 2.208588957f;
-                    //surface = plane_to_load->jdyn->LIFT;
-                    wing_aspec_ratio = (envergure * envergure) / surface ;
-                    ie_pi_AR = 4000.0f/plane_to_load->drag;
-                    roll_rate_max = plane_to_load->jdyn->ROLL_RATE;
-                    pitch_rate_max = plane_to_load->jdyn->TWIST_RATE;
-                    
-                    SCJdynPlane *new_plane = new SCJdynPlane(
-                        10.0f,
-                        -7.0f,
-                        40.0f,
-                        40.0f,
-                        plane_to_load->jdyn->TWIST_RATE,
-                        plane_to_load->jdyn->ROLL_RATE,
-                        surface,
-                        weight,
-                        fuel,
-                        thrust,
-                        envergure,
-                        0.83f,
-                        120,
-                        this->current_mission->area,
-                        player_plane->x,
-                        player_plane->y,
-                        player_plane->z
-                    );
-                    new_plane->simple_simulation = false;
-                    new_plane->object = player_plane->object;
-                    new_plane->object->entity = plane_to_load;
-                    new_plane->azimuthf = player_plane->azimuthf;
-                    new_plane->yaw = player_plane->yaw;
-                    this->player_plane = new_plane;
-                    this->cockpit->player_plane = this->player_plane;
-                }
-            }
-            ImGui::EndCombo();
-        }
-        ImGui::Text("Plane name: %s", plane_name.c_str());
-        ImGui::Text("Envergure: %.2f", envergure);
-        ImGui::Text("Thrust: %.2f", thrust);
-        ImGui::Text("Weight: %.2f", weight);
-        ImGui::Text("Fuel: %.2f", fuel);
-        ImGui::Text("Surface: %.2f", surface);
-        ImGui::Text("Wing aspect ratio: %.2f", wing_aspec_ratio);
-        ImGui::Text("Induced efficiency: %.2f", ie_pi_AR);
-        ImGui::Text("Roll rate max: %.2f", roll_rate_max);
-        ImGui::Text("Pitch rate max: %.2f", pitch_rate_max);
+        loadPlane();
         ImGui::End();
     }
     if (show_radar) {
@@ -358,216 +573,12 @@ void DebugStrike::renderMenu() {
     }
     if (show_simulation_config) {
         ImGui::Begin("Simulation Config");
-        ImGui::DragInt("set altitude", &altitude, 100, 0, 30000);
-        ImGui::DragInt("set throttle", &throttle, 10, 0, 100);
-        ImGui::DragInt("set azimuth", &azimuth, 1, 0, 360);
-        ImGui::DragInt("set speed", &speed, 2, 0, 30);
-        if (ImGui::Button("set")) {
-            this->player_plane->vz = (float) -speed;
-            this->player_plane->y = (float) altitude;
-            this->player_plane->last_py = this->player_plane->y;
-            this->player_plane->rollers = 0;
-            this->player_plane->roll_speed = 0;
-            this->player_plane->elevation_speedf = 0;
-            this->player_plane->elevator = 0;
-            this->player_plane->SetThrottle(throttle);
-            this->player_plane->ptw.Identity();
-            this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
-
-            this->player_plane->ptw.rotateM(tenthOfDegreeToRad(azimuth * 10.0f), 0, 1, 0);
-            this->player_plane->ptw.rotateM(tenthOfDegreeToRad(this->player_plane->elevationf), 1, 0, 0);
-            this->player_plane->ptw.rotateM(tenthOfDegreeToRad(this->player_plane->twist), 0, 0, 1);
-            this->player_plane->Simulate();
-
-            this->pause_simu = true;
-        }
-        ImGui::SameLine();
-        ImGui::PushID(1);
-        if (this->autopilot) {
-            this->pilot.target_speed = -speed;
-            this->pilot.target_climb = altitude;
-            this->pilot.target_azimut = (float) azimuth;
-            this->pilot.AutoPilot();
-            ImGui::PushStyleColor(ImGuiCol_Button,
-                                  (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
-        } else {
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 1.0f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
-        }
-        if (ImGui::Button("Autopilot")) {
-            this->pilot.plane = this->player_plane;
-            this->autopilot = !this->autopilot;
-            go_to_nav = false;
-        }
-        if (go_to_nav) {
-            this->pilot.plane = this->player_plane;
-            this->pilot.target_speed = -speed;
-            this->pilot.SetTargetWaypoint(this->current_mission->waypoints[this->nav_point_id]->spot->position);
-            this->pilot.AutoPilot();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Go To Waypoint")) {
-            this->pilot.plane = this->player_plane;
-            this->pilot.SetTargetWaypoint(this->current_mission->waypoints[this->nav_point_id]->spot->position);
-            go_to_nav = !go_to_nav;
-            this->autopilot = false;
-        }
-        
-        ImGui::PopStyleColor(3);
-        ImGui::PopID();
-
-        float azimut_diff = azimuth - (360 - (this->player_plane->azimuthf / 10.0f));
-
-        if (azimut_diff > 180.0f) {
-            azimut_diff -= 360.0f;
-        } else if (azimut_diff < -180.0f) {
-            azimut_diff += 360.0f;
-        }
-
-        const float max_twist_angle = 80.0f;
-        const float Kp = 3.0f;
-
-        float target_twist_angle = Kp * azimut_diff;
-        float current_twist = 360 - this->player_plane->twist / 10.0f;
-
-        if (current_twist > 180.0f) {
-            current_twist -= 360.0f;
-        } else if (current_twist < -180.0f) {
-            current_twist += 360.0f;
-        }
-
-        if (target_twist_angle > 180.0f) {
-            target_twist_angle -= 360.0f;
-        } else if (target_twist_angle < -180.0f) {
-            target_twist_angle += 360.0f;
-        }
-
-        if (target_twist_angle > max_twist_angle) {
-            target_twist_angle = max_twist_angle;
-        } else if (target_twist_angle < -max_twist_angle) {
-            target_twist_angle = -max_twist_angle;
-        }
-
-        ImGui::Text("Current diff %f ", current_twist);
-        ImGui::Text("azymuth diff %f", azimut_diff);
-        ImGui::Text("target twist %f", target_twist_angle);
-        ImGui::Text("Twist to go %f", current_twist - target_twist_angle);
-
-        if (azimut_diff > 0) {
-            ImGui::Text("Go right");
-
-            if (current_twist - target_twist_angle < 0) {
-                ImGui::SameLine();
-                ImGui::Text("Push RIGHT");
-            } else {
-                ImGui::SameLine();
-                ImGui::Text("Let go the stick");
-            }
-            if (azymuth_control) {
-                if (current_twist - target_twist_angle < 0) {
-                    this->player_plane->control_stick_x = 50;
-                } else {
-                    this->player_plane->control_stick_x = 0;
-                }
-            }
-        } else {
-
-            ImGui::Text("Go left");
-            if (current_twist - target_twist_angle > 0) {
-                ImGui::SameLine();
-                ImGui::Text("Push LEFT");
-            } else {
-                ImGui::SameLine();
-                ImGui::Text("Let go the stick");
-            }
-            if (azymuth_control) {
-                if (current_twist - target_twist_angle > 0) {
-                    this->player_plane->control_stick_x = -50;
-                } else {
-                    this->player_plane->control_stick_x = 0;
-                }
-            }
-        }
-
-        ImGui::PushID(1);
-        if (azymuth_control) {
-            if (azimut_diff > 0) {
-
-            } else {
-            }
-            ImGui::PushStyleColor(ImGuiCol_Button,
-                                  (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.7f));
-        } else {
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 1.0f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
-        }
-        if (ImGui::Button("Azymuth control")) {
-            azymuth_control = !azymuth_control;
-        }
-        ImGui::PopStyleColor(3);
-        ImGui::PopID();
-
-        Vector3D target = {this->player_plane->x, (float) altitude, (this->player_plane->z + 60 * this->player_plane->vz)};
-        Vector3D current_position = {this->player_plane->x, this->player_plane->y, this->player_plane->z};
-
-        float target_elevation = atan2(this->player_plane->z - (this->player_plane->z + (60 * this->player_plane->vz)),
-                                       this->player_plane->y - altitude);
-        target_elevation = target_elevation * 180.0f / (float)M_PI;
-
-        if (target_elevation > 180.0f) {
-            target_elevation -= 360.0f;
-        } else if (target_elevation < -180.0f) {
-            target_elevation += 360.0f;
-        }
-        target_elevation = target_elevation - 90.0f;
-
-        ImGui::Text("Current elevation %.3f, target elevation %.3f", this->player_plane->elevationf / 10.0f,
-                    target_elevation);
+        simConfig();
         ImGui::End();
     }
     if (show_simulation) {
         ImGui::Begin("Simulation");
-        ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", this->player_plane->airspeed, this->new_position.y,
-                    this->player_plane->azimuthf);
-        ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
-        ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
-        float twist_diff = 360 - this->player_plane->twist / 10.0f;
-        if (twist_diff > 180.0f) {
-            twist_diff -= 360.0f;
-        } else if (twist_diff < -180.0f) {
-            twist_diff += 360.0f;
-        }
-
-        ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf, twist_diff,
-                    this->player_plane->roll_speed);
-        ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
-        ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", this->player_plane->rollers,
-                    this->player_plane->elevator, this->player_plane->rudder);
-        ImGui::Text("Acceleration (vx,vy,vz) [%.3f ,%.3f ,%.3f ]", this->player_plane->vx, this->player_plane->vy,
-                    this->player_plane->vz);
-        ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]", this->player_plane->ax, this->player_plane->ay,
-                    this->player_plane->az);
-        ImGui::Text("Lift %.3f", this->player_plane->lift);
-        ImGui::Text("%.3f %.3f %.3f %.3f %.3f %.3f", this->player_plane->uCl, this->player_plane->Cl,
-                    this->player_plane->Cd, this->player_plane->Cdc, this->player_plane->kl, this->player_plane->qs);
-        ImGui::Text("Gravity %.3f", this->player_plane->gravity);
-        ImGui::Text("ptw");
-        for (int o = 0; o < 4; o++) {
-            ImGui::Text("PTW[%d]=[%f,%f,%f,%f]", o, this->player_plane->ptw.v[o][0], this->player_plane->ptw.v[o][1],
-                        this->player_plane->ptw.v[o][2], this->player_plane->ptw.v[o][3]);
-        }
-        ImGui::Text("incremental");
-        for (int o = 0; o < 4; o++) {
-            ImGui::Text("INC[%d]=[%f,%f,%f,%f]", o, this->player_plane->incremental.v[o][0],
-                        this->player_plane->incremental.v[o][1], this->player_plane->incremental.v[o][2],
-                        this->player_plane->incremental.v[o][3]);
-        }
+        simInfo();
         ImGui::End();
     }
     if (show_camera) {
@@ -1059,7 +1070,27 @@ void DebugStrike::renderMenu() {
 }
 
 void DebugStrike::renderUI() {
-    ImGui::BeginChild("Debug Strike", ImVec2(0, 0), true);
-    radar();
-    ImGui::EndChild();
+    if (ImGui::BeginTabBar("DebugTabs")) {
+        if (ImGui::BeginTabItem("Mission Info")) {
+            ImGui::BeginChild("Radar", ImVec2(0, 0), true);
+            radar();
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Simulation")) {
+            ImGui::BeginChild("Simulation Info", ImVec2(0, 370), true);
+            simInfo();
+            ImGui::EndChild();
+            ImGui::BeginChild("Simulation config", ImVec2(0, 250), true);
+            simConfig();
+            ImGui::EndChild();
+            ImGui::BeginChild("Planes", ImVec2(0, 0), true);
+            loadPlane();
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+        // Additional tabs can be added here.
+        ImGui::EndTabBar();
+    }
+    
 }
