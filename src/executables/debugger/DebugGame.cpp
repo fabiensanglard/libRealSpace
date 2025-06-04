@@ -349,4 +349,9 @@ void DebugGame::StopTopActivity(void) {
     currentActivity->Stop();
 }
 
-IActivity *DebugGame::GetCurrentActivity(void) { return activities.top(); }
+IActivity *DebugGame::GetCurrentActivity(void) { 
+    if (activities.empty()) {
+        return nullptr; // No activity is running
+    }
+    return activities.top();
+}

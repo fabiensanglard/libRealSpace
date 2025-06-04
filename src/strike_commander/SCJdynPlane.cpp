@@ -53,8 +53,7 @@ void SCJdynPlane::Simulate() {
 
     rottm.rotateM(pitch_input, 1, 0, 0);
     rottm.rotateM(roll_input, 0, 0, 1);
-    this->vz = this->vz - ((.01f / this->tps / this->tps * this->thrust * this->Mthrust) + (DRAG_COEFFICIENT * this->vz)) * deltaTime;
-    this->vz = std::clamp(this->vz, -25.0f, 25.0f);
+    
     rottm.translateM(this->vx/3.2808399f, this->vy/3.2808399f, this->vz/3.2808399f);
     this->on_ground = false;
     this->pitch = -asinf(rottm.v[2][1]);
@@ -92,7 +91,7 @@ void SCJdynPlane::Simulate() {
     
     // Retrieve dynamic parameters from jdynn data
     float mass = this->object->entity->weight_in_kg;
-    float wingArea = 1.0f;
+    float wingArea = 41.0f;
     float liftCoefficient = this->object->entity->jdyn->LIFT;
     float dragCoefficient = this->object->entity->jdyn->DRAG;
 
@@ -100,27 +99,25 @@ void SCJdynPlane::Simulate() {
     float speed = sqrtf(this->vx * this->vx + this->vy * this->vy + this->vz * this->vz);
 
     // Compute dynamic pressure: q = 0.5 * air_density * speed^2
-    float q = 0.5f * AIR_DENSITY * speed;
+    float q = 0.5f * AIR_DENSITY * speed * speed;
 
     // Compute forces (in Newtons)
     float F_drag = dragCoefficient * q * wingArea;
     float F_lift = liftCoefficient * q * wingArea;
-    float F_thrust = this->thrust * this->Mthrust;
-    float F_gravity = mass * GRAVITY;
-    if (y <= this->area->getY(this->x, this->z)) {
-        // If the plane is on the ground, set vertical velocity to zero
-        //this->vy = 0.0f;
-        F_gravity = 0.0f; // No gravity force when on ground
-        this->on_ground = true;
-    } else {
-        this->on_ground = false;
+    float F_thrust = 0.001f * this->thrust * this->Mthrust;
+    if (this->thrust > 0) {
+        // If thrust is negative, it means the plane is decelerating
+        printf("breaking\n");
     }
+    float F_gravity = mass * GRAVITY;
+    
     // Compute net accelerations (in m/s^2) in the body frame:
     // Assume positive forward is along the aircraft's forward axis,
     // and positive upward is along its upwards axis.
     float acc_forward = (F_thrust - F_drag) / mass;
     float acc_upward = (F_lift - F_gravity) / mass;
-
+    this->lift = F_lift;
+    
     // Extract forward and up vectors from the rotation matrix.
     // (Assuming the third row is the forward vector and the second row is the up vector)
     struct Vector3 { float x, y, z; };
@@ -128,9 +125,26 @@ void SCJdynPlane::Simulate() {
     Vector3 up = { rottm.v[1][0], rottm.v[1][1], rottm.v[1][2] };
 
     // Update velocity based on the net accelerations and the elapsed time.
-    this->vx += (forward.x * acc_forward + up.x * acc_upward) * deltaTime;
-    this->vy += (forward.y * acc_forward + up.y * acc_upward) * deltaTime;
-    this->vz += (forward.z * acc_forward + up.z * acc_upward) * deltaTime;
+    this->ax = (forward.x * acc_forward + up.x * acc_upward) * deltaTime;
+    this->ay = (forward.y * acc_forward + up.y * acc_upward) * deltaTime;
+    this->az = (forward.z * acc_forward + up.z * acc_upward) * deltaTime;
+    
+    if (y <= this->area->getY(this->x, this->z)) {
+        // If the plane is on the ground, set vertical velocity to zero
+        if (this->ay < 0.0f) {
+            this->ay = 0.0f;
+        }
+        this->on_ground = true;
+    } else {
+        this->on_ground = false;
+    }
+
+    this->vx += this->ax;
+    this->vy += this->ay;
+    this->vz += this->az;
+
+    
+    // Compute turn rate from lateral accelerations (ax and az)
     
     this->airspeed = -(int)(this->fps_knots * this->vz);
     this->azimuthf = (this->yaw * 180.0f / (float) M_PI) * 10.0f;
