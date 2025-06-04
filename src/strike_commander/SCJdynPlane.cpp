@@ -89,7 +89,49 @@ void SCJdynPlane::Simulate() {
     this->x = rottm.v[3][0];
     this->y = rottm.v[3][1];
     this->z = rottm.v[3][2];
+    
+    // Retrieve dynamic parameters from jdynn data
+    float mass = this->object->entity->weight_in_kg;
+    float wingArea = 1.0f;
+    float liftCoefficient = this->object->entity->jdyn->LIFT;
+    float dragCoefficient = this->object->entity->jdyn->DRAG;
 
+    // Calculate current speed (magnitude of velocity vector)
+    float speed = sqrtf(this->vx * this->vx + this->vy * this->vy + this->vz * this->vz);
+
+    // Compute dynamic pressure: q = 0.5 * air_density * speed^2
+    float q = 0.5f * AIR_DENSITY * speed;
+
+    // Compute forces (in Newtons)
+    float F_drag = dragCoefficient * q * wingArea;
+    float F_lift = liftCoefficient * q * wingArea;
+    float F_thrust = this->thrust * this->Mthrust;
+    float F_gravity = mass * GRAVITY;
+    if (y <= this->area->getY(this->x, this->z)) {
+        // If the plane is on the ground, set vertical velocity to zero
+        //this->vy = 0.0f;
+        F_gravity = 0.0f; // No gravity force when on ground
+        this->on_ground = true;
+    } else {
+        this->on_ground = false;
+    }
+    // Compute net accelerations (in m/s^2) in the body frame:
+    // Assume positive forward is along the aircraft's forward axis,
+    // and positive upward is along its upwards axis.
+    float acc_forward = (F_thrust - F_drag) / mass;
+    float acc_upward = (F_lift - F_gravity) / mass;
+
+    // Extract forward and up vectors from the rotation matrix.
+    // (Assuming the third row is the forward vector and the second row is the up vector)
+    struct Vector3 { float x, y, z; };
+    Vector3 forward = { rottm.v[2][0], rottm.v[2][1], rottm.v[2][2] };
+    Vector3 up = { rottm.v[1][0], rottm.v[1][1], rottm.v[1][2] };
+
+    // Update velocity based on the net accelerations and the elapsed time.
+    this->vx += (forward.x * acc_forward + up.x * acc_upward) * deltaTime;
+    this->vy += (forward.y * acc_forward + up.y * acc_upward) * deltaTime;
+    this->vz += (forward.z * acc_forward + up.z * acc_upward) * deltaTime;
+    
     this->airspeed = -(int)(this->fps_knots * this->vz);
     this->azimuthf = (this->yaw * 180.0f / (float) M_PI) * 10.0f;
     this->elevationf = (this->pitch * 180.0f / (float) M_PI) * 10.0f;
