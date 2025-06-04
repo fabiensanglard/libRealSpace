@@ -6,6 +6,8 @@ private:
     void simInfo();
     void simConfig();
     void loadPlane();
+    void showActorDetails(SCMissionActors* actor);
+    void showOffCamera();
 public:
     DebugStrike();
     ~DebugStrike();
