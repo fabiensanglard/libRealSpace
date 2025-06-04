@@ -1057,3 +1057,9 @@ void DebugStrike::renderMenu() {
         ImGui::End();
     }
 }
+
+void DebugStrike::renderUI() {
+    ImGui::BeginChild("Debug Strike", ImVec2(0, 0), true);
+    radar();
+    ImGui::EndChild();
+}

@@ -9,4 +9,5 @@ public:
     void init();
     void setMission(std::string mission_name);
     void renderMenu();
+    void renderUI() override;
 };
