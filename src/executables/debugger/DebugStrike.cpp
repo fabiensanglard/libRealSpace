@@ -47,9 +47,9 @@ void DebugStrike::simInfo() {
     ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]", this->player_plane->ax, this->player_plane->ay,
             this->player_plane->az);
     ImGui::Text("Lift %.3f", this->player_plane->lift);
-    ImGui::Text("%.3f %.3f %.3f %.3f %.3f %.3f", this->player_plane->uCl, this->player_plane->Cl,
-            this->player_plane->Cd, this->player_plane->Cdc, this->player_plane->kl, this->player_plane->qs);
     ImGui::Text("Gravity %.3f", this->player_plane->gravity);
+    ImGui::Text("Drag %.3f", this->player_plane->drag);
+    ImGui::Text("Thrust %.3f", this->player_plane->thrust_force);
     ImGui::Text("ptw");
     for (int o = 0; o < 4; o++) {
     ImGui::Text("PTW[%d]=[%f,%f,%f,%f]", o, this->player_plane->ptw.v[o][0], this->player_plane->ptw.v[o][1],
@@ -353,7 +353,7 @@ void DebugStrike::radar() {
     }
 
     // Update panning based on right mouse button drag.
-    if (ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
+    if (ImGui::IsWindowFocused() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
         pan_offset.x += io.MouseDelta.x;
         pan_offset.y += io.MouseDelta.y;
     }

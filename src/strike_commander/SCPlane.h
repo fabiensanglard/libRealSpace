@@ -212,7 +212,9 @@ public:
 
     /* the effect of gravity realtive to tps */
     float gravity;
-
+    float drag;
+    float thrust_force;
+    
     /* coefficients of lift and drag	*/
     float uCl;
     float Cl;

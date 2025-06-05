@@ -192,7 +192,19 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel, Vector3D position,
     drawModel(object, 0);
     glPopMatrix();
 }
-
+void SCRenderer::drawPoint(Vector3D point, Vector3D color, Vector3D pos, Vector3D orientation) {
+    glPushMatrix();
+    glTranslatef(pos.x, pos.y, pos.z);
+    glRotatef(orientation.x, 0, 1, 0);
+    glRotatef(orientation.y, 0, 0, 1);
+    glRotatef(orientation.z, 1, 0, 0);
+    glPointSize(5.0f);
+    glBegin(GL_POINTS);
+    glColor3f(color.x, color.y, color.z);
+    glVertex3f(point.x, point.y, point.z);
+    glEnd();
+    glPopMatrix();
+}
 void SCRenderer::drawModel(RSEntity *object, Vector3D position, Vector3D orientation) {
     glPushMatrix();
     Matrix rotation;

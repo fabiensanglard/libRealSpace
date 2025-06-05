@@ -811,8 +811,13 @@ void SCStrike::runFrame(void) {
 
     if (this->target != nullptr) {
         if (this->target->plane != nullptr) {
-           
-            this->setCameraFollow(this->target->plane);
+            this->setCameraLookat(
+                {
+                    this->target->plane->x, 
+                    this->target->plane->y, 
+                    this->target->plane->z
+                }
+            );
             Renderer.initRenderToTexture();
             Renderer.initRenderCameraView();
             Renderer.renderWorldToTexture(&area);
@@ -949,7 +954,26 @@ void SCStrike::runFrame(void) {
                 actor->plane->Render();
                 if (this->show_bbox) {
                     BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
-                    Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};
+                    Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};          
+                    Vector3D orientation = {
+                        actor->plane->azimuthf/10.0f + 90,
+                        actor->plane->elevationf/10.0f,
+                        -actor->plane->twist/10.0f
+                    };
+                    for (auto vertex: actor->plane->object->entity->vertices) {
+                        if (vertex.x == bb->min.x) {
+                            Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
+                        }
+                        if (vertex.x == bb->max.x) {
+                            Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
+                        }
+                        if (vertex.z == bb->min.z) {
+                            Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
+                        }
+                        if (vertex.z == bb->max.z) {
+                            Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
+                        }
+                    }
                     Renderer.renderBBox(position, bb->min, bb->max);
                     Renderer.renderBBox(position+actor->formation_pos_offset, bb->min, bb->max);
                     Renderer.renderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
