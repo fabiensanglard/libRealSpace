@@ -10,6 +10,7 @@
 
 float tenthOfDegreeToRad(float angle) { return (angle / 10) * (float(M_PI) / 180.0f); };
 float degreeToRad(float angle) { return (angle) * (float(M_PI) / 180.0f); };
+float radToDegree(float angle) { return (angle) * (180.0f / float(M_PI)); };
 // Long life to however came up with this. You rule man.
 float InvSqrt(float x)
 {

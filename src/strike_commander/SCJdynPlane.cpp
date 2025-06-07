@@ -34,44 +34,137 @@ void SCJdynPlane::Simulate() {
     this->fps_knots = this->tps * (3600.0f / 6082.0f);
     float deltaTime = 1.0f / (float) this->tps;
     
-    float pitch_input = (this->control_stick_y / 100.0f) * deltaTime;
-    
-    float roll_input = (-this->control_stick_x / 100.0f) * deltaTime;
+    this->pitch_input = (this->control_stick_y / 100.0f) * deltaTime;
+    this->elevation_speedf = radToDegree(this->pitch);
+    this->roll_input = (-this->control_stick_x / 100.0f) * deltaTime;
+    this->roll_speed = radToDegree(this->roll);
+    float rudder = 0.0f;
 
+    float temp = rudder * this->vz - (2.0f) * this->vx;
+    int itemp = (int) temp;
+    itemp -= this->yaw_input;
+    int TDELAY = tps/4;
+    if (itemp!=0) {
+        if (itemp >= TDELAY || itemp <= -TDELAY)
+            itemp /= TDELAY;
+        else
+            itemp = itemp>0 ? 1 : -1;
+    }
+	
+    this->yaw_input += itemp;
+    this->azimuth_speedf = this->yaw_input;
+    this->updatePosition();
+    this->updateAcceleration();
 
-    if (this->object->alive == false) {
-        this->thrust = 0;
-        this->vy -= +0.1f;
-        if (this->vz > 5.0f) {
-            this->vz = 5.0f;
+    this->airspeed = -(int)(this->fps_knots * this->vz);
+    this->azimuthf = (this->yaw * 180.0f / (float) M_PI) * 10.0f;
+    this->elevationf = (this->pitch * 180.0f / (float) M_PI) * 10.0f;
+    this->twist = (this->roll * 180.0f / (float) M_PI) * 10.0f;
+    this->tick_counter++;
+}
+void SCJdynPlane::Render() {
+    if (this->object != nullptr) {
+        
+        Vector3D pos = {
+            this->x, this->y, this->z
+        };
+        Vector3D orientation = {
+            tenthOfDegreeToRad(this->azimuthf + 900),
+            tenthOfDegreeToRad(this->elevationf),
+            -tenthOfDegreeToRad(this->twist)
+        };
+        std::vector<std::tuple<Vector3D, RSEntity*>> weapons;
+        for (auto weaps:this->weaps_load) {
+            float decy=0.5f;
+            if (weaps == nullptr) {
+                continue;  
+            }
+            if (weaps->hpts_type == 0) {
+                continue;
+            }
+            if (weaps->hpts_type == 4) {
+                decy = 0.0f;
+            }
+            Vector3D position = weaps->position;
+            std::vector<Vector3D> path = {
+                {0, -2*decy, 0},
+                {decy, -decy, 0},
+                {-decy,-decy,0},
+                {0, -2*decy, -2*decy},
+                {decy, -decy, -2*decy},
+                {-decy,-decy,-2*decy}
+            };
+
+            for (int i = 0; i < weaps->nb_weap; i++) {
+                Vector3D weap_pos = {position.z/250+path[i].z, position.y/250 + path[i].y, -position.x/250+path[i].x};
+                std::tuple<Vector3D, RSEntity*> weapon = std::make_tuple(weap_pos, weaps->objct);
+                weapons.push_back(weapon);
+                position.y -= 0.5f;
+            }
+        }
+        Renderer.drawModelWithChilds(this->object->entity, LOD_LEVEL_MAX, pos, orientation, wheel_index, thrust, weapons);
+        Renderer.drawLine({this->x, this->y, this->z}, {-this->vx, this->vy, -this->vz}, {1.0f, 1.0f, 0.0f});
+        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*100.0f, this->ay*100.0f, this->az*100.0f}, {1.0f, 0.0f, 1.0f});
+        BoudingBox *bb = this->object->entity->GetBoudingBpx();
+        Vector3D position = {this->x, this->y, this->z};          
+        orientation = {
+            this->azimuthf/10.0f + 90,
+            this->elevationf/10.0f,
+            -this->twist/10.0f
+        };
+        for (auto vertex: this->object->entity->vertices) {
+            if (vertex.x == bb->min.x) {
+                Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
+            }
+            if (vertex.x == bb->max.x) {
+                Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
+            }
+            if (vertex.z == bb->min.z) {
+                Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
+            }
+            if (vertex.z == bb->max.z) {
+                Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
+            }
         }
     }
-    Matrix rottm;
-    rottm.Identity();
-    rottm.translateM(this->x, this->y, this->z);
+}
+void SCJdynPlane::updatePosition() {
+    this->ptw.Identity();
+    this->ptw.translateM(this->x, this->y, this->z);
 
-    rottm.rotateM(this->yaw, 0, 1, 0);
-    rottm.rotateM(this->pitch, 1, 0, 0);
-    rottm.rotateM(this->roll, 0, 0, 1);
+    this->ptw.rotateM(this->yaw, 0, 1, 0);
+    this->ptw.rotateM(this->pitch, 1, 0, 0);
+    this->ptw.rotateM(this->roll, 0, 0, 1);
 
+    this->ptw.translateM(this->vx, this->vy, this->vz);
 
-    float pitch_increment = this->object->entity->jdyn->TWIST_RATE * deltaTime;
-    rottm.rotateM(pitch_input, 1, 0, 0);
-    rottm.rotateM(roll_input, 0, 0, 1);
+    if (yaw_input != 0.0f) {
+        this->ptw.rotateM(tenthOfDegreeToRad(yaw_input), 0, 1, 0);    
+    }
+    if (pitch_input != 0.0f) {
+        this->ptw.rotateM(pitch_input, 1, 0, 0);    
+    }
+    if (roll_input != 0.0f) {
+        this->ptw.rotateM(roll_input, 0, 0, 1);    
+    }
     
-    rottm.translateM(this->vx, this->vy, this->vz);
-    this->on_ground = false;
-    this->pitch = -asinf(rottm.v[2][1]);
-    float temp = cosf(this->pitch);
-    if (temp != 0.0) {
-        float sincosas = rottm.v[2][0] / temp;
+
+    this->x = this->ptw.v[3][0];
+    this->y = this->ptw.v[3][1];
+    this->z = this->ptw.v[3][2];
+
+    this->pitch = -asinf(this->ptw.v[2][1]);
+    float cos_pitch = cosf(this->pitch);
+    if (cos_pitch != 0.0) {
+        float sincosas = this->ptw.v[2][0] / cos_pitch;
         if (sincosas > 1.0f) {
             sincosas = 1.0f;
         } else if (sincosas < -1.0f) {
             sincosas = -1;
         }
+
         this->yaw = asinf(sincosas);
-        if (rottm.v[2][2] < 0.0f) {
+        if (this->ptw.v[2][2] < 0.0f) {
             this->yaw = (float)M_PI - this->yaw;
         }
         if (this->yaw < 0.0f) {
@@ -80,8 +173,8 @@ void SCJdynPlane::Simulate() {
         if (this->yaw > 2.0f*(float)M_PI) {
             this->yaw -= 2.0f*(float)M_PI;
         }
-        this->roll = asinf(rottm.v[0][1] / temp);
-        if (rottm.v[1][1] < 0.0f) {
+        this->roll = asinf(this->ptw.v[0][1] / cos_pitch);
+        if (this->ptw.v[1][1] < 0.0f) {
             /* if upside down	*/
             this->roll = (float)M_PI - this->roll;
         }
@@ -89,96 +182,76 @@ void SCJdynPlane::Simulate() {
             this->roll += 2.0f*(float)M_PI;
         }
     }
-
-    this->x = rottm.v[3][0];
-    this->y = rottm.v[3][1];
-    this->z = rottm.v[3][2];
     
-    // Retrieve dynamic parameters from jdynn data
-    float mass = this->object->entity->weight_in_kg;
-    float wingArea = 41.0f;
-    float liftCoefficient = 0.83f;
-    float dragCoefficient = this->object->entity->jdyn->DRAG;
+    this->incremental.Identity();
 
-    // Calculate current speed (magnitude of velocity vector)
-    float speed = -this->vz * tps;
-
-    // Compute dynamic pressure: q = 0.5 * air_density * speed^2
-    float q = 0.5f * AIR_DENSITY * speed * speed;
-
-    // Compute forces (in Newtons)
-    float F_drag = 0.05f * q * wingArea;
-
-    // Ajuste le coefficient de portance en fonction de la vitesse verticale minimale et limite-le
-    float liftCoefficientAdjusted = liftCoefficient * (-this->vz / this->MIN_LIFT_SPEED);
-    if (liftCoefficientAdjusted < 0.0f) {
-        liftCoefficientAdjusted = 0.0f;
+    if (roll_input != 0.0f) {
+        this->incremental.rotateM(-roll_input, 0, 0, 1);
     }
-    if (liftCoefficientAdjusted > MAX_LIFT_COEFFICIENT) {
-        liftCoefficientAdjusted = MAX_LIFT_COEFFICIENT;
+    if (pitch_input != 0.0f) {
+        this->incremental.rotateM(-pitch_input, 1, 0, 0);
+    }
+    if (yaw_input != 0.0f) {
+        this->incremental.rotateM(-tenthOfDegreeToRad(yaw_input), 0, 1, 0);
     }
     
-    // Calcul d'un facteur d'efficacité aérodynamique (simplifié via le cosinus de l'angle de pitch)
-    float aerodynamicEfficiency = cosf(this->pitch);
-    if (aerodynamicEfficiency < 0.0f) {
-        aerodynamicEfficiency = 0.0f;
-    }
-    
-    // Calcul de la force de portance tenant compte des facteurs aérodynamiques
-    float F_lift = liftCoefficientAdjusted * aerodynamicEfficiency* q * wingArea;
-    
-    // Calcul du q correspondant à la vitesse minimale de portance
-    float q_min = 0.5f * AIR_DENSITY * (this->MIN_LIFT_SPEED * this->MIN_LIFT_SPEED);
-    // Calcul de la force de portance maximum de l'aile en condition optimale (cos(pitch)=1)
-    
-    float F_thrust = this->thrust * this->Mthrust;
-    float F_gravity = mass * GRAVITY;
-    
-    float F_lift_max = F_gravity * 1.2f;
+    this->incremental.translateM(this->vx, this->vy, this->vz);
 
-    if (F_lift > F_lift_max) {
-        // Si la force de portance dépasse la force maximale, on la limite
-        F_lift = F_lift_max;
+    this->vx = this->incremental.v[3][0];
+    this->vy = this->incremental.v[3][1];
+    this->vz = this->incremental.v[3][2];
+
+}
+void SCJdynPlane::updateAcceleration() {
+    float deltaTime = 1.0f / (float) this->tps;
+
+    float mass = this->object->entity->weight_in_kg * GRAVITY;
+
+    this->gravity = mass;
+    
+
+    this->thrust_force = thrust * Mthrust;
+    this->lift = this->vz*this->vz * this->object->entity->jdyn->LIFT;
+    if (lift > mass) {
+        lift = mass;
     }
 
-    // Compute net accelerations (in m/s^2) in the body frame:
-    // Assume positive forward is along the aircraft's forward axis,
-    // and positive upward is along its upwards axis.
-    
-    float acc_forward = (F_thrust - F_drag) / mass;
+    this->az = this->vy * lift;
+    this->ay = -this->vz * lift;
+    this->ax = 0.0f;
+
+    this->az -= this->thrust_force;
 
 
+    this->ay = this->ay + lift;
 
-    float acc_upward = (F_lift - F_gravity) / mass;
+    this->az = this->az / mass;
+    this->ax = this->ax / mass;
+    this->ay = this->ay / mass;
 
-    this->lift = F_lift;
-    this->gravity = F_gravity;
-    this->drag = F_drag;
-    this->thrust_force = F_thrust;
-    this->vz = this->vz - acc_forward * deltaTime * deltaTime *0.1f;
-    this->vy = this->vy + acc_upward * deltaTime;
-    if (y <= this->area->getY(this->x, this->z)) {
-        // If the plane is on the ground, set vertical velocity to zero
-        if (this->vy < 0.0f) {
-            this->vy = 0.0f;
-        }
+
+    this->ax -= this->ptw.v[0][1]*GRAVITY;
+    this->ay -= this->ptw.v[1][1]*GRAVITY;
+    this->az -= this->ptw.v[2][1]*GRAVITY;
+
+    this->ax *= deltaTime;
+    this->ay *= deltaTime;
+    this->az *= deltaTime;
+
+    this->vz += this->az;
+    this->vx += this->ax; 
+    this->vy += this->ay;
+
+    this->vz = std::clamp(this->vz, -9.0f, 9.0f);
+    this->vx = std::clamp(this->vx, -9.0f, 9.0f);
+    this->vy = std::clamp(this->vy, -9.0f, 9.0f);
+
+
+    float groundlevel = this->area->getY(this->x, this->z);
+
+    if (this->y < groundlevel) {
+        this->vy = 0.0f;
+        this->y = groundlevel;
         this->on_ground = true;
-    } else {
-        this->on_ground = false;
-    }
-
-    
-    // Compute turn rate from lateral accelerations (ax and az)
-    
-    this->airspeed = -(int)(this->fps_knots * this->vz);
-    this->azimuthf = (this->yaw * 180.0f / (float) M_PI) * 10.0f;
-    this->elevationf = (this->pitch * 180.0f / (float) M_PI) * 10.0f;
-    this->twist = (this->roll * 180.0f / (float) M_PI) * 10.0f;
-    this->tick_counter++;
-    if (this->object->alive == false) {
-        this->smoke_positions.push_back({this->x, this->y, this->z});
-        if (this->smoke_positions.size() > 100) {
-            this->smoke_positions.erase(this->smoke_positions.begin());
-        }
     }
 }

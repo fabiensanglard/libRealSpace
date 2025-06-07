@@ -810,24 +810,24 @@ void SCStrike::runFrame(void) {
     }
 
     if (this->target != nullptr) {
-        if (this->target->plane != nullptr) {
-            this->setCameraLookat(
-                {
-                    this->target->plane->x, 
-                    this->target->plane->y, 
-                    this->target->plane->z
-                }
-            );
+        if (this->target->object != nullptr) {
+            Vector3D target_position = {
+                this->target->object->position.x, 
+                this->target->object->position.y, 
+                this->target->object->position.z
+            };
+            this->setCameraLookat(target_position);
             Renderer.initRenderToTexture();
             Renderer.initRenderCameraView();
             Renderer.renderWorldToTexture(&area);
-            Vector3D target_position = {
-                this->target->plane->x,
-                this->target->plane->y,
-                this->target->plane->z
-            };
+            
             this->player_plane->Render();
-            this->target->plane->Render();
+            if (this->target->plane != nullptr) {
+                this->target->plane->Render();    
+            } else {
+                Renderer.drawModel(this->target->object->entity, target_position, {0.0f, 0.0f, 0.0f});
+            }
+            
             Renderer.getRenderToTexture();
         }
     }

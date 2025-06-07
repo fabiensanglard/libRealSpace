@@ -30,15 +30,11 @@ void DebugStrike::simInfo() {
         this->player_plane->azimuthf);
     ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
     ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
-    float twist_diff = 360 - this->player_plane->twist / 10.0f;
-    if (twist_diff > 180.0f) {
-    twist_diff -= 360.0f;
-    } else if (twist_diff < -180.0f) {
-    twist_diff += 360.0f;
-    }
+    
 
-    ImGui::Text("Elevation %.3f, Twist %.3f, RollSpeed %d", this->player_plane->elevationf, twist_diff,
-            this->player_plane->roll_speed);
+    ImGui::Text("Pitch %.3f, Yaw %.3f, roll %d", this->player_plane->elevationf, this->player_plane->azimuthf,
+            this->player_plane->twist);
+    ImGui::Text("Pich input %.3f, Roll input %d, Yaw input %.3f", this->player_plane->elevation_speedf, this->player_plane->roll_speed, this->player_plane->azimuth_speedf);
     ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
     ImGui::Text("flight [roller:%4f, elevator:%4f, rudder:%4f]", this->player_plane->rollers,
             this->player_plane->elevator, this->player_plane->rudder);
@@ -487,6 +483,9 @@ void DebugStrike::radar() {
             if (ImGui::IsMouseHoveringRect(top_left, bottom_right)) {
                 ImGui::OpenPopup("Actor Details");
                 if (ImGui::BeginPopup("Actor Details")) {
+                    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                        this->target = actor;
+                    }
                     ImGui::Text("Actor: %s", actor->actor_name.c_str());
                     ImGui::Text("Position: (%.2f, %.2f, %.2f)", actor->object->position.x, actor->object->position.y, actor->object->position.z);
                     ImGui::EndPopup();

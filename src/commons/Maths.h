@@ -27,3 +27,4 @@ typedef struct Vector2D {
 float InvSqrt(float x);
 float tenthOfDegreeToRad(float angle);
 float degreeToRad(float angle);
+float radToDegree(float angle);

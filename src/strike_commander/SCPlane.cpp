@@ -1020,6 +1020,29 @@ void SCPlane::Render() {
             }
         }
         Renderer.drawModelWithChilds(this->object->entity, LOD_LEVEL_MAX, pos, orientation, wheel_index, thrust, weapons);
+        Renderer.drawLine({this->x, this->y, this->z}, {-this->vx, this->vy, -this->vz}, {1.0f, 1.0f, 0.0f});
+        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*10000.0f, this->ay*10000.0f, this->az*10000.0f}, {1.0f, 0.0f, 1.0f});
+        BoudingBox *bb = this->object->entity->GetBoudingBpx();
+        Vector3D position = {this->x, this->y, this->z};          
+        orientation = {
+            this->azimuthf/10.0f + 90,
+            this->elevationf/10.0f,
+            -this->twist/10.0f
+        };
+        for (auto vertex: this->object->entity->vertices) {
+            if (vertex.x == bb->min.x) {
+                Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
+            }
+            if (vertex.x == bb->max.x) {
+                Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
+            }
+            if (vertex.z == bb->min.z) {
+                Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
+            }
+            if (vertex.z == bb->max.z) {
+                Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
+            }
+        }
     }
 }
 void SCPlane::RenderSmoke() {

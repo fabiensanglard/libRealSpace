@@ -224,7 +224,7 @@ void SCRenderer::drawLine(Vector3D start, Vector3D end, Vector3D color) {
     glTranslatef(start.x, start.y, start.z);
     glLineWidth(1.2f);
     glBegin(GL_LINES);
-    glColor3f(1.0f,1.0f,0.0f);
+    glColor3f(color.x, color.y, color.z);
     glVertex3f(0.0f,0.0f,0.0f);
     glVertex3f(end.x, end.y, end.z);
     glEnd();
