@@ -39,8 +39,8 @@ static float ro[75] = {
 #define TPS 20
 #define MAX_TURNRATE (600 / TPS)
 #define DELAY_FACTOR 4
-#define DELAY TPS / 4
-#define DELAYF TPS / 4.0f
+#define DDELAY TPS / 4
+#define DDELAYF TPS / 4.0f
 
 #define G_ACC 32.17f
 

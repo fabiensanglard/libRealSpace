@@ -296,6 +296,8 @@ void SCPlane::OrigSimulate() {
     this->Splf = 1.0f - .005f * this->spoilers;
 
     float groundlevel = this->area->getY(this->x, this->z);
+    int DELAY = tps/4;
+    float DELAYF = tps/4.0f;
 
     if (this->status > MEXPLODE) {
         /* tenths of degrees per tick	*/
@@ -332,7 +334,7 @@ void SCPlane::OrigSimulate() {
         }
         this->elevation_speedf += itemp;
         float aztemp;
-        temp = this->rudder * this->vz - (2.0f * this->tps / 20.0f) * this->vx;
+        temp = this->rudder * this->vz - (2.0f) * this->vx;
         if (this->on_ground) {
             itemp = (int)(16.0f * temp);
             if (itemp < -MAX_TURNRATE || itemp > MAX_TURNRATE) {
@@ -1020,8 +1022,8 @@ void SCPlane::Render() {
             }
         }
         Renderer.drawModelWithChilds(this->object->entity, LOD_LEVEL_MAX, pos, orientation, wheel_index, thrust, weapons);
-        Renderer.drawLine({this->x, this->y, this->z}, {-this->vx, this->vy, -this->vz}, {1.0f, 1.0f, 0.0f});
-        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*10000.0f, this->ay*10000.0f, this->az*10000.0f}, {1.0f, 0.0f, 1.0f});
+        Renderer.drawLine({this->x, this->y, this->z}, {this->vx, this->vy, this->vz}, {1.0f, 1.0f, 0.0f}, orientation);
+        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*10000.0f, this->ay*10000.0f, this->az*10000.0f}, {1.0f, 0.0f, 1.0f}, orientation);
         BoudingBox *bb = this->object->entity->GetBoudingBpx();
         Vector3D position = {this->x, this->y, this->z};          
         orientation = {

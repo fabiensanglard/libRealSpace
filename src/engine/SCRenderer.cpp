@@ -219,6 +219,20 @@ void SCRenderer::drawModel(RSEntity *object, Vector3D position, Vector3D orienta
     drawModel(object, 0);
     glPopMatrix();
 }
+void SCRenderer::drawLine(Vector3D start, Vector3D end, Vector3D color, Vector3D orientation) {
+    glPushMatrix();
+    glTranslatef(start.x, start.y, start.z);
+    glRotatef(orientation.x, 0, 1, 0);
+    glRotatef(orientation.y, 0, 0, 1);
+    glRotatef(orientation.z, 1, 0, 0);
+    glLineWidth(1.2f);
+    glBegin(GL_LINES);
+    glColor3f(color.x, color.y, color.z);
+    glVertex3f(0.0f,0.0f,0.0f);
+    glVertex3f(end.x, end.y, end.z);
+    glEnd();
+    glPopMatrix();
+}
 void SCRenderer::drawLine(Vector3D start, Vector3D end, Vector3D color) {
     glPushMatrix();
     glTranslatef(start.x, start.y, start.z);

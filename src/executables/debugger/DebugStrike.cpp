@@ -32,7 +32,7 @@ void DebugStrike::simInfo() {
     ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
     
 
-    ImGui::Text("Pitch %.3f, Yaw %.3f, roll %d", this->player_plane->elevationf, this->player_plane->azimuthf,
+    ImGui::Text("Pitch %.3f, Yaw %.3f, roll %.3f", this->player_plane->elevationf, this->player_plane->azimuthf,
             this->player_plane->twist);
     ImGui::Text("Pich input %.3f, Roll input %d, Yaw input %.3f", this->player_plane->elevation_speedf, this->player_plane->roll_speed, this->player_plane->azimuth_speedf);
     ImGui::Text("Y %.3f, On ground %d", this->player_plane->y, this->player_plane->on_ground);
