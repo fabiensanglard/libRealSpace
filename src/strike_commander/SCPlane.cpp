@@ -675,7 +675,8 @@ void SCPlane::OrigSimulate() {
         }
 
         /* engine thrust		*/
-        this->az = this->az - (.01f / this->tps / this->tps * this->thrust * this->Mthrust);
+        this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->Mthrust;
+        this->az = this->az - this->thrust_force ;
 
         /* drag - needs to be broken into y/z components		*/
         this->Cd = this->Cdp + this->kl * this->uCl * this->uCl * this->ie_pi_AR + this->Cdc;
@@ -1022,15 +1023,16 @@ void SCPlane::Render() {
             }
         }
         Renderer.drawModelWithChilds(this->object->entity, LOD_LEVEL_MAX, pos, orientation, wheel_index, thrust, weapons);
-        Renderer.drawLine({this->x, this->y, this->z}, {this->vx, this->vy, this->vz}, {1.0f, 1.0f, 0.0f}, orientation);
-        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*10000.0f, this->ay*10000.0f, this->az*10000.0f}, {1.0f, 0.0f, 1.0f}, orientation);
         BoudingBox *bb = this->object->entity->GetBoudingBpx();
         Vector3D position = {this->x, this->y, this->z};          
         orientation = {
-            this->azimuthf/10.0f + 90,
+            this->azimuthf/10.0f,
             this->elevationf/10.0f,
             -this->twist/10.0f
         };
+        Renderer.drawLine({this->x, this->y, this->z}, {this->vx*10.0f, this->vy*10.0f, this->vz*10.0f}, {1.0f, 1.0f, 0.0f}, orientation);
+        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*10000.0f, this->ay*10000.0f, this->az*10000.0f}, {1.0f, 0.0f, 1.0f}, orientation);
+        orientation.x += 90.0f;
         for (auto vertex: this->object->entity->vertices) {
             if (vertex.x == bb->min.x) {
                 Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);

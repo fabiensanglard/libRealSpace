@@ -199,6 +199,7 @@ public:
     WDAT *wdat{nullptr};
     DYNN_MISS *dynn_miss{nullptr};
     bool gravity{false};
+    float wing_area{0};
     JDYN *jdyn{nullptr};
 
     uint16_t life{0};
@@ -229,7 +230,7 @@ public:
 private:
     BoudingBox bb;
     void CalcBoundingBox(void);
-
+    void calcWingArea(void);
     void AddImage(RSImage *image);
     void AddVertex(Point3D *vertex);
     void AddUV(uvxyEntry *uv);

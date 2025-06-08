@@ -117,7 +117,7 @@ protected:
     /* weight of fuel			*/
     float fuel_weight;
     /* 1.0 / mass of plane			*/
-    float inverse_mass;
+    
     /* plane design parameters	*/
     
     
@@ -186,7 +186,7 @@ public:
     float b;
     float W;
     float Mthrust;
-    
+    float inverse_mass;
     float elevation_speedf;
     float azimuth_speedf;
 

@@ -17,6 +17,18 @@ typedef struct Point2D{
     int32_t y;
 } Point2D;
 
+class Point2Df {
+public:
+    float x;
+    float y;
+    Point2Df(float x, float y) {
+        this->x = x;
+        this->y = y;
+    };
+    int operator==(const Point2Df& other) {
+        return this->x == other.x && this->y == other.y;
+    };
+};
 //typedef Point2D Vector2D;
 typedef struct Vector2D {
     float x;

@@ -74,34 +74,34 @@ public:
         this->x = x;
         this->y = y;
         this->z = z;
-    }
+    };
     
     inline void Clear(void){
         SetWithCoo(0, 0,0);
-    }
+    };
 
     inline void Negate(void){
         Scale(-1);
-    }
+    };
     
     inline void Add(Vector3D* other){
         this->x += other->x;
         this->y += other->y;
         this->z += other->z;
-    }
+    };
 
     inline void Substract(Vector3D* other){
         this->x -= other->x;
         this->y -= other->y;
         this->z -= other->z;
-    }
+    };
     
 
     inline void Scale(float factor){
         this->x *= factor;
         this->y *= factor;
         this->z *= factor;
-    }
+    };
 
     
     inline Vector3D CrossProduct(const Vector3D* other){
@@ -112,7 +112,7 @@ public:
         result.z = this->x * other->y - this->y * other->x;                // Z
         
         return result;
-    }
+    };
 
     static Vector3D Cross(const Vector3D& v1, const Vector3D& v2) {
         return Vector3D{
@@ -127,10 +127,13 @@ public:
         ilength = DotProduct(this);
         float invSqrtLength = InvSqrt(ilength);
         Scale(invSqrtLength);
-    }
+    };
     inline float Length() {
         return sqrtf(this->x * this->x + this->y * this->y + this->z * this->z);
-    }
+    };
+    inline float Distance(Vector3D* other) {
+        return sqrtf((this->x - other->x) * (this->x - other->x) + (this->y - other->y) * (this->y - other->y) + (this->z - other->z) * (this->z - other->z));
+    };
     
     inline float DotProduct(Vector3D* other){
         
@@ -140,7 +143,7 @@ public:
         acc += this->z * other->z;
         
         return acc;
-    }
+    };
 
     float Norm() {
         return sqrtf(this->x * this->x + this->y * this->y + this->z * this->z);
@@ -164,7 +167,7 @@ public:
         result.y = matrix.v[1][0] * this->x + matrix.v[1][1] * this->y + matrix.v[1][2] * this->z;
         result.z = matrix.v[2][0] * this->x + matrix.v[2][1] * this->y + matrix.v[2][2] * this->z;
         return result;
-    }
+    };
     inline Vector3D operator+(const Vector3D& other) {
         return Vector3D(this->x + other.x, this->y + other.y, this->z + other.z);
     };
@@ -173,10 +176,13 @@ public:
     };
     inline Vector3D operator-() {
         return Vector3D(-this->x, -this->y, -this->z);
-    }
+    };
     inline Vector3D operator*(const float& factor) {
         return Vector3D(this->x * factor, this->y * factor, this->z * factor);
-    }
+    };
+    int operator==(const Vector3D& other) {
+        return this->x == other.x && this->y == other.y && this->z == other.z;
+    };
     float x;
     float y;
     float z;

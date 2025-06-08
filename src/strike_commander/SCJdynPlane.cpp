@@ -102,16 +102,21 @@ void SCJdynPlane::Render() {
                 position.y -= 0.5f;
             }
         }
-        Renderer.drawModelWithChilds(this->object->entity, LOD_LEVEL_MAX, pos, orientation, wheel_index, thrust, weapons);
-        Renderer.drawLine({this->x, this->y, this->z}, {-this->vx, this->vy, -this->vz}, {1.0f, 1.0f, 0.0f});
-        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*100.0f, this->ay*100.0f, this->az*100.0f}, {1.0f, 0.0f, 1.0f});
+        //Renderer.drawModelWithChilds(this->object->entity, LOD_LEVEL_MAX, pos, orientation, wheel_index, thrust, weapons);
+        
         BoudingBox *bb = this->object->entity->GetBoudingBpx();
         Vector3D position = {this->x, this->y, this->z};          
         orientation = {
-            this->azimuthf/10.0f + 90,
+            this->azimuthf/10.0f,
             this->elevationf/10.0f,
             -this->twist/10.0f
         };
+        Renderer.drawLine({this->x, this->y, this->z}, {this->vx*10.0f, this->vy*10.0f, this->vz*10.0f}, {1.0f, 1.0f, 0.0f},orientation);
+        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*100.0f, this->ay*100.0f, this->az*100.0f}, {1.0f, 0.0f, 1.0f},orientation);
+        orientation.x += 90.0f;
+        int vert_id = 0;
+        int wing_id_left = 0;
+        std::vector<int> wing_ids;
         for (auto vertex: this->object->entity->vertices) {
             if (vertex.x == bb->min.x) {
                 Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
@@ -120,11 +125,116 @@ void SCJdynPlane::Render() {
                 Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
             }
             if (vertex.z == bb->min.z) {
+                wing_ids.push_back(vert_id);
                 Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
             }
             if (vertex.z == bb->max.z) {
+                wing_ids.push_back(vert_id);
                 Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
             }
+            vert_id++;
+        }
+        
+        std::vector<int> wing_tr_id;
+        std::vector<Point2Df> wing_surface_points;
+        for (int i=0; i < this->object->entity->lods[LOD_LEVEL_MAX].numTriangles; i++) {
+            int triangle_id = this->object->entity->lods[LOD_LEVEL_MAX].triangleIDs[i];
+            Triangle triangle = this->object->entity->triangles[triangle_id];
+            
+            for (auto id : triangle.ids) {
+                if (std::find(wing_ids.begin(), wing_ids.end(), id) != wing_ids.end()) {
+                    Vector3D v0,v1,v2;
+                    v0 = this->object->entity->vertices[triangle.ids[0]];
+                    v1 = this->object->entity->vertices[triangle.ids[1]];
+                    v2 = this->object->entity->vertices[triangle.ids[2]];
+
+                    Point2Df p0 = {v0.x, v0.z};
+                    if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p0) == wing_surface_points.end()) {
+                        wing_surface_points.push_back(p0);
+                    }
+
+                    Point2Df p1 = {v1.x, v1.z};
+                    if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p1) == wing_surface_points.end()) {
+                        wing_surface_points.push_back(p1);
+                    }
+                    Point2Df p2 = {v2.x, v2.z};
+                    if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p2) == wing_surface_points.end()) {
+                        wing_surface_points.push_back(p2);
+                    }
+                    if (std::find(wing_tr_id.begin(), wing_tr_id.end(), triangle_id) == wing_tr_id.end()) {
+                        wing_tr_id.push_back(triangle_id);
+                    }
+                    v0  = this->object->entity->vertices[triangle.ids[0]];
+                    v1  = this->object->entity->vertices[triangle.ids[1]];
+                    v2  = this->object->entity->vertices[triangle.ids[2]];
+
+                    Renderer.drawPoint(v0, {0.0f,1.0f,1.0f}, position, orientation);
+                    Renderer.drawPoint(v1, {0.0f,1.0f,1.0f}, position, orientation);
+                    Renderer.drawPoint(v2, {0.0f,1.0f,1.0f}, position, orientation);
+                }
+            }
+        }
+
+        for (int i=0; i < this->object->entity->lods[LOD_LEVEL_MAX].numTriangles; i++) {
+            int triangle_id = this->object->entity->lods[LOD_LEVEL_MAX].triangleIDs[i];
+            Vector3D v0,v1,v2;
+            v0  = this->object->entity->vertices[this->object->entity->triangles[triangle_id].ids[0]];
+            v1  = this->object->entity->vertices[this->object->entity->triangles[triangle_id].ids[1]];
+            v2  = this->object->entity->vertices[this->object->entity->triangles[triangle_id].ids[2]];
+            if (std::find(wing_tr_id.begin(), wing_tr_id.end(), triangle_id) != wing_tr_id.end()) {
+                Renderer.drawLine(v0,v1,{1.0f,0.0f,0.0f},orientation, position);
+                Renderer.drawLine(v1,v2,{1.0f,0.0f,0.0f},orientation, position);
+                Renderer.drawLine(v2,v0,{1.0f,0.0f,0.0f},orientation, position);
+            } else {
+                Renderer.drawLine(v0,v1,{0.5f,0.5f,0.5f},orientation, position);
+                Renderer.drawLine(v1,v2,{0.5f,0.5f,0.5f},orientation, position);
+                Renderer.drawLine(v2,v0,{0.5f,0.5f,0.5f},orientation, position);
+            }
+        }
+        if (!wing_surface_points.empty()) {
+            float area = 0.0f;
+            
+            // Compute the convex hull of wing_surface_points using the monotone chain algorithm.
+            auto cross = [](const Point2Df &O, const Point2Df &A, const Point2Df &B) -> float {
+                return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
+            };
+
+            // Tri des points par coordonnées (x, puis y)
+            std::sort(wing_surface_points.begin(), wing_surface_points.end(), [](const Point2Df &a, const Point2Df &b) {
+                return (a.x == b.x) ? (a.y < b.y) : (a.x < b.x);
+            });
+
+            std::vector<Point2Df> hull;
+            // Construction de la chaîne inférieure
+            for (const auto &p : wing_surface_points) {
+                while (hull.size() >= 2 && cross(hull[hull.size()-2], hull.back(), p) <= 0)
+                    hull.pop_back();
+                hull.push_back(p);
+            }
+            // Construction de la chaîne supérieure
+            for (int i = wing_surface_points.size() - 2, t = hull.size() + 1; i >= 0; i--) {
+                while (hull.size() >= t && cross(hull[hull.size()-2], hull.back(), wing_surface_points[i]) <= 0)
+                    hull.pop_back();
+                hull.push_back(wing_surface_points[i]);
+            }
+            // Retirer le dernier point car il est identique au premier
+            if (!hull.empty())
+                hull.pop_back();
+            
+            
+            wing_surface_points = hull;
+            int n = wing_surface_points.size();
+            // Calcul de la surface selon la formule du polygone (formule de shoelace)
+            for (int i = 0; i < n; i++) {
+                Vector3D sp1 = {wing_surface_points[i].x, 0.0f , wing_surface_points[i].y};
+                Vector3D sp2 = {wing_surface_points[(i + 1) % n].x, 0.0f , wing_surface_points[(i + 1) % n].y};
+                Renderer.drawLine(sp1,sp2,{1.0f,1.0f,0.0f},orientation, position);
+            }
+            for (int i = 0; i < n; i++) {
+                int next = (i + 1) % n;
+                area += wing_surface_points[i].x * wing_surface_points[next].y - wing_surface_points[i].y * wing_surface_points[next].x;
+            }
+            area = std::fabs(area) / 2.0f;
         }
     }
 }
@@ -197,21 +307,21 @@ void SCJdynPlane::updatePosition() {
     
     this->incremental.translateM(this->vx, this->vy, this->vz);
 
-    this->vx = this->incremental.v[3][0];
+    /*this->vx = this->incremental.v[3][0];
     this->vy = this->incremental.v[3][1];
-    this->vz = this->incremental.v[3][2];
+    this->vz = this->incremental.v[3][2];*/
 
 }
 void SCJdynPlane::updateAcceleration() {
     float deltaTime = 1.0f / (float) this->tps;
-
-    float mass = this->object->entity->weight_in_kg * GRAVITY;
-
-    this->gravity = mass;
+    this->gravity = GRAVITY;
+    float mass = this->object->entity->weight_in_kg * this->gravity;
+    this->inverse_mass = 1.0f /mass;
+    
     
 
-    this->thrust_force = thrust * Mthrust;
-    this->lift = this->vz*this->vz * this->object->entity->jdyn->LIFT;
+    this->thrust_force = 0.01f * thrust * Mthrust;
+    this->lift = this->vz * this->vz * this->object->entity->jdyn->LIFT * this->object->entity->jdyn->CS3_qqch_lift;
     if (lift > mass) {
         lift = mass;
     }
@@ -230,9 +340,16 @@ void SCJdynPlane::updateAcceleration() {
     this->ay = this->ay / mass;
 
 
-    this->ax -= this->ptw.v[0][1]*GRAVITY;
-    this->ay -= this->ptw.v[1][1]*GRAVITY;
-    this->az -= this->ptw.v[2][1]*GRAVITY;
+    this->ax -= this->ptw.v[0][1]*this->gravity;
+    this->ay -= this->ptw.v[1][1]*this->gravity;
+    this->az -= this->ptw.v[2][1]*this->gravity;
+
+    this->ax = 0.0f;
+    this->ay = 0.0f;
+    this->az = 0.0f;
+
+    this->az = -this->thrust_force / mass;
+
 
     this->ax *= deltaTime;
     this->ay *= deltaTime;

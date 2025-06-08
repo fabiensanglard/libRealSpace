@@ -45,6 +45,7 @@ void DebugStrike::simInfo() {
     ImGui::Text("Lift %.3f", this->player_plane->lift);
     ImGui::Text("Gravity %.3f", this->player_plane->gravity);
     ImGui::Text("Drag %.3f", this->player_plane->drag);
+    ImGui::Text("Inv mass %.8f", this->player_plane->inverse_mass);
     ImGui::Text("Thrust %.3f", this->player_plane->thrust_force);
     ImGui::Text("ptw");
     for (int o = 0; o < 4; o++) {
@@ -95,13 +96,13 @@ void DebugStrike::loadPlane() {
                 TreEntry *entry = Assets.GetEntryByName(Assets.object_root_path + plane + ".IFF");
                 plane_to_load->InitFromRAM(entry->data, entry->size);
                 BoudingBox *bb = plane_to_load->GetBoudingBpx();
-                envergure = (bb->max.x - bb->min.x);
-                surface = (envergure * 2.0f)* 3.2808399f;
-                //surface = surface * 3.2808399f;
+                envergure = (bb->max.z - bb->min.z) / 2.0f;
+                surface = plane_to_load->wing_area;
+                
                 thrust = plane_to_load->thrust_in_newton * 0.153333333f;
                 weight = plane_to_load->weight_in_kg * 2.208588957f;
                 fuel = plane_to_load->jdyn->FUEL * 2.208588957f;
-                //surface = plane_to_load->jdyn->LIFT;
+                
                 wing_aspec_ratio = (envergure * envergure) / surface ;
                 ie_pi_AR = 4000.0f/plane_to_load->drag;
                 roll_rate_max = plane_to_load->jdyn->ROLL_RATE;
@@ -142,7 +143,7 @@ void DebugStrike::loadPlane() {
     ImGui::Text("Thrust: %.2f", thrust);
     ImGui::Text("Weight: %.2f", weight);
     ImGui::Text("Fuel: %.2f", fuel);
-    ImGui::Text("Surface: %.2f", surface);
+    ImGui::Text("Surface: %.2f", this->player_plane->s);
     ImGui::Text("Wing aspect ratio: %.2f", wing_aspec_ratio);
     ImGui::Text("Induced efficiency: %.2f", ie_pi_AR);
     ImGui::Text("Roll rate max: %.2f", roll_rate_max);

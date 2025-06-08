@@ -32,6 +32,7 @@ void RSEntity::InitFromRAM(uint8_t *data, size_t size) {
     handlers["REAL"] = std::bind(&RSEntity::parseREAL, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
     CalcBoundingBox();
+    calcWingArea();
 }
 
 BoudingBox *RSEntity::GetBoudingBpx(void) { return &this->bb; }
@@ -45,27 +46,123 @@ void RSEntity::CalcBoundingBox(void) {
     this->bb.max.x = FLT_MIN;
     this->bb.max.y = FLT_MIN;
     this->bb.max.z = FLT_MIN;
+    if (this->vertices.size() == 0)
+        return;
+    for (int i=0; i < this->lods[LOD_LEVEL_MAX].numTriangles; i++) {
+        int triangle_id = this->lods[LOD_LEVEL_MAX].triangleIDs[i];
+        Vector3D v0,v1,v2;
+        for (int j = 0; j < 3; j++) {
+            Point3D vertex = this->vertices[this->triangles[triangle_id].ids[j]];
 
-    for (size_t i = 0; i < this->vertices.size(); i++) {
+            if (bb.min.x > vertex.x)
+                bb.min.x = vertex.x;
+            if (bb.min.y > vertex.y)
+                bb.min.y = vertex.y;
+            if (bb.min.z > vertex.z)
+                bb.min.z = vertex.z;
 
-        Point3D vertex = vertices[i];
-
-        if (bb.min.x > vertex.x)
-            bb.min.x = vertex.x;
-        if (bb.min.y > vertex.y)
-            bb.min.y = vertex.y;
-        if (bb.min.z > vertex.z)
-            bb.min.z = vertex.z;
-
-        if (bb.max.x < vertex.x)
-            bb.max.x = vertex.x;
-        if (bb.max.y < vertex.y)
-            bb.max.y = vertex.y;
-        if (bb.max.z < vertex.z)
-            bb.max.z = vertex.z;
+            if (bb.max.x < vertex.x)
+                bb.max.x = vertex.x;
+            if (bb.max.y < vertex.y)
+                bb.max.y = vertex.y;
+            if (bb.max.z < vertex.z)
+                bb.max.z = vertex.z;
+        }
     }
 }
 
+void RSEntity::calcWingArea(void) {
+    if (this->vertices.size() == 0)
+        return;
+    if (this->jdyn == NULL)
+        return;
+    std::vector<int> wing_ids;
+    int vert_id = 0;
+    for (auto vertex: this->vertices) {
+        if (vertex.z == bb.min.z) {
+            wing_ids.push_back(vert_id);
+        }
+        if (vertex.z == bb.max.z) {
+            wing_ids.push_back(vert_id);
+        }
+        vert_id++;
+    }
+
+    std::vector<Point2Df> wing_surface_points;
+    for (int i=0; i < this->lods[LOD_LEVEL_MAX].numTriangles; i++) {
+        int triangle_id = this->lods[LOD_LEVEL_MAX].triangleIDs[i];
+        Triangle triangle = this->triangles[triangle_id];
+        
+        for (auto id : triangle.ids) {
+            if (std::find(wing_ids.begin(), wing_ids.end(), id) != wing_ids.end()) {
+                Vector3D v0,v1,v2;
+                v0 = this->vertices[triangle.ids[0]];
+                v1 = this->vertices[triangle.ids[1]];
+                v2 = this->vertices[triangle.ids[2]];
+
+                Point2Df p0 = {v0.x*0.5f, v0.z * 0.5f};
+                if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p0) == wing_surface_points.end()) {
+                    wing_surface_points.push_back(p0);
+                }
+
+                Point2Df p1 = {v1.x*0.5f, v1.z * 0.5f};
+                if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p1) == wing_surface_points.end()) {
+                    wing_surface_points.push_back(p1);
+                }
+                Point2Df p2 = {v2.x*0.5f, v2.z * 0.5f};
+                if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p2) == wing_surface_points.end()) {
+                    wing_surface_points.push_back(p2);
+                }
+            }
+        }
+    }
+
+    if (!wing_surface_points.empty()) {
+        float area = 0.0f;
+        
+        // Compute the convex hull of wing_surface_points using the monotone chain algorithm.
+        auto cross = [](const Point2Df &O, const Point2Df &A, const Point2Df &B) -> float {
+            return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
+        };
+
+        // Tri des points par coordonnées (x, puis y)
+        std::sort(wing_surface_points.begin(), wing_surface_points.end(), [](const Point2Df &a, const Point2Df &b) {
+            return (a.x == b.x) ? (a.y < b.y) : (a.x < b.x);
+        });
+
+        std::vector<Point2Df> hull;
+        // Construction de la chaîne inférieure
+        for (const auto &p : wing_surface_points) {
+            while (hull.size() >= 2 && cross(hull[hull.size()-2], hull.back(), p) <= 0)
+                hull.pop_back();
+            hull.push_back(p);
+        }
+        // Construction de la chaîne supérieure
+        for (int i = wing_surface_points.size() - 2, t = hull.size() + 1; i >= 0; i--) {
+            while (hull.size() >= t && cross(hull[hull.size()-2], hull.back(), wing_surface_points[i]) <= 0)
+                hull.pop_back();
+            hull.push_back(wing_surface_points[i]);
+        }
+        // Retirer le dernier point car il est identique au premier
+        if (!hull.empty())
+            hull.pop_back();
+        
+        
+        wing_surface_points = hull;
+        int n = wing_surface_points.size();
+        // Calcul de la surface selon la formule du polygone (formule de shoelace)
+        for (int i = 0; i < n; i++) {
+            Vector3D sp1 = {wing_surface_points[i].x*2, 0.0f , wing_surface_points[i].y*2};
+            Vector3D sp2 = {wing_surface_points[(i + 1) % n].x*2, 0.0f , wing_surface_points[(i + 1) % n].y*2};
+        }
+        for (int i = 0; i < n; i++) {
+            int next = (i + 1) % n;
+            area += wing_surface_points[i].x * wing_surface_points[next].y - wing_surface_points[i].y * wing_surface_points[next].x;
+        }
+        area = std::fabs(area) / 2.0f;
+        this->wing_area = area;
+    }
+}
 size_t RSEntity::NumImages(void) { return this->images.size(); }
 
 size_t RSEntity::NumVertice(void) { return this->vertices.size(); }
