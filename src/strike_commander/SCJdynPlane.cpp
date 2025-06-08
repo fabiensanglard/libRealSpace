@@ -37,12 +37,12 @@ void SCJdynPlane::Simulate() {
     this->pitch_input = (this->control_stick_y / 100.0f) * deltaTime;
     this->elevation_speedf = radToDegree(this->pitch);
     this->roll_input = (-this->control_stick_x / 100.0f) * deltaTime;
-    this->roll_speed = radToDegree(this->roll);
+    this->roll_speed = (int) radToDegree(this->roll);
     float rudder = 0.0f;
 
     float temp = rudder * this->vz - (2.0f) * this->vx;
     int itemp = (int) temp;
-    itemp -= this->yaw_input;
+    itemp -= (int) this->yaw_input;
     int TDELAY = tps/4;
     if (itemp!=0) {
         if (itemp >= TDELAY || itemp <= -TDELAY)
@@ -212,7 +212,7 @@ void SCJdynPlane::Render() {
                 hull.push_back(p);
             }
             // Construction de la chaîne supérieure
-            for (int i = wing_surface_points.size() - 2, t = hull.size() + 1; i >= 0; i--) {
+            for (int i = (int)wing_surface_points.size() - 2, t = hull.size() + 1; i >= 0; i--) {
                 while (hull.size() >= t && cross(hull[hull.size()-2], hull.back(), wing_surface_points[i]) <= 0)
                     hull.pop_back();
                 hull.push_back(wing_surface_points[i]);
@@ -223,15 +223,15 @@ void SCJdynPlane::Render() {
             
             
             wing_surface_points = hull;
-            int n = wing_surface_points.size();
+            size_t n = wing_surface_points.size();
             // Calcul de la surface selon la formule du polygone (formule de shoelace)
-            for (int i = 0; i < n; i++) {
+            for (size_t i = 0; i < n; i++) {
                 Vector3D sp1 = {wing_surface_points[i].x, 0.0f , wing_surface_points[i].y};
                 Vector3D sp2 = {wing_surface_points[(i + 1) % n].x, 0.0f , wing_surface_points[(i + 1) % n].y};
                 Renderer.drawLine(sp1,sp2,{1.0f,1.0f,0.0f},orientation, position);
             }
-            for (int i = 0; i < n; i++) {
-                int next = (i + 1) % n;
+            for (size_t i = 0; i < n; i++) {
+                size_t next = (i + 1) % n;
                 area += wing_surface_points[i].x * wing_surface_points[next].y - wing_surface_points[i].y * wing_surface_points[next].x;
             }
             area = std::fabs(area) / 2.0f;
