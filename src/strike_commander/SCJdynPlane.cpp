@@ -35,9 +35,9 @@ void SCJdynPlane::Simulate() {
     float deltaTime = 1.0f / (float) this->tps;
     
     this->pitch_input = (this->control_stick_y / 100.0f) * deltaTime;
-    this->elevation_speedf = radToDegree(this->pitch);
+    this->elevation_speedf = radToDegree(this->pitch_input);
     this->roll_input = (-this->control_stick_x / 100.0f) * deltaTime;
-    this->roll_speed = (int) radToDegree(this->roll);
+    this->roll_speed = (int) radToDegree(this->roll_input);
     float rudder = 0.0f;
 
     float temp = rudder * this->vz - (2.0f) * this->vx;
@@ -307,48 +307,51 @@ void SCJdynPlane::updatePosition() {
     
     this->incremental.translateM(this->vx, this->vy, this->vz);
 
-    /*this->vx = this->incremental.v[3][0];
+    this->vx = this->incremental.v[3][0];
     this->vy = this->incremental.v[3][1];
-    this->vz = this->incremental.v[3][2];*/
+    this->vz = this->incremental.v[3][2];
 
 }
 void SCJdynPlane::updateAcceleration() {
     float deltaTime = 1.0f / (float) this->tps;
     this->gravity = GRAVITY;
-    float mass = this->object->entity->weight_in_kg * this->gravity;
+    float mass = this->object->entity->weight_in_kg * GRAVITY;
     this->inverse_mass = 1.0f /mass;
     
     
 
     this->thrust_force = 0.01f * thrust * Mthrust;
-    this->lift = this->vz * this->vz * this->object->entity->jdyn->LIFT * this->object->entity->jdyn->CS3_qqch_lift;
+
+    this->lift = std::fabs(this->vz) * this->object->entity->jdyn->LIFT * this->object->entity->jdyn->CS3_qqch_lift;
     if (lift > mass) {
         lift = mass;
     }
 
-    this->az = this->vy * lift;
-    this->ay = -this->vz * lift;
+    this->az = -this->vy*0.6;
+    this->ay = this->vz*0.6;
     this->ax = 0.0f;
 
     this->az -= this->thrust_force;
 
 
-    this->ay = this->ay + lift;
+    this->ay = this->ay;
 
     this->az = this->az / mass;
     this->ax = this->ax / mass;
     this->ay = this->ay / mass;
 
+    this->thrust_force = this->az;
 
-    this->ax -= this->ptw.v[0][1]*this->gravity;
-    this->ay -= this->ptw.v[1][1]*this->gravity;
-    this->az -= this->ptw.v[2][1]*this->gravity;
+    this->gravity = GRAVITY * deltaTime;
+    this->ax -= this->ptw.v[0][1]*GRAVITY*deltaTime;
+    this->ay -= this->ptw.v[1][1]*GRAVITY*deltaTime;
+    this->az -= this->ptw.v[2][1]*GRAVITY*deltaTime;
 
-    this->ax = 0.0f;
+    /*this->ax = 0.0f;
     this->ay = 0.0f;
     this->az = 0.0f;
 
-    this->az = -this->thrust_force / mass;
+    this->az = -this->thrust_force / mass;*/
 
 
     this->ax *= deltaTime;
