@@ -167,7 +167,7 @@ void DebugStrike::loadPlane() {
                 player_plane->z
             );
         } else {
-            surface = surface * 10.7639;
+            surface = surface * 10.7639f;
             envergure = envergure * 3.28084f;
             new_plane = new SCPlane(
                 10.0f,
