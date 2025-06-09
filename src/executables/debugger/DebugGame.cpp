@@ -170,14 +170,12 @@ void DebugGame::testMissionSC() {
     
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
-    
+    Assets.ReadISOImage("./SC.DAT");
     std::vector<std::string> treFiles = {
-        "GAMEFLOW.TRE",
-        "OBJECTS.TRE",
-        "MISC.TRE",
-        "SOUND.TRE",
-        "MISSIONS.TRE",
-        "TEXTURES.TRE"
+        "BIGTRE.TRE",
+        "LILTRE.TRE",
+        "TOBIGTRE.TRE",
+        "PACIFIC.DAT"
     };
     Assets.init(treFiles);
     
@@ -268,7 +266,7 @@ void DebugGame::loadPacific() {
     FontManager.init(&Assets);
 
     // Load assets needed for Conversations (char and background)
-    ConvAssets.init();
+    // ConvAssets.init();
 
     //Add MainMenu activity on the game stack.
     SCObjectViewer* main = new SCObjectViewer();

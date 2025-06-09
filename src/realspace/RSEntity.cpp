@@ -50,24 +50,52 @@ void RSEntity::CalcBoundingBox(void) {
         return;
     for (int i=0; i < this->lods[LOD_LEVEL_MAX].numTriangles; i++) {
         int triangle_id = this->lods[LOD_LEVEL_MAX].triangleIDs[i];
-        Vector3D v0,v1,v2;
-        for (int j = 0; j < 3; j++) {
+        char attribute = 'T';
+        if (this->attrs.size() > 0) {
+            if (this->attrs[triangle_id] != nullptr) {
+                attribute = this->attrs[triangle_id]->type;
+                triangle_id = this->attrs[triangle_id]->id;
+            }
+        }
+        
+        if (attribute == 'T') {
+            for (int j = 0; j < 3; j++) {
             Point3D vertex = this->vertices[this->triangles[triangle_id].ids[j]];
 
-            if (bb.min.x > vertex.x)
-                bb.min.x = vertex.x;
-            if (bb.min.y > vertex.y)
-                bb.min.y = vertex.y;
-            if (bb.min.z > vertex.z)
-                bb.min.z = vertex.z;
+                if (bb.min.x > vertex.x)
+                    bb.min.x = vertex.x;
+                if (bb.min.y > vertex.y)
+                    bb.min.y = vertex.y;
+                if (bb.min.z > vertex.z)
+                    bb.min.z = vertex.z;
 
-            if (bb.max.x < vertex.x)
-                bb.max.x = vertex.x;
-            if (bb.max.y < vertex.y)
-                bb.max.y = vertex.y;
-            if (bb.max.z < vertex.z)
-                bb.max.z = vertex.z;
+                if (bb.max.x < vertex.x)
+                    bb.max.x = vertex.x;
+                if (bb.max.y < vertex.y)
+                    bb.max.y = vertex.y;
+                if (bb.max.z < vertex.z)
+                    bb.max.z = vertex.z;
+            }
+        } else if (attribute == 'Q') {
+            for (int j = 0; j < 4; j++) {
+                Point3D vertex = this->vertices[this->quads[triangle_id]->ids[j]];
+
+                if (bb.min.x > vertex.x)
+                    bb.min.x = vertex.x;
+                if (bb.min.y > vertex.y)
+                    bb.min.y = vertex.y;
+                if (bb.min.z > vertex.z)
+                    bb.min.z = vertex.z;
+
+                if (bb.max.x < vertex.x)
+                    bb.max.x = vertex.x;
+                if (bb.max.y < vertex.y)
+                    bb.max.y = vertex.y;
+                if (bb.max.z < vertex.z)
+                    bb.max.z = vertex.z;
+            }
         }
+        
     }
 }
 
@@ -91,30 +119,43 @@ void RSEntity::calcWingArea(void) {
     std::vector<Point2Df> wing_surface_points;
     for (int i=0; i < this->lods[LOD_LEVEL_MAX].numTriangles; i++) {
         int triangle_id = this->lods[LOD_LEVEL_MAX].triangleIDs[i];
-        Triangle triangle = this->triangles[triangle_id];
+        char attribute = 'T';
         
-        for (auto id : triangle.ids) {
-            if (std::find(wing_ids.begin(), wing_ids.end(), id) != wing_ids.end()) {
-                Vector3D v0,v1,v2;
-                v0 = this->vertices[triangle.ids[0]];
-                v1 = this->vertices[triangle.ids[1]];
-                v2 = this->vertices[triangle.ids[2]];
+        if (this->attrs.size() > 0) {
+            if (this->attrs[triangle_id] != nullptr) {
+                attribute = this->attrs[triangle_id]->type;
+                triangle_id = this->attrs[triangle_id]->id;
 
-                Point2Df p0 = {v0.x*0.5f, v0.z * 0.5f};
-                if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p0) == wing_surface_points.end()) {
-                    wing_surface_points.push_back(p0);
+            }
+        }
+        if (attribute == 'T') {
+            Triangle triangle = this->triangles[triangle_id];
+            for (auto id : triangle.ids) {
+                if (std::find(wing_ids.begin(), wing_ids.end(), id) != wing_ids.end()) {
+                    for (int j = 0; j < 3; j++) {
+                        Vector3D v = this->vertices[triangle.ids[j]];
+                        Point2Df p = {v.x*0.5f, v.z * 0.5f};
+                        if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p) == wing_surface_points.end()) {
+                            wing_surface_points.push_back(p);
+                        }
+                    }
                 }
-
-                Point2Df p1 = {v1.x*0.5f, v1.z * 0.5f};
-                if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p1) == wing_surface_points.end()) {
-                    wing_surface_points.push_back(p1);
-                }
-                Point2Df p2 = {v2.x*0.5f, v2.z * 0.5f};
-                if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p2) == wing_surface_points.end()) {
-                    wing_surface_points.push_back(p2);
+            }
+        } else {
+            Quads *quad = this->quads[triangle_id];
+            for (auto id : quad->ids) {
+                if (std::find(wing_ids.begin(), wing_ids.end(), id) != wing_ids.end()) {
+                    for (int j = 0; j < 4; j++) {
+                        Vector3D v = this->vertices[quad->ids[j]];
+                        Point2Df p = {v.x*0.5f, v.z * 0.5f};
+                        if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p) == wing_surface_points.end()) {
+                            wing_surface_points.push_back(p);
+                        }
+                    }
                 }
             }
         }
+        
     }
 
     if (!wing_surface_points.empty()) {
@@ -806,17 +847,12 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMP(uint8_t *data, size_t size) {
         LZBuffer lzbuffer;
         pic_data = lzbuffer.DecodeLZW(src+2,size-14,csize);
         src = pic_data;
-    }
-    if (src[0]=='P' && src[1]=='+'){
-        LZBuffer lzbuffer;
-        pic_data = lzbuffer.DecodeLZ77(src+4,size-16,csize);
+    } else if (src[0]=='P' && src[1]=='+'){
+        uint8_t *pic_data = new uint8_t[width * height];
+        for (size_t i = 0; i < width * height; i++) {
+            pic_data[i] = i%256;
+        }
         src = pic_data;
-        if (csize < width * height) {
-            return;
-        }
-        if (src == nullptr) {
-            return;
-        }
     }
     
     image->UpdateContent(src);
@@ -847,6 +883,12 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size) {
         src = pic_data;
         image->UpdateContent(src);
         AddImage(image);
+    }  else if (src[0]=='P' && src[1]=='+'){
+        uint8_t *pic_data = new uint8_t[width * height];
+        for (size_t i = 0; i < width * height; i++) {
+            pic_data[i] = i%256;
+        }
+        src = pic_data;
     } else {
         image->UpdateContent(src);
         AddImage(image);

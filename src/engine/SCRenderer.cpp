@@ -564,6 +564,9 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     for (int i = 0; i < lod->numTriangles; i++) {
         uint16_t triangleID = lod->triangleIDs[i];
         if (object->attrs.size() > 0) {
+            if (object->attrs[triangleID] == nullptr) {
+                continue;
+            }
             if (object->attrs[triangleID]->type == 'Q') {
                 continue;
             }
@@ -677,6 +680,9 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         
         uint16_t triangleID = lod->triangleIDs[i];
         if (object->attrs.size() > 0) {
+            if (object->attrs[triangleID] == nullptr) {
+                continue;
+            }
             if (object->attrs[triangleID]->type == 'Q') {
                 continue;
             }

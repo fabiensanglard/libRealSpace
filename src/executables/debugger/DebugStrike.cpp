@@ -62,11 +62,20 @@ void DebugStrike::simInfo() {
 void DebugStrike::loadPlane() {
     std::vector<std::string> planes;
     planes = {
-        "F-16DES",
-        "F-15",
-        "F-18",
+        "747",
+        "A-10",
+        "AWACS",
+        "B-1B",
         "C130DES",
+        "C130GRN",
+        "F-4",
+        "F-15",
+        "F-16DES",
+        "F-16GRAY",
+        "F-18",
         "F-22",
+        "F-117",
+        "LEARJET",
         "MIG21",
         "MIG29",
         "MIRAGE",
@@ -74,8 +83,24 @@ void DebugStrike::loadPlane() {
         "TORNCG",
         "TU-20",
         "YF23",
-        "747",
-        "A-10"
+        "F4F3",
+        "TBD",
+        "SBD",
+        "TBF",
+        "HELLCAT",
+        "HELLDIVE",
+        "CORSAIR",
+        "BEARCAT",
+        "ZERO",
+        "KATETORP",
+        "VAL",
+        "CLAUDE",
+        "FRANK",
+        "JUDY",
+        "BETTY",
+        "EMILY",
+        "BAKA",
+        "F4F4",
     };
     static float envergure = 0.0f;
     static float thrust = 0.0f;
@@ -87,56 +112,93 @@ void DebugStrike::loadPlane() {
     static float roll_rate_max = 0.0f;
     static float pitch_rate_max = 0.0f;
     static std::string plane_name = "";
-    if (ImGui::BeginCombo("Plane", nullptr, 0)) {
+    static bool simple_simulation = false;
+    
+    if (ImGui::BeginCombo("Plane", plane_name.c_str(), 0)) {
         for (auto plane : planes) {
-            if (ImGui::Selectable(plane.c_str(), false)) {
+            if (ImGui::Selectable(plane.c_str(), !plane_name.compare(plane))) {
                 plane_name = plane;
-                //this->plane_to_load = planes.indexOf(plane);
-                RSEntity *plane_to_load = new RSEntity(&Assets);
-                TreEntry *entry = Assets.GetEntryByName(Assets.object_root_path + plane + ".IFF");
-                plane_to_load->InitFromRAM(entry->data, entry->size);
-                BoudingBox *bb = plane_to_load->GetBoudingBpx();
-                envergure = (bb->max.z - bb->min.z) / 2.0f;
-                surface = plane_to_load->wing_area;
-                
-                thrust = plane_to_load->thrust_in_newton * 0.153333333f;
-                weight = plane_to_load->weight_in_kg * 2.208588957f;
-                fuel = plane_to_load->jdyn->FUEL * 2.208588957f;
-                
-                wing_aspec_ratio = (envergure * envergure) / surface ;
-                ie_pi_AR = 4000.0f/plane_to_load->drag;
-                roll_rate_max = plane_to_load->jdyn->ROLL_RATE;
-                pitch_rate_max = plane_to_load->jdyn->TWIST_RATE;
-                
-                SCJdynPlane *new_plane = new SCJdynPlane(
-                    10.0f,
-                    -7.0f,
-                    40.0f,
-                    40.0f,
-                    plane_to_load->jdyn->TWIST_RATE,
-                    plane_to_load->jdyn->ROLL_RATE,
-                    surface,
-                    weight,
-                    fuel,
-                    thrust,
-                    envergure,
-                    0.83f,
-                    120,
-                    this->current_mission->area,
-                    player_plane->x,
-                    player_plane->y,
-                    player_plane->z
-                );
-                new_plane->simple_simulation = false;
-                new_plane->object = player_plane->object;
-                new_plane->object->entity = plane_to_load;
-                new_plane->azimuthf = player_plane->azimuthf;
-                new_plane->yaw = player_plane->yaw;
-                this->player_plane = new_plane;
-                this->cockpit->player_plane = this->player_plane;
+            }
+            if (!plane_name.compare(plane)) {
+                ImGui::SetItemDefaultFocus();
             }
         }
         ImGui::EndCombo();
+    }
+    
+    ImGui::SameLine();
+    ImGui::Checkbox("Simple Sim", &simple_simulation);
+    if (ImGui::Button("Load") && plane_name != "") {
+        //this->plane_to_load = planes.indexOf(plane);
+        RSEntity *plane_to_load = new RSEntity(&Assets);
+        TreEntry *entry = Assets.GetEntryByName(Assets.object_root_path + plane_name + ".IFF");
+        plane_to_load->InitFromRAM(entry->data, entry->size);
+        BoudingBox *bb = plane_to_load->GetBoudingBpx();
+        envergure = (bb->max.z - bb->min.z) / 2.0f;
+        surface = plane_to_load->wing_area;
+        
+        thrust = plane_to_load->thrust_in_newton * 0.153333333f;
+        weight = plane_to_load->weight_in_kg * 2.208588957f;
+        fuel = plane_to_load->jdyn->FUEL * 2.208588957f;
+        
+        wing_aspec_ratio = (envergure * envergure) / surface ;
+        ie_pi_AR = 4000.0f/plane_to_load->drag;
+        roll_rate_max = plane_to_load->jdyn->ROLL_RATE;
+        pitch_rate_max = plane_to_load->jdyn->TWIST_RATE;
+        SCPlane *new_plane = nullptr;
+        if (simple_simulation) {
+            new_plane = new SCJdynPlane(
+                10.0f,
+                -7.0f,
+                40.0f,
+                40.0f,
+                plane_to_load->jdyn->TWIST_RATE,
+                plane_to_load->jdyn->ROLL_RATE,
+                surface,
+                weight,
+                fuel,
+                thrust,
+                envergure,
+                0.83f,
+                120,
+                this->current_mission->area,
+                player_plane->x,
+                player_plane->y,
+                player_plane->z
+            );
+        } else {
+            surface = surface * 10.7639;
+            envergure = envergure * 3.28084f;
+            new_plane = new SCPlane(
+                10.0f,
+                -7.0f,
+                40.0f,
+                40.0f,
+                plane_to_load->jdyn->TWIST_RATE,
+                plane_to_load->jdyn->ROLL_RATE,
+                surface,
+                weight,
+                fuel,
+                thrust,
+                envergure,
+                0.83f,
+                120,
+                this->current_mission->area,
+                player_plane->x,
+                player_plane->y,
+                player_plane->z
+            );
+        }
+        
+        new_plane->simple_simulation = false;
+        new_plane->object = player_plane->object;
+        new_plane->object->entity = plane_to_load;
+        new_plane->azimuthf = player_plane->azimuthf;
+        new_plane->yaw = player_plane->yaw;
+        this->player_plane = new_plane;
+        this->current_mission->player->plane = this->player_plane;
+
+        this->cockpit->player_plane = this->player_plane;
     }
     ImGui::Text("Plane name: %s", plane_name.c_str());
     ImGui::Text("Envergure: %.2f", envergure);
@@ -1101,7 +1163,30 @@ void DebugStrike::renderUI() {
             radar();
             ImGui::EndChild();
             ImGui::BeginChild("View", ImVec2(0, 200), true);
-            showOffCamera();
+            ImGui::BeginChild("Camera", ImVec2(250, 0), true);
+                showOffCamera();    
+            ImGui::EndChild();
+            ImGui::SameLine();
+            ImGui::BeginChild("Target", ImVec2(0, 0), true);
+                if (this->target != nullptr) {
+                    ImGui::Text("Target: %s", this->target->actor_name.c_str());
+                    if (this->target->plane) {
+                        ImGui::Text("Air Speed: %d", this->target->plane->airspeed);
+                        ImGui::Text("Altitude: %.0f", this->target->plane->y);
+                        ImGui::Text("Heading: %.0f", 360 - (this->target->plane->azimuthf / 10.0f));
+                        ImGui::Text("Position: (%.2f, %.2f, %.2f)", this->target->plane->x, this->target->plane->y, this->target->plane->z);
+                    } else {
+                        ImGui::Text("Position: (%.2f, %.2f, %.2f)", this->target->object->position.x, this->target->object->position.y, this->target->object->position.z);
+                    }
+                    if (this->target->pilot != nullptr) {
+                        ImGui::Text("{TH %.0f TA %d}", this->target->pilot->target_azimut, this->target->pilot->target_climb);
+                        
+                        ImGui::Text("AI OBJ %d", this->target->current_objective);
+                        
+                        ImGui::Text("AI Target %d", this->target->current_target);
+                    }
+                }
+            ImGui::EndChild();
             ImGui::EndChild();
             ImGui::BeginChild("Target info", ImVec2(0, 0), true);
             if (this->target != nullptr) {
