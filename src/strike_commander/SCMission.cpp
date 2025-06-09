@@ -44,7 +44,7 @@ RSProf *SCMission::LoadProfile(std::string name) {
 }
 void SCMission::loadMission() {
     std::string miss_file_name = Assets.mission_root_path + this->mission_name; 
-    
+    std::transform(miss_file_name.begin(), miss_file_name.end(), miss_file_name.begin(), ::toupper);
     TreEntry *mission_tre = Assets.GetEntryByName(miss_file_name.c_str());
     this->mission = new RSMission();
     this->mission->InitFromRAM(mission_tre->data, mission_tre->size);

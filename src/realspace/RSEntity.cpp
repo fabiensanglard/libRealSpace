@@ -552,9 +552,19 @@ void RSEntity::parseREAL_OBJT_JETP_DYNM_GRAV(uint8_t *data, size_t size) {
 }
 void RSEntity::parseREAL_OBJT_JETP_DYNM_THRS(uint8_t *data, size_t size) {
     ByteStream bs(data);
-    bs.ReadByte();
-    this->thrust_in_newton = bs.ReadInt24LEByte3();
-    /* il reste 2 ou 3 octets (en fonction de la taille du chunk 6 ou 7) en suite dont je ne sais rien*/
+    if (size == 6 || size == 7) {
+        bs.ReadByte();
+        this->thrust_in_newton = bs.ReadInt24LEByte3();
+        /* il reste 2 ou 3 octets (en fonction de la taille du chunk 6 ou 7) en suite dont je ne sais rien*/
+    } else if (size == 19 || size == 20) {
+        bs.ReadByte();
+        bs.ReadByte();
+        bs.ReadByte();
+        bs.ReadByte();
+        bs.ReadByte();
+        this->thrust_in_newton = bs.ReadInt24LEByte3()*15;
+    }
+    
 }
 void RSEntity::parseREAL_OBJT_JETP_DYNM_JDYN(uint8_t *data, size_t size) {
     ByteStream bs(data);

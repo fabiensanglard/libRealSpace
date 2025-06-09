@@ -913,8 +913,42 @@ void DebugStrike::renderMenu() {
     }
     if (show_mission) {
         ImGui::Begin("Mission");
+        std::vector<const char *> to_mission_list= {
+            "MISN-a1.IFF",
+            "MISN-a2.IFF",
+            "MISN-b1.IFF",
+            "MISN-bw.IFF",
+            "MISN-b2.IFF",
+            "MISN-b3.IFF",
+            "MISN-b4.IFF",
+            "MISN-c1.IFF",
+            "MISN-cw.IFF",
+            "MISN-c2.IFF",
+            "MISN-c3.IFF",
+            "MISN-cy.IFF",
+            "MISN-c4.IFF",
+            "MISN-cz.IFF",
+            "MISN-d1.IFF",
+            "MISN-dw.IFF",
+            "MISN-d2.IFF",
+            "MISN-e1.IFF",
+            "MISN-e2.IFF",
+            "MISN-e3.IFF",
+            "MISN-e4.IFF",
+            "MISN-f1.IFF",
+            "MISN-f2.IFF",
+            "MISN-fx.IFF",
+            "MISN-f3.IFF",
+            "MISN-f4.IFF",
+            "MISN-g1.IFF",
+            "MISN-g2.IFF",
+            "MISN-g3.IFF",
+            "MISN-h1.IFF"
+        };
         static ImGuiComboFlags flags = 0;
-        if (ImGui::BeginCombo("List des missions", mission_list[mission_idx], flags)) {
+        static int to_mission_idx = 0;
+        ImGui::PushItemWidth(200.0f);
+        if (ImGui::BeginCombo("Strike Commander", mission_list[mission_idx], flags)) {
             for (int n = 0; n < SCSTRIKE_MAX_MISSIONS; n++) {
                 const bool is_selected = (mission_idx == n);
                 if (ImGui::Selectable(mission_list[n], is_selected))
@@ -924,8 +958,26 @@ void DebugStrike::renderMenu() {
             }
             ImGui::EndCombo();
         }
-        if (ImGui::Button("Load Mission")) {
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+        if (ImGui::Button("Load SC Mission")) {
             this->setMission((char *)mission_list[mission_idx]);
+        }
+        ImGui::PushItemWidth(200.0f);
+        if (ImGui::BeginCombo("Tactical Operation", to_mission_list[to_mission_idx], flags)) {
+            for (int n = 0; n < to_mission_list.size(); n++) {
+                const bool is_selected = (to_mission_idx == n);
+                if (ImGui::Selectable(to_mission_list[n], is_selected))
+                    to_mission_idx = n;
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+        if (ImGui::Button("Load TO Mission")) {
+            this->setMission((char *)to_mission_list[to_mission_idx]);
         }
 
         ImGui::End();
