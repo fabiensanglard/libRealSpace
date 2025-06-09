@@ -403,7 +403,7 @@ void DebugStrike::radar() {
 
     if (ImGui::IsWindowFocused() && io.MouseWheel != 0.0f) {
         float prev_zoom = zoom;
-        zoom += io.MouseWheel * 0.1f;
+        zoom += io.MouseWheel * zoom * 0.1f; // Adjust zoom sensitivity as needed.
         if (zoom < 0.1f)
             zoom = 0.1f;
         ImVec2 mouse_pos = io.MousePos;
@@ -735,24 +735,24 @@ void DebugStrike::renderMenu() {
                 this->current_mission->mission->mission_data.name.c_str(), this->miss_file_name.c_str(),area_id);
 
     if (show_offcam) {
-        ImGui::Begin("Offcam");
+        ImGui::Begin("Offcam", &show_offcam);
         showOffCamera();
         ImGui::End();
     }
     if (show_load_plane) {
-        ImGui::Begin("Load plane");
+        ImGui::Begin("Load plane", &show_load_plane);
         loadPlane();
         ImGui::End();
     }
     if (show_radar) {
-        if (ImGui::Begin("Actors Position")) {
+        if (ImGui::Begin("Actors Position", &show_radar)) {
             radar();
             ImGui::End();
         }
     
     }
     if (show_ai) {
-        ImGui::Begin("AI");
+        ImGui::Begin("AI", &show_ai);
         for (auto ai_actor: this->current_mission->actors) {
             if (ai_actor->pilot != nullptr) {
                 ImGui::Text("AI %s", ai_actor->object->member_name.c_str());
@@ -776,28 +776,58 @@ void DebugStrike::renderMenu() {
         ImGui::End();
     }
     if (show_music_player) {
-        ImGui::Begin("Music Player");
-        if (ImGui::BeginCombo("Music list", 0, 0)) {
+        ImGui::Begin("Music Player", &show_music_player);
+        static int music_id = 0;
+        ImGui::PushItemWidth(80.0f);
+        if (ImGui::BeginCombo("Music list", std::to_string(music_id).c_str(), 0)) {
             for (int i = 0; i < Mixer.music->musics[2].size(); i++) {
-                if (ImGui::Selectable(std::to_string(i).c_str(), false))
-                    Mixer.PlayMusic(i);
+                if (ImGui::Selectable(std::to_string(i).c_str(), i == music_id)) {
+                    music_id = i;
+                }
+                if (i == music_id) {
+                    ImGui::SetItemDefaultFocus();
+                } 
             }
             ImGui::EndCombo();
+        }
+        ImGui::PopItemWidth();
+        if (ImGui::Button("Play")) {
+            Mixer.PlayMusic(music_id);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Stop")) {
+            Mixer.StopMusic();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Next")) {
+            music_id++;
+            if (music_id >= Mixer.music->musics[2].size()) {
+                music_id = 0;
+            }
+            Mixer.PlayMusic(music_id);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Prev")) {
+            music_id--;
+            if (music_id < 0) {
+                music_id = Mixer.music->musics[2].size() - 1;
+            }
+            Mixer.PlayMusic(music_id);
         }
         ImGui::End();
     }
     if (show_simulation_config) {
-        ImGui::Begin("Simulation Config");
+        ImGui::Begin("Simulation Config", &show_simulation_config);
         simConfig();
         ImGui::End();
     }
     if (show_simulation) {
-        ImGui::Begin("Simulation");
+        ImGui::Begin("Simulation", &show_simulation);
         simInfo();
         ImGui::End();
     }
     if (show_camera) {
-        ImGui::Begin("Camera");
+        ImGui::Begin("Camera", &show_camera);
         ImGui::Text("Tps %d", this->player_plane->tps);
         ImGui::Text("Camera mode %d", this->camera_mode);
         ImGui::Text("Position [%.3f,%.3f,%.3f]", this->camera_pos.x, this->camera_pos.y, this->camera_pos.z);
@@ -805,7 +835,7 @@ void DebugStrike::renderMenu() {
         ImGui::End();
     }
     if (show_cockpit) {
-        ImGui::Begin("Cockpit");
+        ImGui::Begin("Cockpit", &show_cockpit);
         ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
 
         ImGui::SameLine();
@@ -912,7 +942,7 @@ void DebugStrike::renderMenu() {
         ImGui::End();
     }
     if (show_mission) {
-        ImGui::Begin("Mission");
+        ImGui::Begin("Mission", &show_mission);
         std::vector<const char *> to_mission_list= {
             "MISN-a1.IFF",
             "MISN-a2.IFF",
@@ -947,7 +977,7 @@ void DebugStrike::renderMenu() {
         };
         static ImGuiComboFlags flags = 0;
         static int to_mission_idx = 0;
-        ImGui::PushItemWidth(200.0f);
+        ImGui::PushItemWidth(120.0f);
         if (ImGui::BeginCombo("Strike Commander", mission_list[mission_idx], flags)) {
             for (int n = 0; n < SCSTRIKE_MAX_MISSIONS; n++) {
                 const bool is_selected = (mission_idx == n);
@@ -958,12 +988,13 @@ void DebugStrike::renderMenu() {
             }
             ImGui::EndCombo();
         }
-        ImGui::PopItemWidth();
-        ImGui::SameLine();
+        
+        ImGui::SameLine(300);
         if (ImGui::Button("Load SC Mission")) {
             this->setMission((char *)mission_list[mission_idx]);
         }
-        ImGui::PushItemWidth(200.0f);
+        ImGui::PopItemWidth();
+        ImGui::PushItemWidth(120.0f);
         if (ImGui::BeginCombo("Tactical Operation", to_mission_list[to_mission_idx], flags)) {
             for (int n = 0; n < to_mission_list.size(); n++) {
                 const bool is_selected = (to_mission_idx == n);
@@ -974,17 +1005,17 @@ void DebugStrike::renderMenu() {
             }
             ImGui::EndCombo();
         }
-        ImGui::PopItemWidth();
-        ImGui::SameLine();
+        
+        ImGui::SameLine(300);
         if (ImGui::Button("Load TO Mission")) {
             this->setMission((char *)to_mission_list[to_mission_idx]);
         }
-
+        ImGui::PopItemWidth();
         ImGui::End();
     }
 
     if (show_mission_parts_and_areas) {
-        ImGui::Begin("Mission Parts and Areas");
+        ImGui::Begin("Mission Parts and Areas", &show_mission_parts_and_areas);
         ImGui::Text("Mission %s", this->current_mission->mission->mission_data.name.c_str());
         ImGui::Text("Area %s", this->current_mission->mission->mission_data.world_filename.c_str());
         ImGui::Text("Player Coord %.0f %.0f %.0f", this->current_mission->mission->getPlayerCoord()->position.x, this->current_mission->mission->getPlayerCoord()->position.y,
