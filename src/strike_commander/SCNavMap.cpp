@@ -74,6 +74,17 @@ void SCNavMap::init(){
     TreEntry *nav_map = Assets.GetEntryByName(Assets.navmap_filename);
     this->navMap = new RSNavMap();
     this->navMap->InitFromRam(nav_map->data, nav_map->size);
+
+    if (Assets.navmap_add_filename != "") {
+        TreEntry *nav_map_add = Assets.GetEntryByName(Assets.navmap_add_filename);
+        if (nav_map_add != nullptr) {
+            RSNavMap *nav_map_add_obj = new RSNavMap();
+            nav_map_add_obj->InitFromRam(nav_map_add->data, nav_map_add->size);
+            for (auto &map: nav_map_add_obj->maps) {
+                this->navMap->maps[map.first] = map.second;
+            }
+        }
+    }
 }
 /**
  * Sets the name of the current mission.
@@ -105,11 +116,12 @@ void SCNavMap::runFrame(void) {
     VGA.SetPalette(&this->palette);
     
     //Draw static
-    VGA.GetFrameBuffer()->DrawShape(this->navMap->background);
+    
     float center = BLOCK_WIDTH * 9.0f;
     float map_width = BLOCK_WIDTH * 18.0f;
     if (this->navMap->maps.count(*this->name)>0) {
         VGA.GetFrameBuffer()->DrawShape(this->navMap->maps[*this->name]);
+        VGA.GetFrameBuffer()->DrawShape(this->navMap->background);
         Point2D pos = this->navMap->maps[*this->name]->position;
         int w = 238;
         int h = 155;

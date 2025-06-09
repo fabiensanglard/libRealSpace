@@ -86,6 +86,7 @@ public:
     std::string optpals_filename;
     std::string optfont_filename;
     std::string navmap_filename;
+    std::string navmap_add_filename;
     std::string conv_data_filename;
     std::string convpak_filename;
     std::string conv_pal_filename;

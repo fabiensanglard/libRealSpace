@@ -991,6 +991,8 @@ void DebugStrike::renderMenu() {
         
         ImGui::SameLine(300);
         if (ImGui::Button("Load SC Mission")) {
+            Assets.navmap_filename = "..\\..\\DATA\\COCKPITS\\NAVMAP.IFF";
+            Assets.navmap_add_filename = "";
             this->setMission((char *)mission_list[mission_idx]);
         }
         ImGui::PopItemWidth();
@@ -1008,6 +1010,8 @@ void DebugStrike::renderMenu() {
         
         ImGui::SameLine(300);
         if (ImGui::Button("Load TO Mission")) {
+            Assets.navmap_filename = "..\\..\\DATA\\COCKPITS\\NAVMAP.IFF";
+            Assets.navmap_add_filename = "..\\..\\DATA\\COCKPITS\\NAVMAP2.IFF";
             this->setMission((char *)to_mission_list[to_mission_idx]);
         }
         ImGui::PopItemWidth();
