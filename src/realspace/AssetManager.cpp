@@ -96,7 +96,7 @@ void AssetManager::init(std::vector<std::string> nameIds){
         FileData *fileData = GetFileData(nameId);
         if (fileData == nullptr) {
             printf("Unable to load asset '%s' (Did you set the SC base folder ?).\n",nameId.c_str());
-            exit(-1);
+            continue;
         }
         tre->InitFromRAM(nameId.c_str(), fileData->data, fileData->size);
         

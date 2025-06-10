@@ -9,7 +9,7 @@
 
 
 DebugStrike::DebugStrike() : SCStrike(){
-   
+
 }
 
 DebugStrike::~DebugStrike() {}
@@ -132,6 +132,10 @@ void DebugStrike::loadPlane() {
         //this->plane_to_load = planes.indexOf(plane);
         RSEntity *plane_to_load = new RSEntity(&Assets);
         TreEntry *entry = Assets.GetEntryByName(Assets.object_root_path + plane_name + ".IFF");
+        if (entry == nullptr) {
+            printf("Unable to load plane %s\n", plane_name.c_str());
+            return;
+        }
         plane_to_load->InitFromRAM(entry->data, entry->size);
         BoudingBox *bb = plane_to_load->GetBoudingBpx();
         envergure = (bb->max.z - bb->min.z) / 2.0f;
@@ -445,6 +449,33 @@ void DebugStrike::radar() {
         line_end = ImVec2(canvas_pos.x + canvas_size.x, line_start.y);
         draw_list->AddLine(line_start, line_end, IM_COL32(200, 200, 200, 255));
     }
+    
+    for (auto runway: this->current_mission->area->objectOverlay) {
+        if (runway.vertices && runway.nbTriangles > 0) {
+            ImVec2 runway_pos;
+            for (int i = 0; i < runway.nbTriangles; i++) {
+                AreaOverlayTriangles triangle = runway.trianles[i];
+                std::vector<Vector3D> vertices;
+                for (auto vid: triangle.verticesIdx) {
+                    Vector3D v = {
+                        (float)runway.vertices[vid].x,
+                        (float)runway.vertices[vid].y,
+                        (float)runway.vertices[vid].z
+                    };
+                    vertices.push_back(v);
+                }
+                ImVec2 p1 = ImVec2(canvas_center.x + vertices[0].x * scale_x,
+                                canvas_center.y - vertices[0].z * scale_z);
+                ImVec2 p2 = ImVec2(canvas_center.x + vertices[1].x * scale_x,
+                                    canvas_center.y - vertices[1].z * scale_z);
+                ImVec2 p3 = ImVec2(canvas_center.x + vertices[2].x * scale_x,
+                                    canvas_center.y - vertices[2].z * scale_z);
+                runway_pos = p3;
+                draw_list->AddTriangleFilled(p1, p2, p3, IM_COL32(0, 255, 0, 100));
+            }
+            draw_list->AddText(runway_pos, IM_COL32(255, 255, 255, 255),"RUNWAY");
+        }
+    }
     for (auto area : this->current_mission->mission->mission_data.areas) {
         if (area) {
             // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
@@ -452,9 +483,6 @@ void DebugStrike::radar() {
             float world_z = -area->position.z;
             ImVec2 area_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
                                             canvas_center.y - world_z * scale_z);
-            
-            
-            // Draw a square centered at the area's computed canvas position.
             ImVec2 top_left = ImVec2(area_canvas_pos.x - area->AreaWidth*scale_x *0.5f,
                                     area_canvas_pos.y - area->AreaWidth*scale_z * 0.5f);
             ImVec2 bottom_right = ImVec2(area_canvas_pos.x + area->AreaWidth*scale_x * 0.5f,
@@ -462,9 +490,27 @@ void DebugStrike::radar() {
             
             draw_list->AddRect(top_left, bottom_right, IM_COL32(0, 255, 0, 255));
             
-            // Optionally, display the area id near the square.
             draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(255, 255, 255, 255),
                                 area->AreaName);
+        }
+    }
+    for (auto spot: this->current_mission->mission->mission_data.spots) {
+        if (spot) {
+            // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
+            float world_x = spot->position.x;
+            float world_z = -spot->position.z;
+            ImVec2 spot_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
+                                            canvas_center.y - world_z * scale_z);
+            
+            ImVec2 top_left = ImVec2(spot_canvas_pos.x - 5.0f * 0.5f,
+                                    spot_canvas_pos.y - 5.0f * 0.5f);
+            ImVec2 bottom_right = ImVec2(spot_canvas_pos.x + 5.0f * 0.5f,
+                                        spot_canvas_pos.y + 5.0f * 0.5f);
+            
+            draw_list->AddRect(top_left, bottom_right, IM_COL32(0, 255, 255, 255));
+
+            draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(255, 255, 255, 255),
+                                ("SPOT: " + std::to_string(spot->id)).c_str());
         }
     }
     for (auto actor : this->current_mission->actors) {
@@ -472,6 +518,7 @@ void DebugStrike::radar() {
             // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
             float world_x = actor->plane->x;
             float world_z = -actor->plane->z;
+
             ImVec2 actor_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
                                             canvas_center.y - world_z * scale_z);
             
@@ -483,8 +530,15 @@ void DebugStrike::radar() {
                                     actor_canvas_pos.y - square_size * 0.5f);
             ImVec2 bottom_right = ImVec2(actor_canvas_pos.x + square_size * 0.5f,
                                         actor_canvas_pos.y + square_size * 0.5f);
-            
-            draw_list->AddRect(top_left, bottom_right, IM_COL32(255, 0, 0, 255));
+            ImU32 actor_color = IM_COL32(128, 128, 128, 255);
+            if (actor->is_active) {
+                actor_color = IM_COL32(0, 255, 0, 255);
+            } else if (actor->is_destroyed) {
+                actor_color = IM_COL32(128, 0, 128, 255);
+            } else if (actor->plane == this->player_plane) {
+                actor_color = IM_COL32(255, 0, 0, 255);
+            }
+            draw_list->AddRect(top_left, bottom_right, actor_color);
             for (auto wp: actor->plane->weaps_object) {
                 if (wp) {
                     // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
@@ -557,6 +611,36 @@ void DebugStrike::radar() {
             // Optionally, display the actor id near the square.
             draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y),  IM_COL32(255, 255, 255, 255),
                                 actor->actor_name.c_str());
+        }
+    }
+    for (auto scene : this->current_mission->mission->mission_data.scenes) {
+        if (scene) {
+            
+            int area_id = scene->area_id;
+            float world_x = 0.0f;
+            float world_z = 0.0f;
+            if (area_id < 0 || area_id >= this->current_mission->mission->mission_data.areas.size()) {
+                
+            } else {
+                world_x = this->current_mission->mission->mission_data.areas[area_id]->position.x;
+                world_z = -this->current_mission->mission->mission_data.areas[area_id]->position.z;
+            }
+
+            
+            ImVec2 scene_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
+                                            canvas_center.y - world_z * scale_z);
+            
+            // Define square size.
+            float square_size = 30.0f;
+            
+            // Draw a square centered at the scene's computed canvas position.
+            ImVec2 top_left = ImVec2(scene_canvas_pos.x - square_size * 0.5f,
+                                    scene_canvas_pos.y - square_size * 0.5f);
+            ImVec2 bottom_right = ImVec2(scene_canvas_pos.x + square_size * 0.5f,
+                                        scene_canvas_pos.y + square_size * 0.5f);
+            draw_list->AddRect(top_left, bottom_right, IM_COL32(0, 255, 255, 255));
+            draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(255, 255, 255, 255),
+                                ("Scene: " + std::to_string(scene->is_active)).c_str());
         }
     }
 }
