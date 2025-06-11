@@ -398,6 +398,9 @@ bool SCMissionActorsPlayer::land(uint8_t arg) {
  */
 bool SCMissionActorsPlayer::flyToWaypoint(uint8_t arg) {
     SCMissionWaypoint *waypoint = new SCMissionWaypoint();
+    if (arg >= this->mission->mission->mission_data.spots.size()) {
+        return false; // Invalid waypoint ID
+    }
     waypoint->spot = this->mission->mission->mission_data.spots[arg];
     waypoint->objective = new std::string("Fly to\nWay Point");
     this->mission->waypoints.push_back(waypoint);
