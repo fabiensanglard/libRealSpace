@@ -7,6 +7,8 @@ private:
     float roll_input{0.0f};
     float yaw_input{0.0f};
 
+    Vector3D up {0.0f, 0.0f, 0.0f};
+    Vector3D forward {0.0f, 0.0f, 0.0f};
     void updatePosition();
     void updateAcceleration();
 

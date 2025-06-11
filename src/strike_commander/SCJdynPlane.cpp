@@ -236,7 +236,13 @@ void SCJdynPlane::Render() {
             }
             area = std::fabs(area) / 2.0f;
         }
+        Renderer.drawLine(pos, up, {0.0f, 1.0f, 0.0f});
+        
+        Renderer.drawLine(pos, forward, {1.0f, 0.0f, 1.0f});
+        
     }
+    
+    //Renderer.drawLine({this->x, this->y, this->z}, forward, {1.0f, 0.0f, 0.0f});
 }
 void SCJdynPlane::updatePosition() {
     this->ptw.Identity();
@@ -310,6 +316,30 @@ void SCJdynPlane::updatePosition() {
     this->vx = this->incremental.v[3][0];
     this->vy = this->incremental.v[3][1];
     this->vz = this->incremental.v[3][2];
+
+    // Calculer le vecteur UP à partir des angles roll, pitch et yaw
+    float cosYaw   = cosf(this->yaw);
+    float sinYaw   = sinf(this->yaw);
+    float cosPitch = cosf(this->pitch);
+    float sinPitch = sinf(this->pitch);
+    float cosRoll  = cosf(this->roll);
+    float sinRoll  = sinf(this->roll);
+
+    
+    this->up.x = -cosYaw * sinRoll + sinYaw * cosRoll * sinPitch;
+    this->up.y = cosRoll * cosPitch;
+    this->up.z = sinYaw * sinRoll + cosYaw * cosRoll * sinPitch;
+
+    this->up.Normalize();
+    this->up.Scale(5.0f);
+    
+    this->forward.x = -cosf(this->pitch) * sinf(this->yaw);
+    this->forward.y = sinf(this->pitch);
+    this->forward.z = -cosf(this->pitch) * cosf(this->yaw);
+    this->forward.Normalize();
+    
+    this->forward.Scale(5.0f);
+    
 
 }
 void SCJdynPlane::updateAcceleration() {
