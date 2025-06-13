@@ -9,8 +9,17 @@ private:
 
     Vector3D up {0.0f, 0.0f, 0.0f};
     Vector3D forward {0.0f, 0.0f, 0.0f};
+
+    Vector3D thrust_vector {0.0f, 0.0f, 0.0f};
+    Vector3D lift_vector {0.0f, 0.0f, 0.0f};
+    Vector3D gravity_vector {0.0f, 0.0f, 0.0f};
+    Vector3D drag_vector {0.0f, 0.0f, 0.0f};
+    Vector3D acceleration {0.0f, 0.0f, 0.0f};
+    Vector3D velocity {0.0f, 0.0f, 0.0f};
+    
     void updatePosition();
     void updateAcceleration();
+    void applyPhysicsForces();
 
 public:
     SCJdynPlane();

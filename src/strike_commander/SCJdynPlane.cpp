@@ -40,7 +40,7 @@ void SCJdynPlane::Simulate() {
     this->roll_speed = (int) radToDegree(this->roll_input);
     float rudder = 0.0f;
 
-    float temp = rudder * this->vz - (2.0f) * this->vx;
+    /*float temp = rudder * this->vz - (2.0f) * this->vx;
     int itemp = (int) temp;
     itemp -= (int) this->yaw_input;
     int TDELAY = tps/4;
@@ -52,9 +52,9 @@ void SCJdynPlane::Simulate() {
     }
 	
     this->yaw_input += itemp;
-    this->azimuth_speedf = this->yaw_input;
+    this->azimuth_speedf = this->yaw_input;*/
     this->updatePosition();
-    this->updateAcceleration();
+    this->applyPhysicsForces();
 
     this->airspeed = -(int)(this->fps_knots * this->vz);
     this->azimuthf = (this->yaw * 180.0f / (float) M_PI) * 10.0f;
@@ -111,8 +111,6 @@ void SCJdynPlane::Render() {
             this->elevationf/10.0f,
             -this->twist/10.0f
         };
-        Renderer.drawLine({this->x, this->y, this->z}, {this->vx*10.0f, this->vy*10.0f, this->vz*10.0f}, {1.0f, 1.0f, 0.0f},orientation);
-        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*100.0f, this->ay*100.0f, this->az*100.0f}, {1.0f, 0.0f, 1.0f},orientation);
         orientation.x += 90.0f;
         int vert_id = 0;
         int wing_id_left = 0;
@@ -237,8 +235,13 @@ void SCJdynPlane::Render() {
             area = std::fabs(area) / 2.0f;
         }
         Renderer.drawLine(pos, up, {0.0f, 1.0f, 0.0f});
-        
         Renderer.drawLine(pos, forward, {1.0f, 0.0f, 1.0f});
+        Renderer.drawLine(pos, thrust_vector, {0.0f, 0.0f, 1.0f});
+        Renderer.drawLine(pos, lift_vector, {0.0f, 1.0f, 1.0f});
+        Renderer.drawLine(pos, gravity_vector, {1.0f, 0.0f, 0.0f});
+        Renderer.drawLine(pos, this->drag_vector, {0.5f, 0.5f, 0.5f});
+        Renderer.drawLine(pos, this->acceleration, {1.0f, 0.5f, 0.0f});
+        Renderer.drawLine(pos, this->velocity, {0.0f, 1.0f, 0.5f});
         
     }
     
@@ -252,7 +255,7 @@ void SCJdynPlane::updatePosition() {
     this->ptw.rotateM(this->pitch, 1, 0, 0);
     this->ptw.rotateM(this->roll, 0, 0, 1);
 
-    this->ptw.translateM(this->vx, this->vy, this->vz);
+    //this->ptw.translateM(this->vx, this->vy, this->vz);
 
     if (yaw_input != 0.0f) {
         this->ptw.rotateM(tenthOfDegreeToRad(yaw_input), 0, 1, 0);    
@@ -265,9 +268,9 @@ void SCJdynPlane::updatePosition() {
     }
     
 
-    this->x = this->ptw.v[3][0];
+    /*this->x = this->ptw.v[3][0];
     this->y = this->ptw.v[3][1];
-    this->z = this->ptw.v[3][2];
+    this->z = this->ptw.v[3][2];*/
 
     this->pitch = -asinf(this->ptw.v[2][1]);
     float cos_pitch = cosf(this->pitch);
@@ -311,11 +314,11 @@ void SCJdynPlane::updatePosition() {
         this->incremental.rotateM(-tenthOfDegreeToRad(yaw_input), 0, 1, 0);
     }
     
-    this->incremental.translateM(this->vx, this->vy, this->vz);
+    /*this->incremental.translateM(this->vx, this->vy, this->vz);
 
     this->vx = this->incremental.v[3][0];
     this->vy = this->incremental.v[3][1];
-    this->vz = this->incremental.v[3][2];
+    this->vz = this->incremental.v[3][2];*/
 
     // Calculer le vecteur UP à partir des angles roll, pitch et yaw
     float cosYaw   = cosf(this->yaw);
@@ -331,16 +334,112 @@ void SCJdynPlane::updatePosition() {
     this->up.z = sinYaw * sinRoll + cosYaw * cosRoll * sinPitch;
 
     this->up.Normalize();
-    this->up.Scale(5.0f);
+    //this->up.Scale(5.0f);
     
-    this->forward.x = -cosf(this->pitch) * sinf(this->yaw);
-    this->forward.y = sinf(this->pitch);
-    this->forward.z = -cosf(this->pitch) * cosf(this->yaw);
+    this->forward.x = cosf(this->pitch) * sinf(this->yaw);
+    this->forward.y = -sinf(this->pitch);
+    this->forward.z = cosf(this->pitch) * cosf(this->yaw);
     this->forward.Normalize();
     
-    this->forward.Scale(5.0f);
+}
+void SCJdynPlane::applyPhysicsForces() {
+    float deltaTime = 1.0f / static_cast<float>(this->tps);
+    float mass = this->object->entity->weight_in_kg;
     
-
+    // ========== CALCUL DES FORCES ==========
+    
+    // 1. Force de gravité (toujours vers le bas dans le référentiel monde)
+    this->gravity_vector = {0.0f, -GRAVITY * mass, 0.0f};
+    
+    // 2. Force de poussée (dans la direction avant de l'avion)
+    float thrustMagnitude = -0.01f * thrust * Mthrust;
+    this->thrust_force = thrustMagnitude; // Stocker la force de poussée pour le rendu de débogage
+    this->thrust_vector = this->forward;
+    this->thrust_vector.Scale(thrustMagnitude);
+    
+    // 3. Force de portance (perpendiculaire à la vitesse et dans le plan de l'aile)
+    this->velocity = {this->vx, this->vy, this->vz};
+    float airSpeed = velocity.Length();
+    
+    this->lift_vector = {0.0f, 0.0f, 0.0f};
+    if (airSpeed > 0.1f) { // Éviter division par zéro
+        // Calcul de la portance: L = 0.5 * ρ * V² * S * CL
+        float dynamicPressure = 0.5f * AIR_DENSITY * airSpeed * airSpeed;
+        
+        // Angle d'attaque approximatif (angle entre vitesse et direction avant)
+        Vector3D velocityNorm = this->velocity;
+        velocityNorm.Normalize();
+        float angleOfAttack = acosf(std::clamp(velocityNorm.DotProduct(&this->forward), -1.0f, 1.0f));
+        
+        // Coefficient de portance basé sur l'angle d'attaque
+        float liftCoeff = LIFT_COEFFICIENT * sinf(2.0f * angleOfAttack);
+        liftCoeff = std::clamp(liftCoeff, 0.0f, MAX_LIFT_COEFFICIENT);
+        
+        float liftMagnitude = dynamicPressure * WING_AREA * liftCoeff;
+        
+        this->lift = liftMagnitude; // Stocker la portance pour le rendu de débogage
+        // Direction de la portance: perpendiculaire à la vitesse, vers le haut de l'avion
+        Vector3D velocityRight = velocity.CrossProduct(&this->up);
+        velocityRight.Normalize();
+        this->lift_vector = velocityRight.CrossProduct(&velocity);
+        this->lift_vector.Normalize();
+        this->lift_vector.Scale(liftMagnitude);
+    }
+    // 4. Force de traînée (opposée à la vitesse)
+    this->drag_vector = {0.0f, 0.0f, 0.0f};
+    if (airSpeed > 0.1f) {
+        float dynamicPressure = 0.5f * AIR_DENSITY * airSpeed * airSpeed;
+        float dragMagnitude = dynamicPressure * WING_AREA * DRAG_COEFFICIENT;
+        this->drag = dragMagnitude; // Stocker la traînée pour le rendu de débogage
+        Vector3D velocityNorm = velocity;
+        velocityNorm.Normalize();
+        this->drag_vector = velocityNorm;
+        this->drag_vector.Scale(-dragMagnitude); // Opposée à la vitesse
+    }
+    this->drag_vector = {0.0f, 0.0f, 0.0f}; // Désactiver la traînée pour l'instant
+    // ========== SOMME DES FORCES ==========
+    Vector3D totalForce = {
+        this->gravity_vector.x + this->thrust_vector.x + this->lift_vector.x + this->drag_vector.x,
+        this->gravity_vector.y + this->thrust_vector.y + this->lift_vector.y + this->drag_vector.y,
+        this->gravity_vector.z + this->thrust_vector.z + this->lift_vector.z + this->drag_vector.z
+    };
+    
+    // ========== CALCUL DE L'ACCÉLÉRATION ==========
+    this->acceleration = {
+        totalForce.x / mass,
+        totalForce.y / mass,
+        totalForce.z / mass
+    };
+    
+    // Stockage pour le rendu de débogage
+    this->ax = this->acceleration.x;
+    this->ay = this->acceleration.y;
+    this->az = this->acceleration.z;
+    
+    // ========== INTÉGRATION DE LA VITESSE ==========
+    this->vx = acceleration.x ;
+    this->vy = acceleration.y ;
+    this->vz = acceleration.z ;
+    
+    // ========== INTÉGRATION DE LA POSITION ==========
+    this->x += this->vx;
+    this->y += this->vy;
+    this->z += this->vz;
+    
+    // ========== GESTION DU SOL ==========
+    float groundLevel = this->area->getY(this->x, this->z);
+    
+    if (this->y <= groundLevel) {
+        this->y = groundLevel;
+        this->vy = 0.0f;
+        this->on_ground = true;
+        
+        // Friction au sol
+        this->vx *= 0.95f;
+        this->vz *= 0.95f;
+    } else {
+        this->on_ground = false;
+    }
 }
 void SCJdynPlane::updateAcceleration() {
     float deltaTime = 1.0f / (float) this->tps;
