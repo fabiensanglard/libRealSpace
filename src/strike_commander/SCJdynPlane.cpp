@@ -234,8 +234,12 @@ void SCJdynPlane::Render() {
             }
             area = std::fabs(area) / 2.0f;
         }
-        Renderer.drawLine(pos, up, {0.0f, 1.0f, 0.0f});
-        Renderer.drawLine(pos, forward, {1.0f, 0.0f, 1.0f});
+        Vector3D scaled_forward{forward.x,forward.y,forward.z};
+        Vector3D scaled_up{up.x,up.y,up.z};
+        scaled_up.Scale(5.0f);
+        scaled_forward.Scale(5.0f);
+        Renderer.drawLine(pos, scaled_up, {0.0f, 1.0f, 0.0f});
+        Renderer.drawLine(pos, scaled_forward, {1.0f, 0.0f, 1.0f});
         Renderer.drawLine(pos, thrust_vector, {0.0f, 0.0f, 1.0f});
         Renderer.drawLine(pos, lift_vector, {0.0f, 1.0f, 1.0f});
         Renderer.drawLine(pos, gravity_vector, {1.0f, 0.0f, 0.0f});
@@ -334,11 +338,11 @@ void SCJdynPlane::updatePosition() {
     this->up.z = sinYaw * sinRoll + cosYaw * cosRoll * sinPitch;
 
     this->up.Normalize();
-    //this->up.Scale(5.0f);
-    
-    this->forward.x = cosf(this->pitch) * sinf(this->yaw);
-    this->forward.y = -sinf(this->pitch);
-    this->forward.z = cosf(this->pitch) * cosf(this->yaw);
+    // Calcul du vecteur FORWARD à partir des angles roll, pitch et yaw
+    this->forward.x = -sinYaw * cosPitch;
+    this->forward.y = sinPitch;
+    this->forward.z = -cosYaw * cosPitch;
+
     this->forward.Normalize();
     
 }
@@ -352,22 +356,36 @@ void SCJdynPlane::applyPhysicsForces() {
     this->gravity_vector = {0.0f, -GRAVITY * mass, 0.0f};
     
     // 2. Force de poussée (dans la direction avant de l'avion)
-    float thrustMagnitude = -0.01f * thrust * Mthrust;
+    float thrustMagnitude = 0.01f * thrust * Mthrust;
     this->thrust_force = thrustMagnitude; // Stocker la force de poussée pour le rendu de débogage
-    this->thrust_vector = this->forward;
+    this->thrust_vector  = {0, 0, -1};
     this->thrust_vector.Scale(thrustMagnitude);
     
     // 3. Force de portance (perpendiculaire à la vitesse et dans le plan de l'aile)
-    this->velocity = {this->vx, this->vy, this->vz};
+    Matrix direction;
+    direction.Identity();
+    //direction.translateM(this->x, this->y, this->z);
+
+    direction.rotateM(this->yaw, 0, 1, 0);
+    direction.rotateM(this->pitch, 1, 0, 0);
+    direction.rotateM(this->roll, 0, 0, 1);
+
+    this->velocity = {
+        direction.v[2][0],
+        direction.v[2][1],
+        direction.v[2][2],
+    };
+    velocity.Normalize();
+    
     float airSpeed = velocity.Length();
     
-    this->lift_vector = {0.0f, 0.0f, 0.0f};
+    this->lift_vector = {0.0f, 1.0f, 0.0f};
     if (airSpeed > 0.1f) { // Éviter division par zéro
         // Calcul de la portance: L = 0.5 * ρ * V² * S * CL
         float dynamicPressure = 0.5f * AIR_DENSITY * airSpeed * airSpeed;
         
         // Angle d'attaque approximatif (angle entre vitesse et direction avant)
-        Vector3D velocityNorm = this->velocity;
+        Vector3D velocityNorm = {this->velocity.x, this->velocity.y, this->velocity.z};
         velocityNorm.Normalize();
         float angleOfAttack = acosf(std::clamp(velocityNorm.DotProduct(&this->forward), -1.0f, 1.0f));
         
@@ -375,28 +393,20 @@ void SCJdynPlane::applyPhysicsForces() {
         float liftCoeff = LIFT_COEFFICIENT * sinf(2.0f * angleOfAttack);
         liftCoeff = std::clamp(liftCoeff, 0.0f, MAX_LIFT_COEFFICIENT);
         
-        float liftMagnitude = dynamicPressure * WING_AREA * liftCoeff;
+        float liftMagnitude = dynamicPressure * this->object->entity->wing_area * liftCoeff;
         
         this->lift = liftMagnitude; // Stocker la portance pour le rendu de débogage
         // Direction de la portance: perpendiculaire à la vitesse, vers le haut de l'avion
-        Vector3D velocityRight = velocity.CrossProduct(&this->up);
-        velocityRight.Normalize();
-        this->lift_vector = velocityRight.CrossProduct(&velocity);
-        this->lift_vector.Normalize();
         this->lift_vector.Scale(liftMagnitude);
     }
     // 4. Force de traînée (opposée à la vitesse)
-    this->drag_vector = {0.0f, 0.0f, 0.0f};
+    this->drag_vector = {0.0f, 0.0f, 1.0f};
     if (airSpeed > 0.1f) {
         float dynamicPressure = 0.5f * AIR_DENSITY * airSpeed * airSpeed;
-        float dragMagnitude = dynamicPressure * WING_AREA * DRAG_COEFFICIENT;
+        float dragMagnitude = dynamicPressure * this->object->entity->wing_area * DRAG_COEFFICIENT;
         this->drag = dragMagnitude; // Stocker la traînée pour le rendu de débogage
-        Vector3D velocityNorm = velocity;
-        velocityNorm.Normalize();
-        this->drag_vector = velocityNorm;
         this->drag_vector.Scale(-dragMagnitude); // Opposée à la vitesse
     }
-    this->drag_vector = {0.0f, 0.0f, 0.0f}; // Désactiver la traînée pour l'instant
     // ========== SOMME DES FORCES ==========
     Vector3D totalForce = {
         this->gravity_vector.x + this->thrust_vector.x + this->lift_vector.x + this->drag_vector.x,
@@ -404,11 +414,12 @@ void SCJdynPlane::applyPhysicsForces() {
         this->gravity_vector.z + this->thrust_vector.z + this->lift_vector.z + this->drag_vector.z
     };
     
+    
     // ========== CALCUL DE L'ACCÉLÉRATION ==========
     this->acceleration = {
-        totalForce.x / mass,
-        totalForce.y / mass,
-        totalForce.z / mass
+        this->velocity.x * totalForce.x / mass,
+        this->velocity.y * totalForce.y / mass,
+        this->velocity.z * totalForce.z / mass
     };
     
     // Stockage pour le rendu de débogage
@@ -417,9 +428,9 @@ void SCJdynPlane::applyPhysicsForces() {
     this->az = this->acceleration.z;
     
     // ========== INTÉGRATION DE LA VITESSE ==========
-    this->vx = acceleration.x ;
-    this->vy = acceleration.y ;
-    this->vz = acceleration.z ;
+    this->vx += acceleration.x * deltaTime;
+    this->vy += acceleration.y * deltaTime;
+    this->vz += acceleration.z * deltaTime;
     
     // ========== INTÉGRATION DE LA POSITION ==========
     this->x += this->vx;
@@ -440,6 +451,7 @@ void SCJdynPlane::applyPhysicsForces() {
     } else {
         this->on_ground = false;
     }
+    this->velocity.Scale(10.0f);
 }
 void SCJdynPlane::updateAcceleration() {
     float deltaTime = 1.0f / (float) this->tps;
