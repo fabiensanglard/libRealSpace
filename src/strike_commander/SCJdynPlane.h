@@ -14,12 +14,26 @@ private:
     Vector3D lift_vector {0.0f, 0.0f, 0.0f};
     Vector3D gravity_vector {0.0f, 0.0f, 0.0f};
     Vector3D drag_vector {0.0f, 0.0f, 0.0f};
+
+
     Vector3D acceleration {0.0f, 0.0f, 0.0f};
     Vector3D velocity {0.0f, 0.0f, 0.0f};
     
+    float lift_force {0.0f};
+    float drag_force {0.0f};
+    float gravity_drag_force {0.0f};
+    float lift_drag_force {0.0f};
+    float gravity_force {0.0f};
+
+    float airspeed_in_ms {0.0f};
     void updatePosition();
     void updateAcceleration();
     void applyPhysicsForces();
+
+    void computeLift();
+    void computeDrag();
+    void computeGravity();
+    void computeThrust();
 
 public:
     SCJdynPlane();
