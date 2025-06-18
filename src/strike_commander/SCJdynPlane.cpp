@@ -614,14 +614,17 @@ void SCJdynPlane::updateAcceleration() {
 
     this->vx += this->ax;
     this->vz += this->az;
-    this->vy += this->ay;
-
+    
     if (this->y <= this->area->getY(this->x, this->z)) {
-        /* on ground	*/
-        this->on_ground = TRUE;
-        if (this->ay < 0.0f) {
-            this->vy = 0.0f;
+        float temp = 0.0f;
+        float mcos;
+        this->vx = 0.0;
+        temp = sinf(tenthOfDegreeToRad(this->elevationf));
+        mcos = cosf(tenthOfDegreeToRad(this->elevationf));
+        temp = this->vz * temp / mcos;
+        if (this->vy + this->ay < temp) {
+            this->ay = temp - this->vy;
         }
-        this->y = this->area->getY(this->x, this->z);
     }
+    this->vy += this->ay;
 }
