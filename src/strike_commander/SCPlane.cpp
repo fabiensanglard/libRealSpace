@@ -1030,7 +1030,7 @@ void SCPlane::Render() {
             this->elevationf/10.0f,
             -this->twist/10.0f
         };
-        Renderer.drawLine({this->x, this->y, this->z}, {this->vx*10.0f, this->vy*10.0f, this->vz*10.0f}, {1.0f, 1.0f, 0.0f}, orientation);
+        Renderer.drawLine({this->x, this->y, this->z}, {this->vx*10.0f, this->vy*10.0f, this->vz*10.0f}, {1.0f, 1.0f, 0.0f});
         Renderer.drawLine({this->x, this->y, this->z}, {this->ax*10000.0f, this->ay*10000.0f, this->az*10000.0f}, {1.0f, 0.0f, 1.0f}, orientation);
         orientation.x += 90.0f;
         for (auto vertex: this->object->entity->vertices) {

@@ -16,6 +16,9 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->velocity = {0.0f, 0.0f, 0.0f};
     this->thrust_force = 0.0f;
     this->lift_force = 0.0f;
+    this->vx = 0.0f;
+    this->vy = 0.0f;
+    this->vz = 0.0f;
 }
 SCJdynPlane::~SCJdynPlane() {
 
@@ -57,10 +60,10 @@ void SCJdynPlane::Simulate() {
     this->yaw_input += itemp;
     this->azimuth_speedf = this->yaw_input;
     this->updatePosition();
-    this->computeLift();
-    this->computeDrag();
     this->computeGravity();
     this->computeThrust();
+    this->computeLift();
+    this->computeDrag();
     this->updateAcceleration();
 
     this->airspeed = -(int)(this->fps_knots * this->vz);
@@ -263,6 +266,7 @@ void SCJdynPlane::Render() {
         ptw_down.Scale(5.0f);
         ptw_forward.Scale(5.0f);
         Renderer.drawLine(pos, ptw_down, {0.0f, 1.0f, 1.0f});
+        Renderer.drawLine(pos, {this->vx*10.0f, this->vy*10.0f, this->vz*10.0f}, {1.0f, 1.0f, 0.0f});
         Renderer.drawLine(pos, ptw_forward, {1.0f, 1.0f, 0.0f});
     }
     
@@ -332,9 +336,8 @@ void SCJdynPlane::updatePosition() {
         this->incremental.rotateM(-pitch_input, 1, 0, 0);
     }
     if (yaw_input != 0.0f) {
-        this->incremental.rotateM(-tenthOfDegreeToRad(yaw_input), 0, 1, 0);
+        this->incremental.rotateM(tenthOfDegreeToRad(-yaw_input), 0, 1, 0);
     }
-    
     this->incremental.translateM(this->vx, this->vy, this->vz);
 
     this->vx = this->incremental.v[3][0];
@@ -398,7 +401,7 @@ void SCJdynPlane::computeLift() {
 
     this->Spdf = .0025f * this->spoilers;
     this->Splf = 1.0f - .005f * this->spoilers;
-
+    this->kl = 1.0f;
     this->val = (this->vz >= 0.0);
     if (!this->val) {
         this->ae = this->vy / this->vz + this->tilt_factor;
@@ -504,16 +507,17 @@ void SCJdynPlane::computeDrag() {
 }
 void SCJdynPlane::computeGravity() {
     float deltaTime = 1.0f / static_cast<float>(this->tps);
-    this->gravity_force = this->object->entity->weight_in_kg * GRAVITY;
+    
     this->gravity = GRAVITY * deltaTime * deltaTime;
+    this->gravity_force = this->object->entity->weight_in_kg * this->gravity;
 }
 void SCJdynPlane::computeThrust() {
-    this->thrust_force = 0.01f * this->thrust * this->Mthrust ;
+    this->thrust_force = .01f * this->thrust * this->Mthrust;
 }
 void SCJdynPlane::updateAcceleration() {
     float deltaTime = 1.0f / static_cast<float>(this->tps);
     this->acceleration.z = this->thrust_force - this->drag_force - this->gravity_drag_force;
-    this->acceleration.y = +this->lift_force - this->gravity_force + this->lift_drag_force;
+    this->acceleration.y = this->lift_force - this->gravity_force + this->lift_drag_force;
 
     this->ax = 0.0f;
     this->ay = (this->acceleration.y / this->object->entity->weight_in_kg) * deltaTime;
