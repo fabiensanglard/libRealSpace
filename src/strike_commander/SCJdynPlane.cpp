@@ -585,21 +585,23 @@ void SCJdynPlane::processInput() {
     }
     this->elevation_speedf += itemp;
     float aztemp;
-    temp = this->rudder * this->vz - (2.0f) * this->vx;
+    float max_turnrate = 0.0f;
+    max_turnrate = 600.0f / tps;
+    temp = this->rudder * this->vz - (4.0f) * this->vx;
     if (this->on_ground) {
         itemp = (int)(16.0f * temp);
-        if (itemp < -MAX_TURNRATE || itemp > MAX_TURNRATE) {
+        if (itemp < -max_turnrate || itemp > max_turnrate) {
             /* clip turn rate	*/
             if (itemp < 0) {
-                itemp = -MAX_TURNRATE;
+                itemp = -max_turnrate;
             } else {
-                itemp = MAX_TURNRATE;
+                itemp = max_turnrate;
             }
             /* decrease with velocity */
             if (fabs(this->vz) > 10.0f / this->tps) {
                 /* skid effect */
                 temp = 0.4f * this->tps * (this->rudder * this->vz - .75f);
-                if (temp < -MAX_TURNRATE || temp > MAX_TURNRATE) {
+                if (temp < -max_turnrate || temp > max_turnrate) {
                     temp = (float)itemp;
                 }
                 itemp -= (int)temp;
