@@ -1,5 +1,6 @@
 #pragma once
-
+int mrandom(int maxr);
+void gl_sincos(float a, float *b, float *c);
 class SCJdynPlane : public SCPlane {
 private:
 
@@ -34,7 +35,7 @@ private:
     void computeDrag();
     void computeGravity();
     void computeThrust();
-
+    void processInput();
 public:
     SCJdynPlane();
     SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELEVF_CSTE, float ROLLFF_CSTE, float s, float W,

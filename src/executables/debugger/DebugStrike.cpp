@@ -151,6 +151,8 @@ void DebugStrike::loadPlane() {
         pitch_rate_max = plane_to_load->jdyn->TWIST_RATE;
         SCPlane *new_plane = nullptr;
         if (simple_simulation) {
+            surface = surface * 10.7639f;
+            envergure = envergure * 3.28084f;
             new_plane = new SCJdynPlane(
                 10.0f,
                 -7.0f,
