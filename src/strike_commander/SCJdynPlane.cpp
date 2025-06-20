@@ -482,8 +482,6 @@ void SCJdynPlane::Render() {
             this->acceleration.z * 10.0f
         }, {0.0f, 1.0f, 0.0f});
     }
-    
-    //Renderer.drawLine({this->x, this->y, this->z}, forward, {1.0f, 0.0f, 0.0f});
 }
 void SCJdynPlane::updatePosition() {
     float temp{0.0f};
