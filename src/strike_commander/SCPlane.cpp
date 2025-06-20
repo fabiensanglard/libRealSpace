@@ -673,7 +673,7 @@ void SCPlane::OrigSimulate() {
             this->g_limit = TRUE;
             goto relift;
         }
-
+        
         /* engine thrust		*/
         this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->Mthrust;
         this->az = this->az - this->thrust_force ;
@@ -716,6 +716,7 @@ void SCPlane::OrigSimulate() {
                 this->ay = temp - this->vy;
             }
         }
+        this->g_load = this->ay / this->gravity;
         this->vy += this->ay;
 
         this->airspeed = -(int)(this->fps_knots * this->vz);

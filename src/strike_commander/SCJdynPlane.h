@@ -4,9 +4,9 @@ void gl_sincos(float a, float *b, float *c);
 class SCJdynPlane : public SCPlane {
 private:
 
-    float pitch_input{0.0f};
-    float roll_input{0.0f};
-    float yaw_input{0.0f};
+    float pitch_speed{0.0f};
+    float roll_speed{0.0f};
+    float yaw_speed{0.0f};
 
     Vector3D up {0.0f, 0.0f, 0.0f};
     Vector3D forward {0.0f, 0.0f, 0.0f};

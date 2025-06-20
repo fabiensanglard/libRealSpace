@@ -124,8 +124,7 @@ protected:
     float Cdp;
     float ipi_AR;
     float ie_pi_AR;
-    float Lmax;
-    float Lmin;
+
     float ELEVF;
     float ROLLF;
     float last_zdrag;
@@ -182,6 +181,10 @@ protected:
     
 public:
     unsigned int status;
+    float g_load{0.0f};
+    float Lmax;
+    float Lmin;
+    
     float s;
     float b;
     float W;

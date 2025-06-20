@@ -47,6 +47,7 @@ void DebugStrike::simInfo() {
     ImGui::Text("Drag %.3f", this->player_plane->drag);
     ImGui::Text("Inv mass %.8f", this->player_plane->inverse_mass);
     ImGui::Text("Thrust %.3f", this->player_plane->thrust_force);
+    ImGui::Text("G-Load %.3f", this->player_plane->g_load);
     ImGui::Text("ptw");
     for (int o = 0; o < 4; o++) {
     ImGui::Text("PTW[%d]=[%f,%f,%f,%f]", o, this->player_plane->ptw.v[o][0], this->player_plane->ptw.v[o][1],
@@ -112,7 +113,7 @@ void DebugStrike::loadPlane() {
     static float roll_rate_max = 0.0f;
     static float pitch_rate_max = 0.0f;
     static std::string plane_name = "";
-    static bool simple_simulation = false;
+    static bool simple_simulation = true;
     
     if (ImGui::BeginCombo("Plane", plane_name.c_str(), 0)) {
         for (auto plane : planes) {
@@ -172,6 +173,7 @@ void DebugStrike::loadPlane() {
                 player_plane->y,
                 player_plane->z
             );
+            new_plane->yaw = player_plane->azimuthf;
         } else {
             surface = surface * 10.7639f;
             envergure = envergure * 3.28084f;
@@ -194,13 +196,13 @@ void DebugStrike::loadPlane() {
                 player_plane->y,
                 player_plane->z
             );
+            
         }
         
         new_plane->simple_simulation = false;
         new_plane->object = player_plane->object;
         new_plane->object->entity = plane_to_load;
         new_plane->azimuthf = player_plane->azimuthf;
-        new_plane->yaw = player_plane->yaw;
         this->player_plane = new_plane;
         this->current_mission->player->plane = this->player_plane;
 
@@ -216,6 +218,7 @@ void DebugStrike::loadPlane() {
     ImGui::Text("Induced efficiency: %.2f", ie_pi_AR);
     ImGui::Text("Roll rate max: %.2f", roll_rate_max);
     ImGui::Text("Pitch rate max: %.2f", pitch_rate_max);
+    ImGui::Text("G-Load: Max %.2f, Min %.2f", this->player_plane->Lmax, this->player_plane->Lmin);
 }
 void DebugStrike::simConfig() {
     static bool azymuth_control = false;
