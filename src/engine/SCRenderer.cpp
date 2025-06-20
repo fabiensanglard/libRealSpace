@@ -1033,7 +1033,9 @@ void SCRenderer::renderQuad(MapVertex *currentVertex, MapVertex *rightVertex, Ma
 void SCRenderer::renderBlock(RSArea *area, int LOD, int i, bool renderTexture) {
 
     AreaBlock *block = area->GetAreaBlockByID(LOD, i);
-
+    if (block == nullptr) {
+        return;
+    }
     uint32_t sideSize = block->sideSize;
 
     // printf("Rendering block %d at x %f,z %f\n", i, block->vertice[0].v.x, block->vertice[0].v.z);

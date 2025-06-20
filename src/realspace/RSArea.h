@@ -81,6 +81,9 @@ public:
     void InitFromPAKFileName(const char* pakFilename);
     
     inline AreaBlock* GetAreaBlockByID(int lod,int blockID){
+        if (blockID < 0 || blockID >= BLOCKS_PER_MAP) {
+            return nullptr;
+        }
         return &this->blocks[lod][blockID];
     }
     

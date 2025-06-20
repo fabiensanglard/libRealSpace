@@ -681,6 +681,7 @@ void SCPlane::OrigSimulate() {
         /* drag - needs to be broken into y/z components		*/
         this->Cd = this->Cdp + this->kl * this->uCl * this->uCl * this->ie_pi_AR + this->Cdc;
         this->zdrag = this->Cd * this->qs;
+        this->drag = this->zdrag;
         this->ydrag = this->vy * this->zdrag;
         this->zdrag = this->vz * this->zdrag;
         /* if vz is positive	*/

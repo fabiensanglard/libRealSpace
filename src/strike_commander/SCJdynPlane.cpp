@@ -33,10 +33,10 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->x = 0.0f;
     this->y = 0.0f;
     this->z = 0.0f;
-    this->twist = 0;
+    this->roll = 0;
     this->roll_speed = 0;
-    this->azimuthf = 0.0f;
-    this->elevationf = 0.0f;
+    this->yaw = 0.0f;
+    this->pitch = 0.0f;
     this->elevation_speedf = 0.0f;
     this->azimuth_speedf = 0.0f;
     this->airspeed = 0;
@@ -109,6 +109,38 @@ void SCJdynPlane::Simulate() {
 
         this->updatePosition();
         
+        /* compute speed of sound	*/
+        if (this->y <= 36000.0f) {
+            this->sos = -1116.0f / this->tps + (1116.0f - 968.0f) / this->tps / 36000.0f * this->y;
+        } else {
+            this->sos = -968.0f / this->tps;
+        }
+        itemp = ((int)this->y) >> 10;
+        if (itemp > 74) {
+            itemp = 74;
+        } else if (itemp < 0) {
+            itemp = 0;
+        }
+        this->ro2 = .5f * ro[itemp];
+        if (this->Cl < .2) {
+            this->mcc = .7166666f + .1666667f * this->Cl;
+        } else {
+            this->mcc = .7833333f - .1666667f * this->Cl;
+        }
+        /* and current mach number	*/
+        this->mach = this->vz / this->sos;
+        this->mratio = this->mach / this->mcc;
+        if (this->mratio < 1.034f) {
+            this->Cdc = 0.0f;
+        } else {
+            this->Cdc = .082f * this->mratio - 0.084788f;
+            if (this->Cdc > .03f)
+                this->Cdc = .03f;
+        }
+        if (this->spoilers > 0.0f) {
+            this->Cdc += this->Spdf;
+        }
+
         /****************************************************************/
         /*	check altitude for too high, and landing/takeoff            */
         /****************************************************************/
@@ -140,7 +172,7 @@ void SCJdynPlane::Simulate() {
                     this->Cdp *= 3.0;
                     /* allow reverse engines*/
                     this->min_throttle = -this->max_throttle;
-                    rating = report_card(-this->climbspeed, this->twist, (int)(this->vx * this->tps),
+                    rating = report_card(-this->climbspeed, this->roll, (int)(this->vx * this->tps),
                                             (int)(-this->vz * this->fps_knots), this->wheels);
                     /* oops - you crashed	*/
                     if (this->nocrash) {
@@ -175,22 +207,18 @@ void SCJdynPlane::Simulate() {
             }
             if (this->status > MEXPLODE) {
                 /* kill negative elevation */
-                if (this->elevationf < 0) {
-                    this->elevationf = 0;
+                if (this->pitch < 0) {
+                    this->pitch = 0;
                 }
-                /* kill any twist	*/
-                if (this->twist != 0) {
-                    this->twist = 0;
+                /* kill any roll	*/
+                if (this->roll != 0) {
+                    this->roll = 0;
                 }
             }
         }
-    } /* end not crashing	*/
+    }
 
-    /****************************************************************
-    /*	compute new velocities, accelerations
-    /****************************************************************/
-
-    /* out of gas	*/
+    
     if (this->fuel <= 0) {
         this->thrust = 0;
         this->max_throttle = 0;
@@ -210,9 +238,6 @@ void SCJdynPlane::Simulate() {
         this->airspeed = -(int)(this->fps_knots * this->vz);
         this->climbspeed = (short)(this->tps * (this->y - this->last_py));
 
-        this->vx += this->vx_add;
-        this->vy += this->vy_add;
-        this->vz += this->vz_add;
         if (this->thrust > 0) {
             itemp = this->thrust;
         } else {
@@ -265,6 +290,9 @@ void SCJdynPlane::Simulate() {
         }
     }
     this->tick_counter++;
+    this->azimuthf = this->yaw;
+    this->elevationf = this->pitch;
+    this->twist = this->roll;
 }
 void SCJdynPlane::Render() {
     if (this->object != nullptr) {
@@ -273,9 +301,9 @@ void SCJdynPlane::Render() {
             this->x, this->y, this->z
         };
         Vector3D orientation = {
-            this->azimuthf/10.0f + 90,
-            this->elevationf/10.0f,
-            -this->twist/10.0f
+            this->yaw/10.0f + 90,
+            this->pitch/10.0f,
+            -this->roll/10.0f
         };
         std::vector<std::tuple<Vector3D, RSEntity*>> weapons;
         for (auto weaps:this->weaps_load) {
@@ -463,18 +491,14 @@ void SCJdynPlane::Render() {
 }
 void SCJdynPlane::updatePosition() {
     float temp{0.0f};
+    
+    this->ptw.Identity();
+    this->ptw.translateM(this->x, this->y, this->z);
 
-    if (this->tick_counter % 100 == 0) {
-        // rebuild old ptw
-        // to keep it normalized
-
-        this->ptw.Identity();
-        this->ptw.translateM(this->x, this->y, this->z);
-
-        this->ptw.rotateM(tenthOfDegreeToRad(this->azimuthf), 0, 1, 0);
-        this->ptw.rotateM(tenthOfDegreeToRad(this->elevationf), 1, 0, 0);
-        this->ptw.rotateM(tenthOfDegreeToRad(this->twist), 0, 0, 1);
-    }
+    this->ptw.rotateM(tenthOfDegreeToRad(this->yaw), 0, 1, 0);
+    this->ptw.rotateM(tenthOfDegreeToRad(this->pitch), 1, 0, 0);
+    this->ptw.rotateM(tenthOfDegreeToRad(this->roll), 0, 0, 1);
+    
     this->ptw.translateM(this->vx/3.2808399f, this->vy/3.2808399f, this->vz/3.2808399f);
     if (round(this->azimuth_speedf) != 0)
         this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->azimuth_speedf)), 0, 1, 0);
@@ -483,13 +507,12 @@ void SCJdynPlane::updatePosition() {
     if (round(this->roll_speed) != 0)
         this->ptw.rotateM(tenthOfDegreeToRad((float)this->roll_speed), 0, 0, 1);
 
-    /* analyze new ptw	*/
     temp = 0.0f;
-    this->elevationf = (-asinf(this->ptw.v[2][1]) * 180.0f / (float)M_PI) * 10;
+    this->pitch = (-asinf(this->ptw.v[2][1]) * 180.0f / (float)M_PI) * 10;
 
     float ascos = 0.0f;
 
-    temp = cosf(tenthOfDegreeToRad(this->elevationf));
+    temp = cosf(tenthOfDegreeToRad(this->pitch));
 
     if (temp != 0.0) {
 
@@ -500,23 +523,23 @@ void SCJdynPlane::updatePosition() {
         } else if (sincosas < -1) {
             sincosas = -1;
         }
-        this->azimuthf = asinf(sincosas) / (float)M_PI * 1800.0f;
+        this->yaw = asinf(sincosas) / (float)M_PI * 1800.0f;
         if (this->ptw.v[2][2] < 0.0) {
             /* if heading into z	*/
-            this->azimuthf = 1800 - this->azimuthf;
+            this->yaw = 1800 - this->yaw;
         }
-        if (this->azimuthf < 0) {
+        if (this->yaw < 0) {
             /* then adjust		*/
-            this->azimuthf += 3600;
+            this->yaw += 3600;
         }
 
-        this->twist = (asinf(this->ptw.v[0][1] / temp) / (float)M_PI) * 1800.0f;
+        this->roll = (asinf(this->ptw.v[0][1] / temp) / (float)M_PI) * 1800.0f;
         if (this->ptw.v[1][1] < 0.0) {
             /* if upside down	*/
-            this->twist = 1800.0f - this->twist;
+            this->roll = 1800.0f - this->roll;
         }
-        if (this->twist < 0) {
-            this->twist += 3600.0f;
+        if (this->roll < 0) {
+            this->roll += 3600.0f;
         }
     }
     /* save last position	*/
@@ -630,13 +653,13 @@ void SCJdynPlane::processInput() {
     if (this->on_ground) {
         /* dont allow negative pitch unless positive elevation	*/
         if (this->elevation_speedf < 0) {
-            if (this->elevationf <= 0) {
+            if (this->pitch <= 0) {
                 this->elevation_speedf = 0;
             }
         } else {
             /* mimic gravitational torque	*/
             elevtemp = -(this->vz * this->tps + this->MIN_LIFT_SPEED) / 4.0f;
-            if (elevtemp < 0 && this->elevationf <= 0) {
+            if (elevtemp < 0 && this->pitch <= 0) {
                 elevtemp = 0.0f;
             }
             if (this->elevation_speedf > elevtemp) {
@@ -711,40 +734,6 @@ void SCJdynPlane::computeLift() {
     if (this->wing_stall > 64) {
         this->wing_stall = 64;
     }
-    if ((this->tick_counter & 1) == 0) {
-        /* only do on even ticks	*/
-        /* compute speed of sound	*/
-        if (this->y <= 36000.0f) {
-            this->sos = -1116.0f / this->tps + (1116.0f - 968.0f) / this->tps / 36000.0f * this->y;
-        } else {
-            this->sos = -968.0f / this->tps;
-        }
-        itemp = ((int)this->y) >> 10;
-        if (itemp > 74) {
-            itemp = 74;
-        } else if (itemp < 0) {
-            itemp = 0;
-        }
-        this->ro2 = .5f * ro[itemp];
-        if (this->Cl < .2) {
-            this->mcc = .7166666f + .1666667f * this->Cl;
-        } else {
-            this->mcc = .7833333f - .1666667f * this->Cl;
-        }
-        /* and current mach number	*/
-        this->mach = this->vz / this->sos;
-        this->mratio = this->mach / this->mcc;
-        if (this->mratio < 1.034f) {
-            this->Cdc = 0.0f;
-        } else {
-            this->Cdc = .082f * this->mratio - 0.084788f;
-            if (this->Cdc > .03f)
-                this->Cdc = .03f;
-        }
-        if (this->spoilers > 0.0f) {
-            this->Cdc += this->Spdf;
-        }
-    }
 
     /* assume V approx = vz	*/
     this->qs = this->ro2 * this->vz * this->s;
@@ -755,10 +744,10 @@ void SCJdynPlane::computeLift() {
         this->lift *= this->Splf;
     }
 relift:
-    this->ay = this->vz * this->lift;
-    this->az = -this->vy * this->lift;
+    this->lift_drag_force = -this->vy * this->lift;
+    this->lift_force = this->vz * this->lift;
     /* save for wing loading meter	*/
-    this->lift = this->ay * this->inverse_mass;
+    this->lift = this->lift_force * this->inverse_mass;
     if (this->lift > this->Lmax) {
         this->lift = .99f * this->Lmax / this->inverse_mass / this->vz;
         this->g_limit = TRUE;
@@ -771,47 +760,41 @@ relift:
 }
 
 void SCJdynPlane::computeDrag() {
-    /* drag - needs to be broken into y/z components		*/
     this->Cd = this->Cdp + this->kl * this->uCl * this->uCl * this->ie_pi_AR + this->Cdc;
-    this->zdrag = this->Cd * this->qs;
-    this->ydrag = this->vy * this->zdrag;
-    this->zdrag = this->vz * this->zdrag;
-    /* if vz is positive	*/
-    if (this->val) {
-        this->ay -= this->ydrag;
-        this->az -= this->zdrag;
-    } else {
-        this->ay += this->ydrag;
-        this->az += this->zdrag;
-    }
+    this->drag = this->Cd * this->qs;
+    this->gravity_drag_force = this->vy * this->drag ;
+    this->drag_force = this->vz * this->drag ;
 }
 void SCJdynPlane::computeGravity() {
     this->gravity = G_ACC / this->tps / this->tps;
 }
 void SCJdynPlane::computeThrust() {
     this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->Mthrust;
-    this->az = this->az - this->thrust_force ;
+    
 }
 void SCJdynPlane::updateAcceleration() {
     float temp{0.0f};
-    /* now convert forces to accelerations (A=F/M)	*/
+    
     this->ax = 0.0f;
+    int vz_sign = (this->vz < 0.0f) ? 1 : -1;
+    this->ay = this->lift_force + (vz_sign * this->gravity_drag_force);
+    this->az = this->lift_drag_force - this->thrust_force + (vz_sign * this->drag_force);
+    
+
     this->ay *= this->inverse_mass;
     this->az *= this->inverse_mass;
 
-    /* add in gravity which is an acceleration	*/
-    /**/
     this->ax -= this->ptw.v[0][1] * this->gravity;
     this->ay -= this->ptw.v[1][1] * this->gravity;
     this->az -= this->ptw.v[2][1] * this->gravity;
-    /**/
+
     this->vx += this->ax;
     this->vz += this->az;
     if (this->on_ground && this->status > MEXPLODE) {
         temp = 0.0f;
         float mcos;
         this->vx = 0.0;
-        gl_sincos(this->elevationf, &temp, &mcos);
+        gl_sincos(this->pitch, &temp, &mcos);
         temp = this->vz * temp / mcos;
         if (this->vy + this->ay < temp) {
             this->ay = temp - this->vy;
