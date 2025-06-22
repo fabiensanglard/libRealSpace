@@ -129,8 +129,6 @@ protected:
     float ROLLF;
     float last_zdrag;
 
-    short val;
-
     /* TRUE if wing g-limit is hit	*/
     short g_limit;
     /* fuel (0 - 12800)		*/

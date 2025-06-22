@@ -78,7 +78,6 @@ SCJdynPlane::~SCJdynPlane() {
 }
 void SCJdynPlane::Simulate() {
     int itemp;
-    float temp;
     float elevtemp = 0.0f;
 
     uint32_t current_time = SDL_GetTicks();
@@ -483,8 +482,7 @@ void SCJdynPlane::computeLift() {
     }
 
     /* compute new accelerations, lift: only if vz is negative	*/
-    this->val = (this->vz >= 0.0);
-    if (!this->val) {
+    if (this->vz < 0.0f) {
         this->ae = this->vy / this->vz + this->tilt_factor;
         this->Cl = this->uCl = this->ae / (.17f + this->kl * this->ipi_AR);
         /* check for positive stall	*/

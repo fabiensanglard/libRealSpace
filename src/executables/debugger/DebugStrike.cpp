@@ -130,7 +130,6 @@ void DebugStrike::loadPlane() {
     
     ImGui::SameLine();
     ImGui::Checkbox("Simple Sim", &simple_simulation);
-    ImGui::SameLine();
     ImGui::Checkbox("JDYN Sim", &jdyn_simulation);
     if (ImGui::Button("Load") && plane_name != "") {
         //this->plane_to_load = planes.indexOf(plane);
@@ -154,9 +153,9 @@ void DebugStrike::loadPlane() {
         roll_rate_max = plane_to_load->jdyn->ROLL_RATE;
         pitch_rate_max = plane_to_load->jdyn->TWIST_RATE;
         SCPlane *new_plane = nullptr;
+        surface = surface * 10.7639f;
+        envergure = envergure * 3.28084f;
         if (simple_simulation) {
-            surface = surface * 10.7639f;
-            envergure = envergure * 3.28084f;
             new_plane = new SCSimplePlane(
                 10.0f,
                 -7.0f,
@@ -178,8 +177,6 @@ void DebugStrike::loadPlane() {
             );
             new_plane->yaw = player_plane->azimuthf;
         } if (jdyn_simulation) {
-            surface = surface * 10.7639f;
-            envergure = envergure * 3.28084f;
             new_plane = new SCJdynPlane(
                 10.0f,
                 -7.0f,
@@ -201,8 +198,6 @@ void DebugStrike::loadPlane() {
             );
             new_plane->yaw = player_plane->azimuthf;
         } else {
-            surface = surface * 10.7639f;
-            envergure = envergure * 3.28084f;
             new_plane = new SCPlane(
                 10.0f,
                 -7.0f,
