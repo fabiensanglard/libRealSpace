@@ -69,30 +69,40 @@ SCSimplePlane::SCSimplePlane(float LmaxDEF, float LminDEF, float Fmax, float Sma
     init();
 }
 void SCSimplePlane::updateAcceleration() {
+    
 
+    this->ax = 0.0f;
+    this->ay = 0.0f;
+    this->az = 0.0f;
 }
 void SCSimplePlane::updateVelocity(){
     float deltaTime = 1.0f / (float) this->tps;
     this->vz = this->vz - ((.01f / this->tps / this->tps * this->thrust * this->Mthrust) + (DRAG_COEFFICIENT * this->vz)) * deltaTime;
     this->vz = std::clamp(this->vz, -25.0f, 25.0f);
+    this->vx = 0.0f;
+    this->vy = 0.0f;
 }
 void SCSimplePlane::updateForces() {
-
+    
+    this->acceleration.x = 0.0f;
+    this->acceleration.y = 0.0f;
+    this->acceleration.z = 0.0f;
+    
 }
 void SCSimplePlane::computeLift() {
-
+    this->lift_force = 0.0f; // Placeholder for lift force calculation
 }
 void SCSimplePlane::computeDrag() {
-
+    this->drag_force = 0.0f; // Placeholder for drag force calculation
 }
 void SCSimplePlane::computeGravity() {
-
+    this->gravity_force = 0.0f; // Placeholder for gravity force calculation
 }
 void SCSimplePlane::computeThrust() {
 
 }
 void SCSimplePlane::processInput() {
     float deltaTime = 1.0f / (float) this->tps;
-    this->pitch_speed = (this->control_stick_y / 100.0f) * deltaTime;
-    this->roll_speed = (-this->control_stick_x / 100.0f) * deltaTime;
+    this->pitch_speed = (this->control_stick_y ) * deltaTime;
+    this->roll_speed = (-this->control_stick_x ) * deltaTime;
 }

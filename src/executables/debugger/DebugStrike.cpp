@@ -114,6 +114,7 @@ void DebugStrike::loadPlane() {
     static float pitch_rate_max = 0.0f;
     static std::string plane_name = "";
     static bool simple_simulation = true;
+    static bool jdyn_simulation = false;
     
     if (ImGui::BeginCombo("Plane", plane_name.c_str(), 0)) {
         for (auto plane : planes) {
@@ -129,6 +130,8 @@ void DebugStrike::loadPlane() {
     
     ImGui::SameLine();
     ImGui::Checkbox("Simple Sim", &simple_simulation);
+    ImGui::SameLine();
+    ImGui::Checkbox("JDYN Sim", &jdyn_simulation);
     if (ImGui::Button("Load") && plane_name != "") {
         //this->plane_to_load = planes.indexOf(plane);
         RSEntity *plane_to_load = new RSEntity(&Assets);
@@ -155,6 +158,29 @@ void DebugStrike::loadPlane() {
             surface = surface * 10.7639f;
             envergure = envergure * 3.28084f;
             new_plane = new SCSimplePlane(
+                10.0f,
+                -7.0f,
+                40.0f,
+                40.0f,
+                plane_to_load->jdyn->TWIST_RATE,
+                plane_to_load->jdyn->ROLL_RATE,
+                surface,
+                weight,
+                fuel,
+                thrust,
+                envergure,
+                0.83f,
+                120,
+                this->current_mission->area,
+                player_plane->x,
+                player_plane->y,
+                player_plane->z
+            );
+            new_plane->yaw = player_plane->azimuthf;
+        } if (jdyn_simulation) {
+            surface = surface * 10.7639f;
+            envergure = envergure * 3.28084f;
+            new_plane = new SCJdynPlane(
                 10.0f,
                 -7.0f,
                 40.0f,

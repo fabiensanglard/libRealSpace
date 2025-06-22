@@ -424,8 +424,8 @@ void SCPlane::processInput() {
     int itemp {0};
     float temp {0.0f};
     float elevtemp{0.0f};
-    int DELAY = tps/4;
-    float DELAYF = tps/4.0f;
+    int DELAY = this->tps/4;
+    float DELAYF = this->tps/4.0f;
 
     /* tenths of degrees per tick	*/
     this->rollers = (this->ROLLF * ((this->control_stick_x + 8) >> 4));
@@ -653,8 +653,7 @@ void SCPlane::computeLift() {
     }
 
     /* compute new accelerations, lift: only if vz is negative	*/
-    this->val = (this->vz >= 0.0);
-    if (!this->val) {
+    if (this->vz < 0.0f) {
         this->ae = this->vy / this->vz + this->tilt_factor;
         this->Cl = this->uCl = this->ae / (.17f + this->kl * this->ipi_AR);
         /* check for positive stall	*/
