@@ -148,13 +148,15 @@ void DebugStrike::loadPlane() {
         weight = plane_to_load->weight_in_kg * 2.208588957f;
         fuel = plane_to_load->jdyn->FUEL * 2.208588957f;
         
-        wing_aspec_ratio = (envergure * envergure) / surface ;
+        
         ie_pi_AR = 4000.0f/plane_to_load->drag;
         roll_rate_max = plane_to_load->jdyn->ROLL_RATE;
         pitch_rate_max = plane_to_load->jdyn->TWIST_RATE;
         SCPlane *new_plane = nullptr;
         surface = surface * 10.7639f;
         envergure = envergure * 3.28084f;
+        wing_aspec_ratio = (envergure * envergure) / surface;
+        
         if (simple_simulation) {
             new_plane = new SCSimplePlane(
                 10.0f,
