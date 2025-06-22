@@ -154,7 +154,7 @@ void DebugStrike::loadPlane() {
         if (simple_simulation) {
             surface = surface * 10.7639f;
             envergure = envergure * 3.28084f;
-            new_plane = new SCJdynPlane(
+            new_plane = new SCSimplePlane(
                 10.0f,
                 -7.0f,
                 40.0f,
@@ -202,7 +202,7 @@ void DebugStrike::loadPlane() {
         new_plane->simple_simulation = false;
         new_plane->object = player_plane->object;
         new_plane->object->entity = plane_to_load;
-        new_plane->azimuthf = player_plane->azimuthf;
+        new_plane->yaw = player_plane->yaw;
         this->player_plane = new_plane;
         this->current_mission->player->plane = this->player_plane;
 

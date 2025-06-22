@@ -2,7 +2,7 @@
 int mrandom(int maxr);
 void gl_sincos(float a, float *b, float *c);
 class SCJdynPlane : public SCPlane {
-private:
+protected:
 
     float pitch_speed{0.0f};
     float roll_speed{0.0f};
@@ -29,8 +29,10 @@ private:
     float airspeed_in_ms {0.0f};
     void updatePosition();
     void updateAcceleration();
-    void applyPhysicsForces();
-
+    void updateVelocity();
+    void updateForces();
+    void updateSpeedOfSound();
+    void checkStatus();
     void computeLift();
     void computeDrag();
     void computeGravity();

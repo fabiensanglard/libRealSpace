@@ -646,8 +646,7 @@ void SCStrike::setMission(char const *missionName) {
     this->target = this->current_mission->enemies[this->current_target];
     this->nav_point_id = 0;
     this->player_plane = this->current_mission->player->plane;
-    this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
-    this->player_plane->yaw = (360 - playerCoord->azymuth) * (float) M_PI / 180.0f;
+    this->player_plane->yaw = (360 - playerCoord->azymuth) * 10.0f;
     this->player_plane->object = playerCoord;
     float ground = this->area.getY(new_position.x, new_position.z);
     if (ground < new_position.y) {

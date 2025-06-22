@@ -179,6 +179,34 @@ protected:
     SCSmokeSet *smoke_set{nullptr};
     std::vector<Vector3D> smoke_positions;
     
+
+    Vector3D thrust_vector {0.0f, 0.0f, 0.0f};
+    Vector3D lift_vector {0.0f, 0.0f, 0.0f};
+    Vector3D gravity_vector {0.0f, 0.0f, 0.0f};
+    Vector3D drag_vector {0.0f, 0.0f, 0.0f};
+
+
+    Vector3D acceleration {0.0f, 0.0f, 0.0f};
+    
+    float lift_force {0.0f};
+    float drag_force {0.0f};
+    float gravity_drag_force {0.0f};
+    float lift_drag_force {0.0f};
+    float gravity_force {0.0f};
+
+    float airspeed_in_ms {0.0f};
+    virtual void updatePosition();
+    virtual void updateAcceleration();
+    virtual void updateVelocity();
+    virtual void updateForces();
+    virtual void updateSpeedOfSound();
+    virtual void checkStatus();
+    virtual void computeLift();
+    virtual void computeDrag();
+    virtual void computeGravity();
+    virtual void computeThrust();
+    virtual void processInput();
+
 public:
     unsigned int status;
     float g_load{0.0f};
@@ -233,7 +261,11 @@ public:
 
     int control_stick_x;
     int control_stick_y;
-    int roll_speed;
+
+    float pitch_speed{0.0f};
+    float yaw_speed{0.0f};
+    float roll_speed{0.0f};
+
     short on_ground;
 
     int airspeed;
@@ -282,7 +314,6 @@ public:
 
     void SetControlStick(int x, int y);
     virtual void Simulate();
-    void OrigSimulate();
     void SimplifiedSimulate();
     virtual void getPosition(Point3D *position);
     virtual void Render();
