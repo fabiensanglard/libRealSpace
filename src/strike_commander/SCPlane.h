@@ -123,7 +123,7 @@ protected:
     
     float Cdp;
     float ipi_AR;
-    float ie_pi_AR;
+    
 
     float ELEVF;
     float ROLLF;
@@ -207,6 +207,7 @@ protected:
 
 public:
     unsigned int status;
+    float ie_pi_AR{0.0f};
     float g_load{0.0f};
     float Lmax;
     float Lmin;

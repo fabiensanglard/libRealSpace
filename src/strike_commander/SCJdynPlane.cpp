@@ -584,8 +584,8 @@ void SCJdynPlane::updateForces() {
 }
 void SCJdynPlane::updateVelocity() {
     float temp{0.0f};
-    this->vx += this->ax;
-    this->vz += this->az;
+    this->vx += this->acceleration.x;
+    this->vz += this->acceleration.z;
     if (this->on_ground && this->status > MEXPLODE) {
         temp = 0.0f;
         float mcos;

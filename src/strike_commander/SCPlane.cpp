@@ -755,8 +755,8 @@ void SCPlane::updateForces() {
 }
 void SCPlane::updateVelocity() {
     float temp{0.0f};
-    this->vx += this->ax;
-    this->vz += this->az;
+    this->vx += this->acceleration.x;
+    this->vz += this->acceleration.z;
     if (this->on_ground && this->status > MEXPLODE) {
         temp = 0.0f;
         float mcos;
@@ -767,6 +767,7 @@ void SCPlane::updateVelocity() {
             this->acceleration.y = temp - this->vy;
         }
     }
+    this->vy += this->acceleration.y;
 }
 
 void SCPlane::SimplifiedSimulate() {
@@ -1074,7 +1075,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     // Conversion des angles (azimuthf et elevationf, exprimés en dixièmes de degré) en radians.
     float yawRad   = tenthOfDegreeToRad(this->azimuthf);
     float pitchRad = tenthOfDegreeToRad(-this->elevationf);
-    float rollRad  = tenthOfDegreeToRad(this->roll);
+    float rollRad  = tenthOfDegreeToRad(-this->roll);
     // Calcul du vecteur de poussée initiale dans la direction avant de l'avion.
     // On considère que le vecteur avant s'exprime en coordonnées :
     // x = cos(pitch)*sin(yaw), y = sin(pitch), z = cos(pitch)*cos(yaw)

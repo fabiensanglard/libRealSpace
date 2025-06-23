@@ -105,4 +105,7 @@ void SCSimplePlane::processInput() {
     float deltaTime = 1.0f / (float) this->tps;
     this->pitch_speed = (this->control_stick_y ) * deltaTime;
     this->roll_speed = (-this->control_stick_x ) * deltaTime;
+    if (this->wheels && this->y > this->area->getY(this->x, this->z)) {
+        this->wheels = 0;
+    }
 }

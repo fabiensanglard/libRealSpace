@@ -390,8 +390,8 @@ void SCCockpit::RenderTargetingReticle() {
     float thrustMagnitude = -planeSpeed;
     thrustMagnitude = -planeSpeed * 150.0f; // coefficient ajustable
 
-    float yawRad   = tenthOfDegreeToRad(this->player_plane->azimuthf);
-    float pitchRad = tenthOfDegreeToRad(-this->player_plane->elevationf);
+    float yawRad   = tenthOfDegreeToRad(this->player_plane->yaw);
+    float pitchRad = tenthOfDegreeToRad(-this->player_plane->pitch);
     float rollRad  = tenthOfDegreeToRad(-this->player_plane->roll);
     float cosRoll = cosf(rollRad);
     float sinRoll = sinf(rollRad);
@@ -425,25 +425,9 @@ void SCCockpit::RenderTargetingReticle() {
         weap->y = target.y;
         weap->z = target.z;
 
-        yawRad_update   = yawRad_update+degreeToRad(this->yaw_speed);
-        pitchRad_update = pitch_speed+degreeToRad(this->pitch_speed);
-        rollRad_update  = rollRad_update+degreeToRad(this->roll_speed);
-        
-        float yawCorr   = degreeToRad(this->yaw_speed);
-        float pitchCorr = degreeToRad(this->pitch_speed);
-        float rollCorr  = degreeToRad(this->roll_speed);
-        
-        cosRoll = cosf(rollRad_update);
-        sinRoll = sinf(rollRad_update);
-
-        Vector3D plane_update{0,0,0};
-        plane_update.x = (cosf(pitchRad_update) * sinf(yawRad_update) * cosRoll + sinf(pitchRad) * cosf(yawRad_update) * sinRoll);
-        plane_update.y = (sinf(pitchRad_update) * cosRoll - cosf(pitchRad) * sinf(yawRad_update) * sinRoll);
-        plane_update.z = cosf(pitchRad_update) * cosf(yawRad_update);
-
-        weap->vx = velo.x-plane_update.x;
-        weap->vy = velo.y+plane_update.y;
-        weap->vz = velo.z-plane_update.z;
+        weap->vx = velo.x;
+        weap->vy = velo.y;
+        weap->vz = velo.z;
     }
 
     Vector3DHomogeneous v = {target.x, target.y, target.z, 1.0f};

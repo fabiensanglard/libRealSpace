@@ -242,6 +242,7 @@ void DebugStrike::loadPlane() {
     ImGui::Text("Roll rate max: %.2f", roll_rate_max);
     ImGui::Text("Pitch rate max: %.2f", pitch_rate_max);
     ImGui::Text("G-Load: Max %.2f, Min %.2f", this->player_plane->Lmax, this->player_plane->Lmin);
+    ImGui::Text("IE PI AR: %.2f", this->player_plane->ie_pi_AR);
 }
 void DebugStrike::simConfig() {
     static bool azymuth_control = false;
