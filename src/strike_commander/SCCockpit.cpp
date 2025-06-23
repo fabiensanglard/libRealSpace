@@ -386,7 +386,12 @@ void SCCockpit::RenderTargetWithCam() {
 }
 void SCCockpit::RenderTargetingReticle() {
     GunSimulatedObject *weap = new GunSimulatedObject();
-    float planeSpeed = sqrtf(this->player_plane->vx * this->player_plane->vx + this->player_plane->vy * this->player_plane->vy + this->player_plane->vz * this->player_plane->vz);
+    Vector3D direction = {
+        this->player_plane->x - this->player_plane->last_px,
+        this->player_plane->y - this->player_plane->last_py,
+        this->player_plane->z - this->player_plane->last_pz
+    };
+    float planeSpeed = direction.Length();
     float thrustMagnitude = -planeSpeed;
     thrustMagnitude = -planeSpeed * 150.0f; // coefficient ajustable
 
@@ -421,9 +426,9 @@ void SCCockpit::RenderTargetingReticle() {
 
     for (int i=0; i<150; i++) {
         std::tie(target, velo) = weap->ComputeTrajectory(this->player_plane->tps);
-        weap->x = target.x;
-        weap->y = target.y;
-        weap->z = target.z;
+        weap->x = target.x+direction.x;
+        weap->y = target.y+direction.y;
+        weap->z = target.z+direction.z;
 
         weap->vx = velo.x;
         weap->vy = velo.y;
