@@ -6,6 +6,8 @@ FrameBuffer::FrameBuffer(int w, int h) {
     this->height = h;
 }
 FrameBuffer::~FrameBuffer() {
+    if (this->framebuffer == nullptr)
+        return;
     delete (this->framebuffer);
     this->framebuffer = nullptr;
     this->width = 0;

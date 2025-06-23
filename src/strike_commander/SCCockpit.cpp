@@ -392,7 +392,7 @@ void SCCockpit::RenderTargetingReticle() {
 
     float yawRad   = tenthOfDegreeToRad(this->player_plane->yaw);
     float pitchRad = tenthOfDegreeToRad(-this->player_plane->pitch);
-    float rollRad  = tenthOfDegreeToRad(-this->player_plane->roll);
+    float rollRad  = tenthOfDegreeToRad(0.0f);
     float cosRoll = cosf(rollRad);
     float sinRoll = sinf(rollRad);
     Vector3D initial_trust{0,0,0};

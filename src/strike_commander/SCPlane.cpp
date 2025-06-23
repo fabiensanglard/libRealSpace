@@ -1075,7 +1075,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     // Conversion des angles (azimuthf et elevationf, exprimés en dixièmes de degré) en radians.
     float yawRad   = tenthOfDegreeToRad(this->azimuthf);
     float pitchRad = tenthOfDegreeToRad(-this->elevationf);
-    float rollRad  = tenthOfDegreeToRad(-this->roll);
+    float rollRad  = tenthOfDegreeToRad(0.0f); // Roll angle is not used in this context, set to 0.
     // Calcul du vecteur de poussée initiale dans la direction avant de l'avion.
     // On considère que le vecteur avant s'exprime en coordonnées :
     // x = cos(pitch)*sin(yaw), y = sin(pitch), z = cos(pitch)*cos(yaw)

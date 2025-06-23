@@ -17,8 +17,14 @@ RSVGA::RSVGA() {
 }
 
 RSVGA::~RSVGA() {
-    delete this->frameBufferA;
-    delete this->frameBufferB;
+    if (this->frameBufferA != nullptr) {
+        this->frameBufferA->Clear();
+        delete this->frameBufferA;
+    }
+    if (this->frameBufferB != nullptr) {
+        this->frameBufferB->Clear();
+        delete this->frameBufferB;
+    }
 }
 
 void RSVGA::SwithBuffers() {
