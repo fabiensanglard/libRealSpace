@@ -67,15 +67,8 @@ int mrandom(int maxr) {
  * @see SCPlane
  */
 SCPlane::SCPlane() {
-    this->planeid = 0;
-    this->version = 0;
-    this->cmd = 0;
-    this->type = 0;
     this->alive = 0;
-    this->myname[0] = '\0';
     this->status = 0;
-    this->won = 0;
-    this->lost = 0;
     this->x = 0.0f;
     this->y = 0.0f;
     this->z = 0.0f;
@@ -87,7 +80,6 @@ SCPlane::SCPlane() {
     this->azimuth_speedf = 0.0f;
     this->airspeed = 0;
     this->thrust = 0;
-    this->mtype = 0;
     this->rollers = 0.0f;
     this->rudder = 0.0f;
     this->elevator = 0.0f;
@@ -109,8 +101,6 @@ SCPlane::SCPlane() {
  * @param b the wing aspect ratio.
  * @param ie_pi_AR the inverse of the aspect ratio times pi.
  * @param MIN_LIFT_SPEED the minimum lift speed.
- * @param pilot_y the pilot y position.
- * @param pilot_z the pilot z position.
  * @param area the terrain area.
  * @param x the initial x position.
  * @param y the initial y position.
@@ -121,15 +111,8 @@ SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELE
                  RSArea *area, float x, float y, float z) {
     this->weaps_load.reserve(9);
     this->weaps_load.resize(9);
-    this->planeid = 0;
-    this->version = 0;
-    this->cmd = 0;
-    this->type = 0;
     this->alive = 0;
-    this->myname[0] = '\0';
     this->status = 0;
-    this->won = 0;
-    this->lost = 0;
     this->x = 0.0f;
     this->y = 0.0f;
     this->z = 0.0f;
@@ -141,7 +124,6 @@ SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELE
     this->azimuth_speedf = 0.0f;
     this->airspeed = 0;
     this->thrust = 0;
-    this->mtype = 0;
     this->rollers = 0.0f;
     this->rudder = 0.0f;
     this->elevator = 0.0f;
@@ -153,7 +135,6 @@ SCPlane::SCPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELE
     this->Smax = Smax;
     this->ELEVF_CSTE = ELEVF_CSTE;
     this->ROLLFF_CSTE = ROLLFF_CSTE;
-    this->obj = obj;
     this->s = s;
     this->W = W;
     this->fuel_weight = fuel_weight;
@@ -197,9 +178,6 @@ void SCPlane::init() {
     this->ELEVF = this->ELEVF_CSTE * 10.0f / (20.0f * 400.0f);
     /* roll rate (both at 300 mph)	*/
     this->ROLLF = this->ROLLFF_CSTE * 10.0f / (30.0f * 400.0f);
-
-    this->zdrag = 0.0f;
-    this->ydrag = 0.0f;
     /* coefficient of parasitic drag*/
     this->Cdp = .015f;
     /* 1.0 / pi * wing Aspect Ratio	*/
@@ -235,9 +213,6 @@ void SCPlane::init() {
     this->elevationf = 0.0f;
     this->elevation_speedf = 0.0f;
     this->azimuth_speedf = 0.0f;
-    this->vx_add = 0.0f;
-    this->vy_add = 0.0f;
-    this->vz_add = 0.0f;
     this->control_stick_x = 0;
     this->control_stick_y = 0;
     this->ptw.Clear();
@@ -403,6 +378,7 @@ void SCPlane::updatePosition() {
     this->y = this->ptw.v[3][1];
     this->z = this->ptw.v[3][2];
 
+    this->groundlevel = this->area->getY(this->x, this->z);
     /****************************************************************
     /*	perform incremental rotations on velocities
     /****************************************************************/
@@ -546,14 +522,14 @@ void SCPlane::updateSpeedOfSound() {
     this->mratio = this->mach / this->mcc;
 }
 void SCPlane::checkStatus() {
-    float groundlevel = this->area->getY(this->x, this->z);
+    
     /****************************************************************/
     /*	check altitude for too high, and landing/takeoff            */
     /****************************************************************/
     /* flame out		*/
     if (this->y > 50000.0)
         this->thrust = 0;
-    else if (this->y > groundlevel + 4.0) {
+    else if (this->y > this->groundlevel + 4.0) {
         /* not on ground	*/
         if (!this->takeoff) {
             this->takeoff = true;
@@ -564,7 +540,7 @@ void SCPlane::checkStatus() {
             this->min_throttle = 0;
         }
         this->on_ground = FALSE;
-    } else if ((int) this->y <= groundlevel+2) {
+    } else if ((int) this->y <= this->groundlevel+2) {
         /* check for on the ground */
         if (this->object->alive == 0) {
             this->status = MEXPLODE;
@@ -585,8 +561,6 @@ void SCPlane::checkStatus() {
                     if (rating == -1) {
                         /* set to exploding	*/
                         this->status = MEXPLODE;
-                        /* increment count	*/
-                        this->lost++;
                     } else {
                         this->fuel += rating << 7;
                         if (this->fuel > (100 << 7))
@@ -639,7 +613,6 @@ void SCPlane::computeLift() {
 
     this->Spdf = .0025f * this->spoilers;
     this->Splf = 1.0f - .005f * this->spoilers;
-    float groundlevel = this->area->getY(this->x, this->z);
     if (this->y > this->gefy) {
         // ground effect factor
         this->kl = 1.0f;
@@ -769,93 +742,6 @@ void SCPlane::updateVelocity() {
     }
     this->vy += this->acceleration.y;
 }
-
-void SCPlane::SimplifiedSimulate() {
-
-    uint32_t current_time = SDL_GetTicks();
-    uint32_t elapsed_time = (current_time - this->last_time) / 1000;
-    int newtps = 0;
-    if (elapsed_time > 1) {
-        uint32_t ticks = this->tick_counter - this->last_tick;
-        newtps = ticks / elapsed_time;
-        this->last_time = current_time;
-        this->last_tick = this->tick_counter;
-        if (newtps > this->tps / 2) {    
-            this->tps = newtps;
-        }
-    }
-    this->fps_knots = this->tps * (3600.0f / 6082.0f);
-    float deltaTime = 1.0f / (float) this->tps;
-    
-    float pitch_input = (this->control_stick_y / 100.0f) * deltaTime;
-    float roll_input = (-this->control_stick_x / 100.0f) * deltaTime;
-    if (this->object->alive == false) {
-        this->thrust = 0;
-        this->vy -= +0.1f;
-        if (this->vz > 5.0f) {
-            this->vz = 5.0f;
-        }
-        
-    }
-    Matrix rottm;
-    rottm.Identity();
-    rottm.translateM(this->x, this->y, this->z);
-
-    rottm.rotateM(this->yaw, 0, 1, 0);
-    rottm.rotateM(this->pitch, 1, 0, 0);
-    rottm.rotateM(this->roll, 0, 0, 1);
-
-    rottm.rotateM(pitch_input, 1, 0, 0);
-    rottm.rotateM(roll_input, 0, 0, 1);
-    this->vz = this->vz - ((.01f / this->tps / this->tps * this->thrust * this->Mthrust) + (DRAG_COEFFICIENT * this->vz)) * deltaTime;
-    this->vz = std::clamp(this->vz, -25.0f, 25.0f);
-    rottm.translateM(this->vx/3.2808399f, this->vy/3.2808399f, this->vz/3.2808399f);
-    this->on_ground = false;
-    this->pitch = -asinf(rottm.v[2][1]);
-    float temp = cosf(this->pitch);
-    if (temp != 0.0) {
-        float sincosas = rottm.v[2][0] / temp;
-        if (sincosas > 1.0f) {
-            sincosas = 1.0f;
-        } else if (sincosas < -1.0f) {
-            sincosas = -1;
-        }
-        this->yaw = asinf(sincosas);
-        if (rottm.v[2][2] < 0.0f) {
-            this->yaw = (float)M_PI - this->yaw;
-        }
-        if (this->yaw < 0.0f) {
-            this->yaw += 2.0f*(float)M_PI;
-        }
-        if (this->yaw > 2.0f*(float)M_PI) {
-            this->yaw -= 2.0f*(float)M_PI;
-        }
-        this->roll = asinf(rottm.v[0][1] / temp);
-        if (rottm.v[1][1] < 0.0f) {
-            /* if upside down	*/
-            this->roll = (float)M_PI - this->roll;
-        }
-        if (this->roll < 0) {
-            this->roll += 2.0f*(float)M_PI;
-        }
-    }
-
-    this->x = rottm.v[3][0];
-    this->y = rottm.v[3][1];
-    this->z = rottm.v[3][2];
-
-    this->airspeed = -(int)(this->fps_knots * this->vz);
-    this->azimuthf = (this->yaw * 180.0f / (float) M_PI) * 10.0f;
-    this->elevationf = (this->pitch * 180.0f / (float) M_PI) * 10.0f;
-    this->twist = (this->roll * 180.0f / (float) M_PI) * 10.0f;
-    this->tick_counter++;
-    if (this->object->alive == false) {
-        this->smoke_positions.push_back({this->x, this->y, this->z});
-        if (this->smoke_positions.size() > 100) {
-            this->smoke_positions.erase(this->smoke_positions.begin());
-        }
-    }
-}
 /**
  * IN_BOX: Check if the plane is inside a box.
  * 
@@ -974,9 +860,9 @@ void SCPlane::Render() {
             this->x, this->y, this->z
         };
         Vector3D orientation = {
-            tenthOfDegreeToRad(this->azimuthf + 900),
-            tenthOfDegreeToRad(this->elevationf),
-            -tenthOfDegreeToRad(this->twist)
+            tenthOfDegreeToRad(this->yaw + 900),
+            tenthOfDegreeToRad(this->pitch),
+            -tenthOfDegreeToRad(this->roll)
         };
         std::vector<std::tuple<Vector3D, RSEntity*>> weapons;
         for (auto weaps:this->weaps_load) {
@@ -1008,30 +894,6 @@ void SCPlane::Render() {
             }
         }
         Renderer.drawModelWithChilds(this->object->entity, LOD_LEVEL_MAX, pos, orientation, wheel_index, thrust, weapons);
-        BoudingBox *bb = this->object->entity->GetBoudingBpx();
-        Vector3D position = {this->x, this->y, this->z};          
-        orientation = {
-            this->azimuthf/10.0f,
-            this->elevationf/10.0f,
-            -this->twist/10.0f
-        };
-        Renderer.drawLine({this->x, this->y, this->z}, {this->vx*10.0f, this->vy*10.0f, this->vz*10.0f}, {1.0f, 1.0f, 0.0f});
-        Renderer.drawLine({this->x, this->y, this->z}, {this->ax*10000.0f, this->ay*10000.0f, this->az*10000.0f}, {1.0f, 0.0f, 1.0f}, orientation);
-        orientation.x += 90.0f;
-        for (auto vertex: this->object->entity->vertices) {
-            if (vertex.x == bb->min.x) {
-                Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
-            }
-            if (vertex.x == bb->max.x) {
-                Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
-            }
-            if (vertex.z == bb->min.z) {
-                Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
-            }
-            if (vertex.z == bb->max.z) {
-                Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
-            }
-        }
     }
 }
 void SCPlane::RenderSmoke() {
@@ -1073,8 +935,8 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     }
     weap->mission = mission;
     // Conversion des angles (azimuthf et elevationf, exprimés en dixièmes de degré) en radians.
-    float yawRad   = tenthOfDegreeToRad(this->azimuthf);
-    float pitchRad = tenthOfDegreeToRad(-this->elevationf);
+    float yawRad   = tenthOfDegreeToRad(this->yaw);
+    float pitchRad = tenthOfDegreeToRad(-this->pitch);
     float rollRad  = tenthOfDegreeToRad(0.0f); // Roll angle is not used in this context, set to 0.
     // Calcul du vecteur de poussée initiale dans la direction avant de l'avion.
     // On considère que le vecteur avant s'exprime en coordonnées :

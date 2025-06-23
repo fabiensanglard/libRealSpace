@@ -61,27 +61,8 @@ struct SCWeaponLoadoutHardPoint {
 class SCPlane {
 
 protected:
-    long planeid;
-    /* flight version	*/
-    char version;
-    /* type of packet	*/
-    char cmd;
-    /* plane type		*/
-    short type;
     short alive;
-    char myname[NAME_LENGTH + 1];
-    
-    /* for msgs these 2 shorts */
-    unsigned short won;
-    /* hold the plane id	*/
-    unsigned short lost;
-
-
-
     int thrust;
-
-    char mtype;
-
     float ELEVF_CSTE;
     float ROLLFF_CSTE;
     float LminDEF;
@@ -90,10 +71,7 @@ protected:
     float Fmax;
     float Smax;
 
-    
-    /* drag force in y and z	*/
-    float ydrag;
-    float zdrag;
+
     /* fuel consumption rate	*/
     float fuel_rate;
     /* maximum height for ground effect	*/
@@ -127,7 +105,6 @@ protected:
 
     float ELEVF;
     float ROLLF;
-    float last_zdrag;
 
     /* TRUE if wing g-limit is hit	*/
     short g_limit;
@@ -140,22 +117,15 @@ protected:
 
     /* minimum lift-up speed fps	*/
     short MIN_LIFT_SPEED;
-    short last_airspeed;
-    short target_speed;
     short climbspeed;
-    short last_climbspeed;
-    short target_climb;
+
     /* TRUE if wing is stalling	*/
     short wing_stall;
-
-    int obj;
 
     /* fps to knots conversion factor */
     float fps_knots;
     RSArea *area;
-    float vx_add;
-    float vy_add;
-    float vz_add;
+
     int nocrash;
     int IN_BOX(int llx, int urx, int llz, int urz);
     int report_card(int descent, float roll, int vx, int vz, int wheels);
@@ -211,7 +181,7 @@ public:
     float g_load{0.0f};
     float Lmax;
     float Lmin;
-    
+    float groundlevel{0.0f};
     float s;
     float b;
     float W;
@@ -313,7 +283,6 @@ public:
 
     void SetControlStick(int x, int y);
     virtual void Simulate();
-    void SimplifiedSimulate();
     virtual void getPosition(Point3D *position);
     virtual void Render();
     virtual void RenderSimulatedObject();

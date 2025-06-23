@@ -21,15 +21,8 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->vz = 0.0f;
         this->weaps_load.reserve(9);
     this->weaps_load.resize(9);
-    this->planeid = 0;
-    this->version = 0;
-    this->cmd = 0;
-    this->type = 0;
     this->alive = 0;
-    this->myname[0] = '\0';
     this->status = 0;
-    this->won = 0;
-    this->lost = 0;
     this->x = 0.0f;
     this->y = 0.0f;
     this->z = 0.0f;
@@ -41,7 +34,6 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->yaw_speed = 0.0f;
     this->airspeed = 0;
     this->thrust = 0;
-    this->mtype = 0;
     this->rollers = 0.0f;
     this->rudder = 0.0f;
     this->elevator = 0.0f;
@@ -53,7 +45,6 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->Smax = Smax;
     this->ELEVF_CSTE = ELEVF_CSTE;
     this->ROLLFF_CSTE = ROLLFF_CSTE;
-    this->obj = obj;
     this->s = s;
     this->W = W;
     this->fuel_weight = fuel_weight;
@@ -414,8 +405,6 @@ void SCJdynPlane::checkStatus() {
                     if (rating == -1) {
                         /* set to exploding	*/
                         this->status = MEXPLODE;
-                        /* increment count	*/
-                        this->lost++;
                     } else {
                         this->fuel += rating << 7;
                         if (this->fuel > (100 << 7))
