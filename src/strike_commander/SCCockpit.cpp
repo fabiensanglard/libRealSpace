@@ -407,9 +407,9 @@ void SCCockpit::RenderTargetingReticle() {
 
     weap->obj = this->player_plane->weaps_load[0]->objct;
     Vector3D campos = this->cam->GetPosition();
-    weap->x = campos.x;
-    weap->y = campos.y;
-    weap->z = campos.z;
+    weap->x = this->player_plane->x;
+    weap->y = this->player_plane->y;
+    weap->z = this->player_plane->z;
     weap->vx = initial_trust.x;
     weap->vy = initial_trust.y;
     weap->vz = initial_trust.z;
@@ -448,7 +448,7 @@ void SCCockpit::RenderTargetingReticle() {
         float y = result.y / result.w;
 
         int Xhud = (int)((x + 1.0f) * 160.0f);
-        int Yhud = (int)((1.0f - y-0.45f) * 100.0f) - 1;
+        int Yhud = (int)((1.0f - y-0.50f) * 100.0f) - 1;
 
         if (Xhud > 0 && Xhud < 320 && Yhud > 0 && Yhud < 200) {
             Point2D p = {Xhud, Yhud};
