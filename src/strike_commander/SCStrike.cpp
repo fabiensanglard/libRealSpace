@@ -386,7 +386,9 @@ void SCStrike::checkKeyboard(void) {
                                     this->current_mission->waypoints[this->nav_point_id]->spot->position.z};
             this->autopilot_target_azimuth = atan2(this->player_plane->x-destination.x, this->player_plane->z-destination.y);
             this->autopilot_target_azimuth = radToDegree(this->autopilot_target_azimuth);
-            this->player_plane->yaw = this->autopilot_target_azimuth * 10.0f;
+            this->player_plane->yaw = 0.0f;
+            this->player_plane->pitch = 0.0f;
+            this->player_plane->roll = 0.0f;
             float dest_y = this->current_mission->waypoints[this->nav_point_id]->spot->position.y;
             Vector2D origine = {this->player_plane->x, this->player_plane->z};
             std::vector<Vector2D> path;
@@ -847,6 +849,13 @@ void SCStrike::runFrame(void) {
             this->player_plane->yaw = this->autopilot_target_azimuth * 10.0f;
             this->player_plane->Simulate();
             this->camera_mode = View::FRONT;
+            for (auto team: this->current_mission->friendlies) {
+                if (team->is_active) {
+                    if (team->plane != nullptr && team->plane != this->player_plane) {                       
+                        team->plane->yaw=this->autopilot_target_azimuth * 10.0f;
+                    }
+                }
+            }
         }
     } break;
     case View::FRONT: {
