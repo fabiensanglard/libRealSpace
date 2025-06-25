@@ -585,6 +585,14 @@ void DebugStrike::radar() {
                     draw_list->AddRect(wp_top_left, wp_bottom_right, IM_COL32(255, 255, 0, 255));
                 }
             }
+            if (actor->is_active || actor->plane == this->player_plane) {
+                ImVec2 plane_direction = ImVec2(actor->plane->x - actor->plane->last_px, actor->plane->z - actor->plane->last_pz);
+                draw_list->AddLine(ImVec2(actor_canvas_pos.x, actor_canvas_pos.y),
+                                ImVec2(actor_canvas_pos.x + plane_direction.x * 5.0f,
+                                        actor_canvas_pos.y + plane_direction.y * 5.0f),
+                                actor_color);
+            }
+            
             // Optionally, display the actor id near the square.
             draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y),  IM_COL32(255, 255, 255, 255),
                                 actor->actor_name.c_str());
@@ -614,7 +622,6 @@ void DebugStrike::radar() {
             float world_z = -actor->object->position.z;
             ImVec2 actor_canvas_pos = ImVec2(canvas_center.x + world_x * scale_x,
                                             canvas_center.y - world_z * scale_z);
-            
             // Define square size.
             float square_size = 10.0f;
             

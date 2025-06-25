@@ -197,9 +197,9 @@ public:
     float vz;
 
     /* last plane position	*/
-    float last_px;
-    float last_py;
-    float last_pz;
+    float last_px{0.0f};
+    float last_py{0.0f};
+    float last_pz{0.0f};
 
     float x;
     float y;

@@ -112,8 +112,9 @@ void SCJdynPlane::Simulate() {
     if (this->tick_counter % (100 * TPS) == 1) {
         this->fuel_rate = fuel_consump(this->Mthrust, this->W);
         this->fuel -= (int)(itemp * this->fuel_rate);
-        this->inverse_mass = G_ACC / (this->W + this->fuel / 12800.0f * this->fuel_weight);
+        
     }
+    
     if (this->wheels) {
         this->wheel_anim --;
         if (this->wheel_anim == 0) {
@@ -550,6 +551,7 @@ void SCJdynPlane::computeDrag() {
     this->drag_force = this->vz * this->drag ;
 }
 void SCJdynPlane::computeGravity() {
+    this->inverse_mass = G_ACC / (this->W + this->fuel / 12800.0f * this->fuel_weight);
     this->gravity = G_ACC / this->tps / this->tps;
 }
 void SCJdynPlane::computeThrust() {
