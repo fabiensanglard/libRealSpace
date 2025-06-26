@@ -555,7 +555,7 @@ void SCJdynPlane::computeGravity() {
     this->gravity = GRAVITY / this->tps / this->tps;
 }
 void SCJdynPlane::computeThrust() {
-    this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->object->entity->thrust_in_newton;
+    this->thrust_force = .01f / this->tps / this->tps * this->thrust * (this->object->entity->thrust_in_newton / GRAVITY);
     
 }
 void SCJdynPlane::updateAcceleration() {

@@ -179,6 +179,10 @@ void DebugStrike::loadPlane() {
             );
             new_plane->yaw = player_plane->azimuthf;
         } if (jdyn_simulation) {
+            thrust = plane_to_load->thrust_in_newton;
+            surface = plane_to_load->wing_area;
+            weight = plane_to_load->weight_in_kg;
+            fuel = 0;
             new_plane = new SCJdynPlane(
                 10.0f,
                 -7.0f,
