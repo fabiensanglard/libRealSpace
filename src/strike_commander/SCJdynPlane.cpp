@@ -79,9 +79,9 @@ void SCJdynPlane::Simulate() {
         newtps = ticks / elapsed_time;
         this->last_time = current_time;
         this->last_tick = this->tick_counter;
-        if (newtps > this->tps / 2) {    
+        //if (newtps > this->tps / 2) {    
             this->tps = newtps;
-        }
+        //}
     }
     this->fps_knots = this->tps * (3600.0f / 6082.0f);
 
@@ -173,7 +173,7 @@ void SCJdynPlane::updatePosition() {
     this->ptw.rotateM(tenthOfDegreeToRad(this->pitch), 1, 0, 0);
     this->ptw.rotateM(tenthOfDegreeToRad(this->roll), 0, 0, 1);
     
-    this->ptw.translateM(this->vx/3.2808399f, this->vy/3.2808399f, this->vz/3.2808399f);
+    this->ptw.translateM(this->vx, this->vy, this->vz);
     if (round(this->yaw_speed) != 0)
         this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->yaw_speed)), 0, 1, 0);
     if (round(this->pitch_speed) != 0)
@@ -261,7 +261,7 @@ void SCJdynPlane::processInput() {
     }
     if (this->wing_stall > 0) {
         itemp >>= this->wing_stall;
-        itemp += mrandom(this->wing_stall << 3);
+        //itemp += mrandom(this->wing_stall << 3);
     }
     this->roll_speed += itemp;
     this->elevator = -1.0f * (this->ELEVF * ((this->control_stick_y + 8) >> 4));
@@ -277,8 +277,8 @@ void SCJdynPlane::processInput() {
     if (this->wing_stall > 0) {
         itemp >>= this->wing_stall;
         elevtemp = elevtemp / powf(2, this->wing_stall);
-        itemp += mrandom(this->wing_stall * 2);
-        elevtemp += mrandom(this->wing_stall * 2);
+        //itemp += mrandom(this->wing_stall * 2);
+        //elevtemp += mrandom(this->wing_stall * 2);
     }
     this->pitch_speed += itemp;
 
@@ -356,7 +356,7 @@ void SCJdynPlane::updateSpeedOfSound() {
     } else if (itemp < 0) {
         itemp = 0;
     }
-    this->ro2 = .5f * ro[itemp];
+    this->ro2 = 0.5f*1.285f / tps;
     if (this->Cl < .2) {
         this->mcc = .7166666f + .1666667f * this->Cl;
     } else {
@@ -449,8 +449,8 @@ void SCJdynPlane::checkStatus() {
 }
 void SCJdynPlane::computeLift() {
     int itemp {0};
-    this->Lmax = this->LmaxDEF * this->gravity;
-    this->Lmin = this->LminDEF * this->gravity;
+    this->Lmax = this->object->entity->jdyn->MAX_G * this->gravity;
+    this->Lmin = -0.5f * this->object->entity->jdyn->MAX_G * this->gravity;
 
     this->max_cl = 1.5f + this->flaps / 62.5f;
     this->min_cl = this->flaps / 62.5f - 1.5f;
@@ -474,7 +474,7 @@ void SCJdynPlane::computeLift() {
     /* compute new accelerations, lift: only if vz is negative	*/
     if (this->vz < 0.0f) {
         this->ae = this->vy / this->vz + this->tilt_factor;
-        this->Cl = this->uCl = this->ae / (.17f + this->kl * this->ipi_AR);
+        this->Cl = this->uCl = this->ae / (.17f + this->kl * this->object->entity->jdyn->LIFT / 65536.0f);
         /* check for positive stall	*/
         if (this->Cl > this->max_cl) {
             this->Cl = 3.0f * this->max_cl - 2.0f * this->Cl;
@@ -551,11 +551,11 @@ void SCJdynPlane::computeDrag() {
     this->drag_force = this->vz * this->drag ;
 }
 void SCJdynPlane::computeGravity() {
-    this->inverse_mass = G_ACC / (this->W + this->fuel / 12800.0f * this->fuel_weight);
-    this->gravity = G_ACC / this->tps / this->tps;
+    this->inverse_mass = GRAVITY / (this->object->entity->weight_in_kg + this->fuel / 12800.0f * this->fuel_weight);
+    this->gravity = GRAVITY / this->tps / this->tps;
 }
 void SCJdynPlane::computeThrust() {
-    this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->Mthrust;
+    this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->object->entity->thrust_in_newton;
     
 }
 void SCJdynPlane::updateAcceleration() {
