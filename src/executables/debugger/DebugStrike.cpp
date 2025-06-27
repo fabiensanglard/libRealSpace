@@ -42,8 +42,24 @@ void DebugStrike::simInfo() {
             this->player_plane->vz);
     ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]", this->player_plane->ax, this->player_plane->ay,
             this->player_plane->az);
-    ImGui::Text("Lift %.3f", this->player_plane->lift);
-    ImGui::Text("Gravity %.3f", this->player_plane->gravity);
+    ImGui::Text("Lift %.3f, cl %.3f, ae %.3f, mincl %.3f, maxcl %.3f, titl %.3f, stall %d", 
+        this->player_plane->lift,
+        this->player_plane->Cl,
+        this->player_plane->ae,
+        this->player_plane->min_cl,
+        this->player_plane->max_cl,
+        this->player_plane->tilt_factor,
+        this->player_plane->wing_stall
+    );
+    ImGui::Text("Forces : drag %.3f, gravity drag %.3f, lift drag %.3f, thrust %.3f, lift %.3f, weight %.3f",
+        this->player_plane->drag_force,
+        this->player_plane->gravity_drag_force,
+        this->player_plane->lift_drag_force,
+        this->player_plane->thrust_force,
+        this->player_plane->lift_force,
+        this->player_plane->gravity_force
+    );
+    ImGui::Text("Gravity %.3f, gravity drag %.3f", this->player_plane->gravity);
     ImGui::Text("Drag %.3f", this->player_plane->drag);
     ImGui::Text("Inv mass %.8f", this->player_plane->inverse_mass);
     ImGui::Text("Thrust %.3f", this->player_plane->thrust_force);
@@ -156,15 +172,16 @@ void DebugStrike::loadPlane() {
         surface = surface * 10.7639f;
         envergure = envergure * 3.28084f;
         wing_aspec_ratio = (envergure * envergure) / surface;
-        
+        float twist_rate = plane_to_load->jdyn->TWIST_RATE;
+        float roll_rate = plane_to_load->jdyn->ROLL_RATE;
         if (simple_simulation) {
             new_plane = new SCSimplePlane(
                 10.0f,
                 -7.0f,
                 40.0f,
                 40.0f,
-                plane_to_load->jdyn->TWIST_RATE,
-                plane_to_load->jdyn->ROLL_RATE,
+                twist_rate,
+                roll_rate,
                 surface,
                 weight,
                 fuel,
@@ -180,16 +197,19 @@ void DebugStrike::loadPlane() {
             new_plane->yaw = player_plane->azimuthf;
         } if (jdyn_simulation) {
             thrust = plane_to_load->thrust_in_newton;
+            envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
             weight = plane_to_load->weight_in_kg;
             fuel = 0;
+            twist_rate = 30.0f;
+            roll_rate = 100.0f;
             new_plane = new SCJdynPlane(
                 10.0f,
                 -7.0f,
                 40.0f,
                 40.0f,
-                plane_to_load->jdyn->TWIST_RATE,
-                plane_to_load->jdyn->ROLL_RATE,
+                twist_rate,
+                roll_rate,
                 surface,
                 weight,
                 fuel,
@@ -204,13 +224,16 @@ void DebugStrike::loadPlane() {
             );
             new_plane->yaw = player_plane->azimuthf;
         } else {
+            twist_rate = 30.0f;
+            roll_rate = 100.0f;
+            fuel = 0;
             new_plane = new SCPlane(
                 10.0f,
                 -7.0f,
                 40.0f,
                 40.0f,
-                plane_to_load->jdyn->TWIST_RATE,
-                plane_to_load->jdyn->ROLL_RATE,
+                twist_rate,
+                roll_rate,
                 surface,
                 weight,
                 fuel,
@@ -246,7 +269,7 @@ void DebugStrike::loadPlane() {
     ImGui::Text("Roll rate max: %.2f", roll_rate_max);
     ImGui::Text("Pitch rate max: %.2f", pitch_rate_max);
     ImGui::Text("G-Load: Max %.2f, Min %.2f", this->player_plane->Lmax, this->player_plane->Lmin);
-    ImGui::Text("IE PI AR: %.2f", this->player_plane->ie_pi_AR);
+    ImGui::Text("JDYN LIFT: %.3f", this->player_plane->object->entity->jdyn->LIFT / 65536.0f);
 }
 void DebugStrike::simConfig() {
     static bool azymuth_control = false;

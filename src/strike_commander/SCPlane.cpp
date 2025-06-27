@@ -706,6 +706,7 @@ void SCPlane::computeDrag() {
 }
 void SCPlane::computeGravity() {
     this->gravity = G_ACC / this->tps / this->tps;
+    this->gravity_force = this->gravity * this->W;
 }
 void SCPlane::computeThrust() {
     this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->Mthrust;

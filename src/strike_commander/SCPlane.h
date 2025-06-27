@@ -76,13 +76,7 @@ protected:
     float fuel_rate;
     /* maximum height for ground effect	*/
     float gefy;
-    /* angle of attack for wing		*/
-    float ae;
-    /* max and min coefficient of lift	*/
-    float max_cl;
-    float min_cl;
-    /* wing angle tilt due to flaps		*/
-    float tilt_factor;
+
     /* spoiler factors on lift and drag	*/
     float Splf;
     float Spdf;
@@ -119,9 +113,6 @@ protected:
     short MIN_LIFT_SPEED;
     short climbspeed;
 
-    /* TRUE if wing is stalling	*/
-    short wing_stall;
-
     /* fps to knots conversion factor */
     float fps_knots;
     RSArea *area;
@@ -156,11 +147,7 @@ protected:
 
     Vector3D acceleration {0.0f, 0.0f, 0.0f};
     
-    float lift_force {0.0f};
-    float drag_force {0.0f};
-    float gravity_drag_force {0.0f};
-    float lift_drag_force {0.0f};
-    float gravity_force {0.0f};
+
 
     float airspeed_in_ms {0.0f};
     virtual void updatePosition();
@@ -190,11 +177,25 @@ public:
     float elevation_speedf;
     float azimuth_speedf;
 
+    float lift_force {0.0f};
+    float drag_force {0.0f};
+    float gravity_drag_force {0.0f};
+    float lift_drag_force {0.0f};
+    float gravity_force {0.0f};
+
     int tps;
     /* plane velocity */
     float vx;
     float vy;
     float vz;
+
+        /* angle of attack for wing		*/
+    float ae;
+    /* max and min coefficient of lift	*/
+    float max_cl;
+    float min_cl;
+    /* wing angle tilt due to flaps		*/
+    float tilt_factor;
 
     /* last plane position	*/
     float last_px{0.0f};
@@ -223,7 +224,8 @@ public:
     float kl;
     /* ground effect, ro/2*Vz*s		*/
     float qs;
-
+    /* TRUE if wing is stalling	*/
+    short wing_stall;
     /* air density / 2.0, speed of sound	*/
     float ro2;
     float sos;

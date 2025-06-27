@@ -19,12 +19,7 @@ protected:
 
     Vector3D acceleration {0.0f, 0.0f, 0.0f};
     Vector3D velocity {0.0f, 0.0f, 0.0f};
-    
-    float lift_force {0.0f};
-    float drag_force {0.0f};
-    float gravity_drag_force {0.0f};
-    float lift_drag_force {0.0f};
-    float gravity_force {0.0f};
+
 
     float airspeed_in_ms {0.0f};
     void updatePosition();

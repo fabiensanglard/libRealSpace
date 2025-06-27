@@ -50,7 +50,7 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->fuel_weight = fuel_weight;
     this->Mthrust = Mthrust;
     this->b = b;
-    this->ie_pi_AR = ie_pi_AR;
+    
     this->MIN_LIFT_SPEED = MIN_LIFT_SPEED;
     this->object = nullptr;
     this->area = area;
@@ -62,6 +62,8 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->y = y;
     this->z = z;
     this->ro2 = .5f * ro[0];
+    this->ipi_AR = 1.0f / ((float)M_PI * this->b * this->b / this->s);
+    this->ie_pi_AR = 0.83f * this->ipi_AR;
     init();
 }
 SCJdynPlane::~SCJdynPlane() {
@@ -79,11 +81,11 @@ void SCJdynPlane::Simulate() {
         newtps = ticks / elapsed_time;
         this->last_time = current_time;
         this->last_tick = this->tick_counter;
-        //if (newtps > this->tps / 2) {    
+        if (newtps > this->tps / 2) {    
             this->tps = newtps;
-        //}
+        }
     }
-    this->fps_knots = this->tps * (3600.0f / 6082.0f);
+    this->fps_knots = 1.944f;
 
     this->computeGravity();
     this->processInput();
@@ -97,7 +99,8 @@ void SCJdynPlane::Simulate() {
     this->updateAcceleration();
     this->updateVelocity();
 
-    this->airspeed = -(int)(this->fps_knots * this->vz);
+    float vitesse_ms = abs(this->vz) * this->tps;
+    this->airspeed = vitesse_ms * 1.944f;
     this->climbspeed = (short)(this->tps * (this->y - this->last_py));
     this->g_load = (this->lift_force*this->inverse_mass) / this->gravity;
     this->ax = this->acceleration.x;
@@ -252,6 +255,9 @@ void SCJdynPlane::processInput() {
     this->rollers = (this->ROLLF * ((this->control_stick_x + 8) >> 4));
     /* delta */
     itemp = (int)(this->rollers * this->vz - this->roll_speed);
+    if (DELAY == 0) {
+        DELAY = 15; // Avoid division by zero
+    }
     if (itemp != 0) {
         if (itemp >= DELAY || itemp <= -DELAY) {
             itemp /= DELAY;
@@ -345,10 +351,10 @@ void SCJdynPlane::processInput() {
 void SCJdynPlane::updateSpeedOfSound() {
     int itemp {0};
     /* compute speed of sound	*/
-    if (this->y <= 36000.0f) {
-        this->sos = -1116.0f / this->tps + (1116.0f - 968.0f) / this->tps / 36000.0f * this->y;
+    if (this->y <= 35000.0f) {
+        this->sos = -344.111f / this->tps + (344.111f - 308.649f) / this->tps / 35000.0f * this->y;
     } else {
-        this->sos = -968.0f / this->tps;
+        this->sos = -308.649f / this->tps;
     }
     itemp = ((int)this->y) >> 10;
     if (itemp > 74) {
@@ -471,10 +477,10 @@ void SCJdynPlane::computeLift() {
         }
     }
 
-    /* compute new accelerations, lift: only if vz is negative	*/
     if (this->vz < 0.0f) {
         this->ae = this->vy / this->vz + this->tilt_factor;
-        this->Cl = this->uCl = this->ae / (.17f + this->kl * this->object->entity->jdyn->LIFT / 65536.0f);
+        
+        this->Cl = this->uCl = this->ae / (.17f + this->kl * this->ipi_AR);
         /* check for positive stall	*/
         if (this->Cl > this->max_cl) {
             this->Cl = 3.0f * this->max_cl - 2.0f * this->Cl;
@@ -545,6 +551,7 @@ void SCJdynPlane::computeDrag() {
     if (this->spoilers > 0.0f) {
         this->Cdc += this->Spdf;
     }
+    
     this->Cd = this->Cdp + this->kl * this->uCl * this->uCl * this->ie_pi_AR + this->Cdc;
     this->drag = this->Cd * this->qs;
     this->gravity_drag_force = this->vy * this->drag ;
@@ -553,6 +560,7 @@ void SCJdynPlane::computeDrag() {
 void SCJdynPlane::computeGravity() {
     this->inverse_mass = GRAVITY / (this->object->entity->weight_in_kg + this->fuel / 12800.0f * this->fuel_weight);
     this->gravity = GRAVITY / this->tps / this->tps;
+    this->gravity_force = this->gravity * this->object->entity->weight_in_kg;
 }
 void SCJdynPlane::computeThrust() {
     this->thrust_force = .01f / this->tps / this->tps * this->thrust * (this->object->entity->thrust_in_newton / GRAVITY);
