@@ -196,7 +196,7 @@ void DebugStrike::loadPlane() {
             );
             new_plane->yaw = player_plane->azimuthf;
         } if (jdyn_simulation) {
-            thrust = plane_to_load->thrust_in_newton;
+            thrust = plane_to_load->thrust_in_newton / 9.807f;
             envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
             weight = plane_to_load->weight_in_kg;

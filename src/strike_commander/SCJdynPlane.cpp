@@ -1,5 +1,5 @@
 #include "precomp.h"
-const float GRAVITY = 9.81f; // m/s^2
+const float GRAVITY = 9.80f; // m/s^2
 const float AIR_DENSITY = 1.225f; // kg/m^3
 const float DRAG_COEFFICIENT = 0.47f;
 const float MAX_LIFT_COEFFICIENT = 2.0f; // Coefficient de portance maximum
@@ -61,7 +61,7 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->x = x;
     this->y = y;
     this->z = z;
-    this->ro2 = .5f * ro[0];
+    this->ro2 = 0.5f * (AIR_DENSITY - 0.000112f * this->y / 1000.0f); // Approximation atmosphère standard;
     this->ipi_AR = 1.0f / ((float)M_PI * this->b * this->b / this->s);
     this->ie_pi_AR = 0.83f * this->ipi_AR;
     init();
@@ -85,7 +85,7 @@ void SCJdynPlane::Simulate() {
             this->tps = newtps;
         }
     }
-    this->fps_knots = 1.944f;
+    this->fps_knots = this->tps * 1.944f;
 
     this->computeGravity();
     this->processInput();
@@ -351,10 +351,10 @@ void SCJdynPlane::processInput() {
 void SCJdynPlane::updateSpeedOfSound() {
     int itemp {0};
     /* compute speed of sound	*/
-    if (this->y <= 35000.0f) {
-        this->sos = -344.111f / this->tps + (344.111f - 308.649f) / this->tps / 35000.0f * this->y;
+    if (this->y <= 11000.0f) {
+        this->sos = -340.3f / this->tps + (340.3f - 295.0f) / this->tps / 11000.0f * this->y;
     } else {
-        this->sos = -308.649f / this->tps;
+        this->sos = -295.0f / this->tps;
     }
     itemp = ((int)this->y) >> 10;
     if (itemp > 74) {
@@ -362,7 +362,7 @@ void SCJdynPlane::updateSpeedOfSound() {
     } else if (itemp < 0) {
         itemp = 0;
     }
-    this->ro2 = 0.5f*1.285f / tps;
+    this->ro2 = 0.5f * (AIR_DENSITY - 0.000112f * this->y / 1000.0f); // Approximation atmosphère standard;
     if (this->Cl < .2) {
         this->mcc = .7166666f + .1666667f * this->Cl;
     } else {
@@ -558,12 +558,12 @@ void SCJdynPlane::computeDrag() {
     this->drag_force = this->vz * this->drag ;
 }
 void SCJdynPlane::computeGravity() {
-    this->inverse_mass = GRAVITY / (this->object->entity->weight_in_kg + this->fuel / 12800.0f * this->fuel_weight);
+    this->inverse_mass = GRAVITY / (this->W + this->fuel / 12800.0f * this->fuel_weight);
     this->gravity = GRAVITY / this->tps / this->tps;
-    this->gravity_force = this->gravity * this->object->entity->weight_in_kg;
+    this->gravity_force = this->gravity * this->W;
 }
 void SCJdynPlane::computeThrust() {
-    this->thrust_force = .01f / this->tps / this->tps * this->thrust * (this->object->entity->thrust_in_newton / GRAVITY);
+    this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->Mthrust;
     
 }
 void SCJdynPlane::updateAcceleration() {
