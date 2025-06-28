@@ -254,7 +254,7 @@ void SCJdynPlane::processInput() {
     /* tenths of degrees per tick	*/
     this->rollers = (this->ROLLF * ((this->control_stick_x + 8) >> 4));
     /* delta */
-    itemp = (int)(this->rollers * this->vz - this->roll_speed);
+    itemp = (int)(this->rollers * (this->vz*3.2f) - this->roll_speed);
     if (DELAY == 0) {
         DELAY = 15; // Avoid division by zero
     }
@@ -271,8 +271,8 @@ void SCJdynPlane::processInput() {
     }
     this->roll_speed += itemp;
     this->elevator = -1.0f * (this->ELEVF * ((this->control_stick_y + 8) >> 4));
-    itemp = (int)(this->elevator * this->vz + this->vy - this->pitch_speed);
-    elevtemp = this->elevator * this->vz + this->vy - this->pitch_speed;
+    itemp = (int)(this->elevator * (this->vz*3.2f) + (this->vy*3.2f) - this->pitch_speed);
+    elevtemp = this->elevator * (this->vz*3.2f) + (this->vy*3.2f) - this->pitch_speed;
     if (itemp != 0) {
         if (itemp >= DELAY || itemp <= -DELAY) {
             itemp /= DELAY;
@@ -290,7 +290,7 @@ void SCJdynPlane::processInput() {
 
     float max_turnrate = 0.0f;
     max_turnrate = 600.0f / tps;
-    temp = this->rudder * this->vz - (4.0f) * this->vx;
+    temp = this->rudder * (this->vz*3.2) - (4.0f) * (this->vx*3.2);
     if (this->on_ground) {
         itemp = (int)(16.0f * temp);
         if (itemp < -max_turnrate || itemp > max_turnrate) {
@@ -301,9 +301,9 @@ void SCJdynPlane::processInput() {
                 itemp = max_turnrate;
             }
             /* decrease with velocity */
-            if (fabs(this->vz) > 10.0f / this->tps) {
+            if (fabs(this->vz*3.2) > 10.0f / this->tps) {
                 /* skid effect */
-                temp = 0.4f * this->tps * (this->rudder * this->vz - .75f);
+                temp = 0.4f * this->tps * (this->rudder * (this->vz*3.2) - .75f);
                 if (temp < -max_turnrate || temp > max_turnrate) {
                     temp = (float)itemp;
                 }
@@ -335,7 +335,7 @@ void SCJdynPlane::processInput() {
             }
         } else {
             /* mimic gravitational torque	*/
-            elevtemp = -(this->vz * this->tps + this->MIN_LIFT_SPEED) / 4.0f;
+            elevtemp = -((this->vz*3.2f) * this->tps + this->MIN_LIFT_SPEED) / 4.0f;
             if (elevtemp < 0 && this->pitch <= 0) {
                 elevtemp = 0.0f;
             }
