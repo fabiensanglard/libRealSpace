@@ -82,9 +82,7 @@ protected:
     float Spdf;
 
     /* mach #, crest critical #, ratio	*/
-    float mach;
-    float mcc;
-    float mratio;
+    
 
     /* weight of fuel			*/
     float fuel_weight;
@@ -93,7 +91,7 @@ protected:
     /* plane design parameters	*/
     
     
-    float Cdp;
+    
     float ipi_AR;
     
 
@@ -164,8 +162,12 @@ protected:
 
 public:
     unsigned int status;
+    float mach{0.0f};
+    float mcc{0.0f};
+    float mratio{0.0f};
     float ie_pi_AR{0.0f};
     float g_load{0.0f};
+    float Cdp{0.0f};
     float Lmax;
     float Lmin;
     float groundlevel{0.0f};

@@ -26,7 +26,7 @@ void DebugStrike::showOffCamera() {
     ImGui::Image((void*)(intptr_t)Renderer.texture, avail_size, {0, 1}, {1, 0});
 }
 void DebugStrike::simInfo() {
-    ImGui::Text("Speed %d, Altitude %.0f, Heading %.0f", this->player_plane->airspeed, this->new_position.y,
+    ImGui::Text("Speed %d, Mach %.3f, Altitude %.0f, Heading %.0f", this->player_plane->airspeed, this->player_plane->mach, new_position.y,
         this->player_plane->azimuthf);
     ImGui::Text("Throttle %d", this->player_plane->GetThrottle());
     ImGui::Text("Control Stick %d %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y);
@@ -42,15 +42,6 @@ void DebugStrike::simInfo() {
             this->player_plane->vz);
     ImGui::Text("Acceleration (ax,ay,az) [%.3f ,%.3f ,%.3f ]", this->player_plane->ax, this->player_plane->ay,
             this->player_plane->az);
-    ImGui::Text("Lift %.3f, cl %.3f, ae %.3f, mincl %.3f, maxcl %.3f, titl %.3f, stall %d", 
-        this->player_plane->lift,
-        this->player_plane->Cl,
-        this->player_plane->ae,
-        this->player_plane->min_cl,
-        this->player_plane->max_cl,
-        this->player_plane->tilt_factor,
-        this->player_plane->wing_stall
-    );
     ImGui::Text("Forces : drag %.3f, gravity drag %.3f, lift drag %.3f, thrust %.3f, lift %.3f, weight %.3f",
         this->player_plane->drag_force,
         this->player_plane->gravity_drag_force,
@@ -59,7 +50,15 @@ void DebugStrike::simInfo() {
         this->player_plane->lift_force,
         this->player_plane->gravity_force
     );
-    ImGui::Text("Gravity %.3f, gravity drag %.3f", this->player_plane->gravity);
+    ImGui::Text("Lift %.3f, cl %.3f, ae %.3f, cdp %.3f, titl %.3f, stall %d", 
+        this->player_plane->lift,
+        this->player_plane->Cl,
+        this->player_plane->ae,
+        this->player_plane->Cdp,
+        this->player_plane->tilt_factor,
+        this->player_plane->wing_stall
+    );
+    ImGui::Text("Gravity %.3f", this->player_plane->gravity);
     ImGui::Text("Drag %.3f", this->player_plane->drag);
     ImGui::Text("Inv mass %.8f", this->player_plane->inverse_mass);
     ImGui::Text("Thrust %.3f", this->player_plane->thrust_force);
@@ -160,7 +159,7 @@ void DebugStrike::loadPlane() {
         envergure = (bb->max.z - bb->min.z) / 2.0f;
         surface = plane_to_load->wing_area;
         
-        thrust = plane_to_load->thrust_in_newton * 0.153333333f;
+        thrust = plane_to_load->thrust_in_newton / 4.448f;
         weight = plane_to_load->weight_in_kg * 2.208588957f;
         fuel = plane_to_load->jdyn->FUEL * 2.208588957f;
         
@@ -196,7 +195,7 @@ void DebugStrike::loadPlane() {
             );
             new_plane->yaw = player_plane->azimuthf;
         } if (jdyn_simulation) {
-            thrust = plane_to_load->thrust_in_newton / 9.807f;
+            thrust = plane_to_load->thrust_in_newton;
             envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
             weight = plane_to_load->weight_in_kg;
@@ -265,7 +264,7 @@ void DebugStrike::loadPlane() {
     ImGui::Text("Fuel: %.2f", fuel);
     ImGui::Text("Surface: %.2f", this->player_plane->s);
     ImGui::Text("Wing aspect ratio: %.2f", wing_aspec_ratio);
-    ImGui::Text("Induced efficiency: %.2f", ie_pi_AR);
+    ImGui::Text("Induced efficiency: %.2f", this->player_plane->ie_pi_AR);
     ImGui::Text("Roll rate max: %.2f", roll_rate_max);
     ImGui::Text("Pitch rate max: %.2f", pitch_rate_max);
     ImGui::Text("G-Load: Max %.2f, Min %.2f", this->player_plane->Lmax, this->player_plane->Lmin);

@@ -613,7 +613,7 @@ void SCPlane::computeLift() {
 
     this->Spdf = .0025f * this->spoilers;
     this->Splf = 1.0f - .005f * this->spoilers;
-    if (this->y > this->gefy) {
+    if (this->y > this->gefy+this->area->getY(this->x, this->z)) {
         // ground effect factor
         this->kl = 1.0f;
     } else {

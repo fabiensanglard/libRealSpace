@@ -19,7 +19,10 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->vx = 0.0f;
     this->vy = 0.0f;
     this->vz = 0.0f;
-        this->weaps_load.reserve(9);
+    this->ax = 0.0f;
+    this->ay = 0.0f;
+    this->az = 0.0f;
+    this->weaps_load.reserve(9);
     this->weaps_load.resize(9);
     this->alive = 0;
     this->status = 0;
@@ -61,10 +64,19 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->x = x;
     this->y = y;
     this->z = z;
+    this->Cdp = .015f;
     this->ro2 = 0.5f * (AIR_DENSITY - 0.000112f * this->y / 1000.0f); // Approximation atmosphère standard;
     this->ipi_AR = 1.0f / ((float)M_PI * this->b * this->b / this->s);
     this->ie_pi_AR = 0.83f * this->ipi_AR;
-    init();
+    this->wheels = 1;
+    this->on_ground = 1;
+    this->gravity = GRAVITY / tps / tps;
+    this->status = 580000;
+    this->alive = 1;
+    this->tilt_factor = 0.17f;
+    this->inverse_mass = GRAVITY / (this->W + this->fuel / 12800.0f * this->fuel_weight);
+    this->ptw.Clear();
+    this->incremental.Clear();
 }
 SCJdynPlane::~SCJdynPlane() {
 
@@ -420,6 +432,7 @@ void SCJdynPlane::checkStatus() {
                     }
                 }
             } else {
+                this->Cdp = 0.045f;
                 if (this->nocrash == 0) {
                     this->status = MEXPLODE;
                 }
@@ -465,15 +478,18 @@ void SCJdynPlane::computeLift() {
     this->Spdf = .0025f * this->spoilers;
     this->Splf = 1.0f - .005f * this->spoilers;
     float groundlevel = this->area->getY(this->x, this->z);
-    if (this->y > this->gefy) {
+    if (this->y > this->gefy+groundlevel) {
         // ground effect factor
         this->kl = 1.0f;
     } else {
-        this->kl = (this->y / this->b);
-        if (this->kl > .225f) {
-            this->kl = .484f * this->kl + .661f;
+        float height_ratio = (this->y - groundlevel) / this->b;
+
+        if (height_ratio > 0.15f) {
+            // Transition douce vers l'altitude normale
+            this->kl = 0.85f + 0.15f * (height_ratio / 0.3f);
         } else {
-            this->kl = 2.533f * this->kl + .20f;
+            // Effet de sol modéré près du sol
+            this->kl = 0.7f + 1.0f * height_ratio;
         }
     }
 
@@ -558,7 +574,7 @@ void SCJdynPlane::computeDrag() {
     this->drag_force = this->vz * this->drag ;
 }
 void SCJdynPlane::computeGravity() {
-    this->inverse_mass = GRAVITY / (this->W + this->fuel / 12800.0f * this->fuel_weight);
+    this->inverse_mass = 1.0f / (this->W);
     this->gravity = GRAVITY / this->tps / this->tps;
     this->gravity_force = this->gravity * this->W;
 }
@@ -567,7 +583,9 @@ void SCJdynPlane::computeThrust() {
     
 }
 void SCJdynPlane::updateAcceleration() {
-    
+    if (this->acceleration.x != 0.0f) {
+        this->acceleration.x *= this->inverse_mass;
+    }
     this->acceleration.y *= this->inverse_mass;
     this->acceleration.z *= this->inverse_mass;
 
