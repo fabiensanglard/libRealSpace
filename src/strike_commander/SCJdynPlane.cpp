@@ -401,7 +401,7 @@ void SCJdynPlane::checkStatus() {
             this->landed = false;
         }
         if (this->on_ground) {
-            this->Cdp /= 3.0;
+            this->Cdp = 0.015f;
             this->min_throttle = 0;
         }
         this->on_ground = FALSE;
@@ -416,7 +416,7 @@ void SCJdynPlane::checkStatus() {
             if (!this->on_ground) {
                 int rating;
                 /* increase drag	*/
-                this->Cdp *= 3.0;
+                this->Cdp = 0.085f;
                 /* allow reverse engines*/
                 this->min_throttle = -this->max_throttle;
                 rating = report_card(-this->climbspeed, this->roll, (int)(this->vx * this->tps),
@@ -434,7 +434,7 @@ void SCJdynPlane::checkStatus() {
                     }
                 }
             } else {
-                this->Cdp = 0.045f;
+                this->Cdp = 0.085f;
                 if (this->nocrash == 0) {
                     this->status = MEXPLODE;
                 }
@@ -576,9 +576,9 @@ void SCJdynPlane::computeDrag() {
     this->drag_force = this->vz * this->drag ;
 }
 void SCJdynPlane::computeGravity() {
-    this->inverse_mass = 1.0f / (this->W + (this->fuel  * 0.81f));
+    this->inverse_mass = 1.0f / (this->W + (this->fuel));
     this->gravity = GRAVITY / this->tps / this->tps;
-    this->gravity_force = this->gravity * this->W;
+    this->gravity_force = this->gravity * (this->W + (this->fuel));
 }
 void SCJdynPlane::computeThrust() {
     this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->Mthrust;
