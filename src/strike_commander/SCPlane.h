@@ -101,7 +101,7 @@ protected:
     /* TRUE if wing g-limit is hit	*/
     short g_limit;
     /* fuel (0 - 12800)		*/
-    short fuel;
+    int fuel;
     /* upper limit on engines	*/
     short max_throttle;
     /* lower limit on engines	*/

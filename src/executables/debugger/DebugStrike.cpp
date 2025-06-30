@@ -7,6 +7,99 @@
 #include <optional>
 #include <cmath>
 
+struct imperial_plane_data {
+    float LmaxDef{0.0f};
+    float LminDef{0.0f};
+    float Fmax{0.0f};
+    float Fmin{0.0f};
+    float ELEVF_CSTE{0.0f};
+    float ROLLF_CSTE{0.0f};
+    float s{0.0f};
+    float W{0.0f};
+    float fuel_weight{0.0f};
+    float Mthrust{0.0f};
+    float b{0.0f};
+    float ie_pi_AR{0.0f};
+    float MIN_LIFT_SPEED{0.0f};
+};
+
+std::map<std::string, imperial_plane_data> imperial_planes = {
+    {"747", {
+        4.0f,
+        -2.0f,
+        50.0f,
+        80.0f,
+        25.0f,
+        50.0f,
+        5500.0f,
+        500000.0f,
+        100000.0f,
+        200000.0f,
+        220.0f,
+        .83f,
+        200.0f
+    }},
+    {"F-18", {
+        9.0f
+        -6.0f,
+        50.0f,
+        60.0f,
+        30.0f,
+        100.0f,
+        510.0f,
+        24000.0f,
+        12000.0f,
+        32000.0f,
+        38.0f,
+        .90f,
+        200.0f
+    }},
+    {"F-16DES", {
+        10.0f,
+        -7.0f,
+        40.0f,
+        40.0f,
+        30.0f,
+        100.0f,
+        390.0f,
+        18000.0f,
+        8000.0f,
+        23000.0f,
+        32.0f,
+        .93f,
+        120.0f
+    }},
+    {"F-16GRAY", {
+        10.0f,
+        -7.0f,
+        40.0f,
+        40.0f,
+        30.0f,
+        100.0f,
+        390.0f,
+        18000.0f,
+        8000.0f,
+        23000.0f,
+        32.0f,
+        .93f,
+        120.0f
+    }},
+    {"F-15", {
+        8.0f,
+        -5.0f,
+        30.0f,
+        60.0f,
+        32.0f,
+        140.0f,
+        608.0f,
+        28000.0f,
+        14000.0f,
+        46000.0f,
+        43.0f,
+        .87f,
+        100.0f
+    }}
+};
 
 DebugStrike::DebugStrike() : SCStrike(){
 
@@ -199,7 +292,7 @@ void DebugStrike::loadPlane() {
             envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
             weight = plane_to_load->weight_in_kg;
-            fuel = 0;
+            fuel = plane_to_load->jdyn->FUEL;
             twist_rate = 30.0f;
             roll_rate = 100.0f;
             new_plane = new SCJdynPlane(
@@ -223,29 +316,58 @@ void DebugStrike::loadPlane() {
             );
             new_plane->yaw = player_plane->azimuthf;
         } else {
-            twist_rate = 30.0f;
-            roll_rate = 100.0f;
-            fuel = 0;
-            new_plane = new SCPlane(
-                10.0f,
-                -7.0f,
-                40.0f,
-                40.0f,
-                twist_rate,
-                roll_rate,
-                surface,
-                weight,
-                fuel,
-                thrust,
-                envergure,
-                0.83f,
-                120,
-                this->current_mission->area,
-                player_plane->x,
-                player_plane->y,
-                player_plane->z
-            );
-            
+            if (!imperial_planes.count(plane_name)) {
+                twist_rate = 30.0f;
+                roll_rate = 100.0f;
+                fuel = 0;
+                new_plane = new SCPlane(
+                    10.0f,
+                    -7.0f,
+                    40.0f,
+                    40.0f,
+                    twist_rate,
+                    roll_rate,
+                    surface,
+                    weight,
+                    fuel,
+                    thrust,
+                    envergure,
+                    0.83f,
+                    120,
+                    this->current_mission->area,
+                    player_plane->x,
+                    player_plane->y,
+                    player_plane->z
+                );
+            } else {
+                imperial_plane_data &plane_data = imperial_planes[plane_name];
+                new_plane = new SCPlane(
+                    plane_data.LmaxDef,
+                    plane_data.LminDef,
+                    plane_data.Fmax,
+                    plane_data.Fmin,
+                    plane_data.ELEVF_CSTE,
+                    plane_data.ROLLF_CSTE,
+                    plane_data.s,
+                    plane_data.W,
+                    plane_data.fuel_weight,
+                    plane_data.Mthrust,
+                    plane_data.b,
+                    plane_data.ie_pi_AR,
+                    plane_data.MIN_LIFT_SPEED,
+                    this->current_mission->area,
+                    player_plane->x,
+                    player_plane->y,
+                    player_plane->z
+                );
+                twist_rate = plane_data.ELEVF_CSTE;
+                roll_rate = plane_data.ROLLF_CSTE;
+                envergure = plane_data.b;
+                surface = plane_data.s;
+                weight = plane_data.W;
+                fuel = plane_data.fuel_weight;
+                thrust = plane_data.Mthrust;
+            }
         }
         
         new_plane->simple_simulation = false;

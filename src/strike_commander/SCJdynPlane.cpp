@@ -50,7 +50,9 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->ROLLFF_CSTE = ROLLFF_CSTE;
     this->s = s;
     this->W = W;
-    this->fuel_weight = fuel_weight;
+    this->fuel_weight = 0;
+    this->fuel = fuel_weight;
+    this->fuel_max = fuel_weight;
     this->Mthrust = Mthrust;
     this->b = b;
     
@@ -74,7 +76,7 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->status = 580000;
     this->alive = 1;
     this->tilt_factor = 0.17f;
-    this->inverse_mass = GRAVITY / (this->W + this->fuel / 12800.0f * this->fuel_weight);
+    this->inverse_mass = 1.0f / (this->W + (this->fuel  * 0.81f));
     this->ptw.Clear();
     this->incremental.Clear();
 }
@@ -574,7 +576,7 @@ void SCJdynPlane::computeDrag() {
     this->drag_force = this->vz * this->drag ;
 }
 void SCJdynPlane::computeGravity() {
-    this->inverse_mass = 1.0f / (this->W);
+    this->inverse_mass = 1.0f / (this->W + (this->fuel  * 0.81f));
     this->gravity = GRAVITY / this->tps / this->tps;
     this->gravity_force = this->gravity * this->W;
 }

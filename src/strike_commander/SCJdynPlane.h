@@ -20,6 +20,7 @@ protected:
     Vector3D acceleration {0.0f, 0.0f, 0.0f};
     Vector3D velocity {0.0f, 0.0f, 0.0f};
 
+    float fuel_max {0.0f};
 
     float airspeed_in_ms {0.0f};
     void updatePosition();
