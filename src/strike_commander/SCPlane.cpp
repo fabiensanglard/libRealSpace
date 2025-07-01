@@ -251,14 +251,8 @@ void SCPlane::Simulate() {
     this->updateForces();
     this->updateAcceleration();
     this->updateVelocity();
-
-    this->airspeed = -(int)(this->fps_knots * this->vz);
-    this->climbspeed = (short)(this->tps * (this->y - this->last_py));
-    this->g_load = (this->lift_force*this->inverse_mass) / this->gravity;
-    this->ax = this->acceleration.x;
-    this->ay = this->acceleration.y;
-    this->az = this->acceleration.z;
-
+    this->updatePlaneStatus();
+    
     if (this->thrust > 0) {
         itemp = this->thrust;
     } else {
@@ -313,8 +307,14 @@ void SCPlane::Simulate() {
     this->azimuthf = this->yaw;
     this->elevationf = this->pitch;
     this->twist = this->roll;
-
-    
+}
+void SCPlane::updatePlaneStatus() {
+    this->airspeed = -(int)(this->fps_knots * this->vz);
+    this->climbspeed = (short)(this->tps * (this->y - this->last_py));
+    this->g_load = (this->lift_force*this->inverse_mass) / this->gravity;
+    this->ax = this->acceleration.x;
+    this->ay = this->acceleration.y;
+    this->az = this->acceleration.z;
 }
 
 void SCPlane::updatePosition() {

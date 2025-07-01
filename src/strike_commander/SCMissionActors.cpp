@@ -29,6 +29,7 @@ bool SCMissionActors::takeOff(uint8_t arg) {
     if (this->pilot->target_climb == 0) {
         this->pilot->target_speed = -15;
         this->pilot->target_climb = (int) (this->plane->y + 300.0f);
+        this->pilot->target_azimut = this->plane->yaw;
     }
     if (std::abs(this->plane->y-this->pilot->target_climb) < 10.0f) {
         this->taken_off = true;

@@ -58,6 +58,16 @@ SCSimplePlane::SCSimplePlane(float LmaxDEF, float LminDEF, float Fmax, float Sma
     this->z = z;
     this->ro2 = .5f * ro[0];
     init();
+    this->fps_knots = this->tps * 1.944f;
+}
+void SCSimplePlane::updatePlaneStatus() {
+    this->fps_knots = this->tps * 1.944f;
+    this->airspeed = -(int)(this->fps_knots * this->vz);
+    this->climbspeed = (short)(this->tps * (this->y - this->last_py));
+    this->g_load = (this->lift_force*this->inverse_mass) / this->gravity;
+    this->ax = this->acceleration.x;
+    this->ay = this->acceleration.y;
+    this->az = this->acceleration.z;
 }
 void SCSimplePlane::updatePosition() {
     float temp{0.0f};
@@ -141,12 +151,10 @@ void SCSimplePlane::updatePosition() {
 void SCSimplePlane::updateAcceleration() {
     float deltaTime = 1.0f / (float) this->tps;
     this->acceleration.z = (this->acceleration.z / this->W);
-    
 }
 void SCSimplePlane::updateVelocity(){
     
     this->vz += this->acceleration.z;
-    this->vz = std::clamp(this->vz, -25.0f, 25.0f);
     this->vx = 0.0f;
     this->vy = 0.0f;
 }
@@ -174,6 +182,12 @@ void SCSimplePlane::processInput() {
     float deltaTime = 1.0f / (float) this->tps;
     this->pitch_speed = (this->control_stick_y ) * deltaTime;
     this->roll_speed = (-this->control_stick_x ) * deltaTime;
+    if (this->airspeed < this->MIN_LIFT_SPEED) {
+        this->pitch_speed = 0.0f;
+        this->roll_speed = 0.0f;
+        this->pitch = 0.0f;
+        this->roll = 0.0f;
+    } 
     if (this->wheels && this->y > this->area->getY(this->x, this->z)) {
         this->wheels = 0;
     }

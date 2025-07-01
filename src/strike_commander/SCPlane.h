@@ -159,7 +159,7 @@ protected:
     virtual void computeGravity();
     virtual void computeThrust();
     virtual void processInput();
-
+    virtual void updatePlaneStatus();
 public:
     unsigned int status;
     float mach{0.0f};

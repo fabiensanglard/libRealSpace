@@ -11,6 +11,7 @@ protected:
     void computeThrust();
     void processInput();
     void updatePosition();
+    void updatePlaneStatus();
 public:
     SCSimplePlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, float ELEVF_CSTE, float ROLLFF_CSTE, float s, float W,
             float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED,
