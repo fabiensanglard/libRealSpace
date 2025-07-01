@@ -109,9 +109,27 @@ void SCMission::loadMission() {
                 if (actor->profile != nullptr && actor->profile->ai.isAI) {
                     if (actor->profile->ai.goal.size() > 0) {
                         actor->pilot = new SCPilot();
-                        actor->plane = new SCSimplePlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
-                                                23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
-                                                part->position.y, part->position.z);
+                        BoudingBox *bb = actor->object->entity->GetBoudingBpx();
+                        
+                        actor->plane = new SCSimplePlane(
+                            10.0f,
+                            -7.0f,
+                            40.0f,
+                            40.0f,
+                            30.0f,
+                            100.0f,
+                            actor->object->entity->wing_area,
+                            actor->object->entity->weight_in_kg,
+                            actor->object->entity->jdyn->FUEL,
+                            actor->object->entity->thrust_in_newton,
+                            (bb->max.z - bb->min.z) / 2.0f,
+                            .93f,
+                            120,
+                            this->area,
+                            part->position.x,
+                            part->position.y,
+                            part->position.z
+                        );
                         actor->plane->yaw = (360 - part->azymuth) * 10.0f;
                         
                         part->weapon_load.shrink_to_fit();

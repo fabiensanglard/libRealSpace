@@ -14,7 +14,7 @@ SCSimplePlane::SCSimplePlane(float LmaxDEF, float LminDEF, float Fmax, float Sma
     this->vx = 0.0f;
     this->vy = 0.0f;
     this->vz = 0.0f;
-        this->weaps_load.reserve(9);
+    this->weaps_load.reserve(9);
     this->weaps_load.resize(9);
     this->alive = 0;
     this->status = 0;
@@ -59,38 +59,116 @@ SCSimplePlane::SCSimplePlane(float LmaxDEF, float LminDEF, float Fmax, float Sma
     this->ro2 = .5f * ro[0];
     init();
 }
-void SCSimplePlane::updateAcceleration() {
+void SCSimplePlane::updatePosition() {
+    float temp{0.0f};
     
+    this->ptw.Identity();
+    this->ptw.translateM(this->x, this->y, this->z);
 
-    this->ax = 0.0f;
-    this->ay = 0.0f;
-    this->az = 0.0f;
+    this->ptw.rotateM(tenthOfDegreeToRad(this->yaw), 0, 1, 0);
+    this->ptw.rotateM(tenthOfDegreeToRad(this->pitch), 1, 0, 0);
+    this->ptw.rotateM(tenthOfDegreeToRad(this->roll), 0, 0, 1);
+    
+    this->ptw.translateM(this->vx, this->vy, this->vz);
+    if (round(this->yaw_speed) != 0)
+        this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->yaw_speed)), 0, 1, 0);
+    if (round(this->pitch_speed) != 0)
+        this->ptw.rotateM(tenthOfDegreeToRad(roundf(this->pitch_speed)), 1, 0, 0);
+    if (round(this->roll_speed) != 0)
+        this->ptw.rotateM(tenthOfDegreeToRad((float)this->roll_speed), 0, 0, 1);
+
+    temp = 0.0f;
+    this->pitch = (-asinf(this->ptw.v[2][1]) * 180.0f / (float)M_PI) * 10;
+
+    float ascos = 0.0f;
+
+    temp = cosf(tenthOfDegreeToRad(this->pitch));
+
+    if (temp != 0.0) {
+
+        float sincosas = this->ptw.v[2][0] / temp;
+
+        if (sincosas > 1) {
+            sincosas = 1.0f;
+        } else if (sincosas < -1) {
+            sincosas = -1;
+        }
+        this->yaw = asinf(sincosas) / (float)M_PI * 1800.0f;
+        if (this->ptw.v[2][2] < 0.0) {
+            /* if heading into z	*/
+            this->yaw = 1800 - this->yaw;
+        }
+        if (this->yaw < 0) {
+            /* then adjust		*/
+            this->yaw += 3600;
+        }
+
+        this->roll = (asinf(this->ptw.v[0][1] / temp) / (float)M_PI) * 1800.0f;
+        if (this->ptw.v[1][1] < 0.0) {
+            /* if upside down	*/
+            this->roll = 1800.0f - this->roll;
+        }
+        if (this->roll < 0) {
+            this->roll += 3600.0f;
+        }
+    }
+    /* save last position	*/
+    this->last_px = this->x;
+    this->last_py = this->y;
+    this->last_pz = this->z;
+    this->x = this->ptw.v[3][0];
+    this->y = this->ptw.v[3][1];
+    this->z = this->ptw.v[3][2];
+
+    this->groundlevel = this->area->getY(this->x, this->z);
+    /****************************************************************
+    /*	perform incremental rotations on velocities
+    /****************************************************************/
+
+    this->incremental.Identity();
+    if (this->roll_speed)
+        this->incremental.rotateM(tenthOfDegreeToRad((float)-this->roll_speed), 0, 0, 1);
+    if (this->pitch_speed)
+        this->incremental.rotateM(tenthOfDegreeToRad(-this->pitch_speed), 1, 0, 0);
+    if (this->yaw_speed)
+        this->incremental.rotateM(tenthOfDegreeToRad(-this->yaw_speed), 0, 1, 0);
+    this->incremental.translateM(this->vx, this->vy, this->vz);
+
+    this->vx = this->incremental.v[3][0];
+    this->vy = this->incremental.v[3][1];
+    this->vz = this->incremental.v[3][2];
+}
+void SCSimplePlane::updateAcceleration() {
+    float deltaTime = 1.0f / (float) this->tps;
+    this->acceleration.z = (this->acceleration.z / this->W);
+    
 }
 void SCSimplePlane::updateVelocity(){
-    float deltaTime = 1.0f / (float) this->tps;
-    this->vz = this->vz - ((.01f / this->tps / this->tps * this->thrust * this->Mthrust) + (DRAG_COEFFICIENT * this->vz)) * deltaTime;
+    
+    this->vz += this->acceleration.z;
     this->vz = std::clamp(this->vz, -25.0f, 25.0f);
     this->vx = 0.0f;
     this->vy = 0.0f;
 }
 void SCSimplePlane::updateForces() {
     
+    int vz_sign = (this->vz < 0.0f) ? 1 : -1;
     this->acceleration.x = 0.0f;
-    this->acceleration.y = 0.0f;
-    this->acceleration.z = 0.0f;
+    this->acceleration.y = this->lift_force + (vz_sign * this->gravity_drag_force);
+    this->acceleration.z = -this->thrust_force + (vz_sign * this->drag_force);
     
 }
 void SCSimplePlane::computeLift() {
     this->lift_force = 0.0f; // Placeholder for lift force calculation
 }
 void SCSimplePlane::computeDrag() {
-    this->drag_force = 0.0f; // Placeholder for drag force calculation
+    this->drag_force = DRAG_COEFFICIENT * this->vz * this->vz; // Placeholder for drag force calculation
 }
 void SCSimplePlane::computeGravity() {
     this->gravity_force = 0.0f; // Placeholder for gravity force calculation
 }
 void SCSimplePlane::computeThrust() {
-
+    this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->Mthrust;
 }
 void SCSimplePlane::processInput() {
     float deltaTime = 1.0f / (float) this->tps;

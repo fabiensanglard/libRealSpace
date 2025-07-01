@@ -267,6 +267,11 @@ void DebugStrike::loadPlane() {
         float twist_rate = plane_to_load->jdyn->TWIST_RATE;
         float roll_rate = plane_to_load->jdyn->ROLL_RATE;
         if (simple_simulation) {
+            thrust = plane_to_load->thrust_in_newton;
+            envergure = (bb->max.z - bb->min.z) / 2.0f;
+            surface = plane_to_load->wing_area;
+            weight = plane_to_load->weight_in_kg;
+            fuel = plane_to_load->jdyn->FUEL;
             new_plane = new SCSimplePlane(
                 10.0f,
                 -7.0f,
@@ -287,7 +292,7 @@ void DebugStrike::loadPlane() {
                 player_plane->z
             );
             new_plane->yaw = player_plane->azimuthf;
-        } if (jdyn_simulation) {
+        } else if (jdyn_simulation) {
             thrust = plane_to_load->thrust_in_newton;
             envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
