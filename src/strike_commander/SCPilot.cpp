@@ -120,15 +120,15 @@ void SCPilot::AutoPilot() {
     float target_roll = 0.0f;
     if (this->plane->yaw > target_yaw) {
         this->plane->roll = -300.0f;
-        if (std::abs(this->plane->yaw-target_yaw) > 1.0f) {
-            this->plane->yaw -= 1.0f;
+        if (std::abs(this->plane->yaw-target_yaw) > 5.0f) {
+            this->plane->yaw -= 5.0f;
         } else {
             this->plane->yaw = target_yaw;
         }
     } else if (this->plane->yaw < target_yaw) {
         this->plane->roll = 300.0f;
-        if (std::abs(this->plane->yaw-target_yaw) > 1.0f) {
-            this->plane->yaw += 1.0f;
+        if (std::abs(this->plane->yaw-target_yaw) > 5.0f) {
+            this->plane->yaw += 5.0f;
         } else {
             this->plane->yaw = target_yaw;
         }
