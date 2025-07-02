@@ -1,5 +1,7 @@
 #include "precomp.h"
 const float DRAG_COEFFICIENT = 0.47f;
+const float LIFT_COEFFICIENT = 0.05f;
+const float GRAVITY = 9.80f; // m/s^2
 SCSimplePlane::SCSimplePlane() : SCPlane() {
 
 }
@@ -144,36 +146,75 @@ void SCSimplePlane::updatePosition() {
         this->incremental.rotateM(tenthOfDegreeToRad(-this->yaw_speed), 0, 1, 0);
     this->incremental.translateM(this->vx, this->vy, this->vz);
 
-    this->vx = this->incremental.v[3][0];
+    /*this->vx = this->incremental.v[3][0];
     this->vy = this->incremental.v[3][1];
-    this->vz = this->incremental.v[3][2];
+    this->vz = this->incremental.v[3][2];*/
 }
 void SCSimplePlane::updateAcceleration() {
-    float deltaTime = 1.0f / (float) this->tps;
-    this->acceleration.z = (this->acceleration.z / this->W);
+    
+    if (this->acceleration.x != 0.0f) {
+        this->acceleration.x /= this->inverse_mass;
+    }
+    this->acceleration.y /= this->W+this->fuel;
+    this->acceleration.z /= this->W+this->fuel;
+
+    this->acceleration.x -= this->ptw.v[0][1] * this->gravity;
+    this->acceleration.y -= this->ptw.v[1][1] * this->gravity;
+    this->acceleration.z -= this->ptw.v[2][1] * this->gravity;
 }
 void SCSimplePlane::updateVelocity(){
-    
+    float temp{0.0f};
     this->vz += this->acceleration.z;
     this->vx = 0.0f;
-    this->vy = 0.0f;
+    if (this->on_ground && this->status > MEXPLODE) {
+        temp = 0.0f;
+        float mcos;
+        this->vx = 0.0;
+        gl_sincos(this->pitch, &temp, &mcos);
+        temp = this->vz * temp / mcos;
+        if (this->vy + this->acceleration.y < temp) {
+            this->acceleration.y = temp - this->vy;
+        }
+    }
+    this->vy += this->acceleration.y;
 }
 void SCSimplePlane::updateForces() {
     
     int vz_sign = (this->vz < 0.0f) ? 1 : -1;
     this->acceleration.x = 0.0f;
-    this->acceleration.y = this->lift_force + (vz_sign * this->gravity_drag_force);
+    this->acceleration.y = 0.0f; //this->lift_force + (vz_sign * this->gravity_drag_force);
     this->acceleration.z = -this->thrust_force + (vz_sign * this->drag_force);
     
 }
 void SCSimplePlane::computeLift() {
+    this->Lmax = this->object->entity->jdyn->MAX_G * this->gravity;
+    this->Lmin = -0.5f * this->object->entity->jdyn->MAX_G * this->gravity;
+
+    float weight = this->W + (this->fuel);
     this->lift_force = 0.0f; // Placeholder for lift force calculation
+    this->lift_force = 0.5f * this->s * this->vz * this->vz * 1.552f * LIFT_COEFFICIENT;
+    this->lift = this->lift_force / weight;
+    
+    while (this->lift > this->Lmax || this->lift < this->Lmin) {
+        /* if lift is out of bounds, adjust it	*/
+        if (this->lift > this->Lmax) {
+            this->lift = .99f * this->Lmax * weight / (this->vz * this->vz);
+        } else if (this->lift < this->Lmin) {
+            this->lift = .99f * this->Lmin * weight / (this->vz * this->vz);
+        }
+        this->g_limit = TRUE;
+        
+        this->lift_force = this->lift * this->vz * this->vz;
+        this->lift = this->lift_force / weight;
+    }
 }
 void SCSimplePlane::computeDrag() {
     this->drag_force = DRAG_COEFFICIENT * this->vz * this->vz; // Placeholder for drag force calculation
 }
 void SCSimplePlane::computeGravity() {
     this->gravity_force = 0.0f; // Placeholder for gravity force calculation
+    this->gravity = GRAVITY / this->tps / this->tps;
+    this->gravity_force = this->gravity * (this->W + (this->fuel));
 }
 void SCSimplePlane::computeThrust() {
     this->thrust_force = .01f / this->tps / this->tps * this->thrust * this->Mthrust;
@@ -182,7 +223,7 @@ void SCSimplePlane::processInput() {
     float deltaTime = 1.0f / (float) this->tps;
     this->pitch_speed = (this->control_stick_y ) * deltaTime;
     this->roll_speed = (-this->control_stick_x ) * deltaTime;
-    if (this->airspeed < this->MIN_LIFT_SPEED) {
+    if (this->airspeed < this->MIN_LIFT_SPEED && this->on_ground) {
         this->pitch_speed = 0.0f;
         this->roll_speed = 0.0f;
         this->pitch = 0.0f;
