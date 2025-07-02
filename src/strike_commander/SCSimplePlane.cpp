@@ -1,6 +1,6 @@
 #include "precomp.h"
 const float DRAG_COEFFICIENT = 0.47f;
-const float LIFT_COEFFICIENT = 0.05f;
+const float LIFT_COEFFICIENT = 0.83f;
 const float GRAVITY = 9.80f; // m/s^2
 SCSimplePlane::SCSimplePlane() : SCPlane() {
 
@@ -58,7 +58,7 @@ SCSimplePlane::SCSimplePlane(float LmaxDEF, float LminDEF, float Fmax, float Sma
     this->x = x;
     this->y = y;
     this->z = z;
-    this->ro2 = .5f * ro[0];
+    this->ro2 = .5f * 1.522f;
     init();
     this->fps_knots = this->tps * 1.944f;
 }
@@ -66,7 +66,7 @@ void SCSimplePlane::updatePlaneStatus() {
     this->fps_knots = this->tps * 1.944f;
     this->airspeed = -(int)(this->fps_knots * this->vz);
     this->climbspeed = (short)(this->tps * (this->y - this->last_py));
-    this->g_load = (this->lift_force*this->inverse_mass) / this->gravity;
+    //this->g_load = (this->lift_force*) / this->gravity;
     this->ax = this->acceleration.x;
     this->ay = this->acceleration.y;
     this->az = this->acceleration.z;
@@ -146,9 +146,9 @@ void SCSimplePlane::updatePosition() {
         this->incremental.rotateM(tenthOfDegreeToRad(-this->yaw_speed), 0, 1, 0);
     this->incremental.translateM(this->vx, this->vy, this->vz);
 
-    /*this->vx = this->incremental.v[3][0];
+    this->vx = this->incremental.v[3][0];
     this->vy = this->incremental.v[3][1];
-    this->vz = this->incremental.v[3][2];*/
+    this->vz = this->incremental.v[3][2];
 }
 void SCSimplePlane::updateAcceleration() {
     
@@ -182,30 +182,56 @@ void SCSimplePlane::updateForces() {
     
     int vz_sign = (this->vz < 0.0f) ? 1 : -1;
     this->acceleration.x = 0.0f;
-    this->acceleration.y = 0.0f; //this->lift_force + (vz_sign * this->gravity_drag_force);
-    this->acceleration.z = -this->thrust_force + (vz_sign * this->drag_force);
+    this->acceleration.y = this->lift_force + (vz_sign * this->gravity_drag_force);
+    this->acceleration.z = this->lift_drag_force - this->thrust_force + (vz_sign * this->drag_force);
     
 }
 void SCSimplePlane::computeLift() {
-    this->Lmax = this->object->entity->jdyn->MAX_G * this->gravity;
-    this->Lmin = -0.5f * this->object->entity->jdyn->MAX_G * this->gravity;
-
-    float weight = this->W + (this->fuel);
-    this->lift_force = 0.0f; // Placeholder for lift force calculation
-    this->lift_force = 0.5f * this->s * this->vz * this->vz * 1.552f * LIFT_COEFFICIENT;
-    this->lift = this->lift_force / weight;
+    // Calcul de l'angle d'attaque en radians
+    if (this->vz >= 0.0f) {
+        return;
+    }
+    float angle_of_attack = (this->vy / this->vz) + 0.17f;
+    this->ae = angle_of_attack;
+    this->Cl = LIFT_COEFFICIENT * sinf(angle_of_attack);
+    // Calcul de la vitesse au carré
+    float airspeed_squared = this->vz * this->vz;
     
-    while (this->lift > this->Lmax || this->lift < this->Lmin) {
-        /* if lift is out of bounds, adjust it	*/
-        if (this->lift > this->Lmax) {
-            this->lift = .99f * this->Lmax * weight / (this->vz * this->vz);
-        } else if (this->lift < this->Lmin) {
-            this->lift = .99f * this->Lmin * weight / (this->vz * this->vz);
-        }
-        this->g_limit = TRUE;
-        
-        this->lift_force = this->lift * this->vz * this->vz;
-        this->lift = this->lift_force / weight;
+    // Portance de base selon la formule : L = 0.5 * ρ * V² * S * CL
+    // où CL dépend de l'angle d'attaque
+    float cl = LIFT_COEFFICIENT * sinf(angle_of_attack);
+    this->ro2 = 0.5f * 1.522f; // Coefficient de portance, ajusté pour l'exemple
+    float base_lift = this->ro2 * airspeed_squared * this->s * cl;
+    
+    // Calcul du facteur de charge demandé
+    float weight = this->W + this->fuel;
+    float weight_force = weight * this->gravity; // Force de poids en N (Newton)
+    float requested_g_load = base_lift / weight_force;
+    
+    // Application des limites de facteur de charge
+    float max_positive_g = this->LmaxDEF; // Limite positive (ex: +9G)
+    float max_negative_g = this->LminDEF; // Limite négative (ex: -3G)
+    
+    // Limitation du facteur de charge
+    if (requested_g_load > max_positive_g) {
+        requested_g_load = max_positive_g;
+    } else if (requested_g_load < max_negative_g) {
+        requested_g_load = max_negative_g;
+    }
+    float total_lift_force = requested_g_load * weight_force;
+     // Décomposition de la portance selon l'orientation de l'avion
+    float pitch_rad = tenthOfDegreeToRad(this->pitch);
+    this->lift_drag_force = total_lift_force * sinf(pitch_rad);
+
+    // Calcul de la portance finale limitée
+    this->lift_force = total_lift_force * cosf(pitch_rad);
+    this->lift = this->lift_force;
+    // Mise à jour du facteur de charge réel
+    this->g_load = requested_g_load;
+    
+    // Vérification de décrochage à faible vitesse
+    if (this->airspeed < this->MIN_LIFT_SPEED) {
+        this->lift_force *= (float)this->airspeed / (float)this->MIN_LIFT_SPEED;
     }
 }
 void SCSimplePlane::computeDrag() {
