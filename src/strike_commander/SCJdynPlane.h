@@ -41,5 +41,4 @@ public:
             RSArea *area, float x, float y, float z);
     ~SCJdynPlane();
     void Simulate();
-    void Render();
 };

@@ -17,5 +17,4 @@ public:
             float fuel_weight, float Mthrust, float b, float ie_pi_AR, int MIN_LIFT_SPEED,
             RSArea *area, float x, float y, float z);
     SCSimplePlane();
-    void Render();
 };

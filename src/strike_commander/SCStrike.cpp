@@ -960,8 +960,9 @@ void SCStrike::runFrame(void) {
     for (auto actor: this->current_mission->actors) {
         if (actor->plane != nullptr) {
             if (actor->plane != this->player_plane) {
-                actor->plane->Render();
+                
                 if (this->show_bbox) {
+                    actor->plane->renderPlaneLined();
                     BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
                     Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};          
                     Vector3D orientation = {
@@ -986,6 +987,8 @@ void SCStrike::runFrame(void) {
                     Renderer.renderBBox(position, bb->min, bb->max);
                     Renderer.renderBBox(position+actor->formation_pos_offset, bb->min, bb->max);
                     Renderer.renderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
+                } else {
+                    actor->plane->Render();
                 }
                 if (actor->plane->object->alive == false) {
                     actor->plane->RenderSmoke();
@@ -1016,7 +1019,11 @@ void SCStrike::runFrame(void) {
     case View::OBJECT:
     case View::AUTO_PILOT:
     case View::FOLLOW:
-        this->player_plane->Render();
+        if (!this->show_bbox) {
+            this->player_plane->Render();
+        } else {
+            this->player_plane->renderPlaneLined();
+        }
         break;
     case View::RIGHT:
         this->cockpit->Render(1);

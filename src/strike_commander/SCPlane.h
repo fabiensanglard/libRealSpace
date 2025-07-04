@@ -293,6 +293,7 @@ public:
     virtual void RenderSmoke(); 
     virtual void Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission *mission);
     virtual void InitLoadout();
+    void renderPlaneLined();
 };
 
 #endif
