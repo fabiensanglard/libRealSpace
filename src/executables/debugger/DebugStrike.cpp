@@ -738,6 +738,18 @@ void DebugStrike::radar() {
                     draw_list->AddRect(wp_top_left, wp_bottom_right, IM_COL32(255, 255, 0, 255));
                 }
             }
+            if (actor->pilot != nullptr) {
+                ImVec2 pilot_waypoin = ImVec2(canvas_center.x + actor->pilot->target_waypoint.x * scale_x,
+                                                canvas_center.y + actor->pilot->target_waypoint.z * scale_z);
+                // Draw a square centered at the pilot's target waypoint.
+                ImVec2 pilot_top_left = ImVec2(pilot_waypoin.x - 5.0f * 0.5f,
+                                                pilot_waypoin.y - 5.0f * 0.5f);
+                ImVec2 pilot_bottom_right = ImVec2(pilot_waypoin.x + 5.0f * 0.5f,
+                                                    pilot_waypoin.y + 5.0f * 0.5f);
+                draw_list->AddRect(pilot_top_left, pilot_bottom_right, IM_COL32(255, 0, 255, 255));
+                draw_list->AddLine(ImVec2(actor_canvas_pos.x, actor_canvas_pos.y),
+                                ImVec2(pilot_waypoin.x, pilot_waypoin.y), IM_COL32(255, 0, 255, 255));
+            }
             if (actor->is_active || actor->plane == this->player_plane) {
                 ImVec2 plane_direction = ImVec2(actor->plane->x - actor->plane->last_px, actor->plane->z - actor->plane->last_pz);
                 draw_list->AddLine(ImVec2(actor_canvas_pos.x, actor_canvas_pos.y),

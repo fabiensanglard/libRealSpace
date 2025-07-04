@@ -149,6 +149,7 @@ void SCSimplePlane::updatePosition() {
     this->vx = this->incremental.v[3][0];
     this->vy = this->incremental.v[3][1];
     this->vz = this->incremental.v[3][2];
+
 }
 void SCSimplePlane::updateAcceleration() {
     
@@ -165,7 +166,7 @@ void SCSimplePlane::updateAcceleration() {
 void SCSimplePlane::updateVelocity(){
     float temp{0.0f};
     this->vz += this->acceleration.z;
-    this->vx = 0.0f;
+    this->vx += this->acceleration.x;
     if (this->on_ground && this->status > MEXPLODE) {
         temp = 0.0f;
         float mcos;
@@ -191,51 +192,19 @@ void SCSimplePlane::computeLift() {
     if (this->vz >= 0.0f) {
         return;
     }
-    float angle_of_attack = (this->vy / this->vz) + 0.17f;
-    this->ae = angle_of_attack;
-    this->Cl = LIFT_COEFFICIENT * sinf(angle_of_attack);
-    // Calcul de la vitesse au carré
-    float airspeed_squared = this->vz * this->vz;
-    
-    // Portance de base selon la formule : L = 0.5 * ρ * V² * S * CL
-    // où CL dépend de l'angle d'attaque
-    float cl = LIFT_COEFFICIENT * sinf(angle_of_attack);
+    this->ae = (this->vy / this->vz) + 0.17f;
+    this->Cl = LIFT_COEFFICIENT * this->ae;
     this->ro2 = 0.5f * 1.522f; // Coefficient de portance, ajusté pour l'exemple
-    float base_lift = this->ro2 * airspeed_squared * this->s * cl;
-    
-    // Calcul du facteur de charge demandé
-    float weight = this->W + this->fuel;
-    float weight_force = weight * this->gravity; // Force de poids en N (Newton)
-    float requested_g_load = base_lift / weight_force;
-    
-    // Application des limites de facteur de charge
-    float max_positive_g = this->LmaxDEF; // Limite positive (ex: +9G)
-    float max_negative_g = this->LminDEF; // Limite négative (ex: -3G)
-    
-    // Limitation du facteur de charge
-    if (requested_g_load > max_positive_g) {
-        requested_g_load = max_positive_g;
-    } else if (requested_g_load < max_negative_g) {
-        requested_g_load = max_negative_g;
-    }
-    float total_lift_force = requested_g_load * weight_force;
-     // Décomposition de la portance selon l'orientation de l'avion
-    float pitch_rad = tenthOfDegreeToRad(this->pitch);
-    this->lift_drag_force = total_lift_force * sinf(pitch_rad);
-
-    // Calcul de la portance finale limitée
-    this->lift_force = total_lift_force * cosf(pitch_rad);
+    float areo_lift = this->s * this->vz * this->ro2 * this->Cl;
+    this->lift_force = areo_lift * this->vz;
+    this->lift_drag_force = areo_lift * -this->vy;
     this->lift = this->lift_force;
-    // Mise à jour du facteur de charge réel
-    this->g_load = requested_g_load;
-    
-    // Vérification de décrochage à faible vitesse
-    if (this->airspeed < this->MIN_LIFT_SPEED) {
-        this->lift_force *= (float)this->airspeed / (float)this->MIN_LIFT_SPEED;
-    }
+    this->g_load = this->lift_force / this->gravity_force;
 }
 void SCSimplePlane::computeDrag() {
     this->drag_force = DRAG_COEFFICIENT * this->vz * this->vz; // Placeholder for drag force calculation
+    this->drag = this->drag_force;
+    this->gravity_drag_force = this->vy * this->vy * DRAG_COEFFICIENT ;
 }
 void SCSimplePlane::computeGravity() {
     this->gravity_force = 0.0f; // Placeholder for gravity force calculation
@@ -257,5 +226,202 @@ void SCSimplePlane::processInput() {
     } 
     if (this->wheels && this->y > this->area->getY(this->x, this->z)) {
         this->wheels = 0;
+    }
+    this->elevation_speedf = this->pitch_speed;
+    this->azimuth_speedf = this->yaw_speed;
+}
+void SCSimplePlane::Render() {
+    if (this->object != nullptr) {
+        
+        Vector3D pos = {
+            this->x, this->y, this->z
+        };
+        Vector3D orientation = {
+            this->yaw/10.0f + 90,
+            this->pitch/10.0f,
+            -this->roll/10.0f
+        };
+        std::vector<std::tuple<Vector3D, RSEntity*>> weapons;
+        for (auto weaps:this->weaps_load) {
+            float decy=0.5f;
+            if (weaps == nullptr) {
+                continue;  
+            }
+            if (weaps->hpts_type == 0) {
+                continue;
+            }
+            if (weaps->hpts_type == 4) {
+                decy = 0.0f;
+            }
+            Vector3D position = weaps->position;
+            std::vector<Vector3D> path = {
+                {0, -2*decy, 0},
+                {decy, -decy, 0},
+                {-decy,-decy,0},
+                {0, -2*decy, -2*decy},
+                {decy, -decy, -2*decy},
+                {-decy,-decy,-2*decy}
+            };
+
+            for (int i = 0; i < weaps->nb_weap; i++) {
+                Vector3D weap_pos = {position.z/250+path[i].z, position.y/250 + path[i].y, -position.x/250+path[i].x};
+                std::tuple<Vector3D, RSEntity*> weapon = std::make_tuple(weap_pos, weaps->objct);
+                weapons.push_back(weapon);
+                position.y -= 0.5f;
+            }
+        }
+        //Renderer.drawModelWithChilds(this->object->entity, LOD_LEVEL_MAX, pos, orientation, wheel_index, thrust, weapons);
+        
+        BoudingBox *bb = this->object->entity->GetBoudingBpx();
+        Vector3D position = {this->x, this->y, this->z};          
+        
+        int vert_id = 0;
+        int wing_id_left = 0;
+        std::vector<int> wing_ids;
+        for (auto vertex: this->object->entity->vertices) {
+            if (vertex.x == bb->min.x) {
+                Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
+            }
+            if (vertex.x == bb->max.x) {
+                Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
+            }
+            if (vertex.z == bb->min.z) {
+                wing_ids.push_back(vert_id);
+                Renderer.drawPoint(vertex, {1.0f,0.0f,0.0f}, position, orientation);
+            }
+            if (vertex.z == bb->max.z) {
+                wing_ids.push_back(vert_id);
+                Renderer.drawPoint(vertex, {0.0f,1.0f,0.0f}, position, orientation);
+            }
+            vert_id++;
+        }
+        
+        std::vector<int> wing_tr_id;
+        std::vector<Point2Df> wing_surface_points;
+        for (int i=0; i < this->object->entity->lods[LOD_LEVEL_MAX].numTriangles; i++) {
+            int triangle_id = this->object->entity->lods[LOD_LEVEL_MAX].triangleIDs[i];
+            Triangle triangle = this->object->entity->triangles[triangle_id];
+            
+            for (auto id : triangle.ids) {
+                if (std::find(wing_ids.begin(), wing_ids.end(), id) != wing_ids.end()) {
+                    Vector3D v0,v1,v2;
+                    v0 = this->object->entity->vertices[triangle.ids[0]];
+                    v1 = this->object->entity->vertices[triangle.ids[1]];
+                    v2 = this->object->entity->vertices[triangle.ids[2]];
+
+                    Point2Df p0 = {v0.x, v0.z};
+                    if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p0) == wing_surface_points.end()) {
+                        wing_surface_points.push_back(p0);
+                    }
+
+                    Point2Df p1 = {v1.x, v1.z};
+                    if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p1) == wing_surface_points.end()) {
+                        wing_surface_points.push_back(p1);
+                    }
+                    Point2Df p2 = {v2.x, v2.z};
+                    if (std::find(wing_surface_points.begin(), wing_surface_points.end(), p2) == wing_surface_points.end()) {
+                        wing_surface_points.push_back(p2);
+                    }
+                    if (std::find(wing_tr_id.begin(), wing_tr_id.end(), triangle_id) == wing_tr_id.end()) {
+                        wing_tr_id.push_back(triangle_id);
+                    }
+                    v0  = this->object->entity->vertices[triangle.ids[0]];
+                    v1  = this->object->entity->vertices[triangle.ids[1]];
+                    v2  = this->object->entity->vertices[triangle.ids[2]];
+
+                    Renderer.drawPoint(v0, {0.0f,1.0f,1.0f}, position, orientation);
+                    Renderer.drawPoint(v1, {0.0f,1.0f,1.0f}, position, orientation);
+                    Renderer.drawPoint(v2, {0.0f,1.0f,1.0f}, position, orientation);
+                }
+            }
+        }
+
+        for (int i=0; i < this->object->entity->lods[LOD_LEVEL_MAX].numTriangles; i++) {
+            int triangle_id = this->object->entity->lods[LOD_LEVEL_MAX].triangleIDs[i];
+            Vector3D v0,v1,v2;
+            v0  = this->object->entity->vertices[this->object->entity->triangles[triangle_id].ids[0]];
+            v1  = this->object->entity->vertices[this->object->entity->triangles[triangle_id].ids[1]];
+            v2  = this->object->entity->vertices[this->object->entity->triangles[triangle_id].ids[2]];
+            if (std::find(wing_tr_id.begin(), wing_tr_id.end(), triangle_id) != wing_tr_id.end()) {
+                Renderer.drawLine(v0,v1,{1.0f,0.0f,0.0f},orientation, position);
+                Renderer.drawLine(v1,v2,{1.0f,0.0f,0.0f},orientation, position);
+                Renderer.drawLine(v2,v0,{1.0f,0.0f,0.0f},orientation, position);
+            } else {
+                Renderer.drawLine(v0,v1,{0.5f,0.5f,0.5f},orientation, position);
+                Renderer.drawLine(v1,v2,{0.5f,0.5f,0.5f},orientation, position);
+                Renderer.drawLine(v2,v0,{0.5f,0.5f,0.5f},orientation, position);
+            }
+        }
+        if (!wing_surface_points.empty()) {
+            float area = 0.0f;
+            
+            // Compute the convex hull of wing_surface_points using the monotone chain algorithm.
+            auto cross = [](const Point2Df &O, const Point2Df &A, const Point2Df &B) -> float {
+                return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
+            };
+
+            // Tri des points par coordonnées (x, puis y)
+            std::sort(wing_surface_points.begin(), wing_surface_points.end(), [](const Point2Df &a, const Point2Df &b) {
+                return (a.x == b.x) ? (a.y < b.y) : (a.x < b.x);
+            });
+
+            std::vector<Point2Df> hull;
+            // Construction de la chaîne inférieure
+            for (const auto &p : wing_surface_points) {
+                while (hull.size() >= 2 && cross(hull[hull.size()-2], hull.back(), p) <= 0)
+                    hull.pop_back();
+                hull.push_back(p);
+            }
+            // Construction de la chaîne supérieure
+            for (int i = (int)wing_surface_points.size() - 2, t = hull.size() + 1; i >= 0; i--) {
+                while (hull.size() >= t && cross(hull[hull.size()-2], hull.back(), wing_surface_points[i]) <= 0)
+                    hull.pop_back();
+                hull.push_back(wing_surface_points[i]);
+            }
+            // Retirer le dernier point car il est identique au premier
+            if (!hull.empty())
+                hull.pop_back();
+            
+            
+            wing_surface_points = hull;
+            size_t n = wing_surface_points.size();
+            // Calcul de la surface selon la formule du polygone (formule de shoelace)
+            for (size_t i = 0; i < n; i++) {
+                Vector3D sp1 = {wing_surface_points[i].x, 0.0f , wing_surface_points[i].y};
+                Vector3D sp2 = {wing_surface_points[(i + 1) % n].x, 0.0f , wing_surface_points[(i + 1) % n].y};
+                Renderer.drawLine(sp1,sp2,{1.0f,1.0f,0.0f},orientation, position);
+            }
+            for (size_t i = 0; i < n; i++) {
+                size_t next = (i + 1) % n;
+                area += wing_surface_points[i].x * wing_surface_points[next].y - wing_surface_points[i].y * wing_surface_points[next].x;
+            }
+            area = std::fabs(area) / 2.0f;
+        }
+        Vector3D scaled_forward{forward.x,forward.y,forward.z};
+        scaled_forward.Scale(5.0f);
+        Renderer.drawLine(pos, scaled_forward, {1.0f, 0.0f, 1.0f});
+        
+        Vector3D ptw_down = {
+            -this->ptw.v[0][1],
+            -this->ptw.v[1][1],
+            -this->ptw.v[2][1]
+        };
+        ptw_down.Normalize();
+        Vector3D ptw_forward = {
+            this->ptw.v[0][2],
+            this->ptw.v[1][2],
+            this->ptw.v[2][2]
+        };
+        ptw_forward.Normalize();
+        ptw_down.Scale(5.0f);
+        ptw_forward.Scale(5.0f);
+        Renderer.drawLine(pos, ptw_down, {0.0f, 1.0f, 1.0f});
+        Renderer.drawLine(pos, {this->vx*10.0f, this->vy*10.0f, this->vz*10.0f}, {1.0f, 1.0f, 0.0f});
+        Renderer.drawLine(pos, ptw_forward, {1.0f, 1.0f, 0.0f});
+        Renderer.drawLine(pos, {
+            this->acceleration.x * 10.0f,
+            this->acceleration.y * 10.0f,
+            this->acceleration.z * 10.0f
+        }, {0.0f, 1.0f, 0.0f});
     }
 }

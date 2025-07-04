@@ -15,6 +15,7 @@ private:
     bool alive{true};
     
 public:
+    Vector3D target_waypoint{0.0f, 0.0f, 0.0f};
     bool turning{false};
     int target_speed{0};
     int target_climb{0};
