@@ -48,6 +48,7 @@ extern SCState GameState;
 #include "SCPlane.h"
 #include "SCJdynPlane.h"
 #include "SCSimplePlane.h"
+#include "SCVectorPlane.h"
 #include "SCPilot.h"
 #include "SCMissionActors.h"
 #include "SCMission.h"

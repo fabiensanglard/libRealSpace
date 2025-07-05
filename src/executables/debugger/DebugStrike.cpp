@@ -236,9 +236,15 @@ void DebugStrike::loadPlane() {
         ImGui::EndCombo();
     }
     
-    ImGui::SameLine();
-    ImGui::Checkbox("Simple Sim", &simple_simulation);
-    ImGui::Checkbox("JDYN Sim", &jdyn_simulation);
+    //ImGui::SameLine();
+    static int sim_type = 0;
+    const char* sim_types[] = { "simple sim", "jdyn sim", "sgi sim", "vector sim" };
+    for (int i = 0; i < IM_ARRAYSIZE(sim_types); ++i) {
+        ImGui::RadioButton(sim_types[i], &sim_type, i);
+        if (i < IM_ARRAYSIZE(sim_types) - 1)
+            ImGui::SameLine();
+    }
+
     if (ImGui::Button("Load") && plane_name != "") {
         //this->plane_to_load = planes.indexOf(plane);
         RSEntity *plane_to_load = new RSEntity(&Assets);
@@ -266,7 +272,8 @@ void DebugStrike::loadPlane() {
         wing_aspec_ratio = (envergure * envergure) / surface;
         float twist_rate = plane_to_load->jdyn->TWIST_RATE;
         float roll_rate = plane_to_load->jdyn->ROLL_RATE;
-        if (simple_simulation) {
+        switch (sim_type) {
+        case 0:
             thrust = plane_to_load->thrust_in_newton;
             envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
@@ -292,7 +299,8 @@ void DebugStrike::loadPlane() {
                 player_plane->z
             );
             new_plane->yaw = player_plane->azimuthf;
-        } else if (jdyn_simulation) {
+        break;
+        case 1:
             thrust = plane_to_load->thrust_in_newton;
             envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
@@ -320,7 +328,8 @@ void DebugStrike::loadPlane() {
                 player_plane->z
             );
             new_plane->yaw = player_plane->azimuthf;
-        } else {
+        break;
+        case 2:
             if (!imperial_planes.count(plane_name)) {
                 twist_rate = 30.0f;
                 roll_rate = 100.0f;
@@ -373,6 +382,36 @@ void DebugStrike::loadPlane() {
                 fuel = plane_data.fuel_weight;
                 thrust = plane_data.Mthrust;
             }
+        break;
+        case 3:
+            thrust = plane_to_load->thrust_in_newton;
+            envergure = (bb->max.z - bb->min.z) / 2.0f;
+            surface = plane_to_load->wing_area;
+            weight = plane_to_load->weight_in_kg;
+            fuel = plane_to_load->jdyn->FUEL;
+            twist_rate = 30.0f;
+            roll_rate = 100.0f;
+            new_plane = new SCVectorPlane(
+                10.0f,
+                -7.0f,
+                40.0f,
+                40.0f,
+                twist_rate,
+                roll_rate,
+                surface,
+                weight,
+                fuel,
+                thrust,
+                envergure,
+                0.83f,
+                120,
+                this->current_mission->area,
+                player_plane->x,
+                player_plane->y,
+                player_plane->z
+            );
+            new_plane->yaw = player_plane->azimuthf;
+        break;
         }
         
         new_plane->simple_simulation = false;
