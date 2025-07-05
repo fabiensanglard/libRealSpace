@@ -71,8 +71,9 @@ void SCVectorPlane::updateAcceleration() {
 }
 void SCVectorPlane::updateVelocity() {
     float dt = 1.0f / (float)this->tps;
-    acceleration.Scale(dt);
-    this->velocity.Add(&this->acceleration);
+    this->acceleration = this->acceleration * dt;
+    this->velocity = this->velocity + this->acceleration;
+    this->velocity = this->velocity * dt;
 }
 void SCVectorPlane::updateForces() {
     // 1. Calcul des forces dans le repère monde
@@ -83,10 +84,34 @@ void SCVectorPlane::updateForces() {
     this->total_force = thrust + lift + gravity;
 }
 void SCVectorPlane::computeLift() {
-    this->lift_force = this->velocity.Length() * this->velocity.Length() * this->object->entity->jdyn->LIFT / 65536.0f;
+    Vector3D velocity_dir = this->velocity;
+    velocity_dir.Normalize();
+
+    // Calcul de la projection de la vitesse sur le plan de portance (défini par right et forward)
+    Vector3D lift_plane_normal = this->right.CrossProduct(&this->forward);
+    lift_plane_normal.Normalize();
+
+    // Composante de la vitesse dans le plan de portance
+    Vector3D vel_in_lift_plane = velocity_dir - lift_plane_normal * velocity_dir.DotProduct(&lift_plane_normal);
+    vel_in_lift_plane.Normalize();
+
+    // L'angle d'attaque est l'angle entre le vecteur forward et la composante de la vitesse dans le plan de portance
+    float dot = this->forward.DotProduct(&vel_in_lift_plane);
+    dot = std::clamp(dot, -1.0f, 1.0f); // Sécurité numérique
+    float angle_of_attack = acosf(dot);
+
+    // Signe de l'angle d'attaque (positif si la vitesse vient du dessous de l'aile)
+    float sign = this->up.DotProduct(&velocity_dir) < 0 ? 1.0f : -1.0f;
+    angle_of_attack *= sign;
+
+    // Stocker ou utiliser l'angle d'attaque selon les besoins
+    this->ae = angle_of_attack;
+    this->Cl = this->object->entity->jdyn->LIFT/65535.0f;
+    this->lift_force = this->velocity.Length() * this->velocity.Length() * this->ae * this->Cl;
+    this->lift = this->lift_force;
 }
 void SCVectorPlane::computeDrag() {
-    this->drag_force = this->velocity.Length() *this->velocity.Length() * this->object->entity->jdyn->DRAG / 65536.0f;
+    this->drag_force = this->velocity.Length() *this->velocity.Length() * this->object->entity->jdyn->DRAG;
 }
 void SCVectorPlane::computeGravity() {
     this->gravity_force = this->W * 9.81f;
@@ -136,6 +161,11 @@ void SCVectorPlane::updatePosition() {
     
     //velocity.Scale(dt);
     //velocity = velocity * dt;
+    if (this->y <= this->area->getY(this->x, this->z)) {
+        this->velocity.y = 0.0f;
+        this->acceleration.y = 0.0f;
+        this->y = this->area->getY(this->x, this->z);
+    }
     this->position.Add(&this->velocity);
     this->last_px = this->x;
     this->last_py = this->y;
@@ -171,10 +201,16 @@ void SCVectorPlane::rotateAroundAxis(Vector3D& v, const Vector3D& axis, float an
     v = v * cosf(angle) + k.CrossProduct(&v) * sinf(angle) + k * (k.DotProduct(&v)) * (1 - cosf(angle));
 }
 void SCVectorPlane::updatePlaneStatus() {
-    float vz = this->velocity.Length();
-    this->airspeed = vz * this->fps_knots;
+    this->vz = this->velocity.z;
+    this->vx = this->velocity.x;
+    this->vy = this->velocity.y;
+    this->ax = this->acceleration.x;
+    this->ay = this->acceleration.y;
+    this->az = this->acceleration.z;
+    
+    this->airspeed = this->velocity.Length() * this->fps_knots;
     //vy = this->velocity.y;
-    this->velocity = this->forward * vz;
+    //this->velocity = this->forward * vz;
 }
 void SCVectorPlane::Render() {
     SCPlane::renderPlaneLined();
@@ -195,5 +231,21 @@ void SCVectorPlane::Render() {
         this->position,
         {this->right.x * 10, this->right.y * 10, this->right.z * 10},
         {0, 255, 0}
+    );
+    Vector3D total_force_normalized = {
+        this->total_force.x,
+        this->total_force.y,
+        this->total_force.z
+    };
+    total_force_normalized.Normalize();
+    Renderer.drawLine(
+        this->position,
+        {total_force_normalized.x * 10, total_force_normalized.y * 10, total_force_normalized.z * 10},
+        {255, 255, 0}
+    );
+    Renderer.drawLine(
+        this->position,
+        this->velocity,
+        {255, 0, 255}
     );
 }
