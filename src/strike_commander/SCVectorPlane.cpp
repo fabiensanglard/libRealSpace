@@ -81,12 +81,12 @@ void SCVectorPlane::updateForces() {
     Vector3D gravity = {0, -this->gravity_force, 0};      // Gravité vers le bas du monde
 
     
-    this->total_force = thrust;
+    this->total_force = thrust + lift + gravity;
 }
 void SCVectorPlane::computeLift() {
     
-    this->ae = tenthOfDegreeToRad(this->pitch);
-    this->Cl = this->object->entity->jdyn->LIFT/65535.0f;
+    this->ae = 0.17f;
+    this->Cl = this->object->entity->jdyn->LIFT/65536.0f;
     float vcarre = this->velocity.Length() * this->velocity.Length();
     this->lift_force = 0.5 * 1.522f * vcarre * this->s * this->ae * this->Cl;
     this->lift = this->lift_force;
@@ -97,7 +97,7 @@ void SCVectorPlane::computeDrag() {
 }
 void SCVectorPlane::computeGravity() {
     float dt = 1.0f / (float)this->tps;
-    this->gravity_force = this->W * (9.81f * dt);
+    this->gravity_force = this->W * 9.81f;
 }
 void SCVectorPlane::computeThrust() {
     this->thrust_force = .01f * this->thrust * this->Mthrust;
