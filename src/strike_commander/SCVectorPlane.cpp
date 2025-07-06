@@ -73,6 +73,21 @@ void SCVectorPlane::updateVelocity() {
     float dt = 1.0f / (float)this->tps;
     this->acceleration = this->acceleration * dt * dt;
     this->velocity = this->velocity + this->acceleration;
+
+    if (this->y <= this->area->getY(this->x, this->z)) {
+        if (this->velocity.y < 0.0f) {
+            this->velocity.y = 0.0f;
+            this->acceleration.y = 0.0f;
+        }
+        this->y = this->area->getY(this->x, this->z);
+    }
+    // 2. Arcade : pousse la vitesse vers le forward, mais sans l'imposer
+    float arcade_align = 0.8f; // 0 = pas d'effet arcade, 1 = effet arcade pur
+    float speed = this->velocity.Length();
+    Vector3D target_velocity = this->forward * speed;
+    this->velocity = this->velocity * (1.0f - arcade_align) + target_velocity * arcade_align;
+    this->velocity.y -= 9.81f *dt *dt;
+
 }
 void SCVectorPlane::updateForces() {
     // 1. Calcul des forces dans le repère monde
@@ -176,21 +191,7 @@ void SCVectorPlane::rotateAroundAxis(Vector3D& v, const Vector3D& axis, float an
     v = v * cosf(angle) + k.CrossProduct(&v) * sinf(angle) + k * (k.DotProduct(&v)) * (1 - cosf(angle));
 }
 void SCVectorPlane::updatePlaneStatus() {
-    float dt = 1.0f / (float)this->tps;
-
-    if (this->y <= this->area->getY(this->x, this->z)) {
-        if (this->velocity.y < 0.0f) {
-            this->velocity.y = 0.0f;
-            this->acceleration.y = 0.0f;
-        }
-        this->y = this->area->getY(this->x, this->z);
-    }
-    // 2. Arcade : pousse la vitesse vers le forward, mais sans l'imposer
-    float arcade_align = 0.8f; // 0 = pas d'effet arcade, 1 = effet arcade pur
-    float speed = this->velocity.Length();
-    Vector3D target_velocity = this->forward * speed;
-    this->velocity = this->velocity * (1.0f - arcade_align) + target_velocity * arcade_align;
-
+    
     // 3. Mets à jour les autres variables
     this->vx = this->velocity.x;
     this->vy = this->velocity.y;
