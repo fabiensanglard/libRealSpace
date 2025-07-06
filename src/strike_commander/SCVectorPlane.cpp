@@ -71,9 +71,8 @@ void SCVectorPlane::updateAcceleration() {
 }
 void SCVectorPlane::updateVelocity() {
     float dt = 1.0f / (float)this->tps;
-    this->acceleration = this->acceleration * dt;
+    this->acceleration = this->acceleration * dt * dt;
     this->velocity = this->velocity + this->acceleration;
-    this->velocity = this->velocity * dt;
 }
 void SCVectorPlane::updateForces() {
     // 1. Calcul des forces dans le repère monde
@@ -81,50 +80,34 @@ void SCVectorPlane::updateForces() {
     Vector3D lift   = up * lift_force;             // Portance dans l'axe haut de l'avion
     Vector3D gravity = {0, -this->gravity_force, 0};      // Gravité vers le bas du monde
 
-    this->total_force = thrust + lift + gravity;
+    
+    this->total_force = thrust;
 }
 void SCVectorPlane::computeLift() {
-    Vector3D velocity_dir = this->velocity;
-    velocity_dir.Normalize();
-
-    // Calcul de la projection de la vitesse sur le plan de portance (défini par right et forward)
-    Vector3D lift_plane_normal = this->right.CrossProduct(&this->forward);
-    lift_plane_normal.Normalize();
-
-    // Composante de la vitesse dans le plan de portance
-    Vector3D vel_in_lift_plane = velocity_dir - lift_plane_normal * velocity_dir.DotProduct(&lift_plane_normal);
-    vel_in_lift_plane.Normalize();
-
-    // L'angle d'attaque est l'angle entre le vecteur forward et la composante de la vitesse dans le plan de portance
-    float dot = this->forward.DotProduct(&vel_in_lift_plane);
-    dot = std::clamp(dot, -1.0f, 1.0f); // Sécurité numérique
-    float angle_of_attack = acosf(dot);
-
-    // Signe de l'angle d'attaque (positif si la vitesse vient du dessous de l'aile)
-    float sign = this->up.DotProduct(&velocity_dir) < 0 ? 1.0f : -1.0f;
-    angle_of_attack *= sign;
-
-    // Stocker ou utiliser l'angle d'attaque selon les besoins
-    this->ae = angle_of_attack;
+    
+    this->ae = tenthOfDegreeToRad(this->pitch);
     this->Cl = this->object->entity->jdyn->LIFT/65535.0f;
-    this->lift_force = this->velocity.Length() * this->velocity.Length() * this->ae * this->Cl;
+    float vcarre = this->velocity.Length() * this->velocity.Length();
+    this->lift_force = 0.5 * 1.522f * vcarre * this->s * this->ae * this->Cl;
     this->lift = this->lift_force;
 }
 void SCVectorPlane::computeDrag() {
-    this->drag_force = this->velocity.Length() *this->velocity.Length() * this->object->entity->jdyn->DRAG;
+    float vcarre = this->velocity.Length() * this->velocity.Length();
+    this->drag_force = 0.5 * 1.522f * vcarre * this->s * 0.45f;
 }
 void SCVectorPlane::computeGravity() {
-    this->gravity_force = this->W * 9.81f;
+    float dt = 1.0f / (float)this->tps;
+    this->gravity_force = this->W * (9.81f * dt);
 }
 void SCVectorPlane::computeThrust() {
     this->thrust_force = .01f * this->thrust * this->Mthrust;
 }
 void SCVectorPlane::processInput() {
-    float deltaTime = 1.0f / (float) this->tps;
-    this->pitch_speed = (this->control_stick_y ) * deltaTime;
-    this->roll_speed = (this->control_stick_x ) * deltaTime;
-
     float dt = 1.0f / (float)this->tps;
+    this->pitch_speed = (this->control_stick_y ) * dt;
+    this->roll_speed = (this->control_stick_x ) * dt;
+
+    
 
     // Convertir les vitesses angulaires en radians
     float dpitch = tenthOfDegreeToRad(this->pitch_speed);
@@ -157,15 +140,7 @@ void SCVectorPlane::processInput() {
 void SCVectorPlane::updatePosition() {
     
     float dt = 1.0f / (float)this->tps;
-    // Mise à jour de la position selon l'axe avant (forward)
     
-    //velocity.Scale(dt);
-    //velocity = velocity * dt;
-    if (this->y <= this->area->getY(this->x, this->z)) {
-        this->velocity.y = 0.0f;
-        this->acceleration.y = 0.0f;
-        this->y = this->area->getY(this->x, this->z);
-    }
     this->position.Add(&this->velocity);
     this->last_px = this->x;
     this->last_py = this->y;
@@ -201,19 +176,32 @@ void SCVectorPlane::rotateAroundAxis(Vector3D& v, const Vector3D& axis, float an
     v = v * cosf(angle) + k.CrossProduct(&v) * sinf(angle) + k * (k.DotProduct(&v)) * (1 - cosf(angle));
 }
 void SCVectorPlane::updatePlaneStatus() {
-    this->vz = this->velocity.z;
+    float dt = 1.0f / (float)this->tps;
+
+    if (this->y <= this->area->getY(this->x, this->z)) {
+        if (this->velocity.y < 0.0f) {
+            this->velocity.y = 0.0f;
+            this->acceleration.y = 0.0f;
+        }
+        this->y = this->area->getY(this->x, this->z);
+    }
+    // 2. Arcade : pousse la vitesse vers le forward, mais sans l'imposer
+    float arcade_align = 0.8f; // 0 = pas d'effet arcade, 1 = effet arcade pur
+    float speed = this->velocity.Length();
+    Vector3D target_velocity = this->forward * speed;
+    this->velocity = this->velocity * (1.0f - arcade_align) + target_velocity * arcade_align;
+
+    // 3. Mets à jour les autres variables
     this->vx = this->velocity.x;
     this->vy = this->velocity.y;
+    this->vz = this->velocity.z;
     this->ax = this->acceleration.x;
     this->ay = this->acceleration.y;
     this->az = this->acceleration.z;
-    
-    this->airspeed = this->velocity.Length() * this->fps_knots;
-    //vy = this->velocity.y;
-    //this->velocity = this->forward * vz;
+    this->airspeed = sqrtf(this->velocity.x * this->velocity.x + this->velocity.z * this->velocity.z) * this->fps_knots;
 }
 void SCVectorPlane::Render() {
-    SCPlane::renderPlaneLined();
+    //SCPlane::renderPlaneLined();
     // Forward: bleu
     Renderer.drawLine(
         this->position,
@@ -221,11 +209,11 @@ void SCVectorPlane::Render() {
         {0, 0, 255}
     );
 
-    Renderer.drawLine(
+    /*Renderer.drawLine(
         this->position,
         {this->forward.x * 10, this->forward.y * 10, this->forward.z * 10},
         {255, 0, 0}
-    );
+    );*/
 
     Renderer.drawLine(
         this->position,
