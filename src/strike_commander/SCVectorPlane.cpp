@@ -74,60 +74,55 @@ void SCVectorPlane::updateVelocity() {
     Vector3D deltaV = this->acceleration * dt;
     Vector3D physicsVelocity = this->velocity + deltaV;
     
-    // NOUVEAU: Appliquer les rotations au vecteur vitesse
-    // Facteur de suivi de rotation - 1.0 = suivi complet, 0.0 = pas de suivi
-    float velocity_follow_factor = 1.0f;
     
-    if (velocity_follow_factor > 0.0f && physicsVelocity.Length() > 0.1f) {
-        // Convertir les vitesses angulaires en radians
+    if (this->thrust_force > 0.1f) {
+    
         float dpitch = tenthOfDegreeToRad(this->pitch_speed);
         float droll = tenthOfDegreeToRad(this->roll_speed);
         float dyaw = tenthOfDegreeToRad(this->yaw_speed);
         
-
-        // Rotation autour de l'axe "right" (pitch)
+        
         if (dpitch != 0.0f) {
             rotateAroundAxis(physicsVelocity, right, dpitch);
         }
-        // Rotation autour de l'axe "up" (yaw)
+
         if (dyaw != 0.0f) {
             rotateAroundAxis(physicsVelocity, up, dyaw);
         }
-        // Rotation autour de l'axe "forward" (roll)
+
         if (droll != 0.0f) {
-            rotateAroundAxis(physicsVelocity,    forward, droll);
+            rotateAroundAxis(physicsVelocity, forward, droll);
         }
     }
     this->velocity = physicsVelocity;
+    // Calcul de la vitesse terminale en chute libre (seule la gravité et la traînée agissent)
+    float rho = 1.522f; // densité de l'air (en kg/m³)
+    float Cd = this->object->entity->drag / 65535.0f;
+    float g = 9.81f;
+    float v_terminal = sqrtf((2.0f * this->W * g) / (rho * Cd * this->s));
+
+    // Si la vitesse verticale descendante dépasse la vitesse terminale, on la limite
+    if (this->velocity.y < -v_terminal) {
+        this->velocity.y = -v_terminal;
+    }
     if (this->y <= this->area->getY(this->x, this->z)) {
         if (this->velocity.y < 0.0f) {
             this->velocity.y = 0.0f;
             this->acceleration.y = 0.0f;
         }
         this->y = this->area->getY(this->x, this->z);
+        this->on_ground = true;
+    } else {
+        this->on_ground = false;
     }
 }
 void SCVectorPlane::updateForces() {
-    // 1. Calcul des forces dans le repère monde
-    
-    // Traînée dans la direction opposée à la vitesse
-    Vector3D velocity_direction = this->velocity;
-    velocity_direction.Normalize();
-    Vector3D drag = velocity_direction * (-this->drag_force);
-    
-    // Poussée dans l'axe avant
+
     Vector3D thrust = forward * this->thrust_force;
-    
-    // Portance dans l'axe haut de l'avion
-    Vector3D lift = up * lift_force;
-    if (up.y < 0) {
-        lift.Negate();
-    }
-    
-    // Gravité vers le bas du monde
+    Vector3D drag = forward * -this->drag_force;
+    Vector3D lift = {0 , this->lift_force, 0};
     Vector3D gravity = {0, -this->gravity_force, 0};
     
-    // Force latérale due à l'inclinaison (roll) de l'avion
     Vector3D lateral_force = {0, 0, 0};
     if (this->roll != 0) {
         float roll_rad = tenthOfDegreeToRad(this->roll);
@@ -140,8 +135,7 @@ void SCVectorPlane::updateForces() {
 void SCVectorPlane::computeLift() {
     // Vérifier si la vitesse est significative avant de calculer la portance
     float speed = this->velocity.Length();
-    if (speed < 0.1f) {
-        // Vitesse trop faible pour générer une portance significative
+    if (speed < this->MIN_LIFT_SPEED) {
         this->lift_force = 0.0f;
         this->lift = 0.0f;
         this->ae = 0.0f;
@@ -183,8 +177,13 @@ void SCVectorPlane::computeLift() {
     // Par exemple, limiter à 3 fois le poids de l'avion
     float max_lift = this->W *9.81f * 1.0f;
     this->lift_force = fminf(this->lift_force, max_lift);
-    
     this->lift = this->lift_force;
+    if (this->thrust_force <= 0.1f) {
+        // Si l'avion n'a pas de poussée, on ne peut pas générer de portance
+        this->lift_force = 0.0f;
+        this->lift = 0.0f;
+        this->ae = 0.0f;
+    }
 }
 void SCVectorPlane::computeDrag() {
     // Calculer la vitesse relative au lieu de la vitesse absolue
@@ -192,7 +191,7 @@ void SCVectorPlane::computeDrag() {
     float vcarre = speed * speed;
     
     // Coefficient de traînée de base AUGMENTÉ
-    float Cd = 0.05f;  // Valeur augmentée de 0.02 à 0.05
+    float Cd = this->object->entity->drag/65535.0f;
     
     // Augmenter la traînée avec l'angle d'attaque
     float angle_of_attack = this->ae;
@@ -202,16 +201,8 @@ void SCVectorPlane::computeDrag() {
     float roll_rad = fabsf(tenthOfDegreeToRad(this->roll));
     Cd += 0.05f * roll_rad;
     
-    // Ajouter une traînée SUPPLÉMENTAIRE quand les moteurs sont coupés
-    if (this->thrust_force < 0.1f * this->Mthrust) {
-        Cd += 0.1f;  // Traînée additionnelle IMPORTANTE quand moteurs au ralenti
-    }
     
     this->drag_force = 0.5f * 1.522f * vcarre * this->s * Cd;
-    
-    // Garantir une traînée minimale à toute vitesse
-    float min_drag = 0.05f * this->W;
-    this->drag_force = fmaxf(this->drag_force, min_drag);
     
     this->drag = this->drag_force;
 }
@@ -224,6 +215,10 @@ void SCVectorPlane::computeThrust() {
 }
 void SCVectorPlane::processInput() {
     float dt = 1.0f / (float)this->tps;
+    if (this->airspeed < this->MIN_LIFT_SPEED && this->on_ground) {
+        // Si l'avion est en dessous de la vitesse minimale de portance, on ne peut pas contrôler le pitch
+        this->control_stick_y = 0.0f;
+    }
     this->pitch_speed = (this->control_stick_y ) * dt;
     this->roll_speed = (this->control_stick_x ) * dt;
 
