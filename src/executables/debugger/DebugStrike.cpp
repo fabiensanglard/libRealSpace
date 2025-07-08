@@ -471,7 +471,7 @@ void DebugStrike::simConfig() {
     if (this->autopilot) {
         this->pilot.target_speed = -speed;
         this->pilot.target_climb = altitude;
-        this->pilot.target_azimut = (float) azimuth;
+        this->pilot.target_azimut = (float) azimuth *10.0f;
         this->pilot.AutoPilot();
         ImGui::PushStyleColor(ImGuiCol_Button,
                                 (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
@@ -487,102 +487,14 @@ void DebugStrike::simConfig() {
         this->autopilot = !this->autopilot;
         go_to_nav = false;
     }
+    ImGui::PopStyleColor(3);
+    ImGui::PopID();
+    ImGui::PushID(1);
     if (go_to_nav) {
         this->pilot.plane = this->player_plane;
         this->pilot.target_speed = -speed;
         this->pilot.SetTargetWaypoint(this->current_mission->waypoints[this->nav_point_id]->spot->position);
         this->pilot.AutoPilot();
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Go To Waypoint")) {
-        this->pilot.plane = this->player_plane;
-        this->pilot.SetTargetWaypoint(this->current_mission->waypoints[this->nav_point_id]->spot->position);
-        go_to_nav = !go_to_nav;
-        this->autopilot = false;
-    }
-    
-    ImGui::PopStyleColor(3);
-    ImGui::PopID();
-
-    float azimut_diff = azimuth - (360 - (this->player_plane->azimuthf / 10.0f));
-
-    if (azimut_diff > 180.0f) {
-        azimut_diff -= 360.0f;
-    } else if (azimut_diff < -180.0f) {
-        azimut_diff += 360.0f;
-    }
-
-    const float max_twist_angle = 80.0f;
-    const float Kp = 3.0f;
-
-    float target_twist_angle = Kp * azimut_diff;
-    float current_twist = 360 - this->player_plane->twist / 10.0f;
-
-    if (current_twist > 180.0f) {
-        current_twist -= 360.0f;
-    } else if (current_twist < -180.0f) {
-        current_twist += 360.0f;
-    }
-
-    if (target_twist_angle > 180.0f) {
-        target_twist_angle -= 360.0f;
-    } else if (target_twist_angle < -180.0f) {
-        target_twist_angle += 360.0f;
-    }
-
-    if (target_twist_angle > max_twist_angle) {
-        target_twist_angle = max_twist_angle;
-    } else if (target_twist_angle < -max_twist_angle) {
-        target_twist_angle = -max_twist_angle;
-    }
-
-    ImGui::Text("Current diff %f ", current_twist);
-    ImGui::Text("azymuth diff %f", azimut_diff);
-    ImGui::Text("target twist %f", target_twist_angle);
-    ImGui::Text("Twist to go %f", current_twist - target_twist_angle);
-
-    if (azimut_diff > 0) {
-        ImGui::Text("Go right");
-
-        if (current_twist - target_twist_angle < 0) {
-            ImGui::SameLine();
-            ImGui::Text("Push RIGHT");
-        } else {
-            ImGui::SameLine();
-            ImGui::Text("Let go the stick");
-        }
-        if (azymuth_control) {
-            if (current_twist - target_twist_angle < 0) {
-                this->player_plane->control_stick_x = 50;
-            } else {
-                this->player_plane->control_stick_x = 0;
-            }
-        }
-    } else {
-
-        ImGui::Text("Go left");
-        if (current_twist - target_twist_angle > 0) {
-            ImGui::SameLine();
-            ImGui::Text("Push LEFT");
-        } else {
-            ImGui::SameLine();
-            ImGui::Text("Let go the stick");
-        }
-        if (azymuth_control) {
-            if (current_twist - target_twist_angle > 0) {
-                this->player_plane->control_stick_x = -50;
-            } else {
-                this->player_plane->control_stick_x = 0;
-            }
-        }
-    }
-
-    ImGui::PushID(1);
-    if (azymuth_control) {
-        if (azimut_diff > 0) {
-
-        } else {
-        }
         ImGui::PushStyleColor(ImGuiCol_Button,
                                 (ImVec4)ImColor::HSV(120.0f / 355.0f, 100.0f / 100.0f, 60.0f / 100.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.8f));
@@ -592,28 +504,15 @@ void DebugStrike::simConfig() {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.3f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.2f));
     }
-    if (ImGui::Button("Azymuth control")) {
-        azymuth_control = !azymuth_control;
+    ImGui::SameLine();
+    if (ImGui::Button("Go To Waypoint")) {
+        this->pilot.plane = this->player_plane;
+        this->pilot.SetTargetWaypoint(this->current_mission->waypoints[this->nav_point_id]->spot->position);
+        go_to_nav = !go_to_nav;
+        this->autopilot = false;
     }
     ImGui::PopStyleColor(3);
     ImGui::PopID();
-
-    Vector3D target = {this->player_plane->x, (float) altitude, (this->player_plane->z + 60 * this->player_plane->vz)};
-    Vector3D current_position = {this->player_plane->x, this->player_plane->y, this->player_plane->z};
-
-    float target_elevation = atan2(this->player_plane->z - (this->player_plane->z + (60 * this->player_plane->vz)),
-                                    this->player_plane->y - altitude);
-    target_elevation = target_elevation * 180.0f / (float)M_PI;
-
-    if (target_elevation > 180.0f) {
-        target_elevation -= 360.0f;
-    } else if (target_elevation < -180.0f) {
-        target_elevation += 360.0f;
-    }
-    target_elevation = target_elevation - 90.0f;
-
-    ImGui::Text("Current elevation %.3f, target elevation %.3f", this->player_plane->elevationf / 10.0f,
-                target_elevation);
 }
 void DebugStrike::radar() {
     // Get the canvas parameters for converting world-coordinates to canvas coordinates.
@@ -884,6 +783,40 @@ void DebugStrike::radar() {
         }
     }
 }
+void printProgTable(std::vector<PROG> &prog, SCMissionActors *actor) {
+    static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+    if (ImGui::BeginTable("Flags", 2, flags)) {    
+        auto it = GameState.requierd_flags.begin();
+        int cpt = 0;
+        for (auto op : prog) {
+            ImGui::TableNextRow();
+            bool executed = false;
+            if (actor!=nullptr) {
+                for (auto opt_traced: actor->executed_opcodes) {
+                    if (opt_traced == cpt) {
+                        executed = true;
+                        break;
+                    }
+                }
+            }
+            ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
+            if (executed) {
+                cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
+            } else {
+                cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
+            }
+            
+            ImGui::TableSetColumnIndex(0);
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
+            ImGui::Text("opcode:[%03d] %s ", op.opcode, prog_op_names[prog_op(op.opcode)].c_str());
+            ImGui::TableSetColumnIndex(1);
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
+            ImGui::Text("arg:[%d]", op.arg);
+            cpt++;
+        }
+        ImGui::EndTable();
+    }
+}
 void DebugStrike::showActorDetails(SCMissionActors* actor) {
     if (actor->profile != nullptr) {
         ImGui::Text("Name %s", actor->profile->radi.info.name.c_str());
@@ -939,9 +872,7 @@ void DebugStrike::showActorDetails(SCMissionActors* actor) {
         int cpt=0;
         if (actor->on_is_activated.size() > 0) {
             if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_activated, "Prog %d", cpt)) {
-                for (auto opcodes: actor->on_is_activated) {
-                    ImGui::Text("OPCODE [%d] %s\t\tARG [%d]", opcodes.opcode, prog_op_names[prog_op(opcodes.opcode)].c_str(), opcodes.arg);
-                }
+                printProgTable(actor->on_is_activated, nullptr);
                 ImGui::TreePop();
             }
             cpt++;
@@ -952,36 +883,7 @@ void DebugStrike::showActorDetails(SCMissionActors* actor) {
         int cpt=0;
         if (actor->on_update.size() > 0) {
             if (ImGui::TreeNode((void *)(intptr_t)&actor->on_update, "Prog %d", cpt)) {
-                static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
-                if (ImGui::BeginTable("Flags", 2, flags)) {    
-                    auto it = GameState.requierd_flags.begin();
-                    int cpt = 0;
-                    for (auto op : actor->on_update) {
-                        ImGui::TableNextRow();
-                        bool executed = false;
-                        for (auto opt_traced: actor->executed_opcodes) {
-                            if (opt_traced == cpt) {
-                                executed = true;
-                                break;
-                            }
-                        }
-                        ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
-                        if (executed) {
-                            cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
-                        } else {
-                            cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
-                        }
-                        
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
-                        ImGui::Text("opcode:[%03d] %s ", op.opcode, prog_op_names[prog_op(op.opcode)].c_str());
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
-                        ImGui::Text("arg:[%d]", op.arg);
-                        cpt++;
-                    }
-                    ImGui::EndTable();
-                }
+                printProgTable(actor->on_update, actor);
                 ImGui::TreePop();
             }
             cpt++;
@@ -992,9 +894,7 @@ void DebugStrike::showActorDetails(SCMissionActors* actor) {
         int cpt=0;
         if (actor->on_is_destroyed.size() > 0) {
             if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_destroyed, "Prog %d", cpt)) {
-                for (auto opcodes: actor->on_is_destroyed) {
-                    ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
-                }
+                printProgTable(actor->on_is_destroyed, nullptr);
                 ImGui::TreePop();
             }
             cpt++;
@@ -1005,9 +905,7 @@ void DebugStrike::showActorDetails(SCMissionActors* actor) {
         int cpt=0;
         if (actor->on_mission_start.size() > 0) {
             if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_destroyed, "Prog %d", cpt)) {
-                for (auto opcodes: actor->on_mission_start) {
-                    ImGui::Text("OPCODE [%d]\t\tARG [%d]", opcodes.opcode, opcodes.arg);
-                }
+                printProgTable(actor->on_is_destroyed, nullptr);
                 ImGui::TreePop();
             }
             cpt++;
