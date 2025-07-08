@@ -123,19 +123,13 @@ void SCVectorPlane::updateForces() {
     Vector3D lift = {0 , this->lift_force, 0};
     Vector3D gravity = {0, -this->gravity_force, 0};
     
-    Vector3D lateral_force = {0, 0, 0};
-    if (this->roll != 0) {
-        float roll_rad = tenthOfDegreeToRad(this->roll);
-        float lateral_component = this->lift_force * sinf(roll_rad);
-        lateral_force = right * lateral_component;
-    }
     
-    this->total_force = thrust + lift + gravity + drag + lateral_force;
+    this->total_force = thrust + lift + gravity + drag;
 }
 void SCVectorPlane::computeLift() {
     // Vérifier si la vitesse est significative avant de calculer la portance
     float speed = this->velocity.Length();
-    if (speed < this->MIN_LIFT_SPEED) {
+    if (this->velocity.DotProduct(&forward) <= 0.0f) {
         this->lift_force = 0.0f;
         this->lift = 0.0f;
         this->ae = 0.0f;
@@ -153,7 +147,7 @@ void SCVectorPlane::computeLift() {
     this->ae = acosf(dot_product);
     
     // Coefficient de portance basé sur l'angle d'attaque
-    this->Cl = 0.5f + 0.1f * this->ae; // Modèle simplifié
+    this->Cl = this->object->entity->jdyn->LIFT / 65535.0f + 0.1f * this->ae; // Modèle simplifié
     if (this->ae > 0.5f) {  // ~30 degrés
         this->Cl *= (1.0f - (this->ae - 0.5f) * 2.0f); // Décrochage progressif
     }
@@ -166,12 +160,6 @@ void SCVectorPlane::computeLift() {
     
     this->lift_force = 0.5f * 1.522f * vcarre * this->s * this->Cl;
     
-    // Augmenter artificiellement la portance quand l'avion pointe vers le haut, mais avec limite
-    float upFactor = this->forward.DotProduct(&Vector3D(0,1,0));
-    if (upFactor > 0) {
-        // Limiter le facteur d'augmentation à 1.5x maximum
-        this->lift_force *= (1.0f + fminf(upFactor, 1.0f) * 0.5f);
-    }
     
     // Limiter la force de portance maximale à une valeur raisonnable
     // Par exemple, limiter à 3 fois le poids de l'avion
@@ -197,10 +185,6 @@ void SCVectorPlane::computeDrag() {
     float angle_of_attack = this->ae;
     Cd += 0.1f * angle_of_attack * angle_of_attack;
     
-    // Augmenter la traînée avec le roll
-    float roll_rad = fabsf(tenthOfDegreeToRad(this->roll));
-    Cd += 0.05f * roll_rad;
-    
     
     this->drag_force = 0.5f * 1.522f * vcarre * this->s * Cd;
     
@@ -217,35 +201,42 @@ void SCVectorPlane::processInput() {
     float dt = 1.0f / (float)this->tps;
     if (this->airspeed < this->MIN_LIFT_SPEED && this->on_ground) {
         // Si l'avion est en dessous de la vitesse minimale de portance, on ne peut pas contrôler le pitch
-        this->control_stick_y = 0.0f;
+        this->control_stick_y = 0;
     }
     this->pitch_speed = (this->control_stick_y ) * dt;
     this->roll_speed = (this->control_stick_x ) * dt;
 
-    
+    float induced_pitch_speed = 0.0f;
+    if (this->lift_force < this->gravity_force * 0.95f && !this->on_ground) {
+        Vector3D velocity_normalized = this->velocity;
+        velocity_normalized.Normalize();
+        float dot = forward.DotProduct(&velocity_normalized);
+        dot = fmaxf(-1.0f, fminf(1.0f, dot));
+        float angle = acosf(dot);
+        if (angle > 0.05f) { // ~3 degrés
+            induced_pitch_speed = -radToDegree(angle)*0.1f; // facteur à ajuster
+        }
+    }
+    this->pitch_speed += induced_pitch_speed;
 
     // Convertir les vitesses angulaires en radians
     float dpitch = tenthOfDegreeToRad(this->pitch_speed);
     float droll  = tenthOfDegreeToRad(this->roll_speed);
     float dyaw   = tenthOfDegreeToRad(this->yaw_speed);
 
-    // Rotation autour de l'axe "right" (pitch)
     if (dpitch != 0.0f) {
         rotateAroundAxis(forward, right, dpitch);
         rotateAroundAxis(up,      right, dpitch);
     }
-    // Rotation autour de l'axe "up" (yaw)
     if (dyaw != 0.0f) {
         rotateAroundAxis(forward, up, dyaw);
         rotateAroundAxis(right,   up, dyaw);
     }
-    // Rotation autour de l'axe "forward" (roll)
     if (droll != 0.0f) {
         rotateAroundAxis(right, forward, droll);
         rotateAroundAxis(up,    forward, droll);
     }
 
-    // Renormaliser pour garder l'orthogonalité
     forward.Normalize();
     right = forward.CrossProduct(&up);
     right.Normalize();
@@ -275,7 +266,6 @@ void SCVectorPlane::updatePosition() {
     } else {
         new_yaw = 0.0f; // Avion à la verticale, yaw indéfini
     }
-    // Roll : atan2(right.y, up.y)
     float new_roll = atan2f(right.y, up.y);
 
     // Conversion en dixièmes de degrés
