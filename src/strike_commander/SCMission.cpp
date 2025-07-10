@@ -111,7 +111,7 @@ void SCMission::loadMission() {
                         actor->pilot = new SCPilot();
                         BoudingBox *bb = actor->object->entity->GetBoudingBpx();
                         
-                        actor->plane = new SCSimplePlane(
+                        actor->plane = new SCJdynPlane(
                             10.0f,
                             -7.0f,
                             40.0f,

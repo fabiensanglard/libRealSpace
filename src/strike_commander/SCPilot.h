@@ -13,7 +13,13 @@
 class SCPilot {
 private:
     bool alive{true};
-    
+    enum TurnState {
+        TURN_NONE,
+        TURN_LEFT,
+        TURN_RIGHT
+    };
+    TurnState turnState;
+    float turnRate;
 public:
     Vector3D target_waypoint{0.0f, 0.0f, 0.0f};
     bool turning{false};
