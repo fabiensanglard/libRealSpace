@@ -7,26 +7,12 @@
 //
 #include <algorithm>
 #include "precomp.h"
-class PIDController {
-public:
-    PIDController(float kp, float ki, float kd)
-        : kp(kp), ki(ki), kd(kd), prev_error(0), integral(0) {}
 
-    float calculate(float setpoint, float measured_value, float dt) {
-        float error = setpoint - measured_value;
-        integral += error * dt;
-        float derivative = (error - prev_error) / dt;
-        prev_error = error;
-        return kp * error + ki * integral + kd * derivative;
-    }
-
-private:
-    float kp, ki, kd;
-    float prev_error;
-    float integral;
-};
-
-SCPilot::SCPilot() {
+SCPilot::SCPilot() :
+    altitudeController(0.5f, 0.05f, 0.02f),  // Valeurs ajustées pour moins d'oscillations
+    rollController(0.05f, 0.01f, 0.02f),
+    headingController(0.02f, 0.005f, 0.01f)
+{
     target_speed = 0;
     target_climb = 0;
     target_azimut = 0;
@@ -38,13 +24,15 @@ void SCPilot::SetTargetWaypoint(Vector3D waypoint) {
     this->target_waypoint = {
         waypoint.x, waypoint.y, waypoint.z
     };
-    Vector2D weapoint_direction = {waypoint.x - plane->x,
-                                   waypoint.z - plane->z};
+    Vector2D weapoint_direction = {
+        waypoint.x - plane->x,
+        waypoint.z - plane->z
+    };
     float az = (atan2f((float)weapoint_direction.y, (float)weapoint_direction.x) * 180.0f / (float)M_PI);
     if (turning) {
         return;
     }
-    turning = true;
+    //turning = true;
     az -= 360.0f;
     az += 90.0f;
     if (az > 360.0f) {
@@ -63,11 +51,6 @@ void SCPilot::SetTargetWaypoint(Vector3D waypoint) {
 }
 
 void SCPilot::AutoPilot() {
-    // Constantes PID optimisées pour les intervalles de manche spécifiques
-    PIDController altitudeController(1.0f, 0.1f, 0.05f);
-    PIDController rollController(0.05f, 0.01f, 0.02f);
-    PIDController headingController(0.02f, 0.005f, 0.01f);
-
     if (!this->alive) {
         return;
     }
@@ -117,14 +100,17 @@ void SCPilot::AutoPilot() {
 
     // Déterminer la direction du virage et la magnitude du virage
     float turn_magnitude = std::abs(yaw_difference) / 1800.0f; // Normaliser entre 0 et 1
-    
-    if (yaw_difference > 10.0f) {
-        turnState = TURN_LEFT;
-    } else if (yaw_difference < -10.0f) {
-        turnState = TURN_RIGHT;
+    if (!turning) {
+        if (yaw_difference > 10.0f) {
+            turnState = TURN_LEFT;
+            turning = true;
+        } else if (yaw_difference < -10.0f) {
+            turnState = TURN_RIGHT;
+            turning = true;
+        }
     } else {
-        turnState = TURN_NONE;
         if (std::abs(yaw_difference) <= 1.0f) {
+            turnState = TURN_NONE;
             turning = false;
         }
     }

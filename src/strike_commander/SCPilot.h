@@ -9,6 +9,24 @@
 #pragma once
 
 #include "precomp.h"
+class PIDController {
+public:
+    PIDController() : kp(0), ki(0), kd(0), prev_error(0), integral(0) {};
+    PIDController(float kp, float ki, float kd)
+        : kp(kp), ki(ki), kd(kd), prev_error(0), integral(0) {};
+    float calculate(float setpoint, float measured_value, float dt) {
+        float error = setpoint - measured_value;
+        integral += error * dt;
+        float derivative = (error - prev_error) / dt;
+        prev_error = error;
+        return kp * error + ki * integral + kd * derivative;
+    };
+
+private:
+    float kp, ki, kd;
+    float prev_error;
+    float integral;
+};
 
 class SCPilot {
 private:
@@ -20,6 +38,10 @@ private:
     };
     TurnState turnState;
     float turnRate;
+    PIDController altitudeController;
+    PIDController rollController;
+    PIDController headingController;
+    
 public:
     Vector3D target_waypoint{0.0f, 0.0f, 0.0f};
     bool turning{false};
