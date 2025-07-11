@@ -36,11 +36,9 @@ private:
         TURN_LEFT,
         TURN_RIGHT
     };
-    TurnState turnState;
+    
     float turnRate;
-    PIDController altitudeController;
-    PIDController rollController;
-    PIDController headingController;
+    
     
 public:
     Vector3D target_waypoint{0.0f, 0.0f, 0.0f};
@@ -48,7 +46,9 @@ public:
     int target_speed{0};
     int target_climb{0};
     float target_azimut{0.0f};
+    float old_target_azimut{0.0f};
     bool land{false};
+    TurnState turnState;
     SCPlane* plane{nullptr};
     SCPilot();
     ~SCPilot();

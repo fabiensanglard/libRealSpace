@@ -8,11 +8,7 @@
 #include <algorithm>
 #include "precomp.h"
 
-SCPilot::SCPilot() :
-    altitudeController(0.5f, 0.05f, 0.02f),  // Valeurs ajustées pour moins d'oscillations
-    rollController(0.05f, 0.01f, 0.02f),
-    headingController(0.02f, 0.005f, 0.01f)
-{
+SCPilot::SCPilot() {
     target_speed = 0;
     target_climb = 0;
     target_azimut = 0;
@@ -51,6 +47,9 @@ void SCPilot::SetTargetWaypoint(Vector3D waypoint) {
 }
 
 void SCPilot::AutoPilot() {
+    PIDController altitudeController(1.0f, 0.1f, 0.05f); // Adjust these values as needed
+    PIDController azimuthController(1.0f, 0.1f, 0.05f); // Adjust these values as needed
+
     if (!this->alive) {
         return;
     }
@@ -66,7 +65,6 @@ void SCPilot::AutoPilot() {
         this->plane->vy *=1.05f;
         this->plane->SetThrottle(0);
         this->alive = false;
-        return;
     }
     if (this->plane == nullptr) {
         return;
@@ -75,20 +73,36 @@ void SCPilot::AutoPilot() {
         this->plane->SetThrottle(0);
         return;
     }
-    
-    // Contrôle de la vitesse
     if (this->plane->vz > this->target_speed) {
         this->plane->SetThrottle(100);
     } else {
         this->plane->SetThrottle(this->plane->GetThrottle() - 10);
     }
 
-    // Calcul de l'altitude cible
+
     float horizontal_distance = 1000.0f;
     float vertical_distance = this->target_climb - this->plane->y;
     float target_elevation = radToDegree(atan2(vertical_distance, horizontal_distance))*10.0f;
     
-    // Calcul de l'écart de cap
+    
+    float dt = 0.1f; // Time step, adjust as needed
+    float control_signal = altitudeController.calculate(target_elevation, this->plane->pitch, dt);
+    
+    if (this->plane->pitch > target_elevation) {
+        if (std::abs(target_elevation) > 1.0f) {
+            this->plane->pitch -= 1.0f;
+        } else {
+            this->plane->pitch = target_elevation;
+        } 
+    } else if (this->plane->pitch < target_elevation) {
+        if (std::abs(target_elevation) > 1.0f) {
+            this->plane->pitch += 1.0f;
+        } else {
+            this->plane->pitch = target_elevation;
+        }
+    }
+
+    
     float target_yaw = (float)(3600.0f - this->target_azimut);
     float yaw_difference = this->plane->yaw - target_yaw;
         
@@ -96,131 +110,77 @@ void SCPilot::AutoPilot() {
     while (yaw_difference > 1800.0f) yaw_difference -= 3600.0f;
     while (yaw_difference < -1800.0f) yaw_difference += 3600.0f;
         
-    float dt = 0.1f; // Pas de temps
-
-    // Déterminer la direction du virage et la magnitude du virage
-    float turn_magnitude = std::abs(yaw_difference) / 1800.0f; // Normaliser entre 0 et 1
-    if (!turning) {
-        if (yaw_difference > 10.0f) {
-            turnState = TURN_LEFT;
-            turning = true;
-        } else if (yaw_difference < -10.0f) {
-            turnState = TURN_RIGHT;
-            turning = true;
-        }
+    // Déterminer la direction du virage
+    if (yaw_difference > 10.0f) {
+        turnState = TURN_LEFT;
+    } else if (yaw_difference < -10.0f) {
+        turnState = TURN_RIGHT;
     } else {
+        turnState = TURN_NONE;
+        // On est presque aligné, on fait un ajustement final précis
         if (std::abs(yaw_difference) <= 1.0f) {
-            turnState = TURN_NONE;
+            this->plane->yaw = target_yaw;
             turning = false;
+        } else {
+            this->plane->yaw += (yaw_difference > 0) ? -1.0f : 1.0f;
         }
     }
-    
-    // Ajustement du manche basé sur l'état de virage et l'altitude
+
+    // Taux de virage basé sur l'écart (plus rapide pour grand angle)
+    turnRate = (std::min)(5.0f, std::abs(yaw_difference) / 100.0f);
+    if (turnRate < 0.5f) turnRate = 0.5f;
+
+    // Gérer l'inclinaison et le virage
     switch (turnState) {
         case TURN_LEFT:
-            // Pour tourner à gauche, nous voulons un roll de 270° (2700)
-            {
-                float roll_error = 0;
-                // Si le roll actuel est entre 0 et 180, prendre le chemin le plus court vers 270
-                if (this->plane->roll >= 0 && this->plane->roll <= 1800) {
-                    roll_error = 2700.0f - this->plane->roll;
-                } 
-                // Si le roll est entre 180 et 360, il peut être plus court de "dérouler"
-                else {
-                    roll_error = -(this->plane->roll - 2700.0f);
-                    // Assurer que nous prenons le chemin le plus court
-                    if (roll_error < -1800.0f) roll_error += 3600.0f;
-                }
+            // Incliner progressivement à gauche (vers 2700 = 270°)
+            if (this->plane->roll < 2700.0f && this->plane->roll > 899.0f) {
+                this->plane->roll += (std::min)(20.0f, 2700.0f - this->plane->roll);
+            } else if (this->plane->roll <= 899.0f) {
+                this->plane->roll += 20.0f;
+            } else if (this->plane->roll > 2700.0f) {
+                this->plane->roll = (int) (this->plane->roll + 20.0f) % 3600;
+            }
                 
-                // Utiliser PID pour déterminer la position du manche en x
-                // Multiplie par un facteur proportionnel à l'amplitude du virage nécessaire
-                float stick_adjustment = -rollController.calculate(0, roll_error, dt);
-                
-                // Application plus progressive pour les grands changements
-                if (std::abs(roll_error) > 900.0f) {
-                    this->plane->control_stick_x = stick_adjustment * 0.8f;  // 80% de la puissance pour grands changements
-                } else {
-                    this->plane->control_stick_x = stick_adjustment;
-                }
-                
-                // Limiter les valeurs du manche à l'intervalle -160 à 160
-                this->plane->control_stick_x = (std::max)(-160, (std::min)(160, this->plane->control_stick_x));
-                
-                // Une fois proche de l'inclinaison cible, ajuster le manche en y pour maintenir l'altitude
-                if (std::abs(roll_error) < 200.0f) {
-                    // En virage, nous avons besoin de plus de portance, donc tirez légèrement sur le manche
-                    // Pull-up proportionnel à l'intensité du virage (max -20)
-                    this->plane->control_stick_y = -20.0f * turn_magnitude;
-                }
+            if (std::abs(this->plane->roll - 2700.0f) < 200.0f) {
+                this->plane->yaw -= turnRate;
             }
             break;
                 
         case TURN_RIGHT:
-            // Pour tourner à droite, nous voulons un roll de 90° (900)
-            {
-                float roll_error = 0;
-                // Calculer l'erreur pour atteindre 900
-                if (this->plane->roll >= 1800 && this->plane->roll <= 3600) {
-                    roll_error = -(this->plane->roll - 900.0f);
-                    if (roll_error < -1800.0f) roll_error += 3600.0f;
-                } else {
-                    roll_error = 900.0f - this->plane->roll;
-                }
+            // Incliner progressivement à droite (vers 900 = 90°)
+            if (this->plane->roll > 899.0f && this->plane->roll < 2700.0f) {
+                this->plane->roll -= (std::min)(20.0f, this->plane->roll - 899.0f);
+            } else if (this->plane->roll >= 2700.0f) {
+                this->plane->roll = (int) (this->plane->roll + 20.0f) % 3600;
+            } else if (this->plane->roll < 899.0f) {
+                this->plane->roll += 20.0f;
+            }
                 
-                // Utiliser PID pour déterminer la position du manche en x
-                float stick_adjustment = rollController.calculate(0, roll_error, dt);
-                
-                // Application plus progressive pour les grands changements
-                if (std::abs(roll_error) > 900.0f) {
-                    this->plane->control_stick_x = stick_adjustment * 0.8f;  // 80% de la puissance pour grands changements
-                } else {
-                    this->plane->control_stick_x = stick_adjustment;
-                }
-                
-                // Limiter les valeurs du manche à l'intervalle -160 à 160
-                this->plane->control_stick_x = (std::max)(-160, (std::min)(160, this->plane->control_stick_x));
-                
-                // Une fois incliné, ajuster le manche en y
-                if (std::abs(roll_error) < 200.0f) {
-                    // Pull-up proportionnel à l'intensité du virage (max -20)
-                    this->plane->control_stick_y = -20.0f * turn_magnitude;
-                }
+            // Une fois incliné, utiliser le pitch pour tourner
+            if (std::abs(this->plane->roll - 899.0f) < 200.0f) {
+                this->plane->yaw += turnRate;
             }
             break;
                 
         case TURN_NONE:
-            // Stabiliser l'avion à l'horizontale (roll = 0)
-            {
-                float roll_error = 0;
-                if (this->plane->roll > 1800.0f) {
-                    roll_error = -(this->plane->roll - 3600.0f);
-                } else {
-                    roll_error = -this->plane->roll;
+            // Redresser l'avion quand on ne tourne pas (vers 0 ou 3600)
+            if (this->plane->roll > 20.0f && this->plane->roll < 1800.0f) {
+                this->plane->roll -= 20.0f;
+            } else if (this->plane->roll > 1800.0f && this->plane->roll < 3580.0f) {
+                this->plane->roll += 20.0f;
+                if (this->plane->roll >= 3600.0f) {
+                    this->plane->roll = 0.0f;
                 }
-                
-                this->plane->control_stick_x = rollController.calculate(0, roll_error, dt);
-                this->plane->control_stick_x = (std::max)(-160, (std::min)(160, this->plane->control_stick_x));
+            } else {
+                this->plane->roll = 0.0f;
             }
             break;
     }
-    
-    // Contrôle d'altitude
-    float pitch_error = target_elevation - this->plane->pitch;
-    float pitch_control = altitudeController.calculate(0, pitch_error, dt);
-    
-    // Ne pas écraser les ajustements de pitch pour les virages si on est en train de tourner
-    if (turnState == TURN_NONE || std::abs(pitch_error) > 100.0f) {
-        // Ajustement plus doux pour le manche Y si déjà en ajustement de virage
-        if (turnState != TURN_NONE) {
-            pitch_control *= 0.5f; // Réduire l'effet pour ne pas perturber le virage
-        }
-        
-        this->plane->control_stick_y -= pitch_control; // Inverser car -y = monter, +y = descendre
-        this->plane->control_stick_y = (std::max)(-100, (std::min)(100, this->plane->control_stick_y));
-    }
-    
-    // Vérifier si on a atteint le cap cible
-    if (std::abs(yaw_difference) <= 1.0f) {
+
+    if (std::abs(this->plane->yaw-target_yaw) <= 1.0f) {
+        this->plane->yaw = target_yaw;
         turning = false;
     }
+    
 }

@@ -513,6 +513,11 @@ void DebugStrike::simConfig() {
     }
     ImGui::PopStyleColor(3);
     ImGui::PopID();
+    ImGui::Text("turnstate %d", this->pilot.turnState);
+    ImGui::Text("target speed %d", this->pilot.target_speed);
+    ImGui::Text("target azimuth %.2f", this->pilot.target_azimut);
+    ImGui::Text("target climb %d", this->pilot.target_climb);
+    
 }
 void DebugStrike::radar() {
     // Get the canvas parameters for converting world-coordinates to canvas coordinates.
