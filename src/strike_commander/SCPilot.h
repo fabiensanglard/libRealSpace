@@ -47,6 +47,7 @@ public:
     int target_climb{0};
     float target_azimut{0.0f};
     float old_target_azimut{0.0f};
+    float targetRoll{0.0f};
     bool land{false};
     TurnState turnState;
     SCPlane* plane{nullptr};

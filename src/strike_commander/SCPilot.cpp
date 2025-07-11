@@ -105,7 +105,10 @@ void SCPilot::AutoPilot() {
     
     float target_yaw = (float)(3600.0f - this->target_azimut);
     float yaw_difference = this->plane->yaw - target_yaw;
-        
+    float delta_time = 1.0f / this->plane->tps;
+
+    float roll_rate = (this->plane->object->entity->jdyn->ROLL_RATE / 60.0f) *10.0f * delta_time;
+    
     // Normaliser la différence entre -1800 et 1800 (entre -180° et 180°)
     while (yaw_difference > 1800.0f) yaw_difference -= 3600.0f;
     while (yaw_difference < -1800.0f) yaw_difference += 3600.0f;
@@ -129,46 +132,61 @@ void SCPilot::AutoPilot() {
     // Taux de virage basé sur l'écart (plus rapide pour grand angle)
     turnRate = (std::min)(5.0f, std::abs(yaw_difference) / 100.0f);
     if (turnRate < 0.5f) turnRate = 0.5f;
-
+    // Calculate target roll angle proportional to turn rate
+    targetRoll = 0.0f;
+    if (turnState == TURN_LEFT) {
+        // Pour les virages à gauche, incliner vers 2700 (aile gauche vers le bas)
+        targetRoll = 2700.0f * (turnRate / 5.0f);
+        // Assurer une valeur minimale pour l'inclinaison
+        if (targetRoll < 900.0f) targetRoll = 900.0f;
+    } else if (turnState == TURN_RIGHT) {
+        // Pour les virages à droite, incliner vers 900 (aile droite vers le bas)
+        targetRoll = 900.0f * (turnRate / 5.0f);
+        // Assurer une valeur minimale pour l'inclinaison
+        if (targetRoll < 300.0f) targetRoll = 300.0f;
+    }
     // Gérer l'inclinaison et le virage
     switch (turnState) {
         case TURN_LEFT:
-            // Incliner progressivement à gauche (vers 2700 = 270°)
-            if (this->plane->roll < 2700.0f && this->plane->roll > 899.0f) {
-                this->plane->roll += (std::min)(20.0f, 2700.0f - this->plane->roll);
+            // Incliner progressivement à gauche vers la valeur targetRoll
+            if (this->plane->roll < targetRoll && this->plane->roll > 899.0f) {
+                this->plane->roll += (std::min)(roll_rate, targetRoll - this->plane->roll);
             } else if (this->plane->roll <= 899.0f) {
-                this->plane->roll += 20.0f;
-            } else if (this->plane->roll > 2700.0f) {
-                this->plane->roll = (int) (this->plane->roll + 20.0f) % 3600;
+                this->plane->roll = 3600.0f - roll_rate;
+            } else if (this->plane->roll > targetRoll) {
+                this->plane->roll -= roll_rate;
             }
                 
-            if (std::abs(this->plane->roll - 2700.0f) < 200.0f) {
+            // Une fois suffisamment incliné, effectuer le virage
+            // Utiliser targetRoll au lieu de 2700.0f
+            if (std::abs(this->plane->roll - targetRoll) < 200.0f) {
                 this->plane->yaw -= turnRate;
             }
             break;
                 
         case TURN_RIGHT:
-            // Incliner progressivement à droite (vers 900 = 90°)
-            if (this->plane->roll > 899.0f && this->plane->roll < 2700.0f) {
-                this->plane->roll -= (std::min)(20.0f, this->plane->roll - 899.0f);
+            // Incliner progressivement à droite vers la valeur targetRoll
+            if (this->plane->roll > targetRoll && this->plane->roll < 2700.0f) {
+                this->plane->roll -= (std::min)(roll_rate, this->plane->roll - targetRoll);
             } else if (this->plane->roll >= 2700.0f) {
-                this->plane->roll = (int) (this->plane->roll + 20.0f) % 3600;
-            } else if (this->plane->roll < 899.0f) {
-                this->plane->roll += 20.0f;
+                this->plane->roll = (int) (this->plane->roll + roll_rate) % 3600;
+            } else if (this->plane->roll < targetRoll) {
+                this->plane->roll += roll_rate;
             }
                 
-            // Une fois incliné, utiliser le pitch pour tourner
-            if (std::abs(this->plane->roll - 899.0f) < 200.0f) {
+            // Une fois suffisamment incliné, effectuer le virage
+            // Utiliser targetRoll au lieu de 900.0f
+            if (std::abs(this->plane->roll - targetRoll) < 200.0f) {
                 this->plane->yaw += turnRate;
             }
             break;
                 
         case TURN_NONE:
             // Redresser l'avion quand on ne tourne pas (vers 0 ou 3600)
-            if (this->plane->roll > 20.0f && this->plane->roll < 1800.0f) {
-                this->plane->roll -= 20.0f;
-            } else if (this->plane->roll > 1800.0f && this->plane->roll < 3580.0f) {
-                this->plane->roll += 20.0f;
+            if (this->plane->roll > roll_rate && this->plane->roll < 1800.0f) {
+                this->plane->roll -= roll_rate;
+            } else if (this->plane->roll > 1800.0f && this->plane->roll < 3600.0f - roll_rate) {
+                this->plane->roll += roll_rate;
                 if (this->plane->roll >= 3600.0f) {
                     this->plane->roll = 0.0f;
                 }

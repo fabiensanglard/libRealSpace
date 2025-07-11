@@ -517,6 +517,7 @@ void DebugStrike::simConfig() {
     ImGui::Text("target speed %d", this->pilot.target_speed);
     ImGui::Text("target azimuth %.2f", this->pilot.target_azimut);
     ImGui::Text("target climb %d", this->pilot.target_climb);
+    ImGui::Text("target roll %.2f", this->pilot.targetRoll);
     
 }
 void DebugStrike::radar() {
