@@ -1495,7 +1495,8 @@ void DebugStrike::renderUI() {
                     }
                     if (this->target->pilot != nullptr) {
                         ImGui::Text("{TH %.0f TA %d}", this->target->pilot->target_azimut, this->target->pilot->target_climb);
-                        
+                        ImGui::Text("Turning %d, L/R/N %d, TRoll %.3f" , this->target->pilot->turning, 
+                            this->target->pilot->turnState, this->target->pilot->targetRoll);   
                         ImGui::Text("AI OBJ %d", this->target->current_objective);
                         
                         ImGui::Text("AI Target %d", this->target->current_target);

@@ -113,7 +113,7 @@ protected:
 
     /* fps to knots conversion factor */
     float fps_knots;
-    RSArea *area;
+    
 
     int nocrash;
     int IN_BOX(int llx, int urx, int llz, int urz);
@@ -249,7 +249,8 @@ public:
     float rollers;
     float rudder;
     float elevator;
-
+    RSArea *area;
+    
     float lift;
     std::vector <SCWeaponLoadoutHardPoint *> weaps_load;
     std::vector <SCSimulatedObject *> weaps_object;
