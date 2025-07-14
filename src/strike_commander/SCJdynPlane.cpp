@@ -126,11 +126,6 @@ void SCJdynPlane::Simulate() {
     } else {
         itemp = -this->thrust;
     }
-    if (this->tick_counter % (100 * TPS) == 1) {
-        this->fuel_rate = fuel_consump(this->Mthrust, this->W);
-        this->fuel -= (int)(itemp * this->fuel_rate);
-        
-    }
     
     if (this->wheels) {
         this->wheel_anim --;
@@ -383,6 +378,12 @@ void SCJdynPlane::updateSpeedOfSound() {
         this->mcc = .7833333f - .1666667f * this->Cl;
     }
     /* and current mach number	*/
+    if (this->sos == 0.0f) {
+        this->sos = 1.0f; // Avoid division by zero
+    }
+    if (this->mcc == 0.0f) {
+        this->mcc = 1.0f; // Avoid division by zero
+    }
     this->mach = this->vz / this->sos;
     this->mratio = this->mach / this->mcc;
 }
@@ -547,15 +548,22 @@ void SCJdynPlane::computeLift() {
     this->lift = this->lift_force * this->inverse_mass;
     while (this->lift > this->Lmax || this->lift < this->Lmin) {
         /* if lift is out of bounds, adjust it	*/
-        if (this->lift > this->Lmax) {
-            this->lift = .99f * this->Lmax / this->inverse_mass / this->vz;
-        } else if (this->lift < this->Lmin) {
-            this->lift = .99f * this->Lmin / this->inverse_mass / this->vz;
+        if (this->vz < 0.0f) {
+            if (this->lift > this->Lmax) {
+                this->lift = .99f * this->Lmax / this->inverse_mass / this->vz;
+            } else if (this->lift < this->Lmin) {
+                this->lift = .99f * this->Lmin / this->inverse_mass / this->vz;
+            }
+            this->g_limit = TRUE;
+            this->lift_drag_force = -this->vy * this->lift;
+            this->lift_force = this->vz * this->lift;
+            this->lift = this->lift_force * this->inverse_mass;
+        } else {
+            this->lift = 0.0f;
+            this->lift_drag_force = 0.0f;
+            this->lift_force = 0.0f;
         }
-        this->g_limit = TRUE;
-        this->lift_drag_force = -this->vy * this->lift;
-        this->lift_force = this->vz * this->lift;
-        this->lift = this->lift_force * this->inverse_mass;
+            
     }
 }
 void SCJdynPlane::computeDrag() {
@@ -610,6 +618,9 @@ void SCJdynPlane::updateVelocity() {
         float mcos;
         this->vx = 0.0;
         gl_sincos(this->pitch, &temp, &mcos);
+        if (mcos == 0.0f) {
+            mcos = 0.0001f; // Avoid division by zero
+        }
         temp = this->vz * temp / mcos;
         if (this->vy + this->acceleration.y < temp) {
             this->acceleration.y = temp - this->vy;

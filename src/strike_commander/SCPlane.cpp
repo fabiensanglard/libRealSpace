@@ -676,6 +676,12 @@ void SCPlane::computeLift() {
     this->lift_force = this->vz * this->lift;
     /* save for wing loading meter	*/
     this->lift = this->lift_force * this->inverse_mass;
+    if (this->vz == 0.0f) {
+        /* if no vertical speed, then no lift	*/
+        this->lift = 0.0f;
+        this->lift_drag_force = 0.0f;
+        this->lift_force = 0.0f;
+    }
     while (this->lift > this->Lmax || this->lift < this->Lmin) {
         /* if lift is out of bounds, adjust it	*/
         if (this->lift > this->Lmax) {
