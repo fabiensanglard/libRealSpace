@@ -252,6 +252,16 @@ void SCJdynPlane::updatePosition() {
     this->vx = this->incremental.v[3][0];
     this->vy = this->incremental.v[3][1];
     this->vz = this->incremental.v[3][2];
+
+    if (isnan(this->pitch)) {
+        this->pitch = 0.0f; // Reset to a sensible default value
+    }
+    if (isnan(this->roll)) {
+        this->roll = 0.0f; // Reset to a sensible default value
+    }
+    if (isnan(this->yaw)) {
+        this->yaw = 0.0f; // Reset to a sensible default value
+    }
 }
 void SCJdynPlane::processInput() {
     int itemp {0};
@@ -613,6 +623,14 @@ void SCJdynPlane::updateVelocity() {
     float temp{0.0f};
     this->vx += this->acceleration.x;
     this->vz += this->acceleration.z;
+    // Check if vz is NaN and reset it
+    if (this->vz > 0.0f) {
+        // positive horizontal speed, trouble ahead
+        this->vz = 0.0f; // Reset to a sensible default value
+    }
+    if (std::isnan(this->vz)) {
+        this->vz = 0.0f; // Reset to a sensible default value
+    }
     if (this->on_ground && this->status > MEXPLODE) {
         temp = 0.0f;
         float mcos;

@@ -58,6 +58,9 @@ void SCPilot::AutoPilot() {
     if (!this->alive) {
         return;
     }
+    if (!this->plane->on_ground && this->plane->GetWheel()) {
+        this->plane->SetWheel();
+    }
     if (!this->plane->object->alive) {
         this->plane->Mthrust = 0;
         this->plane->s = 0.001f;
@@ -131,23 +134,24 @@ void SCPilot::AutoPilot() {
         // On est presque aligné, on fait un ajustement final précis
         if (std::abs(yaw_difference) <= 1.0f) {
             this->plane->yaw = target_yaw;
-            //turning = false;
+            turning = false;
         } else {
             this->plane->yaw += (yaw_difference > 0) ? -1.0f : 1.0f;
         }
     }
 
     // Taux de virage basé sur l'écart (plus rapide pour grand angle)
-    turnRate = (std::min)(5.0f, std::abs(yaw_difference) / 100.0f);
-    if (turnRate < 0.5f) turnRate = 0.5f;
-    // Calculate target roll angle proportional to turn rate
+    turnRate = fabs(yaw_difference) / 450.0f;
+    if (turnRate < 1.0f) {
+        turnRate = 1.0f; // Assurer un minimum de virage
+    }
     targetRoll = 0.0f;
     if (turnState == TURN_LEFT) {
         // Pour les virages à gauche, incliner vers 2700 (aile gauche vers le bas)
-        targetRoll = 2700.0f; 
+        targetRoll = 2700.0f-(900.0f-(900.0f/turnRate)); 
     } else if (turnState == TURN_RIGHT) {
         // Pour les virages à droite, incliner vers 900 (aile droite vers le bas)
-        targetRoll = 900.0f;
+        targetRoll = 900.0f-(900.0f-(900.0f/turnRate));
     }
     // Gérer l'inclinaison et le virage
     switch (turnState) {
@@ -199,12 +203,7 @@ void SCPilot::AutoPilot() {
                 turning = false;
             }
             break;
-    }
-
-    if (std::abs(this->plane->yaw-target_yaw) <= 1.0f) {
-        this->plane->yaw = target_yaw;
-    }
-    
+    }    
 }
 
 void SCPilot::DirectAutoPilot() {
