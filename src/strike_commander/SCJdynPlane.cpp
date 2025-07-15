@@ -195,12 +195,9 @@ void SCJdynPlane::updatePosition() {
 
     temp = 0.0f;
     this->pitch = (-asinf(this->ptw.v[2][1]) * 180.0f / (float)M_PI) * 10;
-
-    float ascos = 0.0f;
-
     temp = cosf(tenthOfDegreeToRad(this->pitch));
 
-    if (temp != 0.0) {
+    if (temp != 0.0f) {
 
         float sincosas = this->ptw.v[2][0] / temp;
 
