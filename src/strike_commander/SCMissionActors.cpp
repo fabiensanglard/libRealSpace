@@ -149,6 +149,7 @@ bool SCMissionActors::destroyTarget(uint8_t arg) {
                     this->pilot->target_speed = -60;
                 } else if (dist > 300.0f) {
                     this->pilot->target_speed = (int) actor->plane->vz;
+                    this->plane->Shoot(0, actor, this->mission);
                 }
             }
             return false;
