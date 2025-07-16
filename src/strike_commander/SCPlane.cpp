@@ -360,8 +360,13 @@ void SCPlane::updatePosition() {
             /* then adjust		*/
             this->yaw += 3600;
         }
-
-        this->roll = (asinf(this->ptw.v[0][1] / temp) / (float)M_PI) * 1800.0f;
+        float a = this->ptw.v[0][1] / temp;
+        if (a > 1.0f) {
+            a = 1.0f;
+        } else if (a < -1.0f) {
+            a = -1.0f;
+        }
+        this->roll = (asinf(a) / (float)M_PI) * 1800.0f;
         if (this->ptw.v[1][1] < 0.0) {
             /* if upside down	*/
             this->roll = 1800.0f - this->roll;
