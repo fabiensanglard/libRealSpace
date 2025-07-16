@@ -28,7 +28,7 @@ public:
     float elevationf{0.0f};
 
     float weight{1.0f};
-
+    float distance{0.0f};
     bool alive{true};
     RSEntity *obj;
     SCMissionActors *target{nullptr};
