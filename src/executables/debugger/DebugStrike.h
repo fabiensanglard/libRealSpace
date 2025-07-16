@@ -8,6 +8,20 @@ private:
     void loadPlane();
     void showActorDetails(SCMissionActors* actor);
     void showOffCamera();
+    enum class DebugEntityMode {
+        None,
+        Actor,
+        Scene,
+        Area,
+        Spot,
+        Entity
+    };
+    DebugEntityMode debug_entity_mode{DebugEntityMode::Actor};
+    RSEntity* debug_entity{nullptr};
+    MISN_SCEN* debug_scene{nullptr};
+    AREA* debug_area{nullptr};
+    SPOT* debug_spot{nullptr};
+
 public:
     DebugStrike();
     ~DebugStrike();

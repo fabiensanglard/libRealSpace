@@ -529,9 +529,9 @@ void DebugStrike::radar() {
     static ImVec2 pan_offset = ImVec2(0, 0);
     ImGuiIO& io = ImGui::GetIO();
 
-    // Update zoom factor based on mouse wheel and adjust pan so that the zoom centers on the mouse.
+    // Check if the mouse is hovering over the window
 
-    if (ImGui::IsWindowFocused() && io.MouseWheel != 0.0f) {
+    if (ImGui::IsWindowHovered() && io.MouseWheel != 0.0f) {
         float prev_zoom = zoom;
         zoom += io.MouseWheel * zoom * 0.1f; // Adjust zoom sensitivity as needed.
         if (zoom < 0.1f)
@@ -541,8 +541,26 @@ void DebugStrike::radar() {
         pan_offset.y = pan_offset.y * (zoom / prev_zoom) + (mouse_pos.y - canvas_pos.y) * (1 - (zoom / prev_zoom));
     }
 
-    // Update panning based on right mouse button drag.
-    if (ImGui::IsWindowFocused() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+    bool is_titlebar_hovered = false;
+    {
+        // Vérifier si la souris est dans la barre de titre
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
+        ImVec2 mouse_pos = ImGui::GetIO().MousePos;
+        
+        float title_bar_height = ImGui::GetFrameHeight(); // Hauteur approximative de la barre de titre
+        
+        // La souris est sur la barre de titre si elle est dans la partie supérieure de la fenêtre
+        if (mouse_pos.x >= window_pos.x && 
+            mouse_pos.x <= window_pos.x + window_size.x &&
+            mouse_pos.y >= window_pos.y && 
+            mouse_pos.y <= window_pos.y + title_bar_height) {
+            is_titlebar_hovered = true;
+        }
+    }
+
+
+    if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !is_titlebar_hovered) {
         pan_offset.x += io.MouseDelta.x;
         pan_offset.y += io.MouseDelta.y;
     }
@@ -618,6 +636,12 @@ void DebugStrike::radar() {
             
             draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(255, 255, 255, 255),
                                 area->AreaName);
+            if (ImGui::IsMouseHoveringRect(top_left, bottom_right)) {
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                    this->debug_area = area;
+                    this->debug_entity_mode = DebugEntityMode::Area;
+                }
+            }
         }
     }
     for (auto spot: this->current_mission->mission->mission_data.spots) {
@@ -637,6 +661,12 @@ void DebugStrike::radar() {
 
             draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(255, 255, 255, 255),
                                 ("SPOT: " + std::to_string(spot->id)).c_str());
+            if (ImGui::IsMouseHoveringRect(top_left, bottom_right)) {
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                    this->debug_spot = spot;
+                    this->debug_entity_mode = DebugEntityMode::Spot;
+                }
+            }
         }
     }
     for (auto actor : this->current_mission->actors) {
@@ -709,6 +739,7 @@ void DebugStrike::radar() {
             if (ImGui::IsMouseHoveringRect(top_left, bottom_right)) {
                 if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                     this->target = actor;
+                    this->debug_entity_mode = DebugEntityMode::Actor;
                 }
                 ImGui::OpenPopup("Actor Details");
                 if (ImGui::BeginPopup("Actor Details")) {
@@ -747,6 +778,7 @@ void DebugStrike::radar() {
                 if (ImGui::BeginPopup("Actor Details")) {
                     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                         this->target = actor;
+                        this->debug_entity_mode = DebugEntityMode::Actor;
                     }
                     ImGui::Text("Actor: %s", actor->actor_name.c_str());
                     ImGui::Text("Position: (%.2f, %.2f, %.2f)", actor->object->position.x, actor->object->position.y, actor->object->position.z);
@@ -786,6 +818,12 @@ void DebugStrike::radar() {
             draw_list->AddRect(top_left, bottom_right, IM_COL32(0, 255, 255, 255));
             draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(255, 255, 255, 255),
                                 ("Scene: " + std::to_string(scene->is_active)).c_str());
+            if (ImGui::IsMouseHoveringRect(top_left, bottom_right)) {
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                    this->debug_scene = scene;
+                    this->debug_entity_mode = DebugEntityMode::Scene;
+                }
+            }
         }
     }
 }
@@ -973,7 +1011,33 @@ void DebugStrike::renderMenu() {
         ImGui::End();
     }
     if (show_radar) {
-        if (ImGui::Begin("Actors Position", &show_radar)) {
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove;
+        static bool is_dragging_window = false;
+
+        if (ImGui::Begin("Actors Position", &show_radar, window_flags)) {
+            // Vérifier si la souris est sur la barre de titre
+            bool is_titlebar_hovered = ImGui::IsMouseHoveringRect(
+                ImGui::GetWindowPos(),
+                ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowSize().x, 
+                    ImGui::GetWindowPos().y + ImGui::GetFrameHeight()),
+                false);
+            
+            // Commencer à déplacer si on clique sur la barre de titre
+            if (is_titlebar_hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+                is_dragging_window = true;
+            
+            // Arrêter de déplacer si on relâche le bouton
+            if (!ImGui::IsMouseDown(ImGuiMouseButton_Left))
+                is_dragging_window = false;
+            
+            // Déplacer la fenêtre si on est en train de la faire glisser
+            if (is_dragging_window && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+                ImGui::SetWindowPos(
+                    ImVec2(ImGui::GetWindowPos().x + ImGui::GetIO().MouseDelta.x,
+                        ImGui::GetWindowPos().y + ImGui::GetIO().MouseDelta.y)
+                );
+            }
+            
             radar();
             ImGui::End();
         }
@@ -989,7 +1053,7 @@ void DebugStrike::renderMenu() {
                             360 - (ai_actor->plane->azimuthf / 10.0f));
                 ImGui::SameLine();
                 if (ai_actor->pilot != nullptr) {
-                    ImGui::Text("{TH %.0f TA %d}", ai_actor->pilot->target_azimut, ai_actor->pilot->target_climb);
+                    ImGui::Text("{TH %.0f TA %d TS %.3f}", ai_actor->pilot->target_azimut, ai_actor->pilot->target_climb, ai_actor->pilot->target_speed);
                     ImGui::SameLine();
                     ImGui::Text("AI OBJ %d", ai_actor->current_objective);
                     ImGui::SameLine();
@@ -1505,11 +1569,61 @@ void DebugStrike::renderUI() {
             ImGui::EndChild();
             ImGui::EndChild();
             ImGui::BeginChild("Target info", ImVec2(0, 0), true);
-            if (this->target != nullptr) {
-                showActorDetails(this->target);
-            } else {
-                ImGui::Text("No target selected");
+            switch (debug_entity_mode) {
+                case DebugEntityMode::None:
+                    ImGui::Text("No entity selected");
+                break;
+                case DebugEntityMode::Actor:
+                    if (this->target != nullptr) {
+                        showActorDetails(this->target);
+                    } else {
+                        ImGui::Text("No target selected");
+                    }
+                break;
+                case DebugEntityMode::Spot:
+                    if (this->debug_spot != nullptr) {
+                        ImGui::Text("Spot ID: %d", this->debug_spot->id);
+                        ImGui::Text("Position: (%.0f, %.0f, %.0f)", this->debug_spot->position.x, this->debug_spot->position.y, this->debug_spot->position.z);
+                        ImGui::Text("Origin: (%.0f, %.0f, %.0f)", this->debug_spot->origin.x, this->debug_spot->origin.y, this->debug_spot->origin.z);
+                        ImGui::Text("Area ID: %d", this->debug_spot->area_id);
+                        ImGui::Text("Unknown1: %d", this->debug_spot->unknown1);
+                        ImGui::Text("Unknown2: %d", this->debug_spot->unknown2);
+                    } else {
+                        ImGui::Text("No spot selected");
+                    }
+                break;
+                case DebugEntityMode::Area:
+                    if (this->debug_area != nullptr) {
+                        ImGui::Text("Area ID: %d", this->debug_area->id);
+                        ImGui::Text("Area Name: %s", this->debug_area->AreaName);
+                        ImGui::Text("Position: (%.0f, %.0f, %.0f)", this->debug_area->position.x, this->debug_area->position.y, this->debug_area->position.z);
+                        ImGui::Text("Width: %d, Height: %d", this->debug_area->AreaWidth, this->debug_area->AreaHeight);
+                    } else {
+                        ImGui::Text("No area selected");
+                    }
+                break;
+                case DebugEntityMode::Scene:
+                    if (this->debug_scene != nullptr) {
+                        ImGui::Text("Area ID: %d", this->debug_scene->area_id);
+                        ImGui::Text("Is Active: %d", this->debug_scene->is_active);
+                        ImGui::Text("Is Coord Relative to Area: %d", this->debug_scene->is_coord_on_area);
+                        ImGui::Text("Cast Count: %d", this->debug_scene->cast.size());
+                        for (auto cast : this->debug_scene->cast) {
+                            ImGui::Text("Cast %d", cast);
+                        }
+                        ImGui::Text("Prog Count: %d", this->debug_scene->progs_id.size());
+                        for (auto prog : this->debug_scene->progs_id) {
+                            ImGui::Text("Prog %d", prog);
+                        }
+                        for (auto b: this->debug_scene->unknown_bytes) {
+                            ImGui::Text("ub %d", b);
+                        }
+                    } else {
+                        ImGui::Text("No scene selected");
+                    }
+                break;
             }
+            
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
