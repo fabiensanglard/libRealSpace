@@ -862,99 +862,163 @@ void printProgTable(std::vector<PROG> &prog, SCMissionActors *actor) {
     }
 }
 void DebugStrike::showActorDetails(SCMissionActors* actor) {
+    if (actor->object != nullptr) {
+        if (ImGui::TreeNode("Object")) {
+            RSEntity *entity = actor->object->entity;
+            ImGui::Text("Name: %s", actor->object->member_name.c_str());
+            if (entity->jdyn != nullptr) {
+                if (ImGui::TreeNode("JDYN")) {
+                    ImGui::Text("LIFT: %.3f", entity->jdyn->LIFT / 65536.0f);
+                    ImGui::Text("DRAG: %.3f", entity->jdyn->DRAG / 65536.0f);
+                    ImGui::Text("WEIGHT: %d", entity->weight_in_kg);
+                    ImGui::Text("THRUST: %d", entity->thrust_in_newton);
+                    ImGui::Text("MAX G-LOAD: %d", entity->jdyn->MAX_G);
+                    ImGui::Text("ROLL: %d", entity->jdyn->ROLL_RATE);
+                    ImGui::Text("PITCH: %d", entity->jdyn->TWIST_RATE);
+                    ImGui::Text("WING AREA: %.3f", entity->wing_area);
+                    ImGui::TreePop();
+                }
+            }
+            if (entity->weaps.size() > 0) {
+                if (ImGui::TreeNode("Weapons")) {
+                    for (auto weap : entity->weaps) {
+                        ImGui::Text("Weapon: %s", weap->name.c_str());
+                        ImGui::Text("Numbers: %d", weap->nb_weap);
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            
+            ImGui::TreePop();
+        }
+    } else {
+        ImGui::Text("No object");
+    }
     if (actor->profile != nullptr) {
-        ImGui::Text("Name %s", actor->profile->radi.info.name.c_str());
-        ImGui::Text("CallSign %s", actor->profile->radi.info.callsign.c_str());
-        ImGui::Text("Is AI %d", actor->profile->ai.isAI);
-        if (ImGui::TreeNode("MSGS")) {
-            for (auto msg : actor->profile->radi.msgs) {
-                ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+        if (ImGui::TreeNode("Profile")) {
+            ImGui::Text("Name %s", actor->profile->radi.info.name.c_str());
+            ImGui::Text("CallSign %s", actor->profile->radi.info.callsign.c_str());
+            ImGui::Text("Is AI %d", actor->profile->ai.isAI);
+            if (ImGui::TreeNode("MSGS")) {
+                for (auto msg : actor->profile->radi.msgs) {
+                    ImGui::Text("- [%d]: %s", msg.first, msg.second.c_str());
+                }
+                ImGui::TreePop();
             }
-            ImGui::TreePop();
-        }
-        if (ImGui::TreeNode("ASKS")) {
-            for (auto msg : actor->profile->radi.asks) {
-                ImGui::Text("- [%s]: %s", msg.first.c_str(), msg.second.c_str());
+            if (ImGui::TreeNode("ASKS")) {
+                for (auto msg : actor->profile->radi.asks) {
+                    ImGui::Text("- [%s]: %s", msg.first.c_str(), msg.second.c_str());
+                }
+                ImGui::TreePop();
             }
-            ImGui::TreePop();
-        }
-        if (ImGui::TreeNode("AI MVRS")) {
-            for (auto ai : actor->profile->ai.mvrs) {
-                ImGui::Text("NODE [%d] - [%d]", ai.node_id, ai.value);
+            if (ImGui::TreeNode("AI MVRS")) {
+                for (auto ai : actor->profile->ai.mvrs) {
+                    ImGui::Text("NODE [%d] - [%d]", ai.node_id, ai.value);
+                }
+                ImGui::TreePop();
             }
-            ImGui::TreePop();
-        }
-        if (ImGui::TreeNode("AI GOAL")) {
-            for (auto goal : actor->profile->ai.goal) {
-                ImGui::Text("[%d]", goal);
+            if (ImGui::TreeNode("AI GOAL")) {
+                for (auto goal : actor->profile->ai.goal) {
+                    ImGui::Text("[%d]", goal);
+                }
+                ImGui::TreePop();
             }
-            ImGui::TreePop();
-        }
-        if (ImGui::TreeNode("AI ATRB")) {
-            ImGui::Text("TH %d", actor->profile->ai.atrb.TH);
-            ImGui::Text("CN %d", actor->profile->ai.atrb.CN);
-            ImGui::Text("VB %d", actor->profile->ai.atrb.VB);
-            ImGui::Text("LY %d", actor->profile->ai.atrb.LY);
-            ImGui::Text("FL %d", actor->profile->ai.atrb.FL);
-            ImGui::Text("AG %d", actor->profile->ai.atrb.AG);
-            ImGui::Text("AA %d", actor->profile->ai.atrb.AA);
-            ImGui::Text("SM %d", actor->profile->ai.atrb.SM);
-            ImGui::Text("AR %d", actor->profile->ai.atrb.AR);
-            ImGui::TreePop();
-        }
-        if (ImGui::TreeNode("Score")) {
-            ImGui::Text("Score %d", actor->score);
-            ImGui::Text("Plane %d", actor->plane_down);
-            ImGui::Text("Ground %d", actor->ground_down);
+            if (ImGui::TreeNode("AI ATRB")) {
+                ImGui::Text("TH %d", actor->profile->ai.atrb.TH);
+                ImGui::Text("CN %d", actor->profile->ai.atrb.CN);
+                ImGui::Text("VB %d", actor->profile->ai.atrb.VB);
+                ImGui::Text("LY %d", actor->profile->ai.atrb.LY);
+                ImGui::Text("FL %d", actor->profile->ai.atrb.FL);
+                ImGui::Text("AG %d", actor->profile->ai.atrb.AG);
+                ImGui::Text("AA %d", actor->profile->ai.atrb.AA);
+                ImGui::Text("SM %d", actor->profile->ai.atrb.SM);
+                ImGui::Text("AR %d", actor->profile->ai.atrb.AR);
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Score")) {
+                ImGui::Text("Score %d", actor->score);
+                ImGui::Text("Plane %d", actor->plane_down);
+                ImGui::Text("Ground %d", actor->ground_down);
+                ImGui::TreePop();
+            }
             ImGui::TreePop();
         }
     } else {
         ImGui::Text("Name %s", actor->actor_name.c_str());
         ImGui::Text("No profile");
     }
-    if (ImGui::TreeNode("On is activated")) {
+    if (ImGui::TreeNode("Progs")) {
         int cpt=0;
         if (actor->on_is_activated.size() > 0) {
-            if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_activated, "Prog %d", cpt)) {
-                printProgTable(actor->on_is_activated, nullptr);
+            if (ImGui::TreeNode("On is activated")) {
+                if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_activated, "Prog %d", cpt)) {
+                    printProgTable(actor->on_is_activated, nullptr);
+                    ImGui::TreePop();
+                    cpt++;
+                }
                 ImGui::TreePop();
             }
-            cpt++;
+            
         }
-        ImGui::TreePop();
-    }
-    if (ImGui::TreeNode("On update")) {
-        int cpt=0;
         if (actor->on_update.size() > 0) {
-            if (ImGui::TreeNode((void *)(intptr_t)&actor->on_update, "Prog %d", cpt)) {
-                printProgTable(actor->on_update, actor);
+            if (ImGui::TreeNode("On update")) {
+                if (ImGui::TreeNode((void *)(intptr_t)&actor->on_update, "Prog %d", cpt)) {
+                    printProgTable(actor->on_update, actor);
+                    ImGui::TreePop();
+                    cpt++;
+                }
+                
                 ImGui::TreePop();
             }
-            cpt++;
+            
         }
-        ImGui::TreePop();
-    }
-    if (ImGui::TreeNode("On is destroyed")) {
-        int cpt=0;
         if (actor->on_is_destroyed.size() > 0) {
-            if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_destroyed, "Prog %d", cpt)) {
-                printProgTable(actor->on_is_destroyed, nullptr);
+            if (ImGui::TreeNode("On is destroyed")) {
+                if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_destroyed, "Prog %d", cpt)) {
+                    printProgTable(actor->on_is_destroyed, nullptr);
+                    ImGui::TreePop();
+                    cpt++;
+                }
                 ImGui::TreePop();
             }
-            cpt++;
+            
+        }
+        if (actor->on_mission_start.size() > 0) {
+            if (ImGui::TreeNode("On mission start")) {      
+                if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_destroyed, "Prog %d", cpt)) {
+                    printProgTable(actor->on_is_destroyed, nullptr);
+                    ImGui::TreePop();
+                    cpt++;
+                }                
+                ImGui::TreePop();
+            }
+            
         }
         ImGui::TreePop();
     }
-    if (ImGui::TreeNode("On mission start")) {
-        int cpt=0;
-        if (actor->on_mission_start.size() > 0) {
-            if (ImGui::TreeNode((void *)(intptr_t)&actor->on_is_destroyed, "Prog %d", cpt)) {
-                printProgTable(actor->on_is_destroyed, nullptr);
-                ImGui::TreePop();
+    if (actor->plane != nullptr) {
+        if (ImGui::TreeNode("Plane")) {
+            ImGui::Text("Position: (%.2f, %.2f, %.2f)", actor->plane->x, actor->plane->y, actor->plane->z);
+            ImGui::Text("Yaw: %.2f", actor->plane->yaw);
+            ImGui::Text("Pitch: %.2f", actor->plane->pitch);
+            ImGui::Text("Roll: %.2f", actor->plane->roll);
+            ImGui::Text("Airspeed: %d", actor->plane->airspeed);
+            ImGui::Text("Altitude: %.0f", actor->plane->y);
+            if (actor->plane->weaps_load.size() > 0) {
+                if (ImGui::TreeNode("Weapons")) {
+                    for (auto weap: actor->plane->weaps_load) {
+                        if (weap) {
+                            ImGui::Text("Weapon: %s", weap->name.c_str());
+                            ImGui::Text("Ammo: %d", weap->nb_weap);
+                        }
+                    }
+                    ImGui::TreePop();
+                }
             }
-            cpt++;
+            ImGui::TreePop();
         }
-        ImGui::TreePop();
+    } else {
+        ImGui::Text("No plane");
     }
 }
 void DebugStrike::renderMenu() {
@@ -1370,13 +1434,6 @@ void DebugStrike::renderMenu() {
                         auto it = GameState.requierd_flags.begin();
                         for (auto op : *prog) {
                             ImGui::TableNextRow();
-                            /*ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
-                            if (it->second) {
-                                cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
-                            } else {
-                                cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
-                            }
-                            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);*/
                             ImGui::TableSetColumnIndex(0);
                             ImGui::Text("opcode:[%03d] %s ", op.opcode, prog_op_names[prog_op(op.opcode)].c_str());
                             ImGui::TableSetColumnIndex(1);
@@ -1607,16 +1664,55 @@ void DebugStrike::renderUI() {
                         ImGui::Text("Area ID: %d", this->debug_scene->area_id);
                         ImGui::Text("Is Active: %d", this->debug_scene->is_active);
                         ImGui::Text("Is Coord Relative to Area: %d", this->debug_scene->is_coord_on_area);
-                        ImGui::Text("Cast Count: %d", this->debug_scene->cast.size());
-                        for (auto cast : this->debug_scene->cast) {
-                            ImGui::Text("Cast %d", cast);
+                        if (this->debug_scene->cast.size() > 0) {
+                            if (ImGui::TreeNode("Cast Actors")) {
+                                for (auto cast_actor : this->debug_scene->cast) {
+                                    if (ImGui::TreeNode((void *)(intptr_t)cast_actor, "Cast Actor %d", cast_actor)) {
+                                        int i=0;
+                                        for (auto part: this->current_mission->mission->mission_data.parts) {
+                                            if (i == cast_actor) {
+                                                for (auto actor : this->current_mission->actors) {
+                                                    if (actor->actor_id == part->id) {
+                                                        showActorDetails(actor);
+                                                        break;
+                                                    }
+                                                }
+                                                break;
+                                            }
+                                            i++;
+                                        }
+                                        ImGui::TreePop();
+                                    }
+                                }
+                                ImGui::TreePop();
+                            }
                         }
-                        ImGui::Text("Prog Count: %d", this->debug_scene->progs_id.size());
+                        
+                        boolean has_progs = false;
                         for (auto prog : this->debug_scene->progs_id) {
-                            ImGui::Text("Prog %d", prog);
+                            if (prog != -1) {
+                                has_progs = true;
+                                break;
+                            }
                         }
-                        for (auto b: this->debug_scene->unknown_bytes) {
-                            ImGui::Text("ub %d", b);
+                        if (has_progs) {
+                            if (ImGui::TreeNode("Progs")) {
+                                for (auto prog : this->debug_scene->progs_id) {
+                                    if (prog != -1) {
+                                        ImGui::Text("Prog %d", prog);
+                                        std::vector<PROG>& p = *(this->current_mission->mission->mission_data.prog[prog]);
+                                        printProgTable(p, nullptr);
+                                    }
+                                    
+                                }
+                                ImGui::TreePop();
+                            }
+                        }
+                        if (ImGui::TreeNode("Unknown Bytes")) {
+                            for (auto b: this->debug_scene->unknown_bytes) {
+                                ImGui::Text("ub %d", b);
+                            }
+                            ImGui::TreePop();
                         }
                     } else {
                         ImGui::Text("No scene selected");
