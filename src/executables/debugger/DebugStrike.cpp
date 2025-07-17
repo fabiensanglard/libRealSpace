@@ -623,9 +623,9 @@ void printProgTable(std::vector<PROG> &prog, SCMissionActors *actor) {
             }
             ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
             if (executed) {
-                cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
+                cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.35f));
             } else {
-                cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
+                cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.35f));
             }
 
             ImGui::TableSetColumnIndex(0);
@@ -1478,7 +1478,80 @@ void DebugStrike::renderUI() {
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Missions Scripts")) {
+            ImGui::BeginChild("Working Registers", ImVec2(0, 400), true);
+            renderWorkingRegisters();
+            ImGui::EndChild();
+            ImGui::BeginChild("Progs", ImVec2(0, 0), true);
+            static int selectedProgIndex = 0;
+
+            ImGui::Text("Mission Programs");
+            ImGui::Separator();
+
+            // Get the list of progs
+            auto& progs = this->current_mission->mission->mission_data.prog;
+            std::vector<std::string> progLabels;
+
+            // Create labels for each prog
+            for (int i = 0; i < progs.size(); i++) {
+                progLabels.push_back("Program #" + std::to_string(i));
+            }
+
+            // Combo box for selecting a prog
+            if (ImGui::BeginCombo("Select Program", progLabels.empty() ? "No programs" : progLabels[selectedProgIndex].c_str())) {
+                for (int i = 0; i < progLabels.size(); i++) {
+                    bool isSelected = (selectedProgIndex == i);
+                    if (ImGui::Selectable(progLabels[i].c_str(), isSelected)) {
+                        selectedProgIndex = i;
+                    }
+
+                    if (isSelected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+
+            // Display the selected prog's contents
+            if (!progLabels.empty() && selectedProgIndex >= 0 && selectedProgIndex < progs.size()) {
+                ImGui::Separator();
+                ImGui::Text("Program #%d Operations", selectedProgIndex);
+                
+                // Using the existing printProgTable function to display the program
+                if (progs[selectedProgIndex]) {
+                    printProgTable(*progs[selectedProgIndex], nullptr);
+                } else {
+                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "Program is nullptr");
+                }
+            }
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
         // Additional tabs can be added here.
         ImGui::EndTabBar();
+    }
+}
+
+void DebugStrike::renderWorkingRegisters() {
+    static ImGuiTableFlags tableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+    
+    if (ImGui::BeginTable("Mission Flags", 2, tableFlags)) {
+        ImGui::TableSetupColumn("Flag Index");
+        ImGui::TableSetupColumn("Value");
+        ImGui::TableHeadersRow();
+        
+        int cpt_flags = 0;
+        for (auto flag : this->current_mission->mission->mission_data.flags) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("%d", cpt_flags);
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text("%d", flag);
+            if (flag != 0) {
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 0.0f, 0.5f)));
+            }
+            cpt_flags++;
+        }
+        ImGui::EndTable();
     }
 }

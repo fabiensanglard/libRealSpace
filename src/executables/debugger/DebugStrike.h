@@ -29,4 +29,5 @@ public:
     void setMission(std::string mission_name);
     void renderMenu();
     void renderUI() override;
+    void renderWorkingRegisters();
 };
