@@ -163,7 +163,7 @@ void SCJdynPlane::Simulate() {
     this->object->entity->position.z = this->z;
     if (this->object->alive == false) {
         this->smoke_positions.push_back({this->x, this->y, this->z});
-        if (this->smoke_positions.size() > 100) {
+        if (this->smoke_positions.size() > this->smoke_set->textures.size() - 1) {
             this->smoke_positions.erase(this->smoke_positions.begin());
         }
     }

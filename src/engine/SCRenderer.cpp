@@ -812,7 +812,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         }
     }
     
-
+    glDisable(GL_ALPHA_TEST);
     glDisable(GL_BLEND);
 }
 
@@ -1656,4 +1656,5 @@ void SCRenderer::drawBillboard(Vector3D pos, Texture *tex, float size) {
     glTexCoord2f(0.0f, 1.0f);
     glVertex3f(topLeft.x, topLeft.y, topLeft.z);
     glEnd();
+    glDisable(GL_ALPHA_TEST);
 }

@@ -299,7 +299,7 @@ void SCPlane::Simulate() {
     this->object->entity->position.z = this->z;
     if (this->object->alive == false) {
         this->smoke_positions.push_back({this->x, this->y, this->z});
-        if (this->smoke_positions.size() > 100) {
+        if (this->smoke_positions.size() > this->smoke_set->textures.size() - 1) {
             this->smoke_positions.erase(this->smoke_positions.begin());
         }
     }
@@ -911,9 +911,14 @@ void SCPlane::Render() {
 }
 void SCPlane::RenderSmoke() {
     int cpt = 0;
+    static int img_count[46] = {0};
+
     for (auto pos: this->smoke_positions) {
-        //Renderer.drawSprite(pos, this->smoke_set->textures[cpt%(this->smoke_set->textures.size()-1)], (this->smoke_positions.size()-cpt)/(1.0f*this->smoke_positions.size()));
-        Renderer.drawBillboard(pos, this->smoke_set->textures[cpt%(this->smoke_set->textures.size()-1)], 10*(this->smoke_positions.size()-cpt)/(1.0f*this->smoke_positions.size()));
+        img_count[cpt]++;
+        if (img_count[cpt] > this->smoke_set->textures.size()-1) {
+            img_count[cpt] = 0;
+        }
+        Renderer.drawBillboard(pos, this->smoke_set->textures[img_count[cpt]], 10*(this->smoke_positions.size()-cpt)/(1.0f*this->smoke_positions.size()));
         cpt++;
     }
 }
