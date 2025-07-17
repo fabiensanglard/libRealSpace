@@ -396,7 +396,8 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f);
     // Texture pass
     if (lodLevel == 0) {
         glEnable(GL_TEXTURE_2D);
@@ -1578,6 +1579,8 @@ void SCRenderer::drawBillboard(Vector3D pos, Texture *tex, float size) {
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
     glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
     glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f);
     
     // Initialize texture if needed
     if (!tex->initialized) {
