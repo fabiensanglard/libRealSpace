@@ -62,11 +62,13 @@ public:
     void drawModelWithChilds(RSEntity *object, size_t lodLevel, Vector3D position, Vector3D orientation,
                              int wheel_index, int thrust, std::vector<std::tuple<Vector3D, RSEntity *>> weaps_load);
     void drawModel(RSEntity *object, size_t lodLevel);
+    void drawBillboard(Vector3D pos, Texture *tex, float size);
     void displayModel(RSEntity *object, size_t lodLevel);
 
     void createTextureInGPU(Texture *texture);
     void uploadTextureContentToGPU(Texture *texture);
     void deleteTextureInGPU(Texture *texture);
+
 
     VGAPalette *getPalette(void);
 
@@ -85,6 +87,7 @@ public:
     void renderObjects(RSArea *area, size_t blockID);
     void renderLineCube(Vector3D position, int32_t size);
     void renderBBox(Vector3D position, Point3D min, Point3D max);
+    
     Camera *getCamera(void);
 
     void setLight(Point3D *position);
@@ -100,6 +103,7 @@ public:
     void initRenderToTexture();
     void getRenderToTexture();
     void initRenderCameraView();
+
     int32_t width;
     int32_t height;
 private:

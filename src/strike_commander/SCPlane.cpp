@@ -912,7 +912,8 @@ void SCPlane::Render() {
 void SCPlane::RenderSmoke() {
     int cpt = 0;
     for (auto pos: this->smoke_positions) {
-        Renderer.drawSprite(pos, this->smoke_set->textures[cpt%(this->smoke_set->textures.size()-1)], (this->smoke_positions.size()-cpt)/(1.0f*this->smoke_positions.size()));
+        //Renderer.drawSprite(pos, this->smoke_set->textures[cpt%(this->smoke_set->textures.size()-1)], (this->smoke_positions.size()-cpt)/(1.0f*this->smoke_positions.size()));
+        Renderer.drawBillboard(pos, this->smoke_set->textures[cpt%(this->smoke_set->textures.size()-1)], 10*(this->smoke_positions.size()-cpt)/(1.0f*this->smoke_positions.size()));
         cpt++;
     }
 }

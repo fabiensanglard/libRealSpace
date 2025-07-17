@@ -1568,3 +1568,89 @@ void SCRenderer::renderWorldByID(RSArea *area, int LOD, int verticesPerBlock, in
     renderObjects(area, blockId);
     glPopMatrix();
 }
+
+void SCRenderer::drawBillboard(Vector3D pos, Texture *tex, float size) {
+    if (!initialized || tex == nullptr)
+        return;
+    
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
+    glEnable(GL_BLEND);
+    
+    // Initialize texture if needed
+    if (!tex->initialized) {
+        glGenTextures(1, &tex->id);
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)tex->width, (GLsizei)tex->height, 
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, tex->data);
+        
+        tex->initialized = true;
+    } else {
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+    }
+    
+    // Get camera position
+    Point3D cameraPos = camera.GetPosition();
+    
+    // Calculate billboard vectors
+    Vector3D look, right, up;
+    
+    // Look vector points from billboard to camera
+    look.x = cameraPos.x - pos.x;
+    look.y = cameraPos.y - pos.y;
+    look.z = cameraPos.z - pos.z;
+    look.Normalize();
+    
+    // Right vector is perpendicular to look and global up
+    Vector3D globalUp = {0.0f, 1.0f, 0.0f};
+    right = globalUp.CrossProduct(&look);
+    right.Normalize();
+    
+    // Up vector completes the orthogonal basis
+    up = look.CrossProduct(&right);
+    
+    // Calculate the corners of the billboard quad
+    float halfSize = size * 0.5f;
+    
+    Vector3D bottomLeft, bottomRight, topRight, topLeft;
+    
+    bottomLeft.x = pos.x - right.x * halfSize - up.x * halfSize;
+    bottomLeft.y = pos.y - right.y * halfSize - up.y * halfSize;
+    bottomLeft.z = pos.z - right.z * halfSize - up.z * halfSize;
+    
+    bottomRight.x = pos.x + right.x * halfSize - up.x * halfSize;
+    bottomRight.y = pos.y + right.y * halfSize - up.y * halfSize;
+    bottomRight.z = pos.z + right.z * halfSize - up.z * halfSize;
+    
+    topRight.x = pos.x + right.x * halfSize + up.x * halfSize;
+    topRight.y = pos.y + right.y * halfSize + up.y * halfSize;
+    topRight.z = pos.z + right.z * halfSize + up.z * halfSize;
+    
+    topLeft.x = pos.x - right.x * halfSize + up.x * halfSize;
+    topLeft.y = pos.y - right.y * halfSize + up.y * halfSize;
+    topLeft.z = pos.z - right.z * halfSize + up.z * halfSize;
+    
+    // Draw the billboard quad
+    glBegin(GL_QUADS);
+    glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+    
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
+    
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
+    
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(topRight.x, topRight.y, topRight.z);
+    
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(topLeft.x, topLeft.y, topLeft.z);
+    glEnd();
+}
