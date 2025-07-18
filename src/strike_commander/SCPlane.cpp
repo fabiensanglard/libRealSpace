@@ -1076,7 +1076,9 @@ void SCPlane::InitLoadout() {
                         (float) this->object->entity->hpts[hpt_id]->z
                     };
                     weap->hud_pos = {0, 0};
-                    this->weaps_load[hpt_id] = weap;
+                    if (hpt_id < this->weaps_load.size()) {
+                        this->weaps_load[hpt_id] = weap;
+                    }
 
                     int second_hpt_id = (int)this->object->entity->hpts.size()-hpt_id;
                     weap = new SCWeaponLoadoutHardPoint();
@@ -1090,7 +1092,9 @@ void SCPlane::InitLoadout() {
                         (float) this->object->entity->hpts[second_hpt_id]->z
                     };
                     weap->hud_pos = {0, 0};
-                    this->weaps_load[second_hpt_id] = weap;
+                    if (second_hpt_id < this->weaps_load.size()) {
+                        this->weaps_load[second_hpt_id] = weap;
+                    }
                     nbwep -= weap->nb_weap;
                 }
             }

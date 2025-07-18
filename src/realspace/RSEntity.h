@@ -15,6 +15,7 @@
 #include "../commons/Maths.h"
 #include "../commons/Matrix.h"
 #include "../commons/Quaternion.h"
+#include "RSSmokeSet.h"
 #include "RSImage.h"
 #include "TreArchive.h"
 #include "../commons/LZBuffer.h"
@@ -201,7 +202,8 @@ public:
     bool gravity{false};
     float wing_area{0};
     JDYN *jdyn{nullptr};
-
+    std::string smoke_set_name;
+    RSSmokeSet *smoke_set{nullptr};
     uint16_t life{0};
     std::map<std::string, std::map<std::string, uint16_t>> sysm;
     // For rendering

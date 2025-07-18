@@ -11,6 +11,7 @@
 
 #include "precomp.h"
 
+
 struct HudLine {
     Point2D start;
     Point2D end;
@@ -34,7 +35,7 @@ private:
     RSFont *font;
     RSFont *big_font;
     int radio_mission_timer{0};
-    
+    FrameBuffer *hud_framebuffer{nullptr};
 public:
     RSCockpit* cockpit;
     RSHud* hud;

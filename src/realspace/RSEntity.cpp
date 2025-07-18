@@ -285,7 +285,9 @@ void RSEntity::parseREAL_OBJT_MISS(uint8_t *data, size_t size) {
 void RSEntity::parseREAL_OBJT_MISS_EXPL(uint8_t *data, size_t size){}
 void RSEntity::parseREAL_OBJT_MISS_SIGN(uint8_t *data, size_t size){}
 void RSEntity::parseREAL_OBJT_MISS_TRGT(uint8_t *data, size_t size){}
-void RSEntity::parseREAL_OBJT_MISS_SMOK(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_SMOK(uint8_t *data, size_t size){
+    
+}
 void RSEntity::parseREAL_OBJT_MISS_DAMG(uint8_t *data, size_t size){}
 void RSEntity::parseREAL_OBJT_MISS_WDAT(uint8_t *data, size_t size){
     WDAT *wdat = new WDAT();
@@ -470,7 +472,9 @@ void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
 }
 void RSEntity::parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_SMOK(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_SMOK(uint8_t *data, size_t size) {
+    
+}
 void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {
     size_t nb_child = size /32;
     ByteStream bs(data);

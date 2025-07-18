@@ -591,7 +591,9 @@ void SCCockpit::RenderMFDSWeapon(Point2D pmfd_right) {
                     pmfd_right_weapon_hp.y + s_height + 6};
                 VGA.GetFrameBuffer()->PrintText(this->big_font, &pmfd_right_weapon_hp_text, (char *)txt.c_str(), 0, 0, (uint32_t) txt.length(), 2, 2);
             }
-            
+            if (this->player_plane->weaps_load[9-indice] == nullptr) {
+                continue;
+            }
             nb_weap = this->player_plane->weaps_load[9-indice]->nb_weap;
             selected = 9-indice == this->player_plane->selected_weapon;
             shape = this->cockpit->MONI.MFDS.WEAP.ARTS.GetShape(weapons_shape[weapon_id]+selected);

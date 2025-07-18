@@ -677,6 +677,12 @@ void DebugStrike::showActorDetails(SCMissionActors *actor) {
                     ImGui::TreePop();
                 }
             }
+            if (entity->smoke_set_name.size() > 0) {
+                if (ImGui::TreeNode("SMOK")) {
+                    ImGui::Text("Smoke set name: %s", entity->smoke_set_name.c_str());
+                    ImGui::TreePop();
+                }
+            }
             ImGui::TreePop();
         }
     } else {
