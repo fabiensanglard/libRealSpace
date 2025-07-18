@@ -644,6 +644,13 @@ void DebugStrike::showActorDetails(SCMissionActors *actor) {
         if (ImGui::TreeNode("Object")) {
             RSEntity *entity = actor->object->entity;
             ImGui::Text("Name: %s", actor->object->member_name.c_str());
+            if (entity->explos != nullptr) {
+                if (ImGui::TreeNode("Explosion")) {
+                    ImGui::Text("Explosion: %s", entity->explos->name.c_str());
+                    ImGui::Text("X %d, Y%d", entity->explos->x, entity->explos->y);
+                    ImGui::TreePop();
+                }
+            }
             if (entity->jdyn != nullptr) {
                 if (ImGui::TreeNode("JDYN")) {
                     ImGui::Text("LIFT: %.3f", entity->jdyn->LIFT / 65536.0f);
@@ -657,16 +664,19 @@ void DebugStrike::showActorDetails(SCMissionActors *actor) {
                     ImGui::TreePop();
                 }
             }
-            if (entity->weaps.size() > 0) {
-                if (ImGui::TreeNode("Weapons")) {
-                    for (auto weap : entity->weaps) {
-                        ImGui::Text("Weapon: %s", weap->name.c_str());
-                        ImGui::Text("Numbers: %d", weap->nb_weap);
+            if (entity->sysm.size() > 0) {
+                if (ImGui::TreeNode("SYSM")) {
+                    for (auto& sys_pair : entity->sysm) {
+                        if (ImGui::TreeNode(sys_pair.first.c_str())) {
+                            for (auto& sys : sys_pair.second) {
+                                ImGui::Text("Name: %s, pv %d", sys.first.c_str(), sys.second);
+                            }
+                            ImGui::TreePop();
+                        }
                     }
                     ImGui::TreePop();
                 }
             }
-
             ImGui::TreePop();
         }
     } else {

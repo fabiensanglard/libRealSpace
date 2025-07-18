@@ -466,6 +466,7 @@ void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
     if (entry != nullptr) {
         expl->objct->InitFromRAM(entry->data, entry->size);
     }
+    this->explos = expl;
 }
 void RSEntity::parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size) {}
@@ -650,7 +651,11 @@ void RSEntity::parseREAL_OBJT_JETP_WEAP_HPTS(uint8_t *data, size_t size) {
     }
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG(uint8_t *data, size_t size) {
-    
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["SYSM"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG_SYSM, this, std::placeholders::_1, std::placeholders::_2);
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG_SYSM(uint8_t *data, size_t size) {
     ByteStream bs(data);
