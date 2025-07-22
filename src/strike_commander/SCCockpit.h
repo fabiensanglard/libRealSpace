@@ -19,27 +19,29 @@ struct HudLine {
 
 class SCCockpit {
 private:
-    VGAPalette palette;
+    
     std::vector<HudLine> horizon;
-    void RenderHudHorizonLinesSmall();
-    void RenderAltitude();
+    void RenderHudHorizonLinesSmall(Point2D center, FrameBuffer *fb);
+    void RenderAltitude(Point2D alti_arrow, FrameBuffer *fb);
     void RenderTargetWithCam();
     void RenderTargetingReticle();
     void RenderBombSight();
-    void RenderHeading();
-    void RenderSpeed();
-    void RenderMFDS(Point2D mfds);
-    void RenderMFDSWeapon(Point2D pmfd_right);
-    void RenderMFDSRadar(Point2D pmfd_left, float range, int mode);
-    void RenderMFDSComm(Point2D pmfd_left, int mode);
+    void RenderHeading(Point2D heading_pos, FrameBuffer *fb);
+    void RenderSpeed(Point2D heading_pos, FrameBuffer *fb);
+    void RenderMFDS(Point2D mfds, FrameBuffer *fb);
+    
+    
     RSFont *font;
     RSFont *big_font;
     int radio_mission_timer{0};
-    FrameBuffer *hud_framebuffer{nullptr};
+    
 public:
+    VGAPalette palette;
     RSCockpit* cockpit;
     RSHud* hud;
-    
+    FrameBuffer *hud_framebuffer{nullptr};
+    FrameBuffer *mfd_right_framebuffer{nullptr};
+    FrameBuffer *mfd_left_framebuffer{nullptr};
     float pitch{0.0f};
     float roll{0.0f};
     float yaw{0.0f};
@@ -81,5 +83,9 @@ public:
     void init( );
     void Update();
     void Render(int face);
+    void RenderHUD();
+    void RenderMFDSWeapon(Point2D pmfd_right, FrameBuffer *fb);
+    void RenderMFDSRadar(Point2D pmfd_left, float range, int mode, FrameBuffer *fb);
+    void RenderMFDSComm(Point2D pmfd_left, int mode, FrameBuffer *fb);
 };
 #endif

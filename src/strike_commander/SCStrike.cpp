@@ -1041,11 +1041,70 @@ void SCStrike::runFrame(void) {
         cockpit_pos.x = this->camera->GetPosition().x;
         cockpit_pos.y = this->camera->GetPosition().y;
         cockpit_pos.z = this->camera->GetPosition().z;
+        this->cockpit->RenderHUD();
 
         Vector3D cockpit_rot = {(this->player_plane->azimuthf+900)/10.0f, this->player_plane->elevationf/10.0f, -this->player_plane->twist/10.0f};
         Vector3D cockpit_ajustement = { 0.0f,-3.0f,0.0f};
-
+        Texture *hud_texture = new Texture();
+        RSImage *hud_image = new RSImage();
+        hud_image->palette = &this->cockpit->palette;
+        hud_image->data = this->cockpit->hud_framebuffer->framebuffer;
+        hud_image->width = this->cockpit->hud_framebuffer->width;
+        hud_image->height = this->cockpit->hud_framebuffer->height;
+        hud_texture->Set(hud_image);
+        hud_texture->UpdateContent(hud_image);
         Renderer.drawModel(this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX, cockpit_pos, cockpit_rot, cockpit_ajustement);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {5.0f, 1.8f, -1.0f}, 
+                {5.0f, 1.8f, 1.0f},
+                {5.0f, -0.8f, 1.0f},
+                {5.0f, -0.8f, -1.0f}
+            },
+            hud_texture
+        );
+        Texture *mfd_right_texture = new Texture();
+        RSImage *mfd_right_image = new RSImage();
+        mfd_right_image->palette = &this->cockpit->palette;
+        cockpit->RenderMFDSWeapon({0,0}, cockpit->mfd_right_framebuffer);
+        mfd_right_image->data = this->cockpit->mfd_right_framebuffer->framebuffer;
+        mfd_right_image->width = this->cockpit->mfd_right_framebuffer->width;
+        mfd_right_image->height = this->cockpit->mfd_right_framebuffer->height;
+        mfd_right_texture->Set(mfd_right_image);
+        mfd_right_texture->UpdateContent(mfd_right_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.2f, -2.5f, -3.0f}, 
+                {6.2f, -2.5f, -1.15f},
+                {6.1f, -4.4f, -1.15f},
+                {6.1f, -4.4f, -3.0f}
+            },
+            mfd_right_texture
+        );
+        cockpit->RenderMFDSRadar({0,0}, cockpit->radar_zoom*20000.0f, 0, cockpit->mfd_left_framebuffer);
+        Texture *mfd_left_texture = new Texture();
+        RSImage *mfd_left_image = new RSImage();
+        mfd_left_image->palette = &this->cockpit->palette;
+        mfd_left_image->data = this->cockpit->mfd_left_framebuffer->framebuffer;
+        mfd_left_image->width = this->cockpit->mfd_left_framebuffer->width;
+        mfd_left_image->height = this->cockpit->mfd_left_framebuffer->height;
+        mfd_left_texture->Set(mfd_left_image);
+        mfd_left_texture->UpdateContent(mfd_left_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.2f, -2.5f, 1.15f}, 
+                {6.2f, -2.5f, 3.0f},
+                {6.1f, -4.4f, 3.0f},
+                {6.1f, -4.4f, 1.15f}
+            },
+            mfd_left_texture
+        );
 
         break;
     }

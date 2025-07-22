@@ -64,11 +64,11 @@ public:
     void drawModel(RSEntity *object, size_t lodLevel);
     void drawBillboard(Vector3D pos, Texture *tex, float size);
     void displayModel(RSEntity *object, size_t lodLevel);
-
+     
     void createTextureInGPU(Texture *texture);
     void uploadTextureContentToGPU(Texture *texture);
     void deleteTextureInGPU(Texture *texture);
-
+    void drawTexturedQuad(Vector3D pos, Vector3D orientation,  std::vector<Vector3D> quad, Texture *tex);
 
     VGAPalette *getPalette(void);
 

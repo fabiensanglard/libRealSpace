@@ -110,6 +110,51 @@ void SCRenderer::deleteTextureInGPU(Texture *texture) {
     glDeleteTextures(1, &texture->id);
 }
 
+void SCRenderer::drawTexturedQuad(Vector3D pos, Vector3D orientation, std::vector<Vector3D> quad, Texture *tex) {
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
+    glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f);
+
+    if (!tex->initialized) {
+        glGenTextures(1, &tex->id);
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)tex->width, (GLsizei)tex->height, 
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, tex->data);
+        
+        tex->initialized = true;
+    } else {
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+    }
+    
+    glPushMatrix();
+    glTranslatef(pos.x, pos.y, pos.z);
+    glRotatef(orientation.x, 0, 1, 0);
+    glRotatef(orientation.y, 0, 0, 1);
+    glRotatef(orientation.z, 1, 0, 0);
+    glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(quad[0].x, quad[0].y, quad[0].z);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(quad[1].x, quad[1].y, quad[1].z);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(quad[2].x, quad[2].y, quad[2].z);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(quad[3].x, quad[3].y, quad[3].z);
+    glEnd();
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+}
+
 void SCRenderer::getNormal(RSEntity *object, Triangle *triangle, Vector3D *normal) {
     // Calculate the normal for this triangle
     Vector3D edge1;

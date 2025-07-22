@@ -15,13 +15,15 @@
 #include "../commons/Maths.h"
 #include "../commons/Matrix.h"
 #include "../commons/Quaternion.h"
-#include "RSSmokeSet.h"
 #include "RSImage.h"
+
 #include "TreArchive.h"
 #include "../commons/LZBuffer.h"
 #define LOD_LEVEL_MAX 0
 #define LOD_LEVEL_MED 1
 #define LOD_LEVEL_MIN 2
+
+class RSImageSet;
 
 typedef struct MapVertex {
     Point3D v;
@@ -202,13 +204,12 @@ public:
     bool gravity{false};
     float wing_area{0};
     JDYN *jdyn{nullptr};
-    std::string smoke_set_name;
-    RSSmokeSet *smoke_set{nullptr};
     uint16_t life{0};
     std::map<std::string, std::map<std::string, uint16_t>> sysm;
     // For rendering
     Point3D position;
     Quaternion orientation;
+    std::vector<RSImageSet *> images_set;
 
     // Has the entity been sent to te GPU and is ready to be renderer.
 
@@ -246,6 +247,8 @@ private:
     void parseREAL_OBJT_ORNT(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS(uint8_t *data, size_t size);
     void parseREAL_OBJT_AFTB(uint8_t *data, size_t size);
+    void parseREAL_OBJT_EXPL(uint8_t *data, size_t size);
+    void parseREAL_OBJT_SMKG(uint8_t *data, size_t size);
     void parseREAL_OBJT_AFTB_APPR(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_EXPL(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_SIGN(uint8_t *data, size_t size);
@@ -304,4 +307,9 @@ private:
     void parseREAL_APPR_POLY_QUAD(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_QUAD_FACE(uint8_t *data, size_t size);
     void parseREAL_APPR_POLY_QUAD_MAPS(uint8_t *data, size_t size);
+
+    void parseREAL_APPR_ANIM(uint8_t *data, size_t size);
+    void parseREAL_APPR_ANIM_INFO(uint8_t *data, size_t size);
+    void parseREAL_APPR_ANIM_SEQU(uint8_t *data, size_t size);
+    void parseREAL_APPR_ANIM_SHAP(uint8_t *data, size_t size);
 };
