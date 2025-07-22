@@ -129,7 +129,12 @@ enum PilotsId {
     VIXEN=6,
     HAWK=7
 };
-
+enum RadarMode {
+    AARD,
+    AGRD,
+    ASST,
+    AFRD
+};
 static std::map<uint8_t, std::string> pilot_names = {
     {1, "PRIMETIME"},
     {2, "PHOENIX"},

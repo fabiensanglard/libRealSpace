@@ -144,7 +144,6 @@ protected:
     bool follow_dynamic{false};
     int music{2};
     RSEntity * loadWeapon(std::string name);
-
 public:
     /**
      * @brief Constructor

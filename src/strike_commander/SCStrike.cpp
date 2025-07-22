@@ -1085,7 +1085,7 @@ void SCStrike::runFrame(void) {
             },
             mfd_right_texture
         );
-        cockpit->RenderMFDSRadar({0,0}, cockpit->radar_zoom*20000.0f, 0, cockpit->mfd_left_framebuffer);
+        cockpit->RenderMFDSRadar({0,0}, cockpit->radar_zoom*20000.0f, this->cockpit->radar_mode, cockpit->mfd_left_framebuffer);
         Texture *mfd_left_texture = new Texture();
         RSImage *mfd_left_image = new RSImage();
         mfd_left_image->palette = &this->cockpit->palette;

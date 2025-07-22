@@ -1171,6 +1171,9 @@ void SCPlane::renderPlaneLined() {
         std::vector<Point2Df> wing_surface_points;
         for (int i=0; i < this->object->entity->lods[LOD_LEVEL_MAX].numTriangles; i++) {
             int triangle_id = this->object->entity->lods[LOD_LEVEL_MAX].triangleIDs[i];
+            if (triangle_id < 0 || triangle_id >= this->object->entity->triangles.size()) {
+                continue; // Skip invalid triangle IDs
+            }
             Triangle triangle = this->object->entity->triangles[triangle_id];
             
             for (auto id : triangle.ids) {
@@ -1209,6 +1212,9 @@ void SCPlane::renderPlaneLined() {
 
         for (int i=0; i < this->object->entity->lods[LOD_LEVEL_MAX].numTriangles; i++) {
             int triangle_id = this->object->entity->lods[LOD_LEVEL_MAX].triangleIDs[i];
+            if (triangle_id < 0 || triangle_id >= this->object->entity->triangles.size()) {
+                continue; // Skip invalid triangle IDs
+            }
             Vector3D v0,v1,v2;
             v0  = this->object->entity->vertices[this->object->entity->triangles[triangle_id].ids[0]];
             v1  = this->object->entity->vertices[this->object->entity->triangles[triangle_id].ids[1]];

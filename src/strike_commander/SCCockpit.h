@@ -29,7 +29,7 @@ private:
     void RenderHeading(Point2D heading_pos, FrameBuffer *fb);
     void RenderSpeed(Point2D heading_pos, FrameBuffer *fb);
     void RenderMFDS(Point2D mfds, FrameBuffer *fb);
-    
+    void RenderMFDSRadarImplementation(Point2D pmfd_left, float range, const char* mode_name, bool air_mode, FrameBuffer *fb);
     
     RSFont *font;
     RSFont *big_font;
@@ -63,7 +63,7 @@ public:
     bool show_damage{false};
     bool show_comm{false};
     bool show_cam{false};
-
+    RadarMode radar_mode{RadarMode::AARD};
     int radar_zoom{1};
     int throttle{0};
     int comm_target{0};
