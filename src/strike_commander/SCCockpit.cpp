@@ -755,8 +755,16 @@ void SCCockpit::RenderMFDSRadarImplementation(Point2D pmfd_left, float range, co
 
     // Affiche les infos textuelles
     Point2D pmfd_text = {radar_bg_pos.x + 10, radar_bg_pos.y + 2};
+    std::string rzoom_str = "10";
+    switch (this->radar_zoom) {
+        case 1: rzoom_str = "10"; break;
+        case 2: rzoom_str = "20"; break;
+        case 3: rzoom_str = "40"; break;
+        case 4: rzoom_str = "80"; break;
+        default: rzoom_str = "10"; break;
+    }
     fb->PrintText(this->big_font, &pmfd_text, 
-                 (char *)std::to_string(80 * ((float)this->radar_zoom / 4.0f)).c_str(), 0, 0, 2, 2, 2);
+                 (char *)rzoom_str.c_str(), 0, 0, 2, 2, 2);
     
     std::string mode_text = " " + std::string(mode_name) + " ";
     fb->PrintText(this->big_font, &pmfd_text, const_cast<char *>(mode_text.c_str()), 0, 0, mode_text.length(), 2, 2);
@@ -980,7 +988,21 @@ void SCCockpit::Render(int face) {
                 } else {
                     pmfd = pmfd_right;
                 }
-                this->RenderMFDSRadar(pmfd, this->radar_zoom * 20000.0f, this->radar_mode);
+                float range = 0.0f;
+                switch (this->radar_zoom) {
+                case 1:
+                    range = 18520.0f;
+                    break;
+                case 2:
+                    range = 18520.0f * 2.0f;
+                case 3:
+                    range = 18520.0f * 4.0f;
+                    break;
+                case 4:
+                    range = 18520.0f * 8.0f;
+                    break;    
+                }
+                this->RenderMFDSRadar(pmfd, range, this->radar_mode);
             }
             if (this->show_weapons) {
                 if (!mfds) {
