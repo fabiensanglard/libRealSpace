@@ -85,7 +85,7 @@ void SCCockpit::init() {
         line.end.y   = 0 + i * 20;
         horizon.push_back(line);
     }
-    hud_framebuffer       = new FrameBuffer(92, 88);
+    hud_framebuffer       = new FrameBuffer(96, 93);
     mfd_right_framebuffer = new FrameBuffer(115, 95);
     mfd_left_framebuffer  = new FrameBuffer(115, 95);
     this->font            = FontManager.GetFont("..\\..\\DATA\\FONTS\\SHUDFONT.SHP");
@@ -109,7 +109,7 @@ void SCCockpit::RenderAltitude(Point2D alti_top_left = {185, 30}, FrameBuffer *f
 
     std::vector<Point2D> alti_band_roll;
     float alti_in_feet = this->altitude * 3.28084f; // Convert meters to feet
-    Point2D alti_size  = {20, 40};
+    Point2D alti_size  = {20, 35};
 
     Point2D bottom_right = {alti_top_left.x + alti_size.x, alti_top_left.y + alti_size.y};
 
@@ -137,18 +137,16 @@ void SCCockpit::RenderAltitude(Point2D alti_top_left = {185, 30}, FrameBuffer *f
             this->hud->small_hud->ALTI->SHAP, alti_top_left.x, bottom_right.x, alti_top_left.y - 10, bottom_right.y - 10
         );
     }
-
+    Point2D alti_arrow = {alti_top_left.x-3, alti_top_left.y + alti_size.y / 2};
+    fb->line(
+        alti_arrow.x, alti_arrow.y, alti_arrow.x + 1, alti_arrow.y, 223
+    );
+    alti_arrow.y -= this->hud->small_hud->ALTI->SHP2->GetHeight() / 2;
+    this->hud->small_hud->ALTI->SHP2->SetPosition(&alti_arrow);
+    fb->DrawShape(this->hud->small_hud->ALTI->SHP2);
     Point2D alti_text = {alti_top_left.x, alti_top_left.y + 5 + this->hud->small_hud->ALTI->SHAP->GetHeight()};
     fb->PrintText(this->font, &alti_text, (char *)std::to_string(alti_in_feet).c_str(), 0, 0, 5, 2, 2);
 
-    Point2D gear = {alti_top_left.x, alti_text.y + 5};
-    if (this->gear) {
-        fb->PrintText(this->font, &gear, const_cast<char *>("GEARS"), 0, 0, 5, 2, 2);
-    }
-    Point2D break_text = {alti_top_left.x, gear.y + 5};
-    if (this->airbrake) {
-        fb->PrintText(this->font, &break_text, const_cast<char *>("BREAKS"), 0, 0, 6, 2, 2);
-    }
 }
 /**
  * Renders the heading indicator in the cockpit view.
@@ -242,7 +240,7 @@ void SCCockpit::RenderHeading(Point2D heading_pos = {136, 90}, FrameBuffer *fb =
 }
 void SCCockpit::RenderSpeed(Point2D speed_top_left = {115, 30}, FrameBuffer *fb = VGA.GetFrameBuffer()) {
     std::vector<Point2D> speed_band_roll;
-    Point2D speed_band_size = {20, 40};
+    Point2D speed_band_size = {20, 35};
     Point2D bottom_right    = {speed_top_left.x + speed_band_size.x, speed_top_left.y + speed_band_size.y};
 
     std::string txt;
@@ -275,17 +273,10 @@ void SCCockpit::RenderSpeed(Point2D speed_top_left = {115, 30}, FrameBuffer *fb 
         }
         cpt_speed -= 10;
     }
-
-    Point2D speed_text = {125, 35 + this->hud->small_hud->ASPD->SHAP->GetHeight()};
-    txt                = std::to_string((int)this->speed);
-    fb->PrintText(this->font, &speed_text, (char *)txt.c_str(), 0, 0, (uint32_t)txt.length(), 2, 2);
-    Point2D throttle_text = {125, speed_text.y + 5};
-    txt                   = std::to_string(this->throttle);
-    fb->PrintText(this->font, &throttle_text, (char *)txt.c_str(), 0, 0, (uint32_t)txt.length(), 2, 2);
-    Point2D flaps = {125, throttle_text.y + 5};
-    if (this->flaps) {
-        fb->PrintText(this->font, &flaps, const_cast<char *>("FLAPS"), 0, 0, 5, 2, 2);
-    }
+    Point2D speed_arrow = {bottom_right.x, speed_top_left.y + speed_band_size.y / 2};
+    fb->line(
+        speed_arrow.x-3, speed_arrow.y, speed_arrow.x, speed_arrow.y, 223
+    );
 }
 /**
  * SCCockpit::RenderHudHorizonLinesSmall
@@ -514,8 +505,8 @@ void SCCockpit::RenderBombSight() {
     float thrustMagnitude = -planeSpeed;
     thrustMagnitude       = -planeSpeed * 15.0f; // coefficient ajustable
 
-    float yawRad   = tenthOfDegreeToRad(this->player_plane->azimuthf);
-    float pitchRad = tenthOfDegreeToRad(-this->player_plane->elevationf);
+    float yawRad   = tenthOfDegreeToRad(this->player_plane->yaw);
+    float pitchRad = tenthOfDegreeToRad(-this->player_plane->pitch);
     float rollRad  = tenthOfDegreeToRad(-this->player_plane->roll);
     float cosRoll  = cosf(rollRad);
     float sinRoll  = sinf(rollRad);
@@ -767,7 +758,7 @@ void SCCockpit::RenderMFDSRadarImplementation(Point2D pmfd_left, float range, co
                  (char *)rzoom_str.c_str(), 0, 0, 2, 2, 2);
     
     std::string mode_text = " " + std::string(mode_name) + " ";
-    fb->PrintText(this->big_font, &pmfd_text, const_cast<char *>(mode_text.c_str()), 0, 0, mode_text.length(), 2, 2);
+    fb->PrintText(this->big_font, &pmfd_text, const_cast<char *>(mode_text.c_str()), 0, 0, (int) mode_text.length(), 2, 2);
     
     // Affiche le "360" uniquement en mode air
     if (air_mode) {
@@ -866,6 +857,51 @@ void SCCockpit::RenderMFDSRadarImplementation(Point2D pmfd_left, float range, co
     }
 }
 
+void SCCockpit::RenderRAWS(Point2D pmfd_left = {84,112}, FrameBuffer *fb = VGA.GetFrameBuffer()) {
+    Point2D raws_size = {
+        this->cockpit->MONI.INST.RAWS.NORM.GetWidth(), 
+        this->cockpit->MONI.INST.RAWS.NORM.GetHeight()
+    };
+    Point2D bottom_right = {
+        pmfd_left.x + raws_size.x, pmfd_left.y + raws_size.y
+    };
+    this->cockpit->MONI.INST.RAWS.NORM.SetPosition(&pmfd_left);
+    fb->DrawShape(&this->cockpit->MONI.INST.RAWS.NORM);
+    int heading = (int)this->heading;
+    heading = (heading + 360) % 360;  // Normalisation entre 0-359
+    float headingRad = heading / 180.0f * (float)M_PI;
+
+    for (auto contact: this->current_mission->actors) {
+        if (contact->is_active && contact->object->entity->entity_type == EntityType::jet) {
+            Vector2D contact_pos = {contact->object->position.x, contact->object->position.z};
+            Vector2D center      = {this->player->position.x, this->player->position.z};
+            Vector2D roa_dir     = {contact_pos.x - center.x, contact_pos.y - center.y};
+            
+            float distance = roa_dir.Length();
+            roa_dir.Normalize();
+            const float max_range = 30000.0f; // 30 km
+            if (distance < max_range) {
+                float scale = 10.0f;
+                scale = (distance / max_range ) * this->cockpit->MONI.INST.RAWS.NORM.GetWidth()/2; // Ajustement de l'échelle
+                Point2D p = {
+                    (int)(roa_dir.x * scale),
+                    (int)(roa_dir.y * scale)
+                };
+                Point2D rotatedPos = rotateAroundPoint(p, {0,0}, headingRad);
+                Point2D raw_pos = {
+                    pmfd_left.x + (raws_size.x/2) + rotatedPos.x, 
+                    pmfd_left.y + (raws_size.y/2) + rotatedPos.y 
+                };
+                this->cockpit->MONI.INST.RAWS.SYMB.GetShape(29)->SetPosition(&raw_pos);
+                fb->DrawShape(
+                    this->cockpit->MONI.INST.RAWS.SYMB.GetShape(29)
+                );
+                //fb->plot_pixel((int)p.x, (int)p.y, 223);
+            }
+        }
+    }
+}
+
 void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode, FrameBuffer *fb = VGA.GetFrameBuffer()) {
     this->RenderMFDS(pmfd_left);
     Vector2D center    = {this->player->position.x, this->player->position.y};
@@ -931,18 +967,18 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode, FrameBuffer *fb = VG
  * in 3D.
  */
 void SCCockpit::Render(int face) {
+    FrameBuffer *fb {nullptr};
     if (face >= 0) {
         VGA.SwithBuffers();
         VGA.Activate();
-        VGA.GetFrameBuffer()->Clear();
+        fb=VGA.GetFrameBuffer();
+        fb->Clear();
         VGA.SetPalette(&this->palette);
-        VGA.GetFrameBuffer()->DrawShape(this->cockpit->ARTP.GetShape(face));
+        
         if (face == 0) {
             this->RenderHUD();
-            this->RenderHudHorizonLinesSmall();
-            this->RenderAltitude();
-            this->RenderSpeed();
-            this->RenderHeading();
+            
+            fb->blit(this->hud_framebuffer->framebuffer, 114,6, this->hud_framebuffer->width,this->hud_framebuffer->height);
             if (this->target != this->player) {
                 this->RenderTargetWithCam();
             }
@@ -973,8 +1009,11 @@ void SCCockpit::Render(int face) {
                 }
             }
 
-            VGA.GetFrameBuffer()->plot_pixel(161, 50, 223);
-
+            fb->plot_pixel(161, 50, 223);
+        }
+        fb->DrawShape(this->cockpit->ARTP.GetShape(face));
+        if (face == 0) {
+            this->RenderRAWS({84, 112}, fb);
             Point2D pmfd_right = {0, 200 - this->cockpit->MONI.SHAP.GetHeight()};
             Point2D pmfd_left  = {
                 320 - this->cockpit->MONI.SHAP.GetWidth() - 1, 200 - this->cockpit->MONI.SHAP.GetHeight()
@@ -1029,10 +1068,10 @@ void SCCockpit::Render(int face) {
             }
             Point2D radio_text = {2, 12};
             for (int li = 0; li < 16; li++) {
-                VGA.GetFrameBuffer()->FillLineColor(li, 0);
+                fb->FillLineColor(li, 0);
             }
             RSFont *fnt = this->big_font;
-            VGA.GetFrameBuffer()->PrintText(
+            fb->PrintText(
                 fnt, &radio_text, (char *)this->current_mission->radio_messages[0]->c_str(), 0, 0,
                 (uint32_t)this->current_mission->radio_messages[0]->size(), 2, 2
             );
@@ -1047,7 +1086,6 @@ void SCCockpit::Render(int face) {
         if (this->mouse_control) {
             Mouse.Draw();
         }
-
         VGA.VSync();
         VGA.SwithBuffers();
     }
@@ -1060,6 +1098,9 @@ void SCCockpit::Update() {
     this->roll              = this->player_plane->twist / 10.0f;
     this->yaw               = this->player_plane->azimuthf / 10.0f;
     this->speed             = (float)this->player_plane->airspeed;
+    this->mach              = this->player_plane->mach;
+    this->g_limit           = this->player_plane->Lmax;
+    this->g_load            = this->player_plane->g_load;
     this->throttle          = this->player_plane->GetThrottle();
     this->altitude          = this->player_plane->y;
     this->heading           = this->player_plane->azimuthf / 10.0f;
@@ -1081,7 +1122,100 @@ void SCCockpit::RenderHUD() {
     this->RenderHudHorizonLinesSmall({46, 44}, hud);
     this->RenderAltitude({72, 24}, hud);
     this->RenderSpeed({0, 24}, hud);
-    this->RenderHeading({22, 75}, hud);
-    // 114
-    // VGA.GetFrameBuffer()->blit(hud->framebuffer, 10,6, 92,88);
+    this->RenderHeading({22, 82}, hud);
+
+    std::string txt;
+    char speed_buffer[10];
+    Point2D g_load_text = {7, 14};
+    snprintf(speed_buffer, sizeof(speed_buffer), "%.2f", this->g_load);
+    txt = speed_buffer;
+    hud->PrintText(this->font, &g_load_text, (char *)txt.c_str(), 0, 0, (uint32_t)txt.length(), 2, 2);
+    Point2D g_limit_text = {7, g_load_text.y+5};
+    snprintf(speed_buffer, sizeof(speed_buffer), "%.2f", this->g_limit);
+    txt = speed_buffer;
+    hud->PrintText(this->font, &g_limit_text, (char *)txt.c_str(), 0, 0, (uint32_t)txt.length(), 2, 2);
+
+
+
+    Point2D speed_text = {7, 24+40};
+    snprintf(speed_buffer, sizeof(speed_buffer), "%.3f", this->mach);
+    txt = speed_buffer;
+    hud->PrintText(this->font, &speed_text, (char *)txt.c_str(), 0, 0, (uint32_t)txt.length(), 2, 2);
+    Point2D throttle_text = {7, speed_text.y + 5};
+    txt                   = std::to_string(this->throttle);
+    hud->PrintText(this->font, &throttle_text, (char *)txt.c_str(), 0, 0, (uint32_t)txt.length(), 2, 2);
+    
+
+
+    Point2D inrange_text = {7, throttle_text.y + 5};
+    Point2D weapons_text = {7+16, throttle_text.y + 10};
+    Point2D weapons_count_text = {7, weapons_text.y};
+    std::map<int, std::string> weapon_names = {
+        {ID_20MM, "GUNS"},
+        {ID_AIM9J, "AIM-9J"},
+        {ID_AIM9M, "AIM-9M"},
+        {ID_AIM120, "AIM-120"},
+        {ID_MK20, "MK-20"},
+        {ID_MK82, "MK-82"},
+        {ID_DURANDAL, "DURANDAL"},
+        {ID_AGM65D, "AGM-65D"},
+        {ID_GBU15, "GBU-15"},
+        {ID_LAU3, "LAU-3"}
+    };
+    int weapons_count = 0;
+    bool in_range = false;
+    if (this->player_plane->weaps_load[this->player_plane->selected_weapon] != nullptr) {
+        int weapon_id = this->player_plane->weaps_load[this->player_plane->selected_weapon]->objct->wdat->weapon_id;
+        weapons_count = this->player_plane->weaps_load[this->player_plane->selected_weapon]->nb_weap;
+        if (this->target != nullptr) {
+            uint32_t weap_range = this->player_plane->weaps_load[this->player_plane->selected_weapon]->objct->wdat->effective_range;
+            Vector3D dist_to_target = this->target->position - this->player_plane->object->position;
+            float distance = dist_to_target.Length();
+            if (distance <= weap_range) {
+                in_range = true;
+            }
+        }
+        if (weapon_names.find(weapon_id) != weapon_names.end()) {
+            txt = weapon_names[weapon_id];
+        } else {
+            txt = "UNKNOWN";
+        }
+    } else {
+        txt = "NO WEAP";
+    }
+    hud->PrintText(this->font, &weapons_text, const_cast<char *>(txt.c_str()), 0, 0, (uint32_t)txt.length(), 2, 2);
+    Point2D center = {hud->width / 2, hud->height / 2};
+    center.x -= this->hud->small_hud->LADD->VECT->SHAP->GetWidth() / 2;
+    center.y -= this->hud->small_hud->LADD->VECT->SHAP->GetHeight() / 2;
+    center.x += (int) (this->player_plane->ax*1000.0f);
+    center.y -= (int) (this->player_plane->ay*100.0f);
+    this->hud->small_hud->LADD->VECT->SHAP->SetPosition(&center);
+    hud->DrawShapeWithBox(this->hud->small_hud->LADD->VECT->SHAP,0, hud_framebuffer->width,0, hud_framebuffer->height);
+    if (weapons_count > 0) {
+        txt = std::to_string(weapons_count);
+    } else {
+        txt = "0";
+    }
+    hud->PrintText(this->font, &weapons_count_text, (char *)txt.c_str(), 0, 0, (uint32_t)txt.length(), 2, 2);
+    if (in_range) {
+        hud->PrintText(this->font, &inrange_text, const_cast<char *>("IN RANGE"), 0, 0, 8, 2, 2);
+    }
+    Point2D gear = {75, 9};
+    Point2D flaps = {75, gear.y + 5};
+    Point2D break_text = {75, flaps.y + 5};
+    if (this->gear) {
+        hud->PrintText(this->font, &gear, const_cast<char *>("GEARS"), 0, 0, 5, 2, 2);
+    }
+
+    if (this->flaps) {
+        hud->PrintText(this->font, &flaps, const_cast<char *>("FLAPS"), 0, 0, 5, 2, 2);
+    }
+    
+    if (this->airbrake) {
+        hud->PrintText(this->font, &break_text, const_cast<char *>("BREAKS"), 0, 0, 6, 2, 2);
+    }
+    Point2D pcenter = {hud->width / 2, hud->height / 2};
+    hud->plot_pixel(pcenter.x, pcenter.y, 223);
+    //hud->rect_slow(0,0, hud->width - 1, hud->height - 1, 1);
+
 }

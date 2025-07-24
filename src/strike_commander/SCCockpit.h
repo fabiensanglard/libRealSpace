@@ -30,7 +30,7 @@ private:
     void RenderSpeed(Point2D heading_pos, FrameBuffer *fb);
     void RenderMFDS(Point2D mfds, FrameBuffer *fb);
     void RenderMFDSRadarImplementation(Point2D pmfd_left, float range, const char* mode_name, bool air_mode, FrameBuffer *fb);
-    
+    void RenderRAWS(Point2D pmfd_left, FrameBuffer *fb);
     RSFont *font;
     RSFont *big_font;
     int radio_mission_timer{0};
@@ -47,9 +47,12 @@ public:
     float yaw{0.0f};
 
     float speed{0.0f};
+    float mach{0.0f};
     float altitude{0.0f};
     float heading{0.0f};
 
+    float g_limit{0.0f};
+    float g_load{0.0f};
     float pitch_speed{0.0f};
     float yaw_speed{0.0f};
     float roll_speed{0.0f};

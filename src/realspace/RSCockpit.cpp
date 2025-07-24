@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "RSCockpit.h"
 
 RSCockpit::RSCockpit(AssetManager *amana) {
     this->asset_manager = amana;
@@ -46,6 +47,7 @@ void RSCockpit::parseCKPT(uint8_t* data, size_t size) {
     handlers["REAL"] = std::bind(&RSCockpit::parseREAL, this, std::placeholders::_1, std::placeholders::_2);
     handlers["CHUD"] = std::bind(&RSCockpit::parseCHUD, this, std::placeholders::_1, std::placeholders::_2);
     handlers["MONI"] = std::bind(&RSCockpit::parseMONI, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["INST"] = std::bind(&RSCockpit::parseMONI_INST, this, std::placeholders::_1, std::placeholders::_2);
     handlers["FADE"] = std::bind(&RSCockpit::parseFADE, this, std::placeholders::_1, std::placeholders::_2);
 
 	lexer.InitFromRAM(data, size, handlers);
@@ -334,10 +336,54 @@ void RSCockpit::parseMONI_INST_RAWS_INFO(uint8_t* data, size_t size) {
     this->MONI.INST.RAWS.INFO = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseMONI_INST_RAWS_SHAP(uint8_t* data, size_t size) {
+
+    IFFSaxLexer lexer;
+    std::map<std::string, std::function<void(uint8_t* data, size_t size)>> handlers;
+    handlers["SYMB"] = std::bind(&RSCockpit::parseMONI_INST_RAWS_SHAP_SYMB, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["ZOOM"] = std::bind(&RSCockpit::parseMONI_INST_RAWS_SHAP_ZOOM, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["NORM"] = std::bind(&RSCockpit::parseMONI_INST_RAWS_SHAP_NORM, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+
+	
+}
+void RSCockpit::parseMONI_INST_RAWS_SHAP_SYMB(uint8_t* data, size_t size) {
 	uint8_t *shape_data;
 	shape_data = (uint8_t*) malloc(size);
-	memcpy(shape_data, data+4, size);
-    this->MONI.INST.RAWS.SHAP.init(shape_data, size);
+	memcpy(shape_data, data, size);
+    PakArchive* pak = new PakArchive();
+    pak->InitFromRAM("SYMB",shape_data, size);
+    this->MONI.INST.RAWS.SYMB.InitFromSubPakEntry(pak);
+}
+void RSCockpit::parseMONI_INST_RAWS_SHAP_ZOOM(uint8_t* data, size_t size) {
+    int offset = 0;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lz;
+        size_t csize=0;
+        uint8_t *uncompressed_data = lz.DecodeLZW(data+6, size-6, csize);
+        data = uncompressed_data;
+        size = csize;
+        offset = 8;
+    }
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data, size);
+    this->MONI.INST.RAWS.ZOOM.init(shape_data+offset, size);
+}
+void RSCockpit::parseMONI_INST_RAWS_SHAP_NORM(uint8_t* data, size_t size) {
+    int offset = 0;
+    if (data[0] == 'L' && data[1] == 'Z') {
+        LZBuffer lz;
+        size_t csize=0;
+        uint8_t *uncompressed_data = lz.DecodeLZW(data+6, size-6, csize);
+        data = uncompressed_data;
+        size = csize;
+        offset = 8;
+    }
+	uint8_t *shape_data;
+	shape_data = (uint8_t*) malloc(size);
+	memcpy(shape_data, data, size);
+    // shape 20 byte offset, don't know why
+    this->MONI.INST.RAWS.NORM.init(shape_data+offset, 0);
 }
 void RSCockpit::parseMONI_INST_ALTI(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;

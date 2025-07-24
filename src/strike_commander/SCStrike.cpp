@@ -1058,10 +1058,10 @@ void SCStrike::runFrame(void) {
             cockpit_pos,
             cockpit_rot,
             {
-                {5.0f, 1.8f, -1.0f}, 
-                {5.0f, 1.8f, 1.0f},
-                {5.0f, -0.8f, 1.0f},
-                {5.0f, -0.8f, -1.0f}
+                {5.8f, 2.0f, -1.22f}, 
+                {5.8f, 2.0f, 1.35f},
+                {6.0f, -0.8f, 1.35f},
+                {6.0f, -0.8f, -1.22f}
             },
             hud_texture
         );

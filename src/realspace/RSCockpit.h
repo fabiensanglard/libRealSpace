@@ -59,6 +59,13 @@ struct InfoShape {
     RLEShape SHAP;
     RSImageSet ARTS;
 };
+struct RAWSShape {
+    std::vector<uint8_t> INFO;
+    RSImageSet SYMB;
+    RLEShape ZOOM;
+    RLEShape NORM;
+};
+
 struct RealObjs {
     std::vector<uint8_t> INFO;
     RSEntity *OBJS;
@@ -91,7 +98,7 @@ struct Moni {
         InfoShape DAMG;
     } MFDS;
     struct Inst {
-        InfoShape RAWS;
+        RAWSShape RAWS;
         InfoShape ALTI;
         InfoShape AIRS;
         InfoShape MWRN;
@@ -167,7 +174,10 @@ private:
     void parseMONI_INST(uint8_t* data, size_t size);
     void parseMONI_INST_RAWS_INFO(uint8_t* data, size_t size);
     void parseMONI_INST_RAWS_SHAP(uint8_t* data, size_t size);
-    void parseMONI_INST_RAWS(uint8_t* data, size_t size);
+    void parseMONI_INST_RAWS_SHAP_SYMB(uint8_t *data, size_t size);
+    void parseMONI_INST_RAWS_SHAP_ZOOM(uint8_t *data, size_t size);
+    void parseMONI_INST_RAWS_SHAP_NORM(uint8_t *data, size_t size);
+    void parseMONI_INST_RAWS(uint8_t *data, size_t size);
     void parseMONI_INST_ALTI(uint8_t* data, size_t size);
     void parseMONI_INST_ALTI_INFO(uint8_t* data, size_t size);
     void parseMONI_INST_ALTI_SHAP(uint8_t* data, size_t size);
