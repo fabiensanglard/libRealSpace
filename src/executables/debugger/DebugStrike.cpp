@@ -1442,7 +1442,7 @@ void DebugStrike::renderUI() {
                         }
                     }
 
-                    boolean has_progs = false;
+                    bool has_progs = false;
                     for (auto prog : this->debug_scene->progs_id) {
                         if (prog != -1) {
                             has_progs = true;
