@@ -23,14 +23,14 @@ private:
     std::vector<HudLine> horizon;
     void RenderHudHorizonLinesSmall(Point2D center, FrameBuffer *fb);
     void RenderAltitude(Point2D alti_arrow, FrameBuffer *fb);
-    void RenderTargetWithCam();
+    
     void RenderTargetingReticle();
     void RenderBombSight();
     void RenderHeading(Point2D heading_pos, FrameBuffer *fb);
     void RenderSpeed(Point2D heading_pos, FrameBuffer *fb);
     void RenderMFDS(Point2D mfds, FrameBuffer *fb);
     void RenderMFDSRadarImplementation(Point2D pmfd_left, float range, const char* mode_name, bool air_mode, FrameBuffer *fb);
-    void RenderRAWS(Point2D pmfd_left, FrameBuffer *fb);
+    
     RSFont *font;
     RSFont *big_font;
     int radio_mission_timer{0};
@@ -42,6 +42,9 @@ public:
     FrameBuffer *hud_framebuffer{nullptr};
     FrameBuffer *mfd_right_framebuffer{nullptr};
     FrameBuffer *mfd_left_framebuffer{nullptr};
+    FrameBuffer *raws_framebuffer{nullptr};
+    FrameBuffer *target_framebuffer{nullptr};
+
     float pitch{0.0f};
     float roll{0.0f};
     float yaw{0.0f};
@@ -90,5 +93,7 @@ public:
     void RenderMFDSWeapon(Point2D pmfd_right, FrameBuffer *fb);
     void RenderMFDSRadar(Point2D pmfd_left, float range, int mode, FrameBuffer *fb);
     void RenderMFDSComm(Point2D pmfd_left, int mode, FrameBuffer *fb);
+    void RenderRAWS(Point2D pmfd_left, FrameBuffer *fb);
+    void RenderTargetWithCam(Point2D top_left, FrameBuffer *fb);
 };
 #endif

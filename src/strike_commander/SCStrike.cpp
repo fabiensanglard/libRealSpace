@@ -1105,7 +1105,80 @@ void SCStrike::runFrame(void) {
             },
             mfd_left_texture
         );
+        cockpit->raws_framebuffer->FillWithColor(0);
+        cockpit->RenderRAWS({0,0}, cockpit->raws_framebuffer);
+        Texture *raws_texture = new Texture();
+        RSImage *raws_image = new RSImage();
+        raws_image->palette = &this->cockpit->palette;
+        raws_image->data = this->cockpit->raws_framebuffer->framebuffer;
+        raws_image->width = this->cockpit->raws_framebuffer->width;
+        raws_image->height = this->cockpit->raws_framebuffer->height;
+        raws_texture->Set(raws_image);
+        raws_texture->UpdateContent(raws_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.2f, -1.38f, -2.10f}, 
+                {6.2f, -1.38f, -1.15f},
+                {6.1f, -2.45f, -1.15f},
+                {6.1f, -2.45f, -2.10f}
+            },
+            raws_texture
+        );
+        cockpit->target_framebuffer->FillWithColor(255);
+        cockpit->target_framebuffer->rect_slow(1,1,319,199, 0);
+        cockpit->RenderTargetWithCam({0,0}, cockpit->target_framebuffer);
+        Texture *target_texture = new Texture();
+        RSImage *target_image = new RSImage();
+        target_image->palette = &this->cockpit->palette;
+        target_image->data = this->cockpit->target_framebuffer->framebuffer;
+        target_image->width = this->cockpit->target_framebuffer->width;
+        target_image->height = this->cockpit->target_framebuffer->height;
+        target_texture->Set(target_image);
+        target_texture->UpdateContent(target_image);
+        // Calculate a position in front of the camera
+        // Create a fullscreen quad in front of the camera
+        // Adjust for the camera Y-axis offset
+        Vector3D quadPos = camera->GetPosition() + camera->GetForward() * 8.0f;
+        
+        // Set up vectors for billboard creation
+        Vector3D forward = camera->GetForward();
+        Vector3D right = camera->GetRight();
+        Vector3D up = camera->GetUp();
 
+        
+        
+        // Scale factors for quad size
+        float width =4.92f;
+        float height = 3.22f;
+        // Compensate for the 0.45f Y-axis projection offset
+        // We need to shift the entire quad upwards by adding an offset in the up direction
+        float projectionYOffset = -1.5f;
+        Vector3D offsetCompensation = up * projectionYOffset;
+        
+        // Apply the offset to the quad center position
+        Vector3D adjustedQuadPos = quadPos + offsetCompensation;
+        
+        // Define the quad's corners in world space with the adjusted center position
+        Vector3D topLeft = adjustedQuadPos + (up * height) - (right * width);
+        Vector3D topRight = adjustedQuadPos + (up * height) + (right * width);
+        Vector3D bottomRight = adjustedQuadPos - (up * height) + (right * width);
+        Vector3D bottomLeft = adjustedQuadPos - (up * height) - (right * width);
+        
+        // Draw the quad with the target texture
+        Renderer.drawTexturedQuad(
+            {0, 0, 0}, // No position offset needed as we're using world coordinates
+            {0, 0, 0}, // No rotation needed as we're manually setting vertices
+            {
+                topLeft,
+                topRight,
+                bottomRight,
+                bottomLeft
+            },
+            target_texture
+        );
+        
         break;
     }
 }

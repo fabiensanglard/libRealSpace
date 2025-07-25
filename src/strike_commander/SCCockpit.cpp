@@ -88,6 +88,8 @@ void SCCockpit::init() {
     hud_framebuffer       = new FrameBuffer(96, 93);
     mfd_right_framebuffer = new FrameBuffer(115, 95);
     mfd_left_framebuffer  = new FrameBuffer(115, 95);
+    raws_framebuffer      = new FrameBuffer(36, 32);
+    target_framebuffer    = new FrameBuffer(320, 200);
     this->font            = FontManager.GetFont("..\\..\\DATA\\FONTS\\SHUDFONT.SHP");
     this->big_font        = FontManager.GetFont("..\\..\\DATA\\FONTS\\HUDFONT.SHP");
 }
@@ -380,7 +382,10 @@ void SCCockpit::RenderMFDS(Point2D mfds, FrameBuffer *fb = VGA.GetFrameBuffer())
     }
     fb->DrawShape(&this->cockpit->MONI.SHAP);
 }
-void SCCockpit::RenderTargetWithCam() {
+void SCCockpit::RenderTargetWithCam(Point2D top_left = {126, 5}, FrameBuffer *fb = VGA.GetFrameBuffer()) {
+    Point2D hud_size = {68, 85};
+    Point2D bottom_right = {top_left.x + hud_size.x, top_left.y + hud_size.y};
+
     if (this->target != nullptr) {
         Vector3D campos       = this->cam->GetPosition();
         Vector3DHomogeneous v = {this->target->position.x, this->target->position.y, this->target->position.z, 1.0f};
@@ -396,20 +401,55 @@ void SCCockpit::RenderTargetWithCam() {
 
             int Xhud = (int)((x + 1.0f) * 160.0f);
             int Yhud = (int)((1.0f - y - 0.45f) * 100.0f) - 1;
+            
+            // Calculate HUD coordinates relative to the HUD's frame of reference
+            int hudX = Xhud - top_left.x;
+            int hudY = Yhud - top_left.y;
+
+            // Check if the target is within HUD boundaries
+            bool isInHud = (Xhud >= top_left.x && Xhud < bottom_right.x && 
+                            Yhud >= top_left.y && Yhud < bottom_right.y);
+
+            isInHud = (hudX >= 0 && hudX < fb->width && 
+                            hudX >= 0 && hudX < fb->height);
+            // If the target is within the HUD boundaries, draw a targeting indicator
+            if (isInHud) {
+                // Draw a targeting reticle at the position
+                Point2D targetPoint = {hudX+top_left.x, hudY+top_left.y};
+                
+                // Draw target reticle using HUD coordinates
+                fb->lineWithBox(
+                    targetPoint.x - 4, targetPoint.y - 4, targetPoint.x + 4, targetPoint.y - 4, 223, 
+                    0, fb->width, 0, fb->height
+                );
+                fb->lineWithBox(
+                    targetPoint.x + 4, targetPoint.y - 4, targetPoint.x + 4, targetPoint.y + 4, 223,
+                    0, fb->width, 0, fb->height
+                );
+                fb->lineWithBox(
+                    targetPoint.x + 4, targetPoint.y + 4, targetPoint.x - 4, targetPoint.y + 4, 223,
+                    0, fb->width, 0, fb->height
+                );
+                fb->lineWithBox(
+                    targetPoint.x - 4, targetPoint.y + 4, targetPoint.x - 4, targetPoint.y - 4, 223,
+                    0, fb->width, 0, fb->height
+                );
+            }
+
 
             if (Xhud > 0 && Xhud < 320 && Yhud > 0 && Yhud < 200) {
                 Point2D p = {Xhud, Yhud};
-                VGA.GetFrameBuffer()->lineWithBox(
-                    (int)p.x - 5, (int)p.y - 5, (int)p.x + 5, (int)p.y - 5, 223, 160 - 34, 160 + 34, 5, 90
+                fb->lineWithBox(
+                    (int)p.x - 5, (int)p.y - 5, (int)p.x + 5, (int)p.y - 5, 223, top_left.x, bottom_right.x, top_left.y, bottom_right.y
                 );
-                VGA.GetFrameBuffer()->lineWithBox(
-                    (int)p.x + 5, (int)p.y - 5, (int)p.x + 5, (int)p.y + 5, 223, 160 - 34, 160 + 34, 5, 90
+                fb->lineWithBox(
+                    (int)p.x + 5, (int)p.y - 5, (int)p.x + 5, (int)p.y + 5, 223, top_left.x, bottom_right.x, top_left.y, bottom_right.y
                 );
-                VGA.GetFrameBuffer()->lineWithBox(
-                    (int)p.x + 5, (int)p.y + 5, (int)p.x - 5, (int)p.y + 5, 223, 160 - 34, 160 + 34, 5, 90
+                fb->lineWithBox(
+                    (int)p.x + 5, (int)p.y + 5, (int)p.x - 5, (int)p.y + 5, 223, top_left.x, bottom_right.x, top_left.y, bottom_right.y
                 );
-                VGA.GetFrameBuffer()->lineWithBox(
-                    (int)p.x - 5, (int)p.y + 5, (int)p.x - 5, (int)p.y - 5, 223, 160 - 34, 160 + 34, 5, 90
+                fb->lineWithBox(
+                    (int)p.x - 5, (int)p.y + 5, (int)p.x - 5, (int)p.y - 5, 223, top_left.x, bottom_right.x, top_left.y, bottom_right.y
                 );
             }
         }

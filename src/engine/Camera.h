@@ -41,7 +41,9 @@ public:
     Quaternion GetOrientation(void);
     Matrix* GetProjectionMatrix(void);
     Matrix* GetViewMatrix(void);
-    
+    Vector3D GetForward(void);
+    Vector3D GetUp(void);
+    Vector3D GetRight(void);
     
     
     //Moves
