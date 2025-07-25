@@ -59,6 +59,11 @@ struct InfoShape {
     RLEShape SHAP;
     RSImageSet ARTS;
 };
+struct InfoRSImageSet {
+    std::vector<uint8_t> INFO;
+    RSImageSet SHAP;
+};
+
 struct RAWSShape {
     std::vector<uint8_t> INFO;
     RSImageSet SYMB;

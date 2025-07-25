@@ -90,6 +90,8 @@ void SCCockpit::init() {
     mfd_left_framebuffer  = new FrameBuffer(115, 95);
     raws_framebuffer      = new FrameBuffer(36, 32);
     target_framebuffer    = new FrameBuffer(320, 200);
+    alti_framebuffer      = new FrameBuffer(33, 29);
+    speed_framebuffer     = new FrameBuffer(36, 29);
     this->font            = FontManager.GetFont("..\\..\\DATA\\FONTS\\SHUDFONT.SHP");
     this->big_font        = FontManager.GetFont("..\\..\\DATA\\FONTS\\HUDFONT.SHP");
 }
@@ -419,19 +421,19 @@ void SCCockpit::RenderTargetWithCam(Point2D top_left = {126, 5}, FrameBuffer *fb
                 
                 // Draw target reticle using HUD coordinates
                 fb->lineWithBox(
-                    targetPoint.x - 4, targetPoint.y - 4, targetPoint.x + 4, targetPoint.y - 4, 223, 
+                    targetPoint.x - 5, targetPoint.y - 5, targetPoint.x + 5, targetPoint.y - 5, 223, 
                     0, fb->width, 0, fb->height
                 );
                 fb->lineWithBox(
-                    targetPoint.x + 4, targetPoint.y - 4, targetPoint.x + 4, targetPoint.y + 4, 223,
+                    targetPoint.x + 5, targetPoint.y - 5, targetPoint.x + 5, targetPoint.y + 5, 223,
                     0, fb->width, 0, fb->height
                 );
                 fb->lineWithBox(
-                    targetPoint.x + 4, targetPoint.y + 4, targetPoint.x - 4, targetPoint.y + 4, 223,
+                    targetPoint.x + 5, targetPoint.y + 5, targetPoint.x - 5, targetPoint.y + 5, 223,
                     0, fb->width, 0, fb->height
                 );
                 fb->lineWithBox(
-                    targetPoint.x - 4, targetPoint.y + 4, targetPoint.x - 4, targetPoint.y - 4, 223,
+                    targetPoint.x - 5, targetPoint.y + 5, targetPoint.x - 5, targetPoint.y - 5, 223,
                     0, fb->width, 0, fb->height
                 );
             }
@@ -455,6 +457,7 @@ void SCCockpit::RenderTargetWithCam(Point2D top_left = {126, 5}, FrameBuffer *fb
         }
     }
 }
+
 void SCCockpit::RenderTargetingReticle() {
     GunSimulatedObject *weap = new GunSimulatedObject();
     Vector3D direction       = {
@@ -1054,6 +1057,8 @@ void SCCockpit::Render(int face) {
         fb->DrawShape(this->cockpit->ARTP.GetShape(face));
         if (face == 0) {
             this->RenderRAWS({84, 112}, fb);
+            this->RenderAlti({161,166}, fb);
+            this->RenderSpeedOmetter({125, 166}, fb);
             Point2D pmfd_right = {0, 200 - this->cockpit->MONI.SHAP.GetHeight()};
             Point2D pmfd_left  = {
                 320 - this->cockpit->MONI.SHAP.GetWidth() - 1, 200 - this->cockpit->MONI.SHAP.GetHeight()
@@ -1257,5 +1262,81 @@ void SCCockpit::RenderHUD() {
     Point2D pcenter = {hud->width / 2, hud->height / 2};
     hud->plot_pixel(pcenter.x, pcenter.y, 223);
     //hud->rect_slow(0,0, hud->width - 1, hud->height - 1, 1);
+
+}
+void SCCockpit::RenderAlti(Point2D pmfd_left = {177,179}, FrameBuffer *fb = VGA.GetFrameBuffer()) {
+    RLEShape *shape = this->cockpit->MONI.INST.ALTI.ARTS.GetShape(0);
+    Point2D raws_size = {
+        shape->GetWidth(),
+        shape->GetHeight()
+    };
+    Point2D bottom_right = {
+        pmfd_left.x + raws_size.x, pmfd_left.y + raws_size.y
+    };
+    shape->SetPosition(&pmfd_left);
+    fb->DrawShape(shape);
+    // Calculate altitude in feet
+    float altiInFeet = this->altitude * 3.28084f;
+        
+    // Calculate angles for each needle
+    // 1000s needle (full circle = 10,000 feet)
+    float thousandsAngle = (altiInFeet / 10000.0f) * 2.0f * M_PI;
+    // 100s needle (full circle = 1,000 feet)
+    float hundredsAngle = (fmodf(altiInFeet, 1000.0f) / 1000.0f) * 2.0f * M_PI;
+
+    // Calculate center position of the altimeter
+    Point2D center = {
+        pmfd_left.x + raws_size.x / 2,
+        pmfd_left.y + raws_size.y / 2
+    };
+
+    // Calculate needle lengths
+    int thousandsLength = raws_size.x / 2 - 5;
+    int hundredsLength = raws_size.x / 2 - 6;
+
+    // Calculate needle endpoints
+    Point2D thousandsEnd = {
+        center.x + (int)(thousandsLength * sinf(thousandsAngle)),
+        center.y - (int)(thousandsLength * cosf(thousandsAngle))
+    };
+
+    Point2D hundredsEnd = {
+        center.x + (int)(hundredsLength * sinf(hundredsAngle)),
+        center.y - (int)(hundredsLength * cosf(hundredsAngle))
+    };
+
+    // Draw needles
+    fb->line(center.x, center.y, thousandsEnd.x, thousandsEnd.y, 223);  // Thousands needle
+    fb->line(center.x, center.y, hundredsEnd.x, hundredsEnd.y, 90);     // Hundreds needle (different color)
+}
+void SCCockpit::RenderSpeedOmetter(Point2D pmfd_left = {125,166}, FrameBuffer *fb = VGA.GetFrameBuffer()) {
+    RLEShape *shape = this->cockpit->MONI.INST.AIRS.ARTS.GetShape(0);
+    Point2D raws_size = {
+        shape->GetWidth(),
+        shape->GetHeight()
+    };
+    Point2D bottom_right = {
+        pmfd_left.x + raws_size.x, pmfd_left.y + raws_size.y
+    };
+    shape->SetPosition(&pmfd_left);
+    fb->DrawShape(shape);
+    // Calculate speed in knots
+    float speedInKnots = this->speed * 1.94384f; // Convert m/s to knots (1 m/s = 1.94384 knots)
+    // Calculate angle for the needle
+    float speedAngle = (speedInKnots / 1500.0f) * 2.0f * M_PI; // Assuming max speed is 600 knots
+    // Calculate center position of the speedometer
+    Point2D center = {
+        pmfd_left.x + raws_size.x / 2,
+        pmfd_left.y + raws_size.y / 2
+    };
+    // Calculate needle length
+    int needleLength = raws_size.x / 2 - 5; // Adjusted for the size of the speedometer
+    // Calculate needle endpoint
+    Point2D needleEnd = {
+        center.x + (int)(needleLength * sinf(speedAngle)),
+        center.y - (int)(needleLength * cosf(speedAngle))
+    };
+    // Draw the needle
+    fb->line(center.x, center.y, needleEnd.x, needleEnd.y, 223); // Draw the speed needle
 
 }

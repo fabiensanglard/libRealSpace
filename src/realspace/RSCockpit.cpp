@@ -396,10 +396,12 @@ void RSCockpit::parseMONI_INST_ALTI_INFO(uint8_t* data, size_t size) {
     this->MONI.INST.ALTI.INFO = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseMONI_INST_ALTI_SHAP(uint8_t* data, size_t size) {
-	uint8_t *shape_data;
-	shape_data = (uint8_t*) malloc(size);
-	memcpy(shape_data, data+4, size);
-    this->MONI.INST.ALTI.SHAP.init(shape_data, size);
+	uint8_t *data2;
+	data2 = (uint8_t*) malloc(size);
+	memcpy(data2, data, size);
+    PakArchive* pak = new PakArchive();
+    pak->InitFromRAM("ARTP", data2, size);
+    this->MONI.INST.ALTI.ARTS.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseMONI_INST_AIRS(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
@@ -431,10 +433,12 @@ void RSCockpit::parseMONI_INST_MWRN_INFO(uint8_t* data, size_t size) {
     this->MONI.INST.MWRN.INFO = std::vector<uint8_t>(data, data + size);
 }
 void RSCockpit::parseMONI_INST_MWRN_SHAP(uint8_t* data, size_t size) {
-	uint8_t *shape_data;
-	shape_data = (uint8_t*) malloc(size);
-	memcpy(shape_data, data+4, size);
-    this->MONI.INST.MWRN.SHAP.init(shape_data, size);
+    uint8_t *data2;
+	data2 = (uint8_t*) malloc(size);
+	memcpy(data2, data, size);
+    PakArchive* pak = new PakArchive();
+    pak->InitFromRAM("ARTP", data2, size);
+    this->MONI.INST.MWRN.ARTS.InitFromSubPakEntry(pak);
 }
 void RSCockpit::parseFADE(uint8_t* data, size_t size) {
     this->FADE = std::vector<uint8_t>(data, data + size);

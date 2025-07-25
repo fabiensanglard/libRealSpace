@@ -44,6 +44,9 @@ public:
     FrameBuffer *mfd_left_framebuffer{nullptr};
     FrameBuffer *raws_framebuffer{nullptr};
     FrameBuffer *target_framebuffer{nullptr};
+    FrameBuffer *alti_framebuffer{nullptr};
+    FrameBuffer *speed_framebuffer{nullptr};
+
 
     float pitch{0.0f};
     float roll{0.0f};
@@ -95,5 +98,7 @@ public:
     void RenderMFDSComm(Point2D pmfd_left, int mode, FrameBuffer *fb);
     void RenderRAWS(Point2D pmfd_left, FrameBuffer *fb);
     void RenderTargetWithCam(Point2D top_left, FrameBuffer *fb);
+    void RenderAlti(Point2D alti_pos, FrameBuffer *fb);
+    void RenderSpeedOmetter(Point2D speed_top_left, FrameBuffer *fb);
 };
 #endif

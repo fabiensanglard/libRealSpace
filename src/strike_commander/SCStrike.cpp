@@ -1127,7 +1127,6 @@ void SCStrike::runFrame(void) {
             raws_texture
         );
         cockpit->target_framebuffer->FillWithColor(255);
-        cockpit->target_framebuffer->rect_slow(1,1,319,199, 0);
         cockpit->RenderTargetWithCam({0,0}, cockpit->target_framebuffer);
         Texture *target_texture = new Texture();
         RSImage *target_image = new RSImage();
@@ -1178,7 +1177,48 @@ void SCStrike::runFrame(void) {
             },
             target_texture
         );
-        
+        cockpit->alti_framebuffer->FillWithColor(0);
+        cockpit->RenderAlti({0,0}, cockpit->alti_framebuffer);
+        Texture *alti_texture = new Texture();
+        RSImage *alti_image = new RSImage();
+        alti_image->palette = &this->cockpit->palette;
+        alti_image->data = this->cockpit->alti_framebuffer->framebuffer;
+        alti_image->width = this->cockpit->alti_framebuffer->width;
+        alti_image->height = this->cockpit->alti_framebuffer->height;
+        alti_texture->Set(alti_image);
+        alti_texture->UpdateContent(alti_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.1f, -3.15f, 0.020f}, 
+                {6.1f, -3.15f, 0.90f},
+                {5.7f, -3.92f, 0.90f},
+                {5.7f, -3.92f, 0.020f}
+            },
+            alti_texture
+        );
+        cockpit->speed_framebuffer->FillWithColor(0);
+        cockpit->RenderSpeedOmetter({0,0}, cockpit->speed_framebuffer);
+        Texture *speed_texture = new Texture();
+        RSImage *speed_image = new RSImage();
+        speed_image->palette = &this->cockpit->palette;
+        speed_image->data = this->cockpit->speed_framebuffer->framebuffer;
+        speed_image->width = this->cockpit->speed_framebuffer->width;
+        speed_image->height = this->cockpit->speed_framebuffer->height;
+        speed_texture->Set(speed_image);
+        speed_texture->UpdateContent(speed_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.1f, -3.15f, -0.90f}, 
+                {6.1f, -3.15f, -0.020f},
+                {5.7f, -3.92f, -0.020f},
+                {5.7f, -3.92f, -0.90f}
+            },
+            speed_texture
+        );
         break;
     }
 }
