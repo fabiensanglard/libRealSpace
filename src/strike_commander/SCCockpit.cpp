@@ -1280,9 +1280,9 @@ void SCCockpit::RenderAlti(Point2D pmfd_left = {177,179}, FrameBuffer *fb = VGA.
         
     // Calculate angles for each needle
     // 1000s needle (full circle = 10,000 feet)
-    float thousandsAngle = (altiInFeet / 10000.0f) * 2.0f * M_PI;
+    float thousandsAngle = (altiInFeet / 10000.0f) * 2.0f * (float) M_PI;
     // 100s needle (full circle = 1,000 feet)
-    float hundredsAngle = (fmodf(altiInFeet, 1000.0f) / 1000.0f) * 2.0f * M_PI;
+    float hundredsAngle = (fmodf(altiInFeet, 1000.0f) / 1000.0f) * 2.0f * (float)  M_PI;
 
     // Calculate center position of the altimeter
     Point2D center = {
@@ -1323,7 +1323,7 @@ void SCCockpit::RenderSpeedOmetter(Point2D pmfd_left = {125,166}, FrameBuffer *f
     // Calculate speed in knots
     float speedInKnots = this->speed * 1.94384f; // Convert m/s to knots (1 m/s = 1.94384 knots)
     // Calculate angle for the needle
-    float speedAngle = (speedInKnots / 1500.0f) * 2.0f * M_PI; // Assuming max speed is 600 knots
+    float speedAngle = (speedInKnots / 1500.0f) * 2.0f * (float)  M_PI; // Assuming max speed is 600 knots
     // Calculate center position of the speedometer
     Point2D center = {
         pmfd_left.x + raws_size.x / 2,
