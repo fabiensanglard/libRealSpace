@@ -1321,7 +1321,7 @@ void SCCockpit::RenderSpeedOmetter(Point2D pmfd_left = {125,166}, FrameBuffer *f
     shape->SetPosition(&pmfd_left);
     fb->DrawShape(shape);
     // Calculate speed in knots
-    float speedInKnots = this->speed * 1.94384f; // Convert m/s to knots (1 m/s = 1.94384 knots)
+    float speedInKnots = this->speed;
     // Calculate angle for the needle
     float speedAngle = (speedInKnots / 1500.0f) * 2.0f * (float)  M_PI; // Assuming max speed is 600 knots
     // Calculate center position of the speedometer

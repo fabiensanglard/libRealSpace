@@ -289,7 +289,7 @@ void SCVectorPlane::updatePlaneStatus() {
     this->ay = this->acceleration.y;
     this->az = this->acceleration.z;
     this->fps_knots = 1.944f;  // Facteur de conversion m/s vers nœuds
-    this->airspeed = velocity.Length() * this->fps_knots;
+    this->airspeed = (int) (velocity.Length() * this->fps_knots);
 }
 void SCVectorPlane::Render() {
     //SCPlane::renderPlaneLined();

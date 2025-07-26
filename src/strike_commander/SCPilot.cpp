@@ -177,7 +177,7 @@ void SCPilot::AutoPilot() {
             if (this->plane->roll > targetRoll && this->plane->roll < 2700.0f) {
                 this->plane->roll -= (std::min)(roll_rate, this->plane->roll - targetRoll);
             } else if (this->plane->roll >= 2700.0f) {
-                this->plane->roll = (int) (this->plane->roll + roll_rate) % 3600;
+                this->plane->roll = (float) ((int) (this->plane->roll + roll_rate) % 3600);
             } else if (this->plane->roll < targetRoll) {
                 this->plane->roll += roll_rate;
             }

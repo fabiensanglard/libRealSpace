@@ -223,7 +223,6 @@ void SCPlane::init() {
 
 void SCPlane::Simulate() {
     int itemp;
-    float temp;
     float elevtemp = 0.0f;
 
     uint32_t current_time = SDL_GetTicks();
@@ -450,9 +449,9 @@ void SCPlane::processInput() {
         if (itemp < -max_turnrate || itemp > max_turnrate) {
             /* clip turn rate	*/
             if (itemp < 0) {
-                itemp = -max_turnrate;
+                itemp = -(int) max_turnrate;
             } else {
-                itemp = max_turnrate;
+                itemp = (int) max_turnrate;
             }
             /* decrease with velocity */
             if (fabs(this->vz) > 10.0f / this->tps) {
@@ -1250,7 +1249,7 @@ void SCPlane::renderPlaneLined() {
                 hull.push_back(p);
             }
             // Construction de la chaîne supérieure
-            for (int i = (int)wing_surface_points.size() - 2, t = hull.size() + 1; i >= 0; i--) {
+            for (int i = (int)wing_surface_points.size() - 2, t = (int) hull.size() + 1; i >= 0; i--) {
                 while (hull.size() >= t && cross(hull[hull.size()-2], hull.back(), wing_surface_points[i]) <= 0)
                     hull.pop_back();
                 hull.push_back(wing_surface_points[i]);

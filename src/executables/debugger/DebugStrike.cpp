@@ -152,22 +152,22 @@ void DebugStrike::loadPlane() {
         float roll_rate = plane_to_load->jdyn->ROLL_RATE;
         switch (sim_type) {
         case 0:
-            thrust = plane_to_load->thrust_in_newton;
+            thrust = (float) plane_to_load->thrust_in_newton;
             envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
-            weight = plane_to_load->weight_in_kg;
-            fuel = plane_to_load->jdyn->FUEL;
+            weight =(float)  plane_to_load->weight_in_kg;
+            fuel = (float) plane_to_load->jdyn->FUEL;
             new_plane = new SCSimplePlane(10.0f, -7.0f, 40.0f, 40.0f, twist_rate, roll_rate, surface, weight, fuel,
                                           thrust, envergure, 0.83f, 120, this->current_mission->area, player_plane->x,
                                           player_plane->y, player_plane->z);
             new_plane->yaw = player_plane->azimuthf;
             break;
         case 1:
-            thrust = plane_to_load->thrust_in_newton;
+            thrust = (float) plane_to_load->thrust_in_newton;
             envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
-            weight = plane_to_load->weight_in_kg;
-            fuel = plane_to_load->jdyn->FUEL;
+            weight = (float) plane_to_load->weight_in_kg;
+            fuel = (float) plane_to_load->jdyn->FUEL;
             twist_rate = 30.0f;
             roll_rate = 100.0f;
             new_plane = new SCJdynPlane(10.0f, -7.0f, 40.0f, 40.0f, twist_rate, roll_rate, surface, weight, fuel,
@@ -188,7 +188,7 @@ void DebugStrike::loadPlane() {
                 new_plane = new SCPlane(plane_data.LmaxDef, plane_data.LminDef, plane_data.Fmax, plane_data.Fmin,
                                         plane_data.ELEVF_CSTE, plane_data.ROLLF_CSTE, plane_data.s, plane_data.W,
                                         plane_data.fuel_weight, plane_data.Mthrust, plane_data.b, plane_data.ie_pi_AR,
-                                        plane_data.MIN_LIFT_SPEED, this->current_mission->area, player_plane->x,
+                                        (int) plane_data.MIN_LIFT_SPEED, this->current_mission->area, player_plane->x,
                                         player_plane->y, player_plane->z);
                 twist_rate = plane_data.ELEVF_CSTE;
                 roll_rate = plane_data.ROLLF_CSTE;
@@ -200,11 +200,11 @@ void DebugStrike::loadPlane() {
             }
             break;
         case 3:
-            thrust = plane_to_load->thrust_in_newton;
+            thrust =(float)  plane_to_load->thrust_in_newton;
             envergure = (bb->max.z - bb->min.z) / 2.0f;
             surface = plane_to_load->wing_area;
-            weight = plane_to_load->weight_in_kg;
-            fuel = plane_to_load->jdyn->FUEL;
+            weight =(float)  plane_to_load->weight_in_kg;
+            fuel = (float) plane_to_load->jdyn->FUEL;
             twist_rate = 30.0f;
             roll_rate = 100.0f;
             new_plane = new SCVectorPlane(10.0f, -7.0f, 40.0f, 40.0f, twist_rate, roll_rate, surface, weight, fuel,
@@ -946,7 +946,7 @@ void DebugStrike::renderMenu() {
         if (ImGui::Button("Prev")) {
             music_id--;
             if (music_id < 0) {
-                music_id = Mixer.music->musics[2].size() - 1;
+                music_id = (int) Mixer.music->musics[2].size() - 1;
             }
             Mixer.PlayMusic(music_id);
         }

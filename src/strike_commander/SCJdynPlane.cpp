@@ -51,7 +51,7 @@ SCJdynPlane::SCJdynPlane(float LmaxDEF, float LminDEF, float Fmax, float Smax, f
     this->s = s;
     this->W = W;
     this->fuel_weight = 0;
-    this->fuel = fuel_weight;
+    this->fuel = (int) fuel_weight;
     this->fuel_max = fuel_weight;
     this->Mthrust = Mthrust;
     this->b = b;
@@ -114,7 +114,7 @@ void SCJdynPlane::Simulate() {
     this->updateVelocity();
 
     float vitesse_ms = abs(this->vz) * this->tps;
-    this->airspeed = vitesse_ms * 1.944f;
+    this->airspeed = (int) (vitesse_ms * 1.944f);
     this->climbspeed = (short)(this->tps * (this->y - this->last_py));
     this->g_load = (this->lift_force*this->inverse_mass) / this->gravity;
     this->ax = this->acceleration.x;
@@ -303,20 +303,20 @@ void SCJdynPlane::processInput() {
 
     float max_turnrate = 0.0f;
     max_turnrate = 600.0f / tps;
-    temp = this->rudder * (this->vz*3.2) - (4.0f) * (this->vx*3.2);
+    temp = this->rudder * (this->vz*3.2f) - (4.0f) * (this->vx*3.2f);
     if (this->on_ground) {
         itemp = (int)(16.0f * temp);
         if (itemp < -max_turnrate || itemp > max_turnrate) {
             /* clip turn rate	*/
             if (itemp < 0) {
-                itemp = -max_turnrate;
+                itemp = - (int)max_turnrate;
             } else {
-                itemp = max_turnrate;
+                itemp = (int)max_turnrate;
             }
             /* decrease with velocity */
             if (fabs(this->vz*3.2) > 10.0f / this->tps) {
                 /* skid effect */
-                temp = 0.4f * this->tps * (this->rudder * (this->vz*3.2) - .75f);
+                temp = 0.4f * this->tps * (this->rudder * (this->vz*3.2f) - .75f);
                 if (temp < -max_turnrate || temp > max_turnrate) {
                     temp = (float)itemp;
                 }
