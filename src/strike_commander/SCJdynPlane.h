@@ -2,7 +2,7 @@
 int mrandom(int maxr);
 void gl_sincos(float a, float *b, float *c);
 class SCJdynPlane : public SCPlane {
-private:
+protected:
 
     float pitch_speed{0.0f};
     float roll_speed{0.0f};
@@ -19,18 +19,16 @@ private:
 
     Vector3D acceleration {0.0f, 0.0f, 0.0f};
     Vector3D velocity {0.0f, 0.0f, 0.0f};
-    
-    float lift_force {0.0f};
-    float drag_force {0.0f};
-    float gravity_drag_force {0.0f};
-    float lift_drag_force {0.0f};
-    float gravity_force {0.0f};
+
+    float fuel_max {0.0f};
 
     float airspeed_in_ms {0.0f};
     void updatePosition();
     void updateAcceleration();
-    void applyPhysicsForces();
-
+    void updateVelocity();
+    void updateForces();
+    void updateSpeedOfSound();
+    void checkStatus();
     void computeLift();
     void computeDrag();
     void computeGravity();
@@ -43,5 +41,4 @@ public:
             RSArea *area, float x, float y, float z);
     ~SCJdynPlane();
     void Simulate();
-    void Render();
 };

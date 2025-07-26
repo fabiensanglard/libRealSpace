@@ -286,6 +286,10 @@ void DebugGame::Run() {
         // enderer.Clear();
 
         // Allow the active activity to Run and Render
+        if (activities.empty()) {
+            LogError("No activity to run.\n");
+            return;
+        }
         currentActivity = activities.top();
 
         if (currentActivity->IsRunning()) {

@@ -110,6 +110,51 @@ void SCRenderer::deleteTextureInGPU(Texture *texture) {
     glDeleteTextures(1, &texture->id);
 }
 
+void SCRenderer::drawTexturedQuad(Vector3D pos, Vector3D orientation, std::vector<Vector3D> quad, Texture *tex) {
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
+    glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f);
+
+    if (!tex->initialized) {
+        glGenTextures(1, &tex->id);
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)tex->width, (GLsizei)tex->height, 
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, tex->data);
+        
+        tex->initialized = true;
+    } else {
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+    }
+    
+    glPushMatrix();
+    glTranslatef(pos.x, pos.y, pos.z);
+    glRotatef(orientation.x, 0, 1, 0);
+    glRotatef(orientation.y, 0, 0, 1);
+    glRotatef(orientation.z, 1, 0, 0);
+    glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(quad[0].x, quad[0].y, quad[0].z);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(quad[1].x, quad[1].y, quad[1].z);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(quad[2].x, quad[2].y, quad[2].z);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(quad[3].x, quad[3].y, quad[3].z);
+    glEnd();
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+}
+
 void SCRenderer::getNormal(RSEntity *object, Triangle *triangle, Vector3D *normal) {
     // Calculate the normal for this triangle
     Vector3D edge1;
@@ -396,7 +441,8 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f);
     // Texture pass
     if (lodLevel == 0) {
         glEnable(GL_TEXTURE_2D);
@@ -811,7 +857,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         }
     }
     
-
+    glDisable(GL_ALPHA_TEST);
     glDisable(GL_BLEND);
 }
 
@@ -1567,4 +1613,93 @@ void SCRenderer::renderWorldByID(RSArea *area, int LOD, int verticesPerBlock, in
     glDisable(GL_TEXTURE_2D);
     renderObjects(area, blockId);
     glPopMatrix();
+}
+
+void SCRenderer::drawBillboard(Vector3D pos, Texture *tex, float size) {
+    if (!initialized || tex == nullptr)
+        return;
+    
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
+    glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f);
+    
+    // Initialize texture if needed
+    if (!tex->initialized) {
+        glGenTextures(1, &tex->id);
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)tex->width, (GLsizei)tex->height, 
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, tex->data);
+        
+        tex->initialized = true;
+    } else {
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+    }
+    
+    // Get camera position
+    Point3D cameraPos = camera.GetPosition();
+    
+    // Calculate billboard vectors
+    Vector3D look, right, up;
+    
+    // Look vector points from billboard to camera
+    look.x = cameraPos.x - pos.x;
+    look.y = cameraPos.y - pos.y;
+    look.z = cameraPos.z - pos.z;
+    look.Normalize();
+    
+    // Right vector is perpendicular to look and global up
+    Vector3D globalUp = {0.0f, 1.0f, 0.0f};
+    right = globalUp.CrossProduct(&look);
+    right.Normalize();
+    
+    // Up vector completes the orthogonal basis
+    up = look.CrossProduct(&right);
+    
+    // Calculate the corners of the billboard quad
+    float halfSize = size * 0.5f;
+    
+    Vector3D bottomLeft, bottomRight, topRight, topLeft;
+    
+    bottomLeft.x = pos.x - right.x * halfSize - up.x * halfSize;
+    bottomLeft.y = pos.y - right.y * halfSize - up.y * halfSize;
+    bottomLeft.z = pos.z - right.z * halfSize - up.z * halfSize;
+    
+    bottomRight.x = pos.x + right.x * halfSize - up.x * halfSize;
+    bottomRight.y = pos.y + right.y * halfSize - up.y * halfSize;
+    bottomRight.z = pos.z + right.z * halfSize - up.z * halfSize;
+    
+    topRight.x = pos.x + right.x * halfSize + up.x * halfSize;
+    topRight.y = pos.y + right.y * halfSize + up.y * halfSize;
+    topRight.z = pos.z + right.z * halfSize + up.z * halfSize;
+    
+    topLeft.x = pos.x - right.x * halfSize + up.x * halfSize;
+    topLeft.y = pos.y - right.y * halfSize + up.y * halfSize;
+    topLeft.z = pos.z - right.z * halfSize + up.z * halfSize;
+    
+    // Draw the billboard quad
+    glBegin(GL_QUADS);
+    glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+    
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
+    
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
+    
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(topRight.x, topRight.y, topRight.z);
+    
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(topLeft.x, topLeft.y, topLeft.z);
+    glEnd();
+    glDisable(GL_ALPHA_TEST);
 }

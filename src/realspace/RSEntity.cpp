@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "RSEntity.h"
 #include "RLEShape.h"
+#include "RSImageSet.h"
 #include "../commons/RLEBuffer.h"
 
 RSEntity::RSEntity(AssetManager *amana) {
@@ -258,6 +259,7 @@ void RSEntity::parseREAL_OBJT_AFTB(uint8_t *data, size_t size) {
     handlers["APPR"] = std::bind(&RSEntity::parseREAL_OBJT_AFTB_APPR, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
+
 void RSEntity::parseREAL_OBJT_AFTB_APPR(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
 
@@ -285,7 +287,9 @@ void RSEntity::parseREAL_OBJT_MISS(uint8_t *data, size_t size) {
 void RSEntity::parseREAL_OBJT_MISS_EXPL(uint8_t *data, size_t size){}
 void RSEntity::parseREAL_OBJT_MISS_SIGN(uint8_t *data, size_t size){}
 void RSEntity::parseREAL_OBJT_MISS_TRGT(uint8_t *data, size_t size){}
-void RSEntity::parseREAL_OBJT_MISS_SMOK(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_SMOK(uint8_t *data, size_t size){
+    
+}
 void RSEntity::parseREAL_OBJT_MISS_DAMG(uint8_t *data, size_t size){}
 void RSEntity::parseREAL_OBJT_MISS_WDAT(uint8_t *data, size_t size){
     WDAT *wdat = new WDAT();
@@ -466,10 +470,13 @@ void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
     if (entry != nullptr) {
         expl->objct->InitFromRAM(entry->data, entry->size);
     }
+    this->explos = expl;
 }
 void RSEntity::parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_SMOK(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_SMOK(uint8_t *data, size_t size) {
+    
+}
 void RSEntity::parseREAL_OBJT_JETP_CHLD(uint8_t *data, size_t size) {
     size_t nb_child = size /32;
     ByteStream bs(data);
@@ -650,7 +657,11 @@ void RSEntity::parseREAL_OBJT_JETP_WEAP_HPTS(uint8_t *data, size_t size) {
     }
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG(uint8_t *data, size_t size) {
-    
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["SYSM"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG_SYSM, this, std::placeholders::_1, std::placeholders::_2);
 }
 void RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG_SYSM(uint8_t *data, size_t size) {
     ByteStream bs(data);
@@ -881,6 +892,9 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size) {
     uint32_t width = stream.ReadShort();
     uint32_t height = stream.ReadShort();
     uint16_t unknown = stream.ReadShort();
+    if (width * height * unknown <= size) {
+        printf("Anim\n");
+    }
     image->Create(name, width, height, 0);
     uint8_t *src = stream.GetPosition();
     
@@ -1027,3 +1041,17 @@ void RSEntity::parseREAL_APPR_POLY_QUAD_MAPS(uint8_t *data, size_t size) {
         this->qmapuvs.push_back(uvEntry);
     }
 }
+void RSEntity::parseREAL_APPR_ANIM(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_APPR_ANIM_INFO(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_APPR_ANIM_SEQU(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_APPR_ANIM_SHAP(uint8_t *data, size_t size) {
+    RSImageSet *img_set = new RSImageSet();
+    PakArchive pak;
+    uint8_t* data2 = (uint8_t*) malloc(size);
+    memcpy(data2, data, size);
+    pak.InitFromRAM("SHAPE", data2, size);
+    img_set->InitFromSubPakEntry(&pak);
+    this->images_set.push_back(img_set);
+}
+void RSEntity::parseREAL_OBJT_EXPL(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_SMKG(uint8_t *data, size_t size) {}

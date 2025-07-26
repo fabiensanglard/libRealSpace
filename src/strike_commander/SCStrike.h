@@ -11,7 +11,7 @@
 #ifndef __libRealSpace__SCStrike__
 #define __libRealSpace__SCStrike__
 
-#define SCSTRIKE_MAX_MISSIONS 46
+#define SCSTRIKE_MAX_MISSIONS 48
 static const char *mission_list[] = {
     "MISN-1A.IFF",  "MISN-1B.IFF",  "MISN-1C.IFF",  "MISN-2A.IFF",  "MISN-3A.IFF",  "MISN-3B.IFF",  "MISN-3C.IFF",
     "MISN-4A.IFF",  "MISN-4B.IFF",  "MISN-4C.IFF",  "MISN-5A.IFF",  "MISN-5B.IFF",  "MISN-5BB.IFF", "MISN-5C.IFF",
@@ -19,7 +19,7 @@ static const char *mission_list[] = {
     "MISN-7D.IFF",  "MISN-8A.IFF",  "MISN-8B.IFF",  "MISN-8C.IFF",  "MISN-9AA.IFF", "MISN-9A.IFF",  "MISN-9B.IFF",
     "MISN-10A.IFF", "MISN-10B.IFF", "MISN-10C.IFF", "MISN-10D.IFF", "MISN-11A.IFF", "MISN-11B.IFF", "MISN-11C.IFF",
     "MISN-12A.IFF", "MISN-12B.IFF", "MISN-13A.IFF", "MISN-13B.IFF", "MISN-14A.IFF", "MISN-14B.IFF", "MISN-15A.IFF",
-    "MISN-3X.IFF",  "MISN-6X.IFF",  "MISN-8X.IFF",  "MISN-10X.IFF", "MISN-11X.IFF",
+    "MISN-3X.IFF",  "MISN-6X.IFF",  "MISN-8X.IFF",  "MISN-10X.IFF", "MISN-11X.IFF", "TEMPLATE.IFF"
 };
 static int mission_idx = 0;
 
@@ -144,7 +144,6 @@ protected:
     bool follow_dynamic{false};
     int music{2};
     RSEntity * loadWeapon(std::string name);
-
 public:
     /**
      * @brief Constructor

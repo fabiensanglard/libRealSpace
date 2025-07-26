@@ -168,7 +168,10 @@ uint8_t* LZBuffer::DecodeLZW(const uint8_t* compData, size_t compSize, size_t &u
             printf("LZBuffer::DecodeLZW: output size is 0x594\n");
         }
     }
-    
+    size_t bytesRead = bitPos / 8 + (bitPos % 8 != 0 ? 1 : 0);
+    if (bytesRead < compSize) {
+        printf("LZBuffer::DecodeLZW: bytesRead < compSize\n");
+    }
     uncompSize = output.size();
     uint8_t* result = new uint8_t[uncompSize];
     memcpy(result, output.data(), uncompSize);

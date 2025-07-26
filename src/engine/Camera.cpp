@@ -159,6 +159,33 @@ Matrix *Camera::GetProjectionMatrix(void) { return &this->mproj; }
 
 Matrix *Camera::GetViewMatrix(void) { return &this->mview; }
 
+Vector3D Camera::GetForward(void) { 
+    Matrix m = orientation.ToMatrix();
+    Vector3D forward;
+    forward.x = -m.v[0][2];
+    forward.y = -m.v[1][2];
+    forward.z = -m.v[2][2];
+    return forward;
+}
+
+Vector3D Camera::GetUp(void) { 
+    Matrix m = orientation.ToMatrix();
+    Vector3D up;
+    up.x = m.v[0][1];
+    up.y = m.v[1][1];
+    up.z = m.v[2][1];
+    return up;
+ }
+
+Vector3D Camera::GetRight(void) { 
+    Matrix m = orientation.ToMatrix();
+    Vector3D right;
+    right.x = m.v[0][0];
+    right.y = m.v[1][0];
+    right.z = m.v[2][0];
+    return right;
+}
+
 void Camera::MoveForward(void) {
     Matrix m = orientation.ToMatrix();
     this->position.x -= m.v[0][2] * 100;

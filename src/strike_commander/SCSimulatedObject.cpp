@@ -204,9 +204,18 @@ void SCSimulatedObject::Simulate(int tps) {
     this->vx = velocity.x;
     this->vy = velocity.y;
     this->vz = velocity.z;
+    this->last_px = this->x;
+    this->last_py = this->y;
+    this->last_pz = this->z;
     this->x = position.x;
     this->y = position.y;
     this->z = position.z;
+
+    Vector3D length_vect = { this->x - this->last_px, this->y - this->last_py, this->z - this->last_pz };
+    this->distance += length_vect.Length();
+    if (this->distance > this->obj->wdat->effective_range) {
+        this->alive = false;
+    }
     if (this->y < 0) {
         this->alive = false;
     }
@@ -278,9 +287,18 @@ void GunSimulatedObject::Simulate(int tps) {
     this->vx = velocity.x;
     this->vy = velocity.y;
     this->vz = velocity.z;
-    this->x  = position.x;
-    this->y  = position.y;
-    this->z  = position.z;
+    this->last_px = this->x;
+    this->last_py = this->y;
+    this->last_pz = this->z;
+    this->x = position.x;
+    this->y = position.y;
+    this->z = position.z;
+
+    Vector3D length_vect = { this->x - this->last_px, this->y - this->last_py, this->z - this->last_pz };
+    this->distance += length_vect.Length();
+    if (this->distance > this->obj->wdat->effective_range * 10.0f) {
+        this->alive = false;
+    }
     for (auto entity: this->mission->actors) {
         if (this->CheckCollision(entity)) {
             this->alive = false;

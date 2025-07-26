@@ -253,8 +253,17 @@ void RSMission::parseMISN_MSGS(uint8_t *data, size_t size) {
     }
 }
 void RSMission::parseMISN_FLAG(uint8_t *data, size_t size) {
-    for (int i = 0; i < size; i++) {
-        this->mission_data.flags.push_back(data[i]);
+    ByteStream stream(data);
+    this->mission_data.flags.clear();
+    stream.ReadByte(); // skip first byte
+    size_t read = 1;
+    this->mission_data.flags.push_back(0);
+    while (read < size-2) {
+        int16_t flag = 0;
+        stream.ReadByte(); // skip first byte
+        flag = stream.ReadByte();
+        this->mission_data.flags.push_back(flag);
+        read += 2;
     }
 }
 void RSMission::parseMISN_CAST(uint8_t *data, size_t size) {

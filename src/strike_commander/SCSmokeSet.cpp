@@ -22,6 +22,8 @@ void SCSmokeSet::init(){
     int qsdf = 0;
     for (auto img_set: this->smoke_set->images) {
         size_t numimages = img_set->GetNumImages();
+        std::vector<Texture *> smk_set;
+
         for (size_t i=0; i<numimages; i++) {
             RLEShape *img = img_set->GetShape(i);
             Texture *tex = new Texture();
@@ -60,6 +62,8 @@ void SCSmokeSet::init(){
             tex->initialized = false;
             
             this->textures.push_back(tex);
+            smk_set.push_back(tex);
         }
+        this->smoke_textures.push_back(smk_set);
     }
 }

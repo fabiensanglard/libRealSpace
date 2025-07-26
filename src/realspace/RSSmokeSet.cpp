@@ -1,5 +1,5 @@
 #include "RSSmokeSet.h"
-
+#include "RSImageSet.h"
 RSSmokeSet::RSSmokeSet(){
 
 }

@@ -1,5 +1,10 @@
 #pragma once
-#include "precomp.h"
+#include <vector>
+#include <cstdint>
+#include "AssetManager.h"
+#include "../commons/IFFSaxLexer.h"
+
+class RSImageSet;  // Forward declaration
 
 class RSSmokeSet {
     

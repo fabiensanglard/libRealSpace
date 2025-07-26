@@ -385,7 +385,10 @@ void SCStrike::checkKeyboard(void) {
             Vector2D destination = {this->current_mission->waypoints[this->nav_point_id]->spot->position.x,
                                     this->current_mission->waypoints[this->nav_point_id]->spot->position.z};
             this->autopilot_target_azimuth = atan2(this->player_plane->x-destination.x, this->player_plane->z-destination.y);
-            this->autopilot_target_azimuth = this->autopilot_target_azimuth * 180.0f / (float)M_PI;
+            this->autopilot_target_azimuth = radToDegree(this->autopilot_target_azimuth);
+            this->player_plane->yaw = 0.0f;
+            this->player_plane->pitch = 0.0f;
+            this->player_plane->roll = 0.0f;
             float dest_y = this->current_mission->waypoints[this->nav_point_id]->spot->position.y;
             Vector2D origine = {this->player_plane->x, this->player_plane->z};
             std::vector<Vector2D> path;
@@ -646,8 +649,7 @@ void SCStrike::setMission(char const *missionName) {
     this->target = this->current_mission->enemies[this->current_target];
     this->nav_point_id = 0;
     this->player_plane = this->current_mission->player->plane;
-    this->player_plane->azimuthf = (360 - playerCoord->azymuth) * 10.0f;
-    this->player_plane->yaw = (360 - playerCoord->azymuth) * (float) M_PI / 180.0f;
+    this->player_plane->yaw = (360 - playerCoord->azymuth) * 10.0f;
     this->player_plane->object = playerCoord;
     float ground = this->area.getY(new_position.x, new_position.z);
     if (ground < new_position.y) {
@@ -843,10 +845,17 @@ void SCStrike::runFrame(void) {
         } else {
             this->player_plane->ptw.Identity();
             this->player_plane->ptw.translateM(this->player_plane->x, this->player_plane->y, this->player_plane->z);
-            this->player_plane->ptw.rotateM(this->autopilot_target_azimuth*(float) M_PI /180.0f, 0, 1, 0);
-            this->player_plane->azimuthf = this->autopilot_target_azimuth * 10.0f;
+            this->player_plane->ptw.rotateM(degreeToRad(this->autopilot_target_azimuth), 0, 1, 0);
+            this->player_plane->yaw = this->autopilot_target_azimuth * 10.0f;
             this->player_plane->Simulate();
             this->camera_mode = View::FRONT;
+            for (auto team: this->current_mission->friendlies) {
+                if (team->is_active) {
+                    if (team->plane != nullptr && team->plane != this->player_plane) {                       
+                        team->plane->yaw=this->autopilot_target_azimuth * 10.0f;
+                    }
+                }
+            }
         }
     } break;
     case View::FRONT: {
@@ -951,8 +960,9 @@ void SCStrike::runFrame(void) {
     for (auto actor: this->current_mission->actors) {
         if (actor->plane != nullptr) {
             if (actor->plane != this->player_plane) {
-                actor->plane->Render();
+                
                 if (this->show_bbox) {
+                    actor->plane->renderPlaneLined();
                     BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
                     Vector3D position = {actor->plane->x, actor->plane->y, actor->plane->z};          
                     Vector3D orientation = {
@@ -977,6 +987,8 @@ void SCStrike::runFrame(void) {
                     Renderer.renderBBox(position, bb->min, bb->max);
                     Renderer.renderBBox(position+actor->formation_pos_offset, bb->min, bb->max);
                     Renderer.renderBBox(position+actor->attack_pos_offset, bb->min, bb->max);
+                } else {
+                    actor->plane->Render();
                 }
                 if (actor->plane->object->alive == false) {
                     actor->plane->RenderSmoke();
@@ -1007,7 +1019,11 @@ void SCStrike::runFrame(void) {
     case View::OBJECT:
     case View::AUTO_PILOT:
     case View::FOLLOW:
-        this->player_plane->Render();
+        if (!this->show_bbox) {
+            this->player_plane->Render();
+        } else {
+            this->player_plane->renderPlaneLined();
+        }
         break;
     case View::RIGHT:
         this->cockpit->Render(1);
@@ -1025,12 +1041,184 @@ void SCStrike::runFrame(void) {
         cockpit_pos.x = this->camera->GetPosition().x;
         cockpit_pos.y = this->camera->GetPosition().y;
         cockpit_pos.z = this->camera->GetPosition().z;
+        this->cockpit->RenderHUD();
 
         Vector3D cockpit_rot = {(this->player_plane->azimuthf+900)/10.0f, this->player_plane->elevationf/10.0f, -this->player_plane->twist/10.0f};
         Vector3D cockpit_ajustement = { 0.0f,-3.0f,0.0f};
-
+        Texture *hud_texture = new Texture();
+        RSImage *hud_image = new RSImage();
+        hud_image->palette = &this->cockpit->palette;
+        hud_image->data = this->cockpit->hud_framebuffer->framebuffer;
+        hud_image->width = this->cockpit->hud_framebuffer->width;
+        hud_image->height = this->cockpit->hud_framebuffer->height;
+        hud_texture->Set(hud_image);
+        hud_texture->UpdateContent(hud_image);
         Renderer.drawModel(this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX, cockpit_pos, cockpit_rot, cockpit_ajustement);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {5.8f, 2.0f, -1.22f}, 
+                {5.8f, 2.0f, 1.35f},
+                {6.0f, -0.8f, 1.35f},
+                {6.0f, -0.8f, -1.22f}
+            },
+            hud_texture
+        );
+        Texture *mfd_right_texture = new Texture();
+        RSImage *mfd_right_image = new RSImage();
+        mfd_right_image->palette = &this->cockpit->palette;
+        cockpit->RenderMFDSWeapon({0,0}, cockpit->mfd_right_framebuffer);
+        mfd_right_image->data = this->cockpit->mfd_right_framebuffer->framebuffer;
+        mfd_right_image->width = this->cockpit->mfd_right_framebuffer->width;
+        mfd_right_image->height = this->cockpit->mfd_right_framebuffer->height;
+        mfd_right_texture->Set(mfd_right_image);
+        mfd_right_texture->UpdateContent(mfd_right_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.2f, -2.5f, -3.0f}, 
+                {6.2f, -2.5f, -1.15f},
+                {6.1f, -4.4f, -1.15f},
+                {6.1f, -4.4f, -3.0f}
+            },
+            mfd_right_texture
+        );
+        cockpit->RenderMFDSRadar({0,0}, cockpit->radar_zoom*20000.0f, this->cockpit->radar_mode, cockpit->mfd_left_framebuffer);
+        Texture *mfd_left_texture = new Texture();
+        RSImage *mfd_left_image = new RSImage();
+        mfd_left_image->palette = &this->cockpit->palette;
+        mfd_left_image->data = this->cockpit->mfd_left_framebuffer->framebuffer;
+        mfd_left_image->width = this->cockpit->mfd_left_framebuffer->width;
+        mfd_left_image->height = this->cockpit->mfd_left_framebuffer->height;
+        mfd_left_texture->Set(mfd_left_image);
+        mfd_left_texture->UpdateContent(mfd_left_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.2f, -2.5f, 1.15f}, 
+                {6.2f, -2.5f, 3.0f},
+                {6.1f, -4.4f, 3.0f},
+                {6.1f, -4.4f, 1.15f}
+            },
+            mfd_left_texture
+        );
+        cockpit->raws_framebuffer->FillWithColor(0);
+        cockpit->RenderRAWS({0,0}, cockpit->raws_framebuffer);
+        Texture *raws_texture = new Texture();
+        RSImage *raws_image = new RSImage();
+        raws_image->palette = &this->cockpit->palette;
+        raws_image->data = this->cockpit->raws_framebuffer->framebuffer;
+        raws_image->width = this->cockpit->raws_framebuffer->width;
+        raws_image->height = this->cockpit->raws_framebuffer->height;
+        raws_texture->Set(raws_image);
+        raws_texture->UpdateContent(raws_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.2f, -1.38f, -2.10f}, 
+                {6.2f, -1.38f, -1.15f},
+                {6.1f, -2.45f, -1.15f},
+                {6.1f, -2.45f, -2.10f}
+            },
+            raws_texture
+        );
+        cockpit->target_framebuffer->FillWithColor(255);
+        cockpit->RenderTargetWithCam({0,0}, cockpit->target_framebuffer);
+        Texture *target_texture = new Texture();
+        RSImage *target_image = new RSImage();
+        target_image->palette = &this->cockpit->palette;
+        target_image->data = this->cockpit->target_framebuffer->framebuffer;
+        target_image->width = this->cockpit->target_framebuffer->width;
+        target_image->height = this->cockpit->target_framebuffer->height;
+        target_texture->Set(target_image);
+        target_texture->UpdateContent(target_image);
+        // Calculate a position in front of the camera
+        // Create a fullscreen quad in front of the camera
+        // Adjust for the camera Y-axis offset
+        Vector3D quadPos = camera->GetPosition() + camera->GetForward() * 8.0f;
+        
+        // Set up vectors for billboard creation
+        Vector3D forward = camera->GetForward();
+        Vector3D right = camera->GetRight();
+        Vector3D up = camera->GetUp();
 
+        
+        
+        // Scale factors for quad size
+        float width =4.92f;
+        float height = 3.22f;
+        // Compensate for the 0.45f Y-axis projection offset
+        // We need to shift the entire quad upwards by adding an offset in the up direction
+        float projectionYOffset = -1.5f;
+        Vector3D offsetCompensation = up * projectionYOffset;
+        
+        // Apply the offset to the quad center position
+        Vector3D adjustedQuadPos = quadPos + offsetCompensation;
+        
+        // Define the quad's corners in world space with the adjusted center position
+        Vector3D topLeft = adjustedQuadPos + (up * height) - (right * width);
+        Vector3D topRight = adjustedQuadPos + (up * height) + (right * width);
+        Vector3D bottomRight = adjustedQuadPos - (up * height) + (right * width);
+        Vector3D bottomLeft = adjustedQuadPos - (up * height) - (right * width);
+        
+        // Draw the quad with the target texture
+        Renderer.drawTexturedQuad(
+            {0, 0, 0}, // No position offset needed as we're using world coordinates
+            {0, 0, 0}, // No rotation needed as we're manually setting vertices
+            {
+                topLeft,
+                topRight,
+                bottomRight,
+                bottomLeft
+            },
+            target_texture
+        );
+        cockpit->alti_framebuffer->FillWithColor(0);
+        cockpit->RenderAlti({0,0}, cockpit->alti_framebuffer);
+        Texture *alti_texture = new Texture();
+        RSImage *alti_image = new RSImage();
+        alti_image->palette = &this->cockpit->palette;
+        alti_image->data = this->cockpit->alti_framebuffer->framebuffer;
+        alti_image->width = this->cockpit->alti_framebuffer->width;
+        alti_image->height = this->cockpit->alti_framebuffer->height;
+        alti_texture->Set(alti_image);
+        alti_texture->UpdateContent(alti_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.1f, -3.15f, 0.020f}, 
+                {6.1f, -3.15f, 0.90f},
+                {5.7f, -3.92f, 0.90f},
+                {5.7f, -3.92f, 0.020f}
+            },
+            alti_texture
+        );
+        cockpit->speed_framebuffer->FillWithColor(0);
+        cockpit->RenderSpeedOmetter({0,0}, cockpit->speed_framebuffer);
+        Texture *speed_texture = new Texture();
+        RSImage *speed_image = new RSImage();
+        speed_image->palette = &this->cockpit->palette;
+        speed_image->data = this->cockpit->speed_framebuffer->framebuffer;
+        speed_image->width = this->cockpit->speed_framebuffer->width;
+        speed_image->height = this->cockpit->speed_framebuffer->height;
+        speed_texture->Set(speed_image);
+        speed_texture->UpdateContent(speed_image);
+        Renderer.drawTexturedQuad(
+            cockpit_pos,
+            cockpit_rot,
+            {
+                {6.1f, -3.15f, -0.90f}, 
+                {6.1f, -3.15f, -0.020f},
+                {5.7f, -3.92f, -0.020f},
+                {5.7f, -3.92f, -0.90f}
+            },
+            speed_texture
+        );
         break;
     }
 }

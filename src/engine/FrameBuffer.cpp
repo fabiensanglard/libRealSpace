@@ -6,6 +6,8 @@ FrameBuffer::FrameBuffer(int w, int h) {
     this->height = h;
 }
 FrameBuffer::~FrameBuffer() {
+    if (this->framebuffer == nullptr)
+        return;
     delete (this->framebuffer);
     this->framebuffer = nullptr;
     this->width = 0;
@@ -16,6 +18,8 @@ void FrameBuffer::FillWithColor(uint8_t color) { memset(this->framebuffer, color
 bool FrameBuffer::DrawShape(RLEShape *shape) {
     if (shape != nullptr) {
         size_t byteRead = 0;
+        shape->buffer_size.x = this->width;
+        shape->buffer_size.y = this->height;
         return shape->Expand(this->framebuffer, &byteRead);
     }
     return (false);
@@ -23,12 +27,14 @@ bool FrameBuffer::DrawShape(RLEShape *shape) {
 bool FrameBuffer::DrawShapeWithBox(RLEShape *shape, int bx1, int bx2, int by1, int by2) {
     if (shape != nullptr) {
         size_t byteRead = 0;
+        shape->buffer_size.x = this->width;
+        shape->buffer_size.y = this->height;
         return shape->ExpandWithBox(this->framebuffer, &byteRead, bx1, bx2, by1, by2);
     }
     return (false);
 }
 void FrameBuffer::FillLineColor(size_t lineIndex, uint8_t color) {
-    memset(this->framebuffer + lineIndex * 320, color, 320);
+    memset(this->framebuffer + lineIndex * this->width, color, this->width);
 }
 void FrameBuffer::plot_pixel(int x, int y, uint8_t color) {
     if (x < 0 || x >= this->width || y < 0 || y >= this->height)
@@ -43,11 +49,11 @@ void FrameBuffer::plot_pixel(int x, int y, uint8_t color) {
  **************************************************************************/
 
 void FrameBuffer::line(int x1, int y1, int x2, int y2, uint8_t color) {
-    this->lineWithBoxWithSkip(x1, y1, x2, y2, color, 0, 320, 0, 200, 1);
+    this->lineWithBoxWithSkip(x1, y1, x2, y2, color, 0, this->width, 0, this->height, 1);
 }
 
 void FrameBuffer::lineWithSkip(int x1, int y1, int x2, int y2, uint8_t color, int skip) {
-    this->lineWithBoxWithSkip(x1, y1, x2, y2, color, 0, 320, 0, 200, skip);
+    this->lineWithBoxWithSkip(x1, y1, x2, y2, color, 0, this->width, 0, this->height, skip);
 }
 void FrameBuffer::lineWithBox(int x1, int y1, int x2, int y2, uint8_t color, int bx1, int bx2, int by1, int by2) {
     this->lineWithBoxWithSkip(x1, y1, x2, y2, color, bx1, bx2, by1, by2, 1);
@@ -55,7 +61,7 @@ void FrameBuffer::lineWithBox(int x1, int y1, int x2, int y2, uint8_t color, int
 
 void FrameBuffer::lineWithBoxWithSkip(int x1, int y1, int x2, int y2, uint8_t color, int bx1, int bx2, int by1, int by2,
                                       int skip) {
-    if (x1 > 320 || x2 > 320 || y1 > 200 || y2 > 200)
+    if (x1 > this->width || x2 > this->width || y1 > this->height || y2 > this->height)
         return;
     int i, dx, dy, sdx, sdy, dxabs, dyabs, x, y, px, py;
 
@@ -176,11 +182,11 @@ void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t c
     int startx = coo->x;
     if (coo->y < 0)
         return;
-    if (coo->y > 200)
+    if (coo->y > this->height)
         return;
     if (coo->x < 0)
         return;
-    if (coo->x > 320)
+    if (coo->x > this->width)
         return;
     for (size_t i = 0; i < size; i++) {
 
@@ -206,11 +212,11 @@ void FrameBuffer::PrintText_SM(RSFont *font, Point2D *coo, char *text, uint8_t c
         }
         if (coo->y < 0)
             continue;
-        if (coo->y > 200)
+        if (coo->y > this->height)
             continue;
         if (coo->x < 0)
             continue;
-        if (coo->x + static_cast<int32_t>(spaceSize) > 320)
+        if (coo->x + static_cast<int32_t>(spaceSize) > this->width)
             continue;
         shape->SetPosition(coo);
         DrawShape(shape);
@@ -305,15 +311,15 @@ void FrameBuffer::blitLargeBuffer(uint8_t *srcBuffer, int srcWidth, int srcHeigh
         int destRow = destY + row;
         if (srcRow < 0 || srcRow >= srcHeight)
             continue;
-        if (destRow < 0 || destRow >= 200)
+        if (destRow < 0 || destRow >= this->height)
             continue;
-        int destOffset = destRow * 320;
+        int destOffset = destRow * this->width;
         for (int col = 0; col < width; ++col) {
             int srcCol = srcX + col;
             int destCol = destX + col;
             if (srcCol < 0 || srcCol >= srcWidth)
                 continue;
-            if (destCol < 0 || destCol >= 320)
+            if (destCol < 0 || destCol >= this->width)
                 continue;
             if (srcBuffer[srcRow * srcWidth + srcCol] == 255)
                 continue;

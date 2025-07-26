@@ -76,6 +76,12 @@ void SCMission::loadMission() {
                 SCMissionActors *actor = new SCMissionActors();
                 if (cast->actor == "PLAYER") {
                     actor = new SCMissionActorsPlayer();
+                    if (part->area_id != 255 && part->unknown2 == 0) {
+                        Vector3D correction = this->mission->mission_data.areas[part->area_id]->position;
+                        part->position.x += correction.x;
+                        part->position.y += correction.y;
+                        part->position.z += correction.z;
+                    }
                 }
                 if (cast->actor == "TEAM0") {
                     cast->actor = GameState.wingman;
@@ -109,11 +115,28 @@ void SCMission::loadMission() {
                 if (actor->profile != nullptr && actor->profile->ai.isAI) {
                     if (actor->profile->ai.goal.size() > 0) {
                         actor->pilot = new SCPilot();
-                        actor->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
-                                                23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
-                                                part->position.y, part->position.z);
-                        actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
-                        actor->plane->yaw = (360 - part->azymuth) * (float) M_PI / 180.0f;
+                        BoudingBox *bb = actor->object->entity->GetBoudingBpx();
+                        
+                        actor->plane = new SCJdynPlane(
+                            10.0f,
+                            -7.0f,
+                            40.0f,
+                            40.0f,
+                            30.0f,
+                            100.0f,
+                            actor->object->entity->wing_area,
+                            (float) actor->object->entity->weight_in_kg,
+                            (float) actor->object->entity->jdyn->FUEL,
+                            (float) actor->object->entity->thrust_in_newton,
+                            (bb->max.z - bb->min.z) / 2.0f,
+                            .93f,
+                            120,
+                            this->area,
+                            part->position.x,
+                            part->position.y,
+                            part->position.z
+                        );
+                        actor->plane->yaw = (360 - part->azymuth) * 10.0f;
                         
                         part->weapon_load.shrink_to_fit();
                         if (part->weapon_load.size() > 0) {
@@ -156,7 +179,7 @@ void SCMission::loadMission() {
                     actor->plane = new SCPlane(10.0f, -7.0f, 40.0f, 40.0f, 30.0f, 100.0f, 390.0f, 18000.0f, 8000.0f,
                                                 23000.0f, 32.0f, .93f, 120, this->area, part->position.x,
                                                 part->position.y, part->position.z);
-                    actor->plane->azimuthf = (360 - part->azymuth) * 10.0f;
+                    actor->plane->yaw = (360 - part->azymuth) * 10.0f;
                     actor->plane->simple_simulation = false;
                     actor->plane->yaw = (360 - part->azymuth) * (float) M_PI / 180.0f;
                     actor->plane->object = part;
