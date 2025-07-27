@@ -455,6 +455,10 @@ void RSEntity::parseREAL_OBJT_GRND(uint8_t *data, size_t size) {
     lexer.InitFromRAM(data, size, handlers);
 }
 
+void RSEntity::parseREAL_OBJT_SWPN(uint8_t *data, size_t size) {
+    this->entity_type = EntityType::swpn;
+}
+
 void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
     EXPL *expl = new EXPL();
     
@@ -515,8 +519,13 @@ void RSEntity::parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size) {
     }
 }
 void RSEntity::parseREAL_OBJT_JETP_EJEC(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_SIGN(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_TRGT(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_SIGN(uint8_t *data, size_t size) {
+    ByteStream bs(data);
+    this->radar_signature = bs.ReadInt24LEByte3();
+}
+void RSEntity::parseREAL_OBJT_JETP_TRGT(uint8_t *data, size_t size) {
+    this->target_type = data[0];
+}
 void RSEntity::parseREAL_OBJT_JETP_CTRL(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_TOFF(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_LAND(uint8_t *data, size_t size) {}

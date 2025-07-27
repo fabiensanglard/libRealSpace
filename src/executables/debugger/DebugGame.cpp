@@ -11,6 +11,7 @@
 #include "imgui_impl_sdl2.h"
 #include "DebugGame.h"
 #include "DebugStrike.h"
+#include "DebugGameFlow.h"
 
 #include "../../strike_commander/precomp.h"
 extern RSScreen *Screen;
@@ -156,13 +157,18 @@ void DebugGame::loadSC() {
     ConvAssets.init();
 
     //Add MainMenu activity on the game stack.
-    SCMainMenu* main = new SCMainMenu();
+    DebugGameFlow* main = new DebugGameFlow();
+    
+    GameState.Reset();
+    GameState.player_callsign = "Debug";
+    GameState.player_name = "Debug Player";
+    GameState.player_firstname = "Debug";
+    for (int i=0; i<256; i++) {
+        GameState.requierd_flags[i] = false;
+    }
     main->init();
+
     Game->AddActivity(main);
-    SCAnimationPlayer *intro = new SCAnimationPlayer();
-    intro->init();
-    Game->AddActivity(intro);
-    Game->StopTopActivity();
 }
 
 

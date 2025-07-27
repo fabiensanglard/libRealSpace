@@ -98,6 +98,7 @@ enum EntityType {
     ground = 1,
     jet = 2,
     ornt = 3,
+    swpn = 4,
 };
 class RSImage;
 
@@ -183,6 +184,7 @@ public:
         std::string name;
         RSEntity *objct;
     };
+
     std::vector<RSImage *> images;
     std::vector<Point3D> vertices;
     std::vector<uvxyEntry> uvs;
@@ -199,6 +201,8 @@ public:
     int32_t thrust_in_newton{0};
     int32_t weight_in_kg{0};
     int32_t drag{0};
+    int32_t radar_signature{0};
+    uint8_t target_type{0};
     WDAT *wdat{nullptr};
     DYNN_MISS *dynn_miss{nullptr};
     bool gravity{false};
@@ -244,6 +248,7 @@ private:
     void parseREAL_OBJT(uint8_t *data, size_t size);
     void parseREAL_OBJT_INFO(uint8_t *data, size_t size);
     void parseREAL_OBJT_GRND(uint8_t *data, size_t size);
+    void parseREAL_OBJT_SWPN(uint8_t *data, size_t size);
     void parseREAL_OBJT_ORNT(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS(uint8_t *data, size_t size);
     void parseREAL_OBJT_AFTB(uint8_t *data, size_t size);

@@ -65,7 +65,7 @@ public:
     void loadMiss();
     void runFrame(void);
     std::string gameflow_file;
-private:
+protected:
     RSGameFlow gameFlowParser;
     RSOption optionParser;
     SCEN *sceneOpts;
@@ -93,7 +93,6 @@ private:
     
     RLEShape *test_shape{nullptr};
     SCScene *scen{nullptr};
-    void renderMenu();
     void clicked(std::vector<EFCT *> *script, uint8_t id);
     void returnFromScene(std::vector<EFCT *> *script, uint8_t id);
     void flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id);
@@ -102,6 +101,9 @@ private:
     void checkKeyboard(void);
     SCZone *CheckZones(void);
     void createScen();
+    virtual void flyMission();
+    virtual void playShot(uint8_t shotId);
+    virtual void playConv(uint8_t convId);
     RSImageSet *getShape(uint8_t shpid);
 };
 
