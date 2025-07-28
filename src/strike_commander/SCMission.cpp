@@ -348,6 +348,7 @@ void SCMission::update() {
         }
     }
     for (auto ai_actor : this->actors) {
+        
         if (ai_actor->object->alive == false && ai_actor->is_destroyed == false) {
             ai_actor->is_destroyed = true;
             if (ai_actor->on_is_destroyed.size() > 0) {
@@ -379,10 +380,9 @@ void SCMission::update() {
         if (ai_actor->plane == nullptr) {
             continue;
         }
-        if (ai_actor->plane->status == 0) {
-            continue;
-        }
+        
         ai_actor->plane->Simulate();
+        
         ai_actor->pilot->AutoPilot();
         
         Vector3D npos;
