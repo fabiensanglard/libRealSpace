@@ -82,6 +82,85 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint
     optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     rawpal = optPals.GetEntry(4)->data;
 }
+
+SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint8_t shape_id_offset, bool save)  {
+    this->callback = callback;
+    this->save_mode = save;
+    this->shape_id_offset = shape_id_offset;
+    RSImageSet *uiImageSet = new RSImageSet();
+    TreEntry *tre = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\SAVELOAD.SHP");
+    PakArchive *pak = new PakArchive();
+    pak->InitFromRAM("SAVELOAD.SHP", tre->data, tre->size);
+    uiImageSet->InitFromPakArchive(pak,0);
+    this->uiImageSet = uiImageSet;
+    this->color_offset = 49;
+    SCButton *button;
+
+    Point2D frp = {(320-uiImageSet->GetShape(0)->GetWidth())/2, (200-uiImageSet->GetShape(0)->GetHeight())/2};
+    Point2D buttonDimension = {75, 12};
+    Point2D loadGamePosition = {frp.x+54, frp.y+97};
+    Point2D cancelPosition = {frp.x+10, frp.y+112};
+    Point2D quitToDosPosition = {frp.x+95, frp.y+112};
+
+    Point2D arrowDimentions = {20, 11};
+    Point2D fileUp = {frp.x+9, frp.y+41};
+    Point2D fileDown = {frp.x+9, frp.y+83};
+
+    Point2D loadTitlePosition = {frp.x+36, frp.y+6};
+    uiImageSet->GetShape(1)->position=loadTitlePosition;
+
+    button = new SCButton();
+    button->InitBehavior(std::bind(&SCFileRequester::loadFile, this), loadGamePosition, buttonDimension);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(shape_id_offset+2);
+    button->appearance[SCButton::APR_UP].position=loadGamePosition;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(shape_id_offset+3);
+    button->appearance[SCButton::APR_DOWN].position=loadGamePosition;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    button = new SCButton();
+    button->InitBehavior(std::bind(&SCFileRequester::cancel, this), cancelPosition, buttonDimension);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(shape_id_offset+6);
+    button->appearance[SCButton::APR_UP].position=cancelPosition;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(shape_id_offset+7);
+    button->appearance[SCButton::APR_DOWN].position=cancelPosition;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    button = new SCButton();
+    button->InitBehavior(nullptr, quitToDosPosition, buttonDimension);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(shape_id_offset+8);
+    button->appearance[SCButton::APR_UP].position=quitToDosPosition;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(shape_id_offset+9);
+    button->appearance[SCButton::APR_DOWN].position=quitToDosPosition;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    button = new SCButton();
+    button->InitBehavior(std::bind(&SCFileRequester::fileUp, this), fileUp, arrowDimentions);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(shape_id_offset+10);
+    button->appearance[SCButton::APR_UP].position=fileUp;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(shape_id_offset+11);
+    button->appearance[SCButton::APR_DOWN].position=fileUp;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    button = new SCButton();
+    button->InitBehavior(std::bind(&SCFileRequester::fileDown, this), fileDown, arrowDimentions);
+    button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(shape_id_offset+12);
+    button->appearance[SCButton::APR_UP].position=fileDown;
+    button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(shape_id_offset+13);
+    button->appearance[SCButton::APR_DOWN].position=fileDown;
+    button->SetEnable(true);
+    buttons.push_back(button);
+
+    this->font = FontManager.GetFont("..\\..\\DATA\\FONTS\\SM-FONT.SHP");
+    TreEntry *optPalettesEntry = Assets.GetEntryByName(Assets.optpals_filename);
+    
+    optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
+    rawpal = optPals.GetEntry(4)->data;
+}
+
 SCFileRequester::~SCFileRequester() {
     delete this->uiImageSet;
 }
@@ -94,25 +173,27 @@ void SCFileRequester::draw(FrameBuffer *fb) {
     fb2->DrawShape(shape);
     
     fb->blitLargeBuffer(fb2->framebuffer, 320, 200, shape->GetLeft(), shape->GetTop(), (320-shape->GetWidth())/2, (200-shape->GetHeight())/2, 182, 131);
-    RLEShape *shape2 = this->uiImageSet->GetShape(this->shape_id_offset+1);
-    Point2D shape2Pos = {
-        0,
-        0
-    };
-    shape2->SetPosition(&shape2Pos);
-    fb2->FillWithColor(255);
-    fb2->DrawShape(shape2);
-    fb->blitLargeBuffer(
-        fb2->framebuffer,
-        320,
-        200,
-        0,
-        0,
-        (320-shape->GetWidth())/2+(shape2->GetWidth()/2)-18,
-        (200-shape->GetHeight())/2+(shape2->GetHeight()/2)+1,
-        107,
-        12
-    );
+    if (!this->save_mode) {
+        RLEShape *shape2 = this->uiImageSet->GetShape(this->shape_id_offset+1);
+        Point2D shape2Pos = {
+            0,
+            0
+        };
+        shape2->SetPosition(&shape2Pos);
+        fb2->FillWithColor(255);
+        fb2->DrawShape(shape2);
+        fb->blitLargeBuffer(
+            fb2->framebuffer,
+            320,
+            200,
+            0,
+            0,
+            (320-shape->GetWidth())/2+(shape2->GetWidth()/2)-18,
+            (200-shape->GetHeight())/2+(shape2->GetHeight()/2)+1,
+            107,
+            12
+        );
+    }
     for (auto btn: this->buttons) {
         fb->DrawShape(&btn->appearance[btn->GetAppearance()]);
     }

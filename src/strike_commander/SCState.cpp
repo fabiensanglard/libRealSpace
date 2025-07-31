@@ -109,7 +109,94 @@ void SCState::Load(std::string filename) {
     this->current_scene = buffer[0x0A];
 }
 
-void SCState::Save(std::string filename) {}
+void SCState::Save(std::string filename) {
+    std::vector<uint8_t> buffer(0x24F, 0); // Create buffer with enough space and initialize with zeros
+
+    // Write header
+    std::string header = "SCB1.22";
+    std::copy(header.begin(), header.end(), buffer.begin());
+
+    // Current mission, mission ID, and scene
+    buffer[0x08] = this->current_mission;
+    buffer[0x09] = this->mission_id;
+    buffer[0x0A] = this->current_scene;
+
+    // Required flags
+    for (int i = 0; i < 256; i++) {
+        if (i < this->requierd_flags.size())
+            buffer[0x0B + i] = this->requierd_flags[i];
+    }
+
+    // Mission flown success
+    for (int i = 0; i < 46; i++) {
+        if (i < this->mission_flyed_success.size())
+            buffer[0x10B + i] = this->mission_flyed_success[i];
+    }
+
+    // Money values
+    buffer[0x189] = (this->proj_cash / 1000) & 0xFF;
+    buffer[0x18A] = ((this->proj_cash / 1000) >> 8) & 0xFF;
+    buffer[0x18D] = (this->over_head / 1000) & 0xFF;
+    buffer[0x18E] = ((this->over_head / 1000) >> 8) & 0xFF;
+
+    // Kills
+    buffer[0x199] = this->ground_kills;
+    buffer[0x19B] = this->air_kills;
+
+    // Kill board
+    for (int i = 0; i < 6; i++) {
+        // Skip writing 'alive' status (offset +0) as it's not read in Load
+        // Write ground kills
+        buffer[0x19D + i*0x06 + 2] = this->kill_board[i+1][0] & 0xFF;
+        buffer[0x19D + i*0x06 + 3] = (this->kill_board[i+1][0] >> 8) & 0xFF;
+        // Write air kills
+        buffer[0x19D + i*0x06 + 4] = this->kill_board[i+1][1] & 0xFF;
+        buffer[0x19D + i*0x06 + 5] = (this->kill_board[i+1][1] >> 8) & 0xFF;
+    }
+
+    // Weapon inventory
+    if (this->weapon_inventory.count(ID_AIM9J)) buffer[0x16F] = this->weapon_inventory[ID_AIM9J];
+    if (this->weapon_inventory.count(ID_AIM9M)) buffer[0x171] = this->weapon_inventory[ID_AIM9M];
+    if (this->weapon_inventory.count(ID_AGM65D)) buffer[0x173] = this->weapon_inventory[ID_AGM65D];
+    if (this->weapon_inventory.count(ID_DURANDAL)) buffer[0x175] = this->weapon_inventory[ID_DURANDAL];
+    if (this->weapon_inventory.count(ID_MK20)) buffer[0x177] = this->weapon_inventory[ID_MK20];
+    if (this->weapon_inventory.count(ID_MK82)) buffer[0x179] = this->weapon_inventory[ID_MK82];
+    if (this->weapon_inventory.count(ID_GBU15)) buffer[0x17B] = this->weapon_inventory[ID_GBU15];
+    if (this->weapon_inventory.count(ID_LAU3)) buffer[0x17D] = this->weapon_inventory[ID_LAU3];
+    if (this->weapon_inventory.count(ID_AIM120)) buffer[0x17F] = this->weapon_inventory[ID_AIM120];
+
+    // Player names
+    std::copy(this->player_name.begin(), 
+              this->player_name.length() > 19 ? this->player_name.begin() + 19 : this->player_name.end(), 
+              buffer.begin() + 0x1C9);
+
+    std::copy(this->player_firstname.begin(), 
+              this->player_firstname.length() > 19 ? this->player_firstname.begin() + 19 : this->player_firstname.end(), 
+              buffer.begin() + 0x1DD);
+
+    std::copy(this->player_callsign.begin(), 
+              this->player_callsign.length() > 19 ? this->player_callsign.begin() + 19 : this->player_callsign.end(), 
+              buffer.begin() + 0x1F1);
+
+    // Wingman
+    std::copy(this->wingman.begin(), 
+              this->wingman.length() > 19 ? this->wingman.begin() + 19 : this->wingman.end(), 
+              buffer.begin() + 0x208);
+
+    // Score
+    buffer[0x24D] = this->score & 0xFF;
+    buffer[0x24E] = (this->score >> 8) & 0xFF;
+
+    // Write to file
+    std::ofstream file(filename, std::ios::binary);
+    if (!file) {
+        std::cerr << "Failed to open file for writing: " << filename << std::endl;
+        return;
+    }
+
+    file.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+    file.close();
+}
 
 void SCState::Reset() {
     this->requierd_flags.clear();

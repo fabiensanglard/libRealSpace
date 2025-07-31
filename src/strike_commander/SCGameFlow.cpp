@@ -90,6 +90,12 @@ void SCGameFlow::loadGame(std::string filename) {
     
 }
 
+void SCGameFlow::saveGame(std::string filename) {
+    GameState.Save(filename);
+    this->frequest->requested_file = "";
+}
+
+
 void SCGameFlow::returnFromScene(std::vector<EFCT *> *script, uint8_t id) { this->createScen(); }
 void SCGameFlow::flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id) {
     switch (id) {
@@ -341,8 +347,20 @@ void SCGameFlow::runEffect() {
             }    
             this->frequest->opened = true;
             this->frequest->loadFiles();
-            
         break;
+        case EFECT_OPT_SAVE_GAME:
+            if (this->frequest == nullptr) {
+                uint8_t soffset = 0;
+                if (this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID == 29) {
+                    soffset = 21;
+                } else {
+                    soffset = 0;
+                }
+                this->frequest = new SCFileRequester(std::bind(&SCGameFlow::saveGame, this, std::placeholders::_1),soffset, true);
+            }    
+            this->frequest->opened = true;
+            this->frequest->loadFiles();
+            break;
         case EFECT_OPT_LOOK_AT_LEDGER:
             this->zones->clear();
             if (this->scen != nullptr) {

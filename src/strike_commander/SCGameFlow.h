@@ -96,6 +96,7 @@ protected:
     SCFileRequester *frequest{nullptr};
     void clicked(std::vector<EFCT *> *script, uint8_t id);
     void loadGame(std::string filename);
+    void saveGame(std::string filename);
     void returnFromScene(std::vector<EFCT *> *script, uint8_t id);
     void flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id);
     void runEffect();
