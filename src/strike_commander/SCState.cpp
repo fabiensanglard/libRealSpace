@@ -115,7 +115,7 @@ void SCState::Save(std::string filename) {
     // Write header
     std::string header = "SCB1.22";
     std::copy(header.begin(), header.end(), buffer.begin());
-
+    buffer[0x07] = 0xFF;
     // Current mission, mission ID, and scene
     buffer[0x08] = this->current_mission;
     buffer[0x09] = this->mission_id;
