@@ -235,7 +235,7 @@ void DebugGameFlow::renderGameState() {
 
 void DebugGameFlow::renderMissionInfos() {
     ImGuiTreeNodeFlags tflag = ImGuiTreeNodeFlags_DefaultOpen;
-    ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, this->current_scen);
+    ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID);
     ImGui::Text("Nb Miss %d", this->gameFlowParser.game.game.size());
     ImGui::Text("Nb Layers %d", this->layers.size());
     ImGui::Text("Nb Scenes %d", this->gameFlowParser.game.game[this->current_miss]->scen.size());
@@ -255,6 +255,11 @@ void DebugGameFlow::renderMissionInfos() {
                 if (ImGui::TreeNodeEx((void *)(intptr_t)zone->id, tflag, "Zone %d", zone->id)) {
                     ImGui::Text(zone->label->c_str());
                     animatedSprites *sprite = zone->sprite;
+                    if (sprite == nullptr) {
+                        ImGui::Text("No sprite");
+                        ImGui::TreePop();
+                        continue;
+                    }
                     if (zone->IsActive(&GameState.requierd_flags)) {
                         ImGui::Text("Active");
                     }
@@ -270,7 +275,7 @@ void DebugGameFlow::renderMissionInfos() {
                             ImGui::Text("Rect selection area");
                         }
 
-                        if (sprite->efect->size() > 0) {
+                        if (sprite->efect != nullptr && sprite->efect->size() > 0) {
                             if (ImGui::TreeNodeEx("Efect",tflag)) {
                                 for (auto efct : *sprite->efect) {
                                     ImGui::Text("OPC: %s\tVAL: %03d", game_flow_op_name[GameFlowOpCode(efct->opcode)].c_str(), efct->value);

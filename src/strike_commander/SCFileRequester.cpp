@@ -94,8 +94,13 @@ void SCFileRequester::draw(FrameBuffer *fb) {
     fb2->DrawShape(shape);
     
     fb->blitLargeBuffer(fb2->framebuffer, 320, 200, shape->GetLeft(), shape->GetTop(), (320-shape->GetWidth())/2, (200-shape->GetHeight())/2, 182, 131);
-    RLEShape *shape2 = this->uiImageSet->GetShape(shape_id_offset+1);
-    fb2->FillWithColor(0);
+    RLEShape *shape2 = this->uiImageSet->GetShape(this->shape_id_offset+1);
+    Point2D shape2Pos = {
+        0,
+        0
+    };
+    shape2->SetPosition(&shape2Pos);
+    fb2->FillWithColor(255);
     fb2->DrawShape(shape2);
     fb->blitLargeBuffer(
         fb2->framebuffer,

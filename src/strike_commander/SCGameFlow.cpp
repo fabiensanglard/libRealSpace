@@ -331,10 +331,15 @@ void SCGameFlow::runEffect() {
             break;
         case EFECT_OPT_LOAD_GAME:
             if (this->frequest == nullptr) {
-                this->frequest = new SCFileRequester(std::bind(&SCGameFlow::loadGame, this, std::placeholders::_1),0);
+                uint8_t soffset = 0;
+                if (this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID == 29) {
+                    soffset = 21;
+                } else {
+                    soffset = 0;
+                }
+                this->frequest = new SCFileRequester(std::bind(&SCGameFlow::loadGame, this, std::placeholders::_1),soffset);
             }    
             this->frequest->opened = true;
-            this->frequest->shape_id_offset = 0;
             this->frequest->loadFiles();
             
         break;
@@ -703,9 +708,7 @@ void SCGameFlow::runFrame(void) {
         delete this->frequest;
         this->frequest = nullptr;
     }
-    if (this->frequest != nullptr && this->frequest->opened) {
-        this->frequest->checkevents();
-    }
+    
     if (this->cutsenes.size() > 0) {
         SCShot *c = this->cutsenes.front();
         this->cutsenes.pop();
@@ -744,7 +747,9 @@ void SCGameFlow::runFrame(void) {
     if (fpsupdate) {
         this->fps = (SDL_GetTicks() / 10);
     }
-    checkKeyboard();
+    if (this->frequest != nullptr && this->frequest->opened) {
+        this->frequest->checkevents();
+    }
     VGA.Activate();
     VGA.GetFrameBuffer()->FillWithColor(0);
     if (this->scen != nullptr) {
@@ -752,7 +757,9 @@ void SCGameFlow::runFrame(void) {
         if (this->test_shape != nullptr) {
             VGA.GetFrameBuffer()->DrawShape(this->test_shape);
         }
-        this->CheckZones();
+        if (this->frequest == nullptr || !this->frequest->opened) {
+            this->CheckZones();
+        }
     }
     VGA.VSync();
     VGA.SwithBuffers();
