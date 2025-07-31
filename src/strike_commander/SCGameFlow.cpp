@@ -11,6 +11,7 @@
 #include <imgui.h>
 #include <imgui_impl_opengl2.h>
 #include <imgui_impl_sdl2.h>
+#include "SCGameFlow.h"
 
 /**
  * SCGameFlow constructor.
@@ -28,6 +29,7 @@ SCGameFlow::SCGameFlow() {
     this->currentOptCode = 0;
     this->fps = SDL_GetTicks() / 10;
     this->zones = new std::vector<SCZone *>();
+    this->frequest = nullptr;
 }
 
 SCGameFlow::~SCGameFlow() {}
@@ -64,6 +66,29 @@ void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
  *
  * @throws None
  */
+
+void SCGameFlow::loadGame(std::string filename) {
+    GameState.Load(filename);
+    this->frequest->requested_file = "";
+    this->efect = nullptr;
+    this->current_miss = GameState.current_mission;
+    this->next_miss = GameState.next_mission;
+    int i=0;
+    for (auto sc: this->gameFlowParser.game.game[this->current_miss]->scen) {
+        if (sc->info.ID == GameState.current_scene) {
+            this->current_scen = i;
+            break;
+        }
+        i++;
+    }
+    if (this->gameFlowParser.game.game[this->current_miss]->efct != nullptr) {
+        this->efect = this->gameFlowParser.game.game[this->current_miss]->efct;
+    }
+    this->runEffectAfterLoad();
+    this->efect = nullptr;
+    this->loadMiss();
+    
+}
 
 void SCGameFlow::returnFromScene(std::vector<EFCT *> *script, uint8_t id) { this->createScen(); }
 void SCGameFlow::flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id) {
@@ -304,6 +329,15 @@ void SCGameFlow::runEffect() {
                 ifStack.push(false);
             }
             break;
+        case EFECT_OPT_LOAD_GAME:
+            if (this->frequest == nullptr) {
+                this->frequest = new SCFileRequester(std::bind(&SCGameFlow::loadGame, this, std::placeholders::_1),0);
+            }    
+            this->frequest->opened = true;
+            this->frequest->shape_id_offset = 0;
+            this->frequest->loadFiles();
+            
+        break;
         case EFECT_OPT_LOOK_AT_LEDGER:
             this->zones->clear();
             if (this->scen != nullptr) {
@@ -665,7 +699,13 @@ RSImageSet *SCGameFlow::getShape(uint8_t shpid) {
  * @throws None
  */
 void SCGameFlow::runFrame(void) {
-
+    if (this->frequest != nullptr && !this->frequest->opened) {
+        delete this->frequest;
+        this->frequest = nullptr;
+    }
+    if (this->frequest != nullptr && this->frequest->opened) {
+        this->frequest->checkevents();
+    }
     if (this->cutsenes.size() > 0) {
         SCShot *c = this->cutsenes.front();
         this->cutsenes.pop();
@@ -718,6 +758,9 @@ void SCGameFlow::runFrame(void) {
     VGA.SwithBuffers();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
+    if (this->frequest != nullptr && this->frequest->opened) {
+        this->frequest->draw(VGA.GetFrameBuffer());
+    }
     Mouse.Draw();
     VGA.VSync();
     VGA.SwithBuffers();

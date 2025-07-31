@@ -234,49 +234,31 @@ void DebugGameFlow::renderGameState() {
 }
 
 void DebugGameFlow::renderMissionInfos() {
+    ImGuiTreeNodeFlags tflag = ImGuiTreeNodeFlags_DefaultOpen;
     ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, this->current_scen);
     ImGui::Text("Nb Miss %d", this->gameFlowParser.game.game.size());
     ImGui::Text("Nb Layers %d", this->layers.size());
     ImGui::Text("Nb Scenes %d", this->gameFlowParser.game.game[this->current_miss]->scen.size());
     if (this->gameFlowParser.game.game[this->current_miss]->efct != nullptr) {
         ImGui::Text("Miss has efct");
-        if (ImGui::TreeNode("Miss Efect")) {
+        if (ImGui::TreeNodeEx("Miss Efect", tflag)) {
             for (auto effect : *this->gameFlowParser.game.game[this->current_miss]->efct) {
                 ImGui::Text("OPC: %s\tVAL: %03d", game_flow_op_name[GameFlowOpCode(effect->opcode)].c_str(), effect->value);
             }
             ImGui::TreePop();
         }
     }
-    if (ImGui::TreeNode("Required Flags")) {
-        int nb_flags = (int) GameState.requierd_flags.size();
-        int nb_rows = nb_flags / 8;
-        if (ImGui::BeginTable("Flags", 8)) {    
-            auto it = GameState.requierd_flags.begin();
-            for (int i = 0; i < nb_rows; i++) {
-                ImGui::TableNextRow();
-                for (int j = 0; j < 8; j++) {
-                    if (it != GameState.requierd_flags.end()) {
-                        ImGui::TableSetColumnIndex(j);
-                        ImGui::Text("[%03d]=%d", it->first, it->second);
-                        ++it;
-                    }
-                }
-            }
-            ImGui::EndTable();
-        }
-        ImGui::TreePop();
-    }
     ImGui::Text("Nb Zones %d", this->zones->size());
     if (this->zones->size() > 1) {
-        if (ImGui::TreeNode("Zones")) {
+        if (ImGui::TreeNodeEx("Zones", tflag)) {
             for (auto zone : *this->zones) {
-                if (ImGui::TreeNode((void *)(intptr_t)zone->id, "Zone %d", zone->id)) {
+                if (ImGui::TreeNodeEx((void *)(intptr_t)zone->id, tflag, "Zone %d", zone->id)) {
                     ImGui::Text(zone->label->c_str());
                     animatedSprites *sprite = zone->sprite;
                     if (zone->IsActive(&GameState.requierd_flags)) {
                         ImGui::Text("Active");
                     }
-                    if (ImGui::TreeNode((void *)(intptr_t)sprite->shapid, "Sprite, Frame %d, %d %d",
+                    if (ImGui::TreeNodeEx((void *)(intptr_t)sprite->shapid, tflag ,"Sprite, Frame %d, %d %d",
                                         sprite->frameCounter, sprite->shapid, sprite->unkown)) {
                         if (sprite->frames != nullptr) {
                             ImGui::Text("Frames %d", sprite->frames->size());
@@ -289,7 +271,7 @@ void DebugGameFlow::renderMissionInfos() {
                         }
 
                         if (sprite->efect->size() > 0) {
-                            if (ImGui::TreeNode("Efect")) {
+                            if (ImGui::TreeNodeEx("Efect",tflag)) {
                                 for (auto efct : *sprite->efect) {
                                     ImGui::Text("OPC: %s\tVAL: %03d", game_flow_op_name[GameFlowOpCode(efct->opcode)].c_str(), efct->value);
                                 }
@@ -297,7 +279,7 @@ void DebugGameFlow::renderMissionInfos() {
                             }
                         }
                         if (sprite->requ != nullptr && sprite->requ->size() > 0) {
-                            if (ImGui::TreeNode("Required Flags")) {
+                            if (ImGui::TreeNodeEx("Required Flags", tflag)) {
                                 for (auto requ : *sprite->requ) {
                                     ImGui::Text("OPC: %03d\tVAL: %03d", requ->op, requ->value);
                                 }
@@ -312,23 +294,23 @@ void DebugGameFlow::renderMissionInfos() {
             ImGui::TreePop();
         }
     }
-    if (ImGui::TreeNode("Scene Info")) {
+    if (ImGui::TreeNodeEx("Scene Info",tflag)) {
         this->sceneOpts = this->scen->sceneOpts;
         if (this->sceneOpts->foreground != nullptr) {
-            if (ImGui::TreeNode("Forground Sprites")) {
+            if (ImGui::TreeNodeEx("Forground Sprites", tflag)) {
                 for (auto sprt : this->sceneOpts->foreground->sprites) {
                     ImGui::Text("Sprite %d", sprt.second->sprite.SHP_ID);
                 }
                 ImGui::TreePop();
             }
         }
-        if (ImGui::TreeNode("Background")) {
+        if (ImGui::TreeNodeEx("Background", tflag)) {
             for (auto bg : this->sceneOpts->background->images) {
                 ImGui::Text("Image %d", bg->ID);
             }
             ImGui::TreePop();
         }
-        if (ImGui::TreeNode("Extras")) {
+        if (ImGui::TreeNodeEx("Extras", tflag)) {
             for (auto extra : this->sceneOpts->extr) {
                 ImGui::Text("Extra %d", extra->SHAPE_ID);
             }

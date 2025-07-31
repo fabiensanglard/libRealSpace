@@ -77,7 +77,7 @@ void SCMainMenu::init(void) {
     LoadBackgrounds();
 
     SetTitle("Neo Strike Commander");
-    this->frequest = new SCFileRequester(std::bind(&SCMainMenu::LoadGame, this, std::placeholders::_1));
+    this->frequest = new SCFileRequester(std::bind(&SCMainMenu::LoadGame, this, std::placeholders::_1),42);
     timer = 4200;
 }
 void SCMainMenu::LoadGame(std::string filename) {

@@ -6,8 +6,9 @@ void SCFileRequester::cancel() {
     this->opened = false;
 }
 
-SCFileRequester::SCFileRequester(std::function<void(std::string)> callback) {
+SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint8_t shape_id_offset = 42)  {
     this->callback = callback;
+    this->shape_id_offset = shape_id_offset;
     RSImageSet *uiImageSet = new RSImageSet();
     TreEntry *tre = Assets.GetEntryByName("..\\..\\DATA\\GAMEFLOW\\SAVELOAD.SHP");
     PakArchive *pak = new PakArchive();
