@@ -46,11 +46,8 @@ A cross-platform open-source project aimed at recreating the RealSpace engine or
 
 ## Goal
 
-The long term goal is to be able to play Strike Commander with a Virtual Reality Headset (Oculus Rift), providing:
-- Virtual Reality cockpit implementation
-- 6DOF head tracking for immersive flight experience
-- VR-optimized user interface elements
-- Hand tracking for cockpit interaction
+The long term goal is to be able to play Strike Commander with a Virtual Reality Headset (Oculus Rift)
+
 
 ## Dependencies
 
