@@ -87,6 +87,7 @@ void SCState::Load(std::string filename) {
         int alive = buffer[0x19D + i*0x06];
         int ground_kills = (buffer[0x19D + i*0x06+3] << 8) | buffer[0x19D + i*0x06+2];
         int air_kills = (buffer[0x19D + i*0x06+5] << 8) | buffer[0x19D + i*0x06+4];
+        this->pilot_roaster[i+1] = alive;
         this->kill_board[i+1][0] = ground_kills;
         this->kill_board[i+1][1] = air_kills;
     }
@@ -107,6 +108,7 @@ void SCState::Load(std::string filename) {
     this->current_mission = buffer[0x08];
     this->mission_id = buffer[0x09];
     this->current_scene = buffer[0x0A];
+    this->tune_modifier = buffer[0x24C];
 }
 
 void SCState::Save(std::string filename) {
@@ -145,7 +147,7 @@ void SCState::Save(std::string filename) {
 
     // Kill board
     for (int i = 0; i < 6; i++) {
-        // Skip writing 'alive' status (offset +0) as it's not read in Load
+        buffer[0x19D + i*0x06] = this->pilot_roaster[i+1];
         // Write ground kills
         buffer[0x19D + i*0x06 + 2] = this->kill_board[i+1][0] & 0xFF;
         buffer[0x19D + i*0x06 + 3] = (this->kill_board[i+1][0] >> 8) & 0xFF;
@@ -183,6 +185,7 @@ void SCState::Save(std::string filename) {
               this->wingman.length() > 19 ? this->wingman.begin() + 19 : this->wingman.end(), 
               buffer.begin() + 0x208);
 
+    buffer[0x24C] = this->tune_modifier;
     // Score
     buffer[0x24D] = this->score & 0xFF;
     buffer[0x24E] = (this->score >> 8) & 0xFF;

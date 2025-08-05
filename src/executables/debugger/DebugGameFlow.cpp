@@ -219,7 +219,7 @@ void DebugGameFlow::renderGameState() {
         }
         ImGui::EndTable();
     }
-    
+    ImGui::Text("Tune Modifier %d", GameState.tune_modifier);
     ImGui::Text("Mission ID %d", GameState.mission_id);
     ImGui::Text("Mission Flyed %d", GameState.mission_flyed);
     ImGui::Text("Mission Accepted %d", GameState.mission_accepted);

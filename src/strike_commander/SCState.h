@@ -16,7 +16,8 @@ public:
     std::vector<int64_t> missions_flags;
     std::map<uint8_t, std::uint8_t> weapon_load_out;
     std::map<uint8_t, bool> aircraftHooks;
-    std::map<uint8_t, std::map<uint8_t, uint8_t>> kill_board;
+    std::map<uint8_t, std::map<uint8_t, int16_t>> kill_board;
+    std::map<uint8_t, uint8_t> pilot_roaster;
     std::map<uint8_t, uint16_t> weapon_inventory;
     bool mission_accepted{false};
     uint8_t current_mission{0};
