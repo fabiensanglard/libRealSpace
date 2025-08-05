@@ -112,7 +112,7 @@ void SCState::Load(std::string filename) {
 }
 
 void SCState::Save(std::string filename) {
-    std::vector<uint8_t> buffer(0x24F, 0); // Create buffer with enough space and initialize with zeros
+    std::vector<uint8_t> buffer(0x251, 0); // Create buffer with enough space and initialize with zeros
 
     // Write header
     std::string header = "SCB1.22";
@@ -189,7 +189,8 @@ void SCState::Save(std::string filename) {
     // Score
     buffer[0x24D] = this->score & 0xFF;
     buffer[0x24E] = (this->score >> 8) & 0xFF;
-
+    buffer[0x24F] = 0x00; // Padding byte
+    buffer[0x250] = 0x00; // Padding byte
     // Write to file
     std::ofstream file(filename, std::ios::binary);
     if (!file) {
