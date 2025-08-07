@@ -124,11 +124,13 @@ void DebugGame::loadSC() {
     // Load all TREs and PAKs
     
     std::vector<std::string> cdTreFiles = {
-        "BIGTRE.TRE",
-        "LILTRE.TRE",
-        "VOCLIST.TRE"
+        "GAMEFLOW.TRE",
+        "MISC.TRE",
+        "MISSIONS.TRE",
+        "OBJECTS.TRE",
+        "SOUND.TRE",
+        "TEXTURES.TRE"
     };
-    Assets.ReadISOImage("./SC.DAT");
     Assets.init(cdTreFiles);
     
     Assets.intel_root_path = "..\\..\\DATA\\INTEL\\";

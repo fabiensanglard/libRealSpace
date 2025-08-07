@@ -900,29 +900,38 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size) {
 
     uint32_t width = stream.ReadShort();
     uint32_t height = stream.ReadShort();
-    uint16_t unknown = stream.ReadShort();
-    if (width * height * unknown <= size) {
-        printf("Anim\n");
-    }
-    image->Create(name, width, height, 0);
+    uint16_t nbframe = stream.ReadShort();
+    
+    
     uint8_t *src = stream.GetPosition();
     
     uint8_t *pic_data = nullptr;
     size_t csize = 0;
     if (src[0]=='L' && src[1]=='Z'){
+        image->Create(name, width, height*nbframe, 0);
         LZBuffer lzbuffer;
         size_t remain = size - ((src+4) - data);
-        pic_data = lzbuffer.DecodeLZW(src+4,remain,csize);
+        size_t byte_read = 0;
+        pic_data = lzbuffer.DecodeLZWNoStop(src+4,remain,csize);
+        if (csize == width * height * nbframe) {
+            printf("Image %s decoded successfully with size %zu\n", name, csize);
+        }
+        if (pic_data == nullptr) {
+            printf("Error decoding image %s\n", name);
+            return;
+        }
         src = pic_data;
         image->UpdateContent(src);
         AddImage(image);
     }  else if (src[0]=='P' && src[1]=='+'){
+        image->Create(name, width, height, 0);
         uint8_t *pic_data = new uint8_t[width * height];
         for (size_t i = 0; i < width * height; i++) {
             pic_data[i] = i%256;
         }
         src = pic_data;
     } else {
+        image->Create(name, width, height*nbframe, 0);
         image->UpdateContent(src);
         AddImage(image);
     }

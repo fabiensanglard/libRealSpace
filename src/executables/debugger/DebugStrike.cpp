@@ -812,7 +812,7 @@ void DebugStrike::renderMenu() {
     static bool show_mission = false;
     static bool show_mission_parts_and_areas = false;
     static bool show_simulation_config = false;
-
+    static bool show_textures = false;
     static bool show_music_player = false;
     static bool show_ai = false;
 
@@ -836,6 +836,7 @@ void DebugStrike::renderMenu() {
         ImGui::MenuItem("Off camera", NULL, &show_offcam);
         ImGui::MenuItem("Load plane", NULL, &show_load_plane);
         ImGui::MenuItem("Radar", NULL, &show_radar);
+        ImGui::MenuItem("Show Textures", NULL, &show_textures);
         ImGui::EndMenu();
     }
     int sceneid = -1;
@@ -846,6 +847,9 @@ void DebugStrike::renderMenu() {
                 this->player_plane->tps, this->current_mission->mission->mission_data.name.c_str(),
                 this->miss_file_name.c_str(), area_id);
 
+    if (show_textures) {
+        this->showTextures();
+    }
     if (show_offcam) {
         ImGui::Begin("Offcam", &show_offcam);
         showOffCamera();
@@ -1564,4 +1568,30 @@ void DebugStrike::renderWorkingRegisters() {
         }
         ImGui::EndTable();
     }
+}
+void DebugStrike::showTextures() {
+    ImGui::Begin("Textures");
+    std::vector<Texture *> textures;
+    for (const auto part: this->current_mission->mission->mission_data.parts) {
+        if (part->entity != nullptr) {
+            for (const auto &texture : part->entity->images) {
+                textures.push_back(texture->GetTexture());
+            }
+        }
+    }
+    ImGui::Text("Textures loaded: %d", textures.size());
+    if (ImGui::BeginTable("TexturesTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+        ImGui::TableSetupColumn("Texture Name");
+        ImGui::TableSetupColumn("Texture ID");
+        ImGui::TableHeadersRow();
+        for (const auto &texture : textures) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("%s", texture->name);
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Image((ImTextureID)(intptr_t)texture->id, ImVec2(100, 100));
+        }
+        ImGui::EndTable();
+    }
+    ImGui::End();
 }

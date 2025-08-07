@@ -109,7 +109,10 @@ void DebugScreen::Refresh(void){
     if (ImGui::Begin("##Fullscreen window", &p_open, flags)) {
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Strike Commander")) {
+                if (ImGui::MenuItem("Strike Commander Floppy")) {
+                    debugGameInstance.loadSC();
+                }
+                if (ImGui::MenuItem("Strike Commander CD")) {
                     debugGameInstance.loadSC();
                 }
                 if (ImGui::MenuItem("Tactical Operations")) {

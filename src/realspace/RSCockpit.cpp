@@ -73,8 +73,8 @@ void RSCockpit::parseARTP(uint8_t* data, size_t size) {
 }
 void RSCockpit::parseVTMP(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
-    memcpy(data2, data, size);
-    this->VTMP.init(data2, size);
+    memcpy(data2, data+2, size-2);
+    this->VTMP.init(data2, size-2);
 }
 void RSCockpit::parseEJEC(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);

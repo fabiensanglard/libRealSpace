@@ -8,6 +8,7 @@ private:
     void loadPlane();
     void showActorDetails(SCMissionActors* actor);
     void showOffCamera();
+    void showTextures();
     enum class DebugEntityMode {
         None,
         Actor,
