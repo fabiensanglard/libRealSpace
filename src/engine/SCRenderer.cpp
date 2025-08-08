@@ -452,7 +452,6 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         glEnable(GL_BLEND);
         // glAlphaFunc ( GL_ALWAYS, 1.0f ) ;
         // glEnable ( GL_ALPHA_TEST ) ;
-
         for (int i = 0; i < object->NumUVs(); i++) {
 
             uvxyEntry *textInfo = &object->uvs[i];
@@ -481,7 +480,6 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             if (triangle->property == 9) {
                 alpha = 0.0f;
             }
-
             glBindTexture(GL_TEXTURE_2D, texture->id);
             Vector3D normal;
             getNormal(object, triangle, &normal);
@@ -1325,6 +1323,7 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
             printf("This should never happen: Put a break point here.\n");
             return;
         }
+        
         glBindTexture(GL_TEXTURE_2D, image->GetTexture()->GetTextureID());
 
         glBegin(GL_TRIANGLES);

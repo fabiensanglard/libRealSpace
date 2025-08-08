@@ -174,6 +174,7 @@ public:
     float gravity_force {0.0f};
 
     int tps;
+    int fps{0};
     /* plane velocity */
     float vx{0.0f};
     float vy{0.0f};

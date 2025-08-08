@@ -24,49 +24,32 @@ enum IMAGE_FLAG
 class RSImage{
     
 public:
-    RSImage();
-    ~RSImage();
-    
-    void Create(const char name[8],uint32_t width,uint32_t height, uint32_t flags);
-    
-    void UpdateContent(uint8_t* data);
-    
-    void SetPalette(VGAPalette* palette);
-    
-    void ClearContent(void);
-    
-    Texture* GetTexture(void);
-    void SyncTexture(void);
-    
-    uint8_t* GetData(void);
-    
+
     size_t width;
     size_t height;
+    uint16_t nbframes{1};
     char name[512];
     
     uint8_t* data;
     VGAPalette* palette;
     uint32_t flags;
+
+    RSImage();
+    ~RSImage();
     
-    //Run Length Encoding stuff
-    void SetRLECenterCoo(int16_t left,int16_t right,int16_t top,int16_t bottom);
-    uint8_t* rleCenter;
-    int16_t left;
-    int16_t right;
-    int16_t top;
-    int16_t bottom;
-    bool WriteRLETexel(int16_t dx,int16_t dy, uint8_t color);
+    void Create(const char name[8],uint32_t width,uint32_t height, uint32_t flags);
+    void UpdateContent(uint8_t* data);
+    void SetPalette(VGAPalette* palette);
+    void ClearContent(void);
+    void GetNextFrame();
+    Texture* GetTexture(void);
+    void SyncTexture(void);
+    uint8_t* GetData(void);
     
-    
-    inline void SetPosition(const Point2D position){ this->position = position; }
-    inline Point2D GetPosition(void) { return this->position; }
     
 private:
-    
-    Point2D position;
-    
+    uint8_t *sub_frame_buffer{nullptr};
+    uint8_t current_frame{0};
     Texture texture;
-    
-    
     bool dirty;
 };

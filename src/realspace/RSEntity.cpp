@@ -909,6 +909,7 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size) {
     size_t csize = 0;
     if (src[0]=='L' && src[1]=='Z'){
         image->Create(name, width, height*nbframe, 0);
+        image->nbframes = nbframe;
         LZBuffer lzbuffer;
         size_t remain = size - ((src+4) - data);
         size_t byte_read = 0;
@@ -922,6 +923,8 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size) {
         }
         src = pic_data;
         image->UpdateContent(src);
+        image->width = width;
+        image->height = height;
         AddImage(image);
     }  else if (src[0]=='P' && src[1]=='+'){
         image->Create(name, width, height, 0);
@@ -932,7 +935,10 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size) {
         src = pic_data;
     } else {
         image->Create(name, width, height*nbframe, 0);
+        image->nbframes = nbframe;
         image->UpdateContent(src);
+        image->width = width;
+        image->height = height;
         AddImage(image);
     }
     

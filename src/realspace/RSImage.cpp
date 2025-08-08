@@ -7,6 +7,7 @@
 //
 
 #include "precomp.h"
+#include "RSImage.h"
 
 
 extern SCRenderer Renderer;
@@ -31,15 +32,16 @@ void RSImage::Create(const char name[8],uint32_t width,uint32_t height, uint32_t
     this->height = height;
     this->data = (uint8_t*)malloc(this->width*this->height);
     this->palette = Renderer.getPalette();
-    
+    this->nbframes = 1;
     this->texture.Set(this);
     dirty = true;
 }
 
-void RSImage::UpdateContent(uint8_t* src){
+void RSImage::UpdateContent(uint8_t* src) {
     memcpy(this->data,src, width * height);
     this->dirty = true;
 }
+
 
 void RSImage::SyncTexture(void){
     
@@ -71,14 +73,30 @@ void RSImage::ClearContent(void){
     dirty = true;
 }
 
+void RSImage::GetNextFrame() {
+    if (this->sub_frame_buffer ==  nullptr) {
+        this->sub_frame_buffer = (uint8_t*)malloc(this->width * this->height);
+    }
+    if (this->nbframes > 1) {
+        size_t frame_size = this->width * this->height;
+        memcpy(this->sub_frame_buffer, this->data+frame_size*this->current_frame, frame_size);
+        RSImage subframe;
+        subframe.Create(this->name, this->width, this->height, this->flags);
+        subframe.UpdateContent(this->sub_frame_buffer);
+        subframe.SetPalette(this->palette);
+        //this->texture.Set(&subframe);
+        this->texture.UpdateContent(&subframe);
+        this->current_frame= (this->current_frame + 1) % this->nbframes;
+        //texture.UpdateContent(this);
+        Renderer.uploadTextureContentToGPU(&texture);
+    }
+}
 void RSImage::SetPalette(VGAPalette* palette){
     this->palette = palette;
     dirty = true;
 }
 
 Texture* RSImage::GetTexture(void){
-    
     SyncTexture();
-    
     return &this->texture;
 }
