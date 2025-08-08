@@ -9,9 +9,12 @@
 #ifndef iff_precomp_h
 #define iff_precomp_h
 
+#include "block_def.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #include <stdlib.h>
 #include <stdio.h>
     
@@ -32,81 +35,63 @@ extern "C" {
 #ifndef _WIN32
     #include <unistd.h>
 #endif
+#ifdef _WIN32
+	#include <Windows.h>
+#endif
 
-    #include "SDL2/SDL.h"
-    #include "SDL2/SDL_opengl.h"
+    #include <SDL.h>
+    #include <GL/gl.h>
+    #include <GL/glu.h>
 
-
-    #include "Math.h"
+    #include "Maths.h"
     #include "Matrix.h"
     #include "Quaternion.h"
 
 
-// Reusable Realspace Classes
+    // Reusable Realspace Classes
     #include "Base.h"
+    #include "LZBuffer.h"
     #include "ByteStream.h"
     #include "PakArchive.h"
     #include "TreArchive.h"
 
-
-
+    #include "AssetManager.h"
+    
     #include "Camera.h"
     #include "Texture.h"
     #include "RSImage.h"
 
+//Fonts stuff
+    #include "RSFont.h"
+    #include "RSFontManager.h"
+    #include "RSImageSet.h"
     #include "SCRenderer.h"
-    extern SCRenderer Renderer;
-
-    #include "IffLexer.h"
-
     #include "RSPalette.h"
+    #include "RSSmokeSet.h"
     #include "RSEntity.h"
+    #include "RSProf.h"
     #include "RSMusic.h"
     #include "RSSound.h"
     #include "RSMapTextureSet.h"
     #include "RSArea.h"
     #include "RLEShape.h"
-
-//Fonts stuff
-#include "RSFont.h"
-#include "RSFontManager.h"
-
-    #include "RSImageSet.h"
-
-
-
+    #include "RSOption.h"
+    #include "RSGameflow.h"
+    #include "RSHud.h"
+    #include "RSCockpit.h"
+    #include "RSNavMap.h"
+    #include "RSWorld.h"
+    #include "RSMission.h"
+    
+    // Music Stuff
+    #include "RSMusic.h"
+    #include "RSMixer.h"
+    
     //VGA and Glide
     #include "RSScreen.h"
+    #include "FrameBuffer.h"
     #include "RSVGA.h"
-
-// Strike commander specific.
-
-
-/*
-    
-
-    #include "IFFChunkReader.h"
-    #include "IFFReader.h"
-
-    #include "RealSpaceObject.h"
-    #include "IFFObjectReader.h"
-
-    #include "gfx.h"
-    #include "pak.h"
-
-
-
-    #include "IFFReader.h"
- */
+    extern SCRenderer Renderer;
 #endif
-
-
-
-
-
-
-
-
-
 
 #endif

@@ -1,0 +1,73 @@
+ Chunk: FORM, Taille: 1992
+     TYPE: REAL
+     Chunk: FORM, Taille: 1286
+         TYPE: OBJT
+         Chunk: INFO, Taille: 0
+         Chunk: FORM, Taille: 1218
+             TYPE: DURD
+             Chunk: DAMG, Taille: 2
+               0x01	 1
+               0x00	 0
+             Chunk: EXPL, Taille: 12
+             Chunk: WDAT, Taille: 22
+               Damage: 195
+               Radius of effect: 0
+               flag 1: 9
+               weapon id: 7
+               weapon family: 5
+               air_or_ground: 2
+               aspect: 0
+               target lock: 0
+               tracking cone: 0
+               effective range: 1320
+               flag 7: 0
+               flag 8: 1
+               flag 9: 0
+             Chunk: DATA, Taille: 6
+               0x00	 0
+               0x05	 5
+               0x00	 0
+               0x00	 0
+               0x00	 0
+               0x00	 0
+             Chunk: FORM, Taille: 1094
+                 Chunk: DAPR, Taille: 1179603534
+             Chunk: FORM, Taille: 30
+                 Chunk: DYNM, Taille: 1146703438
+                   0x00	 0
+                   0x00	 0
+                   0x00	 0
+                   0x04	 4
+                   0x00	 0
+                   0xC3	 195
+                   0x00	 0
+                   0x00	 0
+                   0x44	 68
+                   0x55	 85
+                   0x52	 82
+                   0x44	 68
+                   0x00	 0
+                   0x00	 0
+                   0x00	 0
+                   0x06	 6
+                   0x14	 20
+                   0x05	 5
+                   0x72	 114
+                   0xDB	 219
+                   0xFF	 255
+                   0xFF	 255
+         Chunk: EXTE, Taille: 40
+     Chunk: FORM, Taille: 686
+         TYPE: APPR
+         Chunk: FORM, Taille: 674
+             TYPE: POLY
+             Chunk: INFO, Taille: 2
+             Chunk: VERT, Taille: 348
+             Chunk: FORM, Taille: 76
+                 TYPE: DETA
+                 Chunk: LVL0, Taille: 48
+                 Chunk: LVL1, Taille: 8
+             Chunk: FORM, Taille: 212
+                 TYPE: TRIS
+                 Chunk: VTRI, Taille: 192
+                 Chunk: UVXY, Taille: 0

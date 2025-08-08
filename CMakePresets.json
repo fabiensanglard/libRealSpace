@@ -1,0 +1,62 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "windows",
+            "displayName": "Visual Studio Community 2022 Release - x86_amd64",
+            "description": "Using compilers for Visual Studio 17 2022 (x86_x64 architecture)",
+            "generator": "Visual Studio 17 2022",
+            "toolset": "host=x86",
+            "architecture": "x64",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe"
+            }
+        },
+        {
+            "name": "linux",
+            "displayName": "GCC 13.2.0 x86_64-linux-gnu",
+            "description": "Using compilers: C = /usr/bin/gcc, CXX = /usr/bin/g++",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_MAKE_PROGRAM": "/usr/bin/make",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux_clang",
+            "displayName": "Clang 18.1.3 x86_64-pc-linux-gnu",
+            "description": "Using compilers: C = /usr/bin/clang, CXX = /usr/bin/clang++",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/clang",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "windows-debug",
+            "displayName": "Visual Studio Community 2022 Release - x86_amd64 - Debug",
+            "configurePreset": "windows",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Release",
+            "description": "",
+            "displayName": "Visual Studio Community 2022 Release - x86_amd64 - Release",
+            "configurePreset": "windows",
+            "configuration": "Release"
+        }
+    ]
+}

@@ -3,10 +3,143 @@ Strike Commander Jet Format :
 
 By Fabien Sanglard
 January 21st, 2014
+Updated by remi leonard
+August 4th, 2025
 
 
-Jets are selfcontained in IFF files: Everything is there:
+Jets are self-contained in IFF files: Everything is there:
 
 Aerodynamic properties.
-Damange area and HP.
-Apperance.
+Damage area and HP.
+Appearance.
+Flight dynamics data.
+Thrust characteristics.
+
+## File Structure
+
+Strike Commander jet files use the IFF (Interchange File Format) structure with the following hierarchy:
+
+```
+REAL
+├── OBJT
+│   ├── INFO        - Basic object information
+│   ├── JETP        - Jet-specific properties
+│   │   ├── DYNM    - Dynamics container
+│   │   │   ├── JDYN - Flight dynamics data
+│   │   │   ├── THRS - Thrust characteristics
+│   │   │   ├── GRAV - Gravity flag
+│   │   │   └── ATMO - Atmospheric data
+│   │   ├── WEAP    - Weapons systems
+│   │   ├── DAMG    - Damage model
+│   │   └── ...     - Other jet properties
+│   └── EXTE        - External references
+└── APPR            - Appearance/3D model data
+    └── POLY        - Polygon data
+        ├── VERT    - Vertices
+        ├── TRIS    - Triangles
+        └── TXMS    - Texture mapping
+```
+
+## JDYN Chunk - Flight Dynamics Data
+
+The JDYN (Jet Dynamics) chunk contains the core aerodynamic and flight characteristics of the aircraft. This data is used by the flight simulation system to calculate realistic aircraft behavior.
+
+### JDYN Structure (67 bytes total)
+
+| Offset | Size | Type    | Field Name      | Description |
+|--------|------|---------|-----------------|-------------|
+| 0      | 1    | uint8   | unknown         | Always 0x00? |
+| 1      | 3    | int24   | FUEL            | Maximum fuel capacity |
+| 4      | 2    | uint16  | U1              | Unknown parameter 1 |
+| 6      | 2    | uint16  | C1              | Common parameter 1 |
+| 8      | 2    | uint16  | C2              | Common parameter 2 |
+| 10     | 3    | uint24  | U2              | Unknown parameter 2 |
+| 13     | 3    | uint24  | U3              | Unknown parameter 3 |
+| 16     | 1    | uint8   | separator       | Always 0x00? |
+| 17     | 3    | int24   | ROLL_RATE       | Roll response rate |
+| 20     | 3    | int24   | ROLL_RATE_MAX   | Maximum roll rate |
+| 23     | 2    | uint16  | CS3_qqch_lift   | Lift-related parameter |
+| 25     | 2    | uint16  | CS4             | Control surface parameter |
+| 27     | 3    | uint24  | U5              | Unknown parameter 5 |
+| 30     | 3    | uint24  | U6              | Unknown parameter 6 |
+| 33     | 2    | uint16  | U7              | Unknown parameter 7 |
+| 35     | 2    | uint16  | U8              | Unknown parameter 8 |
+| 37     | 3    | uint24  | LIFT_SPD        | Lift speed parameter |
+| 40     | 3    | uint24  | DRAG            | Drag coefficient data |
+| 43     | 3    | uint24  | LIFT            | Lift coefficient data |
+| 46     | 1    | uint8   | aileron         | Aileron effectiveness |
+| 47     | 1    | uint8   | gouverne        | Elevator effectiveness |
+| 48     | 1    | uint8   | MAX_G           | Maximum G-force rating |
+| 49     | 2    | uint16  | U13             | Unknown parameter 13 |
+| 51     | 2    | uint16  | TWIST_RATE      | Yaw response rate |
+| 53     | 2    | uint16  | TWIST_RATE_MAX  | Maximum yaw rate |
+| 55     | 3    | uint24  | U16             | Unknown parameter 16 |
+| 58     | 2    | uint16  | U17             | Unknown parameter 17 |
+
+### Usage in Flight Simulation
+
+The JDYN data is used by the `SCJdynPlane` class to provide realistic flight dynamics:
+
+- **FUEL**: Maximum fuel capacity affects aircraft weight and performance
+- **ROLL_RATE/ROLL_RATE_MAX**: Control roll response and maximum roll speed
+- **TWIST_RATE/TWIST_RATE_MAX**: Control yaw response and maximum yaw speed  
+- **MAX_G**: Limits the maximum G-forces the aircraft can sustain
+- **aileron/gouverne**: Control surface effectiveness multipliers
+- **LIFT_SPD/DRAG/LIFT**: Aerodynamic coefficients for flight calculations
+
+## THRS Chunk - Thrust Characteristics
+
+The THRS (Thrust) chunk defines the engine thrust characteristics of the aircraft.
+
+### THRS Structure (Variable Size)
+
+The THRS chunk comes in two main variants:
+
+#### Short Format (6-8 bytes):
+| Offset | Size | Type    | Field Name        | Description |
+|--------|------|---------|-------------------|-------------|
+| 0      | 1    | uint8   | unknown           | Always 0x00? |
+| 1      | 3    | int24   | thrust_in_newton  | Engine thrust in Newtons |
+| 4      | 2-3  | uint8[] | unknown_data      | Additional parameters |
+
+#### Long Format (19-20 bytes):  
+| Offset | Size | Type    | Field Name        | Description |
+|--------|------|---------|-------------------|-------------|
+| 0      | 5    | uint8[] | unknown_header    | Header data |
+| 5      | 3    | int24   | thrust_raw        | Raw thrust value |
+| 8      | 11-12| uint8[] | unknown_data      | Additional parameters |
+
+**Note**: In the long format, the thrust value is multiplied by 15 to get the final thrust in Newtons.
+
+### Usage in Flight Simulation
+
+The thrust data from THRS is used by:
+- `SCJdynPlane::computeThrust()` - Calculates engine thrust force
+- `SCJdynPlane::Simulate()` - Applies thrust to aircraft dynamics
+- Engine power calculations and fuel consumption modeling
+
+## Data Analysis
+
+Example JDYN data for F-15 Eagle:
+- FUEL: 6,103 (fuel units)
+- ROLL_RATE: 400 (roll response)
+- MAX_G: 9 (maximum G-force rating)
+- TWIST_RATE: 70 (yaw response)
+
+Example THRS data for F-15 Eagle:
+- thrust_in_newton: 222,000 N
+
+This data provides realistic flight characteristics matching the real F-15's performance envelope.
+
+## File Format Notes
+
+- All multi-byte integers are stored in little-endian format
+- The IFF chunk structure allows for extensibility
+- Some fields remain unknown and may control advanced flight characteristics
+- The format supports both military jets and civilian aircraft (C-130, 747, Learjet)
+
+## Related Files
+
+Flight dynamics data has been extracted and analyzed in CSV format:
+- `doc/jdynn_data/*.JDYN.csv` - JDYN chunk analysis for various aircraft
+- `doc/jdynn_data/*.THRS.csv` - THRS chunk analysis for various aircraft

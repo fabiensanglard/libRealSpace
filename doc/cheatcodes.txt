@@ -1,16 +1,95 @@
-024D - 024E - Current Score
-019B - # of ground kills
-0199 - # of Air Kills
-018D - 018E - Amount of money lost
-0189 - 018A - Bank balance
-017F - # of AIM-120 AMRAAM missles
-017D - # of LAU-3 Rocket Pods
-017B - # of GBU-15 LGB's
-0179 - # of MK-82 Bombs
-0177 - # of MK-20 Rockeye Cluster Munitions
-0175 - # of Durandal Munitions
-0173 - # of AGM-65D missiles
-0171 - # of AIM-9M missiles
-016F - # of AIM-9J missiles
-0009 - Next mission
-0008 - Current mission
+Strike Commander Save File Format (SCB1.22)
+===========================================
+
+Based on analysis of SCState.cpp
+File size: 0x24F bytes (591 bytes)
+Header: "SCB1.22" (7 bytes)
+
+## File Header and Control
+0000 - 0006 - File Header: "SCB1.22"
+0007        - Separator byte (0xFF)
+0008        - Current mission ID
+0009        - Mission ID (next mission?)
+000A        - Current scene ID
+
+## Mission Flags and Progress
+000B - 010A - Required flags array (256 bytes)
+             - Mission prerequisites and state flags
+010B - 0138 - Mission flown success array (46 bytes)
+             - Success status for each mission
+
+## Weapon Inventory
+016F        - # of AIM-9J Sidewinder missiles
+0171        - # of AIM-9M Sidewinder missiles  
+0173        - # of AGM-65D Maverick missiles
+0175        - # of Durandal anti-runway munitions
+0177        - # of MK-20 Rockeye cluster munitions
+0179        - # of MK-82 general purpose bombs
+017B        - # of GBU-15 laser-guided bombs
+017D        - # of LAU-3 rocket pods
+017F        - # of AIM-120 AMRAAM missiles
+
+## Financial Data
+0189 - 018A - Bank balance (16-bit little-endian, x1000 multiplier)
+018D - 018E - Amount of money lost/overhead (16-bit little-endian, x1000 multiplier)
+
+## Player Statistics
+0199        - # of Air-to-Air kills (player)
+019B        - # of Ground kills (player)
+
+## Kill Board (Wingmen Statistics)
+019D - 01C4 - Kill board for 6 wingmen (6 x 6 bytes each)
+             Structure per wingman:
+             +0: Alive status
+             +2-3: Ground kills (16-bit little-endian)
+             +4-5: Air kills (16-bit little-endian)
+
+## Player Identity
+01C9 - 01DB - Player Last Name (19 bytes, null-terminated)
+01DD - 01EF - Player First Name (19 bytes, null-terminated)  
+01F1 - 0203 - Player Callsign (19 bytes, null-terminated)
+
+## Wingman Assignment
+0208 - 021A - Current Wingman name (19 bytes)
+
+## Score
+024D - 024E - Current Score (16-bit little-endian)
+
+## Data Types and Formats
+
+**Multi-byte Values:**
+- All 16-bit values are stored in little-endian format
+- Money values are stored divided by 1000 (multiply by 1000 when reading)
+- Strings are null-terminated and padded to fixed lengths
+
+**Weapon IDs (from code):**
+- ID_AIM9J: AIM-9J Sidewinder
+- ID_AIM9M: AIM-9M Sidewinder
+- ID_AGM65D: AGM-65D Maverick
+- ID_LAU3: LAU-3 Rocket Pod
+- ID_MK20: MK-20 Rockeye
+- ID_MK82: MK-82 General Purpose Bomb
+- ID_DURANDAL: Durandal Anti-Runway Weapon
+- ID_GBU15: GBU-15 Laser-Guided Bomb
+- ID_AIM120: AIM-120 AMRAAM
+
+**Mission Progress:**
+- mission_flyed_success[]: Tracks completion status of 46 missions
+- requierd_flags[]: 256 mission prerequisite flags
+- Kill board tracks statistics for player (index 0) + 6 wingmen (indices 1-6)
+
+## Usage Notes
+
+**Editing Values:**
+- Money values: Edit raw bytes, remember x1000 multiplier
+- Weapons: Direct byte values (0-255 count per weapon type)
+- Kills: Single byte values for air/ground kills
+- Names: 19-character limit, null-terminated
+
+**File Structure:**
+- Fixed 591-byte format
+- No compression or encryption
+- Direct binary editing possible
+- Header validation: Must start with "SCB1.22"
+
+This format stores complete campaign progress including pilot identity, mission completion status, weapon inventory, financial status, and combat statistics for both player and AI wingmen.

@@ -1,4 +1,12 @@
-Strike Commander PlayTester's Guide :
+Strike Commander AI Format & Implementation :
+=============================================
+
+By remileonard
+August 4th, 2025
+
+Based on analysis of RSProf.cpp, RSMission.cpp, and SCMissionActors.cpp
+
+## AI System Overview
 
 It seems the IA is made of state machine with goal orientation:
 
@@ -8,6 +16,175 @@ It seems the IA is made of state machine with goal orientation:
 4/ Secure Area
 5/ Stay in radius of combat
 
+## Pilot Profile System (RSProf)
+
+The AI system is implemented through pilot profiles stored in IFF format files with the following structure:
+
+```
+PROF
+├── VERS - Version information
+├── RADI - Radio communication data
+│   ├── INFO - Pilot identification (ID, name, callsign)
+│   ├── SPCH - Speech parameters
+│   ├── OPTS - Communication options
+│   ├── MSGS - Radio messages by ID
+│   └── ASKS - Question/response pairs
+└── _AI_ - AI behavior parameters
+    ├── AI\0_ - AI flag marker
+    ├── MVRS - Movement/behavior states
+    ├── GOAL - AI goals and objectives
+    └── ATRB - Pilot attributes/skills
+```
+
+### RADI Structure (Radio Communications)
+
+**INFO Section:**
+- `id` (uint16): Pilot identification number
+- `name` (string): Pilot's full name
+- `callsign` (string): Radio callsign
+
+**SPCH Section:**
+- `spch` (uint16): Speech characteristics parameter
+
+**OPTS Section:**
+- `opts` (vector<char>): Communication options and behaviors
+
+**MSGS Section:**
+- `msgs` (map<uint8, string>): Radio messages indexed by message ID
+- Used for in-flight communications and mission briefings
+
+**ASKS Section:**
+- `asks` (map<string, string>): Question/response pairs for interactive dialogue
+- `asks_vector` (vector<string>): Sequential list of responses
+
+### _AI_ Structure (Artificial Intelligence)
+
+**AI Flag:**
+- `isAI` (bool): Marks profile as AI-controlled (vs human player)
+
+**MVRS Section (Movement/Behavior States):**
+- `mvrs` (vector<AI_STATE>): State machine transitions
+- Each AI_STATE contains: `{state_id, next_state_id}`
+- Controls pilot behavior state transitions
+
+**GOAL Section:**
+- `goal` (vector<uint8>): AI objectives and priorities
+- goal[0]: Primary target ID for destroy/defend missions
+- Used by `defendTarget()` and `destroyTarget()` functions
+
+**ATRB Section (Pilot Attributes):**
+The ATRB chunk contains 9 bytes representing pilot skills:
+
+| Offset | Field | Description |
+|--------|-------|-------------|
+| 0 | TH | Trigger Happy (0-16) |
+| 1 | CN | Confidence (0-16) |
+| 2 | VB | Verbosity (0-16) |
+| 3 | LY | Loyalty (0-16) |
+| 4 | FL | Flying skill (0-16) |
+| 5 | AG | Air-to-Ground skill (0-16) |
+| 6 | AA | Air-to-Air skill (0-16) |
+| 7 | SM | Showmanship (0-16) |
+| 8 | AR | Aggressiveness (0-16) |
+
+## Mission Actor System (SCMissionActors)
+
+### AI Objectives and Actions
+
+The AI system implements various mission objectives through the SCMissionActors class:
+
+**Primary Objectives:**
+- `OP_SET_OBJ_TAKE_OFF` - Aircraft takeoff procedures
+- `OP_SET_OBJ_LAND` - Landing approach and touchdown
+- `OP_SET_OBJ_FLY_TO_WP` - Navigate to specific waypoints
+- `OP_SET_OBJ_FLY_TO_AREA` - Fly to designated areas
+- `OP_SET_OBJ_DESTROY_TARGET` - Engage and destroy enemies
+- `OP_SET_OBJ_DEFEND_TARGET` - Protect allies or strategic points
+- `OP_SET_OBJ_FOLLOW_ALLY` - Formation flying and escort
+
+### AI Behavior Implementation
+
+**takeOff(uint8_t arg):**
+- Sets target climb altitude (+300 units above current height)
+- Adjusts speed and heading for optimal takeoff
+- Returns true when takeoff altitude is reached
+
+**land(uint8_t arg):**
+- Navigates to landing waypoint (arg = spot ID)
+- Reduces speed progressively as distance decreases
+- Activates landing configuration within 3000 units
+
+**flyToWaypoint(uint8_t arg):**
+- Sets navigation target to mission waypoint
+- Maintains formation and speed parameters
+- Completes when within 3000 units of target
+
+**destroyTarget(uint8_t arg):**
+- Engages hostile targets (arg = target actor ID)
+- Adjusts altitude and speed to match target
+- Uses pilot attributes to determine engagement tactics
+
+**defendTarget(uint8_t arg):**
+- Patrols assigned area for threats
+- Uses AI goals to prioritize targets
+- Automatically engages enemies within operational area
+
+**followAlly(uint8_t arg):**
+- Maintains formation position relative to lead aircraft
+- Adjusts for altitude, speed, and heading changes
+- Uses formation_position offset for wing positioning
+
+### Communication System
+
+**setMessage(uint8_t arg):**
+- Displays radio communications using pilot callsign
+- Messages indexed from pilot's RADI.MSGS section
+- Format: "[Callsign]: [Message Text]"
+
+**Radio Message Management:**
+- `radio_messages` vector stores active communications
+- Messages tied to mission objectives and status updates
+- Player receives different message sets than AI actors
+
+## Mission Integration
+
+### Mission Data Structures
+
+**MISN_PART (Mission Participants):**
+- Links profile data to mission actors
+- Contains position, equipment, and objective data
+- Integrates with entity models and flight dynamics
+
+**AREA System:**
+- Defines operational zones for AI behavior
+- Three area types: 'S' (Simple), 'C' (Complex), 'B' (Base)
+- AI uses area boundaries for patrol and engagement rules
+
+**SPOT System:**
+- Waypoint navigation for AI flight paths
+- 14-byte structure with position and area linkage
+- Used for takeoff, landing, and navigation objectives
+
+## AI Decision Making
+
+The AI system uses a hierarchical priority system:
+
+1. **Immediate Threats:** Respond to incoming missiles or attacks
+2. **Mission Objectives:** Execute assigned primary and secondary goals
+3. **Formation Keeping:** Maintain tactical positioning with allies
+4. **Area Defense:** Patrol and secure assigned operational zones
+5. **Return to Base:** Land when fuel or ammunition is depleted
+
+### Pilot Skill Impact
+
+Pilot attributes from ATRB affect AI behavior:
+
+- **Trigger Happy:** Controls engagement distance and weapon selection
+- **Confidence:** Affects risk-taking and aggressive maneuvers
+- **Flying:** Determines flight precision and aerobatic capability
+- **Air-to-Air/Air-to-Ground:** Combat effectiveness in respective roles
+- **Aggressiveness:** Influences pursuit and engagement persistence
+
 Also, each pilot have levels in 8 differences areas:
 (this is from the Strike Commander PlayTester's Guide)
 
@@ -15,18 +192,28 @@ Also, each pilot have levels in 8 differences areas:
 
 All characters in SC have specific marks but there are three types of generic pilots:
 
-                         Rookie         Veteran       Ace
-
-Trigger Happy             10               5           0
-Confidence                10              13          16
-Verbosity                 16              10          16
-Loaylty                   10              16          10
-Flying                   6/3/1          10/5/2      16/8/4
-Air-to-Ground            8/4/2          13/6/2      16/8/4
-Air-to-Air               6/3/1          10/5/2      16/8/4
-Showmanship                8               5           8
-Aggressiveness            10              10          16
+|                       |  Rookie   |      Veteran   |    Ace   |
+|-----------------------|-----------|----------------|----------|
+|Trigger Happy          |   10      |        5       |     0    |
+|Confidence             |   10      |     13         |     16   |
+|Verbosity              |   16      |       10       |     16   |
+|Loaylty                |   10      |      16        |     10   |
+|Flying                 |  6/3/1    |    10/5/2      |   16/8/4 |
+|Air-to-Ground          |  8/4/2    |    13/6/2      |   16/8/4 |
+|Air-to-Air             |  6/3/1    |    10/5/2      |   16/8/4 |
+|Showmanship            |    8      |       5        |      8   |
+|Aggressiveness         |   10      |      10        |     16   |
 
 Some other pilot have specific characteristics (c-130 pilot etc...)
+
+## Implementation Notes
+
+- AI profiles are loaded through `RSProf::InitFromRAM()`
+- Mission actors link profiles via `SCMissionActors::profile`
+- Player actors use different objective handling (`SCMissionActorsPlayer`)
+- AI state updates occur during mission simulation loop
+- Radio communications provide feedback on AI decision-making
+
+The system provides realistic pilot behavior with skill-based variation, making each AI wingman unique in combat effectiveness and flying characteristics.
 
 

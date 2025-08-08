@@ -1,0 +1,255 @@
+  PROGCMDS.DOC
+
+# Mission opcodes for Wing Commander IV.
+
+   1991-95 by Origin Systems, Inc. BCP.
+Revision 1,1
+
+    The following document is a list of commands used in WC4 missions to control/monitor events and send results back to gameflow. These commands are used in CHUNK PROG portion of the mission files. Below is a sample program in the correct WC4 format. Note the lack of #define's and %INDEX's which have now been replaced by anl— prog_nurre at the end of the program's name, ffice so:
+
+                 PROG name_of program =- prog_nurn
+                     long CMD_test_object_active, CAST wingman
+                     long CMD_If_true_iabel, 'A'
+                     long CMD_destroy_object, CAST layer
+                     long CMD_return
+                     long CMD_label, 'A'
+                     long CMD_destroy_object, CAST_wingman
+                     CMD_terminator
+
+    The ' = prog_num' format is also used for CHUNK CAST, MSGS, PART, AREA, & SPOT( =
+castnum, = pan_num, = area_num, = spot_num). The long' noes before each line except the first and last,
+from this point on the tongs will be omitted from all sample code. Sample code will be in bold with the
+references to other implied lines of code and defined values in other chunks in italics. The above program
+is a basic routine to tell ifs caller to detect if the 'CAST wind an" is active, if so kill him, if not then attack
+'CAST_playee.
+
+## Control 
+
+CMD_terminator       Program terminator. Must be the last line of every defined
+                     program in CI-TUNK_PROG and cannot appear more than
+                     once in each defined program.
+
+CMD__return         Internal program terminator, used generally for staged events
+                     like;
+
+                 PROG narne_of program = prog_num
+                     CMD_test_object_active, CAST_wingman
+                     CMD_if_true_label,
+                     CMD_destroy object, CAST_player
+                     CMD_return
+                     CMD_label, 'A'
+                     CMD_destroy_object, CAST_wingman
+                     CMD_terminator
+
+                     Once the CMD_return is called it will no longer run the rest
+                     of the program. So that the caller of this program will only
+                     attempt to execute the first half of the progam unless the
+                     conditions of the first two lines have not been met.
+
+
+
+CMD_call_program, PROG X    Transfers control of the program to PROG X
+                            PROG X must appear in the PROG_CHUNIC before
+                            being called by CMDLcall_program. For example:
+
+
+                     PROG_first = prog_num
+                           CMD_terminator
+                           ...
+                     PROG_second = prog_num
+                           CMD_terminator
+                           ...
+                     PROG_third = prog_num
+                           CMD_terminator
+                           ...
+
+                           PROG _first then cannot contain a line saying:
+                           CMD_call_program, PROG second
+                           or:
+                           CMD_call_program, PROD _third
+                           PROD second could call PROG first. And PROG third
+                           could call either the first or second PROG's.
+
+CMD_call work_program, PROG_X   Transfers control to the program stored in the work register.
+                                As with CMD_call_program the program that is being called
+                                must appear before the program calling it. The program being
+                                called must also be sent to the work register using
+                                CMD_move value_to_work. ie:
+
+                     PROG_kill_player = prog_num
+                           CMD_destroy_object, CAST_player
+                           CMD_terminator
+
+                     PROG_kill_wingman = prog_num
+                           CMD_destroy_object, CAST in man
+                           CMD_terminator
+
+                     PROG_enemy_mission = prog_num
+                           CMD_random_work_value, 1
+                           CMD_goto_work label
+
+                           CMD_label, 0
+                           CMD_move_value_to_work, PROG_kill_player
+                           CMD_goto_label, 'A'
+                           CMS return
+
+                           CMD_label, 1
+                           CMD_move_value_to_work PROG_kill_wingman
+                           CMD_label, 'A'
+                           CMD_call_work_program 
+                           CMD_terminator
+
+
+                                 The caller of this program will run either of the two
+                                 programs depending upon the random value sent to the work
+                                 register in line 1 of 'PROG enemy mission'.
+
+CMD_end_missio, status              Ends the mission in progress with the status status and
+                                    returns control to garneflow. status is defined as any one of
+                                    the following states: GAME, FINISHED, EJECTED,
+                                    KILLED, ABORTED, INSTANT, and RESTART.
+
+CMD_exit                       Used to exit the mission in progress. Used mainly for debugging.
+
+CMD_label                Used to delineate a branch entry point. Labels may be of any number value or character. Numbers may be typed directly while characters must be surrounded by single quotes and will be dereferenced prior to use (ie, 'A' = 65). The following
+
+CMD_data, SPOT_X               SPOT X is defined in CHUNK_SPOT. It usually contains
+                                 data pertinent to a previous command. In most cases, data
+                                 spots need to be keyed to AR_EA_global in there definitions.
+
+Work 
+
+CMD_move_value_to_work, value       Moves a number value, value, to the work register.
+
+CMD_move_flag_to_work, FLAG_x       Moves the value stored in FLAG x to the work register.
+
+CMD_xchg_work_and_flag, FLAG_x      Swaps the work register value with the vague stored in
+                                    FLAG_x.
+
+CMD_move_result_to_work             Moves the result of the previous operation to the work
+                                    register. ie.:
+
+                          PROG enemy_cleath = prog_num
+                                 CMD_test_object_active, CAST_enemy x
+                                 CMD_move result to work
+                                 CMD_terminator
+
+CMD_move_work_to_register, REQx     Used to move a value to a gameflow register REG x.
+
+CMD_random work_value, value        Moves a random value from 0 to value inclusive to the work
+                                    register.
+
+Math
+
+CMD_add_value_to_work, value        Adds value to the value stored in the work register.
+
+CMD_add_flag_to_work, FLAG x        Adds the value in FLAG x to the value in the work register.
+
+CMD_add_vatue_to_flag, FLAG x       Adds the defined value of the flag in the mission file to the
+                                    flag itself.
+
+CMD_add_work_to_flag, FLAG x        Adds the va/ue of the work register to the value stored in
+                                    FLAG x.
+
+CMD_sub_value_from_work, value      Subtracts value from the value in the work register.
+
+CMD_sub_flag_from_work, FLAG_x      Subtracts the value of FLAG x from the value in the work
+                                    register.
+
+CMD_sub_value_from flag, FLAG x  Subtracts the original defined value of FLAG x in the
+                                  mission file from the current value of the flag.
+
+CMD_sub_work_from_flag, FLAG x    Subtracts the value stored in the work register from
+                                  FLAG x.
+
+CMD_or_work_with_value, value      Performs a boolean comparison with the value stored in the
+                                  work resister and value. Sets the work register to FALSE
+                                  only if both values are FALSE. All other cases set the work
+                                  register to TRUE.
+
+CMD_or_work_with_flag, FLAG_x    Performs a boolean comparison with the value stored in the
+                                  work register and FLAG x. Sets the work register to FALSE
+                                  only if both values are FALSE. All other cases set the work
+                                  register to TRUE.
+
+CMD_and_work_with_value, value    Performs a boolean comparison with value and the value
+                                  stored in the work register. Sets the work register to TRUE
+                                  only if both values are TRUE. Sets the work register to
+                                  FALSE if one or the other is FALSE.
+
+CMD_and_work_with_flag, FLAG x    Performs a boolean comparison with FLAG_x and the value
+                                  stored in the work register. Sets the work register to TRUE
+                                  only if both values are TRUE. Sets the work register to
+                                  FALSE if one or the other is FALSE.
+
+CMD_xor_work_with_value, value    Performs a boolean comparison with value and the value
+                                  stored in the work register. Sets the work register to FALSE if
+                           the values are equal. Sets the work register to TRUE if the
+                           values are unequal.
+
+CMD_xor_work_with_flag, FLAG x    Performs a boolean comparison with FLAG x and the value
+                                  stored in the work register. Sets the work register to FALSE if
+                           the values are equal. Sets the work resister to TRUE if the
+                           values are unequal.
+
+CMD_mul_work_by_value, value        Multiplies the value stored in the work register by value.
+
+CMD_mul_work_by_flag, FL4G        Multiplies the value stored in the work register by the value
+                                  stored in FLAG x.
+
+CMD_div_work_by_value, value Divides the value stored in the work register by value.
+
+CMD_div_work_by_flag, FLAG_x      Divides the value stored in the work register by the value
+                                  stored in FLAG x.
+
+Conditionals 
+
+CMD_compare_work_to_value, value   Compares value to the value stored in the work register
+                                     returning the results equal., less, more, less equal, and more
+                                     equal.
+
+CMD_compare_value_to_work, value   Compares the value stored in the work register to value
+                                     returning the results equal, less, more, less equal, and more
+                                     equal
+
+CMD_compare_work_to_flag, FL4G   Compares the value in HAG index to the value stored in the
+                             work register returning the results equal, less, more, less
+                             equal, and more equal.
+
+CMD_compare_flag_to_work, FLAG x Compares the value in the or register to the value in
+                                     FLAG x returning the results equal, less. more, less equal,
+                                     and more equal.
+
+CMD_compare_result_to_value., value Compares the result of the previous command to value,
+                                     returning the results equaL less, more, less equal, and more
+                                     equal.
+
+CMD_test_flag, FLAG x               Returns the TRUE or FALSE value of FLAG x.
+
+CMD_if_result_label, 'X'      If the current command is in progress, branch to the label
+
+
+CMD_if_not_result label, 'X'          If the current command has completed, branch to the label
+                                     'X'.
+
+CMD_branch_equal_label, 'X'        Branches to the labe] 'X' if the previous comparison returns
+                                     an equal value.
+
+CMD_branch_not_equal _label, 'X'      Branches to the label 'X' if the previous comparison returns
+                                     a not equal value.
+
+CMD_branch_less_label, ', 'X'          Branches to the label 'X' if the previous comparison returns a
+                             less value.
+
+CMD_branch_more_label, 'X'         Branches to the label 'X' if the previous comparison returns a
+                             more value.
+
+CMD_branch_less_equal_label, X'    Branches to the label 'X' if the previous comparison returns a
+                             less equal value.
+
+CMD_branch_more_equal_label, 'X'     Branches to the label 'X' if the previous comparison returns a
+                             more equal value.
+
+CMD_goto_label, 'X'                 Forces a branch to the label 'X'.
+
+CMD_goto_work_label                  Branches to the label equal to the value in the work register.

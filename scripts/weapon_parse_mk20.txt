@@ -1,0 +1,64 @@
+ Chunk: FORM, Taille: 1004
+     TYPE: REAL
+     Chunk: FORM, Taille: 208
+         TYPE: OBJT
+         Chunk: INFO, Taille: 0
+         Chunk: FORM, Taille: 140
+             TYPE: BOMB
+             Chunk: EXPL, Taille: 12
+             Chunk: DAMG, Taille: 2
+               0x01	 1
+               0x00	 0
+             Chunk: WDAT, Taille: 22
+               Damage: 100
+               Radius of effect: 200
+               flag 1: 9
+               weapon id: 5
+               weapon family: 4
+               air_or_ground: 2
+               aspect: 0
+               target lock: 0
+               tracking cone: 45
+               effective range: 40
+               flag 7: 0
+               flag 8: 1
+               flag 9: 0
+             Chunk: DATA, Taille: 6
+               0x00	 0
+               0x03	 3
+               0x01	 1
+               0x00	 0
+               0x00	 0
+               0x00	 0
+             Chunk: DAMG, Taille: 2
+               0x01	 1
+               0x00	 0
+             Chunk: FORM, Taille: 44
+                 TYPE: DYNM
+                 Chunk: DYNM, Taille: 4
+                   0x00	 0
+                   0xDE	 222
+                   0x00	 0
+                   0x00	 0
+                 Chunk: ATMO, Taille: 4
+                   0x19	 25
+                   0x00	 0
+                   0x00	 0
+                   0x00	 0
+                 Chunk: GRAV, Taille: 0
+                 Chunk: AGRV, Taille: 0
+         Chunk: EXTE, Taille: 40
+     Chunk: FORM, Taille: 776
+         TYPE: APPR
+         Chunk: FORM, Taille: 764
+             TYPE: POLY
+             Chunk: INFO, Taille: 2
+             Chunk: VERT, Taille: 348
+             Chunk: FORM, Taille: 94
+                 TYPE: DETA
+                 Chunk: LVL0, Taille: 66
+                 Chunk: LVL1, Taille: 8
+             Chunk: FORM, Taille: 284
+                 TYPE: TRIS
+                 Chunk: VTRI, Taille: 264
+                 Chunk: UVXY, Taille: 0
