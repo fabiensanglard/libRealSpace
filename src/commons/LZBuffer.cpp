@@ -239,10 +239,9 @@ uint8_t* LZBuffer::DecodeLZWNoStop(const uint8_t* compData, size_t compSize, siz
             break;
         }
         if (code == STOP_CODE) {
-            size_t bytesRead = bitPos / 8 + (bitPos % 8 != 0 ? 1 : 0);
-            int next_bitpos = (bytesRead + 1) *8;
-            int other = (((bitPos + 15) / 16)) * 16;
-            bitPos = other;
+            int next_bitpos = bitPos + (8-bitPos % 8) + 5 * 8 +1;
+            bitPos = next_bitpos;
+            currentWidth = INITIAL_WIDTH;
             code = CLEAR_CODE; // Traiter comme un CLEAR_CODE pour réinitialiser le dictionnaire.
         }
             
