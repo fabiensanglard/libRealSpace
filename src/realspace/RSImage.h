@@ -52,4 +52,5 @@ private:
     uint8_t current_frame{0};
     Texture texture;
     bool dirty;
+    int fps{0};
 };

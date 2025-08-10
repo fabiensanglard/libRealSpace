@@ -433,7 +433,13 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                (object->NumLods() - 1), lodLevel);
         return;
     }
-
+    
+    for (auto img: object->images) {
+        if (img->nbframes > 1) {
+            img->GetNextFrame();
+        }
+    }
+    
     float ambientLamber = 0.4f;
 
     Lod *lod = &object->lods[lodLevel];

@@ -868,15 +868,7 @@ void SCPlane::getPosition(Point3D *position) {
 void SCPlane::Render() {
     
     if (this->object != nullptr) {
-        this->fps++;
-        if (this->fps > 12) {
-            this->fps = 0;
-            for (auto img: this->object->entity->images) {
-                if (img->nbframes > 1) {
-                    img->GetNextFrame();
-                }
-            }
-        }
+        
         Vector3D pos = {
             this->x, this->y, this->z
         };

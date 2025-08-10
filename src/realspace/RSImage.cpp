@@ -78,6 +78,11 @@ void RSImage::GetNextFrame() {
         this->sub_frame_buffer = (uint8_t*)malloc(this->width * this->height);
     }
     if (this->nbframes > 1) {
+        this->fps++;
+        if (this->fps < 10) {
+            return; // Do not change frame too fast
+        }
+        this->fps = 0;
         size_t frame_size = this->width * this->height;
         memcpy(this->sub_frame_buffer, this->data+frame_size*this->current_frame, frame_size);
         RSImage subframe;
