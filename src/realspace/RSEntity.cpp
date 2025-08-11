@@ -692,6 +692,7 @@ void RSEntity::parseREAL_APPR(uint8_t *data, size_t size) {
     std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
     handlers["POLY"] = std::bind(&RSEntity::parseREAL_APPR_POLY, this, std::placeholders::_1, std::placeholders::_2);
     handlers["AFTB"] = std::bind(&RSEntity::parseREAL_APPR_POLY, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["ANIM"] = std::bind(&RSEntity::parseREAL_APPR_ANIM, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSEntity::parseREAL_APPR_POLY(uint8_t *data, size_t size) {
@@ -1065,7 +1066,20 @@ void RSEntity::parseREAL_APPR_POLY_QUAD_MAPS(uint8_t *data, size_t size) {
         this->qmapuvs.push_back(uvEntry);
     }
 }
-void RSEntity::parseREAL_APPR_ANIM(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_APPR_ANIM(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+
+    std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    
+    handlers["INFO"] =
+        std::bind(&RSEntity::parseREAL_APPR_ANIM_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SEQU"] =
+        std::bind(&RSEntity::parseREAL_APPR_ANIM_SEQU, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SHAP"] =
+        std::bind(&RSEntity::parseREAL_APPR_ANIM_SHAP, this, std::placeholders::_1, std::placeholders::_2);
+
+    lexer.InitFromRAM(data, size, handlers);
+}
 void RSEntity::parseREAL_APPR_ANIM_INFO(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_APPR_ANIM_SEQU(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_APPR_ANIM_SHAP(uint8_t *data, size_t size) {
