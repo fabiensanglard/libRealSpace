@@ -159,7 +159,7 @@ void DebugGame::loadSC() {
     ConvAssets.init();
 
     //Add MainMenu activity on the game stack.
-    DebugGameFlow* main = new DebugGameFlow();
+    //DebugGameFlow* main = new DebugGameFlow();
     
     GameState.Reset();
     GameState.player_callsign = "Debug";
@@ -168,9 +168,10 @@ void DebugGame::loadSC() {
     for (int i=0; i<256; i++) {
         GameState.requierd_flags[i] = false;
     }
-    main->init();
-
-    Game->AddActivity(main);
+    //main->init();
+    SCMainMenu *to_gf = new SCMainMenu();
+    to_gf->init();
+    Game->AddActivity(to_gf);
 }
 
 
@@ -211,7 +212,12 @@ void DebugGame::testMissionSC() {
 
     // Load assets needed for Conversations (char and background)
     ConvAssets.init();
-
+    std::string c130_filename = Assets.object_root_path + "SMOKEGEN.IFF";
+    RSEntity *objct = new RSEntity(&Assets);
+    TreEntry *entry = Assets.GetEntryByName((char *)c130_filename.c_str());
+    if (entry != nullptr) {
+        objct->InitFromRAM(entry->data, entry->size);
+    }
     //Add MainMenu activity on the game stack.
     DebugStrike * main = new DebugStrike();
     main->init();
@@ -255,7 +261,7 @@ void DebugGame::loadTO() {
     FontManager.init(&Assets);
     // Load assets needed for Conversations (char and background)
     ConvAssets.init();
-
+    
     SCMainMenu *to_gf = new SCMainMenu();
     to_gf->init();
     Game->AddActivity(to_gf);

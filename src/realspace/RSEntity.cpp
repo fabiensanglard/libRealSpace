@@ -913,7 +913,7 @@ void RSEntity::parseREAL_APPR_POLY_TRIS_TXMS_TXMA(uint8_t *data, size_t size) {
         LZBuffer lzbuffer;
         size_t remain = size - ((src+4) - data);
         size_t byte_read = 0;
-        pic_data = lzbuffer.DecodeLZWNoStop(src+4,remain,csize);
+        pic_data = lzbuffer.DecodeLZW(src+4,remain,csize);
         if (csize == width * height * nbframe) {
             printf("Image %s decoded successfully with size %zu\n", name, csize);
         }
