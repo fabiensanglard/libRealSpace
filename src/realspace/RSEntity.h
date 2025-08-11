@@ -214,7 +214,7 @@ public:
     Point3D position;
     Quaternion orientation;
     std::vector<RSImageSet *> images_set;
-
+    std::vector<Texture *> animations;
     // Has the entity been sent to te GPU and is ready to be renderer.
 
     bool prepared{false};

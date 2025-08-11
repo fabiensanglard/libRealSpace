@@ -1089,6 +1089,46 @@ void RSEntity::parseREAL_APPR_ANIM_SHAP(uint8_t *data, size_t size) {
     memcpy(data2, data, size);
     pak.InitFromRAM("SHAPE", data2, size);
     img_set->InitFromSubPakEntry(&pak);
+    RSPalette palette;
+    palette.initFromFileData(this->assetsManager->GetFileData("PALETTE.IFF"));
+
+    for (auto img : img_set->shapes) {
+        Texture *tex = new Texture();
+        tex->width = img->GetWidth();
+        tex->height = img->GetHeight();
+        img->position.x = 0;
+        img->position.y = 0;
+        img->buffer_size.x = (int32_t) tex->width;
+        img->buffer_size.y = (int32_t) tex->height;
+        size_t imgsize = tex->width*tex->height;
+        uint8_t *imgdata = (uint8_t *)malloc(imgsize);
+        size_t byteRead = 0;
+        img->Expand(imgdata, &byteRead);
+        if (byteRead > imgsize) {
+            printf("RLEShape::Expand failed\n");
+        }
+        
+        tex->data = (uint8_t *)malloc(imgsize*4);
+
+        uint8_t *dst = tex->data;
+        long checksum = 0;
+        for (size_t j = 0; j < imgsize; j++) {
+            Texel *rgba = palette.GetColorPalette()->GetRGBColor(imgdata[j]);
+            if (imgdata[j] == 255) {
+                rgba->a = 0;
+            }
+            if (rgba->a == 255 && rgba->r == 210 && rgba->g == 208 && rgba->b == 208) {
+                rgba->a = 0;
+            }
+            dst[0] = rgba->r;
+            dst[1] = rgba->g;
+            dst[2] = rgba->b;
+            dst[3] = rgba->a;
+            dst += 4;
+        }
+        tex->initialized = false;
+        this->animations.push_back(tex);
+    }
     this->images_set.push_back(img_set);
 }
 void RSEntity::parseREAL_OBJT_EXPL(uint8_t *data, size_t size) {}

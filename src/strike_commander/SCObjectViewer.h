@@ -37,7 +37,8 @@ protected:
     RLEShape bluePrint;
     RLEShape title;
     RLEShape board;
-    
+    int fps{0};
+    int current_frame{0};
     uint32_t currentObject;
 
     //For rotating the object

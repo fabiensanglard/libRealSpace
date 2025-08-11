@@ -112,6 +112,13 @@ void DebugObjectViewer::renderUI() {
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Image((ImTextureID)(intptr_t)texture->GetTexture()->id, ImVec2(100, 100));
                 }
+                for (const auto &texture : objs.showCases[currentObject].entity->animations) {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::Text("%s", texture->name);
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::Image((ImTextureID)(intptr_t)texture->id, ImVec2(100, 100));
+                }
                 ImGui::EndTable();
             }
             ImGui::EndChild();

@@ -259,7 +259,23 @@ void SCObjectViewer::runFrame(void) {
     glRotatef(this->rotateUpDownAngle, 0, 0, 1);
 
     glScalef(1 / this->zoomFactor, 1 / this->zoomFactor, 1 / this->zoomFactor);
-    Renderer.drawModel(objs.showCases[currentObject].entity, LOD_LEVEL_MAX);
+    if (objs.showCases[currentObject].entity->triangles.size() > 0) {
+        Renderer.drawModel(objs.showCases[currentObject].entity, LOD_LEVEL_MAX);    
+    } else if (objs.showCases[currentObject].entity->animations.size() > 0) {
+        this->fps++;
+        if (this->fps > 12) {
+            this->fps = 0;
+            this->current_frame = (this->current_frame + 1) % objs.showCases[currentObject].entity->animations.size();
+        }
+        Renderer.drawBillboard(
+            {0, 0, 0},
+            objs.showCases[currentObject].entity->animations[this->current_frame],
+            1.0f / this->zoomFactor
+        );
+    } else {
+        printf("No model to draw for %s\n", objs.showCases[currentObject].displayName.c_str());
+    }
+    
     glPopMatrix();
     glPushMatrix();
     glDisable(GL_DEPTH_TEST);
