@@ -33,9 +33,11 @@ public:
     IActivity* GetCurrentActivity(void);
     void PumpEvents(void);
     void loadSC();
+    void loadSCCD();
     void loadTO();
     void loadPacific();
     void testMissionSC();
+    void testObjects();
 
 private:
     std::stack<IActivity*> activities;

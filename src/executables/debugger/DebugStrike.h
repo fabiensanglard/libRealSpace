@@ -1,3 +1,4 @@
+#pragma once
 #include "../../strike_commander/precomp.h"
 
 class DebugStrike : public SCStrike {

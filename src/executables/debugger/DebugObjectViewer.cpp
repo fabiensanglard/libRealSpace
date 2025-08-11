@@ -1,0 +1,122 @@
+#include "DebugObjectViewer.h"
+#include <imgui.h>
+#include <imgui_impl_opengl2.h>
+#include <imgui_impl_sdl2.h>
+
+DebugObjectViewer::DebugObjectViewer() {
+
+}
+DebugObjectViewer::~DebugObjectViewer() {
+    
+}
+void DebugObjectViewer::renderMenu() {
+    static bool load_object = false;
+    static bool view_textures = false;
+
+    if (ImGui::BeginMenu("Object Viewer")) {
+        ImGui::MenuItem("Load Object", nullptr, &load_object);
+        ImGui::MenuItem("view Textures", nullptr, &view_textures);
+        ImGui::EndMenu();
+    }
+    ImGui::Text("Object Name: %s", objs.showCases[currentObject].filename.c_str());
+    if (load_object) {
+        ImGui::Begin("List Of Objects");
+        static ImGuiComboFlags shtsflags = 0;
+        if (ImGui::BeginCombo("List des objets", nullptr, shtsflags)) {
+            for (auto tre :Assets.tres) {
+                for (auto entry : tre->entries) {
+                    if (std::string(entry->name).find("OBJECT") != std::string::npos) {
+                        // Your logic here if entry->name contains "OBJECT"
+                        if (ImGui::Selectable(entry->name, false)) {
+                            printf("load object");
+                            RSEntity *obj = new RSEntity(&Assets);
+                            obj->InitFromRAM(entry->data, entry->size);
+                            objs.showCases[0].entity = obj;
+                            objs.showCases[0].filename = std::string(entry->name);
+                            currentObject = 0; 
+                        }
+                    }
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::End();
+    }
+    if (view_textures) {
+        ImGui::Begin("List Of Textures");
+        static ImGuiComboFlags shtsflags = 0;
+        static RSImage *currentTexture = nullptr;
+        if (ImGui::BeginCombo("List des textures", nullptr, shtsflags)) {
+            for (auto tex: objs.showCases[currentObject].entity->images) {
+                if (ImGui::Selectable(tex->name, false)) {
+                    currentTexture = tex;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        if (currentTexture != nullptr) {
+            ImGui::Image((void*)(intptr_t)currentTexture->GetTexture()->GetTextureID(), ImVec2(256, 256), {0, 1}, {1, 0});
+        }           
+        ImGui::End();
+    }
+}
+void DebugObjectViewer::renderUI() {
+    if (ImGui::BeginTabBar("Object Viewer")) {
+        if (ImGui::BeginTabItem("Objects")) {
+            ImGui::BeginChild("List", ImVec2(0, 400), true);
+            for (auto tre :Assets.tres) {
+                for (auto entry : tre->entries) {
+                    if (std::string(entry->name).find("OBJECT") != std::string::npos) {
+                        if (ImGui::Selectable(entry->name, false)) {
+                            printf("load object");
+                            RSEntity *obj = new RSEntity(&Assets);
+                            obj->InitFromRAM(entry->data, entry->size);
+                            objs.showCases[0].entity = obj;
+                            objs.showCases[0].filename = std::string(entry->name);
+                            currentObject = 0; 
+                        }
+                    }
+                }
+            }
+            ImGui::EndChild();
+            ImGui::BeginChild("Camera", ImVec2(0, 400), true);
+            ImGui::SliderFloat("Zoom", &objs.showCases[0].cameraDist, 1.0f, 100000.0f);
+            ImGui::SliderFloat("Angle Up/Down", &this->rotateUpDownAngle, -180.0f, 180.0f);
+            ImGui::SliderFloat("Angle Left/Right", &this->rotateLeftRightAngle, -180.0f, 180.0f);
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Details")) {
+            ImGui::BeginChild("Details", ImVec2(0, 200), true);
+            if (objs.showCases[currentObject].entity != nullptr) {
+                ImGui::Text("Entity Name: %s", objs.showCases[currentObject].filename.c_str());
+                ImGui::Text("Number of Images: %zu", objs.showCases[currentObject].entity->NumImages());
+                ImGui::Text("Number of Vertices: %zu", objs.showCases[currentObject].entity->NumVertice());
+                ImGui::Text("Number of UVs: %zu", objs.showCases[currentObject].entity->NumUVs());
+                ImGui::Text("Number of LODs: %zu", objs.showCases[currentObject].entity->NumLods());
+                ImGui::Text("Number of Triangles: %zu", objs.showCases[currentObject].entity->NumTriangles());
+            } else {
+                ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "No entity loaded");
+            }
+            ImGui::EndChild();
+            ImGui::BeginChild("Textures", ImVec2(0, 0), true);
+            ImGui::Text("Textures loaded: %d", objs.showCases[currentObject].entity->images.size());
+            if (ImGui::BeginTable("TexturesTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+                ImGui::TableSetupColumn("Texture Name");
+                ImGui::TableSetupColumn("Texture ID");
+                ImGui::TableHeadersRow();
+                for (const auto &texture : objs.showCases[currentObject].entity->images) {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::Text("%s", texture->name);
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::Image((ImTextureID)(intptr_t)texture->GetTexture()->id, ImVec2(100, 100));
+                }
+                ImGui::EndTable();
+            }
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
+    }
+}

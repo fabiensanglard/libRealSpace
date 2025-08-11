@@ -113,7 +113,7 @@ void DebugScreen::Refresh(void){
                     debugGameInstance.loadSC();
                 }
                 if (ImGui::MenuItem("Strike Commander CD")) {
-                    debugGameInstance.loadSC();
+                    debugGameInstance.loadSCCD();
                 }
                 if (ImGui::MenuItem("Tactical Operations")) {
                     debugGameInstance.loadTO();   
@@ -123,6 +123,9 @@ void DebugScreen::Refresh(void){
                 }
                 if (ImGui::MenuItem("Test mission SC")) {
                     debugGameInstance.testMissionSC();
+                }
+                if (ImGui::MenuItem("Test Objects")) {
+                    debugGameInstance.testObjects();
                 }
                 if (ImGui::MenuItem("Exit")) {
                     exit(0);

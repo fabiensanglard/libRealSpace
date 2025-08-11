@@ -12,6 +12,7 @@
 #include "DebugGame.h"
 #include "DebugStrike.h"
 #include "DebugGameFlow.h"
+#include "DebugObjectViewer.h"
 
 #include "../../strike_commander/precomp.h"
 extern RSScreen *Screen;
@@ -159,7 +160,7 @@ void DebugGame::loadSC() {
     ConvAssets.init();
 
     //Add MainMenu activity on the game stack.
-    //DebugGameFlow* main = new DebugGameFlow();
+    DebugGameFlow* main = new DebugGameFlow();
     
     GameState.Reset();
     GameState.player_callsign = "Debug";
@@ -168,10 +169,61 @@ void DebugGame::loadSC() {
     for (int i=0; i<256; i++) {
         GameState.requierd_flags[i] = false;
     }
-    //main->init();
-    SCMainMenu *to_gf = new SCMainMenu();
-    to_gf->init();
-    Game->AddActivity(to_gf);
+    main->init();
+    Game->AddActivity(main);
+}
+
+
+void DebugGame::loadSCCD() {
+    
+    Assets.SetBase("./assets");
+    // Load all TREs and PAKs
+    
+    Assets.ReadISOImage("./SC.DAT");
+    std::vector<std::string> treFiles = {
+        "BIGTRE.TRE",
+        "LILTRE.TRE",
+        "VOCLIST.TRE"
+    };
+    Assets.init(treFiles);
+    
+    Assets.intel_root_path = "..\\..\\DATA\\INTEL\\";
+    Assets.mission_root_path = "..\\..\\DATA\\MISSIONS\\";
+    Assets.object_root_path = "..\\..\\DATA\\OBJECTS\\";
+    Assets.sound_root_path = "..\\..\\DATA\\SOUNDS\\";
+    Assets.texture_root_path = "..\\..\\DATA\\TXM\\";
+    Assets.gameflow_root_path = "..\\..\\DATA\\GAMEFLOW\\";
+
+    Assets.gameflow_filename = Assets.gameflow_root_path+"GAMEFLOW.IFF";
+    Assets.optshps_filename = Assets.gameflow_root_path+"OPTSHPS.PAK";
+    Assets.optpals_filename = Assets.gameflow_root_path+"OPTPALS.PAK";
+    Assets.optfont_filename = Assets.gameflow_root_path+"OPTFONT.IFF";
+    Assets.navmap_filename = "..\\..\\DATA\\COCKPITS\\NAVMAP.IFF";
+    Assets.conv_pak_filename = Assets.gameflow_root_path+"CONVSHPS.PAK";
+    Assets.option_filename = Assets.gameflow_root_path+"OPTIONS.IFF";
+    Assets.conv_data_filename = Assets.gameflow_root_path+"CONVDATA.IFF";
+    Assets.conv_pal_filename = Assets.gameflow_root_path+"CONVPALS.PAK";
+    Assets.txm_filename = Assets.texture_root_path+"TXMPACK.PAK";
+    Assets.acc_filename = Assets.texture_root_path+"ACCPACK.PAK";
+    Assets.convpak_filename = Assets.gameflow_root_path+"CONV.PAK";
+    
+    FontManager.init(&Assets);
+
+    // Load assets needed for Conversations (char and background)
+    ConvAssets.init();
+
+    //Add MainMenu activity on the game stack.
+    DebugGameFlow* main = new DebugGameFlow();
+    
+    GameState.Reset();
+    GameState.player_callsign = "Debug";
+    GameState.player_name = "Debug Player";
+    GameState.player_firstname = "Debug";
+    for (int i=0; i<256; i++) {
+        GameState.requierd_flags[i] = false;
+    }
+    main->init();
+    Game->AddActivity(main);
 }
 
 
@@ -212,12 +264,6 @@ void DebugGame::testMissionSC() {
 
     // Load assets needed for Conversations (char and background)
     ConvAssets.init();
-    std::string c130_filename = Assets.object_root_path + "SMOKEGEN.IFF";
-    RSEntity *objct = new RSEntity(&Assets);
-    TreEntry *entry = Assets.GetEntryByName((char *)c130_filename.c_str());
-    if (entry != nullptr) {
-        objct->InitFromRAM(entry->data, entry->size);
-    }
     //Add MainMenu activity on the game stack.
     DebugStrike * main = new DebugStrike();
     main->init();
@@ -265,6 +311,29 @@ void DebugGame::loadTO() {
     SCMainMenu *to_gf = new SCMainMenu();
     to_gf->init();
     Game->AddActivity(to_gf);
+}
+
+
+void DebugGame::testObjects() {
+    Game->StopTopActivity();
+    Assets.SetBase("./assets");
+    // Load all TREs and PAKs
+    std::vector<std::string> cdTreFiles = {
+        "TOBIGTRE.TRE",
+        "LILTRE.TRE"
+    };
+    Assets.ReadISOImage("./SC.DAT");
+    Assets.init(cdTreFiles);
+    
+    FontManager.init(&Assets);
+
+    // Load assets needed for Conversations (char and background)
+    // ConvAssets.init();
+
+    //Add MainMenu activity on the game stack.
+    DebugObjectViewer* main = new DebugObjectViewer();
+    main->init();
+    Game->AddActivity(main);
 }
 
 void DebugGame::loadPacific() {
