@@ -541,12 +541,13 @@ void SCCockpit::RenderBombSight() {
     int by1                  = center.y - height / 2;
     int by2                  = center.y + height / 2;
     GunSimulatedObject *weap = new GunSimulatedObject();
-    float planeSpeed         = sqrtf(
-        this->player_plane->vx * this->player_plane->vx + this->player_plane->vy * this->player_plane->vy +
-        this->player_plane->vz * this->player_plane->vz
-    );
+    Vector3D direction       = {
+        this->player_plane->x - this->player_plane->last_px, this->player_plane->y - this->player_plane->last_py,
+        this->player_plane->z - this->player_plane->last_pz
+    };
+    float planeSpeed      = direction.Length();
     float thrustMagnitude = -planeSpeed;
-    thrustMagnitude       = -planeSpeed * 15.0f; // coefficient ajustable
+    thrustMagnitude       = -planeSpeed * 50.0f; // coefficient ajustable
 
     float yawRad   = tenthOfDegreeToRad(this->player_plane->yaw);
     float pitchRad = tenthOfDegreeToRad(-this->player_plane->pitch);
@@ -569,8 +570,8 @@ void SCCockpit::RenderBombSight() {
     weap->vz        = initial_trust.z;
 
     weap->weight   = this->player_plane->weaps_load[this->player_plane->selected_weapon]->objct->weight_in_kg * 2.205f;
-    weap->azimuthf = this->player_plane->azimuthf;
-    weap->elevationf = this->player_plane->elevationf;
+    weap->azimuthf = yawRad;
+    weap->elevationf = -pitchRad;
     weap->target     = nullptr;
     weap->mission    = this->current_mission;
     Vector3D target{0, 0, 0};

@@ -223,8 +223,10 @@ void SCSimulatedObject::Simulate(int tps) {
     this->distance += length_vect.Length();
     if (this->distance > this->obj->wdat->effective_range) {
         this->alive = false;
+        this->mission->explosions.push_back(new SCExplosion(this->obj->explos->objct, position));
     }
-    if (this->y < 0) {
+    if (this->y < this->mission->area->getY(this->x, this->z)) {
+        this->mission->explosions.push_back(new SCExplosion(this->obj->explos->objct, position));
         this->alive = false;
     }
 }
@@ -304,13 +306,17 @@ void GunSimulatedObject::Simulate(int tps) {
 
     Vector3D length_vect = { this->x - this->last_px, this->y - this->last_py, this->z - this->last_pz };
     this->distance += length_vect.Length();
-    if (this->distance > this->obj->wdat->effective_range * 10.0f) {
+    /*if (this->distance > this->obj->wdat->effective_range * 10.0f) {
         this->alive = false;
-    }
+    }*/
     for (auto entity: this->mission->actors) {
         if (this->CheckCollision(entity)) {
             this->alive = false;
             entity->object->alive = false;
+            if (entity->object->entity->explos != nullptr) {
+                SCExplosion *explosion = new SCExplosion(entity->object->entity->explos->objct, position);
+                this->mission->explosions.push_back(explosion);
+            }
             this->shooter->score += 100;
             if (entity->plane != nullptr) {
                 this->shooter->plane_down += 1;
@@ -323,6 +329,10 @@ void GunSimulatedObject::Simulate(int tps) {
     // Désactive l'objet s'il touche le sol
     if (this->y < this->mission->area->getY(this->x, this->z)) {
         this->alive = false;
+        if (this->obj->explos != nullptr && this->obj->explos->objct != nullptr) {
+            SCExplosion *explosion = new SCExplosion(this->obj->explos->objct, position);
+            this->mission->explosions.push_back(explosion);
+        }
     }
 }
 

@@ -394,9 +394,10 @@ void SCMission::update() {
         ai_actor->object->azymuth = 360 - (uint16_t)(ai_actor->plane->azimuthf / 10.0f);
         ai_actor->object->roll = (uint16_t)(ai_actor->plane->twist / 10.0f);
         ai_actor->object->pitch = (uint16_t)(ai_actor->plane->elevationf / 10.0f);
-        if (ai_actor->is_destroyed == true && ai_actor->object->position.y < 0) {
+        if (ai_actor->is_destroyed == true && ai_actor->object->position.y < this->area->getY(ai_actor->object->position.x, ai_actor->object->position.z)) {
             ai_actor->object->alive = false;
             ai_actor->is_active = false;
+            this->explosions.push_back(new SCExplosion(ai_actor->object->entity->explos->objct, ai_actor->object->position));
         }
     }
     if (this->player->plane->landed) {

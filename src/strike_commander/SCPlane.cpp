@@ -933,16 +933,20 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     }
     SCSimulatedObject *weap{nullptr};
     Vector3D initial_trust = {0,0,0};
-    float planeSpeed = sqrtf(this->vx * this->vx + this->vy * this->vy + this->vz * this->vz);
+    Vector3D direction       = {
+        this->x - this->last_px, this->y - this->last_py,
+        this->z - this->last_pz
+    };
+    float planeSpeed      = direction.Length();
     float thrustMagnitude = -planeSpeed;
     switch (this->weaps_load[weapon_hard_point_id]->objct->wdat->weapon_id) {
         case 12:
             weap = new GunSimulatedObject();
-            thrustMagnitude = -planeSpeed * 150.0f; // coefficient ajustable
+            thrustMagnitude = -planeSpeed * 250.0f; // coefficient ajustable
         break;
         case 5:
         case 6:
-            thrustMagnitude = -planeSpeed * 15.0f;
+            thrustMagnitude = -planeSpeed * 50.0f;
             weap = new GunSimulatedObject();
         break;
         default:
@@ -989,15 +993,13 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     weap->x = this->x;
     weap->y = this->y;
     weap->z = this->z;
-    weap->azimuthf = this->azimuthf;
-    weap->elevationf = this->elevationf;
+    weap->azimuthf = this->yaw;
+    weap->elevationf = this->pitch;
     weap->vx = initial_trust.x;
     weap->vy = initial_trust.y;
     weap->vz = initial_trust.z;
 
     weap->weight = this->weaps_load[weapon_hard_point_id]->objct->weight_in_kg*2.205f;
-    weap->azimuthf = this->azimuthf;
-    weap->elevationf = this->elevationf;
     weap->target = target;
     this->weaps_object.push_back(weap);
 }
