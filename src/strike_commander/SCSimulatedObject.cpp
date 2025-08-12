@@ -161,6 +161,11 @@ void SCSimulatedObject::Simulate(int tps) {
         if (this->CheckCollision(this->target)) {
             this->alive = false;
             this->target->object->alive = false;
+            if (this->target->object->entity->explos != nullptr) {
+                SCExplosion *explosion = new SCExplosion(this->target->object->entity->explos->objct, position);
+                this->mission->explosions.push_back(explosion);
+            }
+            
             this->shooter->score += 100;
             if (this->target->plane != nullptr) {
                 this->shooter->plane_down += 1;
@@ -180,6 +185,10 @@ void SCSimulatedObject::Simulate(int tps) {
                 this->alive = false;
                 this->target->object->alive = false;
                 this->shooter->score += 100;
+                if (this->target->object->entity->explos != nullptr) {
+                    SCExplosion *explosion = new SCExplosion(this->target->object->entity->explos->objct, position);
+                    this->mission->explosions.push_back(explosion);
+                }
                 if (this->target->plane != nullptr) {
                     this->shooter->plane_down += 1;
                 } else {

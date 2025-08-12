@@ -272,7 +272,7 @@ void RSEntity::parseREAL_OBJT_MISS(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
 
     std::map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
-    handlers["EXPL"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_EXPL, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["EXPL"] = std::bind(&RSEntity::parseREAL_OBJT_JETP_EXPL, this, std::placeholders::_1, std::placeholders::_2);
     handlers["SIGN"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_SIGN, this, std::placeholders::_1, std::placeholders::_2);
     handlers["TRGT"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_TRGT, this, std::placeholders::_1, std::placeholders::_2);
     handlers["SMOK"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_SMOK, this, std::placeholders::_1, std::placeholders::_2);

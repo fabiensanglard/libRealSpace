@@ -1008,6 +1008,18 @@ void SCStrike::runFrame(void) {
             printf("Actor has no plane or object\n");
         }
     }
+    for (auto expl: this->current_mission->explosions) {
+        if (expl->is_finished) {
+            // Remove explosion when finished
+            this->current_mission->explosions.erase(
+                std::remove_if(this->current_mission->explosions.begin(),
+                              this->current_mission->explosions.end(),
+                              [](const auto& expl) { return expl->is_finished; }),
+                this->current_mission->explosions.end());
+            continue;
+        }
+        expl->render();
+    }
     this->player_plane->RenderSimulatedObject();
     this->cockpit->cam = camera;
     switch (this->camera_mode) {
