@@ -3,7 +3,7 @@
 void SCExplosion::render() {
     if (is_finished) return;
     this->fps++;
-    if (this->fps > 12) {
+    if (this->fps > 6) {
         this->fps = 0;
         this->current_frame = this->current_frame + 1;
     }

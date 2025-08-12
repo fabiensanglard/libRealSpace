@@ -197,7 +197,6 @@ void SCSimulatedObject::Simulate(int tps) {
                 return;
             }
         }
-        
     }
     this->smoke_positions.push_back(position);
     if (this->smoke_positions.size() > 20) {
