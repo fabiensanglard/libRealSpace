@@ -30,10 +30,9 @@ DebugGame::~DebugGame() {}
 void DebugGame::init() {
 
     // Load Main Palette and Initialize the GL
-    Screen->init(1200,800,0);
+    
     VGA.init(1200,800, &Assets);
     Renderer.init(1200,800, &Assets);
-
     // Load the Mouse Cursor
     Mouse.init();
     testMissionSC();
@@ -262,8 +261,6 @@ void DebugGame::testMissionSC() {
     
     FontManager.init(&Assets);
 
-    // Load assets needed for Conversations (char and background)
-    ConvAssets.init();
     //Add MainMenu activity on the game stack.
     DebugStrike * main = new DebugStrike();
     main->init();

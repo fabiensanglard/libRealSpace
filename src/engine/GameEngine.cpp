@@ -10,7 +10,7 @@
 #include "imgui_impl_opengl2.h"
 #include "imgui_impl_sdl2.h"
 #include "GameEngine.h"
-
+#include "Loader.h"
 extern RSScreen *Screen;
 extern GameEngine *Game;
 extern SCMouse Mouse;
@@ -28,7 +28,6 @@ void GameEngine::init() {
     Screen->init(WIDTH,HEIGHT,FULLSCREEN);
     VGA.init(WIDTH,HEIGHT, &Assets);
     Renderer.init(WIDTH,HEIGHT, &Assets);
-
     // Load the Mouse Cursor
     Mouse.init();
 }

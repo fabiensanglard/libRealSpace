@@ -22,6 +22,7 @@
 #include "RSVGA.h"
 #include "SCRenderer.h"
 #include "IActivity.h"
+#include "Loader.h"
 
 class GameEngine{
     
@@ -44,6 +45,8 @@ public:
     
     virtual void PumpEvents(void);
     
+protected:
+    Loader *loader;
 private:
     
     std::stack<IActivity*> activities;

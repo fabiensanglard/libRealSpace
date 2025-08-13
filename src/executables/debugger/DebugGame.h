@@ -12,7 +12,7 @@
 #include "../../engine/RSVGA.h"
 #include "../../engine/SCRenderer.h"
 #include "../../engine/IActivity.h"
-
+#include "../../engine/Loader.h"
 class DebugGame : public GameEngine {
     
 public:

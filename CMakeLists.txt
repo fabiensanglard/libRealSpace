@@ -6,6 +6,7 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer_ext CONFIG REQUIRED)
+find_package(SDL2_ttf CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 set (OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)

@@ -65,6 +65,7 @@ void PakArchive::Parse(void){
             uint8_t *dt = lzbuffer.DecodeLZW(entry->data+4, entry->size-4, csize);
             entry->data = dt;
             entry->size = csize;
+            entry->type = 0; // Reset type to 0 after decompression.
         }
     }   
     

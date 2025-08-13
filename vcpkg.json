@@ -1,21 +1,22 @@
 {
   "dependencies": [
-    { 
-      "name": "imgui", 
-      "features": [
-        "opengl2-binding", 
-        "sdl2-binding"
-      ] 
-    },
-    "sdl2",
     {
-      "name" : "sdl2-mixer-ext",
+      "name": "imgui",
+      "features": [
+        "opengl2-binding",
+        "sdl2-binding"
+      ]
+    },
+    "opengl",
+    "sdl2",
+    "sdl2-mixer-ext",
+    {
+      "name": "sdl2-mixer-ext",
       "features": [
         "libadlmidi",
         "libopnmidi"
       ]
     },
-    "sdl2-mixer-ext",
-    "opengl"
+    "sdl2-ttf"
   ]
 }
