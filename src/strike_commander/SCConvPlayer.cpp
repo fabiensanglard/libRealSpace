@@ -88,7 +88,7 @@ std::map<uint8_t, std::vector<uint8_t>> faces_shape = {
     {255,         std::vector<uint8_t>{1, 2, 35}},
 };
 
-void SCConvPlayer::Focus(void) { IActivity::Focus(); }
+void SCConvPlayer::focus(void) { IActivity::focus(); }
 
 void SCConvPlayer::clicked(void *none, uint8_t id) {
     printf("clicked on %d\n", id);
@@ -182,7 +182,7 @@ void SCConvPlayer::ReadNextFrame(void) {
         Mixer.StopSound();
     }
     if (conv.GetPosition() == end) {
-        Stop();
+        stop();
         return;
     }
 
@@ -410,7 +410,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
     default:
         printf("ConvID: %d Unknown opcode: %X.\n", this->conversationID, type);
-        Stop();
+        stop();
         return;
         break;
     }
@@ -422,7 +422,7 @@ void SCConvPlayer::SetArchive(PakEntry *convPakEntry) {
 
     if (convPakEntry->size == 0) {
         Game->log("Conversation entry is empty: Unable to load it.\n");
-        Stop();
+        stop();
         return;
     }
 
@@ -443,7 +443,7 @@ void SCConvPlayer::SetID(int32_t id) {
     this->conversationID = id;
 
     if (convPak.GetNumEntries() <= id) {
-        Stop();
+        stop();
         Game->log("Cannot load conversation id (max convID is %lu).", convPak.GetNumEntries() - 1);
         return;
     }
@@ -645,7 +645,7 @@ void SCConvPlayer::CheckZones() {
 void SCConvPlayer::runFrame(void) {
 
     if (!initialized) {
-        Stop();
+        stop();
         Game->log("Conv ID %d was not initialized: Stopping.\n", this->conversationID);
         return;
     }
@@ -659,7 +659,7 @@ void SCConvPlayer::runFrame(void) {
         ReadNextFrame();
     }
 
-    CheckButtons();
+    checkButtons();
 
     VGA.Activate();
     VGA.GetFrameBuffer()->FillWithColor(255);

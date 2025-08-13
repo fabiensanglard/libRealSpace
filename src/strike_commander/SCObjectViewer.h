@@ -20,8 +20,8 @@ public:
     void init( );
     
     void runFrame(void);
-    void Focus(void);
-    void UnFocus(void);
+    void focus(void);
+    void unFocus(void);
     
     void NextObject(void);
     float rotateUpDownAngle;

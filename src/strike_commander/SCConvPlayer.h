@@ -74,7 +74,7 @@ public:
     void init();
     void runFrame(void);
     void SetID(int32_t id);
-    virtual void Focus(void);
+    virtual void focus(void);
 };
 
 #endif /* defined(__libRealSpace__SCConvPlayer__) */

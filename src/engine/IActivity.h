@@ -34,22 +34,22 @@ protected:
     bool focused;
     int timer{0};
     IActivity();
-    SCButton* CheckButtons(void);
+    SCButton* checkButtons(void);
     std::vector<SCButton*> buttons;
-    void DrawButtons(void);
+    void drawButtons(void);
     
 public:
     VGAPalette palette;
 
     virtual void init(void) = 0;
-    virtual void Start(void) { this->running = true;}
-    void Stop(void) { this->running = false;}
+    virtual void start(void) { this->running = true;}
+    void stop(void) { this->running = false;}
     virtual void runFrame (void) = 0;
-    void SetTitle(const char* title);
-    inline bool IsRunning(void){ return this->running; }
+    void setTitle(const char* title);
+    inline bool isRunning(void){ return this->running; }
     virtual ~IActivity();
-    virtual void Focus(void)  { this->focused = true;}
-    virtual void UnFocus(void){ this->focused = false;}
+    virtual void focus(void)  { this->focused = true;}
+    virtual void unFocus(void){ this->focused = false;}
     virtual void renderMenu(void) {}
     virtual void renderUI(void) {}
     void checkKeyboard(void);

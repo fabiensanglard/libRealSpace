@@ -16,8 +16,8 @@ public:
     ~SCTrainingMenu();
 
     void init();
-    void UnFocus(void);
-    void Focus(void);
+    void unFocus(void);
+    void focus(void);
     void runFrame(void);
 
 private:

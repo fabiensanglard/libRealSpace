@@ -44,7 +44,7 @@ IActivity::IActivity() {}
 
 IActivity::~IActivity() {}
 
-void IActivity::SetTitle(const char *title) { Screen->setTitle(title); }
+void IActivity::setTitle(const char *title) { Screen->setTitle(title); }
 
 void IActivity::checkKeyboard(void) {
     // Keyboard
@@ -64,7 +64,7 @@ void IActivity::checkKeyboard(void) {
     }
 }
 
-SCButton *IActivity::CheckButtons(void) {
+SCButton *IActivity::checkButtons(void) {
     for (size_t i = 0; i < buttons.size(); i++) {
 
         SCButton *button = buttons[i];
@@ -97,7 +97,7 @@ SCButton *IActivity::CheckButtons(void) {
     return NULL;
 }
 
-void IActivity::DrawButtons(void) {
+void IActivity::drawButtons(void) {
 
     for (auto button : buttons) {
         RLEShape ap = button->appearance[button->GetAppearance()];

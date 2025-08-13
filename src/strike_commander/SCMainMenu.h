@@ -25,8 +25,8 @@ public:
     
     virtual void init(void);
     virtual void runFrame(void);
-    virtual void Focus(void);
-    virtual void UnFocus(void);
+    virtual void focus(void);
+    virtual void unFocus(void);
     
 private:
     void LoadButtons(void);

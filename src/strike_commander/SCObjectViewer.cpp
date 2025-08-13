@@ -62,7 +62,7 @@ void SCObjectViewer::OnRotateDown(void) {
 void SCObjectViewer::NextObject(void) { currentObject = (currentObject + 1) % objs.showCases.size(); }
 
 
-void SCObjectViewer::Focus(void) {
+void SCObjectViewer::focus(void) {
     this->focused = true;
     if (!this->music_playing) {
         Mixer.SwitchBank(0);
@@ -70,7 +70,7 @@ void SCObjectViewer::Focus(void) {
         this->music_playing = true;
     }
 }
-void SCObjectViewer::UnFocus(void) {
+void SCObjectViewer::unFocus(void) {
     this->focused = false;
     if (this->music_playing) {
         Mixer.StopMusic();
@@ -209,7 +209,7 @@ void SCObjectViewer::init(void) {
 
 void SCObjectViewer::runFrame(void) {
 
-    CheckButtons();
+    checkButtons();
 
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
@@ -287,7 +287,7 @@ void SCObjectViewer::runFrame(void) {
 
     VGA.GetFrameBuffer()->DrawShape(&title);
 
-    DrawButtons();
+    drawButtons();
 
     // Draw Mouse
     Mouse.Draw();

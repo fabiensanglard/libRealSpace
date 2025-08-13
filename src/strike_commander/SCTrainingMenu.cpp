@@ -16,7 +16,7 @@ SCTrainingMenu::~SCTrainingMenu() {}
 
 void SCTrainingMenu::OnDogFight() {}
 
-void SCTrainingMenu::Focus(void) {
+void SCTrainingMenu::focus(void) {
     this->focused = true;
     if (!this->music_playing) {
         Mixer.SwitchBank(0);
@@ -24,7 +24,7 @@ void SCTrainingMenu::Focus(void) {
         this->music_playing = true;
     }
 }
-void SCTrainingMenu::UnFocus(void) {
+void SCTrainingMenu::unFocus(void) {
     this->focused = false;
     if (this->music_playing) {
         Mixer.StopMusic();
@@ -108,7 +108,7 @@ void SCTrainingMenu::init() {
 }
 
 void SCTrainingMenu::runFrame(void) {
-    CheckButtons();
+    checkButtons();
 
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
@@ -119,7 +119,7 @@ void SCTrainingMenu::runFrame(void) {
     VGA.GetFrameBuffer()->DrawShape(&title);
     VGA.GetFrameBuffer()->DrawShape(&board);
 
-    DrawButtons();
+    drawButtons();
 
     Mouse.Draw();
 

@@ -51,7 +51,7 @@ SCMainMenu::SCMainMenu() {
 
 SCMainMenu::~SCMainMenu() {}
 
-void SCMainMenu::Focus(void) {
+void SCMainMenu::focus(void) {
     this->focused = true;
     if (!this->music_playing) {
         Mixer.SwitchBank(0);
@@ -59,7 +59,7 @@ void SCMainMenu::Focus(void) {
         this->music_playing = true;
     }
 }
-void SCMainMenu::UnFocus(void) {
+void SCMainMenu::unFocus(void) {
     this->focused = false;
     if (this->music_playing) {
         Mixer.StopMusic();
@@ -76,7 +76,7 @@ void SCMainMenu::init(void) {
     LoadBoard();
     LoadBackgrounds();
 
-    SetTitle("Neo Strike Commander");
+    setTitle("Neo Strike Commander");
     this->frequest = new SCFileRequester(std::bind(&SCMainMenu::LoadGame, this, std::placeholders::_1),42);
     timer = 4200;
 }
@@ -205,7 +205,7 @@ void SCMainMenu::runFrame(void) {
         this->frequest->checkevents();
     } else {
         checkKeyboard();
-        CheckButtons();
+        checkButtons();
         timer --;
     }
     if (timer <= 0) {
@@ -229,7 +229,7 @@ void SCMainMenu::runFrame(void) {
 
     VGA.GetFrameBuffer()->DrawShape(&board);
 
-    DrawButtons();
+    drawButtons();
     if (this->frequest->opened) {
         this->frequest->draw(VGA.GetFrameBuffer());
     }

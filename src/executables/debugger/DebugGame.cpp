@@ -372,8 +372,8 @@ void DebugGame::run() {
         }
         currentActivity = activities.top();
 
-        if (currentActivity->IsRunning()) {
-            currentActivity->Focus();
+        if (currentActivity->isRunning()) {
+            currentActivity->focus();
             currentActivity->runFrame();
         } else {
             activities.pop();
@@ -419,16 +419,16 @@ void DebugGame::addActivity(IActivity *activity) {
     if (activities.size()>0) {
         IActivity *currentActivity;
         currentActivity = activities.top();
-        currentActivity->UnFocus();
+        currentActivity->unFocus();
     }
-    activity->Start();
+    activity->start();
     this->activities.push(activity);
 }
 
 void DebugGame::stopTopActivity(void) {
     IActivity *currentActivity;
     currentActivity = activities.top();
-    currentActivity->Stop();
+    currentActivity->stop();
 }
 
 IActivity *DebugGame::getCurrentActivity(void) { 

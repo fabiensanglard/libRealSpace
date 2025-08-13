@@ -109,7 +109,7 @@ void SCRegister::checkKeyboard(void){
                     for (int i=0; i<256; i++) {
                         GameState.requierd_flags[i] = false;
                     }
-                    Stop();
+                    stop();
                 } else {
                     if (this->current_entry == &GameState.player_callsign){
                         this->current_entry = &GameState.player_firstname;
@@ -164,7 +164,7 @@ void SCRegister::init( ){
 }
 
 void SCRegister::runFrame(void){
-    CheckButtons();
+    checkButtons();
     checkKeyboard();
     
     VGA.Activate();
