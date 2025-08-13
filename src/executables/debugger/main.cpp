@@ -34,7 +34,11 @@ int main(int argc, char* argv[]) {
     loader.init();
 
     // Démarrer le chargement des assets en arrière-plan
-    
+    while (!loader.ison) {
+        loader.openScreen();
+        Screen->Refresh();
+        SDL_PumpEvents();
+    }
     loader.startLoading([](Loader* loader) {
         // Simuler le chargement des assets
         const int totalAssets = 100;
@@ -99,6 +103,7 @@ int main(int argc, char* argv[]) {
         
         // Mettre à jour l'affichage
         Screen->Refresh();
+        SDL_PumpEvents();
     }
 
     Game->init();

@@ -33,10 +33,12 @@ public:
     
     void renderMenu();
     void renderUI();
-
+    void openScreen();
+    bool ison{false};
 private:
     std::thread loadingThread;
     std::atomic<bool> loadingComplete;
     std::atomic<float> loadingProgress;
     std::mutex progressMutex;
+    
 };
