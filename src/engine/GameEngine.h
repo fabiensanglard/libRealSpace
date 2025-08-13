@@ -32,18 +32,16 @@ public:
     ~GameEngine();
     
     virtual void init(void);
-    virtual void Run(void);
-    virtual void Terminate(const char* reason, ...);
+    virtual void run(void);
+    virtual void terminate(const char* reason, ...);
     
-    virtual void Log(const char* text, ...);
-    virtual void LogError(const char* text, ...);
+    virtual void log(const char* text, ...);
+    virtual void logError(const char* text, ...);
+    virtual void addActivity(IActivity* activity);
+    virtual void stopTopActivity(void);
+    virtual IActivity* getCurrentActivity(void);
     
-    //Add an activity on the top of the stack.
-    virtual void AddActivity(IActivity* activity);
-    virtual void StopTopActivity(void);
-    virtual IActivity* GetCurrentActivity(void);
-    
-    virtual void PumpEvents(void);
+    virtual void pumpEvents(void);
     
 protected:
     Loader *loader;

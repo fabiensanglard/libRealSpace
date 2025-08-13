@@ -80,11 +80,11 @@ int main(int argc, char* argv[]) {
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();
     main->init();
-    Game->AddActivity(main);
+    Game->addActivity(main);
     SCAnimationPlayer *intro = new SCAnimationPlayer();
     intro->init();
-    Game->AddActivity(intro);
-    Game->Run();
+    Game->addActivity(intro);
+    Game->run();
 
     
     return EXIT_SUCCESS;

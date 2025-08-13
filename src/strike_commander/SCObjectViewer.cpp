@@ -17,45 +17,45 @@ SCObjectViewer::SCObjectViewer() {
 
 SCObjectViewer::~SCObjectViewer() {}
 
-void SCObjectViewer::OnExit(void) { Game->StopTopActivity(); }
+void SCObjectViewer::OnExit(void) { Game->stopTopActivity(); }
 
 void SCObjectViewer::OnNext(void) {
     // startTime = SDL_GetTicks();
-    SCObjectViewer *that = (SCObjectViewer *)Game->GetCurrentActivity();
+    SCObjectViewer *that = (SCObjectViewer *)Game->getCurrentActivity();
     that->NextObject();
 }
 
 void SCObjectViewer::OnZoomOut(void) {
-    SCObjectViewer *that = (SCObjectViewer *)Game->GetCurrentActivity();
+    SCObjectViewer *that = (SCObjectViewer *)Game->getCurrentActivity();
     that->zoomFactor += 0.1f;
     if (that->zoomFactor > 2.5f)
         that->zoomFactor = 2.5f;
 }
 
 void SCObjectViewer::OnZoomIn(void) {
-    SCObjectViewer *that = (SCObjectViewer *)Game->GetCurrentActivity();
+    SCObjectViewer *that = (SCObjectViewer *)Game->getCurrentActivity();
     that->zoomFactor -= 0.1f;
     if (that->zoomFactor < 0.4f)
         that->zoomFactor = 0.4f;
 }
 
 void SCObjectViewer::OnRotateLeft(void) {
-    SCObjectViewer *that = (SCObjectViewer *)Game->GetCurrentActivity();
+    SCObjectViewer *that = (SCObjectViewer *)Game->getCurrentActivity();
     that->rotateLeftRightAngle -= 10.0f;
 }
 
 void SCObjectViewer::OnRotateRight(void) {
-    SCObjectViewer *that = (SCObjectViewer *)Game->GetCurrentActivity();
+    SCObjectViewer *that = (SCObjectViewer *)Game->getCurrentActivity();
     that->rotateLeftRightAngle += 10.0f;
 }
 
 void SCObjectViewer::OnRotateUp(void) {
-    SCObjectViewer *that = (SCObjectViewer *)Game->GetCurrentActivity();
+    SCObjectViewer *that = (SCObjectViewer *)Game->getCurrentActivity();
     that->rotateUpDownAngle += 10.0f;
 }
 
 void SCObjectViewer::OnRotateDown(void) {
-    SCObjectViewer *that = (SCObjectViewer *)Game->GetCurrentActivity();
+    SCObjectViewer *that = (SCObjectViewer *)Game->getCurrentActivity();
     that->rotateUpDownAngle -= 10.0f;
 }
 

@@ -30,7 +30,7 @@ void SCShot::checkKeyboard(void) {
 
         switch (event->type) {
         case SDL_MOUSEBUTTONUP:
-            Game->StopTopActivity();
+            Game->stopTopActivity();
             break;
         default:
             break;
@@ -43,7 +43,7 @@ void SCShot::checkKeyboard(void) {
 
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
-            Game->StopTopActivity();
+            Game->stopTopActivity();
             break;
         }
         default:
@@ -168,7 +168,7 @@ void SCShot::runFrame(void) {
 
     VGA.VSync();
     if (ended) {
-        Game->StopTopActivity();
+        Game->stopTopActivity();
     }
 }
 
@@ -223,7 +223,7 @@ void EndMissionScene::checkKeyboard(void) {
                 this->part = 1;
                 this->rawPalette = this->optPals.GetEntry(19)->data;
             } else {
-                Game->StopTopActivity();
+                Game->stopTopActivity();
             }
             break;
         default:
@@ -237,7 +237,7 @@ void EndMissionScene::checkKeyboard(void) {
 
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
-            Game->StopTopActivity();
+            Game->stopTopActivity();
             break;
         }
         default:
@@ -352,7 +352,7 @@ void MapShot::runFrame(void) {
     }
     VGA.VSync();
     if (ended) {
-        Game->StopTopActivity();
+        Game->stopTopActivity();
     }
 }
 void MapShot::checkKeyboard(void) {
@@ -363,7 +363,7 @@ void MapShot::checkKeyboard(void) {
 
         switch (event->type) {
         case SDL_MOUSEBUTTONUP:
-            Game->StopTopActivity();
+            Game->stopTopActivity();
             break;
         default:
             break;
@@ -376,7 +376,7 @@ void MapShot::checkKeyboard(void) {
 
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
-            Game->StopTopActivity();
+            Game->stopTopActivity();
             break;
         }
         case SDLK_c:

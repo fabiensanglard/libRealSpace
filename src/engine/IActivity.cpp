@@ -55,7 +55,7 @@ void IActivity::checkKeyboard(void) {
 
         switch (event->key.keysym.sym) {
         case SDLK_ESCAPE: {
-            Game->StopTopActivity();
+            Game->stopTopActivity();
             break;
         }
         default:

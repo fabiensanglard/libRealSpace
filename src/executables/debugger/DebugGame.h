@@ -21,17 +21,17 @@ public:
     ~DebugGame();
     
     void init(void);
-    void Run(void);
-    void Terminate(const char* reason, ...);
+    void run(void);
+    void terminate(const char* reason, ...);
     
-    void Log(const char* text, ...);
-    void LogError(const char* text, ...);
+    void log(const char* text, ...);
+    void logError(const char* text, ...);
     
     //Add an activity on the top of the stack.
-    void AddActivity(IActivity* activity);
-    void StopTopActivity(void);
-    IActivity* GetCurrentActivity(void);
-    void PumpEvents(void);
+    void addActivity(IActivity* activity);
+    void stopTopActivity(void);
+    IActivity* getCurrentActivity(void);
+    void pumpEvents(void);
     void loadSC();
     void loadSCCD();
     void loadTO();

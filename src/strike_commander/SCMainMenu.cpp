@@ -27,21 +27,21 @@ void SCMainMenu::OnStartNewGame() {
     gfl->init();
     SCRegister *registerActivity = new SCRegister();
     registerActivity->init();
-    Game->AddActivity(gfl);
-    Game->AddActivity(registerActivity);
+    Game->addActivity(gfl);
+    Game->addActivity(registerActivity);
 }
 
 void SCMainMenu::OnTrainingMission() {
 
     SCTrainingMenu *trainingActivity = new SCTrainingMenu();
     trainingActivity->init();
-    Game->AddActivity(trainingActivity);
+    Game->addActivity(trainingActivity);
 }
 
 void SCMainMenu::OnViewObject() {
     SCObjectViewer *objViewer = new SCObjectViewer();
     objViewer->init();
-    Game->AddActivity(objViewer);
+    Game->addActivity(objViewer);
 }
 
 SCMainMenu::SCMainMenu() { 
@@ -84,7 +84,7 @@ void SCMainMenu::LoadGame(std::string filename) {
     GameState.Load(filename);
     SCGameFlow *gfl = new SCGameFlow();
     gfl->InitFromGameState();
-    Game->AddActivity(gfl);
+    Game->addActivity(gfl);
     this->frequest->requested_file = "";
 }
     
@@ -213,7 +213,7 @@ void SCMainMenu::runFrame(void) {
         intro->init();
         timer = 4200;
         Mixer.StopMusic();
-        Game->AddActivity(intro);
+        Game->addActivity(intro);
         return;
     }
     

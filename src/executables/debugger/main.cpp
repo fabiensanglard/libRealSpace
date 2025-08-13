@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     }
 
     Game->init();
-    Game->Run();
+    Game->run();
 
     
     return EXIT_SUCCESS;

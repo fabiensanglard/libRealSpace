@@ -38,7 +38,7 @@ void DebugGame::init() {
     testMissionSC();
 }
 
-void DebugGame::PumpEvents(void) {
+void DebugGame::pumpEvents(void) {
 
     SDL_PumpEvents();
 
@@ -86,10 +86,10 @@ void DebugGame::PumpEvents(void) {
 
         switch (event->type) {
         case SDL_APP_TERMINATING:
-            Terminate("System request.");
+            terminate("System request.");
             break;
         case SDL_QUIT:
-            Terminate("System request.");
+            terminate("System request.");
             break;
 
         // Verify is we should be capturing the mouse or not.
@@ -107,7 +107,7 @@ void DebugGame::PumpEvents(void) {
             }
 
             if (event->window.event == SDL_WINDOWEVENT_CLOSE) {
-                Terminate("System request.");
+                terminate("System request.");
                 break;
             }
             
@@ -169,7 +169,7 @@ void DebugGame::loadSC() {
         GameState.requierd_flags[i] = false;
     }
     main->init();
-    Game->AddActivity(main);
+    Game->addActivity(main);
 }
 
 
@@ -222,7 +222,7 @@ void DebugGame::loadSCCD() {
         GameState.requierd_flags[i] = false;
     }
     main->init();
-    Game->AddActivity(main);
+    Game->addActivity(main);
 }
 
 
@@ -265,12 +265,12 @@ void DebugGame::testMissionSC() {
     DebugStrike * main = new DebugStrike();
     main->init();
     main->setMission("MISN-1A.IFF");
-    Game->AddActivity(main);
+    Game->addActivity(main);
     
 }
 
 void DebugGame::loadTO() {
-    Game->StopTopActivity();
+    Game->stopTopActivity();
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     
@@ -307,12 +307,12 @@ void DebugGame::loadTO() {
     
     SCMainMenu *to_gf = new SCMainMenu();
     to_gf->init();
-    Game->AddActivity(to_gf);
+    Game->addActivity(to_gf);
 }
 
 
 void DebugGame::testObjects() {
-    Game->StopTopActivity();
+    Game->stopTopActivity();
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     std::vector<std::string> cdTreFiles = {
@@ -330,11 +330,11 @@ void DebugGame::testObjects() {
     //Add MainMenu activity on the game stack.
     DebugObjectViewer* main = new DebugObjectViewer();
     main->init();
-    Game->AddActivity(main);
+    Game->addActivity(main);
 }
 
 void DebugGame::loadPacific() {
-    Game->StopTopActivity();
+    Game->stopTopActivity();
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     
@@ -351,23 +351,23 @@ void DebugGame::loadPacific() {
     //Add MainMenu activity on the game stack.
     SCObjectViewer* main = new SCObjectViewer();
     main->init();
-    Game->AddActivity(main);
+    Game->addActivity(main);
 }
 
-void DebugGame::Run() {
+void DebugGame::run() {
 
     IActivity *currentActivity;
 
     while (activities.size() > 0) {
 
-        PumpEvents();
+        pumpEvents();
 
         // Clear the screen
         // enderer.Clear();
 
         // Allow the active activity to Run and Render
         if (activities.empty()) {
-            LogError("No activity to run.\n");
+            logError("No activity to run.\n");
             return;
         }
         currentActivity = activities.top();
@@ -391,31 +391,31 @@ void DebugGame::Run() {
     }
 }
 
-void DebugGame::Terminate(const char *reason, ...) {
-    Log("Terminating: ");
+void DebugGame::terminate(const char *reason, ...) {
+    log("Terminating: ");
     va_list args;
     va_start(args, reason);
     vfprintf(stdout, reason, args);
     va_end(args);
-    Log("\n");
+    log("\n");
     exit(0);
 }
 
-void DebugGame::Log(const char *text, ...) {
+void DebugGame::log(const char *text, ...) {
     va_list args;
     va_start(args, text);
     vfprintf(stdout, text, args);
     va_end(args);
 }
 
-void DebugGame::LogError(const char *text, ...) {
+void DebugGame::logError(const char *text, ...) {
     va_list args;
     va_start(args, text);
     vfprintf(stderr, text, args);
     va_end(args);
 }
 
-void DebugGame::AddActivity(IActivity *activity) {
+void DebugGame::addActivity(IActivity *activity) {
     if (activities.size()>0) {
         IActivity *currentActivity;
         currentActivity = activities.top();
@@ -425,13 +425,13 @@ void DebugGame::AddActivity(IActivity *activity) {
     this->activities.push(activity);
 }
 
-void DebugGame::StopTopActivity(void) {
+void DebugGame::stopTopActivity(void) {
     IActivity *currentActivity;
     currentActivity = activities.top();
     currentActivity->Stop();
 }
 
-IActivity *DebugGame::GetCurrentActivity(void) { 
+IActivity *DebugGame::getCurrentActivity(void) { 
     if (activities.empty()) {
         return nullptr; // No activity is running
     }

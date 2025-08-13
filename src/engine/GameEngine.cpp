@@ -32,7 +32,7 @@ void GameEngine::init() {
     Mouse.init();
 }
 
-void GameEngine::PumpEvents(void) {
+void GameEngine::pumpEvents(void) {
 
     SDL_PumpEvents();
 
@@ -80,10 +80,10 @@ void GameEngine::PumpEvents(void) {
 
         switch (event->type) {
         case SDL_APP_TERMINATING:
-            Terminate("System request.");
+            terminate("System request.");
             break;
         case SDL_QUIT:
-            Terminate("System request.");
+            terminate("System request.");
             break;
 
         // Verify is we should be capturing the mouse or not.
@@ -101,7 +101,7 @@ void GameEngine::PumpEvents(void) {
             }
 
             if (event->window.event == SDL_WINDOWEVENT_CLOSE) {
-                Terminate("System request.");
+                terminate("System request.");
                 break;
             }
 
@@ -112,13 +112,13 @@ void GameEngine::PumpEvents(void) {
     }
 }
 
-void GameEngine::Run() {
+void GameEngine::run() {
 
     IActivity *currentActivity;
 
     while (activities.size() > 0) {
 
-        PumpEvents();
+        pumpEvents();
 
         // Clear the screen
         // enderer.Clear();
@@ -145,31 +145,31 @@ void GameEngine::Run() {
     }
 }
 
-void GameEngine::Terminate(const char *reason, ...) {
-    Log("Terminating: ");
+void GameEngine::terminate(const char *reason, ...) {
+    log("Terminating: ");
     va_list args;
     va_start(args, reason);
     vfprintf(stdout, reason, args);
     va_end(args);
-    Log("\n");
+    log("\n");
     exit(0);
 }
 
-void GameEngine::Log(const char *text, ...) {
+void GameEngine::log(const char *text, ...) {
     va_list args;
     va_start(args, text);
     vfprintf(stdout, text, args);
     va_end(args);
 }
 
-void GameEngine::LogError(const char *text, ...) {
+void GameEngine::logError(const char *text, ...) {
     va_list args;
     va_start(args, text);
     vfprintf(stderr, text, args);
     va_end(args);
 }
 
-void GameEngine::AddActivity(IActivity *activity) {
+void GameEngine::addActivity(IActivity *activity) {
     if (activities.size()>0) {
         IActivity *currentActivity;
         currentActivity = activities.top();
@@ -179,10 +179,10 @@ void GameEngine::AddActivity(IActivity *activity) {
     this->activities.push(activity);
 }
 
-void GameEngine::StopTopActivity(void) {
+void GameEngine::stopTopActivity(void) {
     IActivity *currentActivity;
     currentActivity = activities.top();
     currentActivity->Stop();
 }
 
-IActivity *GameEngine::GetCurrentActivity(void) { return activities.top(); }
+IActivity *GameEngine::getCurrentActivity(void) { return activities.top(); }

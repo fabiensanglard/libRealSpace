@@ -132,7 +132,7 @@ void DebugScreen::refresh(void){
                 }
                 ImGui::EndMenu();
             }
-            IActivity* act = Game->GetCurrentActivity();
+            IActivity* act = Game->getCurrentActivity();
             if (act != nullptr) {
                 act->renderMenu();    
             }
@@ -148,7 +148,7 @@ void DebugScreen::refresh(void){
         // Calculate the remaining width for the Console child
         float remainingWidth = ImGui::GetContentRegionAvail().x;
         ImGui::BeginChild("Console", ImVec2(remainingWidth, 0), ImGuiChildFlags_Border | ImGuiWindowFlags_NoSavedSettings);
-        IActivity* act = Game->GetCurrentActivity();
+        IActivity* act = Game->getCurrentActivity();
         if (act != nullptr) {
             act->renderUI();    
         }
