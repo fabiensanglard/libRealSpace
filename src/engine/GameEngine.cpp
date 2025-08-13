@@ -25,7 +25,7 @@ GameEngine::~GameEngine() {}
 void GameEngine::init() {
 
     // Load Main Palette and Initialize the GL
-    Screen->init(WIDTH,HEIGHT,FULLSCREEN);
+    
     VGA.init(WIDTH,HEIGHT, &Assets);
     Renderer.init(WIDTH,HEIGHT, &Assets);
     // Load the Mouse Cursor

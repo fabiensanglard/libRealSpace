@@ -24,6 +24,13 @@ int main(int argc, char* argv[]) {
 
     Game = new GameEngine();
     Screen = new RSScreen();
+    Screen->init(WIDTH,HEIGHT,FULLSCREEN);
+    Loader loader;
+    while (!loader.ison) {
+        loader.openScreen();
+        Screen->Refresh();
+        SDL_PumpEvents();
+    }
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     if (FLOPPY) {
