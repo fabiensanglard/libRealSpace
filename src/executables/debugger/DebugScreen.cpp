@@ -25,7 +25,7 @@ DebugScreen::~DebugScreen(){
     
 }
 
-void DebugScreen::SetTitle(const char* title){
+void DebugScreen::setTitle(const char* title){
     SDL_SetWindowTitle(sdlWindow, title);
 }
 
@@ -90,7 +90,7 @@ void DebugScreen::init(int w, int h, bool fullscreen){
     SDL_ShowWindow(sdlWindow);
 }
 
-void DebugScreen::Refresh(void){
+void DebugScreen::refresh(void){
     glBindTexture(GL_TEXTURE_2D, this->screen_texture);
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, this->width, this->height, 0);
     glViewport(0,0,this->width,this->height);			// Reset The Current Viewport

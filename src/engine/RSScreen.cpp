@@ -23,7 +23,7 @@ RSScreen::~RSScreen(){
     
 }
 
-void RSScreen::SetTitle(const char* title){
+void RSScreen::setTitle(const char* title){
     SDL_SetWindowTitle(sdlWindow, title);
 }
 
@@ -83,6 +83,6 @@ void RSScreen::init(int width, int height, bool fullscreen){
     SDL_ShowWindow(sdlWindow);
 }
 
-void RSScreen::Refresh(void){
+void RSScreen::refresh(void){
     SDL_GL_SwapWindow(sdlWindow);
 }

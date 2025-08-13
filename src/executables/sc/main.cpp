@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     Loader loader;
     while (!loader.ison) {
         loader.openScreen();
-        Screen->Refresh();
+        Screen->refresh();
         SDL_PumpEvents();
     }
     Assets.SetBase("./assets");

@@ -135,7 +135,7 @@ void GameEngine::Run() {
         }
 
         // Swap GL buffer
-        Screen->Refresh();
+        Screen->refresh();
 
         // Flush all events since they should all have been interpreted.
         SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);

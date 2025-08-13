@@ -789,7 +789,7 @@ void SCStrike::runFrame(void) {
             }
             GameState.mission_flyed_success[GameState.mission_flyed] = this->current_mission->gameflow_registers[0];
             Renderer.clear();
-            Screen->Refresh();
+            Screen->refresh();
             Renderer.clear();
             Game->StopTopActivity();
             return;

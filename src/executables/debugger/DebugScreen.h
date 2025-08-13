@@ -32,8 +32,8 @@ public:
     ~DebugScreen();
     
     void init(int width, int height, bool fullscreen);
-    void SetTitle(const char* title);
-    void Refresh(void);
+    void setTitle(const char* title);
+    void refresh(void);
 private:
     GLuint screen_texture;
     

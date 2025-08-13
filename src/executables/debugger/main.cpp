@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
     // Démarrer le chargement des assets en arrière-plan
     while (!loader.ison) {
         loader.openScreen();
-        Screen->Refresh();
+        Screen->refresh();
         SDL_PumpEvents();
     }
     loader.startLoading([](Loader* loader) {
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
         loader.runFrame();
         
         // Mettre à jour l'affichage
-        Screen->Refresh();
+        Screen->refresh();
         SDL_PumpEvents();
     }
 
