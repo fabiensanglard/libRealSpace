@@ -149,7 +149,7 @@ void DebugObjectViewer::renderUI() {
                 ImGui::EndChild();
             }
             if (entity->explos != nullptr) {
-                ImGui::BeginChild("Explosion Data:", ImVec2(0, 0), true);
+                ImGui::BeginChild("Explosion Data:", ImVec2(0, 50), true);
                 ImGui::Text("Explosion Name: %s", entity->explos->name.c_str());
                 ImGui::Text("Explosion Position: (%d, %d)", entity->explos->x, entity->explos->y);
                 if (entity->explos->objct != nullptr) {

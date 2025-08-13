@@ -39,6 +39,8 @@ void FrameBuffer::FillLineColor(size_t lineIndex, uint8_t color) {
 void FrameBuffer::plot_pixel(int x, int y, uint8_t color) {
     if (x < 0 || x >= this->width || y < 0 || y >= this->height)
         return;
+    if ((y * this->width) + x < 0 || (y * this->width) + x >= this->width * this->height)
+        return;
     this->framebuffer[(y * this->width) + x] = color;
 }
 
@@ -134,14 +136,35 @@ void FrameBuffer::circle_slow(int x, int y, int radius, uint8_t color) {
     while (dx <= dy) {
         dxoffset = dx * this->width;
         dyoffset = dy * this->width;
-        this->framebuffer[offset + dy - dxoffset] = color;
-        this->framebuffer[offset + dx - dyoffset] = color;
-        this->framebuffer[offset - dx - dyoffset] = color;
-        this->framebuffer[offset - dy - dxoffset] = color;
-        this->framebuffer[offset - dy + dxoffset] = color;
-        this->framebuffer[offset - dx + dyoffset] = color;
-        this->framebuffer[offset + dx + dyoffset] = color;
-        this->framebuffer[offset + dy + dxoffset] = color;
+        if (offset + dy - dxoffset<0) {
+            dx++;
+            n += invradius;
+            dy = (int)((float) radius * sin(acos(n)));
+            continue;
+        }
+        if (offset + dx - dyoffset < 0) {
+            dx++;
+            n += invradius;
+            dy = (int)((float) radius * sin(acos(n)));
+            continue;
+        }
+        if (offset + dy - dxoffset < this->width * this->height &&
+            offset + dx - dyoffset < this->width * this->height &&
+            offset - dx - dyoffset < this->width * this->height &&
+            offset - dy - dxoffset < this->width * this->height &&
+            offset + dy + dxoffset < this->width * this->height &&
+            offset + dx + dyoffset < this->width * this->height &&
+            offset - dx + dyoffset < this->width * this->height &&
+            offset - dy + dxoffset < this->width * this->height) {
+                this->framebuffer[offset + dy - dxoffset] = color;
+                this->framebuffer[offset + dx - dyoffset] = color;
+                this->framebuffer[offset - dx - dyoffset] = color;
+                this->framebuffer[offset - dy - dxoffset] = color;
+                this->framebuffer[offset - dy + dxoffset] = color;
+                this->framebuffer[offset - dx + dyoffset] = color;
+                this->framebuffer[offset + dx + dyoffset] = color;
+                this->framebuffer[offset + dy + dxoffset] = color;
+        }
         dx++;
         n += invradius;
         dy = (int)((float) radius * sin(acos(n)));

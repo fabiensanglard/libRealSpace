@@ -551,12 +551,11 @@ void SCCockpit::RenderBombSight() {
 
     float yawRad   = tenthOfDegreeToRad(this->player_plane->yaw);
     float pitchRad = tenthOfDegreeToRad(-this->player_plane->pitch);
-    float rollRad  = tenthOfDegreeToRad(-this->player_plane->roll);
+    float rollRad  = tenthOfDegreeToRad(0.0f);
     float cosRoll  = cosf(rollRad);
     float sinRoll  = sinf(rollRad);
     Vector3D initial_trust{0, 0, 0};
-    initial_trust.x =
-        thrustMagnitude * (cosf(pitchRad) * sinf(yawRad) * cosRoll + sinf(pitchRad) * cosf(yawRad) * sinRoll);
+    initial_trust.x = thrustMagnitude * (cosf(pitchRad) * sinf(yawRad) * cosRoll + sinf(pitchRad) * cosf(yawRad) * sinRoll);
     initial_trust.y = thrustMagnitude * (sinf(pitchRad) * cosRoll - cosf(pitchRad) * sinf(yawRad) * sinRoll);
     initial_trust.z = thrustMagnitude * cosf(pitchRad) * cosf(yawRad);
 
@@ -570,24 +569,19 @@ void SCCockpit::RenderBombSight() {
     weap->vz        = initial_trust.z;
 
     weap->weight   = this->player_plane->weaps_load[this->player_plane->selected_weapon]->objct->weight_in_kg * 2.205f;
-    weap->azimuthf = yawRad;
-    weap->elevationf = -pitchRad;
+    weap->azimuthf = this->player_plane->yaw;
+    weap->elevationf = this->player_plane->pitch;
     weap->target     = nullptr;
     weap->mission    = this->current_mission;
     Vector3D target{0, 0, 0};
     Vector3D velo{0, 0, 0};
-    std::tie(target, velo) = weap->ComputeTrajectory(this->player_plane->tps);
-    int cpt_iteration      = 0;
-    while (target.y > this->current_mission->area->getY(target.x, target.z) == true && cpt_iteration < 1000) {
-        std::tie(target, velo) = weap->ComputeTrajectory(this->player_plane->tps);
-        weap->x                = target.x;
-        weap->y                = target.y;
-        weap->z                = target.z;
-        weap->vx               = velo.x;
-        weap->vy               = velo.y;
-        weap->vz               = velo.z;
-        cpt_iteration++;
-    }
+    std::tie(target, velo) = weap->ComputeTrajectoryUntilGround(this->player_plane->tps);
+    weap->x                = target.x;
+    weap->y                = target.y;
+    weap->z                = target.z;
+    weap->vx               = velo.x;
+    weap->vy               = velo.y;
+    weap->vz               = velo.z;
     Vector3DHomogeneous v = {target.x, target.y, target.z, 1.0f};
 
     Matrix *mproj = this->cam->GetProjectionMatrix();

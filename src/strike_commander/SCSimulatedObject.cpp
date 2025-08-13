@@ -271,6 +271,12 @@ std::tuple<Vector3D, Vector3D> GunSimulatedObject::ComputeTrajectoryUntilGround(
     while (position.y > this->mission->area->getY(position.x, position.z) == true && cpt_iteration<100000) {
         oldpos = position;
         std::tie(position, velocity) = this->ComputeTrajectory(tps);
+        this->x = position.x;
+        this->y = position.y;
+        this->z = position.z;
+        this->vx = velocity.x;
+        this->vy = velocity.y;
+        this->vz = velocity.z;
         if (oldpos.x == position.x && oldpos.y == position.y && oldpos.z == position.z && cpt_iteration>1000) {
             printf("should not happen\n");
             break;
