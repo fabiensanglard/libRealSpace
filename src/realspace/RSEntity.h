@@ -179,11 +179,29 @@ class RSEntity {
         uint8_t unknown7{0};
         uint8_t unknown8{0};
     };
+    struct SWPN_DATA {
+        std::string weapon_name;
+        int32_t weapons_round{0};
+        int32_t detection_range{0};
+        int32_t effective_range{0};
+        uint16_t unknown1{0};
+        uint16_t unknown2{0};
+        uint16_t unknown3{0};
+        uint8_t max_simultaneous_shots{0};
+        uint16_t weapons_round2{0};
+        int32_t unknown4{0};
+        RSEntity *weapon_entity{nullptr};
+    };
     struct DYNN_MISS {
         uint32_t turn_degre_per_sec{0};
         uint32_t velovity_m_per_sec{0};
         uint32_t proximity_cm{0};
     };
+    struct RADAR_SIGN {
+        uint8_t unknown1{0};
+        uint8_t unknown2{0};
+        uint8_t unknown3{0};
+    }; 
 
 
 public:
@@ -209,10 +227,12 @@ public:
     int32_t thrust_in_newton{0};
     int32_t weight_in_kg{0};
     int32_t drag{0};
-    int32_t radar_signature{0};
+    RADAR_SIGN *radar_signature{nullptr};
     uint8_t target_type{0};
+    uint8_t health{0};
     WDAT *wdat{nullptr};
     DYNN_MISS *dynn_miss{nullptr};
+    SWPN_DATA *swpn_data{nullptr};
     RSEntity *destroyed_object{nullptr};
     std::string destroyed_object_name;
     bool gravity{false};
@@ -278,7 +298,9 @@ private:
     void parseREAL_OBJT_MISS_DATA(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_DYNM(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_DYNM_MISS(uint8_t *data, size_t size);
-
+    void parseREAL_OBJT_SWPN_DYNM(uint8_t *data, size_t size);
+    void parseREAL_OBJT_SWPN_DATA(uint8_t *data, size_t size);
+    void parseREAL_OBJT_SWPN_ALGN(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size);
     void parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size);

@@ -458,39 +458,47 @@ void RSEntity::parseREAL_OBJT_SWPN(uint8_t *data, size_t size) {
         std::bind(&RSEntity::parseREAL_OBJT_JETP_DEBR, this, std::placeholders::_1, std::placeholders::_2);
     handlers["DEST"] =
         std::bind(&RSEntity::parseREAL_OBJT_JETP_DEST, this, std::placeholders::_1, std::placeholders::_2);
-    handlers["SMOK"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_SMOK, this, std::placeholders::_1, std::placeholders::_2);
-
-    handlers["CHLD"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_CHLD, this, std::placeholders::_1, std::placeholders::_2);
-    handlers["JINF"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_JINF, this, std::placeholders::_1, std::placeholders::_2);
     handlers["DAMG"] =
         std::bind(&RSEntity::parseREAL_OBJT_JETP_DAMG, this, std::placeholders::_1, std::placeholders::_2);
-    handlers["EJEC"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_EJEC, this, std::placeholders::_1, std::placeholders::_2);
-
     handlers["SIGN"] =
         std::bind(&RSEntity::parseREAL_OBJT_JETP_SIGN, this, std::placeholders::_1, std::placeholders::_2);
     handlers["TRGT"] =
         std::bind(&RSEntity::parseREAL_OBJT_JETP_TRGT, this, std::placeholders::_1, std::placeholders::_2);
-    handlers["CTRL"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_CTRL, this, std::placeholders::_1, std::placeholders::_2);
-    handlers["TOFF"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_TOFF, this, std::placeholders::_1, std::placeholders::_2);
-
-    handlers["LAND"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_LAND, this, std::placeholders::_1, std::placeholders::_2);
     handlers["DYNM"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_DYNM, this, std::placeholders::_1, std::placeholders::_2);
-    handlers["WEAP"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_WEAP, this, std::placeholders::_1, std::placeholders::_2);
-    handlers["DAMG"] =
-        std::bind(&RSEntity::parseREAL_OBJT_JETP_DAMG, this, std::placeholders::_1, std::placeholders::_2);
-
+        std::bind(&RSEntity::parseREAL_OBJT_SWPN_DYNM, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DATA"] =
+        std::bind(&RSEntity::parseREAL_OBJT_SWPN_DATA, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["ALGN"] =
+        std::bind(&RSEntity::parseREAL_OBJT_SWPN_ALGN, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
-
+void RSEntity::parseREAL_OBJT_SWPN_DYNM(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_SWPN_DATA(uint8_t *data, size_t size) {
+    ByteStream bs(data);
+    SWPN_DATA *swpn_data = new SWPN_DATA();
+    swpn_data->weapons_round = bs.ReadInt32LE();
+    swpn_data->detection_range = bs.ReadInt32LE();
+    swpn_data->effective_range = bs.ReadInt32LE();
+    swpn_data->unknown1 = bs.ReadShort();
+    swpn_data->unknown2 = bs.ReadShort();
+    swpn_data->unknown3 = bs.ReadShort();
+    swpn_data->max_simultaneous_shots = bs.ReadByte();
+    swpn_data->weapons_round2 = bs.ReadShort();
+    swpn_data->weapon_name = bs.ReadString(8);
+    std::transform(swpn_data->weapon_name.begin(), swpn_data->weapon_name.end(), swpn_data->weapon_name.begin(), ::toupper);
+    swpn_data->weapon_name = assetsManager->object_root_path + swpn_data->weapon_name + ".IFF";
+    TreEntry *entry = assetsManager->GetEntryByName(swpn_data->weapon_name);
+    if (entry != nullptr) {
+        RSEntity *objct = new RSEntity(this->assetsManager);
+        objct->InitFromRAM(entry->data, entry->size);
+        swpn_data->weapon_entity = objct;
+    } else {
+        swpn_data->weapon_entity = nullptr;
+    }
+    swpn_data->unknown4 = bs.ReadInt32LE();
+    this->swpn_data = swpn_data;
+}
+void RSEntity::parseREAL_OBJT_SWPN_ALGN(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
     EXPL *expl = new EXPL();
     
@@ -562,12 +570,19 @@ void RSEntity::parseREAL_OBJT_JETP_DAMG(uint8_t *data, size_t size) {
         handlers["SYSM"] = std::bind(&RSEntity::parseREAL_OBJT_JETP_WEAP_DAMG_SYSM, this, std::placeholders::_1, std::placeholders::_2);
 
         lexer.InitFromRAM(data, size, handlers);
+    } else {
+        ByteStream bs(data);
+        this->health = bs.ReadByte();
     }
 }
 void RSEntity::parseREAL_OBJT_JETP_EJEC(uint8_t *data, size_t size) {}
 void RSEntity::parseREAL_OBJT_JETP_SIGN(uint8_t *data, size_t size) {
     ByteStream bs(data);
-    this->radar_signature = bs.ReadInt24LEByte3();
+    RADAR_SIGN *radar_signature = new RADAR_SIGN();
+    radar_signature->unknown1 = bs.ReadByte();
+    radar_signature->unknown2 = bs.ReadByte();  
+    radar_signature->unknown3 = bs.ReadByte();
+    this->radar_signature = radar_signature;
 }
 void RSEntity::parseREAL_OBJT_JETP_TRGT(uint8_t *data, size_t size) {
     this->target_type = data[0];

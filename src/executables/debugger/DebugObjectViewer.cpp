@@ -190,6 +190,69 @@ void DebugObjectViewer::renderUI() {
                     ImGui::TreePop();
                 }
             }
+            if (entity->chld.size() > 0) {
+                if (ImGui::TreeNode("Child Objects")) {
+                    for (const auto &chld : entity->chld) {
+                        ImGui::Text("Child Name: %s", chld->name.c_str());
+                        ImGui::Text("Position: (%d, %d, %d)", chld->x, chld->y, chld->z);
+                        if (chld->objct != nullptr) {
+                            ImGui::Text("Child Object Frames: %zu", chld->objct->animations.size());
+                        } else {
+                            ImGui::Text("Child Object: None");
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            if (entity->weaps.size() > 0) {
+                if (ImGui::TreeNode("Weapons")) {
+                    for (const auto &weap : entity->weaps) {
+                        ImGui::Text("Weapon Name: %s", weap->name.c_str());
+                        ImGui::Text("Number of Weapons: %d", weap->nb_weap);
+                        if (weap->objct != nullptr) {
+                            ImGui::Text("Weapon Object Frames: %zu", weap->objct->animations.size());
+                        } else {
+                            ImGui::Text("Weapon Object: None");
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            if (entity->sysm.size() > 0) {
+                if (ImGui::TreeNode("Damages System Data")) {
+                    for (const auto &sys : entity->sysm) {
+                        ImGui::Text("System Name: %s", sys.first.c_str());
+                        for (const auto &attr : sys.second) {
+                            ImGui::Text("  Attribute: %s, Value: %d", attr.first.c_str(), attr.second);
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::Text("Health: %d", entity->health);
+            if (entity->swpn_data != nullptr) {
+                if (ImGui::TreeNode("Surface Weapon Data")) {
+                    ImGui::Text("Weapon Name: %s", entity->swpn_data->weapon_name.c_str());
+                    ImGui::Text("Weapons Round: %d", entity->swpn_data->weapons_round);
+                    ImGui::Text("Detection Range: %d", entity->swpn_data->detection_range);
+                    ImGui::Text("Effective Range: %d", entity->swpn_data->effective_range);
+                    ImGui::Text("Unknown1: %d", entity->swpn_data->unknown1);
+                    ImGui::Text("Unknown2: %d", entity->swpn_data->unknown2);
+                    ImGui::Text("Unknown3: %d", entity->swpn_data->unknown3);
+                    ImGui::Text("Max Simultaneous Shots: %d", entity->swpn_data->max_simultaneous_shots);
+                    ImGui::Text("Weapons Round2: %d", entity->swpn_data->weapons_round2);
+                    ImGui::Text("Unknown4: %d", entity->swpn_data->unknown4);
+                    ImGui::TreePop();
+                }
+            }
+            if (entity->radar_signature != nullptr) {
+                if (ImGui::TreeNode("Radar Signature")) {
+                    ImGui::Text("Unknown1: %d", entity->radar_signature->unknown1);
+                    ImGui::Text("Unknown2: %d", entity->radar_signature->unknown2);
+                    ImGui::Text("Unknown3: %d", entity->radar_signature->unknown3);
+                    ImGui::TreePop();
+                }
+            }
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
