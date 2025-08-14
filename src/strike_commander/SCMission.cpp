@@ -387,15 +387,21 @@ void SCMission::update() {
             }
         }
         for (auto weapon: ai_actor->weapons_shooted) {
-            weapon->Simulate(tps);
+            if (weapon) {
+                weapon->Simulate(tps);
+            }
+        }
+        for (auto weapon: ai_actor->weapons_shooted) {
             if (weapon->alive == false) {
                 ai_actor->weapons_shooted.erase(
                     std::remove(ai_actor->weapons_shooted.begin(), ai_actor->weapons_shooted.end(), weapon),
                     ai_actor->weapons_shooted.end()
                 );
                 delete weapon;
+                weapon = nullptr;
             }
         }
+        
         if (ai_actor->profile == nullptr) {
             continue;
         }

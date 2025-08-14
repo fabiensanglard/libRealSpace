@@ -383,14 +383,17 @@ void SCMissionActors::shootWeapon(SCMissionActors *target) {
         return; // No direction to shoot
     }
     direction.Normalize();
-
+    float p_y = this->object->position.y;
+    if (this->mission->area->getY(this->object->position.x, this->object->position.z) > this->object->position.y) {
+        this->object->position.y = this->mission->area->getY(this->object->position.x, this->object->position.z)+10.0f;
+    }
     SCSimulatedObject *weapon = nullptr;
     switch (weapon_entity->wdat->weapon_category) {
         case 2: // Missiles
             weapon = new SCSimulatedObject();
             weapon->obj = weapon_entity;
             weapon->x = this->object->position.x;
-            weapon->y = this->object->position.y;
+            weapon->y = p_y;
             weapon->z = this->object->position.z;
 
             
@@ -402,7 +405,7 @@ void SCMissionActors::shootWeapon(SCMissionActors *target) {
             weapon = new GunSimulatedObject();
             weapon->obj = weapon_entity;
             weapon->x = this->object->position.x;
-            weapon->y = this->object->position.y;
+            weapon->y = p_y;
             weapon->z = this->object->position.z;
 
             

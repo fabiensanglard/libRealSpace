@@ -479,21 +479,6 @@ void DebugStrike::radar() {
                 actor_color = IM_COL32(255, 0, 0, 255);
             }
             draw_list->AddRect(top_left, bottom_right, actor_color);
-            for (auto wp : actor->weapons_shooted) {
-                if (wp) {
-                    // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
-                    float wp_world_x = wp->x;
-                    float wp_world_z = -wp->z;
-                    ImVec2 wp_canvas_pos =
-                        ImVec2(canvas_center.x + wp_world_x * scale_x, canvas_center.y - wp_world_z * scale_z);
-
-                    // Draw a square centered at the weapon's computed canvas position.
-                    ImVec2 wp_top_left = ImVec2(wp_canvas_pos.x - 5.0f * 0.5f, wp_canvas_pos.y - 5.0f * 0.5f);
-                    ImVec2 wp_bottom_right = ImVec2(wp_canvas_pos.x + 5.0f * 0.5f, wp_canvas_pos.y + 5.0f * 0.5f);
-
-                    draw_list->AddRect(wp_top_left, wp_bottom_right, IM_COL32(255, 255, 0, 255));
-                }
-            }
             for (auto wp : actor->plane->weaps_object) {
                 if (wp) {
                     // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
@@ -566,8 +551,33 @@ void DebugStrike::radar() {
             ImVec2 bottom_right =
                 ImVec2(actor_canvas_pos.x + square_size * 0.5f, actor_canvas_pos.y + square_size * 0.5f);
             ImVec2 circle_center = ImVec2(actor_canvas_pos.x, actor_canvas_pos.y);
-            draw_list->AddCircle(circle_center, square_size, IM_COL32(255, 255, 0, 255));
-            draw_list->AddRect(top_left, bottom_right, IM_COL32(255, 255, 0, 255));
+            ImU32 color = IM_COL32(255, 255, 0, 255);
+            switch (actor->object->entity->entity_type) {
+            case EntityType::swpn:
+                color = IM_COL32(0, 255, 0, 255);
+                if (!actor->is_active) {
+                    color = IM_COL32(0, 128, 0, 255);
+                } 
+                break;
+            case EntityType::ornt:
+                color = IM_COL32(255, 255, 0, 255);
+                break;
+            case EntityType::object_mobile:
+                color = IM_COL32(0, 0, 255, 255);
+                if (!actor->is_active) {
+                    color = IM_COL32(0, 0, 128, 255);
+                } 
+                break;
+            case EntityType::destroyed_object:
+                color = IM_COL32(128, 0, 128, 255);
+                break;
+            }
+            
+            if (actor->is_destroyed) {
+                color = IM_COL32(128, 128, 128, 255);
+            }
+            draw_list->AddCircle(circle_center, square_size, color);
+            draw_list->AddRect(top_left, bottom_right, color);
             if (ImGui::IsMouseHoveringRect(top_left, bottom_right)) {
                 ImGui::OpenPopup("Actor Details");
                 if (ImGui::BeginPopup("Actor Details")) {
@@ -584,6 +594,21 @@ void DebugStrike::radar() {
             // Optionally, display the actor id near the square.
             draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(255, 255, 255, 255),
                                actor->actor_name.c_str());
+            for (auto wp : actor->weapons_shooted) {
+                if (wp) {
+                    // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
+                    float wp_world_x = wp->x;
+                    float wp_world_z = -wp->z;
+                    ImVec2 wp_canvas_pos =
+                        ImVec2(canvas_center.x + wp_world_x * scale_x, canvas_center.y - wp_world_z * scale_z);
+
+                    // Draw a square centered at the weapon's computed canvas position.
+                    ImVec2 wp_top_left = ImVec2(wp_canvas_pos.x - 5.0f * 0.5f, wp_canvas_pos.y - 5.0f * 0.5f);
+                    ImVec2 wp_bottom_right = ImVec2(wp_canvas_pos.x + 5.0f * 0.5f, wp_canvas_pos.y + 5.0f * 0.5f);
+                    
+                    draw_list->AddRect(wp_top_left, wp_bottom_right, IM_COL32(255, 255, 0, 255));
+                }
+            }
         }
     }
     for (auto scene : this->current_mission->mission->mission_data.scenes) {
