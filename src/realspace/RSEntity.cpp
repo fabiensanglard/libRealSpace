@@ -509,7 +509,21 @@ void RSEntity::parseREAL_OBJT_JETP_EXPL(uint8_t *data, size_t size) {
     this->explos = expl;
 }
 void RSEntity::parseREAL_OBJT_JETP_DEBR(uint8_t *data, size_t size) {}
-void RSEntity::parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size) {}
+void RSEntity::parseREAL_OBJT_JETP_DEST(uint8_t *data, size_t size) {
+    ByteStream bs(data);
+    std::string tmpname = bs.ReadString(8);
+    std::transform(tmpname.begin(), tmpname.end(), tmpname.begin(), ::toupper);
+    this->destroyed_object_name = assetsManager->object_root_path + tmpname + ".IFF";
+    RSEntity *objct = new RSEntity(this->assetsManager);
+    TreEntry *entry = assetsManager->GetEntryByName(this->destroyed_object_name);
+    if (entry != nullptr) { 
+        objct->InitFromRAM(entry->data, entry->size);
+        this->destroyed_object = objct;
+    } else {
+        this->destroyed_object = nullptr;
+    }
+    
+}
 void RSEntity::parseREAL_OBJT_JETP_SMOK(uint8_t *data, size_t size) {
     
 }

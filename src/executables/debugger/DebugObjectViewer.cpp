@@ -127,59 +127,70 @@ void DebugObjectViewer::renderUI() {
         if (ImGui::BeginTabItem("Properties")) {
             
             RSEntity *entity = objs.showCases[currentObject].entity;
-            ImGui::BeginChild("general", ImVec2(0, 50), true);
+            ImGui::BeginChild("general", ImVec2(0, 0), true);
             ImGui::Text("Entity Type: %d", entity->entity_type);
             ImGui::Text("Target Type: %d", entity->target_type);
-            ImGui::EndChild();
             if (entity->wdat != nullptr) {
-                ImGui::BeginChild("Weapon Data:", ImVec2(0, 200), true);
-                ImGui::Text("Damage: %d", entity->wdat->damage);
-                ImGui::Text("Radius: %d", entity->wdat->radius);
-                ImGui::Text("Weapon ID: %d", entity->wdat->weapon_id);
-                ImGui::Text("Weapon Category: %d", entity->wdat->weapon_category);
-                ImGui::Text("Radar Type: %d", entity->wdat->radar_type);
-                ImGui::Text("Target Range: %d", entity->wdat->target_range);
-                ImGui::EndChild();
+                if (ImGui::TreeNode("Weapon Data")) {
+                    ImGui::Text("Damage: %d", entity->wdat->damage);
+                    ImGui::Text("Radius: %d", entity->wdat->radius);
+                    ImGui::Text("Weapon ID: %d", entity->wdat->weapon_id);
+                    ImGui::Text("Weapon Category: %d", entity->wdat->weapon_category);
+                    ImGui::Text("Radar Type: %d", entity->wdat->radar_type);
+                    ImGui::Text("Weapon Aspect: %d", entity->wdat->weapon_aspec);
+                    ImGui::Text("Target Range: %d", entity->wdat->target_range);
+                    ImGui::Text("Tracking Cone: %d", entity->wdat->tracking_cone);
+                    ImGui::Text("Effective Range: %d", entity->wdat->effective_range);
+                    ImGui::TreePop();
+                }
             }
             if (entity->dynn_miss != nullptr) {
-                ImGui::BeginChild("Dynamic Missile Data:", ImVec2(0, 50), true);
-                ImGui::Text("Turn Degree per Second: %d", entity->dynn_miss->turn_degre_per_sec);
-                ImGui::Text("Velocity m/s: %d", entity->dynn_miss->velovity_m_per_sec);
-                ImGui::Text("Proximity cm: %d", entity->dynn_miss->proximity_cm);
-                ImGui::EndChild();
+                if (ImGui::TreeNode("Dynamic Missile Data")) {
+                    ImGui::Text("Turn Degree per Second: %d", entity->dynn_miss->turn_degre_per_sec);
+                    ImGui::Text("Velocity m/s: %d", entity->dynn_miss->velovity_m_per_sec);
+                    ImGui::Text("Proximity cm: %d", entity->dynn_miss->proximity_cm);
+                    ImGui::TreePop();
+                }
             }
             if (entity->explos != nullptr) {
-                ImGui::BeginChild("Explosion Data:", ImVec2(0, 50), true);
-                ImGui::Text("Explosion Name: %s", entity->explos->name.c_str());
-                ImGui::Text("Explosion Position: (%d, %d)", entity->explos->x, entity->explos->y);
-                if (entity->explos->objct != nullptr) {
-                    ImGui::Text("Explosion Animations Frames %d", entity->explos->objct->animations.size());
-                } else {
-                    ImGui::Text("Explosion Object: None");
+                if (ImGui::TreeNode("Explosion Data")) {
+                    ImGui::Text("Explosion Name: %s", entity->explos->name.c_str());
+                    ImGui::Text("Explosion Position: (%d, %d)", entity->explos->x, entity->explos->y);
+                    if (entity->explos->objct != nullptr) {
+                        ImGui::Text("Explosion Animations Frames %zu", entity->explos->objct->animations.size());
+                    } else {
+                        ImGui::Text("Explosion Object: None");
+                    }
+                    ImGui::TreePop();
                 }
-                ImGui::EndChild();
+            }
+            if (entity->destroyed_object != nullptr) {
+                ImGui::Text("Destroyed Object: %s", entity->destroyed_object_name.c_str());
+            } else {
+                ImGui::Text("Destroyed Object: None");
             }
             if (entity->jdyn != nullptr) {
-                ImGui::BeginChild("JDYN Data:", ImVec2(0, 0), true);
-                ImGui::Text("Fuel: %d", entity->jdyn->FUEL);
-                ImGui::Text("Roll Rate: %d", entity->jdyn->ROLL_RATE);
-                ImGui::Text("Max Roll Rate: %d", entity->jdyn->ROLL_RATE_MAX);
-                ImGui::Text("Lift Speed: %d", entity->jdyn->LIFT_SPD);
-                ImGui::Text("Drag: %d", entity->jdyn->DRAG);
-                ImGui::Text("Lift: %d", entity->jdyn->LIFT);
-                ImGui::Text("Aileron: %d", entity->jdyn->aileron);
-                ImGui::Text("Gouverne: %d", entity->jdyn->gouverne);
-                ImGui::Text("Max G: %d", entity->jdyn->MAX_G);
-                ImGui::Text("Twist Rate: %d", entity->jdyn->TWIST_RATE);
-                ImGui::Text("Max Twist Rate: %d", entity->jdyn->TWIST_RATE_MAX);
-                ImGui::Text("Wing Area: %.2f", entity->wing_area);
-                ImGui::Text("Gravity: %s", entity->gravity ? "Enabled" : "Disabled");
-                ImGui::Text("Weight in kg: %d", entity->weight_in_kg);
-                ImGui::Text("Thrust in Newton: %d", entity->thrust_in_newton);
-                ImGui::Text("Drag: %d", entity->drag);
-                ImGui::EndChild();
+                if (ImGui::TreeNode("Jet Dynamics")) {
+                    ImGui::Text("Fuel: %d", entity->jdyn->FUEL);
+                    ImGui::Text("Roll Rate: %d", entity->jdyn->ROLL_RATE);
+                    ImGui::Text("Max Roll Rate: %d", entity->jdyn->ROLL_RATE_MAX);
+                    ImGui::Text("Lift Speed: %d", entity->jdyn->LIFT_SPD);
+                    ImGui::Text("Drag: %d", entity->jdyn->DRAG);
+                    ImGui::Text("Lift: %d", entity->jdyn->LIFT);
+                    ImGui::Text("Aileron: %d", entity->jdyn->aileron);
+                    ImGui::Text("Gouverne: %d", entity->jdyn->gouverne);
+                    ImGui::Text("Max G: %d", entity->jdyn->MAX_G);
+                    ImGui::Text("Twist Rate: %d", entity->jdyn->TWIST_RATE);
+                    ImGui::Text("Max Twist Rate: %d", entity->jdyn->TWIST_RATE_MAX);
+                    ImGui::Text("Wing Area: %.2f", entity->wing_area);
+                    ImGui::Text("Gravity: %s", entity->gravity ? "Enabled" : "Disabled");
+                    ImGui::Text("Weight in kg: %d", entity->weight_in_kg);
+                    ImGui::Text("Thrust in Newton: %d", entity->thrust_in_newton);
+                    ImGui::Text("Drag: %d", entity->drag);
+                    ImGui::TreePop();
+                }
             }
-            
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();

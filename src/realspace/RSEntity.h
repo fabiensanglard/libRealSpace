@@ -213,6 +213,8 @@ public:
     uint8_t target_type{0};
     WDAT *wdat{nullptr};
     DYNN_MISS *dynn_miss{nullptr};
+    RSEntity *destroyed_object{nullptr};
+    std::string destroyed_object_name;
     bool gravity{false};
     float wing_area{0};
     JDYN *jdyn{nullptr};

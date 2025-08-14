@@ -358,6 +358,9 @@ void SCMission::update() {
             if (ai_actor->object->member_name_destroyed != "") {
                 ai_actor->object->entity = LoadEntity(ai_actor->object->member_name_destroyed);
             }
+            if (ai_actor->object->entity->destroyed_object != nullptr && ai_actor->plane == nullptr) {
+                ai_actor->object->entity = ai_actor->object->entity->destroyed_object;
+            }
         }
         if (ai_actor->profile == nullptr) {
             continue;
@@ -398,6 +401,10 @@ void SCMission::update() {
             ai_actor->object->alive = false;
             ai_actor->is_active = false;
             this->explosions.push_back(new SCExplosion(ai_actor->object->entity->explos->objct, ai_actor->object->position));
+            if (ai_actor->object->entity->destroyed_object != nullptr && ai_actor->plane == nullptr) {
+                ai_actor->object->entity = ai_actor->object->entity->destroyed_object;
+            }
+            ai_actor->plane = nullptr;
         }
     }
     if (this->player->plane->landed) {
