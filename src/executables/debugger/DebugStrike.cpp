@@ -562,10 +562,10 @@ void DebugStrike::radar() {
             case EntityType::ornt:
                 color = IM_COL32(255, 255, 0, 255);
                 break;
-            case EntityType::object_mobile:
-                color = IM_COL32(0, 0, 255, 255);
+            case EntityType::ground:
+                color = IM_COL32(240, 255, 255, 255);
                 if (!actor->is_active) {
-                    color = IM_COL32(0, 0, 128, 255);
+                    color = IM_COL32(120, 128, 128, 255);
                 } 
                 break;
             case EntityType::destroyed_object:
@@ -585,7 +585,7 @@ void DebugStrike::radar() {
                         this->target = actor;
                         this->debug_entity_mode = DebugEntityMode::Actor;
                     }
-                    ImGui::Text("Actor: %s", actor->actor_name.c_str());
+                    ImGui::Text("Actor: %s", actor->object->member_name.c_str());
                     ImGui::Text("Position: (%.2f, %.2f, %.2f)", actor->object->position.x, actor->object->position.y,
                                 actor->object->position.z);
                     ImGui::EndPopup();
@@ -593,7 +593,7 @@ void DebugStrike::radar() {
             }
             // Optionally, display the actor id near the square.
             draw_list->AddText(ImVec2(bottom_right.x + 2, top_left.y), IM_COL32(255, 255, 255, 255),
-                               actor->actor_name.c_str());
+                               actor->object->member_name.c_str());
             for (auto wp : actor->weapons_shooted) {
                 if (wp) {
                     // Map world coordinates (using x and z for a top-down view) to canvas coordinates.
@@ -1397,7 +1397,7 @@ void DebugStrike::renderUI() {
             ImGui::SameLine();
             ImGui::BeginChild("Target", ImVec2(0, 0), true);
             if (this->target != nullptr) {
-                ImGui::Text("Target: %s", this->target->actor_name.c_str());
+                ImGui::Text("Target: %s", this->target->object->member_name.c_str());
                 if (this->target->plane) {
                     ImGui::Text("Air Speed: %d", this->target->plane->airspeed);
                     ImGui::Text("Altitude: %.0f", this->target->plane->y);

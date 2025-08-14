@@ -256,6 +256,9 @@ bool SCMissionActors::followAlly(uint8_t arg) {
     this->current_objective = OP_SET_OBJ_FOLLOW_ALLY;
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg) {
+            if (actor->plane == nullptr || !actor->plane->object->alive) {
+                return false; // Actor not found or plane not alive
+            }
             wp.x = actor->plane->x;
             wp.y = actor->plane->y;
             wp.z = actor->plane->z;
