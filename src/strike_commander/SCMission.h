@@ -22,6 +22,10 @@ private:
     std::map<std::string, RSEntity *> *obj_cache{nullptr};
     RSEntity * LoadEntity(std::string name);
     RSProf * LoadProfile(std::string name);
+    uint32_t last_time;
+    uint32_t last_tick;
+    uint32_t tick_counter;
+    uint32_t tps;
 public:    
     std::vector<SCMissionActors *> actors;
     std::vector<SCMissionActors *> enemies;

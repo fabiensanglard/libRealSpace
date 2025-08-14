@@ -17,6 +17,7 @@ public:
     std::vector<PROG> on_is_activated;
     std::vector<PROG> on_is_destroyed;
     std::vector<PROG> on_update;
+    std::vector<SCSimulatedObject *> weapons_shooted;
     MISN_PART *object{nullptr};
     SCPlane *plane{nullptr};
     SCPilot *pilot{nullptr};
@@ -46,6 +47,7 @@ public:
     virtual bool activateTarget(uint8_t arg);
     virtual int getDistanceToTarget(uint8_t arg);
     virtual int getDistanceToSpot(uint8_t arg);
+    virtual void shootWeapon(SCMissionActors *target);
     std::vector<uint8_t> executed_opcodes;
 private:
     Vector3D target_position{0.0f, 0.0f, 0.0f};

@@ -358,6 +358,66 @@ int SCMissionActors::getDistanceToSpot(uint8_t arg) {
     Vector3D diff = plane_pos - position;
     return (int) diff.Length()/1000;
 }
+void SCMissionActors::shootWeapon(SCMissionActors *target) {
+    if (this->object->entity->entity_type != EntityType::swpn) {
+        return;
+    }
+    if (this->object->entity->swpn_data == nullptr) {
+        return;
+    }
+    if (this->object->entity->swpn_data->weapon_entity == nullptr) {
+        return;
+    }
+    if (this->weapons_shooted.size()> 20) {
+        return; // Too many weapons already shot
+    }
+    if (this->object->entity->swpn_data->max_simultaneous_shots > 0 && this->weapons_shooted.size() >= this->object->entity->swpn_data->max_simultaneous_shots) {
+        return;
+    }
+    if (this->object->entity->swpn_data->weapons_round <= 0) {
+        return; // No ammo left
+    }
+    RSEntity *weapon_entity = this->object->entity->swpn_data->weapon_entity;
+    Vector3D direction = target->object->position - this->object->position;
+    if (direction.Length() > this->object->entity->swpn_data->effective_range) {
+        return; // No direction to shoot
+    }
+    direction.Normalize();
+
+    SCSimulatedObject *weapon = nullptr;
+    switch (weapon_entity->wdat->weapon_category) {
+        case 2: // Missiles
+            weapon = new SCSimulatedObject();
+            weapon->obj = weapon_entity;
+            weapon->x = this->object->position.x;
+            weapon->y = this->object->position.y;
+            weapon->z = this->object->position.z;
+
+            
+            weapon->vx = direction.x * weapon_entity->dynn_miss->velovity_m_per_sec / 100.0f;
+            weapon->vy = direction.y * weapon_entity->dynn_miss->velovity_m_per_sec / 100.0f;
+            weapon->vz = direction.z * weapon_entity->dynn_miss->velovity_m_per_sec / 100.0f;
+            break;
+        case 0: // Guns
+            weapon = new GunSimulatedObject();
+            weapon->obj = weapon_entity;
+            weapon->x = this->object->position.x;
+            weapon->y = this->object->position.y;
+            weapon->z = this->object->position.z;
+
+            
+            weapon->vx = direction.x *  100.0f;
+            weapon->vy = direction.y *  100.0f;
+            weapon->vz = direction.z *  100.0f;
+            break;
+        default:
+            return;
+    }
+    weapon->mission = this->mission;
+    weapon->shooter = this;
+    this->object->entity->swpn_data->weapons_round--;
+    this->weapons_shooted.push_back(weapon);
+}
 /**
  * SCMissionActorsPlayer::takeOff
  *

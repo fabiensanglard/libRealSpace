@@ -3,6 +3,10 @@
 SCMission::SCMission(std::string mission_name, std::map<std::string, RSEntity *> *objCache) {
     this->mission_name = mission_name;
     this->obj_cache = objCache;
+    this->last_time = SDL_GetTicks();
+    this->last_tick = 0;
+    this->tick_counter = 0;
+    this->tps = 0;
     this->loadMission();
 }
 SCMission::~SCMission() {
@@ -260,6 +264,19 @@ RSEntity * SCMission::LoadEntity(std::string name) {
     return nullptr;
 }
 void SCMission::update() {
+    uint32_t current_time = SDL_GetTicks();
+    uint32_t elapsed_time = (current_time - this->last_time) / 1000;
+    int newtps = 0;
+    if (elapsed_time > 1) {
+        uint32_t ticks = this->tick_counter - this->last_tick;
+        newtps = ticks / elapsed_time;
+        this->last_time = current_time;
+        this->last_tick = this->tick_counter;
+        if (newtps > this->tps / 2) {    
+            this->tps = newtps;
+        }
+    }
+    this->tick_counter++;
     uint8_t area_id = this->getAreaID({this->player->plane->x, this->player->plane->y, this->player->plane->z});
     if (area_id != this->current_area_id) {
         this->current_area_id = area_id;
@@ -360,6 +377,23 @@ void SCMission::update() {
             }
             if (ai_actor->object->entity->destroyed_object != nullptr && ai_actor->plane == nullptr) {
                 ai_actor->object->entity = ai_actor->object->entity->destroyed_object;
+            }
+        }
+        if (ai_actor->object->entity->entity_type == EntityType::swpn && !ai_actor->is_destroyed && ai_actor->is_active) {
+            for (auto targets: this->friendlies) {
+                if (targets->object->alive) {
+                    ai_actor->shootWeapon(targets);
+                }
+            }
+        }
+        for (auto weapon: ai_actor->weapons_shooted) {
+            weapon->Simulate(tps);
+            if (weapon->alive == false) {
+                ai_actor->weapons_shooted.erase(
+                    std::remove(ai_actor->weapons_shooted.begin(), ai_actor->weapons_shooted.end(), weapon),
+                    ai_actor->weapons_shooted.end()
+                );
+                delete weapon;
             }
         }
         if (ai_actor->profile == nullptr) {
