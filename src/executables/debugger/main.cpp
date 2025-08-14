@@ -34,14 +34,13 @@ int main(int argc, char* argv[]) {
     loader.init();
 
     // Démarrer le chargement des assets en arrière-plan
-    while (!loader.ison) {
-        loader.openScreen();
+    Screen->is_spfx_finished = false; // Reset the TV effect state
+    while (!Screen->is_spfx_finished) {
+        Screen->fxTurnOnTv();
         Screen->refresh();
         SDL_PumpEvents();
     }
     loader.startLoading([](Loader* loader) {
-        // Simuler le chargement des assets
-        const int totalAssets = 100;
         loader->setProgress(0.0f);
         // Load all TREs and PAKs
         if (FLOPPY) {

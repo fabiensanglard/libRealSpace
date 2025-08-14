@@ -32,8 +32,9 @@ public:
     virtual void init(int width, int height, bool fullscreen);
     virtual void setTitle(const char* title);
     virtual void refresh(void);
-    
+    virtual void fxTurnOnTv();
     int32_t width;
     int32_t height;
     int32_t scale;
+    bool is_spfx_finished{false};
 };

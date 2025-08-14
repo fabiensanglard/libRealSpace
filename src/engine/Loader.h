@@ -30,11 +30,7 @@ public:
     
     // Fonction pour mettre à jour la progression du chargement
     void setProgress(float progress);
-    
-    void renderMenu();
-    void renderUI();
-    void openScreen();
-    bool ison{false};
+
 private:
     std::thread loadingThread;
     std::atomic<bool> loadingComplete;
