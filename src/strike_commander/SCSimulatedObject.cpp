@@ -335,6 +335,27 @@ void GunSimulatedObject::Simulate(int tps) {
     // Désactive l'objet s'il touche le sol
     if (this->y < this->mission->area->getY(this->x, this->z)) {
         this->alive = false;
+        if (this->obj->wdat->radius > 5 && this->obj->entity_type == EntityType::bomb) {
+            for (auto entity : this->mission->actors) {
+                float distance = entity->object->position.Distance(&position);
+                if (!entity->object->alive) {
+                    continue;
+                }
+                if (distance < this->obj->wdat->radius) {
+                    entity->object->alive = false;
+                    if (entity->object->entity->explos != nullptr) {
+                        SCExplosion *explosion = new SCExplosion(entity->object->entity->explos->objct, position);
+                        this->mission->explosions.push_back(explosion);
+                    }
+                    this->shooter->score += 100;
+                    if (entity->plane != nullptr) {
+                        this->shooter->plane_down += 1;
+                    } else {
+                        this->shooter->ground_down += 1;
+                    }
+                }
+            }
+        }
         if (this->obj->explos != nullptr && this->obj->explos->objct != nullptr) {
             SCExplosion *explosion = new SCExplosion(this->obj->explos->objct, position);
             this->mission->explosions.push_back(explosion);
