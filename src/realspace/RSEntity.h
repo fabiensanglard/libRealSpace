@@ -99,6 +99,14 @@ enum EntityType {
     jet = 2,
     ornt = 3,
     swpn = 4,
+    aftb = 5,
+    missiles = 6,
+    bomb = 7,
+    tracer = 8,
+    explosion = 9,
+    object_mobile = 10,
+    debris = 11,
+    destroyed_object = 12,
 };
 class RSImage;
 
@@ -251,9 +259,13 @@ private:
     void parseREAL_OBJT_SWPN(uint8_t *data, size_t size);
     void parseREAL_OBJT_ORNT(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS(uint8_t *data, size_t size);
+    void parseREAL_OBJT_BOMB(uint8_t *data, size_t size);
+    void parseREAL_OBJT_TRCR(uint8_t *data, size_t size); 
     void parseREAL_OBJT_AFTB(uint8_t *data, size_t size);
     void parseREAL_OBJT_EXPL(uint8_t *data, size_t size);
     void parseREAL_OBJT_SMKG(uint8_t *data, size_t size);
+    void parseREAL_OBJT_OMOB(uint8_t *data, size_t size);
+    void parseREAL_OBJT_DEBR(uint8_t *data, size_t size);
     void parseREAL_OBJT_AFTB_APPR(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_EXPL(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_SIGN(uint8_t *data, size_t size);
