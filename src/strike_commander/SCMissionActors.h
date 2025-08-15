@@ -33,6 +33,7 @@ public:
     bool current_command_executed{false};
     prog_op current_command;
     uint8_t current_command_arg;
+    Vector3D aiming_vector{0.0f, 0.0f, 0.0f};
     virtual bool execute();
     virtual bool takeOff(uint8_t arg); 
     virtual bool land(uint8_t arg);

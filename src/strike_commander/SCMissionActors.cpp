@@ -382,6 +382,7 @@ void SCMissionActors::shootWeapon(SCMissionActors *target) {
     }
     RSEntity *weapon_entity = this->object->entity->swpn_data->weapon_entity;
     Vector3D direction = target->object->position - this->object->position;
+    this->aiming_vector = direction;
     if (direction.Length() > this->object->entity->swpn_data->effective_range) {
         return; // No direction to shoot
     }
@@ -412,9 +413,9 @@ void SCMissionActors::shootWeapon(SCMissionActors *target) {
             weapon->z = this->object->position.z;
 
             
-            weapon->vx = direction.x *  100.0f;
-            weapon->vy = direction.y *  100.0f;
-            weapon->vz = direction.z *  100.0f;
+            weapon->vx = direction.x *  1000.0f;
+            weapon->vy = direction.y *  1000.0f;
+            weapon->vz = direction.z *  1000.0f;
             break;
         default:
             return;

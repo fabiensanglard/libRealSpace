@@ -238,7 +238,7 @@ std::tuple<Vector3D, Vector3D> GunSimulatedObject::ComputeTrajectory(int tps) {
     // Calcul de la force de gravité (en utilisant la constante GRAVITY et le poids de l'objet)
     // 
     if (this->weight == 0) {
-        this->weight = 1;
+        this->weight = 0.2f;
     }
     Vector3D gravity_force = { 0.0f, -this->weight * GRAVITY , 0.0f };
 
@@ -312,9 +312,9 @@ void GunSimulatedObject::Simulate(int tps) {
 
     Vector3D length_vect = { this->x - this->last_px, this->y - this->last_py, this->z - this->last_pz };
     this->distance += length_vect.Length();
-    /*if (this->distance > this->obj->wdat->effective_range * 10.0f) {
+    if (this->distance > this->obj->wdat->effective_range * 10.0f && this->obj->entity_type == EntityType::tracer) {
         this->alive = false;
-    }*/
+    }
     for (auto entity: this->mission->actors) {
         if (this->CheckCollision(entity)) {
             this->alive = false;

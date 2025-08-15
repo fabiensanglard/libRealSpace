@@ -998,6 +998,12 @@ void SCStrike::runFrame(void) {
             Vector3D actor_position = {actor->object->position.x, actor->object->position.y, actor->object->position.z};
             Vector3D actor_orientation = {(360.0f - static_cast<float>(actor->object->azymuth) + 90.0f), static_cast<float>(actor->object->pitch), -static_cast<float>(actor->object->roll)};
             Renderer.drawModel(actor->object->entity, LOD_LEVEL_MAX, actor_position, actor_orientation);
+            if (this->show_bbox) {
+                if (actor->aiming_vector.x != 0.0f || actor->aiming_vector.y != 0.0f || actor->aiming_vector.z != 0.0f) {
+                    Vector3D aim_pos = {actor->aiming_vector.x, actor->aiming_vector.y, actor->aiming_vector.z};
+                    Renderer.drawLine(actor_position, aim_pos, {1.0f, 0.0f, 0.0f});
+                }    
+            }
             for (auto weapons : actor->weapons_shooted) {
                 if (weapons->alive) {
                     weapons->Render();
