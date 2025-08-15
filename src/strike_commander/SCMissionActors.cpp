@@ -325,12 +325,16 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
     for (auto actor: this->mission->actors) {
         if (actor->actor_id == arg && actor->is_active == false && actor->is_destroyed == false) {
             actor->is_active = true;
-            
-            Vector3D correction = {
-                this->mission->player->plane->x,
-                this->mission->player->plane->y,
-                this->mission->player->plane->z
-            };
+            Vector3D correction = {0.0f, 0.0f, 0.0f};
+            if (actor->object->area_id != 255 && actor->object->unknown2 == 0) {
+                correction = this->mission->mission->mission_data.areas[actor->object->area_id]->position;
+            } else {
+                correction = {
+                    this->mission->player->plane->x,
+                    this->mission->player->plane->y,
+                    this->mission->player->plane->z
+                };
+            }
             actor->object->position += correction;
             if (actor->plane != nullptr) {
                 actor->plane->on_ground = false;
