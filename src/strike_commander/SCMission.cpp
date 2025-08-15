@@ -336,6 +336,12 @@ void SCMission::update() {
                                         actor->plane->x = actor->object->position.x;
                                         actor->plane->y = actor->object->position.y;
                                         actor->plane->z = actor->object->position.z;
+                                        if (abs(this->area->getY(actor->object->position.x, actor->object->position.z) - actor->object->position.y) <= 10 ) {
+                                            actor->object->position.y = this->area->getY(actor->object->position.x, actor->object->position.z);
+                                            actor->plane->on_ground = true;
+                                        } else {
+                                            actor->plane->on_ground = false;
+                                        }
                                     }
                                 }
                                 

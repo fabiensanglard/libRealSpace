@@ -172,6 +172,57 @@ void SCJdynPlane::Simulate() {
     this->elevationf = this->pitch;
     this->twist = this->roll;
 
+    // Check for NaN values in velocity components
+    if (std::isnan(this->vx) || std::isnan(this->vy) || std::isnan(this->vz)) {
+        // Log or output debug information
+        printf("NaN velocity detected! Resetting velocity components.\n");
+        
+        // Reset velocity to prevent simulation instability
+        this->vx = 0.0f;
+        this->vy = 0.0f;
+        this->vz = 0.0f;
+        
+        // Reset related values that might be affected
+        this->airspeed = 0;
+        this->acceleration.x = 0.0f;
+        this->acceleration.y = 0.0f;
+        this->acceleration.z = 0.0f;
+    }
+
+    // Also check for NaN in rotation speeds
+    if (std::isnan(this->roll_speed) || std::isnan(this->pitch_speed) || std::isnan(this->yaw_speed)) {
+        printf("NaN rotation speed detected! Resetting rotation components.\n");
+        
+        // Reset rotation speeds
+        this->roll_speed = 0;
+        this->pitch_speed = 0.0f;
+        this->yaw_speed = 0.0f;
+    }
+    // Check for NaN in position and rotation angles
+    if (std::isnan(this->yaw) || std::isnan(this->pitch) || std::isnan(this->roll)) {
+        printf("NaN detected in rotation angles! Resetting angles.\n");
+        
+        // Reset angles to prevent further instability
+        if (std::isnan(this->yaw)) {
+            this->yaw = 0.0f;
+            this->yaw_speed = 0.0f;
+        }
+        
+        if (std::isnan(this->pitch)) {
+            this->pitch = 0.0f;
+            this->pitch_speed = 0.0f;
+        }
+        
+        if (std::isnan(this->roll)) {
+            this->roll = 0.0f;
+            this->roll_speed = 0;
+        }
+        
+        // Also update the derived values
+        this->azimuthf = this->yaw;
+        this->elevationf = this->pitch;
+        this->twist = this->roll;
+    }
     
 }
 

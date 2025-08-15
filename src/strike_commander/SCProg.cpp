@@ -150,6 +150,9 @@ void SCProg::execute() {
                         if (actor->actor_id == prog.arg) {
                             actor->object->alive = false;
                             actor->is_destroyed = false;
+                            if (actor->object->entity->explos->objct != nullptr) {
+                                actor->mission->explosions.push_back(new SCExplosion(actor->object->entity->explos->objct, actor->object->position));
+                            }
                             break;
                         }
                     }
