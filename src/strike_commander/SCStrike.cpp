@@ -528,6 +528,7 @@ void SCStrike::checkKeyboard(void) {
                 if (team->is_active) {
                     if (team->plane != nullptr && team->plane != this->player_plane) {
                         prev += formation_pos_offset;
+                        team->taken_off = true;
                         team->plane->x = prev.x;
                         team->plane->z = prev.z;
                         team->plane->y = prev.y;
