@@ -231,14 +231,16 @@ bool SCMissionActors::deactivate(uint8_t arg) {
  * @return true Always returns true.
  */
 bool SCMissionActors::setMessage(uint8_t arg) {   
-    if (arg >= this->profile->radi.msgs.size()) {
-        return true;
+    for (auto message: this->profile->radi.msgs) {
+        if (message.first == arg) {
+            std::string *message = new std::string();
+            *message = this->profile->radi.info.callsign + ": " + this->profile->radi.msgs[arg];
+            this->mission->radio_messages.push_back(message);
+            printf("Message  %s\n", message->c_str()); 
+            return true;
+        }
     }
-    std::string *message = new std::string();
-    *message = this->profile->radi.info.callsign + ": " + this->profile->radi.msgs[arg];
-    this->mission->radio_messages.push_back(message);
-    printf("Message  %s\n", message->c_str()); 
-    return true;
+    return false;    
 }
 /**
  * @brief Sets the current objective to follow an ally and adjusts the pilot's target waypoint, speed, and climb.
