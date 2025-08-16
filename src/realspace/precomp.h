@@ -15,6 +15,7 @@
     #include "TreArchive.h"
 
     #include "AssetManager.h"
+    #include "RSSound.h"
     #include "ConvAssetManager.h"
     #include "RSImage.h"
     #include "RSFont.h"

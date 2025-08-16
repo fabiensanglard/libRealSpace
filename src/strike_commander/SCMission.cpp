@@ -47,6 +47,7 @@ RSProf *SCMission::LoadProfile(std::string name) {
     return profile;
 }
 void SCMission::loadMission() {
+    sound.init(&Assets);
     std::string miss_file_name = Assets.mission_root_path + this->mission_name; 
     std::transform(miss_file_name.begin(), miss_file_name.end(), miss_file_name.begin(), ::toupper);
     TreEntry *mission_tre = Assets.GetEntryByName(miss_file_name.c_str());

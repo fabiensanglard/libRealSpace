@@ -236,7 +236,18 @@ bool SCMissionActors::setMessage(uint8_t arg) {
             std::string *message = new std::string();
             *message = this->profile->radi.info.callsign + ": " + this->profile->radi.msgs[arg];
             this->mission->radio_messages.push_back(message);
-            printf("Message  %s\n", message->c_str()); 
+            printf("Message  %s\n", message->c_str());
+            
+            if (this->mission->sound.inGameVoices.find(this->profile->radi.spch) == this->mission->sound.inGameVoices.end()) {
+                printf("No voice found for %d\n", this->profile->radi.spch);
+                return true;
+            }
+            if (this->mission->sound.inGameVoices[this->profile->radi.spch]->messages.find(arg) == this->mission->sound.inGameVoices[this->profile->radi.spch]->messages.end()) {
+                printf("No message found for %d\n", arg);
+                return true;
+            }
+            MemSound *message_sound = this->mission->sound.inGameVoices[this->profile->radi.spch]->messages[arg];
+            Mixer.PlaySoundVoc(message_sound->data, message_sound->size);
             return true;
         }
     }
