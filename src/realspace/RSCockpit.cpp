@@ -24,6 +24,10 @@ void RSCockpit::InitFromRam(uint8_t* data, size_t size) {
 	handlers["CKPT"] = std::bind(&RSCockpit::parseCKPT, this, std::placeholders::_1, std::placeholders::_2);
 	
 	lexer.InitFromRAM(data, size, handlers);
+    TreEntry *plaqu_entry = this->asset_manager->GetEntryByName("..\\..\\DATA\\COCKPITS\\PLAQUES.IFF");
+    if (plaqu_entry) {
+        PLAQ.InitFromRAM(plaqu_entry->data, plaqu_entry->size);
+    }
 }
 
 /**

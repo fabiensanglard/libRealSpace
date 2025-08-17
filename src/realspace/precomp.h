@@ -30,6 +30,7 @@
     #include "RSMapTextureSet.h"
     #include "RSArea.h"
     #include "RLEShape.h"
+    #include "RSPlaque.h"
     #include "RSOption.h"
     #include "RSGameflow.h"
     #include "RSHud.h"

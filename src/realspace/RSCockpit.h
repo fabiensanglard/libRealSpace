@@ -199,6 +199,7 @@ public:
     RSImageSet ARTP;
     RealObjs REAL;
     Moni MONI;
+    RSPlaque PLAQ;
     
     RSCockpit(AssetManager *amana);
     ~RSCockpit();

@@ -1108,16 +1108,18 @@ void SCCockpit::Render(int face) {
                     Mixer.PlaySoundVoc(this->current_mission->radio_messages[0]->sound->data, 
                                        this->current_mission->radio_messages[0]->sound->size);
                 }
-                this->radio_mission_timer = 500;
+                this->radio_mission_timer = 400;
             }
-            Point2D radio_text = {2, 12};
-            for (int li = 0; li < 16; li++) {
-                fb->FillLineColor(li, 0);
-            }
-            RSFont *fnt = this->big_font;
+            Point2D radio_text = {4, 9};
+            RLEShape *background_message = this->cockpit->PLAQ.shapes.GetShape(2);
+            //background_message->SetPosition(&radio_text);
+            fb->DrawShape(background_message);
+            RSFont *fnt = this->cockpit->PLAQ.fonts[1].font;
+            std::string radio_message = this->current_mission->radio_messages[0]->message;
+            std::transform(radio_message.begin(), radio_message.end(), radio_message.begin(), ::toupper);
             fb->PrintText(
-                fnt, &radio_text, (char *)this->current_mission->radio_messages[0]->message.c_str(), 0, 0,
-                (uint32_t)this->current_mission->radio_messages[0]->message.size(), 2, 2
+                fnt, &radio_text, (char *)radio_message.c_str(), 0, 0,
+                (uint32_t)radio_message.size(), 2, 2
             );
             if (this->radio_mission_timer > 0) {
                 this->radio_mission_timer--;
