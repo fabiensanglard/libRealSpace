@@ -1110,9 +1110,13 @@ void SCCockpit::Render(int face) {
                 }
                 this->radio_mission_timer = 400;
             }
-            Point2D radio_text = {4, 9};
+            
             RLEShape *background_message = this->cockpit->PLAQ.shapes.GetShape(2);
-            //background_message->SetPosition(&radio_text);
+            Point2D b_message_pos = {
+                0, 200 - background_message->GetHeight() - 1
+            };
+            background_message->SetPosition(&b_message_pos);
+            Point2D radio_text = {4, b_message_pos.y + 9};
             fb->DrawShape(background_message);
             RSFont *fnt = this->cockpit->PLAQ.fonts[1].font;
             std::string radio_message = this->current_mission->radio_messages[0]->message;
