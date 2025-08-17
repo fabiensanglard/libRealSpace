@@ -939,6 +939,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     };
     float planeSpeed      = direction.Length();
     float thrustMagnitude = -planeSpeed;
+    MemSound *sound;
     switch (this->weaps_load[weapon_hard_point_id]->objct->wdat->weapon_id) {
         case 12:
             weap = new GunSimulatedObject();
@@ -948,19 +949,20 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
         case 6:
             thrustMagnitude = -planeSpeed * 50.0f;
             weap = new GunSimulatedObject();
+            sound = this->pilot->mission->sound.sounds[SoundEffectIds::MK82_DROP];
+            Mixer.PlaySoundVoc(sound->data, sound->size);
         break;
         default:
+            sound = this->pilot->mission->sound.sounds[SoundEffectIds::AIM9_SHOOT];
+            Mixer.PlaySoundVoc(sound->data, sound->size);
             weap = new SCSimulatedObject();
         break;
-    }
-    if (this->weaps_load[weapon_hard_point_id]->objct->wdat->weapon_id == 12) {
-        
     }
     weap->mission = mission;
     // Conversion des angles (azimuthf et elevationf, exprimés en dixièmes de degré) en radians.
     float yawRad   = tenthOfDegreeToRad(this->yaw);
     float pitchRad = tenthOfDegreeToRad(-this->pitch);
-    float rollRad  = tenthOfDegreeToRad(0.0f); // Roll angle is not used in this context, set to 0.
+    float rollRad  = 0.0;
     // Calcul du vecteur de poussée initiale dans la direction avant de l'avion.
     // On considère que le vecteur avant s'exprime en coordonnées :
     // x = cos(pitch)*sin(yaw), y = sin(pitch), z = cos(pitch)*cos(yaw)

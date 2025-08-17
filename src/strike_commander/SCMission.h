@@ -14,6 +14,10 @@ struct SCMissionWaypoint {
     std::string *objective{nullptr};
 };
 
+struct RadioMessages {
+    std::string message;
+    MemSound *sound{nullptr};
+};
 class SCProg;
 
 class SCMission {
@@ -42,7 +46,7 @@ public:
     RSMission *mission{nullptr};
     RSWorld *world{nullptr};
     RSSound sound;
-    std::vector<std::string*> radio_messages;
+    std::vector<RadioMessages*> radio_messages;
     
     SCMission(std::string mission_name, std::map<std::string, RSEntity *> *objCache);
     ~SCMission();

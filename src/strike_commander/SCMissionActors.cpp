@@ -235,19 +235,21 @@ bool SCMissionActors::setMessage(uint8_t arg) {
         if (message.first == arg) {
             std::string *message = new std::string();
             *message = this->profile->radi.info.callsign + ": " + this->profile->radi.msgs[arg];
-            this->mission->radio_messages.push_back(message);
+            RadioMessages *msg = new RadioMessages();
+            msg->message = *message;
+            
             printf("Message  %s\n", message->c_str());
             
             if (this->mission->sound.inGameVoices.find(this->profile->radi.spch) == this->mission->sound.inGameVoices.end()) {
                 printf("No voice found for %d\n", this->profile->radi.spch);
-                return true;
             }
             if (this->mission->sound.inGameVoices[this->profile->radi.spch]->messages.find(arg) == this->mission->sound.inGameVoices[this->profile->radi.spch]->messages.end()) {
                 printf("No message found for %d\n", arg);
-                return true;
             }
+            
             MemSound *message_sound = this->mission->sound.inGameVoices[this->profile->radi.spch]->messages[arg];
-            Mixer.PlaySoundVoc(message_sound->data, message_sound->size);
+            msg->sound = message_sound;
+            this->mission->radio_messages.push_back(msg);
             return true;
         }
     }
@@ -566,7 +568,9 @@ bool SCMissionActorsPlayer::setMessage(uint8_t arg) {
 }
 
 bool SCMissionActorsStrikeBase::setMessage(uint8_t arg) {
-    this->mission->radio_messages.push_back(&this->profile->radi.msgs[arg]);
+    RadioMessages *msg = new RadioMessages();
+    msg->message = this->profile->radi.msgs[arg];
+    this->mission->radio_messages.push_back(msg);
     printf("Message  %s\n", this->profile->radi.msgs[arg].c_str()); 
     return true;
 }

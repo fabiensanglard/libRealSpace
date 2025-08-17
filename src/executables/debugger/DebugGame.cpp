@@ -136,7 +136,7 @@ void DebugGame::loadSC() {
     Assets.intel_root_path = "..\\..\\DATA\\INTEL\\";
     Assets.mission_root_path = "..\\..\\DATA\\MISSIONS\\";
     Assets.object_root_path = "..\\..\\DATA\\OBJECTS\\";
-    Assets.sound_root_path = "..\\..\\DATA\\SOUNDS\\";
+    Assets.sound_root_path = "..\\..\\DATA\\SOUND\\";
     Assets.texture_root_path = "..\\..\\DATA\\TXM\\";
     Assets.gameflow_root_path = "..\\..\\DATA\\GAMEFLOW\\";
 
@@ -189,7 +189,7 @@ void DebugGame::loadSCCD() {
     Assets.intel_root_path = "..\\..\\DATA\\INTEL\\";
     Assets.mission_root_path = "..\\..\\DATA\\MISSIONS\\";
     Assets.object_root_path = "..\\..\\DATA\\OBJECTS\\";
-    Assets.sound_root_path = "..\\..\\DATA\\SOUNDS\\";
+    Assets.sound_root_path = "..\\..\\DATA\\SOUND\\";
     Assets.texture_root_path = "..\\..\\DATA\\TXM\\";
     Assets.gameflow_root_path = "..\\..\\DATA\\GAMEFLOW\\";
 
@@ -242,7 +242,7 @@ void DebugGame::testMissionSC() {
     Assets.intel_root_path = "..\\..\\DATA\\INTEL\\";
     Assets.mission_root_path = "..\\..\\DATA\\MISSIONS\\";
     Assets.object_root_path = "..\\..\\DATA\\OBJECTS\\";
-    Assets.sound_root_path = "..\\..\\DATA\\SOUNDS\\";
+    Assets.sound_root_path = "..\\..\\DATA\\SOUND\\";
     Assets.texture_root_path = "..\\..\\DATA\\TXM\\";
     Assets.gameflow_root_path = "..\\..\\DATA\\GAMEFLOW\\";
 
@@ -284,7 +284,7 @@ void DebugGame::loadTO() {
     Assets.intel_root_path = "..\\..\\DATA\\INTEL\\";
     Assets.mission_root_path = "..\\..\\DATA\\MISSIONS\\";
     Assets.object_root_path = "..\\..\\DATA\\OBJECTS\\";
-    Assets.sound_root_path = "..\\..\\DATA\\SOUNDS\\";
+    Assets.sound_root_path = "..\\..\\DATA\\SOUND\\";
     Assets.texture_root_path = "..\\..\\DATA\\TXM\\";
     Assets.gameflow_root_path = "..\\..\\DATA\\GAMEFLOW\\";
 

@@ -1104,6 +1104,10 @@ void SCCockpit::Render(int face) {
         }
         if (this->current_mission->radio_messages.size() > 0) {
             if (this->radio_mission_timer == 0) {
+                if (this->current_mission->radio_messages[0]->sound != nullptr) {
+                    Mixer.PlaySoundVoc(this->current_mission->radio_messages[0]->sound->data, 
+                                       this->current_mission->radio_messages[0]->sound->size);
+                }
                 this->radio_mission_timer = 500;
             }
             Point2D radio_text = {2, 12};
@@ -1112,8 +1116,8 @@ void SCCockpit::Render(int face) {
             }
             RSFont *fnt = this->big_font;
             fb->PrintText(
-                fnt, &radio_text, (char *)this->current_mission->radio_messages[0]->c_str(), 0, 0,
-                (uint32_t)this->current_mission->radio_messages[0]->size(), 2, 2
+                fnt, &radio_text, (char *)this->current_mission->radio_messages[0]->message.c_str(), 0, 0,
+                (uint32_t)this->current_mission->radio_messages[0]->message.size(), 2, 2
             );
             if (this->radio_mission_timer > 0) {
                 this->radio_mission_timer--;
