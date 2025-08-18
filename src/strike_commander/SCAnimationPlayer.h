@@ -75,6 +75,7 @@ private:
     PakArchive midgames;
     PakArchive optShps;
     PakArchive optPals;
+    std::map<uint8_t, MIDGAME_DATA> midgames_data;
     std::vector<PakArchive*> mid;
     std::vector<PakArchive*> midvoc;
     std::map<uint8_t, std::vector<MIDGAME_SHOT *>> midgames_shots;
@@ -83,6 +84,7 @@ private:
     int fps{1};
     int fps_timer{0};
     int current_music{255};
+    void initMid1();
 public:
     SCAnimationPlayer();
     ~SCAnimationPlayer();

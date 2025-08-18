@@ -12,95 +12,7 @@
 #include <imgui_impl_opengl2.h>
 #include <imgui_impl_sdl2.h>
 
-SCAnimationPlayer::SCAnimationPlayer(){
-    this->fps_timer = SDL_GetTicks() / 10;
-}
-
-SCAnimationPlayer::~SCAnimationPlayer(){
-}
-
-void SCAnimationPlayer::checkKeyboard(void) {
-    SDL_Event mouseEvents[5];
-    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
-    for (int i = 0; i < numMouseEvents; i++) {
-        SDL_Event *event = &mouseEvents[i];
-
-        switch (event->type) {
-        case SDL_MOUSEBUTTONUP:
-            Game->stopTopActivity();
-            break;
-        default:
-            break;
-        }
-    }
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            Game->stopTopActivity();
-            break;
-        }
-        default:
-            break;
-        }
-    }
-}
-void SCAnimationPlayer::init(){
-    TreEntry *midgames_entry = Assets.GetEntryByName(
-        "..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK"
-    );
-    PakArchive *midgames_arch = new PakArchive();
-    this->midgames.InitFromRAM("MIDGAMES.PAK", midgames_entry->data, midgames_entry->size);
-    std::vector<std::string> midgames_files = {
-        "MID1",
-        "MID2",
-        "MID3",
-        "MID5",
-        "MID12",
-        "MID14",
-        "MID15",
-        "MID16",
-        "MID17",
-        "MID20",
-        "MID36"
-    };
-    if (this->mid.size() == 0) {
-        for (int i = 0; i < midgames_files.size(); i++) {
-            std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + ".PAK";
-            TreEntry *entry = Assets.GetEntryByName(file_path.c_str());
-            if (entry == nullptr) {
-                continue;
-            }
-            PakArchive *arch = new PakArchive();
-            arch->InitFromRAM(midgames_files[i].c_str(), entry->data, entry->size);
-            this->mid.push_back(arch);
-        }
-    }
-    if (this->midvoc.size() == 0) {
-
-        for (int i = 0; i < midgames_files.size(); i++) {
-            std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + "VOC.PAK";
-            TreEntry *entry = Assets.GetEntryByName(file_path.c_str());
-            if (entry == nullptr) {
-                continue;
-            }
-            PakArchive *arch = new PakArchive();
-            arch->InitFromRAM(midgames_files[i].c_str(), entry->data, entry->size);
-            this->midvoc.push_back(arch);
-        }
-    }
-    TreEntry *optShapEntry = Assets.GetEntryByName(
-        Assets.optshps_filename
-    );
-    this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
-    TreEntry *optPalettesEntry = Assets.GetEntryByName(
-        Assets.optpals_filename
-    );
-    this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
-
+void SCAnimationPlayer::initMid1() {
     MIDGAME_DATA mid1Data = {
         {
             {
@@ -730,64 +642,157 @@ void SCAnimationPlayer::init(){
             },
         }
     };
+    this->midgames_data[1] = mid1Data;
+}
 
-    for (auto sht: mid1Data.shots) {
-        MIDGAME_SHOT *shot = new MIDGAME_SHOT();
+SCAnimationPlayer::SCAnimationPlayer() { this->fps_timer = SDL_GetTicks() / 10; }
+
+SCAnimationPlayer::~SCAnimationPlayer(){
+}
+
+void SCAnimationPlayer::checkKeyboard(void) {
+    SDL_Event mouseEvents[5];
+    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
+    for (int i = 0; i < numMouseEvents; i++) {
+        SDL_Event *event = &mouseEvents[i];
+
+        switch (event->type) {
+        case SDL_MOUSEBUTTONUP:
+            Game->stopTopActivity();
+            break;
+        default:
+            break;
+        }
+    }
+    SDL_Event keybEvents[1];
+    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
+    for (int i = 0; i < numKeybEvents; i++) {
+        SDL_Event *event = &keybEvents[i];
+
+        switch (event->key.keysym.sym) {
+        case SDLK_ESCAPE: {
+            Game->stopTopActivity();
+            break;
+        }
+        default:
+            break;
+        }
+    }
+}
+void SCAnimationPlayer::init(){
+    TreEntry *midgames_entry = Assets.GetEntryByName(
+        "..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK"
+    );
+    PakArchive *midgames_arch = new PakArchive();
+    this->midgames.InitFromRAM("MIDGAMES.PAK", midgames_entry->data, midgames_entry->size);
+    std::vector<std::string> midgames_files = {
+        "MID1",
+        "MID2",
+        "MID3",
+        "MID5",
+        "MID12",
+        "MID14",
+        "MID15",
+        "MID16",
+        "MID17",
+        "MID20",
+        "MID36"
+    };
+    if (this->mid.size() == 0) {
+        for (int i = 0; i < midgames_files.size(); i++) {
+            std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + ".PAK";
+            TreEntry *entry = Assets.GetEntryByName(file_path.c_str());
+            if (entry == nullptr) {
+                continue;
+            }
+            PakArchive *arch = new PakArchive();
+            arch->InitFromRAM(midgames_files[i].c_str(), entry->data, entry->size);
+            this->mid.push_back(arch);
+        }
+    }
+    if (this->midvoc.size() == 0) {
+
+        for (int i = 0; i < midgames_files.size(); i++) {
+            std::string file_path = "..\\..\\DATA\\MIDGAMES\\" + midgames_files[i] + "VOC.PAK";
+            TreEntry *entry = Assets.GetEntryByName(file_path.c_str());
+            if (entry == nullptr) {
+                continue;
+            }
+            PakArchive *arch = new PakArchive();
+            arch->InitFromRAM(midgames_files[i].c_str(), entry->data, entry->size);
+            this->midvoc.push_back(arch);
+        }
+    }
+    TreEntry *optShapEntry = Assets.GetEntryByName(
+        Assets.optshps_filename
+    );
+    this->optShps.InitFromRAM("OPTSHPS.PAK", optShapEntry->data, optShapEntry->size);
+    TreEntry *optPalettesEntry = Assets.GetEntryByName(
+        Assets.optpals_filename
+    );
+    this->optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
+
+    this->initMid1();
     
-        for (auto shot_bg: sht.background) {
-            if (shot_bg.pak == nullptr) {
-                continue;
+    for (auto mid_data: this->midgames_data) {
+        for (auto sht: mid_data.second.shots) {
+            MIDGAME_SHOT *shot = new MIDGAME_SHOT();
+        
+            for (auto shot_bg: sht.background) {
+                if (shot_bg.pak == nullptr) {
+                    continue;
+                }
+                MIDGAME_SHOT_BG *bg = new MIDGAME_SHOT_BG();
+                RSImageSet *tmp_img = new RSImageSet();
+                PakArchive *pk = new PakArchive();
+                PakEntry *pe = shot_bg.pak->GetEntry(shot_bg.shape_id);
+                pk->InitFromRAM("toto", pe->data, pe->size);
+                tmp_img->InitFromPakArchive(pk,0);
+                if (tmp_img->GetNumImages() == 0) {
+                    delete tmp_img;
+                    tmp_img = new RSImageSet();
+                    tmp_img->InitFromPakEntry(pe);
+                }
+                bg->palette = shot_bg.pal_id;
+                bg->image = tmp_img;
+                if (tmp_img->palettes.size()>0) {
+                    bg->pal = tmp_img->palettes[0];
+                }
+                bg->shapeid = shot_bg.sub_shape_id;
+                bg->position_start = shot_bg.start;
+                bg->position_end = shot_bg.end;
+                bg->velocity = shot_bg.velocity;
+                shot->background.push_back(bg);
             }
-            MIDGAME_SHOT_BG *bg = new MIDGAME_SHOT_BG();
-            RSImageSet *tmp_img = new RSImageSet();
-            PakArchive *pk = new PakArchive();
-            PakEntry *pe = shot_bg.pak->GetEntry(shot_bg.shape_id);
-            pk->InitFromRAM("toto", pe->data, pe->size);
-            tmp_img->InitFromPakArchive(pk,0);
-            if (tmp_img->GetNumImages() == 0) {
-                delete tmp_img;
-                tmp_img = new RSImageSet();
-                tmp_img->InitFromPakEntry(pe);
+            for (auto sprt: sht.sprites) {
+                if (sprt.pak == nullptr) {
+                    continue;
+                }
+                MIDGAME_SHOT_SPRITE *sprite = new MIDGAME_SHOT_SPRITE();
+                RSImageSet *tmp_img = new RSImageSet();
+                tmp_img->InitFromPakEntry(sprt.pak->GetEntry(sprt.shape_id));
+                sprite->image = tmp_img;
+                if (tmp_img->palettes.size()>0) {
+                    sprite->pal = tmp_img->palettes[0];
+                }
+                sprite->position_start = sprt.start;
+                sprite->position_end = sprt.end;
+                sprite->velocity = sprt.velocity;
+                sprite->keep_first_frame = sprt.keep_first_frame;
+                shot->sprites.push_back(sprite);
             }
-            bg->palette = shot_bg.pal_id;
-            bg->image = tmp_img;
-            if (tmp_img->palettes.size()>0) {
-                bg->pal = tmp_img->palettes[0];
-            }
-            bg->shapeid = shot_bg.sub_shape_id;
-            bg->position_start = shot_bg.start;
-            bg->position_end = shot_bg.end;
-            bg->velocity = shot_bg.velocity;
-            shot->background.push_back(bg);
-        }
-        for (auto sprt: sht.sprites) {
-            if (sprt.pak == nullptr) {
-                continue;
-            }
-            MIDGAME_SHOT_SPRITE *sprite = new MIDGAME_SHOT_SPRITE();
-            RSImageSet *tmp_img = new RSImageSet();
-            tmp_img->InitFromPakEntry(sprt.pak->GetEntry(sprt.shape_id));
-            sprite->image = tmp_img;
-            if (tmp_img->palettes.size()>0) {
-                sprite->pal = tmp_img->palettes[0];
-            }
-            sprite->position_start = sprt.start;
-            sprite->position_end = sprt.end;
-            sprite->velocity = sprt.velocity;
-            sprite->keep_first_frame = sprt.keep_first_frame;
-            shot->sprites.push_back(sprite);
-        }
 
-        shot->nbframe = sht.nbframe;
-        shot->music = sht.music;
-        if (sht.sound != nullptr) {
-            MIDGAME_SOUND *sound = new MIDGAME_SOUND();
-            sound->data = sht.sound->data;
-            sound->size = sht.sound->size;
-            shot->sound = sound;
-            shot->sound_time_code = sht.sound_time_code;
+            shot->nbframe = sht.nbframe;
+            shot->music = sht.music;
+            if (sht.sound != nullptr) {
+                MIDGAME_SOUND *sound = new MIDGAME_SOUND();
+                sound->data = sht.sound->data;
+                sound->size = sht.sound->size;
+                shot->sound = sound;
+                shot->sound_time_code = sht.sound_time_code;
+            }
+            this->midgames_shots[1].push_back(shot);
         }
-        this->midgames_shots[1].push_back(shot);
     }
 
 
