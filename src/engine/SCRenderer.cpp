@@ -1303,7 +1303,7 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     }
     glEnd();
     // Rendu des jupes pré-calculées
-    if (0) {
+    if (1) {
         glDepthFunc(GL_LEQUAL);
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(-1.0f, -1.0f);

@@ -52,158 +52,193 @@ void RSArea::BuildSkirts() {
     skirts_.tris.clear();
     if (BLOCKS_PER_MAP == 0) return;
 
-    // On se base sur le LOD le plus fin pour un bord bien échantillonné
     const int lod = BLOCK_LOD_MAX;
     const int N = BLOCK_PER_MAP_SIDE;
 
-    // Monde “infini”
+    // Bord du monde (cohérent avec renderWorldSkyAndGround)
     const float worldHalf = (BLOCK_WIDTH * BLOCK_PER_MAP_SIDE) * 2.0f;
     const float worldMinX = -worldHalf, worldMaxX = worldHalf;
     const float worldMinZ = -worldHalf, worldMaxZ = worldHalf;
 
-    // Paramètres “naturels” (comme ton pass runtime)
-    const float ground_min = -1000.1f;
-    const int   RINGS = 6;
-    const float noiseAmpY = 140.0f;
-    const float noiseFreq = 0.0002f;
-    const float epsOut = 0.02f;
+    // Petits décalages pour éviter les micro-jours
+    const float epsOut = 0.02f; // vers l’extérieur (bord du monde)
+    // Taille de grille locale (pour décaler un peu vers l’intérieur de la carte)
+    const uint32_t s0 = blocks[lod][0].sideSize;
+    const float gridStep = BLOCK_WIDTH / (float)(s0 - 1);
+    const float epsIn = gridStep * 0.2f; // 20% d’une cellule vers l’intérieur
 
-    // Variations couleur autour de la source (conserve la teinte)
-    const float valAmp = 0.18f;
-    const float satAmp = 0.12f;
-    const float hueAmp = 0.00f;
-
-    auto lerp = [](float a, float b, float t){ return a + (b - a) * t; };
-    auto varyColor = [&](const float base[3], float t, float px, float pz, float& outR, float& outG, float& outB) {
-        float h,s,v; rgbToHsv_(base[0], base[1], base[2], h,s,v);
-        float amp = smooth01_(t);
-        float nH = noise2_(px * noiseFreq, pz * noiseFreq, 3.0f);
-        float nS = noise2_(px * noiseFreq, pz * noiseFreq, 5.0f);
-        float nV = noise2_(px * noiseFreq, pz * noiseFreq, 7.0f);
-        float h2 = h + (nH - 0.5f) * 2.0f * hueAmp * amp;
-        float s2 = s * (1.0f + (nS - 0.5f) * 2.0f * satAmp * amp);
-        float v2 = v * (1.0f + (nV - 0.5f) * 2.0f * valAmp * amp);
-        s2 = clamp01_(s2); v2 = clamp01_(v2);
-        hsvToRgb_(h2, s2, v2, outR, outG, outB);
-        outR = clamp01_(outR); outG = clamp01_(outG); outB = clamp01_(outB);
+    auto pushQuadSolidColor = [&](const Vector3D& a, const Vector3D& b,
+                                  const Vector3D& c, const Vector3D& d,
+                                  const float col[3]) {
+        skirts_.tris.push_back({{
+            {a.x,a.y,a.z, col[0],col[1],col[2]},
+            {b.x,b.y,b.z, col[0],col[1],col[2]},
+            {c.x,c.y,c.z, col[0],col[1],col[2]}
+        }});
+        skirts_.tris.push_back({{
+            {a.x,a.y,a.z, col[0],col[1],col[2]},
+            {c.x,c.y,c.z, col[0],col[1],col[2]},
+            {d.x,d.y,d.z, col[0],col[1],col[2]}
+        }});
     };
 
-    auto makeV = [&](MapVertex* p, float t, bool horizontal, bool atMinEdge)->SkirtVertex {
-        SkirtVertex sv{};
-        float x = p->v.x, z = p->v.z;
-        if (horizontal) {
-            z = atMinEdge ? lerp(p->v.z, worldMinZ - epsOut, t) : lerp(p->v.z, worldMaxZ + epsOut, t);
-        } else {
-            x = atMinEdge ? lerp(p->v.x, worldMinX - epsOut, t) : lerp(p->v.x, worldMaxX + epsOut, t);
+    enum class Side { Top, Bottom, Left, Right };
+
+    auto sideColorAvg = [&](AreaBlock* blk, Side s, float out[3]) {
+        out[0]=out[1]=out[2]=0.0f;
+        uint32_t n=0, sz = blk->sideSize;
+        switch (s) {
+            case Side::Top:
+                for (uint32_t x=0; x<sz; ++x){ auto* p=blk->GetVertice(x,0); out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; }
+                break;
+            case Side::Bottom:
+                for (uint32_t x=0; x<sz; ++x){ auto* p=blk->GetVertice(x,sz-1); out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; }
+                break;
+            case Side::Left:
+                for (uint32_t y=0; y<sz; ++y){ auto* p=blk->GetVertice(0,y); out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; }
+                break;
+            case Side::Right:
+                for (uint32_t y=0; y<sz; ++y){ auto* p=blk->GetVertice(sz-1,y); out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; }
+                break;
         }
-        float y = lerp(p->v.y, ground_min, t) + (noise2_(x * noiseFreq, z * noiseFreq, 19.0f) - 0.5f) * 2.0f * noiseAmpY * smooth01_(t);
-        float r,g,b; float baseCol[3]{ p->color[0], p->color[1], p->color[2] };
-        varyColor(baseCol, t, x, z, r,g,b);
-        sv.x = x; sv.y = y; sv.z = z; sv.r = r; sv.g = g; sv.b = b;
-        return sv;
+        if (n>0){ out[0]/=n; out[1]/=n; out[2]/=n; }
     };
 
-    auto pushQuadRing = [&](const std::vector<MapVertex*>& seam, bool horizontal, bool atMinEdge) {
-        for (int j = 0; j < RINGS; ++j) {
-            float t0 = (float)j / (float)RINGS;
-            float t1 = (float)(j + 1) / (float)RINGS;
-            for (size_t i = 0; i + 1 < seam.size(); ++i) {
-                SkirtVertex v0 = makeV(seam[i+0], t0, horizontal, atMinEdge);
-                SkirtVertex v1 = makeV(seam[i+1], t0, horizontal, atMinEdge);
-                SkirtVertex v2 = makeV(seam[i+1], t1, horizontal, atMinEdge);
-                SkirtVertex v3 = makeV(seam[i+0], t1, horizontal, atMinEdge);
-                SkirtTriangle tA{ { v0, v1, v2 } };
-                SkirtTriangle tB{ { v0, v2, v3 } };
-                skirts_.tris.push_back(tA);
-                skirts_.tris.push_back(tB);
-            }
+    // 1) Bandes simples par côté (arête carte décalée vers l’intérieur par epsIn)
+    // Top (vers minZ) — inner = z + epsIn
+    for (int bx=0; bx<N; ++bx) {
+        AreaBlock* blk = &blocks[lod][0 * N + bx];
+        uint32_t s = blk->sideSize;
+        float col[3]; sideColorAvg(blk, Side::Top, col);
+        for (uint32_t x=0; x<s-1; ++x) {
+            auto* p0 = blk->GetVertice(x, 0);
+            auto* p1 = blk->GetVertice(x+1, 0);
+            Vector3D a{p0->v.x, p0->v.y, p0->v.z + epsIn};
+            Vector3D b{p1->v.x, p1->v.y, p1->v.z + epsIn};
+            Vector3D c{p1->v.x, p1->v.y, worldMinZ - epsOut};
+            Vector3D d{p0->v.x, p0->v.y, worldMinZ - epsOut};
+            pushQuadSolidColor(a,b,c,d,col);
         }
+    }
+    // Bottom (vers maxZ) — inner = z - epsIn
+    for (int bx=0; bx<N; ++bx) {
+        AreaBlock* blk = &blocks[lod][(N-1) * N + bx];
+        uint32_t s = blk->sideSize;
+        float col[3]; sideColorAvg(blk, Side::Bottom, col);
+        for (uint32_t x=0; x<s-1; ++x) {
+            auto* p0 = blk->GetVertice(x, s-1);
+            auto* p1 = blk->GetVertice(x+1, s-1);
+            Vector3D a{p0->v.x, p0->v.y, p0->v.z - epsIn};
+            Vector3D b{p1->v.x, p1->v.y, p1->v.z - epsIn};
+            Vector3D c{p1->v.x, p1->v.y, worldMaxZ + epsOut};
+            Vector3D d{p0->v.x, p0->v.y, worldMaxZ + epsOut};
+            pushQuadSolidColor(a,b,c,d,col);
+        }
+    }
+    // Left (vers minX) — inner = x + epsIn
+    for (int by=0; by<N; ++by) {
+        AreaBlock* blk = &blocks[lod][by * N + 0];
+        uint32_t s = blk->sideSize;
+        float col[3]; sideColorAvg(blk, Side::Left, col);
+        for (uint32_t y=0; y<s-1; ++y) {
+            auto* p0 = blk->GetVertice(0, y);
+            auto* p1 = blk->GetVertice(0, y+1);
+            Vector3D a{p0->v.x + epsIn, p0->v.y, p0->v.z};
+            Vector3D b{p1->v.x + epsIn, p1->v.y, p1->v.z};
+            Vector3D c{worldMinX - epsOut, p1->v.y, p1->v.z};
+            Vector3D d{worldMinX - epsOut, p0->v.y, p0->v.z};
+            pushQuadSolidColor(a,b,c,d,col);
+        }
+    }
+    // Right (vers maxX) — inner = x - epsIn
+    for (int by=0; by<N; ++by) {
+        AreaBlock* blk = &blocks[lod][by * N + (N-1)];
+        uint32_t s = blk->sideSize;
+        float col[3]; sideColorAvg(blk, Side::Right, col);
+        for (uint32_t y=0; y<s-1; ++y) {
+            auto* p0 = blk->GetVertice(s-1, y);
+            auto* p1 = blk->GetVertice(s-1, y+1);
+            Vector3D a{p0->v.x - epsIn, p0->v.y, p0->v.z};
+            Vector3D b{p1->v.x - epsIn, p1->v.y, p1->v.z};
+            Vector3D c{worldMaxX + epsOut, p1->v.y, p1->v.z};
+            Vector3D d{worldMaxX + epsOut, p0->v.y, p0->v.z};
+            pushQuadSolidColor(a,b,c,d,col);
+        }
+    }
+
+    // 2) Bouchons de coin: 3 triangles reliant les deux arêtes intérieures et le coin monde
+    auto avg2 = [](const float a[3], const float b[3], float out[3]){
+        out[0]=(a[0]+b[0])*0.5f; out[1]=(a[1]+b[1])*0.5f; out[2]=(a[2]+b[2])*0.5f;
+    };
+    auto pushCorner = [&](AreaBlock* blk, uint32_t xi, uint32_t yi,
+                          bool useMinX, bool useMinZ,
+                          const float colA[3], const float colB[3]) {
+        float col[3]; avg2(colA,colB,col);
+        MapVertex* p = blk->GetVertice(xi, yi);
+
+        // Coin monde
+        Vector3D Pc{ useMinX ? (worldMinX - epsOut) : (worldMaxX + epsOut),
+                     p->v.y,
+                     useMinZ ? (worldMinZ - epsOut) : (worldMaxZ + epsOut) };
+
+        // Projs monde sur X/Z (pour raccorder aux bandes monde)
+        Vector3D Px{ Pc.x, p->v.y, p->v.z };
+        Vector3D Pz{ p->v.x, p->v.y, Pc.z };
+
+        // Arêtes “intérieures” (raccord aux bandes côté carte)
+        Vector3D P_innerX{ p->v.x + (useMinX ? +epsIn : -epsIn), p->v.y, p->v.z };
+        Vector3D P_innerZ{ p->v.x, p->v.y, p->v.z + (useMinZ ? +epsIn : -epsIn) };
+
+        // Triangles: [Pc, Px, P_innerX], [Pc, P_innerZ, Pz], et le petit triangle [Pc, P_innerX, P_innerZ]
+        skirts_.tris.push_back({{
+            {Pc.x,      Pc.y,      Pc.z,      col[0],col[1],col[2]},
+            {Px.x,      Px.y,      Px.z,      col[0],col[1],col[2]},
+            {P_innerX.x,P_innerX.y,P_innerX.z,col[0],col[1],col[2]}
+        }});
+        skirts_.tris.push_back({{
+            {Pc.x,      Pc.y,      Pc.z,      col[0],col[1],col[2]},
+            {P_innerZ.x,P_innerZ.y,P_innerZ.z,col[0],col[1],col[2]},
+            {Pz.x,      Pz.y,      Pz.z,      col[0],col[1],col[2]}
+        }});
+        skirts_.tris.push_back({{
+            {Pc.x,      Pc.y,      Pc.z,      col[0],col[1],col[2]},
+            {P_innerX.x,P_innerX.y,P_innerX.z,col[0],col[1],col[2]},
+            {P_innerZ.x,P_innerZ.y,P_innerZ.z,col[0],col[1],col[2]}
+        }});
     };
 
-    auto collectSeam = [&](bool horizontal, bool atMinEdge)->std::vector<MapVertex*> {
-        std::vector<MapVertex*> seam;
-        if (horizontal) {
-            // top row (y=0) ou bottom row (y=s-1)
-            for (int bx = 0; bx < N; ++bx) {
-                int bid = (atMinEdge ? 0 : (N - 1)) * N + bx;
-                AreaBlock* blk = &blocks[lod][bid];
-                uint32_t s = blk->sideSize;
-                uint32_t yRow = atMinEdge ? 0u : (s - 1);
-                uint32_t startX = (bx == 0) ? 0u : 1u;
-                for (uint32_t x = startX; x < s; ++x) {
-                    seam.push_back(blk->GetVertice(x, yRow));
-                }
-            }
-        } else {
-            // left col (x=0) ou right col (x=s-1)
-            for (int by = 0; by < N; ++by) {
-                int bid = by * N + (atMinEdge ? 0 : (N - 1));
-                AreaBlock* blk = &blocks[lod][bid];
-                uint32_t s = blk->sideSize;
-                uint32_t xCol = atMinEdge ? 0u : (s - 1);
-                uint32_t startY = (by == 0) ? 0u : 1u;
-                for (uint32_t y = startY; y < s; ++y) {
-                    seam.push_back(blk->GetVertice(xCol, y));
-                }
-            }
-        }
-        return seam;
-    };
-
-    // 4 côtés
-    auto seamTop    = collectSeam(true,  true);
-    auto seamBottom = collectSeam(true,  false);
-    auto seamLeft   = collectSeam(false, true);
-    auto seamRight  = collectSeam(false, false);
-
-    pushQuadRing(seamTop,    true,  true);
-    pushQuadRing(seamBottom, true,  false);
-    pushQuadRing(seamLeft,   false, true);
-    pushQuadRing(seamRight,  false, false);
-
-    // Bouchons des 4 coins (t=1)
-    auto emitCornerCap = [&](MapVertex* p, float tx, float tz) {
-        if (!p) return;
-        float cx = (tx < 0 ? tx - epsOut : tx + epsOut);
-        float cz = (tz < 0 ? tz - epsOut : tz + epsOut);
-        // Pc: coin monde, Px: proj X, Pz: proj Z (t=1)
-        SkirtVertex pc; {
-            float r,g,b; float base[3]{ p->color[0], p->color[1], p->color[2] };
-            float t=1.0f;
-            float y = lerp(p->v.y, ground_min, t) + (noise2_(cx * noiseFreq, cz * noiseFreq, 19.0f) - 0.5f) * 2.0f * noiseAmpY;
-            varyColor(base, t, cx, cz, r,g,b);
-            pc = { cx, y, cz, r,g,b };
-        }
-        SkirtVertex px; {
-            float r,g,b; float base[3]{ p->color[0], p->color[1], p->color[2] };
-            float t=1.0f; float x = cx, z = p->v.z;
-            float y = lerp(p->v.y, ground_min, t) + (noise2_(x * noiseFreq, z * noiseFreq, 19.0f) - 0.5f) * 2.0f * noiseAmpY;
-            varyColor(base, t, x, z, r,g,b);
-            px = { x, y, z, r,g,b };
-        }
-        SkirtVertex pz; {
-            float r,g,b; float base[3]{ p->color[0], p->color[1], p->color[2] };
-            float t=1.0f; float x = p->v.x, z = cz;
-            float y = lerp(p->v.y, ground_min, t) + (noise2_(x * noiseFreq, z * noiseFreq, 19.0f) - 0.5f) * 2.0f * noiseAmpY;
-            varyColor(base, t, x, z, r,g,b);
-            pz = { x, y, z, r,g,b };
-        }
-        // Triangles [pc, px, p] et [pc, p, pz]
-        SkirtVertex p0{ p->v.x, p->v.y, p->v.z, p->color[0], p->color[1], p->color[2] };
-        skirts_.tris.push_back({ { pc, px, p0 } });
-        skirts_.tris.push_back({ { pc, p0, pz } });
-    };
-
-    // Sommets de coin (LOD fin)
-    AreaBlock* tlb = &blocks[lod][0];
-    AreaBlock* trb = &blocks[lod][N-1];
-    AreaBlock* blb = &blocks[lod][(N-1)*N + 0];
-    AreaBlock* brb = &blocks[lod][(N-1)*N + (N-1)];
-    uint32_t s = tlb->sideSize;
-    emitCornerCap(tlb->GetVertice(0,0),          worldMinX, worldMinZ);
-    emitCornerCap(trb->GetVertice(s-1,0),        worldMaxX, worldMinZ);
-    emitCornerCap(blb->GetVertice(0,s-1),        worldMinX, worldMaxZ);
-    emitCornerCap(brb->GetVertice(s-1,s-1),      worldMaxX, worldMaxZ);
+    // TL
+    {
+        AreaBlock* blk = &blocks[lod][0];
+        uint32_t s = blk->sideSize;
+        float topC[3]; sideColorAvg(blk, Side::Top, topC);
+        float leftC[3]; sideColorAvg(blk, Side::Left, leftC);
+        pushCorner(blk, 0, 0, /*minX*/true, /*minZ*/true, topC, leftC);
+    }
+    // TR
+    {
+        AreaBlock* blk = &blocks[lod][N-1];
+        uint32_t s = blk->sideSize;
+        float topC[3]; sideColorAvg(blk, Side::Top, topC);
+        float rightC[3]; sideColorAvg(blk, Side::Right, rightC);
+        pushCorner(blk, s-1, 0, /*minX*/false, /*minZ*/true, topC, rightC);
+    }
+    // BL
+    {
+        AreaBlock* blk = &blocks[lod][(N-1)*N + 0];
+        uint32_t s = blk->sideSize;
+        float bottomC[3]; sideColorAvg(blk, Side::Bottom, bottomC);
+        float leftC[3]; sideColorAvg(blk, Side::Left, leftC);
+        pushCorner(blk, 0, s-1, /*minX*/true, /*minZ*/false, bottomC, leftC);
+    }
+    // BR
+    {
+        AreaBlock* blk = &blocks[lod][(N-1)*N + (N-1)];
+        uint32_t s = blk->sideSize;
+        float bottomC[3]; sideColorAvg(blk, Side::Bottom, bottomC);
+        float rightC[3]; sideColorAvg(blk, Side::Right, rightC);
+        pushCorner(blk, s-1, s-1, /*minX*/false, /*minZ*/false, bottomC, rightC);
+    }
 }
 
 RSArea::RSArea() {
