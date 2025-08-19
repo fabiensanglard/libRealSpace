@@ -20,6 +20,77 @@
 
 extern SCRenderer Renderer;
 
+// Helpers: calcule les normales par sommet pour un LOD donné (Gouraud)
+static void AccumulateFaceNormal(const RSEntity* obj, int i0, int i1, int i2, const Point3D& camPos, std::vector<Vector3D>& acc) {
+    // Create local non-const copies to satisfy Substract() signature
+    Vector3D e1 = obj->vertices[i0];
+    Vector3D pivot = obj->vertices[i1];
+    e1.Substract(&pivot);
+    Vector3D e2 = obj->vertices[i2];
+    e2.Substract(&pivot);
+
+    Vector3D n = e1;
+    n = n.CrossProduct(&e2);
+    n.Normalize();
+
+    // Oriente la normale vers la caméra (géométrie avec winding incohérent)
+    Point3D v0 = obj->vertices[i0];
+    Vector3D camDir = camPos;
+    camDir.Substract(&v0);
+    camDir.Normalize();
+    if (camDir.DotProduct(&n) < 0.0f) {
+        n.Negate();
+    }
+
+    acc[i0].x += n.x; acc[i0].y += n.y; acc[i0].z += n.z;
+    acc[i1].x += n.x; acc[i1].y += n.y; acc[i1].z += n.z;
+    acc[i2].x += n.x; acc[i2].y += n.y; acc[i2].z += n.z;
+}
+
+static void ComputeVertexNormalsForLOD(RSEntity* obj, size_t lodLevel, const Point3D& camPos, std::vector<Vector3D>& outNormals) {
+    outNormals.assign(obj->vertices.size(), Vector3D{0,0,0});
+    if (lodLevel >= obj->NumLods()) return;
+
+    const Lod* lod = &obj->lods[lodLevel];
+
+    // Triangles utilisés par ce LOD
+    for (int i = 0; i < lod->numTriangles; ++i) {
+        uint16_t triID = lod->triangleIDs[i];
+        if (obj->attrs.size() > 0) {
+            if (obj->attrs[triID] == nullptr) continue;
+            // ignorer quads et lignes dans ce passage
+            if (obj->attrs[triID]->type == 'Q' || obj->attrs[triID]->type == 'L') continue;
+            triID = obj->attrs[triID]->id;
+        }
+        if (triID >= obj->triangles.size()) continue;
+        const Triangle& t = obj->triangles[triID];
+        AccumulateFaceNormal(obj, t.ids[0], t.ids[1], t.ids[2], camPos, outNormals);
+    }
+
+    // Quads utilisés par ce LOD (comme faces, sans split pour l’accumulation)
+    if (obj->quads.size() > 0) {
+        for (int i = 0; i < lod->numTriangles; ++i) {
+            uint16_t qid = lod->triangleIDs[i];
+            if (obj->attrs.size() > 0) {
+                if (obj->attrs[qid] == nullptr) continue;
+                // ignorer triangles et lignes dans ce passage
+                if (obj->attrs[qid]->type == 'T' || obj->attrs[qid]->type == 'L') continue;
+                qid = obj->attrs[qid]->id;
+            }
+            if (qid >= obj->quads.size()) continue;
+            const Quads* q = obj->quads[qid];
+            // Accumuler avec deux triangles (quad -> 2 tris) pour lisser
+            AccumulateFaceNormal(obj, q->ids[0], q->ids[1], q->ids[2], camPos, outNormals);
+            AccumulateFaceNormal(obj, q->ids[0], q->ids[2], q->ids[3], camPos, outNormals);
+        }
+    }
+
+    // Normalisation finale
+    for (auto& n : outNormals) {
+        n.Normalize();
+    }
+}
+
 SCRenderer::SCRenderer() : initialized(false) {}
 
 SCRenderer::~SCRenderer() {}
@@ -45,7 +116,7 @@ void SCRenderer::init(int width, int height, AssetManager *amana) {
     glClearColor(0.0f, 0.5f, 1.0f, 1.0f); // Black Background
     // glClearDepth(1.0f);								// Depth Buffer Setup
     glDisable(GL_DEPTH_TEST); // Disable Depth Testing
-
+    glShadeModel(GL_SMOOTH);
     camera.SetPersective(45.0f, this->width / (float)this->height, 3.8f, BLOCK_WIDTH * BLOCK_PER_MAP_SIDE * 4);
 
     light.SetWithCoo(300, 300, 300);
@@ -442,6 +513,9 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     float ambientLamber = 0.4f;
 
     Lod *lod = &object->lods[lodLevel];
+    std::vector<Vector3D> vertexNormals;
+    ComputeVertexNormalsForLOD(object, lodLevel, camera.GetPosition(), vertexNormals);
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -491,27 +565,21 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
 
             glBegin(GL_TRIANGLES);
             for (int j = 0; j < 3; j++) {
-
                 Point3D vertice = object->vertices[triangle->ids[j]];
 
-                Vector3D lighDirection;
-                lighDirection = light;
+                // Gouraud: normale par sommet
+                Vector3D vN = vertexNormals[triangle->ids[j]];
+
+                Vector3D lighDirection = light;
                 lighDirection.Substract(&vertice);
                 lighDirection.Normalize();
 
-                float lambertianFactor = lighDirection.DotProduct(&normal);
-                if (lambertianFactor < 0)
-                    lambertianFactor = 0;
-
+                float lambertianFactor = lighDirection.DotProduct(&vN);
+                if (lambertianFactor < 0) lambertianFactor = 0;
                 lambertianFactor += ambientLamber;
-                if (lambertianFactor > 1)
-                    lambertianFactor = 1;
+                if (lambertianFactor > 1) lambertianFactor = 1;
 
                 const Texel *texel = palette.GetRGBColor(triangle->color);
-
-                //
-                // glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,alpha);
-                // glColor4f(0, 0, 0,1);
                 if (colored) {
                     glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                               texel->b / 255.0f * lambertianFactor, alpha);
@@ -561,27 +629,21 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
 
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
-
                 Point3D vertice = object->vertices[triangle->ids[j]];
 
-                Vector3D lighDirection;
-                lighDirection = light;
+                // Gouraud: normale par sommet
+                Vector3D vN = vertexNormals[triangle->ids[j]];
+
+                Vector3D lighDirection = light;
                 lighDirection.Substract(&vertice);
                 lighDirection.Normalize();
 
-                float lambertianFactor = lighDirection.DotProduct(&normal);
-                if (lambertianFactor < 0)
-                    lambertianFactor = 0;
-
+                float lambertianFactor = lighDirection.DotProduct(&vN);
+                if (lambertianFactor < 0) lambertianFactor = 0;
                 lambertianFactor += ambientLamber;
-                if (lambertianFactor > 1)
-                    lambertianFactor = 1;
+                if (lambertianFactor > 1) lambertianFactor = 1;
 
                 const Texel *texel = palette.GetRGBColor(triangle->color);
-
-                //
-                // glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,alpha);
-                // glColor4f(0, 0, 0,1);
                 if (colored) {
                     glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                               texel->b / 255.0f * lambertianFactor, alpha);
@@ -637,27 +699,26 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
 
         glBegin(GL_TRIANGLES);
         for (int j = 0; j < 3; j++) {
-
             Point3D vertice = object->vertices[triangle->ids[j]];
 
-            Vector3D sunDirection;
-            sunDirection = light;
-            sunDirection.Substract(&vertice);
-            sunDirection.Normalize();
+            // Gouraud: normale par sommet
+            Vector3D vN = vertexNormals[triangle->ids[j]];
 
-            float lambertianFactor = sunDirection.DotProduct(&normal);
-            if (lambertianFactor < 0)
-                lambertianFactor = 0;
+            Vector3D lighDirection = light;
+            lighDirection.Substract(&vertice);
+            lighDirection.Normalize();
 
-            lambertianFactor = 0.2f;
+            float lambertianFactor = lighDirection.DotProduct(&vN);
+            if (lambertianFactor < 0) lambertianFactor = 0;
+            lambertianFactor += ambientLamber;
+            if (lambertianFactor > 1) lambertianFactor = 1;
 
-            // int8_t gouraud = 255 * lambertianFactor;
+            const Texel *texel = palette.GetRGBColor(triangle->color);
+            glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
+                      texel->b / 255.0f * lambertianFactor, texel->a);
 
-            // gouraud = 255;
-
-            glColor4f(lambertianFactor, lambertianFactor, lambertianFactor, 1);
-
-            glVertex3f(vertice.x, vertice.y, vertice.z);
+            glVertex3f(object->vertices[triangle->ids[j]].x, object->vertices[triangle->ids[j]].y,
+                       object->vertices[triangle->ids[j]].z);
         }
         glEnd();
     }
@@ -692,26 +753,24 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
-    
-                Point3D vertice = object->vertices[triangle->ids[j]];
-    
-                Vector3D sunDirection;
-                sunDirection = light;
-                sunDirection.Substract(&vertice);
-                sunDirection.Normalize();
-    
-                float lambertianFactor = sunDirection.DotProduct(&normal);
-                if (lambertianFactor < 0)
-                    lambertianFactor = 0;
-    
-                lambertianFactor = 0.2f;
-    
-                // int8_t gouraud = 255 * lambertianFactor;
-    
-                // gouraud = 255;
-    
-                glColor4f(lambertianFactor, lambertianFactor, lambertianFactor, 1);
-    
+                Vector3D vertice = object->vertices[triangle->ids[j]];
+
+                // Gouraud: normale par sommet
+                Vector3D vN = vertexNormals[triangle->ids[j]];
+
+                Vector3D lighDirection = light;
+                lighDirection.Substract(&vertice);
+                lighDirection.Normalize();
+
+                float lambertianFactor = lighDirection.DotProduct(&vN);
+                if (lambertianFactor < 0) lambertianFactor = 0;
+                lambertianFactor += ambientLamber;
+                if (lambertianFactor > 1) lambertianFactor = 1;
+
+                const Texel *texel = palette.GetRGBColor(triangle->color);
+                glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
+                          texel->b / 255.0f * lambertianFactor, texel->a);
+
                 glVertex3f(vertice.x, vertice.y, vertice.z);
             }
             glEnd();
@@ -759,32 +818,26 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         if (triangle->property == 9) {
             continue;
         }
-        Vector3D normal;
-        getNormal(object, triangle, &normal);
 
         glBegin(GL_TRIANGLES);
         for (int j = 0; j < 3; j++) {
-
             Point3D vertice = object->vertices[triangle->ids[j]];
 
-            Vector3D lighDirection;
-            lighDirection = light;
+            // Gouraud: normale par sommet
+            Vector3D vN = vertexNormals[triangle->ids[j]];
+
+            Vector3D lighDirection = light;
             lighDirection.Substract(&vertice);
             lighDirection.Normalize();
 
-            float lambertianFactor = lighDirection.DotProduct(&normal);
-            if (lambertianFactor < 0)
-                lambertianFactor = 0;
-
+            float lambertianFactor = lighDirection.DotProduct(&vN);
+            if (lambertianFactor < 0) lambertianFactor = 0;
             lambertianFactor += ambientLamber;
-            if (lambertianFactor > 1)
-                lambertianFactor = 1;
+            if (lambertianFactor > 1) lambertianFactor = 1;
 
             const Texel *texel = palette.GetRGBColor(triangle->color);
-
             glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                       texel->b / 255.0f * lambertianFactor, texel->a);
-            // glColor4f(texel->r/255.0f, texel->g/255.0f, texel->b/255.0f,1);
 
             glVertex3f(object->vertices[triangle->ids[j]].x, object->vertices[triangle->ids[j]].y,
                        object->vertices[triangle->ids[j]].z);
@@ -832,29 +885,25 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
-    
                 Vector3D vertice = object->vertices[triangle->ids[j]];
-    
-                Vector3D lighDirection;
-                lighDirection = light;
+
+                // Gouraud: normale par sommet
+                Vector3D vN = vertexNormals[triangle->ids[j]];
+
+                Vector3D lighDirection = light;
                 lighDirection.Substract(&vertice);
                 lighDirection.Normalize();
-    
-                float lambertianFactor = lighDirection.DotProduct(&normal);
-                if (lambertianFactor < 0)
-                    lambertianFactor = 0;
-    
+
+                float lambertianFactor = lighDirection.DotProduct(&vN);
+                if (lambertianFactor < 0) lambertianFactor = 0;
                 lambertianFactor += ambientLamber;
-                if (lambertianFactor > 1)
-                    lambertianFactor = 1;
-    
+                if (lambertianFactor > 1) lambertianFactor = 1;
+
                 const Texel *texel = palette.GetRGBColor(triangle->color);
-    
                 glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                           texel->b / 255.0f * lambertianFactor, texel->a);
-    
-                glVertex3f(vertice.x, vertice.y,
-                    vertice.z);
+
+                glVertex3f(vertice.x, vertice.y, vertice.z);
             }
             glEnd();
         }
