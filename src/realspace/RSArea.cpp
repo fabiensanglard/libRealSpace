@@ -8,253 +8,10 @@
 
 #include "RSArea.h"
 #include "../engine/SCRenderer.h"
-
-extern SCRenderer Renderer;
-// ...existing code...
 #include <cmath>
-// Helpers HSV pour varier S/V autour de la teinte d’origine
-static inline void rgbToHsv_(float r, float g, float b, float& h, float& s, float& v) {
-    float mx = (std::max)((std::max)(r, g), b);
-    float mn = (std::min)((std::min)(r, g), b);
-    v = mx;
-    float d = mx - mn;
-    s = (mx == 0.0f) ? 0.0f : d / mx;
-    if (d == 0.0f) { h = 0.0f; return; }
-    if (mx == r)      h = fmodf(((g - b) / d), 6.0f);
-    else if (mx == g) h = ((b - r) / d) + 2.0f;
-    else              h = ((r - g) / d) + 4.0f;
-    h /= 6.0f; if (h < 0.0f) h += 1.0f;
-}
-static inline void hsvToRgb_(float h, float s, float v, float& r, float& g, float& b) {
-    if (s <= 0.0f) { r = g = b = v; return; }
-    h = fmodf(h, 1.0f); if (h < 0.0f) h += 1.0f;
-    float f = h * 6.0f; int i = (int)floorf(f);
-    float p = v * (1.0f - s);
-    float q = v * (1.0f - s * (f - i));
-    float t = v * (1.0f - s * (1.0f - (f - i)));
-    switch (i % 6) {
-        case 0: r = v; g = t; b = p; break;
-        case 1: r = q; g = v; b = p; break;
-        case 2: r = p; g = v; b = t; break;
-        case 3: r = p; g = q; b = v; break;
-        case 4: r = t; g = p; b = v; break;
-        case 5: r = v; g = p; b = q; break;
-    }
-}
-static inline float smooth01_(float t){ return t * t * (3.0f - 2.0f * t); }
-static inline float clamp01_(float x){ return x < 0.0f ? 0.0f : (x > 1.0f ? 1.0f : x); }
-static inline float noise2_(float x, float z, float seed){
-    float n = sinf(x * 12.9898f + z * 78.233f + seed) * 43758.5453f;
-    return n - floorf(n);
-}
+extern SCRenderer Renderer;
 
-void RSArea::BuildSkirts() {
-    skirts_.tris.clear();
-    if (BLOCKS_PER_MAP == 0) return;
 
-    const int lod = BLOCK_LOD_MAX;
-    const int N = BLOCK_PER_MAP_SIDE;
-
-    // Bord du monde (cohérent avec renderWorldSkyAndGround)
-    const float worldHalf = (BLOCK_WIDTH * BLOCK_PER_MAP_SIDE) * 2.0f;
-    const float worldMinX = -worldHalf, worldMaxX = worldHalf;
-    const float worldMinZ = -worldHalf, worldMaxZ = worldHalf;
-
-    // Délais pour éviter micro-jours
-    const float epsOut = 0.02f; // vers l’extérieur (bord du monde)
-    const uint32_t s0 = blocks[lod][0].sideSize;
-    const float gridStep = BLOCK_WIDTH / (float)(s0 - 1);
-    const float epsIn = gridStep * 0.2f; // 20% d’une cellule vers l’intérieur
-
-    // Couleur moyenne d’un côté de bloc
-    enum class Side { Top, Bottom, Left, Right };
-    auto sideColorAvg = [&](AreaBlock* blk, Side s, float out[3]) {
-        out[0]=out[1]=out[2]=0.0f;
-        uint32_t n=0, sz = blk->sideSize;
-        switch (s) {
-            case Side::Top:    for (uint32_t x=0; x<sz; ++x){ auto* p=blk->GetVertice(x,0);       out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; } break;
-            case Side::Bottom: for (uint32_t x=0; x<sz; ++x){ auto* p=blk->GetVertice(x,sz-1);    out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; } break;
-            case Side::Left:   for (uint32_t y=0; y<sz; ++y){ auto* p=blk->GetVertice(0,y);       out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; } break;
-            case Side::Right:  for (uint32_t y=0; y<sz; ++y){ auto* p=blk->GetVertice(sz-1,y);    out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; } break;
-        }
-        if (n>0){ out[0]/=n; out[1]/=n; out[2]/=n; }
-    };
-    auto avg2 = [](const float a[3], const float b[3], float out[3]){
-        out[0]=(a[0]+b[0])*0.5f; out[1]=(a[1]+b[1])*0.5f; out[2]=(a[2]+b[2])*0.5f;
-    };
-
-    struct RingVert {
-        // inner point (à la carte, décalé epsIn)
-        float ix, iy, iz;
-        // outer point (projeté au bord du monde ±epsOut)
-        float ox, oy, oz;
-        // couleur
-        float r, g, b;
-    };
-    std::vector<RingVert> ring;
-    ring.reserve(N * s0 * 4 + 4);
-
-    // 1) Construire une boucle “inner/outer” continue, sens horaire:
-    //    - Top (x croissant, z=+epsIn) -> coin TR
-    //    - Right (y croissant, x=-epsIn) -> coin BR
-    //    - Bottom (x décroissant, z=-epsIn) -> coin BL
-    //    - Left (y décroissant, x=+epsIn) -> coin TL
-    //
-    // À chaque transition de côté, insérer un VERTEX DE COIN explicite
-    // (inner au coin carte avec epsIn sur X et Z, outer au coin monde).
-    auto pushTop = [&](){
-        for (int bx=0; bx<N; ++bx) {
-            AreaBlock* blk = &blocks[lod][0 * N + bx];
-            uint32_t s = blk->sideSize;
-            float col[3]; sideColorAvg(blk, Side::Top, col);
-            uint32_t startX = (bx==0)?0u:1u; // éviter le doublon aux joints de blocs
-            for (uint32_t x=startX; x<s; ++x) {
-                auto* p = blk->GetVertice(x, 0);
-                RingVert v{
-                    p->v.x, p->v.y, p->v.z + epsIn,     // inner
-                    p->v.x, p->v.y, worldMinZ - epsOut, // outer
-                    col[0], col[1], col[2]
-                };
-                ring.push_back(v);
-            }
-        }
-        // Coin TR: bloc [0][N-1], sommet (s-1,0)
-        AreaBlock* trb = &blocks[lod][N-1];
-        uint32_t s = trb->sideSize;
-        MapVertex* pc = trb->GetVertice(s-1, 0);
-        float topC[3];   sideColorAvg(trb, Side::Top,   topC);
-        float rightC[3]; sideColorAvg(trb, Side::Right, rightC);
-        float col[3]; avg2(topC, rightC, col);
-        ring.push_back(RingVert{
-            pc->v.x - epsIn, pc->v.y, pc->v.z + epsIn,    // inner coin
-            worldMaxX + epsOut, pc->v.y, worldMinZ - epsOut, // outer coin (coin monde)
-            col[0], col[1], col[2]
-        });
-    };
-    auto pushRight = [&](){
-        for (int by=0; by<N; ++by) {
-            AreaBlock* blk = &blocks[lod][by * N + (N-1)];
-            uint32_t s = blk->sideSize;
-            float col[3]; sideColorAvg(blk, Side::Right, col);
-            uint32_t startY = (by==0)?1u:1u; // on saute (0) car le coin TR a déjà été inséré
-            for (uint32_t y=startY; y<s; ++y) {
-                auto* p = blk->GetVertice(s-1, y);
-                RingVert v{
-                    p->v.x - epsIn, p->v.y, p->v.z,       // inner
-                    worldMaxX + epsOut, p->v.y, p->v.z,   // outer
-                    col[0], col[1], col[2]
-                };
-                ring.push_back(v);
-            }
-        }
-        // Coin BR
-        AreaBlock* brb = &blocks[lod][(N-1)*N + (N-1)];
-        uint32_t s = brb->sideSize;
-        MapVertex* pc = brb->GetVertice(s-1, s-1);
-        float bottomC[3]; sideColorAvg(brb, Side::Bottom, bottomC);
-        float rightC[3];  sideColorAvg(brb, Side::Right,  rightC);
-        float col[3]; avg2(bottomC, rightC, col);
-        ring.push_back(RingVert{
-            pc->v.x - epsIn, pc->v.y, pc->v.z - epsIn,
-            worldMaxX + epsOut, pc->v.y, worldMaxZ + epsOut,
-            col[0], col[1], col[2]
-        });
-    };
-    auto pushBottom = [&](){
-        for (int bx=N-1; bx>=0; --bx) {
-            AreaBlock* blk = &blocks[lod][(N-1) * N + bx];
-            uint32_t s = blk->sideSize;
-            float col[3]; sideColorAvg(blk, Side::Bottom, col);
-            uint32_t endX = (bx==0)?0u:0u; // on ira jusqu’à 0 inclus
-            uint32_t startX = (bx==N-1)?(s-2):0u; // éviter doublon coin BR
-            for (int x=(int)startX; x>= (int)endX; --x) {
-                auto* p = blk->GetVertice((uint32_t)x, s-1);
-                RingVert v{
-                    p->v.x, p->v.y, p->v.z - epsIn,       // inner
-                    p->v.x, p->v.y, worldMaxZ + epsOut,   // outer
-                    col[0], col[1], col[2]
-                };
-                ring.push_back(v);
-            }
-        }
-        // Coin BL
-        AreaBlock* blb = &blocks[lod][(N-1)*N + 0];
-        uint32_t s = blb->sideSize;
-        MapVertex* pc = blb->GetVertice(0, s-1);
-        float bottomC[3]; sideColorAvg(blb, Side::Bottom, bottomC);
-        float leftC[3];   sideColorAvg(blb, Side::Left,   leftC);
-        float col[3]; avg2(bottomC, leftC, col);
-        ring.push_back(RingVert{
-            pc->v.x + epsIn, pc->v.y, pc->v.z - epsIn,
-            worldMinX - epsOut, pc->v.y, worldMaxZ + epsOut,
-            col[0], col[1], col[2]
-        });
-    };
-    auto pushLeft = [&](){
-        for (int by=N-1; by>=0; --by) {
-            AreaBlock* blk = &blocks[lod][by * N + 0];
-            uint32_t s = blk->sideSize;
-            float col[3]; sideColorAvg(blk, Side::Left, col);
-            uint32_t endY = (by==0)?0u:0u;
-            uint32_t startY = (by==N-1)?(s-2):0u; // éviter doublon coin BL
-            for (int y=(int)startY; y>= (int)endY; --y) {
-                auto* p = blk->GetVertice(0, (uint32_t)y);
-                RingVert v{
-                    p->v.x + epsIn, p->v.y, p->v.z,       // inner
-                    worldMinX - epsOut, p->v.y, p->v.z,   // outer
-                    col[0], col[1], col[2]
-                };
-                ring.push_back(v);
-            }
-        }
-        // Coin TL (dernier coin avant fermeture)
-        AreaBlock* tlb = &blocks[lod][0];
-        uint32_t s = tlb->sideSize;
-        MapVertex* pc = tlb->GetVertice(0, 0);
-        float topC[3];  sideColorAvg(tlb, Side::Top,  topC);
-        float leftC[3]; sideColorAvg(tlb, Side::Left, leftC);
-        float col[3]; avg2(topC, leftC, col);
-        ring.push_back(RingVert{
-            pc->v.x + epsIn, pc->v.y, pc->v.z + epsIn,
-            worldMinX - epsOut, pc->v.y, worldMinZ - epsOut,
-            col[0], col[1], col[2]
-        });
-    };
-
-    ring.clear();
-    ring.reserve(N * s0 * 4 + 4);
-    pushTop();
-    pushRight();
-    pushBottom();
-    pushLeft();
-    if (ring.size() < 4) return;
-
-    // 2) Trianguler la bande entre inner et outer (quad strip fermé)
-    auto pushTri = [&](const RingVert& A, const RingVert& B, const RingVert& C) {
-        skirts_.tris.push_back({{
-            {A.ix, A.iy, A.iz, A.r, A.g, A.b},
-            {B.ix, B.iy, B.iz, B.r, B.g, B.b},
-            {C.ox, C.oy, C.oz, C.r, C.g, C.b}
-        }});
-    };
-    auto pushTri2 = [&](const RingVert& A, const RingVert& C, const RingVert& D) {
-        skirts_.tris.push_back({{
-            {A.ix, A.iy, A.iz, A.r, A.g, A.b},
-            {C.ox, C.oy, C.oz, C.r, C.g, C.b},
-            {D.ox, D.oy, D.oz, D.r, D.g, D.b}
-        }});
-    };
-
-    const size_t M = ring.size();
-    for (size_t i=0; i<M; ++i) {
-        const size_t i1 = (i+1) % M;
-        const RingVert& A = ring[i];
-        const RingVert& B = ring[i1];
-        // Deux triangles: [inner A, inner B, outer B] et [inner A, outer B, outer A]
-        pushTri(A, B, B);
-        pushTri2(A, B, A);
-    }
-}
 RSArea::RSArea() {
 
 }
@@ -798,5 +555,213 @@ void RSArea::parseTERA_TXMS_MAPS(uint8_t *data, size_t size) {
         uint8_t numImages = textureRefStrean.ReadByte();
 
         printf("Texture Set Ref [%3llu] 0x0x%X[%-8s] %02X (%2u files).\n", i, fastID, setName, unknown, numImages);
+    }
+}
+
+void RSArea::BuildSkirts() {
+    skirts_.tris.clear();
+    if (BLOCKS_PER_MAP == 0) return;
+
+    const int lod = BLOCK_LOD_MAX;
+    const int N = BLOCK_PER_MAP_SIDE;
+
+    // Bord du monde (cohérent avec renderWorldSkyAndGround)
+    const float worldHalf = (BLOCK_WIDTH * BLOCK_PER_MAP_SIDE) * 2.0f;
+    const float worldMinX = -worldHalf, worldMaxX = worldHalf;
+    const float worldMinZ = -worldHalf, worldMaxZ = worldHalf;
+
+    // Délais pour éviter micro-jours
+    const float epsOut = 0.02f; // vers l’extérieur (bord du monde)
+    const uint32_t s0 = blocks[lod][0].sideSize;
+    const float gridStep = BLOCK_WIDTH / (float)(s0 - 1);
+    const float epsIn = gridStep * 0.2f; // 20% d’une cellule vers l’intérieur
+
+    // Couleur moyenne d’un côté de bloc
+    enum class Side { Top, Bottom, Left, Right };
+    auto sideColorAvg = [&](AreaBlock* blk, Side s, float out[3]) {
+        out[0]=out[1]=out[2]=0.0f;
+        uint32_t n=0, sz = blk->sideSize;
+        switch (s) {
+            case Side::Top:    for (uint32_t x=0; x<sz; ++x){ auto* p=blk->GetVertice(x,0);       out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; } break;
+            case Side::Bottom: for (uint32_t x=0; x<sz; ++x){ auto* p=blk->GetVertice(x,sz-1);    out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; } break;
+            case Side::Left:   for (uint32_t y=0; y<sz; ++y){ auto* p=blk->GetVertice(0,y);       out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; } break;
+            case Side::Right:  for (uint32_t y=0; y<sz; ++y){ auto* p=blk->GetVertice(sz-1,y);    out[0]+=p->color[0]; out[1]+=p->color[1]; out[2]+=p->color[2]; ++n; } break;
+        }
+        if (n>0){ out[0]/=n; out[1]/=n; out[2]/=n; }
+    };
+    auto avg2 = [](const float a[3], const float b[3], float out[3]){
+        out[0]=(a[0]+b[0])*0.5f; out[1]=(a[1]+b[1])*0.5f; out[2]=(a[2]+b[2])*0.5f;
+    };
+
+    struct RingVert {
+        // inner point (à la carte, décalé epsIn)
+        float ix, iy, iz;
+        // outer point (projeté au bord du monde ±epsOut)
+        float ox, oy, oz;
+        // couleur
+        float r, g, b;
+    };
+    std::vector<RingVert> ring;
+    ring.reserve(N * s0 * 4 + 4);
+
+    // 1) Construire une boucle “inner/outer” continue, sens horaire:
+    //    - Top (x croissant, z=+epsIn) -> coin TR
+    //    - Right (y croissant, x=-epsIn) -> coin BR
+    //    - Bottom (x décroissant, z=-epsIn) -> coin BL
+    //    - Left (y décroissant, x=+epsIn) -> coin TL
+    //
+    // À chaque transition de côté, insérer un VERTEX DE COIN explicite
+    // (inner au coin carte avec epsIn sur X et Z, outer au coin monde).
+    auto pushTop = [&](){
+        for (int bx=0; bx<N; ++bx) {
+            AreaBlock* blk = &blocks[lod][0 * N + bx];
+            uint32_t s = blk->sideSize;
+            float col[3]; sideColorAvg(blk, Side::Top, col);
+            uint32_t startX = (bx==0)?0u:1u; // éviter le doublon aux joints de blocs
+            for (uint32_t x=startX; x<s; ++x) {
+                auto* p = blk->GetVertice(x, 0);
+                RingVert v{
+                    p->v.x, p->v.y, p->v.z + epsIn,     // inner
+                    p->v.x, p->v.y, worldMinZ - epsOut, // outer
+                    col[0], col[1], col[2]
+                };
+                ring.push_back(v);
+            }
+        }
+        // Coin TR: bloc [0][N-1], sommet (s-1,0)
+        AreaBlock* trb = &blocks[lod][N-1];
+        uint32_t s = trb->sideSize;
+        MapVertex* pc = trb->GetVertice(s-1, 0);
+        float topC[3];   sideColorAvg(trb, Side::Top,   topC);
+        float rightC[3]; sideColorAvg(trb, Side::Right, rightC);
+        float col[3]; avg2(topC, rightC, col);
+        ring.push_back(RingVert{
+            pc->v.x - epsIn, pc->v.y, pc->v.z + epsIn,    // inner coin
+            worldMaxX + epsOut, pc->v.y, worldMinZ - epsOut, // outer coin (coin monde)
+            col[0], col[1], col[2]
+        });
+    };
+    auto pushRight = [&](){
+        for (int by=0; by<N; ++by) {
+            AreaBlock* blk = &blocks[lod][by * N + (N-1)];
+            uint32_t s = blk->sideSize;
+            float col[3]; sideColorAvg(blk, Side::Right, col);
+            uint32_t startY = (by==0)?1u:1u; // on saute (0) car le coin TR a déjà été inséré
+            for (uint32_t y=startY; y<s; ++y) {
+                auto* p = blk->GetVertice(s-1, y);
+                RingVert v{
+                    p->v.x - epsIn, p->v.y, p->v.z,       // inner
+                    worldMaxX + epsOut, p->v.y, p->v.z,   // outer
+                    col[0], col[1], col[2]
+                };
+                ring.push_back(v);
+            }
+        }
+        // Coin BR
+        AreaBlock* brb = &blocks[lod][(N-1)*N + (N-1)];
+        uint32_t s = brb->sideSize;
+        MapVertex* pc = brb->GetVertice(s-1, s-1);
+        float bottomC[3]; sideColorAvg(brb, Side::Bottom, bottomC);
+        float rightC[3];  sideColorAvg(brb, Side::Right,  rightC);
+        float col[3]; avg2(bottomC, rightC, col);
+        ring.push_back(RingVert{
+            pc->v.x - epsIn, pc->v.y, pc->v.z - epsIn,
+            worldMaxX + epsOut, pc->v.y, worldMaxZ + epsOut,
+            col[0], col[1], col[2]
+        });
+    };
+    auto pushBottom = [&](){
+        for (int bx=N-1; bx>=0; --bx) {
+            AreaBlock* blk = &blocks[lod][(N-1) * N + bx];
+            uint32_t s = blk->sideSize;
+            float col[3]; sideColorAvg(blk, Side::Bottom, col);
+            uint32_t endX = (bx==0)?0u:0u; // on ira jusqu’à 0 inclus
+            uint32_t startX = (bx==N-1)?(s-2):0u; // éviter doublon coin BR
+            for (int x=(int)startX; x>= (int)endX; --x) {
+                auto* p = blk->GetVertice((uint32_t)x, s-1);
+                RingVert v{
+                    p->v.x, p->v.y, p->v.z - epsIn,       // inner
+                    p->v.x, p->v.y, worldMaxZ + epsOut,   // outer
+                    col[0], col[1], col[2]
+                };
+                ring.push_back(v);
+            }
+        }
+        // Coin BL
+        AreaBlock* blb = &blocks[lod][(N-1)*N + 0];
+        uint32_t s = blb->sideSize;
+        MapVertex* pc = blb->GetVertice(0, s-1);
+        float bottomC[3]; sideColorAvg(blb, Side::Bottom, bottomC);
+        float leftC[3];   sideColorAvg(blb, Side::Left,   leftC);
+        float col[3]; avg2(bottomC, leftC, col);
+        ring.push_back(RingVert{
+            pc->v.x + epsIn, pc->v.y, pc->v.z - epsIn,
+            worldMinX - epsOut, pc->v.y, worldMaxZ + epsOut,
+            col[0], col[1], col[2]
+        });
+    };
+    auto pushLeft = [&](){
+        for (int by=N-1; by>=0; --by) {
+            AreaBlock* blk = &blocks[lod][by * N + 0];
+            uint32_t s = blk->sideSize;
+            float col[3]; sideColorAvg(blk, Side::Left, col);
+            uint32_t endY = (by==0)?0u:0u;
+            uint32_t startY = (by==N-1)?(s-2):0u; // éviter doublon coin BL
+            for (int y=(int)startY; y>= (int)endY; --y) {
+                auto* p = blk->GetVertice(0, (uint32_t)y);
+                RingVert v{
+                    p->v.x + epsIn, p->v.y, p->v.z,       // inner
+                    worldMinX - epsOut, p->v.y, p->v.z,   // outer
+                    col[0], col[1], col[2]
+                };
+                ring.push_back(v);
+            }
+        }
+        // Coin TL (dernier coin avant fermeture)
+        AreaBlock* tlb = &blocks[lod][0];
+        uint32_t s = tlb->sideSize;
+        MapVertex* pc = tlb->GetVertice(0, 0);
+        float topC[3];  sideColorAvg(tlb, Side::Top,  topC);
+        float leftC[3]; sideColorAvg(tlb, Side::Left, leftC);
+        float col[3]; avg2(topC, leftC, col);
+        ring.push_back(RingVert{
+            pc->v.x + epsIn, pc->v.y, pc->v.z + epsIn,
+            worldMinX - epsOut, pc->v.y, worldMinZ - epsOut,
+            col[0], col[1], col[2]
+        });
+    };
+
+    ring.clear();
+    ring.reserve(N * s0 * 4 + 4);
+    pushTop();
+    pushRight();
+    pushBottom();
+    pushLeft();
+    if (ring.size() < 4) return;
+
+    // 2) Trianguler la bande entre inner et outer (quad strip fermé)
+    auto pushTri = [&](const RingVert& A, const RingVert& B, const RingVert& C) {
+        skirts_.tris.push_back({{
+            {A.ix, A.iy, A.iz, A.r, A.g, A.b},
+            {B.ix, B.iy, B.iz, B.r, B.g, B.b},
+            {C.ox, C.oy, C.oz, C.r, C.g, C.b}
+        }});
+    };
+    auto pushTri2 = [&](const RingVert& A, const RingVert& C, const RingVert& D) {
+        skirts_.tris.push_back({{
+            {A.ix, A.iy, A.iz, A.r, A.g, A.b},
+            {C.ox, C.oy, C.oz, C.r, C.g, C.b},
+            {D.ox, D.oy, D.oz, D.r, D.g, D.b}
+        }});
+    };
+
+    const size_t M = ring.size();
+    for (size_t i=0; i<M; ++i) {
+        const size_t i1 = (i+1) % M;
+        const RingVert& A = ring[i];
+        const RingVert& B = ring[i1];
+        // Deux triangles: [inner A, inner B, outer B] et [inner A, outer B, outer A]
+        pushTri(A, B, B);
+        pushTri2(A, B, A);
     }
 }
