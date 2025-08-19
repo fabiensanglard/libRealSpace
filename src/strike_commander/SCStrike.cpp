@@ -1110,6 +1110,7 @@ void SCStrike::runFrame(void) {
         Vector3D cockpit_rot = {(this->player_plane->azimuthf+900)/10.0f, this->player_plane->elevationf/10.0f, -this->player_plane->twist/10.0f};
         Vector3D cockpit_ajustement = { 0.0f,-3.0f,0.0f};
         Texture *hud_texture = new Texture();
+        hud_texture->animated = true;
         RSImage *hud_image = new RSImage();
         hud_image->palette = &this->cockpit->palette;
         hud_image->data = this->cockpit->hud_framebuffer->framebuffer;
@@ -1130,6 +1131,7 @@ void SCStrike::runFrame(void) {
             hud_texture
         );
         Texture *mfd_right_texture = new Texture();
+        mfd_right_texture->animated = true;
         RSImage *mfd_right_image = new RSImage();
         mfd_right_image->palette = &this->cockpit->palette;
         cockpit->RenderMFDSWeapon({0,0}, cockpit->mfd_right_framebuffer);
@@ -1151,6 +1153,7 @@ void SCStrike::runFrame(void) {
         );
         cockpit->RenderMFDSRadar({0,0}, cockpit->radar_zoom*20000.0f, this->cockpit->radar_mode, cockpit->mfd_left_framebuffer);
         Texture *mfd_left_texture = new Texture();
+        mfd_left_texture->animated = true;
         RSImage *mfd_left_image = new RSImage();
         mfd_left_image->palette = &this->cockpit->palette;
         mfd_left_image->data = this->cockpit->mfd_left_framebuffer->framebuffer;
@@ -1172,6 +1175,7 @@ void SCStrike::runFrame(void) {
         cockpit->raws_framebuffer->FillWithColor(0);
         cockpit->RenderRAWS({0,0}, cockpit->raws_framebuffer);
         Texture *raws_texture = new Texture();
+        raws_texture->animated = true;
         RSImage *raws_image = new RSImage();
         raws_image->palette = &this->cockpit->palette;
         raws_image->data = this->cockpit->raws_framebuffer->framebuffer;
@@ -1193,6 +1197,7 @@ void SCStrike::runFrame(void) {
         cockpit->target_framebuffer->FillWithColor(255);
         cockpit->RenderTargetWithCam({0,0}, cockpit->target_framebuffer);
         Texture *target_texture = new Texture();
+        target_texture->animated = true;
         RSImage *target_image = new RSImage();
         target_image->palette = &this->cockpit->palette;
         target_image->data = this->cockpit->target_framebuffer->framebuffer;
@@ -1244,6 +1249,7 @@ void SCStrike::runFrame(void) {
         cockpit->alti_framebuffer->FillWithColor(0);
         cockpit->RenderAlti({0,0}, cockpit->alti_framebuffer);
         Texture *alti_texture = new Texture();
+        alti_texture->animated = true;
         RSImage *alti_image = new RSImage();
         alti_image->palette = &this->cockpit->palette;
         alti_image->data = this->cockpit->alti_framebuffer->framebuffer;
@@ -1265,6 +1271,7 @@ void SCStrike::runFrame(void) {
         cockpit->speed_framebuffer->FillWithColor(0);
         cockpit->RenderSpeedOmetter({0,0}, cockpit->speed_framebuffer);
         Texture *speed_texture = new Texture();
+        speed_texture->animated = true;
         RSImage *speed_image = new RSImage();
         speed_image->palette = &this->cockpit->palette;
         speed_image->data = this->cockpit->speed_framebuffer->framebuffer;

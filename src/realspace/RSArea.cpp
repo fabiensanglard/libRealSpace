@@ -10,6 +10,201 @@
 #include "../engine/SCRenderer.h"
 
 extern SCRenderer Renderer;
+// ...existing code...
+#include <cmath>
+// Helpers HSV pour varier S/V autour de la teinte d’origine
+static inline void rgbToHsv_(float r, float g, float b, float& h, float& s, float& v) {
+    float mx = (std::max)((std::max)(r, g), b);
+    float mn = (std::min)((std::min)(r, g), b);
+    v = mx;
+    float d = mx - mn;
+    s = (mx == 0.0f) ? 0.0f : d / mx;
+    if (d == 0.0f) { h = 0.0f; return; }
+    if (mx == r)      h = fmodf(((g - b) / d), 6.0f);
+    else if (mx == g) h = ((b - r) / d) + 2.0f;
+    else              h = ((r - g) / d) + 4.0f;
+    h /= 6.0f; if (h < 0.0f) h += 1.0f;
+}
+static inline void hsvToRgb_(float h, float s, float v, float& r, float& g, float& b) {
+    if (s <= 0.0f) { r = g = b = v; return; }
+    h = fmodf(h, 1.0f); if (h < 0.0f) h += 1.0f;
+    float f = h * 6.0f; int i = (int)floorf(f);
+    float p = v * (1.0f - s);
+    float q = v * (1.0f - s * (f - i));
+    float t = v * (1.0f - s * (1.0f - (f - i)));
+    switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+    }
+}
+static inline float smooth01_(float t){ return t * t * (3.0f - 2.0f * t); }
+static inline float clamp01_(float x){ return x < 0.0f ? 0.0f : (x > 1.0f ? 1.0f : x); }
+static inline float noise2_(float x, float z, float seed){
+    float n = sinf(x * 12.9898f + z * 78.233f + seed) * 43758.5453f;
+    return n - floorf(n);
+}
+
+void RSArea::BuildSkirts() {
+    skirts_.tris.clear();
+    if (BLOCKS_PER_MAP == 0) return;
+
+    // On se base sur le LOD le plus fin pour un bord bien échantillonné
+    const int lod = BLOCK_LOD_MAX;
+    const int N = BLOCK_PER_MAP_SIDE;
+
+    // Monde “infini”
+    const float worldHalf = (BLOCK_WIDTH * BLOCK_PER_MAP_SIDE) * 2.0f;
+    const float worldMinX = -worldHalf, worldMaxX = worldHalf;
+    const float worldMinZ = -worldHalf, worldMaxZ = worldHalf;
+
+    // Paramètres “naturels” (comme ton pass runtime)
+    const float ground_min = -1000.1f;
+    const int   RINGS = 6;
+    const float noiseAmpY = 140.0f;
+    const float noiseFreq = 0.0002f;
+    const float epsOut = 0.02f;
+
+    // Variations couleur autour de la source (conserve la teinte)
+    const float valAmp = 0.18f;
+    const float satAmp = 0.12f;
+    const float hueAmp = 0.00f;
+
+    auto lerp = [](float a, float b, float t){ return a + (b - a) * t; };
+    auto varyColor = [&](const float base[3], float t, float px, float pz, float& outR, float& outG, float& outB) {
+        float h,s,v; rgbToHsv_(base[0], base[1], base[2], h,s,v);
+        float amp = smooth01_(t);
+        float nH = noise2_(px * noiseFreq, pz * noiseFreq, 3.0f);
+        float nS = noise2_(px * noiseFreq, pz * noiseFreq, 5.0f);
+        float nV = noise2_(px * noiseFreq, pz * noiseFreq, 7.0f);
+        float h2 = h + (nH - 0.5f) * 2.0f * hueAmp * amp;
+        float s2 = s * (1.0f + (nS - 0.5f) * 2.0f * satAmp * amp);
+        float v2 = v * (1.0f + (nV - 0.5f) * 2.0f * valAmp * amp);
+        s2 = clamp01_(s2); v2 = clamp01_(v2);
+        hsvToRgb_(h2, s2, v2, outR, outG, outB);
+        outR = clamp01_(outR); outG = clamp01_(outG); outB = clamp01_(outB);
+    };
+
+    auto makeV = [&](MapVertex* p, float t, bool horizontal, bool atMinEdge)->SkirtVertex {
+        SkirtVertex sv{};
+        float x = p->v.x, z = p->v.z;
+        if (horizontal) {
+            z = atMinEdge ? lerp(p->v.z, worldMinZ - epsOut, t) : lerp(p->v.z, worldMaxZ + epsOut, t);
+        } else {
+            x = atMinEdge ? lerp(p->v.x, worldMinX - epsOut, t) : lerp(p->v.x, worldMaxX + epsOut, t);
+        }
+        float y = lerp(p->v.y, ground_min, t) + (noise2_(x * noiseFreq, z * noiseFreq, 19.0f) - 0.5f) * 2.0f * noiseAmpY * smooth01_(t);
+        float r,g,b; float baseCol[3]{ p->color[0], p->color[1], p->color[2] };
+        varyColor(baseCol, t, x, z, r,g,b);
+        sv.x = x; sv.y = y; sv.z = z; sv.r = r; sv.g = g; sv.b = b;
+        return sv;
+    };
+
+    auto pushQuadRing = [&](const std::vector<MapVertex*>& seam, bool horizontal, bool atMinEdge) {
+        for (int j = 0; j < RINGS; ++j) {
+            float t0 = (float)j / (float)RINGS;
+            float t1 = (float)(j + 1) / (float)RINGS;
+            for (size_t i = 0; i + 1 < seam.size(); ++i) {
+                SkirtVertex v0 = makeV(seam[i+0], t0, horizontal, atMinEdge);
+                SkirtVertex v1 = makeV(seam[i+1], t0, horizontal, atMinEdge);
+                SkirtVertex v2 = makeV(seam[i+1], t1, horizontal, atMinEdge);
+                SkirtVertex v3 = makeV(seam[i+0], t1, horizontal, atMinEdge);
+                SkirtTriangle tA{ { v0, v1, v2 } };
+                SkirtTriangle tB{ { v0, v2, v3 } };
+                skirts_.tris.push_back(tA);
+                skirts_.tris.push_back(tB);
+            }
+        }
+    };
+
+    auto collectSeam = [&](bool horizontal, bool atMinEdge)->std::vector<MapVertex*> {
+        std::vector<MapVertex*> seam;
+        if (horizontal) {
+            // top row (y=0) ou bottom row (y=s-1)
+            for (int bx = 0; bx < N; ++bx) {
+                int bid = (atMinEdge ? 0 : (N - 1)) * N + bx;
+                AreaBlock* blk = &blocks[lod][bid];
+                uint32_t s = blk->sideSize;
+                uint32_t yRow = atMinEdge ? 0u : (s - 1);
+                uint32_t startX = (bx == 0) ? 0u : 1u;
+                for (uint32_t x = startX; x < s; ++x) {
+                    seam.push_back(blk->GetVertice(x, yRow));
+                }
+            }
+        } else {
+            // left col (x=0) ou right col (x=s-1)
+            for (int by = 0; by < N; ++by) {
+                int bid = by * N + (atMinEdge ? 0 : (N - 1));
+                AreaBlock* blk = &blocks[lod][bid];
+                uint32_t s = blk->sideSize;
+                uint32_t xCol = atMinEdge ? 0u : (s - 1);
+                uint32_t startY = (by == 0) ? 0u : 1u;
+                for (uint32_t y = startY; y < s; ++y) {
+                    seam.push_back(blk->GetVertice(xCol, y));
+                }
+            }
+        }
+        return seam;
+    };
+
+    // 4 côtés
+    auto seamTop    = collectSeam(true,  true);
+    auto seamBottom = collectSeam(true,  false);
+    auto seamLeft   = collectSeam(false, true);
+    auto seamRight  = collectSeam(false, false);
+
+    pushQuadRing(seamTop,    true,  true);
+    pushQuadRing(seamBottom, true,  false);
+    pushQuadRing(seamLeft,   false, true);
+    pushQuadRing(seamRight,  false, false);
+
+    // Bouchons des 4 coins (t=1)
+    auto emitCornerCap = [&](MapVertex* p, float tx, float tz) {
+        if (!p) return;
+        float cx = (tx < 0 ? tx - epsOut : tx + epsOut);
+        float cz = (tz < 0 ? tz - epsOut : tz + epsOut);
+        // Pc: coin monde, Px: proj X, Pz: proj Z (t=1)
+        SkirtVertex pc; {
+            float r,g,b; float base[3]{ p->color[0], p->color[1], p->color[2] };
+            float t=1.0f;
+            float y = lerp(p->v.y, ground_min, t) + (noise2_(cx * noiseFreq, cz * noiseFreq, 19.0f) - 0.5f) * 2.0f * noiseAmpY;
+            varyColor(base, t, cx, cz, r,g,b);
+            pc = { cx, y, cz, r,g,b };
+        }
+        SkirtVertex px; {
+            float r,g,b; float base[3]{ p->color[0], p->color[1], p->color[2] };
+            float t=1.0f; float x = cx, z = p->v.z;
+            float y = lerp(p->v.y, ground_min, t) + (noise2_(x * noiseFreq, z * noiseFreq, 19.0f) - 0.5f) * 2.0f * noiseAmpY;
+            varyColor(base, t, x, z, r,g,b);
+            px = { x, y, z, r,g,b };
+        }
+        SkirtVertex pz; {
+            float r,g,b; float base[3]{ p->color[0], p->color[1], p->color[2] };
+            float t=1.0f; float x = p->v.x, z = cz;
+            float y = lerp(p->v.y, ground_min, t) + (noise2_(x * noiseFreq, z * noiseFreq, 19.0f) - 0.5f) * 2.0f * noiseAmpY;
+            varyColor(base, t, x, z, r,g,b);
+            pz = { x, y, z, r,g,b };
+        }
+        // Triangles [pc, px, p] et [pc, p, pz]
+        SkirtVertex p0{ p->v.x, p->v.y, p->v.z, p->color[0], p->color[1], p->color[2] };
+        skirts_.tris.push_back({ { pc, px, p0 } });
+        skirts_.tris.push_back({ { pc, p0, pz } });
+    };
+
+    // Sommets de coin (LOD fin)
+    AreaBlock* tlb = &blocks[lod][0];
+    AreaBlock* trb = &blocks[lod][N-1];
+    AreaBlock* blb = &blocks[lod][(N-1)*N + 0];
+    AreaBlock* brb = &blocks[lod][(N-1)*N + (N-1)];
+    uint32_t s = tlb->sideSize;
+    emitCornerCap(tlb->GetVertice(0,0),          worldMinX, worldMinZ);
+    emitCornerCap(trb->GetVertice(s-1,0),        worldMaxX, worldMinZ);
+    emitCornerCap(blb->GetVertice(0,s-1),        worldMinX, worldMaxZ);
+    emitCornerCap(brb->GetVertice(s-1,s-1),      worldMaxX, worldMaxZ);
+}
 
 RSArea::RSArea() {
 
@@ -336,6 +531,8 @@ void RSArea::ParseHeightMap(void) {
     PakArchive smallPak;
     smallPak.InitFromRAM("SMALSIZE", entry->data, entry->size);
     ParseBlocks(BLOCK_LOD_MIN, entry, 5);
+
+    BuildSkirts();
 }
 
 RSImage *RSArea::GetImageByID(size_t ID) { return textures[0]->GetImageById(ID); }

@@ -111,7 +111,7 @@ public:
     char name[9];
     uint8_t* data;
     bool initialized{false};
-    
+    bool animated{false};
     
     enum Location{ DISK=0x1,RAM=0x2,VRAM=0x4};
     uint8_t locFlag;

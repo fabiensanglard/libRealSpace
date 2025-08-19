@@ -70,7 +70,16 @@ struct AreaOverlay {
 class RSMapTextureSet;
 class RSImage;
 class PakArchive;
-
+struct SkirtVertex {
+    float x, y, z;
+    float r, g, b;
+};
+struct SkirtTriangle {
+    SkirtVertex v[3];
+};
+struct PrecomputedSkirts {
+    std::vector<SkirtTriangle> tris;
+};
 class RSArea{
 public:
     
@@ -100,7 +109,8 @@ public:
 	TreArchive *tre;
     float getGroundLevel(int BLOC, float x, float y);
     float getY(float x, float z);
-    
+    void BuildSkirts();                  // pré-calcul des jupes (une fois après ParseHeightMap)
+    const PrecomputedSkirts& GetSkirts() const { return skirts_; }
 private:
     
     void ParseObjects(void );
@@ -135,5 +145,5 @@ private:
     void parseTERA_TXMS_MAPS(uint8_t *data, size_t size);
 
     char name[16];
-    
+    PrecomputedSkirts skirts_;
 };

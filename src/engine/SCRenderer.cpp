@@ -18,8 +18,6 @@
 #include <SDL_opengl.h>
 
 
-
-
 extern SCRenderer Renderer;
 
 SCRenderer::SCRenderer() : initialized(false) {}
@@ -81,7 +79,7 @@ void SCRenderer::createTextureInGPU(Texture *texture) {
 
     if (!initialized)
         return;
-
+    
     glGenTextures(1, &texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glEnable(GL_TEXTURE_2D);
@@ -99,6 +97,7 @@ void SCRenderer::createTextureInGPU(Texture *texture) {
 void SCRenderer::uploadTextureContentToGPU(Texture *texture) {
     if (!initialized)
         return;
+   
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, (GLsizei)texture->width, (GLsizei)texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  texture->data);
@@ -1303,8 +1302,39 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
         renderBlock(area, LOD+1, i, false);
     }
     glEnd();
+    // Rendu des jupes pré-calculées
+    if (0) {
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(-1.0f, -1.0f);
+
+        const auto& skirts = area->GetSkirts();
+        glBegin(GL_TRIANGLES);
+        for (const auto& tri : skirts.tris) {
+            glColor3f(tri.v[0].r, tri.v[0].g, tri.v[0].b);
+            glVertex3f(tri.v[0].x, tri.v[0].y, tri.v[0].z);
+
+            glColor3f(tri.v[1].r, tri.v[1].g, tri.v[1].b);
+            glVertex3f(tri.v[1].x, tri.v[1].y, tri.v[1].z);
+
+            glColor3f(tri.v[2].r, tri.v[2].g, tri.v[2].b);
+            glVertex3f(tri.v[2].x, tri.v[2].y, tri.v[2].z);
+        }
+        glEnd();
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glDepthFunc(GL_LESS);
+    }
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+    // Couper les demi-transparences responsables du halo
+    //glEnable(GL_ALPHA_TEST);
+    //glAlphaFunc(GL_GREATER, 0.5f);
+
+    //glDepthMask(GL_FALSE);           // ne pas écrire dans le depth buffer
+    //glDepthFunc(GL_LEQUAL);          // accepter l'égalité de profondeur
+
     /*for (int i = 0; i < BLOCKS_PER_MAP; i++) {
         RenderBlock(area, LOD+1, i, true);
     }*/
@@ -1344,6 +1374,9 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
         }
         glEnd();
     }
+    //glDepthMask(GL_TRUE);
+    //glDepthFunc(GL_LESS);
+    //glDisable(GL_ALPHA_TEST);
     glDisable(GL_TEXTURE_2D);
     renderMapOverlay(area);
     glDisable(GL_FOG);
@@ -1555,8 +1588,9 @@ void SCRenderer::renderBBox(Vector3D position, Point3D min, Point3D max) {
 }
 void SCRenderer::renderMapOverlay(RSArea *area) {
 
-    // glDepthFunc(GL_LESS);
-    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);           // ne pas écrire dans le depth buffer
+    glDepthFunc(GL_LEQUAL);          // accepter l'égalité de profondeur
+
     for (int i = 0; i < area->objectOverlay.size(); i++) {
         AoVPoints *v = area->objectOverlay[i].vertices;
         for (int j = 0; j < area->objectOverlay[i].nbTriangles; j++) {
@@ -1573,7 +1607,8 @@ void SCRenderer::renderMapOverlay(RSArea *area) {
             glEnd();
         }
     }
-    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
 }
 void SCRenderer::renderWorldByID(RSArea *area, int LOD, int verticesPerBlock, int blockId) {
     textureSortedVertex.clear();

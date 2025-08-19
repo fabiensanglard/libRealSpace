@@ -90,6 +90,7 @@ void RSImage::GetNextFrame() {
         subframe.UpdateContent(this->sub_frame_buffer);
         subframe.SetPalette(this->palette);
         //this->texture.Set(&subframe);
+        this->texture.animated = true;
         this->texture.UpdateContent(&subframe);
         this->current_frame= (this->current_frame + 1) % this->nbframes;
         //texture.UpdateContent(this);
