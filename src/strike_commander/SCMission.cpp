@@ -271,7 +271,7 @@ RSEntity * SCMission::LoadEntity(std::string name) {
 void SCMission::update() {
     uint32_t current_time = SDL_GetTicks();
     uint32_t elapsed_time = (current_time - this->last_time) / 1000;
-    int newtps = 0;
+    uint32_t newtps = 0;
     if (elapsed_time > 1) {
         uint32_t ticks = this->tick_counter - this->last_tick;
         newtps = ticks / elapsed_time;
@@ -392,7 +392,7 @@ void SCMission::update() {
         }
         if (ai_actor->object->entity->entity_type == EntityType::swpn && !ai_actor->is_destroyed && ai_actor->is_active) {
             for (auto targets: this->friendlies) {
-                if (targets->object->alive) {
+                if (targets->object->alive && (targets->profile != nullptr || targets->actor_name == "PLAYER")) {
                     ai_actor->shootWeapon(targets);
                 }
             }

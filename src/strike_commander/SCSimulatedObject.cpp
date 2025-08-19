@@ -189,8 +189,11 @@ void SCSimulatedObject::Simulate(int tps) {
             };
             float distance = (targetPos - position).Norm();
             if (distance < distanceThreshold) {
+                if (this->target->actor_name != "PLAYER") {
+                    this->target->object->alive = false;
+                }
                 this->alive = false;
-                this->target->object->alive = false;
+                
                 this->shooter->score += 100;
                 if (this->target->object->entity->explos != nullptr) {
                     SCExplosion *explosion = new SCExplosion(this->target->object->entity->explos->objct, position);

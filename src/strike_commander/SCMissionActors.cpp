@@ -400,20 +400,33 @@ void SCMissionActors::shootWeapon(SCMissionActors *target) {
         return; // No ammo left
     }
     RSEntity *weapon_entity = this->object->entity->swpn_data->weapon_entity;
-    Vector3D direction = target->object->position - this->object->position;
-    this->aiming_vector = direction;
-    if (direction.Length() > this->object->entity->swpn_data->effective_range) {
+    Vector3D target_position = {0.0f, 0.0f, 0.0f};
+    if (target->plane != nullptr) {
+        target_position = {target->plane->x, target->plane->y, target->plane->z};
+    } else if (target->object != nullptr) {
+        target_position = target->object->position;
+    }
+    Vector3D direction = target_position - this->object->position;
+    float distance = direction.Length();
+    
+    if (distance> weapon_entity->wdat->target_range) {
         return; // No direction to shoot
     }
+    this->aiming_vector = direction;
     direction.Normalize();
     float p_y = this->object->position.y;
     if (this->mission->area->getY(this->object->position.x, this->object->position.z) > this->object->position.y) {
         this->object->position.y = this->mission->area->getY(this->object->position.x, this->object->position.z)+10.0f;
     }
     SCSimulatedObject *weapon = nullptr;
+
     switch (weapon_entity->wdat->weapon_category) {
         case 2: // Missiles
+            if (weapon_entity->wdat->effective_range == 0) {
+                weapon_entity->wdat->effective_range = weapon_entity->wdat->target_range;
+            }
             weapon = new SCSimulatedObject();
+            weapon->target = target;
             weapon->obj = weapon_entity;
             weapon->x = this->object->position.x;
             weapon->y = p_y;
@@ -441,7 +454,7 @@ void SCMissionActors::shootWeapon(SCMissionActors *target) {
     }
     weapon->mission = this->mission;
     weapon->shooter = this;
-    this->object->entity->swpn_data->weapons_round--;
+    //this->object->entity->swpn_data->weapons_round--;
     this->weapons_shooted.push_back(weapon);
 }
 /**
