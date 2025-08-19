@@ -46,7 +46,7 @@ void SCRenderer::init(int width, int height, AssetManager *amana) {
     // glClearDepth(1.0f);								// Depth Buffer Setup
     glDisable(GL_DEPTH_TEST); // Disable Depth Testing
 
-    camera.SetPersective(45.0f, this->width / (float)this->height, 1.0f, BLOCK_WIDTH * BLOCK_PER_MAP_SIDE * 4);
+    camera.SetPersective(45.0f, this->width / (float)this->height, 6.6f, BLOCK_WIDTH * BLOCK_PER_MAP_SIDE * 4);
 
     light.SetWithCoo(300, 300, 300);
 
@@ -1302,28 +1302,26 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
         renderBlock(area, LOD+1, i, false);
     }
     glEnd();
-    // Rendu des jupes pré-calculées
-    if (1) {
-        glDepthFunc(GL_LEQUAL);
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(-1.0f, -1.0f);
+    
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(-1.0f, -1.0f);
 
-        const auto& skirts = area->GetSkirts();
-        glBegin(GL_TRIANGLES);
-        for (const auto& tri : skirts.tris) {
-            glColor3f(tri.v[0].r, tri.v[0].g, tri.v[0].b);
-            glVertex3f(tri.v[0].x, tri.v[0].y, tri.v[0].z);
+    const auto& skirts = area->GetSkirts();
+    glBegin(GL_TRIANGLES);
+    for (const auto& tri : skirts.tris) {
+        glColor3f(tri.v[0].r, tri.v[0].g, tri.v[0].b);
+        glVertex3f(tri.v[0].x, tri.v[0].y, tri.v[0].z);
 
-            glColor3f(tri.v[1].r, tri.v[1].g, tri.v[1].b);
-            glVertex3f(tri.v[1].x, tri.v[1].y, tri.v[1].z);
+        glColor3f(tri.v[1].r, tri.v[1].g, tri.v[1].b);
+        glVertex3f(tri.v[1].x, tri.v[1].y, tri.v[1].z);
 
-            glColor3f(tri.v[2].r, tri.v[2].g, tri.v[2].b);
-            glVertex3f(tri.v[2].x, tri.v[2].y, tri.v[2].z);
-        }
-        glEnd();
-        glDisable(GL_POLYGON_OFFSET_FILL);
-        glDepthFunc(GL_LESS);
+        glColor3f(tri.v[2].r, tri.v[2].g, tri.v[2].b);
+        glVertex3f(tri.v[2].x, tri.v[2].y, tri.v[2].z);
     }
+    glEnd();
+    glDisable(GL_POLYGON_OFFSET_FILL);
+    glDepthFunc(GL_LESS);
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
     //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -1374,9 +1372,6 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
         }
         glEnd();
     }
-    //glDepthMask(GL_TRUE);
-    //glDepthFunc(GL_LESS);
-    //glDisable(GL_ALPHA_TEST);
     glDisable(GL_TEXTURE_2D);
     renderMapOverlay(area);
     glDisable(GL_FOG);
@@ -1590,6 +1585,8 @@ void SCRenderer::renderMapOverlay(RSArea *area) {
 
     glDepthMask(GL_FALSE);           // ne pas écrire dans le depth buffer
     glDepthFunc(GL_LEQUAL);          // accepter l'égalité de profondeur
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(-1.0f, -1.0f);
 
     for (int i = 0; i < area->objectOverlay.size(); i++) {
         AoVPoints *v = area->objectOverlay[i].vertices;
@@ -1607,6 +1604,7 @@ void SCRenderer::renderMapOverlay(RSArea *area) {
             glEnd();
         }
     }
+    glDisable(GL_POLYGON_OFFSET_FILL);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
 }
