@@ -454,7 +454,7 @@ void SCMissionActors::shootWeapon(SCMissionActors *target) {
     }
     weapon->mission = this->mission;
     weapon->shooter = this;
-    //this->object->entity->swpn_data->weapons_round--;
+    this->object->entity->swpn_data->weapons_round--;
     this->weapons_shooted.push_back(weapon);
 }
 /**
