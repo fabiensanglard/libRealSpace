@@ -46,7 +46,7 @@ void SCRenderer::init(int width, int height, AssetManager *amana) {
     // glClearDepth(1.0f);								// Depth Buffer Setup
     glDisable(GL_DEPTH_TEST); // Disable Depth Testing
 
-    camera.SetPersective(45.0f, this->width / (float)this->height, 6.6f, BLOCK_WIDTH * BLOCK_PER_MAP_SIDE * 4);
+    camera.SetPersective(45.0f, this->width / (float)this->height, 3.8f, BLOCK_WIDTH * BLOCK_PER_MAP_SIDE * 4);
 
     light.SetWithCoo(300, 300, 300);
 
