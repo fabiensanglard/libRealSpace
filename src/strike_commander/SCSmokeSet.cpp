@@ -50,7 +50,7 @@ void SCSmokeSet::init(){
                 if (imgdata[j] == 255) {
                     rgba->a = 0;
                 }
-                if (rgba->a == 255 && rgba->r == 210 && rgba->g == 208 && rgba->b == 208) {
+                if (rgba->a == 255 && rgba->r == 211 && rgba->g == 211 && rgba->b == 211) {
                     rgba->a = 0;
                 }
                 dst[0] = rgba->r;

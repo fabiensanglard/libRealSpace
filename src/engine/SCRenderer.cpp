@@ -578,7 +578,6 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 if (lambertianFactor < 0) lambertianFactor = 0;
                 lambertianFactor += ambientLamber;
                 if (lambertianFactor > 1) lambertianFactor = 1;
-
                 const Texel *texel = palette.GetRGBColor(triangle->color);
                 if (colored) {
                     glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
@@ -661,7 +660,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     }
 
     // Pass 3: Let's draw the transparent stuff render RSEntity::SC_TRANSPARENT)
-    glDisable(GL_TEXTURE_2D);
+    
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 #ifndef _WIN32
@@ -693,9 +692,6 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
 
         if (triangle->property != RSEntity::SC_TRANSPARENT)
             continue;
-
-        Vector3D normal;
-        getNormal(object, triangle, &normal);
 
         glBegin(GL_TRIANGLES);
         for (int j = 0; j < 3; j++) {
@@ -743,13 +739,11 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             if (triangle->property != RSEntity::SC_TRANSPARENT)
                 continue;
     
-            Vector3D normal;
             Triangle *tri = new Triangle();
             tri->ids[0] = triangle->ids[0];
             tri->ids[1] = triangle->ids[1];
             tri->ids[2] = triangle->ids[2];
     
-            getNormal(object, tri, &normal);
     
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
@@ -875,13 +869,10 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             if (triangle->property == 9) {
                 continue;
             }
-            Vector3D normal;
             Triangle *tri = new Triangle();
             tri->ids[0] = triangle->ids[0];
             tri->ids[1] = triangle->ids[1];
             tri->ids[2] = triangle->ids[2];
-    
-            getNormal(object, tri, &normal);
     
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
@@ -908,9 +899,10 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             glEnd();
         }
     }
-    
-    glDisable(GL_ALPHA_TEST);
     glDisable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 }
 
 void SCRenderer::setLight(Point3D *l) { this->light = *l; }
@@ -1713,6 +1705,8 @@ void SCRenderer::drawBillboard(Vector3D pos, Texture *tex, float size) {
     glEnable(GL_BLEND);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.1f);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
     
     // Initialize texture if needed
     if (!tex->initialized) {
@@ -1789,4 +1783,8 @@ void SCRenderer::drawBillboard(Vector3D pos, Texture *tex, float size) {
     glVertex3f(topLeft.x, topLeft.y, topLeft.z);
     glEnd();
     glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
 }

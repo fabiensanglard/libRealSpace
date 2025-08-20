@@ -35,6 +35,7 @@ void Texture::Set(RSImage* image){
     this->width = image->width;
     this->height = image->height;
     this->data = (uint8_t*)malloc(width*height*4);
+    this->needAphaFix = image->flags == 1;
     locFlag = RAM;
 }
 
@@ -107,7 +108,7 @@ void Texture::UpdateContent(RSImage* image){
     }
     
     // Appliquer l’anti-halo une seule fois si la texture a de l’alpha
-    if (hasAlpha && !this->animated) {
+    if (hasAlpha && needAphaFix) {
         AlphaBleedRGBA8(this->data, (int)this->width, (int)this->height, 8);
     }
 }

@@ -54,14 +54,13 @@ void RSMapTextureSet::Parse(PakArchive* archive){
         
         uint16_t width = stream.ReadUShort();
         uint16_t height = stream.ReadUShort();
-      
         uint32_t size = width*height;
         
         if (entry->size-4 == size){
             //That does look like a map texture !
             RSImage* image = new RSImage();
             
-            image->Create("MAP_TEXTURE",width,height, 0);
+            image->Create("MAP_TEXTURE",width,height, 1);
             image->UpdateContent(stream.GetPosition());
             images.push_back(image);
             printf("RSMapTextureSet img [%3zu] is %lux%lu.\n",i,(unsigned long)image->width,(unsigned long)image->height);

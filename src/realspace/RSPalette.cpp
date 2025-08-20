@@ -114,11 +114,17 @@ void RSPalette::parsePALT_PALT(uint8_t *data, size_t size){
             texel.a = 255;
         }
             
-        
-        //Since VGA palette RGB are on 6 bits and not 8, we need to adjust
-        texel.r = static_cast<uint8_t>(texel.r * 255/63.0f);
-        texel.g *= static_cast<uint8_t>(255/63.0f);
-        texel.b *= static_cast<uint8_t>(255/63.0f);
+        uint8_t r = texel.r;
+        uint8_t g = texel.g;
+        uint8_t b = texel.b;
+
+        r = (r << 2) | (r >> 4); // Convert 6-bit to 8-bit
+        g = (g << 2) | (g >> 4);
+        b = (b << 2) | (b >> 4);
+
+        texel.r = r;
+        texel.g = g;
+        texel.b = b;
         
         colors.SetColor(i, &texel);
     }
@@ -142,9 +148,19 @@ void RSPalette::parsePALT_BLWH(uint8_t *data, size_t size){
             texel.a = 255;
         }
         
-        texel.r = static_cast<uint8_t>(texel.r * 255/63.0f);
-        texel.g *= static_cast<uint8_t>(255/63.0f);
-        texel.b *= static_cast<uint8_t>(255/63.0f);
+        uint8_t r = texel.r;
+        uint8_t g = texel.g;
+        uint8_t b = texel.b;
+
+        r = (r << 2) | (r >> 4); // Convert 6-bit to 8-bit
+        g = (g << 2) | (g >> 4);
+        b = (b << 2) | (b >> 4);
+        
+        texel.r = r;
+        texel.g = g;
+        texel.b = b;
+
+        
         bwColors.SetColor(i, &texel);
     }
 }

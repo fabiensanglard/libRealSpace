@@ -4,10 +4,115 @@
 #include <imgui_impl_sdl2.h>
 
 DebugObjectViewer::DebugObjectViewer() {
-
+    vertices.clear();
+    vertices.shrink_to_fit();
 }
 DebugObjectViewer::~DebugObjectViewer() {
     
+}
+void DebugObjectViewer::runFrame()  {
+        checkButtons();
+
+    VGA.Activate();
+    VGA.GetFrameBuffer()->Clear();
+    VGA.SetPalette(&this->palette);
+
+    VGA.SetPalette(&this->palette);
+
+    // Draw static
+    VGA.GetFrameBuffer()->DrawShape(&bluePrint);
+
+    VGA.VSync();
+
+    /**/
+    // Ok now time to draw the model
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    uint32_t currentTime = SDL_GetTicks();
+    uint32_t totalTime = currentTime - startTime;
+
+    RSShowCase showCase = objs.showCases[currentObject];
+
+    Point3D newPosition;
+    newPosition.x = showCase.cameraDist / 150 * cosf(totalTime / 2000.0f);
+    newPosition.y = showCase.cameraDist / 350;
+    newPosition.z = showCase.cameraDist / 150 * sinf(totalTime / 2000.0f);
+
+    Renderer.getCamera()->SetPosition(&newPosition);
+    Point3D lookAt = {0, 0, 0};
+    Renderer.getCamera()->LookAt(&lookAt);
+
+    Point3D light;
+    light.x = 4 * cosf(-1 * totalTime / 20000.0f);
+    light.y = 4;
+    light.z = 4 * sinf(-1 * totalTime / 20000.0f);
+    Renderer.setLight(&light);
+
+    glMatrixMode(GL_PROJECTION);
+    Matrix *projection = Renderer.getCamera()->GetProjectionMatrix();
+    glLoadMatrixf(projection->ToGL());
+
+    glMatrixMode(GL_MODELVIEW);
+    Matrix *view = Renderer.getCamera()->GetViewMatrix();
+    glLoadMatrixf(view->ToGL());
+    glPushMatrix();
+    glRotatef(this->rotateLeftRightAngle, 1, 0, 0);
+    glPushMatrix();
+    glRotatef(this->rotateUpDownAngle, 0, 0, 1);
+
+    glScalef(1 / this->zoomFactor, 1 / this->zoomFactor, 1 / this->zoomFactor);
+    if (objs.showCases[currentObject].entity->triangles.size() > 0) {
+        if (this->vertices.size() > 0) {
+            glPointSize(5.0f);
+            glBegin(GL_POINTS);
+            for (const auto& vertex : this->vertices) {
+                glColor3f(1.0f, 0.0f, 0.0f);
+                glVertex3f(vertex.x, vertex.y, vertex.z);
+            }
+            glEnd();
+            glBegin(GL_LINES);
+            for (size_t i = 0; i < this->vertices.size() - 1; i++) {
+                glColor3f(0.0f, 1.0f, 0.0f);
+                glVertex3f(this->vertices[i].x, this->vertices[i].y, this->vertices[i].z);
+                glVertex3f(this->vertices[i + 1].x, this->vertices[i + 1].y, this->vertices[i + 1].z);
+            }
+            glEnd();
+            
+        }
+        Renderer.drawModel(objs.showCases[currentObject].entity, LOD_LEVEL_MAX);    
+    } else if (objs.showCases[currentObject].entity->animations.size() > 0) {
+        this->fps++;
+        if (this->fps > 12) {
+            this->fps = 0;
+            this->current_frame = (this->current_frame + 1) % objs.showCases[currentObject].entity->animations.size();
+        }
+        Renderer.drawBillboard(
+            {0, 0, 0},
+            objs.showCases[currentObject].entity->animations[this->current_frame],
+            1.0f / this->zoomFactor
+        );
+    } else {
+        printf("No model to draw for %s\n", objs.showCases[currentObject].displayName.c_str());
+    }
+    
+    glPopMatrix();
+    glPushMatrix();
+    glDisable(GL_DEPTH_TEST);
+
+    VGA.SwithBuffers();
+    VGA.Activate();
+    VGA.GetFrameBuffer()->Clear();
+    VGA.SetPalette(&this->palette);
+
+    VGA.GetFrameBuffer()->DrawShape(&title);
+
+    drawButtons();
+
+    // Draw Mouse
+    Mouse.Draw();
+
+    VGA.VSync();
+    VGA.SwithBuffers();
 }
 void DebugObjectViewer::renderMenu() {
     static bool load_object = false;
@@ -99,7 +204,7 @@ void DebugObjectViewer::renderUI() {
                 ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "No entity loaded");
             }
             ImGui::EndChild();
-            ImGui::BeginChild("Textures", ImVec2(0, 0), true);
+            ImGui::BeginChild("Textures", ImVec2(0, 400), true);
             ImGui::Text("Textures loaded: %d", objs.showCases[currentObject].entity->images.size());
             if (ImGui::BeginTable("TexturesTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
                 ImGui::TableSetupColumn("Texture Name");
@@ -120,6 +225,33 @@ void DebugObjectViewer::renderUI() {
                     ImGui::Image((ImTextureID)(intptr_t)texture->id, ImVec2(100, 100));
                 }
                 ImGui::EndTable();
+            }
+            ImGui::EndChild();
+            ImGui::BeginChild("Triangles", ImVec2(0, 400), true);
+            int tri_count = 0;
+            for (auto triangle : objs.showCases[currentObject].entity->triangles) {
+                if (ImGui::TreeNode(("Triangle " + std::to_string(tri_count++)).c_str())) {
+                    ImGui::Text("Triangle ID: %d", tri_count);
+                    ImGui::Text("Property: %d", triangle.property);
+                    ImGui::Text("Color ID: %d", triangle.color);
+                    Texel *color = palette.GetRGBColor(triangle.color);
+                    ImGui::Text("Color: R: %d, G: %d, B: %d, A: %d", color->r, color->g, color->b, color->a);
+                    float colorValue[3] = {color->r / 255.0f, color->g / 255.0f, color->b / 255.0f};
+                    ImGui::ColorPicker3("Color Picker", colorValue, ImGuiColorEditFlags_NoInputs);
+                    ImGui::Text("Vertices: ");
+                    for (const auto &vertex : triangle.ids) {
+                        ImGui::Text("  Vertex ID: %d", vertex);
+                    }
+                    this->vertices.clear();
+                    for (const auto &vertex : triangle.ids) {
+                        if (vertex < objs.showCases[currentObject].entity->vertices.size()) {
+                            this->vertices.push_back(objs.showCases[currentObject].entity->vertices[vertex]);
+                        } else {
+                            ImGui::Text("Vertex ID %d out of range", vertex);
+                        }
+                    }
+                    ImGui::TreePop();
+                }
             }
             ImGui::EndChild();
             ImGui::EndTabItem();

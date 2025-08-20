@@ -74,9 +74,14 @@ typedef struct VGAPalette{
         }
         
         for (uint16_t i= 0 ; i < numColors ; i++){
-            colors[offset+i].r = s->ReadByte() * (uint8_t) (255.0f/63.0f);
-            colors[offset+i].g = s->ReadByte() * (uint8_t) (255.0f/63.0f);
-            colors[offset+i].b = s->ReadByte() * (uint8_t) (255.0f/63.0f);
+            colors[offset+i].r = s->ReadByte();
+            colors[offset+i].g = s->ReadByte();
+            colors[offset+i].b = s->ReadByte();
+
+            colors[offset+i].r = (colors[offset+i].r<<2) | (colors[offset+i].r >> 4);
+            colors[offset+i].g = (colors[offset+i].g<<2) | (colors[offset+i].g >> 4);
+            colors[offset+i].b = (colors[offset+i].b<<2) | (colors[offset+i].b >> 4);
+
             colors[offset+i].a = 255 ;
         }
         
@@ -112,7 +117,7 @@ public:
     uint8_t* data;
     bool initialized{false};
     bool animated{false};
-    
+    bool needAphaFix{false};
     enum Location{ DISK=0x1,RAM=0x2,VRAM=0x4};
     uint8_t locFlag;
     
