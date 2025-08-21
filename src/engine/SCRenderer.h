@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include <unordered_map>
 #include "Camera.h"
 #include "../realspace/AssetManager.h"
 #include "../realspace/RSMission.h"
@@ -37,7 +38,14 @@ typedef struct VertexCache {
 
 typedef std::vector<VertexCache> VertexVector;
 typedef std::map<int, VertexVector> TextureVertexMap;
-
+// Petit utilitaire pour le culling
+struct Plane {
+    float a, b, c, d; // ax + by + cz + d = 0
+};
+struct AABB {
+    Vector3D min;
+    Vector3D max;
+};
 class SCRenderer {
 
 public:
@@ -103,6 +111,14 @@ public:
     void initRenderToTexture();
     void getRenderToTexture();
     void initRenderCameraView();
+    
+    // Invalidation cache AABB
+    void InvalidateAABBCache();
+    void InvalidateAABBCache(RSArea* area);
+    void InvalidateAABBForBlock(RSArea* area, int LOD, int blockId);
+
+    // Pré-calcul (optionnel) sur une plage de LOD
+    void PrecomputeAABBs(RSArea* area, int minLOD, int maxLOD);
 
     int32_t width;
     int32_t height;
@@ -123,5 +139,18 @@ private:
     Point3D playerPosition;
     TextureVertexMap textureSortedVertex;
     GLuint framebuffer;
+    // Cache des AABB par (LOD, blockId)
+    std::unordered_map<uint64_t, AABB> blockAABBCache_;
+
+    void extractFrustumPlanes(Plane planes[6]) const;
+    static bool isAABBVisible(const AABB& box, const Plane planes[6]);
+    const AABB& computeBlockAABB(RSArea* area, int LOD, int blockId);
+
+    struct AreaAABBCache {
+        std::unordered_map<uint64_t, AABB> byKey; // key = (LOD<<32)|blockId
+    };
+    // Cache par carte (clé = pointeur RSArea)
+    std::unordered_map<const RSArea*, AreaAABBCache> aabbCache_;
+    
     
 };

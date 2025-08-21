@@ -17,9 +17,146 @@
 #include <SDL_opengl_glext.h>
 #include <SDL_opengl.h>
 
+#include <unordered_map>
+#include <cmath>
+#include <algorithm>
+#include <limits>
 
 extern SCRenderer Renderer;
 
+static inline void normalizePlane(Plane& p) {
+    float invLen = 1.0f / std::sqrt(p.a*p.a + p.b*p.b + p.c*p.c);
+    p.a *= invLen; p.b *= invLen; p.c *= invLen; p.d *= invLen;
+}
+
+// Multiplie des matrices 4x4 (column-major OpenGL): out = A * B
+static inline void mulMat4(const float A[16], const float B[16], float out[16]) {
+    for (int c = 0; c < 4; ++c) {
+        for (int r = 0; r < 4; ++r) {
+            out[c*4 + r] =
+                A[0*4 + r] * B[c*4 + 0] +
+                A[1*4 + r] * B[c*4 + 1] +
+                A[2*4 + r] * B[c*4 + 2] +
+                A[3*4 + r] * B[c*4 + 3];
+        }
+    }
+}
+
+void SCRenderer::extractFrustumPlanes(Plane planes[6]) const {
+    float proj[16], modl[16], clip[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, proj);
+    glGetFloatv(GL_MODELVIEW_MATRIX,  modl);
+
+    // MVP = PROJECTION * MODELVIEW
+    mulMat4(proj, modl, clip);
+
+    // Left, Right, Bottom, Top, Near, Far
+    planes[0] = { clip[ 3] + clip[ 0], clip[ 7] + clip[ 4], clip[11] + clip[ 8], clip[15] + clip[12] }; // Left
+    planes[1] = { clip[ 3] - clip[ 0], clip[ 7] - clip[ 4], clip[11] - clip[ 8], clip[15] - clip[12] }; // Right
+    planes[2] = { clip[ 3] + clip[ 1], clip[ 7] + clip[ 5], clip[11] + clip[ 9], clip[15] + clip[13] }; // Bottom
+    planes[3] = { clip[ 3] - clip[ 1], clip[ 7] - clip[ 5], clip[11] - clip[ 9], clip[15] - clip[13] }; // Top
+    planes[4] = { clip[ 3] + clip[ 2], clip[ 7] + clip[ 6], clip[11] + clip[10], clip[15] + clip[14] }; // Near
+    planes[5] = { clip[ 3] - clip[ 2], clip[ 7] - clip[ 6], clip[11] - clip[10], clip[15] - clip[14] }; // Far
+
+    for (int i=0; i<6; ++i) normalizePlane(planes[i]);
+}
+
+bool SCRenderer::isAABBVisible(const AABB& box, const Plane planes[6]) {
+    // Rendre le test moins strict: on accepte une petite pénétration négative
+    const float cullingEpsilon = 12.0f; // ajustable
+    for (int i=0; i<6; ++i) {
+        const Plane& p = planes[i];
+        Vector3D v;
+        v.x = (p.a >= 0.0f) ? box.max.x : box.min.x;
+        v.y = (p.b >= 0.0f) ? box.max.y : box.min.y;
+        v.z = (p.c >= 0.0f) ? box.max.z : box.min.z;
+        float dist = p.a*v.x + p.b*v.y + p.c*v.z + p.d;
+        if (dist < -cullingEpsilon) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Remplace computeBlockAABB pour utiliser un cache par RSArea
+const AABB& SCRenderer::computeBlockAABB(RSArea* area, int LOD, int blockId) {
+    auto& areaCache = aabbCache_[area].byKey;
+    const uint64_t key = (static_cast<uint64_t>(LOD) << 32) | static_cast<uint32_t>(blockId);
+    if (auto it = areaCache.find(key); it != areaCache.end()) return it->second;
+
+    AABB box;
+    box.min = {  std::numeric_limits<float>::infinity(),
+                 std::numeric_limits<float>::infinity(),
+                 std::numeric_limits<float>::infinity() };
+    box.max = { -std::numeric_limits<float>::infinity(),
+                -std::numeric_limits<float>::infinity(),
+                -std::numeric_limits<float>::infinity() };
+
+    AreaBlock* block = area->GetAreaBlockByID(LOD, blockId);
+    if (!block) {
+        box.min = {0,0,0}; box.max = {0,0,0};
+        return areaCache.emplace(key, box).first->second;
+    }
+
+    const uint32_t s = block->sideSize;
+    for (uint32_t y=0; y<s; ++y) {
+        for (uint32_t x=0; x<s; ++x) {
+            const auto& v = block->vertice[x + y * s].v;
+            if (v.x < box.min.x) box.min.x = v.x;
+            if (v.y < box.min.y) box.min.y = v.y;
+            if (v.z < box.min.z) box.min.z = v.z;
+            if (v.x > box.max.x) box.max.x = v.x;
+            if (v.y > box.max.y) box.max.y = v.y;
+            if (v.z > box.max.z) box.max.z = v.z;
+        }
+    }
+    // Padding pour éviter les clips sur bords
+    float stepX = 0.f, stepZ = 0.f;
+    if (s > 1) {
+        stepX = std::abs(block->vertice[1].v.x - block->vertice[0].v.x);
+        stepZ = std::abs(block->vertice[s].v.z - block->vertice[0].v.z);
+    }
+    const float padX = (std::max)(100.0f, stepX * 2.0f);
+    const float padZ = (std::max)(100.0f, stepZ * 2.0f);
+    const float padY = 200.0f;
+
+    box.min.x -= padX; box.max.x += padX;
+    box.min.z -= padZ; box.max.z += padZ;
+    box.min.y -= padY; box.max.y += padY;
+
+    return areaCache.emplace(key, box).first->second;
+}
+
+// Invalidation globale
+void SCRenderer::InvalidateAABBCache() {
+    aabbCache_.clear();
+}
+
+// Invalidation pour une carte
+void SCRenderer::InvalidateAABBCache(RSArea* area) {
+    if (!area) return;
+    aabbCache_.erase(area);
+}
+
+// Invalidation fine d’un bloc
+void SCRenderer::InvalidateAABBForBlock(RSArea* area, int LOD, int blockId) {
+    if (!area) return;
+    auto itArea = aabbCache_.find(area);
+    if (itArea == aabbCache_.end()) return;
+    const uint64_t key = (static_cast<uint64_t>(LOD) << 32) | static_cast<uint32_t>(blockId);
+    itArea->second.byKey.erase(key);
+}
+
+// Pré-calcul sur une plage de LOD (lazy-safe: réutilise computeBlockAABB)
+void SCRenderer::PrecomputeAABBs(RSArea* area, int minLOD, int maxLOD) {
+    if (!area) return;
+    if (minLOD > maxLOD) std::swap(minLOD, maxLOD);
+    for (int lod = minLOD; lod <= maxLOD; ++lod) {
+        for (int i = 0; i < BLOCKS_PER_MAP; ++i) {
+            (void)computeBlockAABB(area, lod, i);
+        }
+    }
+}
 // Helpers: calcule les normales par sommet pour un LOD donné (Gouraud)
 static void AccumulateFaceNormal(const RSEntity* obj, int i0, int i1, int i2, const Point3D& camPos, std::vector<Vector3D>& acc) {
     // Create local non-const copies to satisfy Substract() signature
@@ -1283,9 +1420,6 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
 
     glDisable(GL_CULL_FACE);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
     glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
     glFogi(GL_FOG_MODE, GL_EXP2);      // Fog Mode
     glFogfv(GL_FOG_COLOR, fogColor);   // Set Fog Color
@@ -1307,102 +1441,113 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     textureSortedVertex.clear();
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    glBegin(GL_TRIANGLES);
+
+    Plane frustum[6];
+    extractFrustumPlanes(frustum);
+
+    // Calcule des blocks visibles (une seule fois)
     Vector3D pos = camera.GetPosition();
     int centerX = BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
     int centerY = BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
     int blocX = (int)(pos.x + centerX) / BLOCK_WIDTH;
     int blocY = (int)(pos.z + centerY) / BLOCK_WIDTH;
 
-
-    int block_id = blocY * BLOCK_PER_MAP_SIDE + blocX;
+    // Prépare les offsets autour de la caméra
     std::map<uint8_t, Point2D> blockid_offset;
     int index = 0;
-    int distance = 1;
+    int distance = 2;      // rayon de recherche en LOD fin
+    const int safeRing = 0; // anneau forcé visible
     for (int y = -distance; y <= distance; y++) {
         for (int x = -distance; x <= distance; x++) {
             blockid_offset[index] = {x, y};
             index++;
         }
     }
-    std::vector<int> blockid_rendered;
-    blockid_rendered.clear();
-    blockid_rendered.shrink_to_fit();
 
-    for (int i=0; i<blockid_offset.size()-1; i++) {
-        int final_block_id = (blocY + blockid_offset[i].y) * BLOCK_PER_MAP_SIDE + (blocX+blockid_offset[i].x);
-        if (final_block_id<0)
+    // Visibilité: hiLOD (LOD) + loLOD (LOD+1) calculées une seule fois
+    std::vector<int> visibleHiLOD;
+    std::vector<int> visibleLoLOD;
+    std::vector<uint8_t> marked(BLOCKS_PER_MAP, 0); // évite les doublons
+
+    // 1) Anneau proche + culling pour les blocs proches en LOD fin
+    for (int i = 0; i < (int)blockid_offset.size() - 1; ++i) {
+        int dx = blockid_offset[i].x;
+        int dy = blockid_offset[i].y;
+        int ring = (std::max)(std::abs(dx), std::abs(dy));
+        int final_block_id = (blocY + dy) * BLOCK_PER_MAP_SIDE + (blocX + dx);
+        if (final_block_id < 0 || final_block_id >= BLOCKS_PER_MAP)
             continue;
-        blockid_rendered.push_back(final_block_id);
-        renderBlock(area, LOD, final_block_id, false);
+
+        if (ring <= safeRing) {
+            visibleHiLOD.push_back(final_block_id);
+            marked[final_block_id] = 1;
+            continue;
+        }
+
+        const AABB& box = computeBlockAABB(area, LOD, final_block_id);
+        if (isAABBVisible(box, frustum)) {
+            visibleHiLOD.push_back(final_block_id);
+            marked[final_block_id] = 1;
+        }
     }
-    
-    for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-        if (std::find(blockid_rendered.begin(), blockid_rendered.end(), i) != blockid_rendered.end())
-            continue;
-        renderBlock(area, LOD+1, i, false);
+
+    // 2) Reste de la carte en LOD+1 si visible
+    for (int i = 0; i < BLOCKS_PER_MAP; ++i) {
+        if (marked[i]) continue;
+        const AABB& box = computeBlockAABB(area, LOD + 1, i);
+        if (isAABBVisible(box, frustum)) {
+            visibleLoLOD.push_back(i);
+        }
+    }
+
+    // Passe géométrie (non texturée)
+    glBegin(GL_TRIANGLES);
+    for (int id : visibleHiLOD) {
+        renderBlock(area, LOD, id, false);
+    }
+    for (int id : visibleLoLOD) {
+        renderBlock(area, LOD + 1, id, false);
     }
     glEnd();
     
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(-1.0f, -1.0f);
-
     const auto& skirts = area->GetSkirts();
     glBegin(GL_TRIANGLES);
     for (const auto& tri : skirts.tris) {
         glColor3f(tri.v[0].r, tri.v[0].g, tri.v[0].b);
         glVertex3f(tri.v[0].x, tri.v[0].y, tri.v[0].z);
-
         glColor3f(tri.v[1].r, tri.v[1].g, tri.v[1].b);
         glVertex3f(tri.v[1].x, tri.v[1].y, tri.v[1].z);
-
         glColor3f(tri.v[2].r, tri.v[2].g, tri.v[2].b);
         glVertex3f(tri.v[2].x, tri.v[2].y, tri.v[2].z);
     }
     glEnd();
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDepthFunc(GL_LESS);
+
+    // Passe textures: réutilise les mêmes listes visibles (pas de culling)
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-    // Couper les demi-transparences responsables du halo
-    //glEnable(GL_ALPHA_TEST);
-    //glAlphaFunc(GL_GREATER, 0.5f);
-
-    //glDepthMask(GL_FALSE);           // ne pas écrire dans le depth buffer
-    //glDepthFunc(GL_LEQUAL);          // accepter l'égalité de profondeur
-
-    /*for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-        RenderBlock(area, LOD+1, i, true);
-    }*/
-    blockid_rendered.clear();
-    blockid_rendered.shrink_to_fit();
-    for (int i=0; i<blockid_offset.size()-1; i++) {
-        int final_block_id = (blocY + blockid_offset[i].y) * BLOCK_PER_MAP_SIDE + (blocX+blockid_offset[i].x);
-        if (final_block_id<0)
-            continue;
-        blockid_rendered.push_back(final_block_id);
-        renderBlock(area, LOD, final_block_id, true);
+    textureSortedVertex.clear();
+    for (int id : visibleHiLOD) {
+        renderBlock(area, LOD, id, true);
     }
-    for (int i = 0; i < BLOCKS_PER_MAP; i++) {
-        if (std::find(blockid_rendered.begin(), blockid_rendered.end(), i) != blockid_rendered.end())
-            continue;
-        renderBlock(area, LOD+1, i, true);
+    for (int id : visibleLoLOD) {
+        renderBlock(area, LOD + 1, id, true);
     }
+
     for (auto const &x : textureSortedVertex) {
-        RSImage *image = NULL;
-        image = area->GetImageByID(x.first);
-        if (image == NULL) {
+        RSImage *image = area->GetImageByID(x.first);
+        if (!image) {
             printf("This should never happen: Put a break point here.\n");
-            return;
+            continue;
         }
-        
         glBindTexture(GL_TEXTURE_2D, image->GetTexture()->GetTextureID());
-
         glBegin(GL_TRIANGLES);
-        for (int i = 0; i < x.second.size(); i++) {
+        for (int i = 0; i < (int)x.second.size(); i++) {
             VertexCache v = x.second.at(i);
             if (v.lv1 != NULL && v.lv1->lowerImageID == x.first) {
                 renderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image);
@@ -1414,9 +1559,9 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
         glEnd();
     }
     glDisable(GL_TEXTURE_2D);
+
     renderMapOverlay(area);
     glDisable(GL_FOG);
-    /**/
 }
 
 void SCRenderer::renderObjects(RSArea *area, size_t blockID) {

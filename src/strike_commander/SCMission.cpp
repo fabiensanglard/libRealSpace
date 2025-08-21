@@ -67,6 +67,10 @@ void SCMission::loadMission() {
     std::transform(area_fn.begin(), area_fn.end(), area_fn.begin(), ::toupper);
     this->area = new RSArea(&Assets);
     this->area->InitFromPAKFileName(area_fn.c_str());
+
+    Renderer.InvalidateAABBCache();           // ou InvalidateAABBCache(oldArea);
+    Renderer.PrecomputeAABBs(this->area, 0, 1);  // optionnel: pré-calc LOD 0-1
+
     for (auto &area_entity: this->area->objects) {
         area_entity.entity = LoadEntity(area_entity.name);
     }
