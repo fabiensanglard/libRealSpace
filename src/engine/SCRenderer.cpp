@@ -24,6 +24,52 @@
 
 extern SCRenderer Renderer;
 
+
+static inline void FixEntityWinding(RSEntity* obj) {
+    if (!obj) return;
+    Vector3D center{0,0,0};
+    if (!obj->vertices.empty()) {
+        for (const auto& v : obj->vertices) { center.x += v.x; center.y += v.y; center.z += v.z; }
+        float invN = 1.0f / (float)obj->vertices.size();
+        center.x *= invN; center.y *= invN; center.z *= invN;
+    }
+    auto ensureTriOutward = [&](uint16_t ids[3]) {
+        const Vector3D& a = obj->vertices[ids[0]];
+        const Vector3D& b = obj->vertices[ids[1]];
+        const Vector3D& c = obj->vertices[ids[2]];
+        Vector3D e1{ b.x-a.x, b.y-a.y, b.z-a.z };
+        Vector3D e2{ c.x-a.x, c.y-a.y, c.z-a.z };
+        Vector3D n{ e1.y*e2.z - e1.z*e2.y,
+                    e1.z*e2.x - e1.x*e2.z,
+                    e1.x*e2.y - e1.y*e2.x };
+        Vector3D faceC{ (a.x+b.x+c.x)/3.0f, (a.y+b.y+c.y)/3.0f, (a.z+b.z+c.z)/3.0f };
+        Vector3D outward{ faceC.x-center.x, faceC.y-center.y, faceC.z-center.z };
+        float d = n.x*outward.x + n.y*outward.y + n.z*outward.z;
+        if (d < 0.0f) std::swap(ids[1], ids[2]); // flip winding
+    };
+    for (auto& t : obj->triangles) ensureTriOutward(t.ids);
+    for (auto* q : obj->quads) { // flip tout le quad si nécessaire
+        if (!q) continue;
+        uint16_t tri[3] = { q->ids[0], q->ids[1], q->ids[2] };
+        uint16_t before[3] = { tri[0], tri[1], tri[2] };
+        ensureTriOutward(tri);
+        bool flipped = !(tri[0]==before[0] && tri[1]==before[1] && tri[2]==before[2]);
+        if (flipped) std::swap(q->ids[1], q->ids[3]);
+    }
+}
+static inline GLenum DetectTerrainFrontFace(AreaBlock* blk) {
+    if (!blk || blk->sideSize < 2) return GL_CCW;
+    MapVertex* a = &blk->vertice[0];
+    MapVertex* b = &blk->vertice[1];
+    MapVertex* c = &blk->vertice[blk->sideSize + 1];
+    Vector3D e1{ b->v.x-a->v.x, b->v.y-a->v.y, b->v.z-a->v.z };
+    Vector3D e2{ c->v.x-a->v.x, c->v.y-a->v.y, c->v.z-a->v.z };
+    Vector3D n{ e1.y*e2.z - e1.z*e2.y,
+                e1.z*e2.x - e1.x*e2.z,
+                e1.x*e2.y - e1.y*e2.x };
+    // On veut les faces "vers le haut" comme faces avant
+    return (n.y >= 0.0f) ? GL_CCW : GL_CW;
+}
 static inline void normalizePlane(Plane& p) {
     float invLen = 1.0f / std::sqrt(p.a*p.a + p.b*p.b + p.c*p.c);
     p.a *= invLen; p.b *= invLen; p.c *= invLen; p.d *= invLen;
@@ -75,6 +121,25 @@ static inline float ComputeLambertAt(const Vector3D& vLocal,
     if (d > 1.0f) d = 1.0f;
     return d;
 }
+static inline float ComputeLambertAtTwoSided(const Vector3D& vLocal,
+                                             const Vector3D& nLocal,
+                                             const float MV[16],
+                                             const Vector3D& lightEye,
+                                             float ambient) {
+    Vector3D vEye = TransformPointCM(MV, vLocal);
+    Vector3D nEye = TransformDirCM3x3(MV, nLocal);
+    nEye.Normalize();
+
+    Vector3D L = lightEye;
+    L.Substract(&vEye);
+    L.Normalize();
+
+    float d = nEye.DotProduct(&L);
+    d = std::fabs(d);            // éclairage double-face
+    d += ambient;
+    if (d > 1.0f) d = 1.0f;
+    return d;
+}
 void SCRenderer::extractFrustumPlanes(Plane planes[6]) const {
     float proj[16], modl[16], clip[16];
     glGetFloatv(GL_PROJECTION_MATRIX, proj);
@@ -110,7 +175,17 @@ bool SCRenderer::isAABBVisible(const AABB& box, const Plane planes[6]) {
     }
     return true;
 }
+// Ajoute un helper pour remettre la projection + vue avec l'offset
+void SCRenderer::bindCameraProjectionAndView(float verticalOffset /*=0.45f*/) {
+    glViewport(0,0,this->width,this->height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glTranslatef(0.0f, verticalOffset, 0.0f);
+    glMultMatrixf(camera.GetProjectionMatrix()->ToGL());
 
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf(camera.GetViewMatrix()->ToGL());
+}
 // Remplace computeBlockAABB pour utiliser un cache par RSArea
 const AABB& SCRenderer::computeBlockAABB(RSArea* area, int LOD, int blockId) {
     auto& areaCache = aabbCache_[area].byKey;
@@ -192,29 +267,14 @@ void SCRenderer::PrecomputeAABBs(RSArea* area, int minLOD, int maxLOD) {
 }
 // Helpers: calcule les normales par sommet pour un LOD donné (Gouraud)
 static void AccumulateFaceNormal(const RSEntity* obj, int i0, int i1, int i2, const Point3D& camPos, std::vector<Vector3D>& acc) {
-    // Create local non-const copies to satisfy Substract() signature
-    Vector3D e1 = obj->vertices[i0];
-    Vector3D pivot = obj->vertices[i1];
-    e1.Substract(&pivot);
-    Vector3D e2 = obj->vertices[i2];
-    e2.Substract(&pivot);
-
-    Vector3D n = e1;
-    n = n.CrossProduct(&e2);
+    Vector3D e1 = obj->vertices[i0]; Vector3D pivot = obj->vertices[i1]; e1.Substract(&pivot);
+    Vector3D e2 = obj->vertices[i2]; e2.Substract(&pivot);
+    Vector3D n = e1.CrossProduct(&e2);
     n.Normalize();
-
-    // Oriente la normale vers la caméra (géométrie avec winding incohérent)
-    Point3D v0 = obj->vertices[i0];
-    Vector3D camDir = camPos;
-    camDir.Substract(&v0);
-    camDir.Normalize();
-    if (camDir.DotProduct(&n) < 0.0f) {
-        n.Negate();
-    }
-
-    acc[i0].x += n.x; acc[i0].y += n.y; acc[i0].z += n.z;
-    acc[i1].x += n.x; acc[i1].y += n.y; acc[i1].z += n.z;
-    acc[i2].x += n.x; acc[i2].y += n.y; acc[i2].z += n.z;
+    // plus de flip vers la caméra
+    acc[i0].x+=n.x; acc[i0].y+=n.y; acc[i0].z+=n.z;
+    acc[i1].x+=n.x; acc[i1].y+=n.y; acc[i1].z+=n.z;
+    acc[i2].x+=n.x; acc[i2].y+=n.y; acc[i2].z+=n.z;
 }
 
 static void ComputeVertexNormalsForLOD(RSEntity* obj, size_t lodLevel, const Point3D& camPos, std::vector<Vector3D>& outNormals) {
@@ -358,7 +418,7 @@ void SCRenderer::drawTexturedQuad(Vector3D pos, Vector3D orientation, std::vecto
     glEnable(GL_BLEND);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.1f);
-
+    glDisable(GL_CULL_FACE);
     if (!tex->initialized) {
         glGenTextures(1, &tex->id);
         glBindTexture(GL_TEXTURE_2D, tex->id);
@@ -393,41 +453,19 @@ void SCRenderer::drawTexturedQuad(Vector3D pos, Vector3D orientation, std::vecto
     glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glEnable(GL_CULL_FACE);
 }
 
 void SCRenderer::getNormal(RSEntity *object, Triangle *triangle, Vector3D *normal) {
-    // Calculate the normal for this triangle
-    Vector3D edge1;
-    edge1 = object->vertices[triangle->ids[0]];
+    Vector3D edge1 = object->vertices[triangle->ids[0]];
     edge1.Substract(&object->vertices[triangle->ids[1]]);
-
-    Vector3D edge2;
-    edge2 = object->vertices[triangle->ids[2]];
+    Vector3D edge2 = object->vertices[triangle->ids[2]];
     edge2.Substract(&object->vertices[triangle->ids[1]]);
-
-    *normal = edge1;
-    *normal = normal->CrossProduct(&edge2);
+    *normal = edge1.CrossProduct(&edge2);
     normal->Normalize();
-
-    // All normals are supposed to point outward in modern GPU but SC triangles
-    // don't have consistent winding. They can be CW or CCW (the back governal of a jet  is
-    // typically one triangle that must be visible from both sides !
-    // As a result, gouraud shading was probably performed in screen space.
-    // How can we replicate this ?
-    //        - Take the normal and compare it to the sign of the direction to the camera.
-    //        - If the signs don't match: reverse the normal.
-    Point3D cameraPosition = camera.GetPosition();
-
-    Point3D *vertexOnTriangle = &object->vertices[triangle->ids[0]];
-
-    Point3D cameraDirection;
-    cameraDirection = cameraPosition;
-    cameraDirection.Substract(vertexOnTriangle);
-    cameraDirection.Normalize();
-
-    if (cameraDirection.DotProduct(normal) < 0) {
-        normal->Negate();
-    }
+    // plus d’orientation vers la caméra
 }
 
 void SCRenderer::drawParticle(Vector3D pos, float alpha) {
@@ -694,7 +732,9 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     Vector3D lightEye = TransformPointCM(V, lightWorld);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CW);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_ALPHA_TEST);
@@ -706,8 +746,6 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
-        // glAlphaFunc ( GL_ALWAYS, 1.0f ) ;
-        // glEnable ( GL_ALPHA_TEST ) ;
         for (int i = 0; i < object->NumUVs(); i++) {
 
             uvxyEntry *textInfo = &object->uvs[i];
@@ -722,6 +760,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             Triangle *triangle = &object->triangles[textInfo->triangleID];
             float alpha = 1.0f;
             int colored = 0;
+            bool twoSided = false;
             if (triangle->property == 6) {
                 alpha = 0.0f;
             }
@@ -736,16 +775,20 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             if (triangle->property == 9) {
                 alpha = 0.0f;
             }
+            
+            if (triangle->flags[2] == 1) {
+                twoSided = true; // If all vertices are at the same Z, we assume it's a 2D quad
+            }
             glBindTexture(GL_TEXTURE_2D, texture->id);
-            Vector3D normal;
-            getNormal(object, triangle, &normal);
-
+            if (twoSided) glDisable(GL_CULL_FACE);
             glBegin(GL_TRIANGLES);
             for (int j = 0; j < 3; j++) {
                 Vector3D vLocal = object->vertices[triangle->ids[j]];
                 Vector3D nLocal = vertexNormals[triangle->ids[j]];
 
-                float lambertianFactor = ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
+                float lambertianFactor = twoSided
+                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
+                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
                 const Texel *texel = palette.GetRGBColor(triangle->color);
                 if (colored) {
@@ -758,6 +801,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 glVertex3f(vLocal.x, vLocal.y, vLocal.z);
             }
             glEnd();
+            if (twoSided) glEnable(GL_CULL_FACE);
         }
 
         for (auto quv: object->qmapuvs) {
@@ -770,6 +814,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             Quads *triangle = object->quads[quv->triangleID];
             float alpha = 1.0f;
             int colored = 0;
+            bool twoSided = false;
             if (triangle->property == 6) {
                 alpha = 0.0f;
             }
@@ -786,20 +831,25 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             }
 
             glBindTexture(GL_TEXTURE_2D, texture->id);
-            Vector3D normal;
+           
             Triangle *tri = new Triangle();
             tri->ids[0] = triangle->ids[0];
             tri->ids[1] = triangle->ids[1];
             tri->ids[2] = triangle->ids[2];
 
-            getNormal(object, tri, &normal);
-
+            
+            if (triangle->flags[2] == 1) {
+                twoSided = true; // If all vertices are at the same Z, we assume it's a 2D quad
+            }
+            if (twoSided) glDisable(GL_CULL_FACE);
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
                 Vector3D vLocal = object->vertices[triangle->ids[j]];
                 Vector3D nLocal = vertexNormals[triangle->ids[j]];
 
-                float lambertianFactor = ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
+                float lambertianFactor = twoSided
+                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
+                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
                 const Texel *texel = palette.GetRGBColor(triangle->color);
                 if (colored) {
@@ -812,6 +862,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 glVertex3f(vLocal.x, vLocal.y, vLocal.z);
             }
             glEnd();
+            if (twoSided) glEnable(GL_CULL_FACE);
         }
         glDisable(GL_BLEND);
         glDisable(GL_TEXTURE_2D);
@@ -847,16 +898,21 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             continue;
         }
         Triangle *triangle = &object->triangles[triangleID];
-
+        bool twoSided = false;
         if (triangle->property != RSEntity::SC_TRANSPARENT)
             continue;
-
+        if (triangle->flags[2] == 1) {
+            twoSided = true; // If all vertices are at the same Z, we assume it's a 2D quad
+        }
+        if (twoSided) glDisable(GL_CULL_FACE);
         glBegin(GL_TRIANGLES);
         for (int j = 0; j < 3; j++) {
             Vector3D vLocal = object->vertices[triangle->ids[j]];
             Vector3D nLocal = vertexNormals[triangle->ids[j]];
 
-            float lambertianFactor = ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
+            float lambertianFactor = twoSided
+                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
+                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
             const Texel *texel = palette.GetRGBColor(triangle->color);
             glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
@@ -865,6 +921,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             glVertex3f(vLocal.x, vLocal.y, vLocal.z);
         }
         glEnd();
+        if (twoSided) glEnable(GL_CULL_FACE);
     }
 
     if (object->quads.size() > 0) {
@@ -883,22 +940,23 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 continue;
             }
             Quads *triangle = object->quads[triangleID];
-    
+            bool twoSided = false;
             if (triangle->property != RSEntity::SC_TRANSPARENT)
                 continue;
-    
             Triangle *tri = new Triangle();
             tri->ids[0] = triangle->ids[0];
             tri->ids[1] = triangle->ids[1];
             tri->ids[2] = triangle->ids[2];
     
-    
+            if (twoSided) glDisable(GL_CULL_FACE);
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
                 Vector3D vLocal = object->vertices[triangle->ids[j]];
                 Vector3D nLocal = vertexNormals[triangle->ids[j]];
 
-                float lambertianFactor = ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
+                float lambertianFactor = twoSided
+                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
+                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
                 const Texel *texel = palette.GetRGBColor(triangle->color);
                 glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
@@ -907,6 +965,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 glVertex3f(vLocal.x, vLocal.y, vLocal.z);
             }
             glEnd();
+            if (twoSided) glEnable(GL_CULL_FACE);
         }    
     }
     
@@ -917,8 +976,6 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // Pass 1, draw color
     for (int i = 0; i < lod->numTriangles; i++) {
-        // for(int i = 60 ; i < 62 ; i++){  //Debug purpose only back governal of F-16 is 60-62
-        
         uint16_t triangleID = lod->triangleIDs[i];
         if (object->attrs.size() > 0) {
             if (object->attrs[triangleID] == nullptr) {
@@ -951,13 +1008,19 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
         if (triangle->property == 9) {
             continue;
         }
-
+        bool twoSided = false;
+        if (triangle->flags[2] == 1) {
+            twoSided = true; // If all vertices are at the same Z, we assume it's a 2D quad
+        }
+        if (twoSided) glDisable(GL_CULL_FACE);
         glBegin(GL_TRIANGLES);
         for (int j = 0; j < 3; j++) {
             Vector3D vLocal = object->vertices[triangle->ids[j]];
             Vector3D nLocal = vertexNormals[triangle->ids[j]];
 
-            float lambertianFactor = ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
+            float lambertianFactor = twoSided
+                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
+                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
             const Texel *texel = palette.GetRGBColor(triangle->color);
             glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
@@ -966,6 +1029,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             glVertex3f(vLocal.x, vLocal.y, vLocal.z);
         }
         glEnd();
+        if (twoSided) glEnable(GL_CULL_FACE);
     }
     if (object->quads.size() > 0) {
         for (int i = 0; i < lod->numTriangles; i++) {
@@ -1002,13 +1066,19 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
             tri->ids[0] = triangle->ids[0];
             tri->ids[1] = triangle->ids[1];
             tri->ids[2] = triangle->ids[2];
-    
+            bool twoSided = false;
+            if (triangle->flags[2] == 1) {
+                twoSided = true; // If all vertices are at the same Z, we assume it's a 2D quad
+            }
+            if (twoSided) glDisable(GL_CULL_FACE);
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
                 Vector3D vLocal = object->vertices[triangle->ids[j]];
                 Vector3D nLocal = vertexNormals[triangle->ids[j]];
 
-                float lambertianFactor = ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
+                float lambertianFactor = twoSided
+                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
+                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
                 const Texel *texel = palette.GetRGBColor(triangle->color);
                 glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
@@ -1017,6 +1087,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 glVertex3f(vLocal.x, vLocal.y, vLocal.z);
             }
             glEnd();
+            if (twoSided) glEnable(GL_CULL_FACE);
         }
     }
     glDisable(GL_BLEND);
@@ -1032,7 +1103,7 @@ void SCRenderer::prepare(RSEntity *object) {
     for (size_t i = 0; i < object->NumImages(); i++) {
         object->images[i]->SyncTexture();
     }
-
+    FixEntityWinding(object);
     object->prepared = true;
 }
 
@@ -1389,21 +1460,6 @@ void SCRenderer::renderWorldSkyAndGround() {
 
 void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     GLfloat fogColor[4] = {0.8f, 0.8f, 0.8f, 1.0f};
-    float model_view_mat[4][4];
-    Matrix *projectionMatrix = camera.GetProjectionMatrix();
-    glViewport(0,0,this->width,this->height);			// Reset The Current Viewport
-	
-    const float verticalOffset = 0.45f; // Move the horizon to the top third of the screen
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glTranslatef(0.0f, verticalOffset, 0.0f); // Apply the vertical offset
-    glMultMatrixf(projectionMatrix->ToGL()); // Apply the camera's projection matrix
-        
-
-    glDisable(GL_CULL_FACE);
-
-    glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)model_view_mat);
     glFogi(GL_FOG_MODE, GL_EXP2);      // Fog Mode
     glFogfv(GL_FOG_COLOR, fogColor);   // Set Fog Color
     glFogf(GL_FOG_DENSITY, 0.0000015f); // How Dense Will The Fog Be
@@ -1413,14 +1469,12 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
     glEnable(GL_FOG);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glMatrixMode(GL_MODELVIEW);
-
-    Matrix *modelViewMatrix = camera.GetViewMatrix();
-    glLoadMatrixf(modelViewMatrix->ToGL());
-
+    glDisable(GL_CULL_FACE);
     this->renderWorldSkyAndGround();
     /**/
+    // Active culling pour le terrain
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     textureSortedVertex.clear();
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -1482,7 +1536,15 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
             visibleLoLOD.push_back(i);
         }
     }
-
+    GLenum terrainFront = GL_CCW;
+    int refId = -1; bool refHi = false;
+    if (!visibleHiLOD.empty()) { refId = visibleHiLOD[0]; refHi = true; }
+    else if (!visibleLoLOD.empty()) { refId = visibleLoLOD[0]; refHi = false; }
+    if (refId >= 0) {
+        AreaBlock* refBlk = area->GetAreaBlockByID(refHi ? LOD : (LOD+1), refId);
+        terrainFront = DetectTerrainFrontFace(refBlk);
+    }
+    glFrontFace(terrainFront);
     // Passe géométrie (non texturée)
     glBegin(GL_TRIANGLES);
     for (int id : visibleHiLOD) {
@@ -1492,23 +1554,6 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
         renderBlock(area, LOD + 1, id, false);
     }
     glEnd();
-    
-    glDepthFunc(GL_LEQUAL);
-    glEnable(GL_POLYGON_OFFSET_FILL);
-    glPolygonOffset(-1.0f, -1.0f);
-    const auto& skirts = area->GetSkirts();
-    glBegin(GL_TRIANGLES);
-    for (const auto& tri : skirts.tris) {
-        glColor3f(tri.v[0].r, tri.v[0].g, tri.v[0].b);
-        glVertex3f(tri.v[0].x, tri.v[0].y, tri.v[0].z);
-        glColor3f(tri.v[1].r, tri.v[1].g, tri.v[1].b);
-        glVertex3f(tri.v[1].x, tri.v[1].y, tri.v[1].z);
-        glColor3f(tri.v[2].r, tri.v[2].g, tri.v[2].b);
-        glVertex3f(tri.v[2].x, tri.v[2].y, tri.v[2].z);
-    }
-    glEnd();
-    glDisable(GL_POLYGON_OFFSET_FILL);
-    glDepthFunc(GL_LESS);
 
     // Passe textures: réutilise les mêmes listes visibles (pas de culling)
     glEnable(GL_TEXTURE_2D);
@@ -1542,9 +1587,33 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
         glEnd();
     }
     glDisable(GL_TEXTURE_2D);
+    // Overlay: inversion de Z -> winding mirroir, on inverse temporairement la front face
+    
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(-1.0f, -1.0f);
+    glFrontFace(GL_CCW);
+    const auto& skirts = area->GetSkirts();
+    glBegin(GL_TRIANGLES);
+    for (const auto& tri : skirts.tris) {
+        glColor3f(tri.v[0].r, tri.v[0].g, tri.v[0].b);
+        glVertex3f(tri.v[0].x, tri.v[0].y, tri.v[0].z);
+        glColor3f(tri.v[1].r, tri.v[1].g, tri.v[1].b);
+        glVertex3f(tri.v[1].x, tri.v[1].y, tri.v[1].z);
+        glColor3f(tri.v[2].r, tri.v[2].g, tri.v[2].b);
+        glVertex3f(tri.v[2].x, tri.v[2].y, tri.v[2].z);
+    }
+    glEnd();
+    glDisable(GL_POLYGON_OFFSET_FILL);
+    glDepthFunc(GL_LESS);
+    glFrontFace(terrainFront);
 
     renderMapOverlay(area);
+
     glDisable(GL_FOG);
+    glDisable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glFrontFace(GL_CCW);
 }
 
 void SCRenderer::renderObjects(RSArea *area, size_t blockID) {

@@ -119,7 +119,7 @@ public:
 
     // Pré-calcul (optionnel) sur une plage de LOD
     void PrecomputeAABBs(RSArea* area, int minLOD, int maxLOD);
-
+    void bindCameraProjectionAndView(float verticalOffset);
     int32_t width;
     int32_t height;
     Point3D light;
@@ -145,7 +145,8 @@ private:
 
     void extractFrustumPlanes(Plane planes[6]) const;
     static bool isAABBVisible(const AABB& box, const Plane planes[6]);
-    const AABB& computeBlockAABB(RSArea* area, int LOD, int blockId);
+    
+    const AABB &computeBlockAABB(RSArea *area, int LOD, int blockId);
 
     struct AreaAABBCache {
         std::unordered_map<uint64_t, AABB> byKey; // key = (LOD<<32)|blockId

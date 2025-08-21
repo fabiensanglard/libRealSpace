@@ -247,14 +247,29 @@ void DebugObjectViewer::renderUI() {
                 if (ImGui::TreeNode(("Triangle " + std::to_string(tri_count++)).c_str())) {
                     ImGui::Text("Triangle ID: %d", tri_count);
                     ImGui::Text("Property: %d", triangle.property);
+                    for (int i=0; i<3; i++) {
+                        ImGui::Text("Flag %d: %d", i, triangle.flags[i]);
+                    }
                     ImGui::Text("Color ID: %d", triangle.color);
                     Texel *color = palette.GetRGBColor(triangle.color);
                     ImGui::Text("Color: R: %d, G: %d, B: %d, A: %d", color->r, color->g, color->b, color->a);
                     float colorValue[3] = {color->r / 255.0f, color->g / 255.0f, color->b / 255.0f};
                     ImGui::ColorPicker3("Color Picker", colorValue, ImGuiColorEditFlags_NoInputs);
+                    auto attr = objs.showCases[currentObject].entity->attrs[tri_count - 1];
+                    if (attr != nullptr) {
+                        ImGui::Text("Attribute props1: %d", attr->props1);
+                        ImGui::Text("Attribute props2: %d", attr->props2);
+                        
+                        ImGui::Text("Attribute ID: %d", attr->id);
+                        ImGui::Text("Attribute Type: %d", attr->type);
+                    } else {
+                        ImGui::Text("No attribute for this triangle");
+                    }
                     ImGui::Text("Vertices: ");
                     for (const auto &vertex : triangle.ids) {
                         ImGui::Text("  Vertex ID: %d", vertex);
+                        auto vert=objs.showCases[currentObject].entity->vertices[vertex];
+                        ImGui::Text("    Position: (%.2f, %.2f, %.2f)", vert.x, vert.y, vert.z);
                     }
                     this->vertices.clear();
                     for (const auto &vertex : triangle.ids) {

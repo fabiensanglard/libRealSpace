@@ -137,6 +137,13 @@ void SCProg::execute() {
                     this->mission->mission->mission_data.flags[prog.arg]++;
                 }
             break;
+            case OP_REMOVE_1_TO_FLAG:
+                if (exec) {
+                    this->actor->executed_opcodes.push_back(i);
+                    if (this->mission->mission->mission_data.flags[prog.arg] > 0) {
+                        this->mission->mission->mission_data.flags[prog.arg]--;
+                    }
+                }
             case OP_ADD_WORK_REGISTER_TO_FLAG:
                 if (exec) {
                     this->actor->executed_opcodes.push_back(i);

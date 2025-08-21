@@ -992,7 +992,7 @@ void SCStrike::runFrame(void) {
     } break;
     }
 
-    
+    Renderer.bindCameraProjectionAndView(0.45f);
     Renderer.renderWorldSolid(&area, BLOCK_LOD_MAX, 400);
 
     glDisable(GL_TEXTURE_2D);
@@ -1138,7 +1138,6 @@ void SCStrike::runFrame(void) {
         hud_texture->Set(hud_image);
         hud_texture->UpdateContent(hud_image);
         Renderer.drawModel(this->cockpit->cockpit->REAL.OBJS, LOD_LEVEL_MAX, cockpit_pos, cockpit_rot, cockpit_ajustement);
-        glDisable(GL_CULL_FACE);
         Renderer.drawTexturedQuad(
             cockpit_pos,
             cockpit_rot,
@@ -1310,7 +1309,6 @@ void SCStrike::runFrame(void) {
             },
             speed_texture
         );
-        glEnable(GL_CULL_FACE);
         break;
     }
 }
