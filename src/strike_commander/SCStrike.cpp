@@ -818,6 +818,7 @@ void SCStrike::setCameraLookat(Vector3D obj_pos) {
 void SCStrike::runFrame(void) {
     Mixer.setVolume(5,5);
     this->checkKeyboard();
+    Renderer.setLight(&this->light);
     if (!this->pause_simu && this->camera_mode!=View::AUTO_PILOT) {
         this->mfd_timeout--;
         this->player_plane->Simulate();
@@ -993,6 +994,8 @@ void SCStrike::runFrame(void) {
 
     
     Renderer.renderWorldSolid(&area, BLOCK_LOD_MAX, 400);
+
+    glDisable(GL_TEXTURE_2D);
     if (this->show_bbox) {
         for (auto rrarea: this->current_mission->mission->mission_data.areas) {
             Renderer.renderLineCube(rrarea->position, rrarea->AreaWidth);

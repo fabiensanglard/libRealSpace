@@ -122,6 +122,7 @@ public:
 
     int32_t width;
     int32_t height;
+    Point3D light;
 private:
     bool initialized;
     AssetManager *assets;
@@ -135,7 +136,7 @@ private:
     bool paused;
     uint32_t counter;
     Camera camera;
-    Point3D light;
+    
     Point3D playerPosition;
     TextureVertexMap textureSortedVertex;
     GLuint framebuffer;

@@ -60,6 +60,7 @@ protected:
      * @brief The target position of the camera
      */
     Point3D target_camera_pos;
+    Point3D light{4.0f, 4.0f, 4.0f};
     /**
      * @brief The yaw of the camera
      */

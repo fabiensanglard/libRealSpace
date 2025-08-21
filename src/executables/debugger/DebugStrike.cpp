@@ -1012,6 +1012,15 @@ void DebugStrike::renderMenu() {
         ImGui::Text("Camera mode %d", this->camera_mode);
         ImGui::Text("Position [%.3f,%.3f,%.3f]", this->camera_pos.x, this->camera_pos.y, this->camera_pos.z);
         ImGui::Text("Pilot lookat [%d,%d]", this->pilote_lookat.x, this->pilote_lookat.y);
+        ImGui::SliderFloat("Camera pos x", &this->camera_pos.x, -150.0f, 150.0f);
+        ImGui::SliderFloat("Camera pos y", &this->camera_pos.y, -150.0f, 150.0f);
+        ImGui::SliderFloat("Camera pos z", &this->camera_pos.z, -150.0f, 150.0f);
+        ImGui::Text("Light position [%.3f,%.3f,%.3f]", this->light.x, this->light.y, this->light.z);
+        ImGui::Text("Renderer Light [%.3f,%.3f,%.3f]", Renderer.light.x,
+                    Renderer.light.y, Renderer.light.z);
+        ImGui::SliderFloat("Light x", &this->light.x, -150.0f, 150.0f);
+        ImGui::SliderFloat("Light y", &this->light.y, -150.0f, 150.0f);
+        ImGui::SliderFloat("Light z", &this->light.z, -150.0f, 150.0f);
         ImGui::End();
     }
     if (show_cockpit) {
