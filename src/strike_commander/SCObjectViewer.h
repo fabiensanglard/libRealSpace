@@ -43,7 +43,7 @@ protected:
 
     //For rotating the object
     uint32_t startTime;
-
+    Point3D light{0, 0, 0};
     void OnExit(void);
     void OnNext(void);
     void OnZoomOut(void);

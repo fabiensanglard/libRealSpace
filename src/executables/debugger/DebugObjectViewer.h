@@ -4,6 +4,8 @@
 class DebugObjectViewer : public SCObjectViewer {
 private:
     std::vector<Vector3D> vertices;
+    bool moovingLight{true};
+    bool autoRotate{true};
 public:
     DebugObjectViewer();
     ~DebugObjectViewer();

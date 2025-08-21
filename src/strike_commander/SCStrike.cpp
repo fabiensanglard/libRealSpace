@@ -16,6 +16,7 @@
 #include <cmath>
 #include "SCStrike.h"
 #define SC_WORLD 1100
+#define RENDER_DISTANCE 40000.0f
 #define AUTOPILOTE_TIMEOUT 1000
 #define AUTOPILOTE_SPEED 4
 /**
@@ -1001,7 +1002,14 @@ void SCStrike::runFrame(void) {
     for (auto actor: this->current_mission->actors) {
         if (actor->plane != nullptr) {
             if (actor->plane != this->player_plane) {
-                
+                Vector3D distance = {
+                    actor->plane->x - this->player_plane->x,
+                    actor->plane->y - this->player_plane->y,
+                    actor->plane->z - this->player_plane->z
+                };
+                if (distance.Length() > RENDER_DISTANCE) {
+                    continue; // Skip rendering if the plane is too far away
+                }
                 if (this->show_bbox) {
                     actor->plane->renderPlaneLined();
                     BoudingBox *bb = actor->plane->object->entity->GetBoudingBpx();
@@ -1038,6 +1046,14 @@ void SCStrike::runFrame(void) {
         } else if (actor->object->entity != nullptr) {
             Vector3D actor_position = {actor->object->position.x, actor->object->position.y, actor->object->position.z};
             Vector3D actor_orientation = {(360.0f - static_cast<float>(actor->object->azymuth) + 90.0f), static_cast<float>(actor->object->pitch), -static_cast<float>(actor->object->roll)};
+            Vector3D distance = {
+                actor_position.x - this->player_plane->x,
+                actor_position.y - this->player_plane->y,
+                actor_position.z - this->player_plane->z
+            };
+            if (distance.Length() > RENDER_DISTANCE) {
+                continue; // Skip rendering if the object is too far away
+            }
             Renderer.drawModel(actor->object->entity, LOD_LEVEL_MAX, actor_position, actor_orientation);
             if (this->show_bbox) {
                 if (actor->aiming_vector.x != 0.0f || actor->aiming_vector.y != 0.0f || actor->aiming_vector.z != 0.0f) {

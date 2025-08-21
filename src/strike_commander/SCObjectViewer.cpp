@@ -240,7 +240,6 @@ void SCObjectViewer::runFrame(void) {
     Point3D lookAt = {0, 0, 0};
     Renderer.getCamera()->LookAt(&lookAt);
 
-    Point3D light;
     light.x = 4 * cosf(-1 * totalTime / 20000.0f);
     light.y = 4;
     light.z = 4 * sinf(-1 * totalTime / 20000.0f);

@@ -34,18 +34,24 @@ void DebugObjectViewer::runFrame()  {
     RSShowCase showCase = objs.showCases[currentObject];
 
     Point3D newPosition;
-    newPosition.x = showCase.cameraDist / 150 * cosf(totalTime / 2000.0f);
-    newPosition.y = showCase.cameraDist / 350;
-    newPosition.z = showCase.cameraDist / 150 * sinf(totalTime / 2000.0f);
+    if (autoRotate) {
+        newPosition.x = showCase.cameraDist / 150 * cosf(totalTime / 2000.0f);
+        newPosition.y = showCase.cameraDist / 350;
+        newPosition.z = showCase.cameraDist / 150 * sinf(totalTime / 2000.0f);
+    } else {
+        newPosition.x = showCase.cameraDist / 150;
+        newPosition.y = showCase.cameraDist / 350;
+        newPosition.z = showCase.cameraDist / 150;
+    }
 
     Renderer.getCamera()->SetPosition(&newPosition);
     Point3D lookAt = {0, 0, 0};
     Renderer.getCamera()->LookAt(&lookAt);
-
-    Point3D light;
-    light.x = 4 * cosf(-1 * totalTime / 20000.0f);
-    light.y = 4;
-    light.z = 4 * sinf(-1 * totalTime / 20000.0f);
+    if (moovingLight) {
+        light.x = 4 * cosf(-1 * totalTime / 20000.0f);
+        light.y = 4;
+        light.z = 4 * sinf(-1 * totalTime / 20000.0f);
+    }
     Renderer.setLight(&light);
 
     glMatrixMode(GL_PROJECTION);
@@ -184,10 +190,18 @@ void DebugObjectViewer::renderUI() {
                 }
             }
             ImGui::EndChild();
-            ImGui::BeginChild("Camera", ImVec2(0, 400), true);
+            ImGui::BeginChild("Camera", ImVec2(0, 150), true);
+            ImGui::Checkbox("Auto Rotate", &autoRotate);
             ImGui::SliderFloat("Zoom", &objs.showCases[0].cameraDist, 1.0f, 100000.0f);
             ImGui::SliderFloat("Angle Up/Down", &this->rotateUpDownAngle, -180.0f, 180.0f);
             ImGui::SliderFloat("Angle Left/Right", &this->rotateLeftRightAngle, -180.0f, 180.0f);
+            ImGui::EndChild();
+            ImGui::BeginChild("Light", ImVec2(0, 150), true);
+            ImGui::Checkbox("Mooving Light", &moovingLight);
+            ImGui::Text("Light Position: (%.2f, %.2f, %.2f)", light.x, light.y, light.z);
+            ImGui::SliderFloat("Light X", &light.x, -10.0f, 10.0f);
+            ImGui::SliderFloat("Light Y", &light.y, -10.0f, 10.0f);
+            ImGui::SliderFloat("Light Z", &light.z, -10.0f, 10.0f);
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
