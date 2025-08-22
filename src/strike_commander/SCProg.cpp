@@ -310,8 +310,9 @@ void SCProg::execute() {
             break;
             case OP_GOTO_IF_GREATER_OR_EQUAL:
                 if (exec) {
-                    
-                    if (compare_flag == 0 || compare_flag == 1) {
+                    // Remove the equal part to have only greater than.
+                    // have to check with more missions
+                    if (compare_flag == 1) {
                         jump_to = prog.arg;
                         exec = false;
                         this->actor->executed_opcodes.push_back(i);
