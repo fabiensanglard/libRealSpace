@@ -70,10 +70,11 @@ struct CAST {
 };
 struct PROG {
     uint8_t opcode;
-    uint8_t arg;
+    int8_t arg;
 };
 struct MISN_SCEN {
     uint8_t is_active {0};
+    uint8_t has_been_activated {0};
     int16_t area_id {0};
     std::vector<int16_t> progs_id;
     int16_t on_is_activated {-1};

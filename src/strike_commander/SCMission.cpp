@@ -288,9 +288,9 @@ void SCMission::update() {
     this->tick_counter++;
     uint8_t area_id = this->getAreaID({this->player->plane->x, this->player->plane->y, this->player->plane->z});
     if (area_id != this->current_area_id) {
-        this->current_area_id = area_id;
+        
         for (auto scene: this->mission->mission_data.scenes) {
-            if (scene->area_id == area_id-1 && scene->on_leaving != -1) {
+            if (scene->area_id == this->current_area_id-1 && scene->on_leaving != -1) {
                 if (scene->on_leaving < this->mission->mission_data.prog.size()) {
                     std::vector<PROG> prog;
                     for (auto prg: *this->mission->mission_data.prog[scene->on_leaving]) {
@@ -301,6 +301,7 @@ void SCMission::update() {
                 }
             }
         }
+        this->current_area_id = area_id;
     }
     for (auto scene: this->mission->mission_data.scenes) {
         if (scene->area_id == area_id-1 || scene->area_id == -1) {
@@ -367,17 +368,19 @@ void SCMission::update() {
                 }
             }
             if (scene->on_is_activated != -1) {
-                if (scene->on_is_activated < this->mission->mission_data.prog.size()) {
+                if (scene->on_is_activated < this->mission->mission_data.prog.size() && scene->has_been_activated == 0) {
                     std::vector<PROG> prog;
                     for (auto prg: *this->mission->mission_data.prog[scene->on_is_activated]) {
                         prog.push_back(prg);
                     }
                     SCProg *p = new SCProg(this->player, prog, this);
                     p->execute();
+                    scene->has_been_activated = 1;
                 }
             }
             scene->is_active = 0;
         }
+        
     }
     for (auto ai_actor : this->actors) {
         
