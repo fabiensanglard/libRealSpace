@@ -605,6 +605,10 @@ void SCStrike::checkKeyboard(void) {
                         continue;
                     }
                     auto enemy = this->current_mission->enemies[i];
+                    if (this->current_mission->area->getY(enemy->object->position.x, enemy->object->position.z) > enemy->object->position.y) {
+                        // under the ground
+                        continue;
+                    }
                     if (enemy->object->alive) {
                         float dx = enemy->object->position.x - this->player_plane->x;
                         float dy = enemy->object->position.y - this->player_plane->y;

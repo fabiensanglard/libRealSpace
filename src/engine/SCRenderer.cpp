@@ -790,7 +790,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
                 : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
-                const Texel *texel = palette.GetRGBColor(triangle->color);
+                const Texel *texel = palette.GetRGBColor(triangle->color-1);
                 if (colored) {
                     glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                               texel->b / 255.0f * lambertianFactor, alpha);
@@ -851,7 +851,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
                 : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
-                const Texel *texel = palette.GetRGBColor(triangle->color);
+                const Texel *texel = palette.GetRGBColor(triangle->color-1);
                 if (colored) {
                     glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                               texel->b / 255.0f * lambertianFactor, alpha);
@@ -914,7 +914,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
                 : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
-            const Texel *texel = palette.GetRGBColor(triangle->color);
+            const Texel *texel = palette.GetRGBColor(triangle->color-1);
             glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                       texel->b / 255.0f * lambertianFactor, texel->a);
 
@@ -958,7 +958,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
                 : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
-                const Texel *texel = palette.GetRGBColor(triangle->color);
+                const Texel *texel = palette.GetRGBColor(triangle->color-1);
                 glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                           texel->b / 255.0f * lambertianFactor, texel->a);
 
@@ -1022,7 +1022,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
                 : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
-            const Texel *texel = palette.GetRGBColor(triangle->color);
+            const Texel *texel = palette.GetRGBColor(triangle->color-1);
             glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                       texel->b / 255.0f * lambertianFactor, texel->a);
 
@@ -1080,7 +1080,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
                 ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
                 : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
 
-                const Texel *texel = palette.GetRGBColor(triangle->color);
+                const Texel *texel = palette.GetRGBColor(triangle->color-1);
                 glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
                           texel->b / 255.0f * lambertianFactor, texel->a);
 
