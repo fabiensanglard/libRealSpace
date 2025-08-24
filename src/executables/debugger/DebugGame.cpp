@@ -35,7 +35,7 @@ void DebugGame::init() {
     Renderer.init(1200,800, &Assets);
     // Load the Mouse Cursor
     Mouse.init();
-    testMissionSC();
+    loadSC();
 }
 
 void DebugGame::pumpEvents(void) {
