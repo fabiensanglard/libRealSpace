@@ -62,7 +62,7 @@ void DebugGameFlow::renderMenu() {
     }
     ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, sceneid);
     if (show_music_player) {
-        ImGui::Begin("Music Player");
+        ImGui::Begin("Music Player", &show_music_player);
         if (ImGui::BeginCombo("Music list Bank 1", 0, 0)) {
             for (int i = 0; i < Mixer.music->musics[1].size(); i++) {
                 if (ImGui::Selectable(std::to_string(i).c_str(), false)) {
@@ -86,7 +86,7 @@ void DebugGameFlow::renderMenu() {
     }
 
     if (show_load_miss) {
-        ImGui::Begin("Load Miss");
+        ImGui::Begin("Load Miss", &show_load_miss);
         static ImGuiComboFlags flags = 0;
         static char **miss = new char *[this->gameFlowParser.game.game.size()];
         for (int i = 0; i < this->gameFlowParser.game.game.size(); i++) {
@@ -116,17 +116,17 @@ void DebugGameFlow::renderMenu() {
         ImGui::End();
     }
     if (show_gamestate) {
-        ImGui::Begin("GameState");
+        ImGui::Begin("GameState", &show_gamestate);
         this->renderGameState();
         ImGui::End();
     }
     if (show_scene_window) {
-        ImGui::Begin("Infos");
+        ImGui::Begin("Infos", &show_scene_window);
         this->renderMissionInfos();
         ImGui::End();
     }
     if (show_shots) {
-        ImGui::Begin("Shots");
+        ImGui::Begin("Shots", &show_shots);
         static ImGuiComboFlags shtsflags = 0;
         if (ImGui::BeginCombo("List des shots", nullptr, shtsflags)) {
             for (auto shot : this->optionParser.estb) {
@@ -142,7 +142,7 @@ void DebugGameFlow::renderMenu() {
         ImGui::End();
     }
     if (conv_player) {
-        ImGui::Begin("Convert Player");
+        ImGui::Begin("Convert Player", &conv_player);
         static ImGuiComboFlags flags = 0;
         if (ImGui::BeginCombo("List des conversations", nullptr, flags)) {
             for (int i = 0; i < 256; i++) {
@@ -158,7 +158,7 @@ void DebugGameFlow::renderMenu() {
         ImGui::End();
     }
     if (load_sprites) {
-        ImGui::Begin("Load Sprites");
+        ImGui::Begin("Load Sprites", &load_sprites);
         static ImGuiComboFlags flags = 0;
         if (ImGui::BeginCombo("List des extras", nullptr, flags)) {
             int cpt_sprite = 0;

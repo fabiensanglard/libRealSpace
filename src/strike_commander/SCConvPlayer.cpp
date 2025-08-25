@@ -155,7 +155,7 @@ void ConvFrame::parse_CLOSEUP(ByteStream *conv) {
 
     conv->MoveForward(next_frame_offset);
     uint8_t color              = conv->ReadByte(); // Color ?
-    this->textColor     = color;
+    this->textColor            = color;
     const char *pszExt         = "normal";
     this->facePaletteID = ConvAssets.GetFacePaletteID(const_cast<char *>(pszExt));
 
@@ -402,6 +402,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     case CLOSEUP_CONTINUATION: // Same person keep talking
     {
         tmp_frame->parse_CLOSEUP_CONTINUATION(&conv);
+        tmp_frame->textColor = this->conversation_frames.back()->textColor;
         tmp_frame->face = this->conversation_frames.back()->face;
         tmp_frame->face_expression = this->conversation_frames.back()->face_expression;
         tmp_frame->mode = this->conversation_frames.back()->mode;
@@ -413,6 +414,11 @@ void SCConvPlayer::ReadNextFrame(void) {
     {
         printf("ConvID: %d CHOICE YES/NO : %d\n", this->conversationID, type);
         tmp_frame->parse_YESNOCHOICE_BRANCH1(&conv, this);
+        tmp_frame->face = this->conversation_frames.back()->face;
+        tmp_frame->textColor = this->conversation_frames.back()->textColor;
+        tmp_frame->face_expression = this->conversation_frames.back()->face_expression;
+        tmp_frame->facePaletteID = this->conversation_frames.back()->facePaletteID;
+        tmp_frame->facePosition = this->conversation_frames.back()->facePosition;
         break;
     }
     case YESNOCHOICE_BRANCH2: // Choice offset after first branch
@@ -422,6 +428,11 @@ void SCConvPlayer::ReadNextFrame(void) {
         printf("ConvID: %d CHOICE YES/NO : %d\n", this->conversationID, type);
         // Looks like first byte is the offset to skip if the answer is no.
         tmp_frame->parse_YESNOCHOICE_BRANCH2(&conv);
+        tmp_frame->face = this->conversation_frames.back()->face;
+        tmp_frame->textColor = this->conversation_frames.back()->textColor;
+        tmp_frame->face_expression = this->conversation_frames.back()->face_expression;
+        tmp_frame->facePaletteID = this->conversation_frames.back()->facePaletteID;
+        tmp_frame->facePosition = this->conversation_frames.back()->facePosition;
         break;
     }
     case GROUP_SHOT_ADD_CHARCTER: // Add person to GROUP
@@ -438,6 +449,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     {
         tmp_frame->parse_SHOW_TEXT(&conv);
         tmp_frame->face = this->conversation_frames.back()->face;
+        tmp_frame->textColor = this->conversation_frames.back()->textColor;
         tmp_frame->face_expression = this->conversation_frames.back()->face_expression;
         tmp_frame->facePaletteID = this->conversation_frames.back()->facePaletteID;
         tmp_frame->facePosition = this->conversation_frames.back()->facePosition;
@@ -464,12 +476,13 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
 
     tmp_frame->SetExpired(false);
-    
-    if (tmp_frame->bgLayers == nullptr) {
-        tmp_frame->bgLayers = this->conversation_frames.back()->bgLayers;
-    }
-    if (tmp_frame->bgPalettes == nullptr) {
-        tmp_frame->bgPalettes = this->conversation_frames.back()->bgPalettes;
+    if (this->conversation_frames.size() > 0) {
+        if (tmp_frame->face == nullptr) {
+            tmp_frame->face = this->conversation_frames.back()->face;
+        }
+        if (tmp_frame->participants.size() == 0) {
+            tmp_frame->participants = this->conversation_frames.back()->participants;
+        }
     }
     this->conversation_frames.push_back(tmp_frame);
 }
@@ -618,12 +631,16 @@ void SCConvPlayer::DrawText(void) {
             lastGoodPos = wordSearch - 1;
             while (*wordSearch != ' ' && wordSearch < end) {
 
-                if (*wordSearch == ' ')
+                if (*wordSearch == ' ') {
                     pixelAvailable -= CONV_SPACE_SIZE;
-                else
-                    pixelAvailable -=
-                        this->current_frame->font->GetShapeForChar(*wordSearch)->GetWidth() + CONV_INTERLETTER_SPACE;
-
+                } else {
+                    RLEShape *letter = this->current_frame->font->GetShapeForChar(*wordSearch);
+                    if (letter != nullptr) {
+                        pixelAvailable -= letter->GetWidth() + CONV_INTERLETTER_SPACE;
+                    } else {
+                        pixelAvailable -= 8 + CONV_INTERLETTER_SPACE;
+                    }
+                }
                 wordSearch++;
             }
 
@@ -642,7 +659,7 @@ void SCConvPlayer::DrawText(void) {
         coo.x += pixelAvailable / 2;
 
         VGA.GetFrameBuffer()->PrintText(
-            this->current_frame->font, &coo, this->current_frame->text, static_cast<uint32_t>(this->current_frame->textColor),
+            this->font, &coo, this->current_frame->text, static_cast<uint32_t>(this->current_frame->textColor),
             static_cast<uint32_t>(cursor - this->current_frame->text), static_cast<uint32_t>(lastGoodPos - cursor),
             CONV_INTERLETTER_SPACE, CONV_SPACE_SIZE
         );
@@ -737,17 +754,22 @@ void SCConvPlayer::runFrame(void) {
     VGA.Activate();
     VGA.GetFrameBuffer()->FillWithColor(255);
     // Update the palette for the current background
-    for (size_t i = 0; i < this->current_frame->bgLayers->size(); i++) {
-        ByteStream paletteReader;
-        paletteReader.Set((*this->current_frame->bgPalettes)[i]);
-        this->palette.ReadPatch(&paletteReader);
+    if (this->current_frame->bgLayers != nullptr && this->current_frame->bgPalettes != nullptr) {
+        for (size_t i = 0; i < this->current_frame->bgLayers->size(); i++) {
+            ByteStream paletteReader;
+            paletteReader.Set((*this->current_frame->bgPalettes)[i]);
+            this->palette.ReadPatch(&paletteReader);
+        }
+        VGA.SetPalette(&this->palette);
+        for (size_t i = 0; i < this->current_frame->bgLayers->size(); i++) {
+            RLEShape *shape = (*this->current_frame->bgLayers)[i];
+            VGA.GetFrameBuffer()->DrawShape(shape);
+        }
     }
-    VGA.SetPalette(&this->palette);
+    
+    
     // Draw static
-    for (size_t i = 0; i < this->current_frame->bgLayers->size(); i++) {
-        RLEShape *shape = (*this->current_frame->bgLayers)[i];
-        VGA.GetFrameBuffer()->DrawShape(shape);
-    }
+    
     if (this->current_frame->sound_file_name != NULL) {
         std::string filename = "F:"+*this->current_frame->sound_file_name+".VOC";
         std::transform(filename.begin(), filename.end(), filename.begin(), ::toupper);
@@ -943,7 +965,7 @@ void SCConvPlayer::runFrame(void) {
     if (this->current_frame->sound_file_name != nullptr && Mixer.IsSoundPlaying() == false) {
         this->current_frame->SetExpired(true);
     }
-    DrawText();
+    this->DrawText();
     
     VGA.VSync();
 }
