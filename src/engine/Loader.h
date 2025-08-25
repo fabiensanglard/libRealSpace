@@ -4,8 +4,8 @@
 #include <Windows.h>
 #include <GL/GL.h>
 #endif
-#include <SDL_opengl_glext.h>
 #include <SDL_opengl.h>
+#include <SDL_opengl_glext.h>
 #include <iostream>
 #include <functional>
 #include <thread>
