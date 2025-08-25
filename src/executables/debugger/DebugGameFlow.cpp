@@ -1,5 +1,7 @@
 #include "DebugGameFlow.h"
 #include "DebugStrike.h"
+#include "DebugConvPlayer.h"
+
 #include <imgui.h>
 #include <imgui_impl_opengl2.h>
 #include <imgui_impl_sdl2.h>
@@ -15,6 +17,12 @@ void DebugGameFlow::flyMission() {
     this->missionToFly = nullptr;
     fly_mission.push(fly);
     this->next_miss = GameState.mission_id;
+}
+void DebugGameFlow::playConv(uint8_t convId) {
+    SCConvPlayer *conv = new DebugConvPlayer();
+    conv->init();
+    conv->SetID(convId);
+    this->convs.push(conv);
 }
 /**
  * This method renders the game flow menu using ImGui.
@@ -139,7 +147,7 @@ void DebugGameFlow::renderMenu() {
         if (ImGui::BeginCombo("List des conversations", nullptr, flags)) {
             for (int i = 0; i < 256; i++) {
                 if (ImGui::Selectable(std::to_string(i).c_str(), false)) {
-                    SCConvPlayer *conv = new SCConvPlayer();
+                    SCConvPlayer *conv = new DebugConvPlayer();
                     conv->init();
                     conv->SetID(i);
                     this->convs.push(conv);

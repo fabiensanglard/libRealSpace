@@ -34,4 +34,5 @@ public:
     void blitWithMaskAndOffset(uint8_t *srcBuffer, int x, int y, int width, int height, uint8_t maxk, uint8_t offset);
     void blitLargeBuffer(uint8_t *srcBuffer, int srcWidth, int srcHeight, int srcX, int srcY, int destX, int destY,
                          int width, int height);
+    Texel* getTexture(VGAPalette* palette);
 };

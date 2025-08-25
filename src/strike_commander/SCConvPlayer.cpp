@@ -237,8 +237,10 @@ void ConvFrame::parse_GROUP_SHOT_ADD_CHARACTER(ByteStream *conv) {
         conv->MoveForward(2);
         this->parse_GROUP_SHOT_ADD_CHARACTER(conv);
     } else if (conv->PeekByte() == SHOW_TEXT) {
-        conv->MoveForward(1);
+        conv->MoveForward(2);
         this->parse_SHOW_TEXT(conv);
+    } else {
+        conv->MoveForward(1);
     }
 }
 void ConvFrame::parse_GROUP_SHOT_CHARACTER_TALK(ByteStream *conv) {
@@ -401,6 +403,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     {
         tmp_frame->parse_CLOSEUP_CONTINUATION(&conv);
         tmp_frame->face = this->conversation_frames.back()->face;
+        tmp_frame->face_expression = this->conversation_frames.back()->face_expression;
         tmp_frame->mode = this->conversation_frames.back()->mode;
         tmp_frame->facePaletteID = this->conversation_frames.back()->facePaletteID;
         tmp_frame->facePosition = this->conversation_frames.back()->facePosition;
@@ -435,6 +438,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     {
         tmp_frame->parse_SHOW_TEXT(&conv);
         tmp_frame->face = this->conversation_frames.back()->face;
+        tmp_frame->face_expression = this->conversation_frames.back()->face_expression;
         tmp_frame->facePaletteID = this->conversation_frames.back()->facePaletteID;
         tmp_frame->facePosition = this->conversation_frames.back()->facePosition;
         
@@ -444,7 +448,7 @@ void SCConvPlayer::ReadNextFrame(void) {
         topOffset = conv.ReadByte();
         first_palette = conv.ReadByte();
         printf("ConvID: %d Unknown usage Flag 0xE: (0x%2X 0x%2X) \n", this->conversationID, topOffset, first_palette);
-        ReadNextFrame();
+
         break;
     }
     case CHOOSE_WINGMAN: // Wingman selection trigger
@@ -569,9 +573,7 @@ void SCConvPlayer::CheckFrameExpired(void) {
 
     
         int32_t currentTime = SDL_GetTicks();
-        if (this->current_frame->text == nullptr || strlen(this->current_frame->text) == 0) {
-            this->current_frame->SetExpired(true);
-        }
+
         if (currentTime - this->current_frame->creationTime > 5000)
             this->current_frame->SetExpired(true);
     }

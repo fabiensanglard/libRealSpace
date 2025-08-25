@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "FrameBuffer.h"
 
 FrameBuffer::FrameBuffer(int w, int h) {
     this->framebuffer = new uint8_t[w * h]();
@@ -349,4 +350,12 @@ void FrameBuffer::blitLargeBuffer(uint8_t *srcBuffer, int srcWidth, int srcHeigh
             this->framebuffer[destOffset + destCol] = srcBuffer[srcRow * srcWidth + srcCol];
         }
     }
+}
+Texel *FrameBuffer::getTexture(VGAPalette *palette) { 
+    Texel *texture = new Texel[this->width * this->height];
+    for (int i = 0; i < this->width * this->height; i++) {
+        Texel entry = palette->colors[this->framebuffer[i]];
+        texture[i] = entry;
+    }
+    return texture;    
 }

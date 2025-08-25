@@ -53,7 +53,7 @@ private:
 };
 
 class SCConvPlayer : public IActivity {
-private:
+protected:
     int32_t conversationID;
     bool initialized;
     ByteStream conv;
@@ -66,8 +66,7 @@ private:
     PakArchive convPals;
     ConvFrame *current_frame{nullptr};
 
-    int SetSentenceFromConv(ByteStream *conv, int start_offset, ConvFrame *tmp_frame);
-    void CheckFrameExpired(void);
+    virtual void CheckFrameExpired(void);
     void ReadNextFrame(void);
     void SetArchive(PakEntry *conv);
     void CheckZones(void);

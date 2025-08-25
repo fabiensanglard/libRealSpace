@@ -33,60 +33,72 @@ void DebugScreen::init(int w, int h, bool fullscreen){
     
     width = w;
     height = h;
-    
-    SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_HIDDEN, &sdlWindow, &sdlRenderer);
-    
-    
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
-        printf("Unable to initialize SDL:  %s\n",SDL_GetError());
-        return ;
-    }
 
+    // 1. Initialiser SDL AVANT toute création de fenêtre
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) != 0) {
+        printf("Unable to initialize SDL: %s\n", SDL_GetError());
+        return;
+    }
 
 #ifdef SDL_HINT_IME_SHOW_UI
     SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 #endif
 
+    // 2. Attributs OpenGL adaptés macOS 10.14 (2.1 max)
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (fullscreen) {
         window_flags = (SDL_WindowFlags)(SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
     }
-    
-    sdlWindow = SDL_CreateWindow("RealSpace OBJ Viewer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,this->width,this->height,window_flags);
-    
-    // Create an OpenGL context associated with the window.
+
+    // 3. UNE seule création de fenêtre
+    sdlWindow = SDL_CreateWindow("RealSpace OBJ Viewer",
+                                 SDL_WINDOWPOS_UNDEFINED,
+                                 SDL_WINDOWPOS_UNDEFINED,
+                                 this->width,
+                                 this->height,
+                                 window_flags);
+    if (!sdlWindow) {
+        printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
+        return;
+    }
+
     SDL_GLContext gl_context = SDL_GL_CreateContext(sdlWindow);
-    
+    if (!gl_context) {
+        printf("SDL_GL_CreateContext failed: %s\n", SDL_GetError());
+        return;
+    }
+    SDL_GL_MakeCurrent(sdlWindow, gl_context);
+    SDL_GL_SetSwapInterval(1); // vsync
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-    // Setup Dear ImGui style
-    //ImGui::StyleColorsDark();
     ImGui::StyleColorsLight();
 
-    // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForOpenGL(sdlWindow, gl_context);
     ImGui_ImplOpenGL2_Init();
-    int wi = (int)((float)this->height * (4.0f/3.0f));
 
     glGenTextures(1, &this->screen_texture);
     glBindTexture(GL_TEXTURE_2D, this->screen_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this->height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this->height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glViewport((int)((float)(this->width - w)/2.0f),0,wi,this->height);			// Reset The Current Viewport
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);				// Black Background
-    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, this->width, this->height);
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     SDL_ShowWindow(sdlWindow);
 }
 
