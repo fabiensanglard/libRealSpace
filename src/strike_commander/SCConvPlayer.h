@@ -8,6 +8,7 @@
 
 #ifndef __libRealSpace__SCConvPlayer__
 #define __libRealSpace__SCConvPlayer__
+bool isNextFrameIsConv(uint8_t type);
 class SCConvPlayer;
 class ConvFrame {
 

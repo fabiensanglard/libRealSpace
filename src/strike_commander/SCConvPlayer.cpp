@@ -88,6 +88,24 @@ std::map<uint8_t, std::vector<uint8_t>> faces_shape = {
     {255,         std::vector<uint8_t>{1, 2, 35}},
 };
 
+bool isNextFrameIsConv(uint8_t type) {
+    switch (type) {
+        case GROUP_SHOT:
+        case GROUP_SHOT_ADD_CHARCTER:
+        case GROUP_SHOT_CHARCTR_TALK:
+        case CLOSEUP:
+        case CLOSEUP_CONTINUATION:
+        case SHOW_TEXT:
+        case YESNOCHOICE_BRANCH1:
+        case YESNOCHOICE_BRANCH2:
+        case CHOOSE_WINGMAN:
+        case 0xE0:
+            return true;
+        default:
+            return false;
+    }
+    return false;
+}
 
 void ConvFrame::parse_GROUP_SHOT(ByteStream *conv) {
     char *location = (char *)conv->GetPosition();
@@ -102,8 +120,14 @@ void ConvFrame::parse_GROUP_SHOT(ByteStream *conv) {
     this->face      = nullptr;
     printf("ConvID: %d WIDEPLAN : LOCATION: '%s'\n", this->conversationID, location);
     conv->MoveForward(8);
-    if (conv->PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
+    while (conv->PeekByte() == 0x0) {
         conv->MoveForward(1);
+    }
+    while (!isNextFrameIsConv((uint8_t) conv->PeekByte())) {
+        conv->MoveForward(1);
+    }
+    if (conv->PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
+        conv->MoveForward(2);
         this->parse_GROUP_SHOT_ADD_CHARACTER(conv);
     } else if (conv->PeekByte() == SHOW_TEXT) {
         conv->MoveForward(1);
@@ -203,11 +227,18 @@ void ConvFrame::parse_GROUP_SHOT_ADD_CHARACTER(ByteStream *conv) {
     participant->x = conv->ReadUShortBE();
     participant->y = conv->ReadUShortBE();
     this->participants.push_back(participant);
+    while (conv->PeekByte() == 0x0) {
+        conv->MoveForward(1);
+    }
+    while (!isNextFrameIsConv((uint8_t) conv->PeekByte())) {
+        conv->MoveForward(1);
+    }
     if (conv->PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
-        conv->MoveForward(1);
+        conv->MoveForward(2);
         this->parse_GROUP_SHOT_ADD_CHARACTER(conv);
-    } else {
+    } else if (conv->PeekByte() == SHOW_TEXT) {
         conv->MoveForward(1);
+        this->parse_SHOW_TEXT(conv);
     }
 }
 void ConvFrame::parse_GROUP_SHOT_CHARACTER_TALK(ByteStream *conv) {
@@ -300,24 +331,7 @@ void SCConvPlayer::selectWingMan(void *none, uint8_t id) {
     }
     
 }
-bool isNextFrameIsConv(uint8_t type) {
-    switch (type) {
-        case GROUP_SHOT:
-        case GROUP_SHOT_ADD_CHARCTER:
-        case GROUP_SHOT_CHARCTR_TALK:
-        case CLOSEUP:
-        case CLOSEUP_CONTINUATION:
-        case SHOW_TEXT:
-        case YESNOCHOICE_BRANCH1:
-        case YESNOCHOICE_BRANCH2:
-        case CHOOSE_WINGMAN:
-        case 0xE0:
-            return true;
-        default:
-            return false;
-    }
-    return false;
-}
+
 int ConvFrame::SetSentenceFromConv(ByteStream *conv, int start_offset) {
     char *sentence = (char *)conv->GetPosition() + start_offset;
     int sound_offset = 0;
@@ -387,6 +401,7 @@ void SCConvPlayer::ReadNextFrame(void) {
     {
         tmp_frame->parse_CLOSEUP_CONTINUATION(&conv);
         tmp_frame->face = this->conversation_frames.back()->face;
+        tmp_frame->mode = this->conversation_frames.back()->mode;
         tmp_frame->facePaletteID = this->conversation_frames.back()->facePaletteID;
         tmp_frame->facePosition = this->conversation_frames.back()->facePosition;
         break;
