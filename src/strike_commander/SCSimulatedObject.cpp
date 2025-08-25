@@ -163,13 +163,15 @@ void SCSimulatedObject::Simulate(int tps) {
             this->target->object->alive = false;
             if (this->target->object->entity->explos != nullptr) {
                 SCExplosion *explosion = new SCExplosion(this->target->object->entity->explos->objct, position);
-                MemSound *sound;
-                if (this->obj->entity_type == EntityType::tracer) {
-                    sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
-                } else {
-                    sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+                if (this->mission->sound.sounds.size() > 0) {
+                    MemSound *sound;
+                    if (this->obj->entity_type == EntityType::tracer) {
+                        sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
+                    } else {
+                        sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+                    }
+                    Mixer.PlaySoundVoc(sound->data, sound->size);
                 }
-                Mixer.PlaySoundVoc(sound->data, sound->size);
                 this->mission->explosions.push_back(explosion);
             }
             
@@ -197,13 +199,15 @@ void SCSimulatedObject::Simulate(int tps) {
                 this->shooter->score += 100;
                 if (this->target->object->entity->explos != nullptr) {
                     SCExplosion *explosion = new SCExplosion(this->target->object->entity->explos->objct, position);
-                    MemSound *sound;
-                    if (this->obj->entity_type == EntityType::tracer) {
-                        sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
-                    } else {
-                        sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+                    if (this->mission->sound.sounds.size() > 0) {
+                        MemSound *sound;
+                        if (this->obj->entity_type == EntityType::tracer) {
+                            sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
+                        } else {
+                            sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+                        }
+                        Mixer.PlaySoundVoc(sound->data, sound->size);
                     }
-                    Mixer.PlaySoundVoc(sound->data, sound->size);
                     this->mission->explosions.push_back(explosion);
                 }
                 if (this->target->plane != nullptr) {
@@ -241,23 +245,27 @@ void SCSimulatedObject::Simulate(int tps) {
     if (this->distance > this->obj->wdat->effective_range) {
         this->alive = false;
         this->mission->explosions.push_back(new SCExplosion(this->obj->explos->objct, position));
-        MemSound *sound;
-        if (this->obj->entity_type == EntityType::tracer) {
-            sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
-        } else {
-            sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+        if (this->mission->sound.sounds.size() > 0) {
+            MemSound *sound;
+            if (this->obj->entity_type == EntityType::tracer) {
+                sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
+            } else {
+                sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+            }
+            Mixer.PlaySoundVoc(sound->data, sound->size);
         }
-        Mixer.PlaySoundVoc(sound->data, sound->size);
     }
     if (this->y < this->mission->area->getY(this->x, this->z)) {
         this->mission->explosions.push_back(new SCExplosion(this->obj->explos->objct, position));
-        MemSound *sound;
-        if (this->obj->entity_type == EntityType::tracer) {
-            sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
-        } else {
-            sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+        if (this->mission->sound.sounds.size() > 0) {
+            MemSound *sound;
+            if (this->obj->entity_type == EntityType::tracer) {
+                sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
+            } else {
+                sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+            }
+            Mixer.PlaySoundVoc(sound->data, sound->size);
         }
-        Mixer.PlaySoundVoc(sound->data, sound->size);
         this->alive = false;
     }
 }
@@ -353,13 +361,15 @@ void GunSimulatedObject::Simulate(int tps) {
             if (entity->object->entity->explos != nullptr) {
                 SCExplosion *explosion = new SCExplosion(entity->object->entity->explos->objct, position);
                 this->mission->explosions.push_back(explosion);
-                MemSound *sound;
-                if (this->obj->entity_type == EntityType::tracer) {
-                    sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
-                } else {
-                    sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+                if (this->mission->sound.sounds.size() > 0) {   
+                    MemSound *sound;
+                    if (this->obj->entity_type == EntityType::tracer) {
+                        sound = this->mission->sound.sounds[SoundEffectIds::GUN_IMPACT_1];
+                    } else {
+                        sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_1];
+                    }
+                    Mixer.PlaySoundVoc(sound->data, sound->size);
                 }
-                Mixer.PlaySoundVoc(sound->data, sound->size);
             }
             this->shooter->score += 100;
             if (entity->plane != nullptr) {
@@ -383,8 +393,10 @@ void GunSimulatedObject::Simulate(int tps) {
                     entity->object->alive = false;
                     if (entity->object->entity->explos != nullptr) {
                         SCExplosion *explosion = new SCExplosion(entity->object->entity->explos->objct, position);
-                        MemSound *sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_2];
-                        Mixer.PlaySoundVoc(sound->data, sound->size);
+                        if (this->mission->sound.sounds.size() > 0) {
+                            MemSound *sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_2];
+                            Mixer.PlaySoundVoc(sound->data, sound->size);
+                        }
                         this->mission->explosions.push_back(explosion);
                     }
                     this->shooter->score += 100;
@@ -398,8 +410,10 @@ void GunSimulatedObject::Simulate(int tps) {
         }
         if (this->obj->explos != nullptr && this->obj->explos->objct != nullptr) {
             SCExplosion *explosion = new SCExplosion(this->obj->explos->objct, position);
-            MemSound *sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_3];
-            Mixer.PlaySoundVoc(sound->data, sound->size);
+            if (this->mission->sound.sounds.size() > 0) {
+                MemSound *sound = this->mission->sound.sounds[SoundEffectIds::EXPLOSION_3];
+                Mixer.PlaySoundVoc(sound->data, sound->size);
+            }
             this->mission->explosions.push_back(explosion);
         }
     }

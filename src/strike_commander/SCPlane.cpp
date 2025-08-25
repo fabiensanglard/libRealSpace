@@ -949,12 +949,16 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
         case 6:
             thrustMagnitude = -planeSpeed * 50.0f;
             weap = new GunSimulatedObject();
-            sound = this->pilot->mission->sound.sounds[SoundEffectIds::MK82_DROP];
-            Mixer.PlaySoundVoc(sound->data, sound->size);
+            if (this->pilot->mission->sound.sounds.size() > 0) {
+                sound = this->pilot->mission->sound.sounds[SoundEffectIds::MK82_DROP];
+                Mixer.PlaySoundVoc(sound->data, sound->size);
+            }
         break;
         default:
-            sound = this->pilot->mission->sound.sounds[SoundEffectIds::AIM9_SHOOT];
-            Mixer.PlaySoundVoc(sound->data, sound->size);
+            if (this->pilot->mission->sound.sounds.size() > 0) {
+                sound = this->pilot->mission->sound.sounds[SoundEffectIds::AIM9_SHOOT];
+                Mixer.PlaySoundVoc(sound->data, sound->size);
+            }
             weap = new SCSimulatedObject();
         break;
     }

@@ -459,8 +459,10 @@ void SCMission::update() {
             ai_actor->object->alive = false;
             ai_actor->is_active = false;
             this->explosions.push_back(new SCExplosion(ai_actor->object->entity->explos->objct, ai_actor->object->position));
-            MemSound *sound = this->sound.sounds[SoundEffectIds::EXPLOSION_4];
-            Mixer.PlaySoundVoc(sound->data, sound->size, 4, 0);
+            if (this->sound.sounds.size() > 0) {
+                MemSound *sound = this->sound.sounds[SoundEffectIds::EXPLOSION_4];
+                Mixer.PlaySoundVoc(sound->data, sound->size, 4, 0);
+            }
             if (ai_actor->object->entity->destroyed_object != nullptr && ai_actor->plane == nullptr) {
                 ai_actor->object->entity = ai_actor->object->entity->destroyed_object;
             }

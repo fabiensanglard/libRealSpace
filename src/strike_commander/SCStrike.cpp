@@ -214,8 +214,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_1:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(10);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);    
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);    
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 1;
@@ -229,8 +231,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_2:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(20);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 2;
@@ -244,8 +248,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_3:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(30);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 3;
@@ -259,8 +265,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_4:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(40);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 4;
@@ -274,8 +282,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_5:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(50);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 5;
@@ -289,8 +299,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_6:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(60);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1); 
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 6;
@@ -304,8 +316,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_7:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(70);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 7;
@@ -319,8 +333,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_8:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(80);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 8;
@@ -334,8 +350,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_9:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(90);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 9;
@@ -349,8 +367,10 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_0:
             if (!this->cockpit->show_comm) {
                 this->player_plane->SetThrottle(100);
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                }
             } else {
                 if (this->cockpit->comm_target == 0) {
                     this->cockpit->comm_target = 10;
@@ -364,30 +384,38 @@ void SCStrike::checkKeyboard(void) {
         case SDLK_MINUS:
             this->player_plane->SetThrottle(this->player_plane->GetThrottle() - 1);
             if (this->player_plane->GetThrottle() == 0) {
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL_SHUT_DOWN];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, 0);
+                if (this->current_mission->sound.sounds.size() > 0) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL_SHUT_DOWN];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, 0);
+                }
             }
             break;
         case SDLK_PLUS:
             
             this->player_plane->SetThrottle(this->player_plane->GetThrottle() + 1);
-            if (this->player_plane->GetThrottle() > 0 && this->player_plane->GetThrottle() < 60) {
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
-            } else if (this->player_plane->GetThrottle() >= 60) {
-                MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
-                Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+            if (this->current_mission->sound.sounds.size() > 0) {
+                if (this->player_plane->GetThrottle() > 0 && this->player_plane->GetThrottle() < 60) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_MIL];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                } else if (this->player_plane->GetThrottle() >= 60) {
+                    MemSound *engine = this->current_mission->sound.sounds[SoundEffectIds::ENGINE_AFB];
+                    Mixer.PlaySoundVoc(engine->data, engine->size, 5, -1);
+                }
             }
+            
             break;
         case SDLK_l:
             this->player_plane->SetWheel();
-            if (this->player_plane->GetWheel()) {
-                MemSound *gears = this->current_mission->sound.sounds[SoundEffectIds::GEARS_UP];
-                Mixer.PlaySoundVoc(gears->data, gears->size, 4, 0);
-            } else {
-                MemSound *gears = this->current_mission->sound.sounds[SoundEffectIds::GEARS_DOWN];
-                Mixer.PlaySoundVoc(gears->data, gears->size, 4, 0);
+            if (this->current_mission->sound.sounds.size() > 0) {
+                if (this->player_plane->GetWheel()) {
+                    MemSound *gears = this->current_mission->sound.sounds[SoundEffectIds::GEARS_UP];
+                    Mixer.PlaySoundVoc(gears->data, gears->size, 4, 0);
+                } else {
+                    MemSound *gears = this->current_mission->sound.sounds[SoundEffectIds::GEARS_DOWN];
+                    Mixer.PlaySoundVoc(gears->data, gears->size, 4, 0);
+                }
             }
+            
             break;
         case SDLK_f:
             this->player_plane->SetFlaps();
