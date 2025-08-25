@@ -7,6 +7,7 @@
 //
 
 #include "precomp.h"
+#include "SCConvPlayer.h"
 
 SCConvPlayer::SCConvPlayer() : conversationID(0), initialized(false) {}
 
@@ -80,10 +81,13 @@ std::map<uint8_t, std::vector<uint8_t>> faces_shape = {
     { 18,     std::vector<uint8_t>{1, 19, 2, 35}},
     { 19,         std::vector<uint8_t>{1, 2, 35}},
     { 20, std::vector<uint8_t>{1, 21, 28, 2, 35}},
+    { 21, std::vector<uint8_t>{1, 21, 28, 2, 35}}, //todo check
     { 22,     std::vector<uint8_t>{1, 23, 2, 35}},
     { 23,     std::vector<uint8_t>{1, 24, 2, 35}},
     { 24,     std::vector<uint8_t>{1, 25, 2, 35}},
     { 25,     std::vector<uint8_t>{1, 26, 2, 35}},
+    { 26,     std::vector<uint8_t>{1, 26, 2, 35}}, //todo check
+    { 27,     std::vector<uint8_t>{1, 26, 2, 35}}, //todo check
     { 31,         std::vector<uint8_t>{1, 2, 35}},
     {255,         std::vector<uint8_t>{1, 2, 35}},
 };
@@ -126,12 +130,16 @@ void ConvFrame::parse_GROUP_SHOT(ByteStream *conv) {
     while (!isNextFrameIsConv((uint8_t) conv->PeekByte())) {
         conv->MoveForward(1);
     }
-    if (conv->PeekByte() == GROUP_SHOT_ADD_CHARCTER) {
+    uint8_t next_type = conv->PeekByte();
+    if (next_type == GROUP_SHOT_ADD_CHARCTER) {
         conv->MoveForward(2);
         this->parse_GROUP_SHOT_ADD_CHARACTER(conv);
-    } else if (conv->PeekByte() == SHOW_TEXT) {
-        conv->MoveForward(1);
+    } else if (next_type == SHOW_TEXT) {
+        conv->MoveForward(2);
         this->parse_SHOW_TEXT(conv);
+    } else if (next_type == GROUP_SHOT_CHARCTR_TALK) {
+        conv->MoveForward(2);
+        this->parse_GROUP_SHOT_CHARACTER_TALK(conv);
     } else {
         conv->MoveForward(1);
     }
@@ -209,13 +217,12 @@ void ConvFrame::parse_YESNOCHOICE_BRANCH1(ByteStream *conv, SCConvPlayer *player
     zone->quad->push_back(np4);
     zone->onclick = std::bind(&SCConvPlayer::clicked, player, std::placeholders::_1, std::placeholders::_2);
     player->zones.push_back(zone);
+    this->yes_no_path = 1;
 }
 void ConvFrame::parse_YESNOCHOICE_BRANCH2(ByteStream *conv) {
     uint8_t t = conv->ReadByte();
     uint8_t b = conv->ReadByte();
-    if (GameState.mission_accepted) {
-        conv->MoveForward(t);
-    }
+    this->yes_no_path = 2;
 }
 void ConvFrame::parse_GROUP_SHOT_ADD_CHARACTER(ByteStream *conv) {
     char *participantName   = (char *)conv->GetPosition();
@@ -307,13 +314,39 @@ void SCConvPlayer::focus(void) { IActivity::focus(); }
 
 void SCConvPlayer::clicked(void *none, uint8_t id) {
     printf("clicked on %d\n", id);
-    if (id == 1) {
-        GameState.mission_accepted = true;
-        conv.MoveForward(yesOffset);
-    } else if (id == 2) {
-        GameState.mission_accepted = false;
-        conv.MoveForward(noOffset);
+    if (id != 1 && id != 2) {
+        this->current_frame->SetExpired(true);
+        return;
     }
+
+    bool accepted = (id == 1);
+    GameState.mission_accepted = accepted;
+
+    // On veut supprimer les frames de la branche opposée :
+    // si accepté -> supprimer yes_no_path == 2 (branche NO)
+    // si refusé  -> supprimer yes_no_path == 1 (branche YES)
+    uint8_t pathToRemove = accepted ? 2 : 1;
+
+    // Ne pas toucher à current_frame (première frame affichée de la question).
+    // Parcours sûr avec itérateur, suppression in situ.
+    // On part après current_frame si elle est bien en tête.
+    auto it = conversation_frames.begin();
+    if (it != conversation_frames.end() && *it == this->current_frame) {
+        ++it;
+    }
+
+    while (it != conversation_frames.end()) {
+        ConvFrame *f = *it;
+        if (f && f->yes_no_path == pathToRemove) {
+            delete f;                                   // libérer la mémoire
+            it = conversation_frames.erase(it);        // erase retourne le suivant
+        } else {
+            ++it;
+        }
+    }
+    // Optionnel: compaction après coup seulement (évite realloc pendant la boucle)
+    conversation_frames.shrink_to_fit();
+
     this->current_frame->SetExpired(true);
 }
 void SCConvPlayer::selectWingMan(void *none, uint8_t id) {
@@ -386,6 +419,36 @@ void SCConvPlayer::ReadNextFrame(void) {
     tmp_frame->conversationID = this->conversationID;
     // tmp_frame->face = nullptr;
 
+    this->parseConv(tmp_frame);
+
+    tmp_frame->SetExpired(false);
+    if (this->conversation_frames.size() > 0) {
+        if (tmp_frame->bgLayers == nullptr) {
+            tmp_frame->bgLayers = this->conversation_frames.back()->bgLayers;
+            tmp_frame->bgPalettes = this->conversation_frames.back()->bgPalettes;
+        }
+    }
+    if (this->txt_color != 0 && tmp_frame->textColor == 0) {
+        tmp_frame->textColor = this->txt_color;
+    } else if (tmp_frame->textColor != 0) {
+        this->txt_color = tmp_frame->textColor;
+    }
+    if (this->yes_no_path == 0 && tmp_frame->yes_no_path != 0) {
+        this->yes_no_path = tmp_frame->yes_no_path;
+    } else if (this->yes_no_path == 1 && tmp_frame->yes_no_path != 0) {
+        this->yes_no_path = tmp_frame->yes_no_path;
+    } else if (tmp_frame->yes_no_path == 0) {
+        tmp_frame->yes_no_path = this->yes_no_path;
+    }
+    if (!tmp_frame->do_not_add) {
+        this->conversation_frames.push_back(tmp_frame);
+    } else {
+        delete tmp_frame;
+    }
+    
+}
+
+void SCConvPlayer::parseConv(ConvFrame *tmp_frame) {
     uint8_t type = conv.ReadByte();
 
     switch (type) {
@@ -428,11 +491,7 @@ void SCConvPlayer::ReadNextFrame(void) {
         printf("ConvID: %d CHOICE YES/NO : %d\n", this->conversationID, type);
         // Looks like first byte is the offset to skip if the answer is no.
         tmp_frame->parse_YESNOCHOICE_BRANCH2(&conv);
-        tmp_frame->face = this->conversation_frames.back()->face;
-        tmp_frame->textColor = this->conversation_frames.back()->textColor;
-        tmp_frame->face_expression = this->conversation_frames.back()->face_expression;
-        tmp_frame->facePaletteID = this->conversation_frames.back()->facePaletteID;
-        tmp_frame->facePosition = this->conversation_frames.back()->facePosition;
+        tmp_frame->do_not_add = true;
         break;
     }
     case GROUP_SHOT_ADD_CHARCTER: // Add person to GROUP
@@ -459,8 +518,8 @@ void SCConvPlayer::ReadNextFrame(void) {
     case 0xE: {
         topOffset = conv.ReadByte();
         first_palette = conv.ReadByte();
+        this->parseConv(tmp_frame);
         printf("ConvID: %d Unknown usage Flag 0xE: (0x%2X 0x%2X) \n", this->conversationID, topOffset, first_palette);
-
         break;
     }
     case CHOOSE_WINGMAN: // Wingman selection trigger
@@ -470,23 +529,10 @@ void SCConvPlayer::ReadNextFrame(void) {
     }
     default:
         printf("ConvID: %d Unknown opcode: %X.\n", this->conversationID, type);
-        stop();
-        return;
+        tmp_frame->do_not_add = true;
         break;
     }
-
-    tmp_frame->SetExpired(false);
-    if (this->conversation_frames.size() > 0) {
-        if (tmp_frame->face == nullptr) {
-            tmp_frame->face = this->conversation_frames.back()->face;
-        }
-        if (tmp_frame->participants.size() == 0) {
-            tmp_frame->participants = this->conversation_frames.back()->participants;
-        }
-    }
-    this->conversation_frames.push_back(tmp_frame);
 }
-
 void SCConvPlayer::SetArchive(PakEntry *convPakEntry) {
 
     if (convPakEntry->size == 0) {
@@ -745,8 +791,13 @@ void SCConvPlayer::runFrame(void) {
     if (this->current_frame->IsExpired()) {
         this->conversation_frames.erase(this->conversation_frames.begin());
         this->conversation_frames.shrink_to_fit();
-        this->current_frame = nullptr;
-        return;
+        if (this->conversation_frames.size() == 0) {
+            stop();
+            Game->log("Conv ID %d has no frames: Stopping.\n", this->conversationID);
+            return;
+        }
+        this->current_frame = this->conversation_frames[0];
+        this->current_frame->creationTime       = SDL_GetTicks();
     }
     
     checkButtons();
@@ -770,7 +821,7 @@ void SCConvPlayer::runFrame(void) {
     
     // Draw static
     
-    if (this->current_frame->sound_file_name != NULL) {
+    if (this->current_frame->sound_file_name != NULL && this->current_frame->sound_file_name->length() > 0) {
         std::string filename = "F:"+*this->current_frame->sound_file_name+".VOC";
         std::transform(filename.begin(), filename.end(), filename.begin(), ::toupper);
         TreEntry *sound_entry = Assets.GetEntryByName(filename.c_str());
@@ -921,9 +972,6 @@ void SCConvPlayer::runFrame(void) {
                 }
                 position.x += s->GetWidth();
             }
-            for (auto zone : zones) {
-                zone->drawQuad();
-            }
             CheckZones();
             Mouse.Draw();
         }
@@ -962,7 +1010,7 @@ void SCConvPlayer::runFrame(void) {
         }   
         break;
     }
-    if (this->current_frame->sound_file_name != nullptr && Mixer.IsSoundPlaying() == false) {
+    if (this->current_frame->sound_file_name != nullptr && this->current_frame->sound_file_name->length()>0 && Mixer.IsSoundPlaying() == false) {
         this->current_frame->SetExpired(true);
     }
     this->DrawText();

@@ -29,7 +29,7 @@ public:
     // If we are in close up mode
     CharFace *face{nullptr};
     int8_t facePaletteID;
-
+    bool do_not_add{false};
     std::vector<RLEShape *> *bgLayers{nullptr};
     std::vector<uint8_t *> *bgPalettes{nullptr};
 
@@ -48,8 +48,10 @@ public:
     void parse_UNKNOWN(ByteStream *conv);
     void parse_CHOOSE_WINGMAN(ByteStream *conv, SCConvPlayer *player);
     int SetSentenceFromConv(ByteStream *conv, int start_offset);
+    int yes_no_path{0}; // current path taken for yes/no choice
 private:
     bool expired;
+    
 };
 
 class SCConvPlayer : public IActivity {
@@ -68,12 +70,12 @@ protected:
 
     virtual void CheckFrameExpired(void);
     void ReadNextFrame(void);
+    void parseConv(ConvFrame *tmp_frame);
     void SetArchive(PakEntry *conv);
     void CheckZones(void);
-    
-    
     void DrawText(void);
-    
+    int txt_color{0};
+    int yes_no_path{0}; // current path taken for yes/no choice
 public:
     uint8_t noOffset{0};
     uint8_t yesOffset{0};

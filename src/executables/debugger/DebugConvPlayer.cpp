@@ -51,7 +51,7 @@ void DebugConvPlayer::renderUI() {
             int frameNumber = 0;
             for (auto frame : this->conversation_frames) {
                 frameNumber++;
-                if (ImGui::TreeNodeEx((void *)(intptr_t)frameNumber, ImGuiTreeNodeFlags_DefaultOpen, "Frame ID %d", frame->conversationID)) {
+                if (ImGui::TreeNodeEx((void *)(intptr_t)frameNumber, ImGuiTreeNodeFlags_DefaultOpen, "Frame ID %d", frameNumber)) {
                     ImGui::Text("Frame Type: %d", frame->mode);
                     ImGui::Text("Frame Time: %d", frame->creationTime);
                     ImGui::Text("Frame Text: %s", frame->text);
