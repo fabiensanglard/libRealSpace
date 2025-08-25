@@ -273,6 +273,7 @@ void RSMission::parseMISN_CAST(uint8_t *data, size_t size) {
     for (int i = 0; i < nbactor; i++) {
         CAST *tmpcast = new CAST();
         std::string actor = stream.ReadString(8);
+        std::transform(actor.begin(), actor.end(), actor.begin(), ::toupper);
         stream.ReadByte();
         tmpcast->actor = actor;
         tmpcast->profile = nullptr;
