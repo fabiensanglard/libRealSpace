@@ -1027,7 +1027,6 @@ void SCStrike::runFrame(void) {
     Renderer.bindCameraProjectionAndView(0.45f);
     Renderer.renderWorldSolid(&area, BLOCK_LOD_MAX, 400);
 
-    glDisable(GL_TEXTURE_2D);
     if (this->show_bbox) {
         for (auto rrarea: this->current_mission->mission->mission_data.areas) {
             Renderer.renderLineCube(rrarea->position, rrarea->AreaWidth);
