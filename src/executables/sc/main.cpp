@@ -92,6 +92,7 @@ int main(int argc, char* argv[]) {
         Screen->refresh();
         SDL_PumpEvents();
     }
+    VGA.upscale = true;
     Game->init();
     //Add MainMenu activity on the game stack.
     SCMainMenu* main = new SCMainMenu();
