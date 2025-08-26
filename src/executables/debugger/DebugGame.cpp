@@ -305,9 +305,18 @@ void DebugGame::loadTO() {
     // Load assets needed for Conversations (char and background)
     ConvAssets.init();
     
-    SCMainMenu *to_gf = new SCMainMenu();
-    to_gf->init();
-    Game->addActivity(to_gf);
+    //Add MainMenu activity on the game stack.
+    DebugGameFlow* main = new DebugGameFlow();
+    
+    GameState.Reset();
+    GameState.player_callsign = "Debug";
+    GameState.player_name = "Debug Player";
+    GameState.player_firstname = "Debug";
+    for (int i=0; i<256; i++) {
+        GameState.requierd_flags[i] = false;
+    }
+    main->init();
+    Game->addActivity(main);
 }
 
 

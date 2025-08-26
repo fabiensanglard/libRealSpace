@@ -87,8 +87,11 @@ std::map<uint8_t, std::vector<uint8_t>> faces_shape = {
     { 24,     std::vector<uint8_t>{1, 25, 2, 35}},
     { 25,     std::vector<uint8_t>{1, 26, 2, 35}},
     { 26,     std::vector<uint8_t>{1, 26, 2, 35}}, //todo check
-    { 27,     std::vector<uint8_t>{1, 26, 2, 35}}, //todo check
-    { 31,         std::vector<uint8_t>{1, 2, 35}},
+    { 27,     std::vector<uint8_t>{1, 27, 2, 35}}, //todo check
+    { 28,     std::vector<uint8_t>{1, 28, 2, 35}}, //todo check
+    { 29,     std::vector<uint8_t>{1, 29, 2, 35}}, //todo check
+    { 31,     std::vector<uint8_t>{1, 31, 2, 35}},
+    { 32,     std::vector<uint8_t>{1, 33, 2, 35}}, //todo check
     {255,         std::vector<uint8_t>{1, 2, 35}},
 };
 

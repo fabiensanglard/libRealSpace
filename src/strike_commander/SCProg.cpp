@@ -281,10 +281,13 @@ void SCProg::execute() {
                     this->actor->executed_opcodes.push_back(i);
                     if (work_register == prog.arg) {
                         compare_flag = 0;
+                        true_flag = true;
                     } else if (work_register > prog.arg) {
                         compare_flag = 1;
+                        true_flag = true;
                     } else if (work_register < prog.arg) {
                         compare_flag = -1;
+                        true_flag = false;
                     }
                 }
             break;
@@ -308,15 +311,9 @@ void SCProg::execute() {
                     }
                 }
             break;
-            case OP_GOTO_IF_GREATER_OR_EQUAL:
+            case OP_GOTO_LABEL_IF_FALSE:
                 if (exec) {
-                    // Remove the equal part to have only greater than.
-                    // have to check with more missions
-                    if (compare_flag == 1) {
-                        jump_to = prog.arg;
-                        exec = false;
-                        this->actor->executed_opcodes.push_back(i);
-                    } else if (compare_flag == -2 && !true_flag) {
+                    if (!true_flag) {
                         jump_to = prog.arg;
                         exec = false;
                         this->actor->executed_opcodes.push_back(i);

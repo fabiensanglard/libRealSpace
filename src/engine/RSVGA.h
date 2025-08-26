@@ -38,6 +38,8 @@ public:
     void SwithBuffers();
     void VSync(void);
     FrameBuffer* GetFrameBuffer(void){ return frameBuffer;};
+    bool upscale{false};
+
 private:
     int width;
     int height;
@@ -46,6 +48,6 @@ private:
     FrameBuffer* frameBuffer;
     FrameBuffer* frameBufferA;
     FrameBuffer* frameBufferB;
-    
+    uint32_t *upscaled_framebuffer{nullptr};
     uint32_t textureID;
 };

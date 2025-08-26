@@ -139,6 +139,9 @@ void DebugScreen::refresh(void){
                 if (ImGui::MenuItem("Test Objects")) {
                     debugGameInstance.testObjects();
                 }
+                if (ImGui::MenuItem("Toggle upscale")) {
+                    VGA.upscale = !VGA.upscale;
+                }
                 if (ImGui::MenuItem("Exit")) {
                     exit(0);
                 }

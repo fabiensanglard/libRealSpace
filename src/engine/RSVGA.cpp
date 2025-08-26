@@ -11,9 +11,34 @@
 #include "../realspace/RSPalette.h"
 #include "SDL2/SDL_opengl_glext.h"
 
+void applyEagle2x(uint32_t* src, uint32_t* dst, int width, int height) {
+    int dst_width = width * 2;
+    
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            uint32_t A = (x > 0 && y > 0) ? src[(y-1) * width + (x-1)] : src[y * width + x];
+            uint32_t B = (y > 0) ? src[(y-1) * width + x] : src[y * width + x];
+            uint32_t C = (x < width-1 && y > 0) ? src[(y-1) * width + (x+1)] : src[y * width + x];
+            uint32_t D = (x > 0) ? src[y * width + (x-1)] : src[y * width + x];
+            uint32_t E = src[y * width + x];
+            uint32_t F = (x < width-1) ? src[y * width + (x+1)] : src[y * width + x];
+            uint32_t G = (x > 0 && y < height-1) ? src[(y+1) * width + (x-1)] : src[y * width + x];
+            uint32_t H = (y < height-1) ? src[(y+1) * width + x] : src[y * width + x];
+            uint32_t I = (x < width-1 && y < height-1) ? src[(y+1) * width + (x+1)] : src[y * width + x];
+            
+            // Eagle2x algorithm
+            dst[(y*2) * dst_width + (x*2)] = (D == B && D != H && B != F) ? B : E;
+            dst[(y*2) * dst_width + (x*2+1)] = (B == F && B != D && F != H) ? F : E;
+            dst[(y*2+1) * dst_width + (x*2)] = (D == H && D != B && H != F) ? D : E;
+            dst[(y*2+1) * dst_width + (x*2+1)] = (F == H && F != B && H != D) ? H : E;
+        }
+    }
+}
+
 RSVGA::RSVGA() {
     this->frameBufferA = new FrameBuffer(320,200);
     this->frameBufferB = new FrameBuffer(320,200);
+    this->upscaled_framebuffer = (uint32_t *)calloc(640*400, sizeof(uint32_t));
 }
 
 RSVGA::~RSVGA() {
@@ -24,6 +49,9 @@ RSVGA::~RSVGA() {
     if (this->frameBufferB != nullptr) {
         this->frameBufferB->Clear();
         delete this->frameBufferB;
+    }
+    if (this->upscaled_framebuffer != nullptr) {
+        free(this->upscaled_framebuffer);
     }
 }
 
@@ -93,11 +121,22 @@ void RSVGA::VSync(void) {
     int x = (this->width - w) /2;
     glViewport(x,0,w,this->height);
 	
+    
+    
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    if (this->upscale)  {
+        applyEagle2x((uint32_t *)data, upscaled_framebuffer, 320, 200);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 640, 400, 0, GL_RGBA, GL_UNSIGNED_BYTE, upscaled_framebuffer);
+    } else {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    }
 
     glEnable(GL_BLEND);
     glEnable(GL_TEXTURE_2D);
