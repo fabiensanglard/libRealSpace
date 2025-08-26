@@ -572,7 +572,7 @@ bool SCMissionActorsPlayer::defendTarget(uint8_t arg) {
  * @return True if the objective was set successfully, false otherwise.
  */
 bool SCMissionActorsPlayer::setMessage(uint8_t arg) {
-    if (arg >= this->profile->radi.msgs.size()) {
+    if (arg >= this->mission->mission->mission_data.messages.size()) {
         return true;
     }
     std::transform(this->mission->mission->mission_data.messages[arg]->begin(), this->mission->mission->mission_data.messages[arg]->end(), this->mission->mission->mission_data.messages[arg]->begin(), ::tolower);
