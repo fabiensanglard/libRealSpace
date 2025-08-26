@@ -45,6 +45,7 @@ void SCGameFlow::clicked(std::vector<EFCT *> *script, uint8_t id) {
     this->efect = script;
     this->currentSpriteId = id;
     this->currentOptCode = 0;
+    VGA.fadeOut(30, 6);
     if (this->scen->sceneOpts->foreground->sprites[id]->tune != nullptr) {
         Mixer.SwitchBank(1);
         Mixer.StopMusic();
@@ -775,11 +776,11 @@ void SCGameFlow::runFrame(void) {
         if (this->test_shape != nullptr) {
             VGA.GetFrameBuffer()->DrawShape(this->test_shape);
         }
-        if (this->frequest == nullptr || !this->frequest->opened) {
-            this->CheckZones();
-        }
     }
     VGA.VSync();
+    if (this->frequest == nullptr || !this->frequest->opened) {
+        this->CheckZones();
+    }
     VGA.SwithBuffers();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
