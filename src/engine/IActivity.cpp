@@ -44,6 +44,11 @@ IActivity::IActivity() {}
 
 IActivity::~IActivity() {}
 
+void IActivity::stop(void) {
+    VGA.fadeOut(30, 6);
+    this->running = false; 
+}
+
 void IActivity::setTitle(const char *title) { Screen->setTitle(title); }
 
 void IActivity::checkKeyboard(void) {

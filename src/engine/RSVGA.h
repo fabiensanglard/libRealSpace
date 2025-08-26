@@ -37,6 +37,7 @@ public:
     VGAPalette* GetPalette(void);
     void SwithBuffers();
     void VSync(void);
+    void fadeOut(int steps = 10, int delayMs = 50);
     FrameBuffer* GetFrameBuffer(void){ return frameBuffer;};
     bool upscale{false};
 
@@ -50,4 +51,6 @@ private:
     FrameBuffer* frameBufferB;
     uint32_t *upscaled_framebuffer{nullptr};
     uint32_t textureID;
+    Texel data[320 * 200];
+    void displayBuffer(uint32_t* buffer, int width, int height);
 };

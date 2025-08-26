@@ -43,7 +43,7 @@ public:
 
     virtual void init(void) = 0;
     virtual void start(void) { this->running = true;}
-    void stop(void) { this->running = false;}
+    void stop(void);
     virtual void runFrame (void) = 0;
     void setTitle(const char* title);
     inline bool isRunning(void){ return this->running; }
