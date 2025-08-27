@@ -1071,6 +1071,7 @@ void CatalogueScene::placeOrder(std::vector<EFCT *> *script, uint8_t sprite_id) 
         }
     }
     GameState.weapons_costs += cost;
+    GameState.proj_cash = GameState.proj_cash - GameState.weapons_costs * 1000;
     this->onclick(nullptr, sprite_id);
 }
 std::vector<SCZone *> * CatalogueScene::UpdateZones() {

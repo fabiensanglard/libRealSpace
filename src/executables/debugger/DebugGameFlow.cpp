@@ -262,9 +262,12 @@ void DebugGameFlow::renderGameState() {
         ImGui::Text("Mission Accepted %d", GameState.mission_accepted);
         ImGui::TreePop();
     }
+    ImGui::Text("Current Cash         %d", GameState.proj_cash);
+    ImGui::Text("Proj Overhead        %d", GameState.over_head);
+    ImGui::Text(" -- Weapons Cost     %d", GameState.weapons_costs);
+    ImGui::Text(" -- F16 Replacements %d", GameState.f16_replacements);
+    ImGui::Text("Proj Cash            %d", GameState.proj_cash - GameState.over_head - GameState.weapons_costs - GameState.f16_replacements);
     
-    ImGui::Text("Proj Cash %d", GameState.proj_cash);
-    ImGui::Text("Proj Overhead %d", GameState.over_head);
     if (ImGui::TreeNode("Pilots")) {
         for (auto killboard : GameState.kill_board) {
             ImGui::Text("Pilote %d, ground[%d] air[%d]", killboard.first, killboard.second[1], killboard.second[0]);
