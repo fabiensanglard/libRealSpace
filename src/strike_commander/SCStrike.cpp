@@ -860,6 +860,8 @@ void SCStrike::runFrame(void) {
             for (auto flags: this->current_mission->gameflow_registers) {
                 GameState.missions_flags.push_back(flags.second);
             }
+            GameState.cash = GameState.proj_cash + this->current_mission->gameflow_registers[1]*1000;
+            GameState.proj_cash = GameState.cash - GameState.over_head;
             GameState.mission_flyed_success[GameState.mission_flyed] = this->current_mission->gameflow_registers[0];
             Renderer.clear();
             Screen->refresh();

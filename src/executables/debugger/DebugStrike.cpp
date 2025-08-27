@@ -1617,6 +1617,25 @@ void DebugStrike::renderWorkingRegisters() {
         }
         ImGui::EndTable();
     }
+    if (ImGui::BeginTable("GameFlow Register", 2, tableFlags)) {
+        ImGui::TableSetupColumn("GameFlow Register");
+        ImGui::TableSetupColumn("Value");
+        ImGui::TableHeadersRow();
+        
+        int cpt_flags = 0;
+        for (auto flag : this->current_mission->gameflow_registers) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("%d", flag.first);
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text("%d", flag.second);
+            if (flag.second != 0) {
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 0.0f, 0.5f)));
+            }
+            cpt_flags++;
+        }
+        ImGui::EndTable();
+    }
 }
 void DebugStrike::showTextures() {
     ImGui::Begin("Textures");

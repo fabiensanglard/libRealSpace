@@ -381,6 +381,7 @@ void SCProg::execute() {
                         }
                     }
                 }
+            break;
             default:
             break;
         }

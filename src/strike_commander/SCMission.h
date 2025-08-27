@@ -36,7 +36,7 @@ public:
     std::vector<SCMissionActors *> friendlies;
     std::vector<SCMissionWaypoint *> waypoints;
     std::vector<SCExplosion *> explosions;
-    std::map<uint8_t, uint8_t> gameflow_registers;
+    std::map<uint8_t, int16_t> gameflow_registers;
     bool success{false};
     bool failure{false};
     bool mission_ended{false};
