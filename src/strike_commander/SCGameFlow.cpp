@@ -92,6 +92,10 @@ void SCGameFlow::loadGame(std::string filename) {
 }
 
 void SCGameFlow::saveGame(std::string filename) {
+    GameState.current_mission = this->current_miss;
+    GameState.next_mission = this->next_miss;
+    GameState.current_scene = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
+
     GameState.Save(filename);
     this->frequest->requested_file = "";
 }
