@@ -1148,8 +1148,14 @@ void RSEntity::parseREAL_APPR_ANIM_SHAP(uint8_t *data, size_t size) {
     PakArchive pak;
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
-    pak.InitFromRAM("SHAPE", data2, size);
-    img_set->InitFromSubPakEntry(&pak);
+    if (data2[0]=='L' && data2[1]=='Z'){
+        pak.InitFromRAM("SHAPE", data2, size);
+        img_set->InitFromSubPakEntry(&pak);
+    } else {
+        pak.InitFromRAM("SHAPE", data2, size-1);
+        img_set->InitFromSubPakEntry(&pak);    
+    }
+    
     RSPalette palette;
     palette.initFromFileData(this->assetsManager->GetFileData("PALETTE.IFF"));
 

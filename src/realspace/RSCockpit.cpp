@@ -64,9 +64,7 @@ void RSCockpit::parseARTP(uint8_t* data, size_t size) {
     uint8_t* data2 = (uint8_t*) malloc(size);
     memcpy(data2, data, size);
     PakArchive* pak = new PakArchive();
-    // size in chunk is one byte short, so minus one to be able to parse pak
-    //pak->InitFromRAM("ARTP", data2, size-1);
-    //this->ARTP.InitFromPakArchive(pak);
+    
     uint32_t tsize = data2[0] + (data2[1] << 8) + (data2[2] << 16) + (data2[3] << 24);
     pak->InitFromRAM("ARTP", data2, tsize);
     if (pak->GetNumEntries() == 0) {
@@ -375,6 +373,7 @@ void RSCockpit::parseMONI_INST_RAWS_SHAP_ZOOM(uint8_t* data, size_t size) {
 }
 void RSCockpit::parseMONI_INST_RAWS_SHAP_NORM(uint8_t* data, size_t size) {
     int offset = 0;
+    uint8_t *shape_data;
     if (data[0] == 'L' && data[1] == 'Z') {
         LZBuffer lz;
         size_t csize=0;
@@ -382,12 +381,19 @@ void RSCockpit::parseMONI_INST_RAWS_SHAP_NORM(uint8_t* data, size_t size) {
         data = uncompressed_data;
         size = csize;
         offset = 8;
+        shape_data = (uint8_t*) malloc(size);
+        memcpy(shape_data, data, size);
+        // shape 20 byte offset, don't know why
+        this->MONI.INST.RAWS.NORM.init(shape_data+offset, 0);
+    } else {
+        shape_data = (uint8_t*) malloc(size);
+        memcpy(shape_data, data, size);
+        PakArchive* pak = new PakArchive();
+        pak->InitFromRAM("ARTP", shape_data, size);
+        RSImageSet *imgset = new RSImageSet();
+        imgset->InitFromSubPakEntry(pak);
+        this->MONI.INST.RAWS.NORM = *imgset->GetShape(0);
     }
-	uint8_t *shape_data;
-	shape_data = (uint8_t*) malloc(size);
-	memcpy(shape_data, data, size);
-    // shape 20 byte offset, don't know why
-    this->MONI.INST.RAWS.NORM.init(shape_data+offset, 0);
 }
 void RSCockpit::parseMONI_INST_ALTI(uint8_t* data, size_t size) {
     IFFSaxLexer lexer;
