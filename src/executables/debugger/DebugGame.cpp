@@ -270,7 +270,6 @@ void DebugGame::testMissionSC() {
 }
 
 void DebugGame::loadTO() {
-    Game->stopTopActivity();
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     
@@ -321,7 +320,6 @@ void DebugGame::loadTO() {
 
 
 void DebugGame::testObjects() {
-    Game->stopTopActivity();
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     std::vector<std::string> cdTreFiles = {
@@ -343,7 +341,6 @@ void DebugGame::testObjects() {
 }
 
 void DebugGame::loadPacific() {
-    Game->stopTopActivity();
     Assets.SetBase("./assets");
     // Load all TREs and PAKs
     
