@@ -105,7 +105,6 @@ void DebugObjectViewer::runFrame()  {
     glPushMatrix();
     glDisable(GL_DEPTH_TEST);
 
-    VGA.SwithBuffers();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
     VGA.SetPalette(&this->palette);
@@ -118,7 +117,6 @@ void DebugObjectViewer::runFrame()  {
     Mouse.Draw();
 
     VGA.VSync();
-    VGA.SwithBuffers();
 }
 void DebugObjectViewer::renderMenu() {
     static bool load_object = false;

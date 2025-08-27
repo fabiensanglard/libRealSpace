@@ -612,8 +612,6 @@ void SCStrike::checkKeyboard(void) {
             }
             this->camera_mode = View::AUTO_PILOT;
             this->autopilot_timeout = 400;
-            fflush(stdout);
-            
         }
         break;
         

@@ -35,7 +35,6 @@ public:
     void Activate(void);
     void SetPalette(VGAPalette* newPalette);
     VGAPalette* GetPalette(void);
-    void SwithBuffers();
     void VSync(void);
     void fadeOut(int steps = 10, int delayMs = 50);
     FrameBuffer* GetFrameBuffer(void){ return frameBuffer;};
@@ -47,8 +46,6 @@ private:
     AssetManager* assets;
     VGAPalette palette;
     FrameBuffer* frameBuffer;
-    FrameBuffer* frameBufferA;
-    FrameBuffer* frameBufferB;
     uint32_t *upscaled_framebuffer{nullptr};
     uint32_t textureID;
     Texel data[320 * 200];

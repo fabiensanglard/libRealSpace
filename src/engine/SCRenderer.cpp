@@ -1142,9 +1142,6 @@ void SCRenderer::displayModel(RSEntity *object, size_t lodLevel) {
 
         // Render light
 
-        glDisable(GL_TEXTURE_2D);
-        glDisable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
         glPointSize(6);
 
         glBegin(GL_POINTS);

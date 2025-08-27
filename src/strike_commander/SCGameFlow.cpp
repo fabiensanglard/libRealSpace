@@ -781,7 +781,6 @@ void SCGameFlow::runFrame(void) {
     if (this->frequest == nullptr || !this->frequest->opened) {
         this->CheckZones();
     }
-    VGA.SwithBuffers();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
     if (this->frequest != nullptr && this->frequest->opened) {
@@ -789,7 +788,6 @@ void SCGameFlow::runFrame(void) {
     }
     Mouse.Draw();
     VGA.VSync();
-    VGA.SwithBuffers();
 }
 void SCGameFlow::playShot(uint8_t shotId) {
     SCShot *sht = new SCShot();

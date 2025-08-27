@@ -50,6 +50,7 @@ void SCProg::execute() {
     bool exec = true;
     bool objective_flag = false;
     bool true_flag = false;
+    SPOT *spot = nullptr;
     this->actor->executed_opcodes.clear();
     this->actor->executed_opcodes.shrink_to_fit();
     for (auto prog : this->prog) {
@@ -64,10 +65,12 @@ void SCProg::execute() {
                     }
                 }
             break;
-            case OP_INVERT_FLAG:
+            case OP_SPOT_DATA:
                 if (exec) {
                     this->actor->executed_opcodes.push_back(i);
-                    //this->mission->mission->mission_data.flags[prog.arg] = !this->mission->mission->mission_data.flags[prog.arg];
+                    if (prog.arg < this->mission->mission->mission_data.spots.size()) {
+                        spot = this->mission->mission->mission_data.spots[prog.arg];
+                    }
                 }
             break;
             case OP_SET_LABEL:

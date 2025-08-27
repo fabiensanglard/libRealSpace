@@ -279,7 +279,6 @@ void SCObjectViewer::runFrame(void) {
     glPushMatrix();
     glDisable(GL_DEPTH_TEST);
 
-    VGA.SwithBuffers();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
     VGA.SetPalette(&this->palette);
@@ -292,6 +291,5 @@ void SCObjectViewer::runFrame(void) {
     Mouse.Draw();
 
     VGA.VSync();
-    VGA.SwithBuffers();
     /**/
 }

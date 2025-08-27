@@ -1007,11 +1007,11 @@ void SCCockpit::RenderMFDSComm(Point2D pmfd_left, int mode, FrameBuffer *fb = VG
 void SCCockpit::Render(int face) {
     FrameBuffer *fb {nullptr};
     if (face >= 0) {
-        VGA.SwithBuffers();
         VGA.Activate();
+        VGA.SetPalette(&this->palette);
         fb=VGA.GetFrameBuffer();
         fb->Clear();
-        VGA.SetPalette(&this->palette);
+        
         
         if (face == 0) {
             this->RenderHUD();
@@ -1137,7 +1137,6 @@ void SCCockpit::Render(int face) {
             Mouse.Draw();
         }
         VGA.VSync();
-        VGA.SwithBuffers();
     }
 }
 void SCCockpit::Update() {

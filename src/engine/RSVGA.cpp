@@ -164,30 +164,16 @@ void applyEagle2x(uint32_t* src, uint32_t* dst, int width, int height) {
 }
 
 RSVGA::RSVGA() {
-    this->frameBufferA = new FrameBuffer(320,200);
-    this->frameBufferB = new FrameBuffer(320,200);
+    this->frameBuffer = new FrameBuffer(320,200);
     this->upscaled_framebuffer = (uint32_t *)calloc(640*400, sizeof(uint32_t));
 }
 
 RSVGA::~RSVGA() {
-    if (this->frameBufferA != nullptr) {
-        this->frameBufferA->Clear();
-        delete this->frameBufferA;
-    }
-    if (this->frameBufferB != nullptr) {
-        this->frameBufferB->Clear();
-        delete this->frameBufferB;
+    if (this->frameBuffer != nullptr) {
+        delete this->frameBuffer;
     }
     if (this->upscaled_framebuffer != nullptr) {
         free(this->upscaled_framebuffer);
-    }
-}
-
-void RSVGA::SwithBuffers() {
-    if (this->frameBuffer == this->frameBufferA) {
-        this->frameBuffer = this->frameBufferB;
-    } else {
-        this->frameBuffer = this->frameBufferA;
     }
 }
 void RSVGA::init(int width, int height, AssetManager *amana) {
@@ -213,8 +199,6 @@ void RSVGA::init(int width, int height, AssetManager *amana) {
     uint8_t *data = (uint8_t *)calloc(1, 320 * 200 * 4);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     free(data);
-
-    this->frameBuffer = this->frameBufferA;
 }
 
 void RSVGA::Activate(void) {
@@ -225,7 +209,7 @@ void RSVGA::Activate(void) {
     glMatrixMode(GL_MODELVIEW); // Select The Modelview Matrix
     glLoadIdentity();
 
-    glColor4f(1, 1, 1, 1);
+    glColor4f(1, 0, 1, 0);
 }
 
 void RSVGA::SetPalette(VGAPalette *newPalette) { this->palette = *newPalette; }
@@ -259,12 +243,18 @@ void RSVGA::fadeOut(int steps, int delayMs) {
         
         displayBuffer((uint32_t *)data, 320, 200);
         Screen->refresh();
-        // Attente entre les étapes
-        #ifdef _WIN32
-        Sleep(delayMs);
-        #else
-        usleep(delayMs * 1000);
-        #endif
+        
+        SDL_Event ev;
+        Uint32 start = SDL_GetTicks();
+        while (SDL_GetTicks() - start < (Uint32)delayMs) {
+            while (SDL_PollEvent(&ev)) {
+                if (ev.type == SDL_QUIT) {
+                    start = SDL_GetTicks();
+                    break;
+                }
+            }
+            SDL_Delay(1);
+        }
     }
     
     // S'assurer que l'écran est complètement noir à la fin
@@ -282,10 +272,8 @@ void RSVGA::displayBuffer(uint32_t *buffer, int width, int height) {
     int w = (int) ((float) this->height * (4.0f/3.0f));
     int x = (this->width - w) /2;
     glViewport(x,0,w,this->height);
-	
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
     glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
     if (this->upscale)  {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -298,6 +286,7 @@ void RSVGA::displayBuffer(uint32_t *buffer, int width, int height) {
     }
 
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
