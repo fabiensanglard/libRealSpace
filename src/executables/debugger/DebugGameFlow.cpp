@@ -206,42 +206,93 @@ void DebugGameFlow::renderGameState() {
     int nb_flags = (int) GameState.requierd_flags.size();
     int nb_rows = nb_flags / 8;
     static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
-    if (ImGui::BeginTable("Flags", 8, flags)) {    
-        auto it = GameState.requierd_flags.begin();
-        for (int i = 0; i < nb_rows; i++) {
-            ImGui::TableNextRow();
-            for (int j = 0; j < 8; j++) {
-                if (it != GameState.requierd_flags.end()) {
-                    ImGui::TableSetColumnIndex(j);
-                    ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
-                    if (it->second) {
-                        cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
-                    } else {
-                        cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
+    if (ImGui::TreeNode("Requierd Flags")) {
+        if (ImGui::BeginTable("Flags", 8, flags)) {    
+            auto it = GameState.requierd_flags.begin();
+            for (int i = 0; i < nb_rows; i++) {
+                ImGui::TableNextRow();
+                for (int j = 0; j < 8; j++) {
+                    if (it != GameState.requierd_flags.end()) {
+                        ImGui::TableSetColumnIndex(j);
+                        ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.3f, 0.7f, 0.65f));
+                        if (it->second) {
+                            cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
+                        } else {
+                            cell_bg_color = ImGui::GetColorU32(ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
+                        }
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
+                        ImGui::Text("[%03d]=%d", it->first, it->second);
+                        ++it;
                     }
-                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
-                    ImGui::Text("[%03d]=%d", it->first, it->second);
-                    ++it;
                 }
             }
+            ImGui::EndTable();
+        }    
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("Mission Success")) {
+        if (ImGui::BeginTable("Mission Flyed", 8, flags)) {  
+            nb_flags = 50;
+            nb_rows = nb_flags / 8;
+            for (int i = 0; i < nb_rows; i++) {
+                ImGui::TableNextRow();
+                for (int j = 0; j < 8; j++) {
+                    bool success = false;
+                    if (GameState.mission_flyed_success.find(i * 8 + j) != GameState.mission_flyed_success.end()) {
+                        success = GameState.mission_flyed_success[i * 8 + j];
+                    }
+                    ImGui::TableSetColumnIndex(j);
+                    ImU32 cell_bg_color = ImGui::GetColorU32(ImVec4(0.9f, 0.3f, 0.7f, 0.65f));
+                    if (success) {
+                        cell_bg_color = ImGui::GetColorU32(ImVec4(0.3f, 0.7f, 0.3f, 0.65f));
+                    } 
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cell_bg_color);
+                    ImGui::Text("[%03d]=%d", i * 8 + j, success);
+                    
+                }
+            }
+            ImGui::EndTable();
         }
-        ImGui::EndTable();
+        ImGui::TreePop();
     }
     ImGui::Text("Tune Modifier %d", GameState.tune_modifier);
-    ImGui::Text("Mission ID %d", GameState.mission_id);
-    ImGui::Text("Mission Flyed %d", GameState.mission_flyed);
-    ImGui::Text("Mission Accepted %d", GameState.mission_accepted);
+    if (ImGui::TreeNode("Missions")) {
+        ImGui::Text("Mission ID %d", GameState.mission_id);
+        ImGui::Text("Mission Flyed %d", GameState.mission_flyed);
+        ImGui::Text("Mission Accepted %d", GameState.mission_accepted);
+        ImGui::TreePop();
+    }
+    
     ImGui::Text("Proj Cash %d", GameState.proj_cash);
     ImGui::Text("Proj Overhead %d", GameState.over_head);
-    for (auto killboard : GameState.kill_board) {
-        ImGui::Text("Pilote %d, ground[%d] air[%d]", killboard.first, killboard.second[1], killboard.second[0]);
+    if (ImGui::TreeNode("Pilots")) {
+        for (auto killboard : GameState.kill_board) {
+            ImGui::Text("Pilote %d, ground[%d] air[%d]", killboard.first, killboard.second[1], killboard.second[0]);
+        }
+        ImGui::TreePop();
     }
-    for (auto weapon : GameState.weapon_inventory) {
-        ImGui::Text("Weapon %d, count %d", weapon.first, weapon.second);
+    if (ImGui::TreeNode("Weapon Inventory")) {
+        for (auto weapon : GameState.weapon_inventory) {
+            ImGui::Text("Weapon %d, count %d", weapon.first, weapon.second);
+        }
+        ImGui::TreePop();
     }
+    
 }
 
 void DebugGameFlow::renderMissionInfos() {
+    static std::vector<GLuint> s_PrevFrameGLTex;
+    static std::vector<GLuint> s_CurrentFrameGLTex;
+    // Détruire les textures de la frame précédente (elles ont été rendues)
+    if (!s_PrevFrameGLTex.empty()) {
+        for (GLuint id : s_PrevFrameGLTex) {
+            glDeleteTextures(1, &id);
+        }
+        s_PrevFrameGLTex.clear();
+    }
+    // Préparer la liste pour cette frame
+    s_PrevFrameGLTex.swap(s_CurrentFrameGLTex); // s_CurrentFrameGLTex devient vide
+
     ImGuiTreeNodeFlags tflag = ImGuiTreeNodeFlags_DefaultOpen;
     ImGui::Text("Current Miss %d, Current Scen %d", this->current_miss, this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID);
     ImGui::Text("Nb Miss %d", this->gameFlowParser.game.game.size());
@@ -313,6 +364,39 @@ void DebugGameFlow::renderMissionInfos() {
             if (ImGui::TreeNodeEx("Forground Sprites", tflag)) {
                 for (auto sprt : this->sceneOpts->foreground->sprites) {
                     ImGui::Text("Sprite %d", sprt.second->sprite.SHP_ID);
+                    RLEShape *shp = this->getShape(sprt.second->sprite.SHP_ID)->GetShape(0);
+                    if (shp != nullptr) {
+                        ImGui::Text("Width %d Height %d", shp->GetWidth(), shp->GetHeight());
+                        if (shp->GetWidth() > 0 && shp->GetHeight() > 0) {
+                            FrameBuffer *fb = new FrameBuffer(320, 200);
+                            fb->Clear();
+                            fb->DrawShape(shp);
+                            fb->rect_slow(0, 0, 319, 199, 0x1F); // Bordure bleue
+                            for (int j = 1; j < this->getShape(sprt.second->sprite.SHP_ID)->GetNumImages(); j++) {
+                                RLEShape *shp = this->getShape(sprt.second->sprite.SHP_ID)->GetShape(j);
+                                if (shp != nullptr) {
+                                    fb->DrawShape(shp);
+                                }
+                            }
+                            Texel* tex = fb->getTexture(VGA.GetPalette());
+                            GLuint glTex = 0;
+                            glGenTextures(1, &glTex);
+                            glBindTexture(GL_TEXTURE_2D, glTex);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+                            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex);
+
+                            // Affichage dans ImGui
+                            ImGui::Image((ImTextureID)(intptr_t)glTex, ImVec2(320, 200));
+                            delete fb;
+                            delete tex;
+                            s_CurrentFrameGLTex.push_back(glTex);
+                        }
+                    } else {
+                        ImGui::Text("No shape for this image");
+                    }
                 }
                 ImGui::TreePop();
             }
@@ -320,12 +404,64 @@ void DebugGameFlow::renderMissionInfos() {
         if (ImGui::TreeNodeEx("Background", tflag)) {
             for (auto bg : this->sceneOpts->background->images) {
                 ImGui::Text("Image %d", bg->ID);
+                RLEShape *shp = this->getShape(bg->ID)->GetShape(0);
+                if (shp != nullptr) {
+                    ImGui::Text("Width %d Height %d", shp->GetWidth(), shp->GetHeight());
+                    FrameBuffer *fb = new FrameBuffer(320, 200);
+                    fb->Clear();
+                    fb->rect_slow(0, 0, 319, 199, 0x1F); // Bordure bleue
+                    fb->DrawShape(shp);
+                    Texel* tex = fb->getTexture(VGA.GetPalette());
+                    GLuint glTex = 0;
+                    glGenTextures(1, &glTex);
+                    glBindTexture(GL_TEXTURE_2D, glTex);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex);
+
+                    // Affichage dans ImGui
+                    ImGui::Image((ImTextureID)(intptr_t)glTex, ImVec2(320, 200));
+                    delete fb;
+                    delete tex;
+                    s_CurrentFrameGLTex.push_back(glTex);
+
+                } else {
+                    ImGui::Text("No shape for this image");
+                }
             }
             ImGui::TreePop();
         }
         if (ImGui::TreeNodeEx("Extras", tflag)) {
             for (auto extra : this->sceneOpts->extr) {
                 ImGui::Text("Extra %d", extra->SHAPE_ID);
+                RLEShape *shp = this->getShape(extra->SHAPE_ID)->GetShape(0);
+                if (shp != nullptr) {
+                    ImGui::Text("Width %d Height %d", shp->GetWidth(), shp->GetHeight());
+                    FrameBuffer *fb = new FrameBuffer(320, 200);
+                    fb->Clear();
+                    fb->rect_slow(0, 0, 319, 199, 0x1F); // Bordure bleue
+                    fb->DrawShape(shp);
+                    Texel* tex = fb->getTexture(VGA.GetPalette());
+                    GLuint glTex = 0;
+                    glGenTextures(1, &glTex);
+                    glBindTexture(GL_TEXTURE_2D, glTex);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex);
+
+                    // Affichage dans ImGui
+                    ImGui::Image((ImTextureID)(intptr_t)glTex, ImVec2(320, 200));
+                    delete fb;
+                    delete tex;
+                    s_CurrentFrameGLTex.push_back(glTex);
+
+                } else {
+                    ImGui::Text("No shape for this image");
+                }
             }
             ImGui::TreePop();
         }
