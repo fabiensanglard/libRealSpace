@@ -137,6 +137,8 @@ void SCStrike::registerSimulatorInputs() {
     m_keyboard->bindKeyToAction(CreateAction(InputAction::SIM_START, SimActionOfst::PAUSE), SDL_SCANCODE_P);
     m_keyboard->bindKeyToAction(CreateAction(InputAction::SIM_START, SimActionOfst::EYES_ON_TARGET), SDL_SCANCODE_Y);
     m_keyboard->bindKeyToAction(CreateAction(InputAction::SIM_START, SimActionOfst::END_MISSION), SDL_SCANCODE_ESCAPE);
+    m_keyboard->bindMouseAxisToAction(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_X), 0, 1.0f);
+    m_keyboard->bindMouseAxisToAction(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_Y), 1, 1.0f);
 }
 void SCStrike::autopilotCompute() {
     Vector2D destination = {this->current_mission->waypoints[this->nav_point_id]->spot->position.x,
@@ -313,16 +315,21 @@ void SCStrike::autopilotCompute() {
  * @return None
  */
 void SCStrike::checkKeyboard(void) {
-    // Keyboard
-    SDL_Event keybEvents[1];
-
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    int upEvents = SDL_PeepEvents(keybEvents, 1, SDL_GETEVENT, SDL_KEYUP, SDL_KEYUP);
     int msx = 0;
     int msy = 0;
     SDL_GetMouseState(&msx, &msy);
-    msy = msy - (Screen->height / 2);
-    msx = msx - (Screen->width / 2);
+    //msy = msy - (Screen->height / 2);
+    //msx = msx - (Screen->width / 2);
+
+    float dx = m_keyboard->getActionValue(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_X));
+    float dy = m_keyboard->getActionValue(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_Y));
+
+    mouseAxisAccumX += dx;
+    mouseAxisAccumY += dy;
+
+    msy = mouseAxisAccumY - (Screen->height / 2);
+    msx = mouseAxisAccumX - (Screen->width / 2);
+
     if (this->camera_mode == View::AUTO_PILOT) {
         return;
     }
@@ -413,10 +420,12 @@ void SCStrike::checkKeyboard(void) {
     if (m_keyboard->isActionJustPressed(CreateAction(InputAction::SIM_START, SimActionOfst::MDFS_WEAPONS))) {
         if (this->cockpit->show_weapons) {
             this->player_plane->selected_weapon = (this->player_plane->selected_weapon+1) % 5;
+            this->player_plane->wp_cooldown = 0;
             this->mfd_timeout = 400;
         } else {
             this->cockpit->show_weapons = !this->cockpit->show_weapons;
             this->mfd_timeout = 400;
+            this->player_plane->wp_cooldown = 0;
         }
     }
     if (m_keyboard->isActionJustPressed(CreateAction(InputAction::SIM_START, SimActionOfst::SHOW_NAVMAP))) {

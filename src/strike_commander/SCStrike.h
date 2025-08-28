@@ -202,8 +202,13 @@ protected:
         MDFS_TARGET_CAMERA = 46,
         PAUSE = 47,
         EYES_ON_TARGET = 48,
-        END_MISSION = 49
+        END_MISSION = 49,
+        MOUSE_X = 50,
+        MOUSE_Y = 51
     };
+    float mouseAxisAccumX = 0.0f;
+    float mouseAxisAccumY = 0.0f;
+    
 public:
     /**
      * @brief Constructor

@@ -23,7 +23,8 @@ public:
     void bindMouseButtonToAction(const InputAction actionId, int button);
     void bindGamepadButtonToAction(const InputAction actionId, int gamepadIndex, SDL_GameControllerButton button);
     void bindGamepadAxisToAction(const InputAction actionId, int gamepadIndex, SDL_GameControllerAxis axis, float scale = 1.0f);
-    
+    void bindMouseAxisToAction(const InputAction actionId, int axis, float scale = 1.0f);
+
     // Persistence des configurations
     bool saveActionBindings(const std::string& filename) const;
     bool loadActionBindings(const std::string& filename);

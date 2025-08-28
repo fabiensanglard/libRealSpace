@@ -67,6 +67,8 @@ void RSMusic::init(AssetManager *assetManager) {
         for (size_t j = 0; j < subpak->GetNumEntries(); j++) {
             PakEntry *sub = subpak->GetEntry(j);
             PakArchive *subsubpak = new PakArchive();
+            if (sub->data[0] == 'F')
+                continue;
             subsubpak->InitFromRAM("..\\..\\DATA\\SOUND\\COMBAT.ADL", sub->data, sub->size);
             for (size_t k = 0; k < subsubpak->GetNumEntries(); k++) {
                 PakEntry *subsub = subpak->GetEntry(k);

@@ -940,10 +940,15 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
     float planeSpeed      = direction.Length();
     float thrustMagnitude = -planeSpeed;
     MemSound *sound;
+    if (this->wp_cooldown > 0) {
+        this->wp_cooldown--;
+        return;
+    }
     switch (this->weaps_load[weapon_hard_point_id]->objct->wdat->weapon_id) {
         case 12:
             weap = new GunSimulatedObject();
             thrustMagnitude = -planeSpeed * 250.0f; // coefficient ajustable
+            this->wp_cooldown = 3; // Cooldown between two shots
         break;
         case 5:
         case 6:
@@ -953,6 +958,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
                 sound = this->pilot->mission->sound.sounds[SoundEffectIds::MK82_DROP];
                 Mixer.PlaySoundVoc(sound->data, sound->size);
             }
+            this->wp_cooldown = 10; // Cooldown between two shots
         break;
         default:
             if (this->pilot->mission->sound.sounds.size() > 0) {
@@ -960,6 +966,7 @@ void SCPlane::Shoot(int weapon_hard_point_id, SCMissionActors *target, SCMission
                 Mixer.PlaySoundVoc(sound->data, sound->size);
             }
             weap = new SCSimulatedObject();
+            this->wp_cooldown = 10; // Cooldown between two shots
         break;
     }
     weap->mission = mission;

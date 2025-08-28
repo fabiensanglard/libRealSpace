@@ -10,6 +10,10 @@ Keyboard::~Keyboard() {
     // InputActionSystem est un singleton, pas besoin de libérer
 }
 
+void Keyboard::bindMouseAxisToAction(const InputAction actionId, int axis, float scale) {
+    m_inputSystem->bindInput(actionId, InputBinding(InputType::MOUSE_AXIS, -1, axis, scale));
+}
+
 bool Keyboard::isActionPressed(const InputAction actionId) const {
     return m_inputSystem->isActionPressed(actionId);
 }

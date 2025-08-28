@@ -120,7 +120,7 @@ protected:
     int spoilers{0};
     int wheel_index{0};
     int wheel_anim{10};
-
+    
     SCSmokeSet *smoke_set{nullptr};
     std::vector<Vector3D> smoke_positions;
     
@@ -150,6 +150,7 @@ protected:
     virtual void updatePlaneStatus();
 public:
     unsigned int status;
+    int wp_cooldown{0};
     float mach{0.0f};
     float mcc{0.0f};
     float mratio{0.0f};
