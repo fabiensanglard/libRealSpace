@@ -6,7 +6,7 @@ void SCFileRequester::cancel() {
     this->opened = false;
 }
 
-SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint8_t shape_id_offset = 42)  {
+SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint8_t shape_id_offset)  {
     this->callback = callback;
     this->shape_id_offset = shape_id_offset;
     RSImageSet *uiImageSet = new RSImageSet();
@@ -50,7 +50,7 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint
     buttons.push_back(button);
 
     button = new SCButton();
-    button->InitBehavior(nullptr, quitToDosPosition, buttonDimension);
+    button->InitBehavior(std::bind(&SCFileRequester::quitToDos, this), quitToDosPosition, buttonDimension);
     button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(shape_id_offset+8);
     button->appearance[SCButton::APR_UP].position=quitToDosPosition;
     button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(shape_id_offset+9);
@@ -81,6 +81,30 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint
     
     optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     rawpal = optPals.GetEntry(4)->data;
+
+    m_keyboard = new Keyboard();
+    
+    m_textEditor = m_keyboard->createTextEditor();
+    m_textEditor->setText(current_file);
+    
+    SDL_Rect inputRect = {
+        frp.x + 31,  // X position
+        frp.y + 27,  // Y position
+        120,         // Width
+        9           // Height
+    };
+    
+    m_textInputZone = new SCZone();
+    m_textInputZone->id = 999; // Un ID spécial pour la zone de texte
+    m_textInputZone->position = {frp.x + 31, frp.y + 27};
+    m_textInputZone->dimension = {120, 9};
+    m_textInputZone->active = true;
+    m_textInputZone->onclick = std::bind(&SCFileRequester::activateTextEditor, this, std::placeholders::_1, std::placeholders::_2);
+    zones.push_back(m_textInputZone);
+    // Dans le constructeur de SCFileRequester, après l'initialisation de m_keyboard
+    m_keyboard->registerAction(InputAction::FILE_REQUESTER_CANCEL);
+    // Lier ces actions aux touches
+    m_keyboard->bindKeyToAction(InputAction::FILE_REQUESTER_CANCEL, SDL_SCANCODE_ESCAPE);
 }
 
 SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint8_t shape_id_offset, bool save)  {
@@ -128,7 +152,7 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint
     buttons.push_back(button);
 
     button = new SCButton();
-    button->InitBehavior(nullptr, quitToDosPosition, buttonDimension);
+    button->InitBehavior(std::bind(&SCFileRequester::quitToDos, this), quitToDosPosition, buttonDimension);
     button->appearance[SCButton::APR_UP]=*uiImageSet->GetShape(shape_id_offset+8);
     button->appearance[SCButton::APR_UP].position=quitToDosPosition;
     button->appearance[SCButton::APR_DOWN]=*uiImageSet->GetShape(shape_id_offset+9);
@@ -159,10 +183,56 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint
     
     optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     rawpal = optPals.GetEntry(4)->data;
+
+        m_keyboard = new Keyboard();
+    
+    m_textEditor = m_keyboard->createTextEditor();
+    m_textEditor->setText(current_file);
+    
+    SDL_Rect inputRect = {
+        frp.x + 30,  // X position
+        frp.y + 28,  // Y position
+        120,         // Width
+        11           // Height
+    };
+    
+    m_textInputZone = new SCZone();
+    m_textInputZone->id = 999; // Un ID spécial pour la zone de texte
+    m_textInputZone->position = {frp.x + 30, frp.y + 28};
+    m_textInputZone->dimension = {120, 11};
+    m_textInputZone->active = true;
+    m_textInputZone->onclick = std::bind(&SCFileRequester::activateTextEditor, this, std::placeholders::_1, std::placeholders::_2);
+    zones.push_back(m_textInputZone);
+
+
+    // Dans le constructeur de SCFileRequester, après l'initialisation de m_keyboard
+    m_keyboard->registerAction(InputAction::FILE_REQUESTER_CANCEL);
+    
+    // Lier ces actions aux touches
+    m_keyboard->bindKeyToAction(InputAction::FILE_REQUESTER_CANCEL, SDL_SCANCODE_ESCAPE);
 }
 
 SCFileRequester::~SCFileRequester() {
     delete this->uiImageSet;
+    delete m_keyboard;
+}
+void SCFileRequester::quitToDos() {
+    Game->terminate("ending");
+}
+void SCFileRequester::activateTextEditor(void* unused, int id) {
+    if (!m_isEditingText) {
+        // Activer l'éditeur de texte
+        SDL_Rect inputRect = {
+            m_textInputZone->position.x,
+            m_textInputZone->position.y,
+            m_textInputZone->dimension.x,
+            m_textInputZone->dimension.y
+        };
+        
+        m_textEditor->setText(current_file);
+        m_textEditor->setActive(true, &inputRect);
+        m_isEditingText = true;
+    }
 }
 void SCFileRequester::draw(FrameBuffer *fb) {
     checkButtons();
@@ -201,7 +271,11 @@ void SCFileRequester::draw(FrameBuffer *fb) {
         (320-shape->GetWidth())/2+34, 
         (200-shape->GetHeight())/2+40
     };
-    fb->PrintText(this->font, {textPos.x,textPos.y-5}, this->current_file, this->color_offset);
+    if (m_isEditingText) {
+        m_textInputZone->drawQuad();
+    }
+    std::string displayText = m_textEditor->getDisplayText();
+    fb->PrintText(this->font, {textPos.x,textPos.y-5}, displayText, this->color_offset);
     int min_y = textPos.y;
     int max_y = textPos.y+6*8;
     for (auto file: this->files) {
@@ -234,82 +308,17 @@ void SCFileRequester::draw(FrameBuffer *fb) {
     }
 }
 void SCFileRequester::checkevents() {
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            this->opened = false;
-            break;
-        }
-        case SDLK_KP_PLUS:
-            this->color_offset = (this->color_offset + 1) % 256;
-            break;
-        case SDLK_KP_MINUS:
-            this->color_offset = (this->color_offset + 255) % 256;
-            break;
-        case SDLK_KP_MULTIPLY:
-            this->palette_index = (this->palette_index + 1) % 40;
-            break;
-        case SDLK_KP_DIVIDE:
-            this->palette_index = (this->palette_index + 39) % 40;
-            break;
-        case SDLK_DELETE:
-            case SDLK_BACKSPACE:
-                if(this->current_file.size() > 0){
-                    this->current_file = this->current_file.substr(0,this->current_file.size()-1);
-                }
-            break;
-            case SDLK_a:
-            case SDLK_b:
-            case SDLK_c:
-            case SDLK_d:
-            case SDLK_e:
-            case SDLK_f:
-            case SDLK_g:
-            case SDLK_h:
-            case SDLK_i:
-            case SDLK_j:
-            case SDLK_k:
-            case SDLK_l:
-            case SDLK_m:
-            case SDLK_n:
-            case SDLK_o:
-            case SDLK_p:
-            case SDLK_q:
-            case SDLK_r:
-            case SDLK_s:
-            case SDLK_t:
-            case SDLK_u:
-            case SDLK_v:
-            case SDLK_w:
-            case SDLK_x:
-            case SDLK_y:
-            case SDLK_z:
-            {
-                this->current_file += char(event->key.keysym.sym - 'a' + 'A');
-                break;
-            }
-            case SDLK_0:
-            case SDLK_1:
-            case SDLK_2:
-            case SDLK_3:
-            case SDLK_4:
-            case SDLK_5:
-            case SDLK_6:
-            case SDLK_7:
-            case SDLK_8:
-            case SDLK_9:
-            case SDLK_PERIOD:
-            {
-                this->current_file += char(event->key.keysym.sym);
-                break;
-            }
-        default:
-            break;
-        }
+    // Mettre à jour l'état des entrées
+    m_keyboard->update();
+    
+    // Synchroniser notre variable current_file avec le contenu de l'éditeur
+    if (m_isEditingText) {
+        current_file = m_textEditor->getText();
+    }
+    
+    // Vérifier les actions au lieu des touches spécifiques
+    if (m_keyboard->isActionJustPressed(InputAction::FILE_REQUESTER_CANCEL)) {
+        this->opened = false;
     }
 }
 
@@ -347,8 +356,10 @@ SCButton *SCFileRequester::checkButtons(void) {
 void SCFileRequester::loadFiles() {
     files.clear();
     files.shrink_to_fit();
+    SCZone *zone = zones[0];
     zones.clear();
     zones.shrink_to_fit();
+    zones.push_back(zone);
     RLEShape *shape = this->uiImageSet->GetShape(0);
     Point2D textPos = {
         (320-shape->GetWidth())/2+32, 
@@ -380,6 +391,18 @@ void SCFileRequester::fileDown() {
     this->texte_x -= 8;
 }
 SCZone * SCFileRequester::checkZones() {
+    if (m_isEditingText && Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED) {
+        // Vérifier si le clic est en dehors de la zone de texte
+        bool clickedOutside = 
+            Mouse.GetPosition().x < m_textInputZone->position.x || 
+            Mouse.GetPosition().x > m_textInputZone->position.x + m_textInputZone->dimension.x ||
+            Mouse.GetPosition().y < m_textInputZone->position.y || 
+            Mouse.GetPosition().y > m_textInputZone->position.y + m_textInputZone->dimension.y;
+        
+        if (clickedOutside) {
+            deactivateTextEditor();
+        }
+    }
     RLEShape *shape = this->uiImageSet->GetShape(0);
     Point2D textPos = {
         (320-shape->GetWidth())/2+34, 
@@ -388,7 +411,7 @@ SCZone * SCFileRequester::checkZones() {
     int min_y = textPos.y;
     int max_y = textPos.y+6*8;
     if (Mouse.GetPosition().y < min_y || Mouse.GetPosition().y > max_y) {
-        return nullptr;
+        //return nullptr;
     }
     for (auto zone : this->zones) {
         if (zone->active) {
@@ -411,8 +434,19 @@ SCZone * SCFileRequester::checkZones() {
     Mouse.SetMode(SCMouse::CURSOR);
     return nullptr;
 }
+void SCFileRequester::deactivateTextEditor() {
+    if (m_isEditingText) {
+        // Désactiver l'éditeur de texte
+        m_textEditor->setActive(false);
+        m_isEditingText = false;
+        
+        // Synchroniser notre variable current_file avec le contenu de l'éditeur
+        current_file = m_textEditor->getText();
+    }
+}
 void SCFileRequester::selectFile(void *unused, int index) {
     current_file = files[index];
+    m_textEditor->setText(current_file);
     this->selectd_file_index = index;
 }
 void SCFileRequester::loadFile() {
