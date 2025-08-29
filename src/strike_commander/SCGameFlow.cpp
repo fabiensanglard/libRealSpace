@@ -723,9 +723,6 @@ void SCGameFlow::runFrame(void) {
     if (this->frequest == nullptr || !this->frequest->opened) {
         this->CheckZones();
     }
-    VGA.VSync();
-    VGA.Activate();
-    VGA.GetFrameBuffer()->Clear();
     if (this->frequest != nullptr && this->frequest->opened) {
         this->frequest->draw(VGA.GetFrameBuffer());
     }
