@@ -195,3 +195,11 @@ void Keyboard::TextEditor::handleSpecialKey(SDL_Keycode key) {
 std::shared_ptr<Keyboard::TextEditor> Keyboard::createTextEditor() {
     return std::make_shared<TextEditor>(this);
 }
+void Keyboard::bindMousePositionToAction(const InputAction actionId, int axis, float scale) {
+    m_inputSystem->registerAction(actionId);
+    m_inputSystem->bindInput(actionId, InputBinding(InputType::MOUSE_POSITION, -1, axis, scale));
+}
+
+void Keyboard::getMouseAbsolutePosition(int& x, int& y) const {
+    m_inputSystem->getMouseAbsolutePosition(x, y);
+}

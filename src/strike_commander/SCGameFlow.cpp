@@ -514,67 +514,6 @@ void SCGameFlow::runEffectAfterLoad() {
     }
 }
 /**
- * Checks for keyboard events and updates the game state accordingly.
- *
- * This function peeks at the SDL event queue to check for keyboard events.
- * If a key is pressed, it updates the game state based on the key pressed.
- * The supported keys are escape, space, and return.
- *
- * @return None
- */
-void SCGameFlow::checkKeyboard(void) {
-    // Keyboard
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            Game->stopTopActivity();
-            break;
-        }
-        case SDLK_SPACE:
-            this->current_miss++;
-            this->current_scen = 0;
-            if (this->current_miss >= this->gameFlowParser.game.game.size()) {
-                this->current_miss = 0;
-            }
-            this->efect = nullptr;
-            this->currentOptCode = 0;
-            this->createMiss();
-            break;
-        case SDLK_a:
-            this->extcpt++;
-            if (this->extcpt > this->sceneOpts->extr.size() - 1) {
-                this->extcpt--;
-            }
-            break;
-        case SDLK_z:
-            this->extcpt--;
-            if (this->extcpt <= 0) {
-                this->extcpt = 0;
-            }
-            break;
-        case SDLK_RETURN:
-            this->current_scen++;
-            if (this->current_scen >= this->gameFlowParser.game.game[this->current_miss]->scen.size()) {
-                this->current_scen = 0;
-                this->current_miss++;
-                if (this->current_miss >= this->gameFlowParser.game.game.size()) {
-                    this->current_miss = 0;
-                }
-            }
-            this->createMiss();
-            return;
-            break;
-        default:
-            break;
-        }
-    }
-}
-
-/**
  * Initializes the SCGameFlow object by loading the necessary IFF files and initializing the optionParser and
  * gameFlowParser. It also initializes the optShps and optPals objects by loading the OPTSHPS.PAK and OPTPALS.PAK files
  * respectively. Finally, it sets the efect pointer to nullptr and calls the createMiss() function.

@@ -23,7 +23,7 @@
 #include "SCRenderer.h"
 #include "IActivity.h"
 #include "Loader.h"
-
+#include "keyboard.h"
 class GameEngine{
     
 public:
@@ -40,11 +40,12 @@ public:
     virtual void addActivity(IActivity* activity);
     virtual void stopTopActivity(void);
     virtual IActivity* getCurrentActivity(void);
-    
+    Keyboard* getKeyboard() const { return m_keyboard; }
     virtual void pumpEvents(void);
     
 protected:
     Loader *loader;
+    Keyboard *m_keyboard;
 private:
     
     std::stack<IActivity*> activities;

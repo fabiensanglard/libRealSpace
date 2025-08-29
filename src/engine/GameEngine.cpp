@@ -11,6 +11,9 @@
 #include "imgui_impl_sdl2.h"
 #include "GameEngine.h"
 #include "Loader.h"
+#include "InputActionSystem.h"  
+#include "EventManager.h"
+#include "keyboard.h" 
 extern RSScreen *Screen;
 extern GameEngine *Game;
 extern SCMouse Mouse;
@@ -20,7 +23,11 @@ extern RSVGA VGA;
 
 GameEngine::GameEngine() {}
 
-GameEngine::~GameEngine() {}
+GameEngine::~GameEngine() {
+    delete m_keyboard;
+    m_keyboard = nullptr;
+}
+
 
 void GameEngine::init() {
 
@@ -30,102 +37,79 @@ void GameEngine::init() {
     Renderer.init(WIDTH,HEIGHT, &Assets);
     // Load the Mouse Cursor
     Mouse.init();
+    // Crée le clavier (abstraction)
+    m_keyboard = new Keyboard();
+
+    // Enregistrer actions souris (position + boutons)
+    m_keyboard->registerAction(InputAction::MOUSE_POS_X);
+    m_keyboard->registerAction(InputAction::MOUSE_POS_Y);
+    m_keyboard->registerAction(InputAction::MOUSE_LEFT);
+    m_keyboard->registerAction(InputAction::MOUSE_MIDDLE);
+    m_keyboard->registerAction(InputAction::MOUSE_RIGHT);
+
+    // Bind position absolue (axis: 0 = X, 1 = Y)
+    m_keyboard->bindMousePositionToAction(InputAction::MOUSE_POS_X, 0, 1.0f);
+    m_keyboard->bindMousePositionToAction(InputAction::MOUSE_POS_Y, 1, 1.0f);
+
+    // Bind boutons (indices SDL : left=1, middle=2, right=3)
+    m_keyboard->bindMouseButtonToAction(InputAction::MOUSE_LEFT,   SDL_BUTTON_LEFT);
+    m_keyboard->bindMouseButtonToAction(InputAction::MOUSE_MIDDLE, SDL_BUTTON_MIDDLE);
+    m_keyboard->bindMouseButtonToAction(InputAction::MOUSE_RIGHT,  SDL_BUTTON_RIGHT);
+
+    m_keyboard->registerAction(InputAction::KEY_ESCAPE);
+    m_keyboard->bindKeyToAction(InputAction::KEY_ESCAPE, SDL_SCANCODE_ESCAPE);
 }
 
 void GameEngine::pumpEvents(void) {
 
-    SDL_PumpEvents();
+    // Met à jour tout (Keyboard encapsule InputActionSystem/EventManager)
+    m_keyboard->update();
 
-    // Mouse
-    SDL_Event mouseEvents[5];
-    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEMOTION, SDL_MOUSEWHEEL);
-    ImGui_ImplSDL2_ProcessEvent(mouseEvents);
-    for (int i = 0; i < numMouseEvents; i++) {
-        SDL_Event *event = &mouseEvents[i];
+    // Position absolue (pixels fenêtre)
+    int px, py;
+    m_keyboard->getMouseAbsolutePosition(px, py);
 
-        switch (event->type) {
-        case SDL_MOUSEMOTION:
+    // Conversion vers l’espace 320x200 legacy
+    Point2D newPosition;
+    newPosition.x = static_cast<int>(px * 320.0f / Screen->width);
+    newPosition.y = static_cast<int>(py * 200.0f / Screen->height);
+    Mouse.SetPosition(newPosition);
+    Mouse.SetVisible(true);
+    // Mettre à jour les événements des trois boutons via transitions
+    struct BtnMap {
+        InputAction action;
+        int legacyIndex; // 0=Left,1=Middle,2=Right (adapter si ordre différent)
+    } maps[] = {
+        { InputAction::MOUSE_LEFT,   0 },
+        { InputAction::MOUSE_MIDDLE, 1 },
+        { InputAction::MOUSE_RIGHT,  2 },
+    };
 
-            Point2D newPosition;
-            newPosition.x = event->motion.x;
-            newPosition.y = event->motion.y;
-
-            newPosition.x = static_cast<int>(newPosition.x * 320 / Screen->width);
-            newPosition.y = static_cast<int>(newPosition.y * 200 / Screen->height);
-
-            Mouse.SetPosition(newPosition);
-
-            break;
-
-        case SDL_MOUSEBUTTONDOWN:
-            // printf("SDL_MOUSEBUTTONDOWN %d\n",event->button.button);
-
-            Mouse.buttons[event->button.button - 1].event = MouseButton::PRESSED;
-            break;
-        case SDL_MOUSEBUTTONUP:
-            // printf("SDL_MOUSEBUTTONUP %d\n",event->button.button);
-            Mouse.buttons[event->button.button - 1].event = MouseButton::RELEASED;
-            break;
-        default:
-            break;
+    for (auto& m : maps) {
+        auto& legacyBtn = Mouse.buttons[m.legacyIndex];
+        if (m_keyboard->isActionJustPressed(m.action)) {
+            legacyBtn.event = MouseButton::PRESSED;
+        } else if (m_keyboard->isActionJustReleased(m.action)) {
+            legacyBtn.event = MouseButton::RELEASED;
+        } else {
+            legacyBtn.event = MouseButton::NONE;
         }
     }
-
-
-    // System events
-    SDL_Event sysEvents[5];
-    int numSysEvents = SDL_PeepEvents(sysEvents, 5, SDL_PEEKEVENT, SDL_FIRSTEVENT, SDL_SYSWMEVENT);
-    for (int i = 0; i < numSysEvents; i++) {
-        SDL_Event *event = &sysEvents[i];
-
-        switch (event->type) {
-        case SDL_APP_TERMINATING:
-            terminate("System request.");
-            break;
-        case SDL_QUIT:
-            terminate("System request.");
-            break;
-
-        // Verify is we should be capturing the mouse or not.
-        case SDL_WINDOWEVENT:
-            if (event->window.event == SDL_WINDOWEVENT_ENTER) {
-                Mouse.SetVisible(true);
-                SDL_ShowCursor(SDL_DISABLE);
-                return;
-            }
-
-            if (event->window.event == SDL_WINDOWEVENT_LEAVE) {
-                Mouse.SetVisible(false);
-                SDL_ShowCursor(SDL_ENABLE);
-                return;
-            }
-
-            if (event->window.event == SDL_WINDOWEVENT_CLOSE) {
-                terminate("System request.");
-                break;
-            }
-
-            break;
-        default:
-            break;
-        }
+    
+    if (EventManager::getInstance().shouldQuit()) {
+        terminate("System request.");
+        return;
     }
 }
 
 void GameEngine::run() {
 
     IActivity *currentActivity;
-
     while (activities.size() > 0) {
 
         pumpEvents();
 
-        // Clear the screen
-        // enderer.Clear();
-
-        // Allow the active activity to Run and Render
         currentActivity = activities.top();
-
         if (currentActivity->isRunning()) {
             currentActivity->focus();
             currentActivity->runFrame();
@@ -134,14 +118,9 @@ void GameEngine::run() {
             delete currentActivity;
         }
 
-        // Swap GL buffer
         Screen->refresh();
 
-        // Flush all events since they should all have been interpreted.
-        SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
-
-        // Also clear the Mouse flags.
-        Mouse.FlushEvents();
+        Mouse.FlushEvents(); // On peut le garder si sa logique interne reste valable.
     }
 }
 

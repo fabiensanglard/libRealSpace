@@ -45,7 +45,6 @@ protected:
 
 class EndMissionScene : public SCShot {
 protected:
-    virtual void checkKeyboard(void);
     int part{0};
 public:
     EndMissionScene(PakArchive *optShps, PakArchive *optPals) : SCShot() {};
@@ -76,6 +75,5 @@ public:
     void init();
     void SetPoints(std::vector<MAP_POINT *> *points);
     void runFrame(void);
-    void checkKeyboard(void);
 };
 #endif

@@ -101,7 +101,6 @@ protected:
     void flyOrReturnFromScene(std::vector<EFCT *> *script, uint8_t id);
     void runEffect();
     void runEffectAfterLoad();
-    void checkKeyboard(void);
     SCZone *CheckZones(void);
     void createScen();
     virtual void flyMission();

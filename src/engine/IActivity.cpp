@@ -52,20 +52,13 @@ void IActivity::stop(void) {
 void IActivity::setTitle(const char *title) { Screen->setTitle(title); }
 
 void IActivity::checkKeyboard(void) {
-    // Keyboard
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            Game->stopTopActivity();
-            break;
-        }
-        default:
-            break;
-        }
+    if (!Game)
+        return;
+    Keyboard* kb = Game->getKeyboard();
+    if (!kb)
+        return;
+    if (kb->isActionJustPressed(InputAction::KEY_ESCAPE)) {
+        Game->stopTopActivity();
     }
 }
 

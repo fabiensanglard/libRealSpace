@@ -163,7 +163,12 @@ bool InputActionSystem::evaluateBinding(const InputBinding& binding, float& outV
             
             return std::abs(outValue) > m_axisDeadZone;
         }
-        
+        case InputType::MOUSE_POSITION: {
+            int x, y;
+            m_eventManager->getMousePosition(x, y);
+            outValue = (binding.code == 0) ? static_cast<float>(x) : static_cast<float>(y);
+            return true; // Always true as we can always get mouse position
+        }
         case InputType::GAMEPAD_BUTTON: {
             int gamepadId = (binding.deviceId >= 0) ? binding.deviceId : 0;
             if (gamepadId < m_eventManager->getJoystickCount()) {
@@ -300,7 +305,9 @@ bool InputActionSystem::isTextInputActive() const {
 const std::vector<std::string>& InputActionSystem::getTextInput() const {
     return m_eventManager->getTextInput();
 }
-
+void InputActionSystem::getMouseAbsolutePosition(int& x, int& y) const {
+    m_eventManager->getMousePosition(x, y);
+}
 void InputActionSystem::clearTextInputBuffer() {
     m_eventManager->clearTextInputBuffer();
 }

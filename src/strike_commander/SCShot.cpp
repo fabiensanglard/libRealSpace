@@ -23,32 +23,14 @@ SCShot::~SCShot() {}
  * @return None
  */
 void SCShot::checkKeyboard(void) {
-    SDL_Event mouseEvents[5];
-    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
-    for (int i = 0; i < numMouseEvents; i++) {
-        SDL_Event *event = &mouseEvents[i];
-
-        switch (event->type) {
-        case SDL_MOUSEBUTTONUP:
-            Game->stopTopActivity();
-            break;
-        default:
-            break;
-        }
-    }
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            Game->stopTopActivity();
-            break;
-        }
-        default:
-            break;
-        }
+    if (!Game)
+        return;
+    Keyboard* kb = Game->getKeyboard();
+    if (!kb)
+        return;
+    if (kb->isActionJustPressed(InputAction::MOUSE_LEFT) ||
+        kb->isActionJustPressed(InputAction::KEY_ESCAPE)) {
+        Game->stopTopActivity();
     }
 }
 
@@ -211,40 +193,6 @@ void EndMissionScene::runFrame() {
     VGA.VSync();
 }
 
-void EndMissionScene::checkKeyboard(void) {
-    SDL_Event mouseEvents[5];
-    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
-    for (int i = 0; i < numMouseEvents; i++) {
-        SDL_Event *event = &mouseEvents[i];
-
-        switch (event->type) {
-        case SDL_MOUSEBUTTONUP:
-            if (this->part == 0) {
-                this->part = 1;
-                this->rawPalette = this->optPals.GetEntry(19)->data;
-            } else {
-                Game->stopTopActivity();
-            }
-            break;
-        default:
-            break;
-        }
-    }
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            Game->stopTopActivity();
-            break;
-        }
-        default:
-            break;
-        }
-    }
-}
 void MapShot::init() {
     SCShot::init();
     x_max = 960;
@@ -353,37 +301,5 @@ void MapShot::runFrame(void) {
     VGA.VSync();
     if (ended) {
         Game->stopTopActivity();
-    }
-}
-void MapShot::checkKeyboard(void) {
-    SDL_Event mouseEvents[5];
-    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
-    for (int i = 0; i < numMouseEvents; i++) {
-        SDL_Event *event = &mouseEvents[i];
-
-        switch (event->type) {
-        case SDL_MOUSEBUTTONUP:
-            Game->stopTopActivity();
-            break;
-        default:
-            break;
-        }
-    }
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            Game->stopTopActivity();
-            break;
-        }
-        case SDLK_c:
-            this->color = (this->color + 1) % 255;
-            break;
-        default:
-            break;
-        }
     }
 }

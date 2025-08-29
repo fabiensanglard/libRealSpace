@@ -99,7 +99,7 @@ public:
     
     // Effacer le buffer de texte (à appeler après avoir traité le texte)
     void clearTextInputBuffer() { m_textInputBuffer.clear(); }
-
+    void enableImGuiForwarding(bool enabled);
 private:
     EventManager();
     ~EventManager();
@@ -113,7 +113,7 @@ private:
     void handleTextInputEvent(const SDL_Event& event);
     
     bool m_quit = false;
-    
+    bool m_forwardImGui = false;
     // État actuel et précédent du clavier
     const Uint8* m_currentKeyStates = nullptr;
     std::vector<Uint8> m_previousKeyStates;

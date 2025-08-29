@@ -10,6 +10,16 @@
 enum class InputAction {
 // Actions de base du système (0-999)
     UNKNOWN = 0,
+    MOUSE_LEFT = 1,
+    MOUSE_RIGHT = 2,
+    MOUSE_MIDDLE = 3,
+    MOUSE_POS_X = 4,
+    MOUSE_POS_Y = 5,
+    MOUSE_WHEEL_UP = 6,
+    MOUSE_WHEEL_DOWN = 7,
+    KEY_ESCAPE = 8,
+    KEY_ENTER = 9,
+    
 
     // Plage réservée pour le File Requester (1000-1999)
     FILE_REQUESTER_START = 1000,
@@ -38,6 +48,7 @@ enum class InputType {
     KEYBOARD,
     MOUSE_BUTTON,
     MOUSE_AXIS,
+    MOUSE_POSITION,
     GAMEPAD_BUTTON,
     GAMEPAD_AXIS
 };
@@ -114,6 +125,7 @@ public:
     bool isActionJustPressed(const InputAction actionId) const;
     bool isActionJustReleased(const InputAction actionId) const;
     float getActionValue(const InputAction actionId) const;  // Pour les axes (-1.0 à 1.0)
+    void getMouseAbsolutePosition(int& x, int& y) const;
     
     // Sauvegarder/charger des configurations
     bool saveBindings(const std::string &filename) const;

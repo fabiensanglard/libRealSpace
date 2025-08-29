@@ -2,7 +2,8 @@
 #include <SDL_gamecontroller.h>
 #include <cstring>
 #include <algorithm>
-
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
 
 EventManager& EventManager::getInstance() {
     static EventManager instance;
@@ -167,7 +168,9 @@ void EventManager::closeJoysticks() {
     m_joysticks.clear();
     m_joystickInstanceMap.clear();
 }
-
+void EventManager::enableImGuiForwarding(bool enabled) {
+    m_forwardImGui = enabled;
+}
 void EventManager::update() {
     // Sauvegarder l'état précédent du clavier
     std::memcpy(m_previousKeyStates.data(), m_currentKeyStates, m_numKeys);
@@ -186,6 +189,9 @@ void EventManager::update() {
     // Traiter tous les événements en attente
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+        if (m_forwardImGui) {
+            ImGui_ImplSDL2_ProcessEvent(&event);
+        }
         switch (event.type) {
             case SDL_QUIT:
                 m_quit = true;

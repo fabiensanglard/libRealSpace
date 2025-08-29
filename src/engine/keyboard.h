@@ -24,7 +24,9 @@ public:
     void bindGamepadButtonToAction(const InputAction actionId, int gamepadIndex, SDL_GameControllerButton button);
     void bindGamepadAxisToAction(const InputAction actionId, int gamepadIndex, SDL_GameControllerAxis axis, float scale = 1.0f);
     void bindMouseAxisToAction(const InputAction actionId, int axis, float scale = 1.0f);
-
+    void bindMousePositionToAction(const InputAction actionId, int axis, float scale = 1.0f);
+    void getMouseAbsolutePosition(int& x, int& y) const;
+    
     // Persistence des configurations
     bool saveActionBindings(const std::string& filename) const;
     bool loadActionBindings(const std::string& filename);

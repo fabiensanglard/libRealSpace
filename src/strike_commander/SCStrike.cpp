@@ -8,9 +8,6 @@
 
 #include "precomp.h"
 #include <cctype>
-#include <imgui.h>
-#include <imgui_impl_opengl2.h>
-#include <imgui_impl_sdl2.h>
 #include <tuple>
 #include <optional>
 #include <cmath>
@@ -29,7 +26,7 @@ SCStrike::SCStrike() {
     this->camera_mode = 0;
     this->camera_pos = {-169.0f, 79.0f, -189.0f};
     this->counter = 0;
-    this->m_keyboard = new Keyboard();
+    this->m_keyboard = Game->getKeyboard();
 }
 
 SCStrike::~SCStrike() {}
@@ -137,8 +134,8 @@ void SCStrike::registerSimulatorInputs() {
     m_keyboard->bindKeyToAction(CreateAction(InputAction::SIM_START, SimActionOfst::PAUSE), SDL_SCANCODE_P);
     m_keyboard->bindKeyToAction(CreateAction(InputAction::SIM_START, SimActionOfst::EYES_ON_TARGET), SDL_SCANCODE_Y);
     m_keyboard->bindKeyToAction(CreateAction(InputAction::SIM_START, SimActionOfst::END_MISSION), SDL_SCANCODE_ESCAPE);
-    m_keyboard->bindMouseAxisToAction(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_X), 0, 1.0f);
-    m_keyboard->bindMouseAxisToAction(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_Y), 1, 1.0f);
+    m_keyboard->bindMousePositionToAction(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_X), 0, 1.0f);
+    m_keyboard->bindMousePositionToAction(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_Y), 1, 1.0f);
 }
 void SCStrike::autopilotCompute() {
     Vector2D destination = {this->current_mission->waypoints[this->nav_point_id]->spot->position.x,
@@ -317,18 +314,12 @@ void SCStrike::autopilotCompute() {
 void SCStrike::checkKeyboard(void) {
     int msx = 0;
     int msy = 0;
-    SDL_GetMouseState(&msx, &msy);
-    //msy = msy - (Screen->height / 2);
-    //msx = msx - (Screen->width / 2);
-
+    
     float dx = m_keyboard->getActionValue(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_X));
     float dy = m_keyboard->getActionValue(CreateAction(InputAction::SIM_START, SimActionOfst::MOUSE_Y));
 
-    mouseAxisAccumX += dx;
-    mouseAxisAccumY += dy;
-
-    msy = mouseAxisAccumY - (Screen->height / 2);
-    msx = mouseAxisAccumX - (Screen->width / 2);
+    msy = dy - (Screen->height / 2);
+    msx = dx - (Screen->width / 2);
 
     if (this->camera_mode == View::AUTO_PILOT) {
         return;
@@ -345,9 +336,8 @@ void SCStrike::checkKeyboard(void) {
         this->pilote_lookat.y = ((Screen->height / 360) * msy) / 6;
     }
 
-    m_keyboard->update();
+    //m_keyboard->update();
     
-    // Utiliser les actions au lieu de détecter directement les touches
     if (m_keyboard->isActionPressed(CreateAction(InputAction::SIM_START, SimActionOfst::THROTTLE_UP))) {
         if (this->player_plane->GetThrottle() == 0) {
             if (this->current_mission->sound.sounds.size() > 0) {
