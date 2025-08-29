@@ -74,6 +74,9 @@ void RSMixer::StopSound(int chanl) { Mix_HaltChannel(chanl); };
 bool RSMixer::IsSoundPlaying() {
     return Mix_Playing(channel) != 0;
 }
+bool RSMixer::IsSoundPlaying(int chanl) {
+    return Mix_Playing(-1) != 0;
+}
 void RSMixer::setVolume(int volume, int channel) {
     if (channel == -1) {
         Mix_VolumeMusic(volume);

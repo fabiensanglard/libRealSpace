@@ -11,7 +11,7 @@ void DebugConvPlayer::CheckFrameExpired(void) {
 }
 
 DebugConvPlayer::DebugConvPlayer() {
-    this->paused = true;
+    this->paused = false;
 }
 
 DebugConvPlayer::~DebugConvPlayer() {

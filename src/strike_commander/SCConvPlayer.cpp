@@ -606,20 +606,26 @@ void SCConvPlayer::CheckFrameExpired(void) {
             return;
         if (kb->isActionJustPressed(InputAction::KEY_ESCAPE)) {
             Game->stopTopActivity();
-            Mixer.StopSound();
+            Mixer.StopSound(6);
         }
         if (kb->isActionJustPressed(InputAction::MOUSE_LEFT)) {
             this->current_frame->SetExpired(true);
-            Mixer.StopSound();
+            Mixer.StopSound(6);
             return;
         }
 
     
         int32_t currentTime = SDL_GetTicks();
 
-        if (currentTime - this->current_frame->creationTime > 5000)
-            this->current_frame->SetExpired(true);
-            Mixer.StopSound();
+        if (this->current_frame->sound_file_name != nullptr && this->current_frame->sound_file_name->length()>0) {
+            if (Mixer.IsSoundPlaying(6) == false) {
+                this->current_frame->SetExpired(true);
+            }
+        } else {
+            if (currentTime - this->current_frame->creationTime > 5000)
+                this->current_frame->SetExpired(true);
+        }
+        
     }
 }
 
@@ -767,6 +773,15 @@ void SCConvPlayer::runFrame(void) {
     if (this->current_frame == nullptr) {
         this->current_frame = this->conversation_frames[0];
         this->current_frame->creationTime       = SDL_GetTicks();
+        this->current_frame->SetExpired(false);
+        if (this->current_frame->sound_file_name != NULL && this->current_frame->sound_file_name->length() > 0) {
+            std::string filename = "F:"+*this->current_frame->sound_file_name+".VOC";
+            std::transform(filename.begin(), filename.end(), filename.begin(), ::toupper);
+            TreEntry *sound_entry = Assets.GetEntryByName(filename.c_str());
+            if (sound_entry != nullptr) {
+                Mixer.PlaySoundVoc(sound_entry->data, sound_entry->size,6);
+            }
+        }
     }
     // If frame needs to be update
     if (this->current_frame->mode != ConvFrame::CONV_CONTRACT_CHOICE && this->current_frame->mode != ConvFrame::CONV_WINGMAN_CHOICE) {
@@ -783,6 +798,14 @@ void SCConvPlayer::runFrame(void) {
         }
         this->current_frame = this->conversation_frames[0];
         this->current_frame->creationTime       = SDL_GetTicks();
+        if (this->current_frame->sound_file_name != NULL && this->current_frame->sound_file_name->length() > 0) {
+            std::string filename = "F:"+*this->current_frame->sound_file_name+".VOC";
+            std::transform(filename.begin(), filename.end(), filename.begin(), ::toupper);
+            TreEntry *sound_entry = Assets.GetEntryByName(filename.c_str());
+            if (sound_entry != nullptr) {
+                Mixer.PlaySoundVoc(sound_entry->data, sound_entry->size,6);
+            }
+        }
     }
     
     checkButtons();
@@ -806,14 +829,7 @@ void SCConvPlayer::runFrame(void) {
     
     // Draw static
     
-    if (this->current_frame->sound_file_name != NULL && this->current_frame->sound_file_name->length() > 0) {
-        std::string filename = "F:"+*this->current_frame->sound_file_name+".VOC";
-        std::transform(filename.begin(), filename.end(), filename.begin(), ::toupper);
-        TreEntry *sound_entry = Assets.GetEntryByName(filename.c_str());
-        if (sound_entry != nullptr) {
-            Mixer.PlaySoundVoc(sound_entry->data, sound_entry->size);
-        }
-    }
+    
 
     switch (this->current_frame->mode) {
         case ConvFrame::CONV_SHOW_TEXT:
@@ -995,9 +1011,7 @@ void SCConvPlayer::runFrame(void) {
         }   
         break;
     }
-    if (this->current_frame->sound_file_name != nullptr && this->current_frame->sound_file_name->length()>0 && Mixer.IsSoundPlaying() == false) {
-        this->current_frame->SetExpired(true);
-    }
+    
     this->DrawText();
     
     VGA.VSync();

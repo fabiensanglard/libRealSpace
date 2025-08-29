@@ -31,5 +31,6 @@ public:
     void PlaySoundVoc(uint8_t *data, size_t vocSize, int channel, int loop=0);
     void setVolume(int volume, int channel = -1);
     bool IsSoundPlaying();
+    bool IsSoundPlaying(int chanl);
     RSMusic *music;
 };
