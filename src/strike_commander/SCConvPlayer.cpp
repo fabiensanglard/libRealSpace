@@ -606,9 +606,11 @@ void SCConvPlayer::CheckFrameExpired(void) {
             return;
         if (kb->isActionJustPressed(InputAction::KEY_ESCAPE)) {
             Game->stopTopActivity();
+            Mixer.StopSound();
         }
         if (kb->isActionJustPressed(InputAction::MOUSE_LEFT)) {
             this->current_frame->SetExpired(true);
+            Mixer.StopSound();
             return;
         }
 
@@ -617,6 +619,7 @@ void SCConvPlayer::CheckFrameExpired(void) {
 
         if (currentTime - this->current_frame->creationTime > 5000)
             this->current_frame->SetExpired(true);
+            Mixer.StopSound();
     }
 }
 

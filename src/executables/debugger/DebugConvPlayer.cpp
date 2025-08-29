@@ -40,6 +40,7 @@ void DebugConvPlayer::renderUI() {
             if (ImGui::Button("Next Frame")) {
                 this->paused = true;
                 this->current_frame->SetExpired(true);
+                Mixer.StopSound();
             }
             ImGui::Text("Conversation ID: %d", this->conversationID);
             ImGui::Text("Number of frames: %d", (int)this->conversation_frames.size());

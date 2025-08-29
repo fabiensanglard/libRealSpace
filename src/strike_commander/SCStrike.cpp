@@ -643,6 +643,8 @@ void SCStrike::checkKeyboard(void) {
     }
     if (m_keyboard->isActionJustPressed(CreateAction(InputAction::SIM_START, SimActionOfst::END_MISSION))) {
         this->current_mission->mission_ended = true;
+        Mixer.StopSound();
+        Mixer.StopSound(5);
     }
     this->cockpit->mouse_control = this->mouse_control;
 }

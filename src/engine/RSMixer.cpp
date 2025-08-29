@@ -70,6 +70,7 @@ void RSMixer::PlaySoundVoc(uint8_t *data, size_t vocSize, int channel, int loop)
     }
 }
 void RSMixer::StopSound() { Mix_HaltChannel(channel); };
+void RSMixer::StopSound(int chanl) { Mix_HaltChannel(chanl); };
 bool RSMixer::IsSoundPlaying() {
     return Mix_Playing(channel) != 0;
 }

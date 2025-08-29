@@ -26,6 +26,7 @@ public:
     void StopMusic();
     uint32_t GetMusicID() { return this->current_music; };
     void StopSound();
+    void StopSound(int chanl);
     void PlaySoundVoc(uint8_t *data, size_t vocSize);
     void PlaySoundVoc(uint8_t *data, size_t vocSize, int channel, int loop=0);
     void setVolume(int volume, int channel = -1);
