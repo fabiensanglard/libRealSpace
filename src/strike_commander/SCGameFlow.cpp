@@ -122,7 +122,6 @@ void SCGameFlow::flyMission() {
 }
 SCZone *SCGameFlow::CheckZones(void) {
     static uint8_t color = 0;
-    color = 0;
     RSFont *fnt = FontManager.GetFont("..\\..\\DATA\\FONTS\\OPTFONT.SHP");
     for (auto zone : *this->zones) {
         if (zone->active) {
@@ -720,10 +719,11 @@ void SCGameFlow::runFrame(void) {
             VGA.GetFrameBuffer()->DrawShape(this->test_shape);
         }
     }
-    VGA.VSync();
+    
     if (this->frequest == nullptr || !this->frequest->opened) {
         this->CheckZones();
     }
+    VGA.VSync();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
     if (this->frequest != nullptr && this->frequest->opened) {
