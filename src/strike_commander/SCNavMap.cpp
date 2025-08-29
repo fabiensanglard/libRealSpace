@@ -7,6 +7,64 @@
 //
 #include "precomp.h"
 
+namespace {
+    struct LabelBox {
+        int x,y,w,h;
+    };
+    static std::vector<LabelBox> g_labelBoxes;
+
+    inline bool intersects(const LabelBox &a, const LabelBox &b) {
+        return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
+    }
+
+    Point2D placeLabel(int anchorX, int anchorY, int w, int h) {
+        // Positions candidates (dx, dy appliqués au point d’ancrage)
+        static const std::vector<std::pair<int,int>> candidates = {
+            { 0, 0},
+            { 0,-h },
+            { 0, h },
+            { 0, h},
+            { w, 0 },
+            { w,-h },
+            { w, h },
+            { -w, 0},
+            { -w,-h },
+            { -w, h }
+        };
+        for (auto &c : candidates) {
+            LabelBox box { anchorX + c.first, anchorY + c.second, w, h };
+            bool clash = false;
+            for (auto &b : g_labelBoxes) {
+                if (intersects(box, b)) { clash = true; break; }
+            }
+            if (!clash) {
+                g_labelBoxes.push_back(box);
+                return Point2D{ box.x, box.y };
+            }
+        }
+        // Fallback : empiler vers le bas
+        int yOff = 6;
+        while (yOff < 60) {
+            LabelBox box { anchorX - w/2, anchorY + yOff, w, h };
+            bool clash = false;
+            for (auto &b : g_labelBoxes) {
+                if (intersects(box, b)) { clash = true; break; }
+            }
+            if (!clash) {
+                g_labelBoxes.push_back(box);
+                return Point2D{ box.x, box.y };
+            }
+            yOff += h + 2;
+        }
+        // Dernier recours : ne pas enregistrer (risque chevauchement)
+        return Point2D{ anchorX - w/2, anchorY + 4 };
+    }
+
+    inline void ResetLabelBoxes() {
+        g_labelBoxes.clear();
+    }
+}
+
 SCNavMap::SCNavMap(){
     this->navMap = nullptr;
 }
@@ -115,11 +173,11 @@ void SCNavMap::runFrame(void) {
     this->checkKeyboard();
     VGA.Activate();
     VGA.GetFrameBuffer()->Clear();
-    
+    ResetLabelBoxes();
     VGA.SetPalette(&this->palette);
     
     //Draw static
-    
+    used_areas.clear();
     float center = BLOCK_WIDTH * 9.0f;
     float map_width = BLOCK_WIDTH * 18.0f;
     if (this->navMap->maps.count(*this->name)>0) {
@@ -204,28 +262,19 @@ void SCNavMap::runFrame(void) {
                 0,
                 (int32_t)leader.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
         }
+        
         if (show_waypoint) {
             int cpt = 0;
+            
             for (auto wp: this->mission->waypoints) {
                 int newx = (int) (((wp->spot->position.x+center)/map_width)*w)+l;
                 int newy = (int) (((wp->spot->position.z+center)/map_width)*h)+t;
                 int c = 134;
                 if (cpt == *this->current_nav_point) {
-                    
-                }
-                if (wp->spot->area_id != 255) {
-                    newx = (int) (((this->missionObj->mission_data.areas[wp->spot->area_id]->position.x+center)/map_width)*w)+l;
-                    newy = (int) (((this->missionObj->mission_data.areas[wp->spot->area_id]->position.z+center)/map_width)*h)+t;
-                    this->showArea(this->missionObj->mission_data.areas[wp->spot->area_id], center, map_width, w, h, t, l, c);
-                }
-                if (newx>0 && newx<320 && newy>0 && newy<200) {
-                    VGA.GetFrameBuffer()->plot_pixel(newx, newy, 128);
-                    VGA.GetFrameBuffer()->circle_slow(newx, newy, 3, 1);
-                }
-                if (cpt == *this->current_nav_point) {
                     int msg_newx = 252;
                     int msg_newy = 80;
                     Point2D *msg_p1 = new Point2D({msg_newx, msg_newy});
+                    
                     VGA.GetFrameBuffer()->PrintText_SM(
                         this->navMap->font,
                         msg_p1,
@@ -237,6 +286,7 @@ void SCNavMap::runFrame(void) {
                         this->navMap->font->GetShapeForChar('A')->GetWidth(),
                         false, false
                     );
+                    
                     msg_p1->y += this->navMap->font->GetShapeForChar('A')->GetHeight();
                     msg_p1->x = msg_newx+5;
                     if (wp->objective != nullptr) {
@@ -257,6 +307,7 @@ void SCNavMap::runFrame(void) {
                     msg_newx = 255;
                     msg_newy = 135;
                     msg_p1 = new Point2D({msg_newx, msg_newy});
+                    
                     VGA.GetFrameBuffer()->PrintText_SM(
                         this->navMap->font,
                         msg_p1,
@@ -287,56 +338,60 @@ void SCNavMap::runFrame(void) {
                     c = 255;
                     newx = (int) (((this->missionObj->mission_data.areas[wp->spot->area_id]->position.x+center)/map_width)*w)+l;
                     newy = (int) (((this->missionObj->mission_data.areas[wp->spot->area_id]->position.z+center)/map_width)*h)+t;
+                    
+                    if (newx>0 && newx<320 && newy>0 && newy<200) {
+                        VGA.GetFrameBuffer()->plot_pixel(newx, newy, 128);
+                        VGA.GetFrameBuffer()->circle_slow(newx, newy, 3, 1);
+                    }
                     this->showArea(this->missionObj->mission_data.areas[wp->spot->area_id], center, map_width, w, h, t, l, c);
+                } else {
+                    if (wp->spot->area_id != 255) {
+                        newx = (int) (((this->missionObj->mission_data.areas[wp->spot->area_id]->position.x+center)/map_width)*w)+l;
+                        newy = (int) (((this->missionObj->mission_data.areas[wp->spot->area_id]->position.z+center)/map_width)*h)+t;
+                        if (used_areas.find(wp->spot->area_id) == used_areas.end()) {
+                            
+                            if (newx>0 && newx<320 && newy>0 && newy<200) {
+                                VGA.GetFrameBuffer()->plot_pixel(newx, newy, 128);
+                                VGA.GetFrameBuffer()->circle_slow(newx, newy, 3, 1);
+                            }
+                            this->showArea(this->missionObj->mission_data.areas[wp->spot->area_id], center, map_width, w, h, t, l, c);
+                        }                    
+                    }
+                    
                 }
                 cpt++;
             }
         }
-        if (show_area) {
-            for (auto area: this->missionObj->mission_data.areas) {
-                this->showArea(area, center, map_width, w, h, t, l, 134);
-            }
-        }
-
         if (show_obj) {
-            for (auto ob: this->missionObj->mission_data.parts) {
-                auto cast = this->missionObj->mission_data.casting[ob->id];
-                if (cast == nullptr) {
-                    continue;
-                }
-                if (ob->alive == 0) {
-                    continue;
-                }
-                if (cast->profile != nullptr && cast->profile->ai.isAI != 1 && cast->actor != "PLAYER") {
-                    continue;
-                }
-                if (cast->actor == "NULL") {
-                    continue;
-                }
-                int newx = (int) (((ob->position.x+center)/map_width)*w)+l;
-                int newy = newy = (int) (((ob->position.z+center)/map_width)*h)+t;
+            for (auto friends : this->mission->friendlies) {
+                if (friends->is_active == 0 && friends->actor_name != "PLAYER") continue;
+                int newx = (int) (((friends->object->position.x+center)/map_width)*w)+l;
+                int newy = (int) (((friends->object->position.z+center)/map_width)*h)+t;
                 if (newx>0 && newx<320 && newy>0 && newy<200) {
-                    VGA.GetFrameBuffer()->plot_pixel(newx, newy, ob->id);
-                    VGA.GetFrameBuffer()->circle_slow(newx, newy, 2, 1);
-                    Point2D *obj_pos = new Point2D({newx, newy});
-                    std::string name;
-                    if (cast->profile != nullptr) {
-                        name = cast->profile->radi.info.callsign;
-                    } else {
-                        name = cast->actor;
-                    }
+                    
+
+                    std::string name = (friends->profile != nullptr) ? friends->profile->radi.info.callsign : "FRIEND";
                     std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+
+                    int glyphW = this->navMap->font->GetShapeForChar('A')->GetWidth();
+                    int glyphH = this->navMap->font->GetShapeForChar('A')->GetHeight();
+                    int labelW = (int)name.size() * (glyphW + 1);
+                    int labelH = glyphH;
+
+                    Point2D obj_pos = placeLabel(newx-labelW, newy+glyphH, labelW, labelH);
                     VGA.GetFrameBuffer()->PrintText_SM(
                         this->navMap->font,
-                        obj_pos,
+                        &obj_pos,
                         (char*) name.c_str(),
                         34,
                         0,
-                        (int32_t)name.size(),1,this->navMap->font->GetShapeForChar('A')->GetWidth(), false, false);
+                        (int32_t)name.size(),1,glyphW,false,false
+                    );
+                    VGA.GetFrameBuffer()->plot_pixel(newx, newy, 10);
+                    VGA.GetFrameBuffer()->circle_slow(newx, newy, 2, 1);
                 }
             }
         }
-       
     }
     
     Mouse.Draw();
@@ -374,9 +429,21 @@ void SCNavMap::showArea(AREA *area, float center, float map_width, int w, int h,
                 VGA.GetFrameBuffer()->line(newx+neww, newy-neww, newx+neww, newy+neww, 1);
                 break;
         }
+        int glyphW = this->navMap->font->GetShapeForChar('A')->GetWidth();
+        int glyphH = this->navMap->font->GetShapeForChar('A')->GetHeight();
+        int labelW = (int)strlen(area->AreaName) * (glyphW + 1);
+        int labelH = glyphH;
+
+        Point2D area_pos;
+        if (used_areas.find(area->id-1) != used_areas.end()) {
+            area_pos = used_areas[area->id-1];
+        } else {
+            area_pos = placeLabel(p1->x, p1->y, labelW, labelH);
+            used_areas[area->id-1]=area_pos;
+        }
         VGA.GetFrameBuffer()->PrintText(
             this->navMap->font,
-            p1,
+            &area_pos,
             area->AreaName,
             c,
             0,

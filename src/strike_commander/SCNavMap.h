@@ -30,6 +30,7 @@ private:
         NAV_PREV_WP = 3,
         NAV_ESCAPE2 = 4,
     };
+    std::map<int, Point2D> used_areas;
     int color{134};
     std::string *name;
     Keyboard *m_keyboard;
