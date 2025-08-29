@@ -185,7 +185,6 @@ void Keyboard::TextEditor::handleSpecialKey(SDL_Keycode key) {
         case SDLK_END:
             m_cursorPosition = static_cast<int>(m_text.length());
             break;
-            
         case SDLK_ESCAPE:
             setActive(false);
             break;

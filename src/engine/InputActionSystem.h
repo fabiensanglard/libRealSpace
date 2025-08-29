@@ -19,6 +19,8 @@ enum class InputAction {
     MOUSE_WHEEL_DOWN = 7,
     KEY_ESCAPE = 8,
     KEY_ENTER = 9,
+    KEY_TAB = 10,
+    KEY_RETURN = 11,
     
 
     // Plage réservée pour le File Requester (1000-1999)
@@ -33,7 +35,8 @@ enum class InputAction {
     // Aucune action prédéfinie ici, elles seront définies dynamiquement
     SIM_END = 2999,
     
-    
+    NAVMAP_START = 3000,
+    NAVMAP_END = 3999,
     // Valeurs spéciales
     CUSTOM_ACTION_START = 10000  // Début de la plage pour actions personnalisées
 };
@@ -104,7 +107,7 @@ public:
     // Initialisation/fermeture
     void initialize();
     void shutdown();
-    
+    SpecialKeyCallback getSpecialKeyCallback() const { return m_specialKeyCallback; } 
     // Mise à jour de l'état des entrées
     void update();
     

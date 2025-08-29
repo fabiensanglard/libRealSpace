@@ -82,7 +82,7 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint
     optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     rawpal = optPals.GetEntry(4)->data;
 
-    m_keyboard = new Keyboard();
+    m_keyboard = Game->getKeyboard();
     
     m_textEditor = m_keyboard->createTextEditor();
     m_textEditor->setText(current_file);
@@ -184,7 +184,7 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint
     optPals.InitFromRAM("OPTPALS.PAK", optPalettesEntry->data, optPalettesEntry->size);
     rawpal = optPals.GetEntry(4)->data;
 
-        m_keyboard = new Keyboard();
+    m_keyboard = Game->getKeyboard();
     
     m_textEditor = m_keyboard->createTextEditor();
     m_textEditor->setText(current_file);
@@ -214,7 +214,6 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint
 
 SCFileRequester::~SCFileRequester() {
     delete this->uiImageSet;
-    delete m_keyboard;
 }
 void SCFileRequester::quitToDos() {
     Game->terminate("ending");

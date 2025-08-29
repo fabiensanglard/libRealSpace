@@ -23,34 +23,25 @@ SCNavMap::~SCNavMap(){
  * @return None
  */
 void SCNavMap::checkKeyboard(void) {
-    //Keyboard
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event* event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            Game->stopTopActivity();
-            break;
+    if (this->m_keyboard == nullptr) {
+        return;
+    }
+    if (this->m_keyboard->isActionJustPressed(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_ESCAPE))) {
+        Game->stopTopActivity();
+    }
+    if (this->m_keyboard->isActionJustPressed(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_ESCAPE2))) {
+        Game->stopTopActivity();
+    }
+    if (this->m_keyboard->isActionJustPressed(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_NEXT_WP))) {
+        *this->current_nav_point = *this->current_nav_point+1;
+        if (*this->current_nav_point > this->mission->waypoints.size()-1) {
+            *this->current_nav_point = (uint8_t) this->mission->waypoints.size()-1;
         }
-        case SDLK_c: 
-            this->color = (this->color + 1) % 255;
-        break;
-        case SDLK_LEFT:
-            *this->current_nav_point = *this->current_nav_point-1;
-            if (*this->current_nav_point == 255) {
-                *this->current_nav_point = 0;
-            }
-        break;
-        case SDLK_RIGHT:
-            *this->current_nav_point = *this->current_nav_point+1;
-            if (*this->current_nav_point > this->mission->waypoints.size()-1) {
-                *this->current_nav_point = (uint8_t) this->mission->waypoints.size()-1;
-            }
-        break;
-        default:
-            break;
+    }
+    if (this->m_keyboard->isActionJustPressed(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_PREV_WP))) {
+        *this->current_nav_point = *this->current_nav_point-1;
+        if (*this->current_nav_point == 255) {
+            *this->current_nav_point = 0;
         }
     }
 }
@@ -85,6 +76,18 @@ void SCNavMap::init(){
             }
         }
     }
+    m_keyboard = Game->getKeyboard();
+    m_keyboard->registerAction(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_ESCAPE));
+    m_keyboard->registerAction(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_NEXT_WP));
+    m_keyboard->registerAction(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_PREV_WP));
+    m_keyboard->registerAction(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_ESCAPE2));
+
+
+    m_keyboard->bindKeyToAction(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_ESCAPE), SDL_SCANCODE_ESCAPE);
+    m_keyboard->bindKeyToAction(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_PREV_WP), SDL_SCANCODE_LEFT);
+    m_keyboard->bindKeyToAction(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_NEXT_WP), SDL_SCANCODE_RIGHT);
+    m_keyboard->bindKeyToAction(CreateAction(InputAction::NAVMAP_START, NavActionOfst::NAV_ESCAPE2), SDL_SCANCODE_N);
+    
 }
 /**
  * Sets the name of the current mission.

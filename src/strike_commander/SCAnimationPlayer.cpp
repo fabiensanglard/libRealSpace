@@ -650,35 +650,6 @@ SCAnimationPlayer::SCAnimationPlayer() { this->fps_timer = SDL_GetTicks() / 10; 
 SCAnimationPlayer::~SCAnimationPlayer(){
 }
 
-void SCAnimationPlayer::checkKeyboard(void) {
-    SDL_Event mouseEvents[5];
-    int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
-    for (int i = 0; i < numMouseEvents; i++) {
-        SDL_Event *event = &mouseEvents[i];
-
-        switch (event->type) {
-        case SDL_MOUSEBUTTONUP:
-            Game->stopTopActivity();
-            break;
-        default:
-            break;
-        }
-    }
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            Game->stopTopActivity();
-            break;
-        }
-        default:
-            break;
-        }
-    }
-}
 void SCAnimationPlayer::init(){
     TreEntry *midgames_entry = Assets.GetEntryByName(
         "..\\..\\DATA\\MIDGAMES\\MIDGAMES.PAK"

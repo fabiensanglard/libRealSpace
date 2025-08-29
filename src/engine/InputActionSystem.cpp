@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-
+#include <unordered_set>
 
 InputActionSystem& InputActionSystem::getInstance() {
     static InputActionSystem instance;
@@ -26,35 +26,47 @@ void InputActionSystem::shutdown() {
 }
 
 void InputActionSystem::update() {
-    // Mettre à jour l'EventManager pour récupérer l'état des entrées
+    // Toujours mettre à jour l'EventManager
     m_eventManager->update();
-    if (m_inputMode == InputMode::NORMAL) {
-        // Sauvegarder l'état précédent pour toutes les actions
-        for (auto& [actionId, state] : m_actions) {
-            state.previousState = state.currentState;
-            state.previousValue = state.currentValue;
-            
-            // Réinitialiser les valeurs actuelles
-            state.currentState = false;
-            state.currentValue = 0.0f;
-            
-            // Évaluer toutes les liaisons pour cette action
-            float highestValue = 0.0f;
-            for (const auto& binding : state.bindings) {
-                float value = 0.0f;
-                if (evaluateBinding(binding, value)) {
-                    // Pour les entrées binaires, on utilise true si au moins une liaison est active
-                    state.currentState = true;
-                    
-                    // Pour les entrées analogiques, on prend la valeur absolue la plus élevée
-                    if (std::abs(value) > std::abs(highestValue)) {
-                        highestValue = value;
-                    }
-                }
-            }
-            
-            state.currentValue = highestValue;
+
+    // Sauvegarder l'état précédent
+    for (auto& [actionId, state] : m_actions) {
+        state.previousState = state.currentState;
+        state.previousValue = state.currentValue;
+        state.currentState = false;
+        state.currentValue = 0.0f;
+    }
+
+    // Whitelist des actions actives pendant TEXT_INPUT
+    static const std::unordered_set<InputAction> textWhitelist = {
+        InputAction::KEY_TAB,
+        InputAction::KEY_RETURN,
+        InputAction::KEY_ESCAPE,
+        InputAction::MOUSE_LEFT,
+        InputAction::MOUSE_POS_X,
+        InputAction::MOUSE_POS_Y
+    };
+
+    bool textMode = (m_inputMode == InputMode::TEXT_INPUT);
+
+    for (auto& [actionId, state] : m_actions) {
+        // En mode texte : ignorer les actions non whitelistes (mais previousState déjà mis à jour)
+        if (textMode && textWhitelist.find(actionId) == textWhitelist.end()) {
+            continue;
         }
+
+        float highestValue = 0.0f;
+        bool any = false;
+        for (const auto& binding : state.bindings) {
+            float value = 0.0f;
+            if (evaluateBinding(binding, value)) {
+                any = true;
+                if (std::fabs(value) > std::fabs(highestValue))
+                    highestValue = value;
+            }
+        }
+        state.currentState  = any;
+        state.currentValue  = highestValue;
     }
 }
 
@@ -295,6 +307,7 @@ void InputActionSystem::startTextInput(const SDL_Rect* inputRect) {
 }
 
 void InputActionSystem::stopTextInput() {
+    this->m_inputMode = InputMode::NORMAL;
     m_eventManager->stopTextInput();
 }
 

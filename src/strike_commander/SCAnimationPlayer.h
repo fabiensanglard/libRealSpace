@@ -88,7 +88,6 @@ private:
 public:
     SCAnimationPlayer();
     ~SCAnimationPlayer();
-    void checkKeyboard(void);
     void init();
     void runFrame(void);
     void renderMenu();

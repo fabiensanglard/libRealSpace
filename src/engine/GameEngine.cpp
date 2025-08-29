@@ -58,6 +58,7 @@ void GameEngine::init() {
 
     m_keyboard->registerAction(InputAction::KEY_ESCAPE);
     m_keyboard->bindKeyToAction(InputAction::KEY_ESCAPE, SDL_SCANCODE_ESCAPE);
+
 }
 
 void GameEngine::pumpEvents(void) {

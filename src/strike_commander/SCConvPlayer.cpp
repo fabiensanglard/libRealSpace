@@ -599,38 +599,17 @@ void SCConvPlayer::init() {
  */
 void SCConvPlayer::CheckFrameExpired(void) {
     if (this->current_frame->mode != ConvFrame::CONV_CONTRACT_CHOICE && this->current_frame->mode != ConvFrame::CONV_WINGMAN_CHOICE) {
-        // A frame expires either after a player press a key, click or 6 seconds elapse.
-        // Mouse
-        SDL_Event mouseEvents[5];
-        int numMouseEvents = SDL_PeepEvents(mouseEvents, 5, SDL_PEEKEVENT, SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONUP);
-        for (int i = 0; i < numMouseEvents; i++) {
-            SDL_Event *event = &mouseEvents[i];
-
-            switch (event->type) {
-            case SDL_MOUSEBUTTONUP:
-                this->current_frame->SetExpired(true);
-                break;
-            default:
-                break;
-            }
+        if (!Game)
+        return;
+        Keyboard* kb = Game->getKeyboard();
+        if (!kb)
+            return;
+        if (kb->isActionJustPressed(InputAction::KEY_ESCAPE)) {
+            Game->stopTopActivity();
         }
-
-        // Keyboard
-        SDL_Event keybEvents[5];
-        int numKeybEvents = SDL_PeepEvents(keybEvents, 5, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-        for (int i = 0; i < numKeybEvents; i++) {
-            SDL_Event *event = &keybEvents[i];
-            switch (event->key.keysym.sym) {
-            case SDLK_SPACE:
-                this->current_frame->SetExpired(true);
-                break;
-            case SDLK_ESCAPE:
-                Game->stopTopActivity();
-                break;
-            default:
-                this->current_frame->SetExpired(true);
-                break;
-            }
+        if (kb->isActionJustPressed(InputAction::MOUSE_LEFT)) {
+            this->current_frame->SetExpired(true);
+            return;
         }
 
     

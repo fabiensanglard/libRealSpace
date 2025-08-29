@@ -24,9 +24,15 @@ public:
     RSNavMap* navMap;
     
 private:
+    enum NavActionOfst {
+        NAV_ESCAPE = 1,
+        NAV_NEXT_WP = 2,
+        NAV_PREV_WP = 3,
+        NAV_ESCAPE2 = 4,
+    };
     int color{134};
     std::string *name;
-    
+    Keyboard *m_keyboard;
     
     VGAPalette palette;
     VGAPalette objpal;

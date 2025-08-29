@@ -35,7 +35,7 @@ private:
     void LoadPalette(void);
     void LoadGame(std::string filename);
     
-    SCFileRequester *frequest;
+    SCFileRequester *frequest{nullptr};
     RLEShape board;
     RLEShape sky;
     RLEShape mountain;

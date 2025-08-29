@@ -17,6 +17,11 @@ void SCMainMenu::OnContinue(void) { printf("OnContinue\n"); }
 
 void SCMainMenu::OnLoadGame() { 
     printf("OnLoadGame\n");
+    if (this->frequest) {
+        delete this->frequest;
+        this->frequest = nullptr;
+    }
+    this->frequest = new SCFileRequester(std::bind(&SCMainMenu::LoadGame, this, std::placeholders::_1),42);
     this->frequest->opened = true;
     this->frequest->loadFiles();
 }
@@ -77,7 +82,6 @@ void SCMainMenu::init(void) {
     LoadBackgrounds();
 
     setTitle("Neo Strike Commander");
-    this->frequest = new SCFileRequester(std::bind(&SCMainMenu::LoadGame, this, std::placeholders::_1),42);
     timer = 4200;
 }
 void SCMainMenu::LoadGame(std::string filename) {
@@ -201,7 +205,7 @@ void SCMainMenu::LoadBackgrounds(void) {
 }
 
 void SCMainMenu::runFrame(void) {
-    if (this->frequest->opened) {
+    if (this->frequest !=nullptr && this->frequest->opened) {
         this->frequest->checkevents();
     } else {
         checkKeyboard();
@@ -230,7 +234,7 @@ void SCMainMenu::runFrame(void) {
     VGA.GetFrameBuffer()->DrawShape(&board);
 
     drawButtons();
-    if (this->frequest->opened) {
+    if (this->frequest!= nullptr && this->frequest->opened) {
         this->frequest->draw(VGA.GetFrameBuffer());
     }
     Mouse.Draw();
