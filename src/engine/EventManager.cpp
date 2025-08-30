@@ -193,6 +193,13 @@ void EventManager::update() {
             ImGui_ImplSDL2_ProcessEvent(&event);
         }
         switch (event.type) {
+            case SDL_WINDOWEVENT:
+                if (event.window.event == SDL_WINDOWEVENT_ENTER) {
+                    SDL_ShowCursor(SDL_DISABLE);
+                } else if (event.window.event == SDL_WINDOWEVENT_LEAVE) {
+                    SDL_ShowCursor(SDL_ENABLE);
+                }
+                break;
             case SDL_QUIT:
                 m_quit = true;
                 break;
@@ -251,7 +258,6 @@ void EventManager::update() {
             }
         }
     }
-    
     // L'état du clavier est mis à jour automatiquement par SDL_PumpEvents() appelé par SDL_PollEvent()
 }
 
