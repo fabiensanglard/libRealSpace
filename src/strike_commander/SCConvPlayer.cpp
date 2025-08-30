@@ -608,7 +608,8 @@ void SCConvPlayer::CheckFrameExpired(void) {
             Game->stopTopActivity();
             Mixer.StopSound(6);
         }
-        if (kb->isActionJustPressed(InputAction::MOUSE_LEFT)) {
+        if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED) {
+            Mouse.buttons[MouseButton::LEFT].event = MouseButton::NONE;
             this->current_frame->SetExpired(true);
             Mixer.StopSound(6);
             return;
@@ -714,8 +715,11 @@ void SCConvPlayer::CheckZones() {
                     Mouse.SetMode(SCMouse::VISOR);
 
                     // If the mouse button has just been released: trigger action.
-                    if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                    if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED) {
+                        Mouse.buttons[MouseButton::LEFT].event = MouseButton::NONE; 
                         zone->OnAction();
+                    }
+                        
                     Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
                     VGA.GetFrameBuffer()->PrintText(
                         FontManager.GetFont("..\\..\\DATA\\FONTS\\OPTFONT.SHP"), &p, (char *)zone->label->c_str(), 64, 0,
@@ -732,8 +736,11 @@ void SCConvPlayer::CheckZones() {
                 Mouse.SetMode(SCMouse::VISOR);
 
                 // If the mouse button has just been released: trigger action.
-                if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED) {
+                    Mouse.buttons[MouseButton::LEFT].event = MouseButton::NONE;
                     zone->OnAction();
+                }
+                    
                 Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
                 VGA.GetFrameBuffer()->PrintText(
                     FontManager.GetFont(""), &p, (char *)zone->label->c_str(), 64, 0,

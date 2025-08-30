@@ -64,13 +64,14 @@ public:
     void createMiss();
     void loadMiss();
     void runFrame(void);
+    void checkKeyboard(void);
     std::string gameflow_file;
 protected:
     RSGameFlow gameFlowParser;
     RSOption optionParser;
     SCEN *sceneOpts;
     int extcpt{0};
-
+    Keyboard *m_keyboard{nullptr};
     PakArchive optShps;
     PakArchive optPals;
     std::vector<background *> layers;

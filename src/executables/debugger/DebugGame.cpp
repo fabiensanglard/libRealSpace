@@ -166,15 +166,15 @@ void DebugGame::loadSC() {
     ConvAssets.init();
 
     //Add MainMenu activity on the game stack.
-    //DebugGameFlow* main = new DebugGameFlow();
-    SCMainMenu* main = new SCMainMenu();
-    /*GameState.Reset();
+    DebugGameFlow* main = new DebugGameFlow();
+    //SCMainMenu* main = new SCMainMenu();
+    GameState.Reset();
     GameState.player_callsign = "Debug";
     GameState.player_name = "Debug Player";
     GameState.player_firstname = "Debug";
     for (int i=0; i<256; i++) {
         GameState.requierd_flags[i] = false;
-    }*/
+    }
     main->init();
     Game->addActivity(main);
 }

@@ -30,6 +30,7 @@ SCGameFlow::SCGameFlow() {
     this->fps = SDL_GetTicks() / 10;
     this->zones = new std::vector<SCZone *>();
     this->frequest = nullptr;
+    this->m_keyboard = Game->getKeyboard();
 }
 
 SCGameFlow::~SCGameFlow() {}
@@ -120,6 +121,9 @@ void SCGameFlow::flyMission() {
     fly_mission.push(fly);
     this->next_miss = GameState.mission_id;
 }
+void SCGameFlow::checkKeyboard(void) {
+    IActivity::checkKeyboard();
+}
 SCZone *SCGameFlow::CheckZones(void) {
     static uint8_t color = 0;
     RSFont *fnt = FontManager.GetFont("..\\..\\DATA\\FONTS\\OPTFONT.SHP");
@@ -130,8 +134,10 @@ SCZone *SCGameFlow::CheckZones(void) {
                     Mouse.SetMode(SCMouse::VISOR);
 
                     // If the mouse button has just been released: trigger action.
-                    if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                    if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED) {
+                        Mouse.buttons[MouseButton::LEFT].event = MouseButton::NONE;
                         zone->OnAction();
+                    }
                     Point2D p = {160 - static_cast<int32_t>(zone->label->length() / 2) * 8, 180};
                     VGA.GetFrameBuffer()->PrintText(fnt, &p, (char *)zone->label->c_str(), color, 0,
                                                     static_cast<uint32_t>(zone->label->length()), 3, 5);
@@ -145,9 +151,10 @@ SCZone *SCGameFlow::CheckZones(void) {
                 // HIT !
                 Mouse.SetMode(SCMouse::VISOR);
 
-                // If the mouse button has just been released: trigger action.
-                if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED)
+                if (Mouse.buttons[MouseButton::LEFT].event == MouseButton::RELEASED) {
+                    Mouse.buttons[MouseButton::LEFT].event = MouseButton::NONE;
                     zone->OnAction();
+                }
                 Point2D p = {160 - ((int32_t)(zone->label->length() / 2) * 8), 180};
                 VGA.GetFrameBuffer()->PrintText(fnt, &p, (char *)zone->label->c_str(), color, 0,
                                                 static_cast<uint32_t>(zone->label->length()), 3, 5);
@@ -669,6 +676,9 @@ void SCGameFlow::runFrame(void) {
         delete this->frequest;
         this->frequest = nullptr;
     }
+    if (this->frequest == nullptr || !this->frequest->opened) {
+        this->CheckZones();
+    }
     
     if (this->cutsenes.size() > 0) {
         SCShot *c = this->cutsenes.front();
@@ -720,9 +730,6 @@ void SCGameFlow::runFrame(void) {
         }
     }
     
-    if (this->frequest == nullptr || !this->frequest->opened) {
-        this->CheckZones();
-    }
     if (this->frequest != nullptr && this->frequest->opened) {
         this->frequest->draw(VGA.GetFrameBuffer());
     }
