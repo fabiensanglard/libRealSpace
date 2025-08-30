@@ -48,6 +48,7 @@ void DebugConvPlayer::renderUI() {
                 ImGui::Text("Current Frame Type: %d", this->current_frame->mode);
                 ImGui::Text("Current Frame Time: %d", this->current_frame->creationTime);
                 ImGui::Text("Current Frame Text: %s", this->current_frame->text);
+                ImGui::Text("Current Frame Text Color: %d", this->current_frame->textColor);
             }
             int frameNumber = 0;
             for (auto frame : this->conversation_frames) {

@@ -237,9 +237,6 @@ void ConvFrame::parse_GROUP_SHOT_ADD_CHARACTER(ByteStream *conv) {
     participant->x = conv->ReadUShortBE();
     participant->y = conv->ReadUShortBE();
     this->participants.push_back(participant);
-    while (conv->PeekByte() == 0x0) {
-        conv->MoveForward(1);
-    }
     while (!isNextFrameIsConv((uint8_t) conv->PeekByte())) {
         conv->MoveForward(1);
     }
@@ -255,7 +252,9 @@ void ConvFrame::parse_GROUP_SHOT_ADD_CHARACTER(ByteStream *conv) {
 }
 void ConvFrame::parse_GROUP_SHOT_CHARACTER_TALK(ByteStream *conv) {
     char *who = (char *)conv->GetPosition();
+    this->textColor = (uint8_t) *(conv->GetPosition() + 0xD);
     int next_frame_offset = this->SetSentenceFromConv(conv, 0xE);
+    
     conv->MoveForward(next_frame_offset);
     printf("ConvID: %d WIDEPLAN PARTICIPANT TALKING: who: '%s' WHAT '%s'\n", this->conversationID, who, this->text);
     CharFigure *participant = ConvAssets.GetFigure(who);
