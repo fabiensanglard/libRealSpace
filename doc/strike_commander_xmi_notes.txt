@@ -1,0 +1,206 @@
+Strike Commander XMI Notes
+==========================
+
+By Pekka Leppaluoto
+September 11th, 2023
+
+Background
+----------
+The original 1993 floppy disk release of Strike Commander supports FM
+synthesized and MIDI data for music and SFX. For these, the game ships with
+drivers for the AdLib Music Synthesizer Card (and compatibles) and the
+Roland MT-32 sound module. In addition to the FM synthesized and MIDI data,
+the game can also provide digital audio for speech and SFX for Sound Blaster,
+Sound Blaster Pro and Pro Audio Spectrum cards if chosen in the game
+INSTALL/hardware configuration program.
+
+The game uses the IBM Audio Interface Library by John Miles / Miles Design,
+Inc. to play XMI data and digital audio. Regarding the XMI files, two sets
+can be found from the game assets, one for FM synth and one for the Roland
+MT-32. This is a typical contemporary scenario for supporting the low-end,
+more popular OPL2-compatible cards and the high-end Roland MT-32.
+
+The add-on Tactical Operations adds support for General MIDI devices. This is
+most likely done by providing a new GM optimized XMI data set and an AIL driver
+for General MIDI devices.
+
+XMI Notes
+---------
+The Roland MT-32 XMI data uses heavily custom patches for both music and of
+course SFX. Some of the XMIs are played back in sequence to provide a seamless,
+dynamic experience between cinematic transitions. The XMI Sequences concept is
+not used (as is used in System Shock, another contemporary Origin Systems
+title). The end credits mention "NIM Dynamic Audio System(tm) by Nenad Vugrinec
+and Martin Galway".
+
+Many of the songs are included twice, one in a different tempo than the other
+(marked with S = slow and F = fast below). This implies some adjusting to either
+on-screen cinematics on slower/faster machines or adjusting the music to the
+Strike Commander Speech Pack add-on.
+
+The game music and driver assets are listed below. Info on how XMI data is
+accessed during run-time is unclear. A typical (real mode) program using the
+AIL library will load the AIL driver (.ADV, renamed .DRV for SC), initialize
+the API and register the driver, load music data (.XMI), load instrument data
+(.AD/.MT) and call "AIL_start_sequence" to start a sequence in a XMI file.
+
+Special note on the extracted Roland MT-32 XMI files when played back with
+normal XMI players such as XPLAY.EXE: The MT-32 rhythm channel is not properly
+initialized with the instrument data (STRIKE.MT). Perhaps SC.EXE (and others)
+initialize the MT-32 rhythm channel separately somehow. This can be fixed by
+registering the XMI file STRKPERC.XMI (included with Origin FX demo) and
+loading global timbre as a separate phase after normal instrument data
+initialization.
+
+Another special note on the extracted AdLib XMI files and stereo panning. Some
+of the songs do contain stereo panning although the game ships with the mono
+ADLIB.DRV driver. This latent stereo capability can be enabled by using the
+stereo SBP1FM.ADV driver and a Sound Blaster Pro 1 (dual-OPL2) card. The
+stereo capabilities do not render OK on OPL3-based XMI drivers for some
+reason.
+
+Possible Approach for Modern Versions
+-------------------------------------
+Prerendered Audio:
+Render both FM synth and MIDI XMI music+SFX on a Sound Blaster Pro 1 (to gain
+stereo) and a Roland MT-32 recording them on pro sound hardware in digital
+format. Digital SFX and speech could be extracted and converted to the same
+format. Then just trigger playback of each digital WAV/OGG/MP3 file from the
+game engine. Identified issues with triggering single files: how to handle
+XMIs that utilize looping and how to handle sync with cinematics?
+
+Modernized versions of Strike Commander could provide the following music +
+sfx options:
+- "All Roland MT-32 + No Speech"
+- "All Sound Blaster Pro 1 + No Speech",
+- "Music Roland MT-32 + Digital SFX/Speech"
+- "Music Sound Blaster Pro 1 + Digital SFX/Speech"
+- "All New Remake Music and SFX" (all modernized music done either from scratch
+  or carefully utilizing the MT-32 XMIs)
+
+AIL and XMI Listing
+-------------------
+The listing below consists of the files found from GAMEFLOW.TRE and SOUND.TRE.
+They were extracted by modifying libRealSpace source code to decompress .TRE
+files. Additional extraction to individual XMI files was done using "uxx.exe".
+
+GAMEFLOW.TRE
+-AMUSIC.PAK     Music for FM/AdLib as XMI
+-RMUSIC.PAK     Music for Roland MT-32/LAPC-I as XMI
+-ASOUNDFX.PAK   SFX for FM/AdLib as XMI
+-RSOUUNDFX.PAK  SFX for Roland MT-32/LAPC-I SFX as XMI
+
+SOUND.TRE
+-SOUNDFX.ADL    SFX for FM/AdLib as XMI
+-SOUNDFX.ROL    SFX for Roland MT-32/LAPC-I as XMI
+-SOUNDFX.DAT
+-COMBAT.ADL     Combat Music for FM/AdLib as XMI
+-COMBAT.ROL     Combat Music for Roland MT-32/LAPC-I as XMI
+-COMBAT.DAT
+-GAMEFLOW.ADL   Music for FM/AdLib as XMI
+-GAMEFLOW.ROL   Music for Roland MT-32/LAPC-I as XMI
+-GAMEFLOW.DAT
+-STRIKE.AD      The AIL instrument data for AdLib Music Synthesizer Card
+-STRIKE.MT      The AIL instrument data for Roland MT-32/LAPC-I
+-ADLIB.DRV      The AIL FM driver for AdLib Music Synthesizer Card
+-SB.DRV         The AIL driver for Sound Blaster (digital only?)
+-PAS.DRV        The AIL driver for Pro Audio Spectrum (digital only?)
+-ROLAND.DRV     The AIL MIDI driver for Roland MT-32/LAPC-I
+
+Listing for the above mentioned .PAK files
+
+RMUSIC.PAK/AMUSIC.PAK (GAMEFLOW.TRE)
+-FILE0.XMI      Introduction
+-FILE1.XMI      Stern shot down S
+-FILE2.XMI      Stern shot down F
+-FILE3.XMI      Retuning from final mission 
+-FILE4.XMI      Alley and Janet S
+-FILE5.XMI      Alley and Janet F
+-FILE6.XMI      Meeting Walters for the last time S
+-FILE7.XMI      Meeting Walters for the last time F
+-FILE8.XMI      Stealing the plane?
+-FILE9.XMI      Janet break-up S
+-FILE10.XMI     Janet break-up F
+-FILE11.XMI     Informant for Generalismo Mendez S
+-FILE12.XMI     Informant for Generalismo Mendez F
+-FILE13.XMI     Ending S 
+-FILE14.XMI     Ending F
+-FILE15.XMI     After dogfight with Prideaux S
+-FILE16.XMI     After dogfight with Prideaux F
+-FILE17.XMI     Own Funeral S
+-FILE18.XMI     Own Funeral F
+-FILE19.XMI     Funeral S
+-FILE20.XMI     Funeral F
+-FILE21.XMI     Ending S
+-FILE22.XMI     Ending F
+-FILE23.XMI     Main menu
+-FILE24.XMI     Ending Credits
+-FILE25.XMI     View objects
+-FILE26.XMI     Start new game
+-FILE27.XMI     Kills when landed
+-FILE28.XMI     Training
+
+RSOUNDFX.PAK/ASOUNDFX.PAK (GAMEFLOW.TRE)
+-FILE1.XMI - FILE106.XMI SFX sounds (when no digital sound card selected during
+             INSTALL)
+
+GAMEFLOW.ROL/GAMEFLOW.ADL (SOUND.TRE)
+-0.XMI - 14.XMI  Loops used when leaving for Selim's
+-15.XMI - 29.XMI Loops used transfer cutscenes
+-30.XMI - 98.XMI Loops used transfer cutscenes
+-99.XMI          Wildcat base
+-100.XMI         Loop used when leaving for Selim's
+-101.XMI         Selim's Bar
+-102.XMI         Mission Pool
+-103.XMI         Prideaux's corner
+-104.XMI         Leaving for Selim's
+-105.XMI         Eject/Died? Fanfare?
+-106.XMI         Transfer to ?
+-107.XMI         Mauritannia?
+-108.XMI         Select payload
+-109.XMI         Transfer to ?
+-110.XMI         Transfer to ?
+-111.XMI         Select payload
+-112.XMI         Transfer to strike base
+-113.XMI         Strike Base Peru
+-114.XMI         Select payload
+-115.XMI         Transfer to strike base
+-116.XMI         Strike Base Egypt
+-117.XMI         Select payload S
+-118.XMI         Ending
+-119.XMI         Strike Base
+-120.XMI         Select payload
+
+COMBAT.ROL/COMBAT.ADL (SOUND.TRE)
+-1.XMI - 5.XMI   Start sections
+-6.XMI - .XMI    Start sections
+-18.XMI - 23.XMI Enemy destroyed parts
+-24.XMI - 25.XMI Start sections
+-26.XMI          Start mission from runaway (Mission #2)
+-27.XMI          Start mission from runaway (Mission #1)
+-28.XMI          Start mission from runaway, fanfare
+-29.XMI          Mission
+-30.XMI          Combat
+-31.XMI          Combat
+-32.XMI          Combat
+-33.XMI          Combat
+-34.XMI          Combat
+-35.XMI          Combat Incoming missile?
+-36.XMI          Combat Eject
+-37.XMI          Combat death
+-38.XMI          Combat over, returning to base success
+-39.XMI          Combat
+-40.XMI          Combat critical?
+-41.XMI          Combat death?
+-42.XMI 
+-43.XMI - 44.XMI Starts
+-45.XMI          Bombing?
+-46.XMI          Eject?
+-47.XMI          Bombs away
+
+RSOUNDFX.ROL/ASOUNDFX.ADL (SOUND.TRE)
+-1.XMI - 14.XMI SFX sounds (when no digital sound card selected during INSTALL)
+
+Thanks @Watcher3223 for identifying some songs.
+
+EOF
