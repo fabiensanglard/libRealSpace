@@ -131,7 +131,6 @@ void SCAIBrain::topLevelThink() {
                 return;
             }
         } else {
-            // AI_QueryTargetField4B
             this->missileCountermeasures();
         }
     }
@@ -1847,7 +1846,6 @@ bool SCAIBrain::reactToMissile() {
     return true;
 }
 
-// AI_EvalTargetAttribute : leurres contre le missile qui me vise ; word_70472 = leurres actifs dans le monde
 void SCAIBrain::missileCountermeasures() {
     bool aims_me = missile_threat != nullptr && missile_threat->alive && missile_threat->target == owner;
     if (!aims_me) {

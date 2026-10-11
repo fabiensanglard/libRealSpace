@@ -259,6 +259,7 @@ public:
     uint8_t combat_class{2};           // chunk JINF, modele +0x52 (9 et plus : chasseur)
     uint8_t bomb_guided{0};            // chunk DATA des BOMB, modele +0x5E
     int16_t bomb_lock_cone_rate{0};    // modele +0x61, deg/s
+    float decoy_lifetime{0.0f};        // secondes
     uint8_t health{0};
     WDAT *wdat{nullptr};
     DYNN_MISS *dynn_miss{nullptr};
@@ -315,6 +316,8 @@ private:
     void parseREAL_OBJT_MISS(uint8_t *data, size_t size);
     void parseREAL_OBJT_BOMB(uint8_t *data, size_t size);
     void parseREAL_OBJT_BOMB_DATA(uint8_t *data, size_t size);
+    void parseREAL_OBJT_DECY(uint8_t *data, size_t size);
+    void parseREAL_OBJT_DECY_DATA(uint8_t *data, size_t size);
     void parseREAL_OBJT_TRCR(uint8_t *data, size_t size); 
     void parseREAL_OBJT_AFTB(uint8_t *data, size_t size);
     void parseREAL_OBJT_EXPL(uint8_t *data, size_t size);

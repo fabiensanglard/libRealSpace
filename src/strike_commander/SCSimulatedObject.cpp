@@ -506,6 +506,12 @@ void DumbSimulatedObject::Simulate(int tps) {
     float deltaTime = 1.0f / (float)tps;
     velocity = (velocity + (acceleration * deltaTime));
     position = position + velocity;
+    this->vx = velocity.x;
+    this->vy = velocity.y;
+    this->vz = velocity.z;
+    this->x = position.x;
+    this->y = position.y;
+    this->z = position.z;
     this->distance -= deltaTime;
     if (this->distance < 0) {
         this->alive = false;

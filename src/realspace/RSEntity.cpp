@@ -259,6 +259,7 @@ void RSEntity::parseREAL_OBJT(uint8_t *data, size_t size) {
     handlers["OMOB"] = std::bind(&RSEntity::parseREAL_OBJT_OMOB, this, std::placeholders::_1, std::placeholders::_2);
     handlers["DEBR"] = std::bind(&RSEntity::parseREAL_OBJT_DEBR, this, std::placeholders::_1, std::placeholders::_2);
     handlers["PODR"] = std::bind(&RSEntity::parseREAL_OBJT_PODR, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DECY"] = std::bind(&RSEntity::parseREAL_OBJT_DECY, this, std::placeholders::_1, std::placeholders::_2);
     
     lexer.InitFromRAM(data, size, handlers);
 }
@@ -391,6 +392,16 @@ void RSEntity::parseREAL_OBJT_BOMB_DATA(uint8_t *data, size_t size) {
     bs.ReadByte();
     bs.ReadByte();
     this->bomb_lock_cone_rate = bs.ReadShort();
+}
+void RSEntity::parseREAL_OBJT_DECY(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+    std::unordered_map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["DATA"] = std::bind(&RSEntity::parseREAL_OBJT_DECY_DATA, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSEntity::parseREAL_OBJT_DECY_DATA(uint8_t *data, size_t size) {
+    ByteStream bs(data, size);
+    this->decoy_lifetime = (float) bs.ReadInt32LE();
 }
 void RSEntity::parseREAL_OBJT_MISS_DYNM(uint8_t *data, size_t size){
     IFFSaxLexer lexer;
