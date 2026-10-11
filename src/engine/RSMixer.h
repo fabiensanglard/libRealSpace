@@ -20,6 +20,8 @@
 #include "AILAdlibDriver.h"
 #include "AILXmidiDriver.h"
 #include "SCMusicSequencer.h"
+#include "MidiOut.h"
+#include "Mt32Timbres.h"
 
 class RSMixer {
     int initted;
@@ -34,6 +36,8 @@ class RSMixer {
     opl3_chip chip;
     AILAdlibDriver adl;
     AILXmidiDriver xmi;
+    MidiOut midi;
+    Mt32Uploader mt32;
     SCMusicSequencer sequencer;
     int sampleRate{ 44100 };
     uint16_t audioFormat{ AUDIO_S16SYS };

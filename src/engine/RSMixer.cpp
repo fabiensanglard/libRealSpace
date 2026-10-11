@@ -2,6 +2,8 @@
 #include <unordered_map>
 #include <mutex>
 #include <atomic>
+#include <cstdlib>
+#include "Config.hpp"
 
 static RSMixer *g_rsmixer_instance = nullptr;
 
@@ -61,6 +63,14 @@ void RSMixer::init() {
         printf("RSMixer: format audio 0x%04X non gere, musique muette\n", this->audioFormat);
     }
     this->music = new RSMusic();
+    {
+        Config &mcfg = Config::getInstance();
+        int src = mcfg.getInt("Sound", "midi_music", 0);
+        if (mcfg.getString("Sound", "midi_port", "").empty() || src < 0 || src > 2) {
+            src = 0;
+        }
+        this->music->midiMusic = src;
+    }
     this->music->init();
     this->isplaying = false;
     {
@@ -71,6 +81,30 @@ void RSMixer::init() {
         });
         xmi.init(&adl);
         sequencer.init(&xmi, &this->music->timbres);
+        Config &cfg = Config::getInstance();
+        std::string midiPort = cfg.getString("Sound", "midi_port", "");
+        midi.mt32 = (this->music->midiMusic == 2);
+        if (!midiPort.empty() && midi.open(midiPort.c_str())) {
+            const bool dbg = cfg.getInt("Sound", "midi_debug", 0) != 0;
+            if (this->music->midiMusic == 2) {
+                mt32.out = &midi;
+                sequencer.mt = &mt32;
+                sequencer.mtLib = &this->music->timbresMt;
+                xmi.sysexTap = [this](const uint8_t *p, size_t n) { midi.raw(p, n); };
+            }
+            xmi.midiTap = [this, dbg](int st, int d1, int d2) -> bool {
+                for (int c = 0; c < SFX_CHANNELS; c++) {
+                    if (sfxHandle[c] >= 0 && sfxHandle[c] == xmi.current) {
+                        return false; // FM-Effekte (SOUNDFX.ADL) bleiben auf OPL
+                    }
+                }
+                if (dbg && (st & 0xF0) == 0xC0) {
+                    printf("MIDI ch%d program %d\n", (st & 0x0F) + 1, d1);
+                }
+                midi.send(st, d1, d2);
+                return true;
+            };
+        }
     }
     Mix_HookMusic(RSMixer::musicHook, this);
     Mix_ChannelFinished(ChannelFinishedCallback);
@@ -362,7 +396,7 @@ void RSMixer::playIsolated(MemMusic *mus, int loop, int index) {
     this->current_music = index < 0 ? UINT32_MAX : (uint32_t)index;
     this->isolatedTrack = index;
     int err = 0;
-    musicHandle = SCMusicSequencer::registerAndStart(&xmi, &this->music->timbres, mus->data, mus->size, &err);
+    musicHandle = SCMusicSequencer::registerAndStart(&xmi, sequencer.mt ? sequencer.mtLib : &this->music->timbres, mus->data, mus->size, &err, sequencer.mt);
     if (musicHandle < 0) {
         printf("Error loading music (error %d)\n", err);
         return;

@@ -41,7 +41,7 @@ void SCMusicSequencer::chanStop(Channel &c) // Music_ChannelStopSequence_59F1D
 }
 
 int SCMusicSequencer::registerAndStart(AILXmidiDriver *xmi, const SCTimbreLibrary *lib,
-                                       const uint8_t *data, size_t size, int *error) {
+                                       const uint8_t *data, size_t size, int *error, Mt32Uploader *mt) {
     if (!data) {
         if (error) {
             *error = 3;
@@ -55,9 +55,13 @@ int SCMusicSequencer::registerAndStart(AILXmidiDriver *xmi, const SCTimbreLibrar
         }
         return -1;
     }
+    std::function<bool(int, int)> mtHave;
+    if (mt) {
+        mtHave = [mt](int b, int p) { return mt->has(b, p); };
+    }
     // Le jeu boucle sans fin sur un timbre introuvable ; ici on s'arrete et on le signale.
     for (int guard = 0; guard < 256; guard++) {
-        int r = xmi->timbreRequest(h);
+        int r = xmi->timbreRequest(h, mt ? &mtHave : nullptr);
         if (r == 0xFFFF) {
             break;
         }
@@ -65,13 +69,21 @@ int SCMusicSequencer::registerAndStart(AILXmidiDriver *xmi, const SCTimbreLibrar
         int patch = r & 0xFF;
         const uint8_t *t = lib ? lib->find(bank, patch) : nullptr; // Music_InstallTimbre_5A62A
         if (!t) {
+            if (mt) {
+                mt->install(bank, patch, nullptr); // als erledigt markieren (ROM-Klang), weiter
+                continue;
+            }
             if (error) {
                 *error = 4;
             }
             std::printf("SCMusicSequencer : timbre absent de la bibliotheque (banque %d, patch %d)\n", bank, patch);
             break;
         }
-        xmi->adl->installTimbre(bank, patch, t);
+        if (mt) {
+            mt->install(bank, patch, t);
+        } else {
+            xmi->adl->installTimbre(bank, patch, t);
+        }
     }
     xmi->start(h);
     return h;
@@ -84,7 +96,7 @@ void SCMusicSequencer::chanPlay(Channel &c, const std::vector<uint8_t> *b, int i
         error = 3;
         return;
     }
-    c.handle = registerAndStart(xmi, lib, b->data(), b->size(), &error);
+    c.handle = registerAndStart(xmi, mt ? mtLib : lib, b->data(), b->size(), &error, mt);
 }
 
 const std::vector<uint8_t> *SCMusicSequencer::track(int i) {

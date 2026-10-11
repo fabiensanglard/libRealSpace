@@ -6,6 +6,8 @@
 #include "AILAdlibTables.h"
 #include "AILMidi.h"
 #include <cstring>
+#include <vector>
+
 using std::memcmp;
 using std::memset;
 using namespace AILMidi;
@@ -50,9 +52,6 @@ namespace {
         return memcmp(p, t, 4) == 0;
     }
 } // namespace
-void AILXmidiDriver::send(int st, int d1, int d2) {
-    adl->send(st, d1, d2);
-}
 
 /* VLN XMIDI (7 bits par octet, bit 7 = suite) */
 namespace {
@@ -236,6 +235,13 @@ void AILXmidiDriver::resetSequence(XmidiSequence *s) {
             send(CONTROL_CHANGE | c, VOICE_PROTECT, 0);
         }
     }
+}
+
+void AILXmidiDriver::send(int st, int d1, int d2) {
+    if (midiTap && midiTap(st, d1, d2)) {
+        return; // Musik laeuft ueber das externe MIDI-Geraet, OPL bleibt fuer die Effekte
+    }
+    adl->send(st, d1, d2);
 }
 
 void AILXmidiDriver::xmidiVolume(XmidiSequence *s) /* sub_311D */
@@ -535,7 +541,7 @@ void AILXmidiDriver::setRelVolume(int h, int vol, int ms) {
 }
 
 /* get_request (fonction 0x9B, 0x1CC7) : premier timbre du chunk TIMB absent du cache */
-int AILXmidiDriver::timbreRequest(int h) {
+int AILXmidiDriver::timbreRequest(int h, const std::function<bool(int, int)> *have) {
     if (h < 0 || !seq[h].used || !seq[h].timb) {
         return 0xFFFF;
     }
@@ -544,7 +550,8 @@ int AILXmidiDriver::timbreRequest(int h) {
     for (int i = 0; i < n; i++) {
         int patch = t[10 + 2 * i];
         int bank = t[11 + 2 * i];
-        if (!adl->timbreStatus(bank, patch)) {
+        bool present = have ? (*have)(bank, patch) : (adl->timbreStatus(bank, patch) != 0);
+        if (!present) {
             return (bank << 8) | patch;
         }
     }
@@ -706,7 +713,22 @@ void AILXmidiDriver::serve() {
                     int d2 = (p + 2 < s->len) ? b[p + 2] : 0;
                     size_t sz;
                     if (op == SYSEX) {
-                        sz = (st == META) ? meta(s, h) : sysex(s);
+                        if (st == META) {
+                            sz = meta(s, h);
+                        } else {
+                            sz = sysex(s);
+                            if (sysexTap && st == 0xF0 && sz > 2 && p + sz <= s->len) {
+                                size_t q = p + 1;
+                                uint32_t n = vln(s->base, s->len, &q);
+                                std::vector<uint8_t> m;
+                                m.push_back(0xF0);
+                                m.insert(m.end(), b + q, b + q + n);
+                                if (m.back() != 0xF7) {
+                                    m.push_back(0xF7);
+                                }
+                                sysexTap(m.data(), m.size());
+                            }
+                        }
                     } else if (op == PITCH_BEND) {
                         s->chan_pitch_l[ch] = (uint8_t)d1;
                         s->chan_pitch_h[ch] = (uint8_t)d2;
