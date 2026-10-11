@@ -97,6 +97,14 @@ void SCGameFlow::loadGame(std::string filename) {
 }
 
 void SCGameFlow::saveGame(std::string filename) {
+    if (filename.empty()) {
+        this->frequest->requested_file = "";
+        return;
+    }
+    // Der Lade-Dialog listet nur .sav/.SAV: Endung ergaenzen, falls sie fehlt
+    if (filename.size() < 4 || (filename.substr(filename.size() - 4) != ".SAV" && filename.substr(filename.size() - 4) != ".sav")) {
+        filename += ".SAV";
+    }
     GameState.current_mission = this->current_miss;
     GameState.next_mission = this->next_miss;
     GameState.current_scene = this->gameFlowParser.game.game[this->current_miss]->scen[this->current_scen]->info.ID;
