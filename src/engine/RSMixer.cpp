@@ -1,3 +1,5 @@
+#define TSF_IMPLEMENTATION
+#include "third_party/tsf.h"
 #include "RSMixer.h"
 #include <unordered_map>
 #include <mutex>
@@ -66,7 +68,16 @@ void RSMixer::init() {
     {
         Config &mcfg = Config::getInstance();
         int src = mcfg.getInt("Sound", "midi_music", 0);
-        if (mcfg.getString("Sound", "midi_port", "").empty() || src < 0 || src > 2) {
+        const bool hasPort = !mcfg.getString("Sound", "midi_port", "").empty();
+        const std::string sf = mcfg.getString("Sound", "soundfont", "");
+        if (src < 0 || src > 2) {
+            src = 0;
+        }
+        if (src == 1 && !hasPort && !sf.empty()) {
+            if (!soft.open(sf.c_str(), this->sampleRate)) {
+                src = 0; // Rueckfall auf AdLib
+            }
+        } else if (!hasPort) {
             src = 0;
         }
         this->music->midiMusic = src;
@@ -102,6 +113,17 @@ void RSMixer::init() {
                     printf("MIDI ch%d program %d\n", (st & 0x0F) + 1, d1);
                 }
                 midi.send(st, d1, d2);
+                return true;
+            };
+        }
+        if (soft.active()) {
+            xmi.midiTap = [this](int st, int d1, int d2) -> bool {
+                for (int c = 0; c < SFX_CHANNELS; c++) {
+                    if (sfxHandle[c] >= 0 && sfxHandle[c] == xmi.current) {
+                        return false; // FM-Effekte bleiben auf OPL
+                    }
+                }
+                soft.send(st, d1, d2);
                 return true;
             };
         }
@@ -239,6 +261,7 @@ void RSMixer::render(int16_t *out, int frames) {
             chunk = frames - done;
         }
         OPL3_GenerateStream(&chip, out + 2 * done, (uint32_t)chunk);
+        soft.render(out + 2 * done, chunk);
         done += chunk;
         accDriver += chunk * drvStep;
         accGame += chunk * gameStep;

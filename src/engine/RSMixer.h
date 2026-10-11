@@ -22,6 +22,7 @@
 #include "SCMusicSequencer.h"
 #include "MidiOut.h"
 #include "Mt32Timbres.h"
+#include "SoftSynth.h"
 
 class RSMixer {
     int initted;
@@ -37,6 +38,7 @@ class RSMixer {
     AILAdlibDriver adl;
     AILXmidiDriver xmi;
     MidiOut midi;
+    SoftSynth soft;
     Mt32Uploader mt32;
     SCMusicSequencer sequencer;
     int sampleRate{ 44100 };
