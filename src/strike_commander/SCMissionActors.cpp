@@ -668,7 +668,8 @@ void SCMissionActors::onMissionUpdate(const MissionUpdateEvent &event) {
         delete p;
     }
 
-    if (ai_actor->pilot == nullptr) {
+    // l'avion du joueur est simule par SCStrike, y compris sous cerveau IA de test (DebugStrike)
+    if (ai_actor->pilot == nullptr || ai_actor == mission->player) {
         return;
     }
     if (ai_actor->plane == nullptr) {
@@ -719,7 +720,7 @@ void SCMissionActors::onMissionUpdate(const MissionUpdateEvent &event) {
  * profil GOAL complet (plane + pilot deja assignes, cf. SCMission.cpp).
  */
 void SCMissionActors::onAIRefresh(const AIRefreshEvent &event) {
-    if (!this->is_active || this->is_destroyed) {
+    if (!this->is_active || this->is_destroyed || this == this->mission->player) {
         return;
     }
     if (this->profile == nullptr || !this->profile->ai.isAI) {

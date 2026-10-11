@@ -1,4 +1,6 @@
 #include "DebugStrike.h"
+#include "../../strike_commander/SCAIBrain.h"
+#include "../../engine/gametimer.h"
 #include <cctype>
 #include <cmath>
 #include <imgui.h>
@@ -35,11 +37,643 @@ DebugStrike::DebugStrike() : SCStrike() {}
 DebugStrike::~DebugStrike() {}
 
 void DebugStrike::setMission(std::string mission_name) { 
+    if (this->current_mission != nullptr) {
+        this->disablePlayerAI();
+    }
     target = nullptr;
     SCStrike::setMission(mission_name.c_str()); 
 }
 
 void DebugStrike::init() { SCStrike::init();}
+void DebugStrike::runFrame(void) {
+    SCMissionActors *player = this->current_mission->player;
+    if (player->brain != nullptr && !this->pause_simu && this->camera_mode != View::AUTO_PILOT) {
+        player->pilot->plane = this->player_plane;
+        this->player_ai_accumulator += GameTimer::getInstance().getDeltaTime();
+        if (this->player_ai_accumulator > 1.0f) {
+            this->player_ai_accumulator = 1.0f;
+        }
+        while (this->player_ai_accumulator >= SCAIBrain::TICK_DURATION) {
+            this->player_ai_accumulator -= SCAIBrain::TICK_DURATION;
+            if (this->maneuver_test) {
+                this->maneuverTestTick();
+            } else {
+                this->restoreDebugOrder();
+                player->brain->tick();
+                this->debug_order_executed = player->current_command_executed;
+            }
+        }
+        player->pilot->FlyTo();
+    }
+    SCStrike::runFrame();
+}
+void DebugStrike::enablePlayerAI(RSProf *profile) {
+    SCMissionActors *player = this->current_mission->player;
+    this->player_profile_saved = player->profile;
+    player->profile = profile;
+    player->pilot = new SCPilot();
+    player->pilot->actor = player;
+    player->pilot->plane = this->player_plane;
+    player->brain = new SCAIBrain(player);
+    this->player_ai_accumulator = 0.0f;
+    this->saved_command = player->current_command;
+    this->saved_command_arg = player->current_command_arg;
+    this->saved_command_arg2 = player->current_command_arg2;
+    this->saved_command_executed = player->current_command_executed;
+    this->saved_target = player->target;
+    this->debug_order_command = player->current_command;
+    this->debug_order_arg = player->current_command_arg;
+    this->debug_order_arg2 = player->current_command_arg2;
+    this->debug_order_executed = player->current_command_executed;
+    this->debug_order_target = player->target;
+    // les PROG de mission sont ignores : le cerveau demarre en errance (0xBE) et ne suit que les ordres de test
+    this->giveDebugOrder(OP_SET_OBJ_BE, 0, 0xFF);
+    this->maneuver_test = false;
+    this->autopilot = true;
+}
+void DebugStrike::disablePlayerAI() {
+    SCMissionActors *player = this->current_mission->player;
+    if (player->brain == nullptr) {
+        return;
+    }
+    player->pilot->disengageAutopilot();
+    player->pilot->CmdKinematic(false, this->player_plane->worldVelocity(), this->player_plane->forward, player->pilot->NosePitch());
+    PlaneControlEvent release;
+    release.plane = this->player_plane;
+    release.normalized_stick = false;
+    release.control_stick_x = 0;
+    release.control_stick_y = 0;
+    release.throttle = (float) this->player_plane->GetThrottle();
+    release.flaps = this->player_plane->GetFlaps();
+    release.spoilers = this->player_plane->GetSpoilers();
+    release.wheel = this->player_plane->GetWheel();
+    MessageBus::getInstance().publish(std::make_unique<PlaneControlEvent>(release));
+    MessageBus::getInstance().processEvents();
+    delete player->brain;
+    player->brain = nullptr;
+    delete player->pilot;
+    player->pilot = nullptr;
+    player->profile = this->player_profile_saved;
+    this->player_profile_saved = nullptr;
+    player->current_command = this->saved_command;
+    player->current_command_arg = this->saved_command_arg;
+    player->current_command_arg2 = this->saved_command_arg2;
+    player->current_command_executed = this->saved_command_executed;
+    player->target = this->saved_target;
+    this->player_plane->alignVelocityToNose();
+    this->autopilot = false;
+}
+// le script du joueur repasse par setObjective a chaque frame : l'ordre de test est repose avant chaque tick du cerveau
+void DebugStrike::restoreDebugOrder() {
+    SCMissionActors *player = this->current_mission->player;
+    player->current_command = this->debug_order_command;
+    player->current_command_arg = this->debug_order_arg;
+    player->current_command_arg2 = this->debug_order_arg2;
+    player->current_command_executed = this->debug_order_executed;
+    if (this->debug_order_command == OP_SET_OBJ_DESTROY_TARGET || this->debug_order_command == OP_SET_OBJ_DEFEND_TARGET) {
+        player->target = this->debug_order_target;
+    }
+}
+void DebugStrike::giveDebugOrder(prog_op command, uint8_t arg, uint8_t arg2) {
+    SCMissionActors *player = this->current_mission->player;
+    this->restoreDebugOrder();
+    player->SCMissionActors::setObjective(command, arg);
+    player->current_command_arg2 = arg2;
+    this->debug_order_command = player->current_command;
+    this->debug_order_arg = player->current_command_arg;
+    this->debug_order_arg2 = player->current_command_arg2;
+    this->debug_order_executed = player->current_command_executed;
+    this->debug_order_target = player->target;
+}
+bool DebugStrike::spotCombo(const char *label, uint8_t &spot, bool allow_none) {
+    std::vector<SPOT *> &spots = this->current_mission->mission->mission_data.spots;
+    std::string preview = spot < spots.size() ? "Spot " + std::to_string(spots[spot]->id) : "aucun";
+    bool changed = false;
+    if (ImGui::BeginCombo(label, preview.c_str(), 0)) {
+        if (allow_none && ImGui::Selectable("aucun", spot >= spots.size())) {
+            spot = 0xFF;
+            changed = true;
+        }
+        for (size_t i = 0; i < spots.size(); i++) {
+            std::string name = "Spot " + std::to_string(spots[i]->id) + " (" + std::to_string((int) spots[i]->position.x) + ", " +
+                               std::to_string((int) spots[i]->position.y) + ", " + std::to_string((int) spots[i]->position.z) + ")";
+            if (ImGui::Selectable(name.c_str(), spot == i)) {
+                spot = (uint8_t) i;
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+bool DebugStrike::actorCombo(const char *label, uint8_t &actor_id) {
+    std::string preview = "aucun";
+    for (auto actor : this->current_mission->actors) {
+        if (actor->actor_id == actor_id) {
+            preview = actor->actor_name + " [" + std::to_string(actor->actor_id) + "]";
+        }
+    }
+    bool changed = false;
+    if (ImGui::BeginCombo(label, preview.c_str(), 0)) {
+        for (auto actor : this->current_mission->actors) {
+            if (actor == this->current_mission->player || actor->is_destroyed || actor->object == nullptr) {
+                continue;
+            }
+            std::string name = actor->actor_name + " [" + std::to_string(actor->actor_id) + "]";
+            if (ImGui::Selectable(name.c_str(), actor->actor_id == actor_id)) {
+                actor_id = (uint8_t) actor->actor_id;
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+void DebugStrike::playerAIOrders() {
+    static const prog_op orders[] = {
+        OP_SET_OBJ_TAKE_OFF,
+        OP_SET_OBJ_LAND,
+        OP_SET_OBJ_FLY_TO_WP,
+        OP_SET_OBJ_DESTROY_TARGET,
+        OP_SET_OBJ_DEFEND_TARGET,
+        OP_SET_OBJ_DEFEND_AREA,
+        OP_SET_OBJ_FOLLOW_ALLY,
+        OP_SET_OBJ_BE,
+    };
+    static const char *order_names[] = {
+        "Decoller",
+        "Atterrir",
+        "Aller au waypoint",
+        "Detruire la cible",
+        "Defendre la cible",
+        "Defendre la zone",
+        "Suivre un allie",
+        "Errance (0xBE)",
+    };
+    static int order_index = 3;
+    static uint8_t spot_a = 0;
+    static uint8_t spot_b = 0xFF;
+    static uint8_t actor_arg = 0;
+    SCMissionActors *player = this->current_mission->player;
+    if (ImGui::BeginCombo("Ordre", order_names[order_index], 0)) {
+        for (int i = 0; i < IM_ARRAYSIZE(order_names); i++) {
+            if (ImGui::Selectable(order_names[i], i == order_index)) {
+                order_index = i;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    prog_op command = orders[order_index];
+    uint8_t arg = 0;
+    uint8_t arg2 = 0xFF;
+    switch (command) {
+    case OP_SET_OBJ_LAND:
+        this->spotCombo("Spot d'approche", spot_a, false);
+        this->spotCombo("Spot de toucher", spot_b, true);
+        arg = spot_a;
+        arg2 = spot_b;
+        break;
+    case OP_SET_OBJ_FLY_TO_WP:
+        this->spotCombo("Point", spot_a, false);
+        this->spotCombo("Vitesse", spot_b, true);
+        arg = spot_a;
+        arg2 = spot_b;
+        break;
+    case OP_SET_OBJ_DEFEND_AREA:
+        this->spotCombo("Centre", spot_a, false);
+        arg = spot_a;
+        break;
+    case OP_SET_OBJ_DESTROY_TARGET:
+    case OP_SET_OBJ_DEFEND_TARGET:
+    case OP_SET_OBJ_FOLLOW_ALLY:
+        this->actorCombo("Acteur", actor_arg);
+        ImGui::SameLine();
+        if (ImGui::Button("Cible radar") && this->target != nullptr) {
+            actor_arg = (uint8_t) this->target->actor_id;
+        }
+        arg = actor_arg;
+        break;
+    default:
+        break;
+    }
+    if (ImGui::Button("Donner l'ordre")) {
+        this->giveDebugOrder(command, arg, arg2);
+    }
+    ImGui::Text("Ordre : %s arg %d arg2 %d, termine %d, verrouille %d", prog_op_names[this->debug_order_command].c_str(), this->debug_order_arg,
+                this->debug_order_arg2, this->debug_order_executed, player->brain->objective_locked);
+}
+static std::string actorLabel(SCMissionActors *actor) {
+    if (actor == nullptr) {
+        return "aucun";
+    }
+    return actor->actor_name + " [" + std::to_string(actor->actor_id) + "]";
+}
+static void vectorText(const char *label, Vector3D v) {
+    ImGui::Text("%s (%.0f, %.0f, %.0f)", label, v.x, v.y, v.z);
+}
+// AI_ManeuverTournament : scores de chaque candidat, etat de manoeuvre et contexte de combat preserves
+void DebugStrike::evaluateTournament() {
+    SCAIBrain *brain = this->current_mission->player->brain;
+    static const int fixed_ids[8] = {
+        20,
+        14,
+        15,
+        16,
+        21,
+        7,
+        19,
+        4,
+    };
+    std::vector<int> ids;
+    std::vector<int> weights;
+    for (int i = 0; i < 8; i++) {
+        ids.push_back(fixed_ids[i]);
+        weights.push_back(0);
+    }
+    for (auto &entry : this->current_mission->player->profile->ai.mvrs) {
+        bool fixed = false;
+        for (int i = 0; i < 8; i++) {
+            if (ids[i] == entry.node_id) {
+                weights[i] = entry.value;
+                fixed = true;
+            }
+        }
+        if (!fixed && ids.size() < 25) {
+            ids.push_back(entry.node_id);
+            weights.push_back(entry.value);
+        }
+    }
+    ManeuverState saved_maneuver = brain->maneuver;
+    CombatContext saved_ctx = brain->ctx;
+    this->tournament_scores.clear();
+    for (size_t i = 0; i < ids.size(); i++) {
+        brain->maneuver.phase_hint = 0;
+        brain->maneuver.bits = 0;
+        int score = brain->scoreManeuver(ids[i], brain->air_target);
+        this->tournament_scores.push_back(std::make_tuple(ids[i], score, weights[i]));
+    }
+    brain->maneuver = saved_maneuver;
+    brain->ctx = saved_ctx;
+}
+// manoeuvres traitees par tickManeuver (ID21 est la navigation, hors tournoi direct)
+static const int test_maneuver_ids[] = {
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    13,
+    14,
+    15,
+    16,
+    19,
+    20,
+};
+SCMissionActors *DebugStrike::testManeuverTarget() {
+    for (auto actor : this->current_mission->actors) {
+        if (actor->actor_id == this->test_maneuver_target && !actor->is_destroyed) {
+            return actor;
+        }
+    }
+    return nullptr;
+}
+// tick du mode test : minuterie et reflexes comme AI_TopLevelThink, puis uniquement la manoeuvre testee (ni GOAL ni ordre)
+void DebugStrike::maneuverTestTick() {
+    SCMissionActors *player = this->current_mission->player;
+    SCAIBrain *brain = player->brain;
+    SCMissionActors *test_target = this->testManeuverTarget();
+    player->pilot->ClearGuidance();
+    brain->selector_ran = false;
+    brain->updateTimers();
+    brain->air_target = test_target;
+    bool reacted = false;
+    if (this->maneuver_test_reflexes && !this->player_plane->on_ground) {
+        reacted = !brain->behaviorRunning() && brain->runReflexes();
+        if (!reacted && brain->reaction_level <= REACT_COLLISION) {
+            reacted = brain->scanCollisionThreats();
+        }
+    }
+    if (!reacted) {
+        if (brain->behaviorRunning()) {
+            brain->tickBehavior();
+        } else if (this->maneuver_test_policy == 0) {
+            int id = test_maneuver_ids[this->test_maneuver_index];
+            brain->maneuver.phase_hint = 0;
+            brain->maneuver.bits = 0;
+            if (test_target != nullptr) {
+                brain->scoreManeuver(id, test_target);
+            }
+            brain->applyManeuver(id, test_target, REACT_NONE);
+            this->maneuver_test_runs++;
+            brain->tickManeuver();
+        } else if (this->maneuver_test_policy == 1 && test_target != nullptr) {
+            if (brain->runTournament()) {
+                this->maneuver_test_runs++;
+            }
+        } else {
+            brain->wander();
+        }
+    }
+    brain->just_hit = false;
+    brain->escort_leader_free = false;
+}
+void DebugStrike::maneuverTestConfig() {
+    SCAIBrain *brain = this->current_mission->player->brain;
+    if (!ImGui::CollapsingHeader("Mode test MVRS", ImGuiTreeNodeFlags_DefaultOpen)) {
+        return;
+    }
+    if (ImGui::Checkbox("Mode test actif", &this->maneuver_test)) {
+        brain->abandonBehavior();
+        this->maneuver_test_runs = 0;
+        if (!this->maneuver_test) {
+            brain->air_target = nullptr;
+        }
+    }
+    ImGui::SameLine();
+    ImGui::Checkbox("Reflexes (decrochage, sol, collision)", &this->maneuver_test_reflexes);
+    ImGui::RadioButton("Repeter la manoeuvre choisie", &this->maneuver_test_policy, 0);
+    ImGui::SameLine();
+    ImGui::RadioButton("Tournoi MVRS", &this->maneuver_test_policy, 1);
+    ImGui::SameLine();
+    ImGui::RadioButton("Une fois puis errance", &this->maneuver_test_policy, 2);
+    if (this->maneuver_test_policy == 2) {
+        ImGui::SameLine();
+        if (ImGui::Button("Lancer") && this->maneuver_test) {
+            int id = test_maneuver_ids[this->test_maneuver_index];
+            SCMissionActors *test_target = this->testManeuverTarget();
+            brain->abandonBehavior();
+            brain->maneuver.phase_hint = 0;
+            brain->maneuver.bits = 0;
+            if (test_target != nullptr) {
+                brain->scoreManeuver(id, test_target);
+            }
+            brain->applyManeuver(id, test_target, REACT_NONE);
+            this->maneuver_test_runs++;
+        }
+    }
+    ImGui::Text("Executions %d, manoeuvre en cours ID %d, derniere terminee %d", this->maneuver_test_runs, brain->maneuver.id,
+                brain->last_finished_behavior);
+    if (this->maneuver_test_policy == 1 && this->testManeuverTarget() == nullptr) {
+        ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "Le tournoi demande une cible");
+    }
+}
+void DebugStrike::playerAIControls() {
+    SCAIBrain *brain = this->current_mission->player->brain;
+    std::string maneuver_preview = "ID " + std::to_string(test_maneuver_ids[this->test_maneuver_index]);
+    if (ImGui::BeginCombo("Manoeuvre", maneuver_preview.c_str(), 0)) {
+        for (int i = 0; i < IM_ARRAYSIZE(test_maneuver_ids); i++) {
+            std::string name = "ID " + std::to_string(test_maneuver_ids[i]);
+            if (ImGui::Selectable(name.c_str(), i == this->test_maneuver_index)) {
+                this->test_maneuver_index = i;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    this->actorCombo("Cible de manoeuvre", this->test_maneuver_target);
+    ImGui::SameLine();
+    if (ImGui::Button("Cible radar##manoeuvre") && this->target != nullptr) {
+        this->test_maneuver_target = (uint8_t) this->target->actor_id;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Sans cible")) {
+        this->test_maneuver_target = 0xFF;
+    }
+    this->maneuverTestConfig();
+    if (!ImGui::CollapsingHeader("Forcage")) {
+        return;
+    }
+    SCMissionActors *chosen = this->testManeuverTarget();
+    if (chosen == nullptr) {
+        chosen = brain->air_target;
+    }
+    ImGui::Text("Cible utilisee : %s", actorLabel(chosen).c_str());
+    if (ImGui::Button("Forcer la manoeuvre") && chosen != nullptr) {
+        // comme AI_ManeuverTournament : le score prepare phase_hint, bits et point, puis la manoeuvre est appliquee
+        brain->abandonBehavior();
+        brain->maneuver.phase_hint = 0;
+        brain->maneuver.bits = 0;
+        brain->scoreManeuver(test_maneuver_ids[this->test_maneuver_index], chosen);
+        brain->applyManeuver(test_maneuver_ids[this->test_maneuver_index], chosen, REACT_NONE);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Finir la manoeuvre")) {
+        brain->endManeuver(false);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Abandonner le comportement")) {
+        brain->abandonBehavior();
+    }
+    if (ImGui::Button("Prendre comme cible air") && chosen != nullptr) {
+        brain->air_target = chosen;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Effacer la cible air")) {
+        brain->air_target = nullptr;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Deverrouiller l'ordre")) {
+        brain->objective_locked = false;
+    }
+    if (ImGui::Button("Evaluer le tournoi (cible air)") && brain->air_target != nullptr) {
+        this->evaluateTournament();
+    }
+    if (!this->tournament_scores.empty() && ImGui::BeginTable("Tournoi", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+        ImGui::TableSetupColumn("ID");
+        ImGui::TableSetupColumn("Score");
+        ImGui::TableSetupColumn("Poids MVRS");
+        ImGui::TableSetupColumn("Total (+/-1 aleatoire)");
+        ImGui::TableHeadersRow();
+        for (auto &entry : this->tournament_scores) {
+            int id = std::get<0>(entry);
+            int score = std::get<1>(entry);
+            int weight = std::get<2>(entry);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("%d", id);
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text("%d", score);
+            ImGui::TableSetColumnIndex(2);
+            ImGui::Text("%d", weight);
+            ImGui::TableSetColumnIndex(3);
+            if (score == 0) {
+                ImGui::Text("exclu");
+            } else {
+                ImGui::Text("%d", score + weight);
+            }
+        }
+        ImGui::EndTable();
+    }
+}
+void DebugStrike::playerAIState() {
+    static const char *reaction_names[] = {
+        "aucune",
+        "engage",
+        "missile",
+        "collision",
+        "evitement sol",
+        "sortie de decrochage",
+    };
+    static const char *behavior_names[] = {
+        "manoeuvre",
+        "navigation",
+        "attaque sol",
+        "decollage",
+        "atterrissage",
+    };
+    static const char *ground_op_names[] = {
+        "aucune",
+        "decollage",
+        "atterrissage",
+    };
+    SCMissionActors *player = this->current_mission->player;
+    SCAIBrain *brain = player->brain;
+    SCPilot *pilot = player->pilot;
+    if (ImGui::CollapsingHeader("Etat du cerveau", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Text("Reaction %s (%d), moral %d, qualite de tir %d", brain->reaction_level < 6 ? reaction_names[brain->reaction_level] : "?",
+                    brain->reaction_level, brain->morale, brain->fire_solution_quality);
+        ImGui::Text("Cible air %s", actorLabel(brain->air_target).c_str());
+        ImGui::Text("Cible sol %s", actorLabel(brain->ground_target).c_str());
+        ImGui::Text("Cible de mission %s, engagee %s, annoncee %s", actorLabel(player->target).c_str(), actorLabel(brain->engage_target).c_str(),
+                    actorLabel(brain->announced_target).c_str());
+        ImGui::Text("Missile menacant %p, etat menace %d, alerte %d", (void *) brain->missile_threat, brain->threat_state, brain->threat_alerted);
+        ImGui::Text("Touche %d par %s", brain->just_hit, actorLabel(brain->last_attacker).c_str());
+        ImGui::Text("Masque d'armes 0x%04X, attaque sol %d", brain->weapon_mask, brain->ground_attack_active);
+        ImGui::Text("Ordre verrouille %d, selecteur passe %d, leader libre %d, tenue d'esquive %d", brain->objective_locked, brain->selector_ran,
+                    brain->escort_leader_free, brain->evasion_hold);
+        ImGui::Text("Candidats air %d, sol %d, missiles %d", brain->last_air_candidates, brain->last_ground_candidates, brain->last_missile_candidates);
+        ImGui::Text("Ciblage : horloge %.2f, masque %d, fenetre lente %d, rapide %d", brain->retarget.clock, brain->retarget.mask, brain->retarget.slow_fired,
+                    brain->retarget.fast_fired);
+    }
+    if (ImGui::CollapsingHeader("Comportements")) {
+        std::string stack = "";
+        for (auto kind : brain->behaviors) {
+            stack += std::string(kind < 5 ? behavior_names[kind] : "?") + " > ";
+        }
+        ImGui::Text("Pile : %s", stack.empty() ? "vide" : stack.c_str());
+        ImGui::Text("Dernier comportement termine : %d", brain->last_finished_behavior);
+    }
+    if (ImGui::CollapsingHeader("Manoeuvre")) {
+        ImGui::Text("ID %d, cible %s, niveau %d", brain->maneuver.id, actorLabel(brain->maneuver.target).c_str(), brain->maneuver.level);
+        ImGui::Text("Minuterie %.2f, phase %d (indice %d), branches %d, cote %d, bits 0x%02X", brain->maneuver.timer, brain->maneuver.phase,
+                    brain->maneuver.phase_hint, brain->maneuver.legs, brain->maneuver.side, brain->maneuver.bits);
+        vectorText("Point", brain->maneuver.point);
+        vectorText("Branche", brain->maneuver.leg);
+        ImGui::Text("Minuterie de branche %.2f, cap initial %.1f, aspect poursuite %.1f", brain->maneuver.leg_timer, brain->maneuver.start_heading,
+                    brain->maneuver.pursuit_aspect);
+        std::string uses = "";
+        for (int i = 0; i < 32; i++) {
+            if (brain->maneuver.uses[i] > 0) {
+                uses += "ID" + std::to_string(i) + "x" + std::to_string(brain->maneuver.uses[i]) + " ";
+            }
+        }
+        ImGui::Text("Utilisations : %s", uses.c_str());
+    }
+    if (ImGui::CollapsingHeader("Contexte de combat")) {
+        CombatContext &ctx = brain->ctx;
+        ImGui::Text("Cible %s, avion %d", actorLabel(ctx.target).c_str(), ctx.aircraft);
+        ImGui::Text("Vitesse %.0f, croisiere %.0f, mini %.0f, IAS %.0f", ctx.my_speed, ctx.cruise, ctx.min_speed, ctx.ias);
+        vectorText("D", ctx.D);
+        vectorText("Position relative future", ctx.future_rel);
+        ImGui::Text("Distance %.0f, angle nez %.1f, angle futur %.1f, angle vitesse cible %.1f", ctx.dist, ctx.nose_angle, ctx.future_angle,
+                    ctx.target_vel_angle);
+        ImGui::Text("Aspect %.1f, vitesse cible %.0f, cote %.1f, derriere %d, face a face %d", ctx.aspect, ctx.target_speed, ctx.side, ctx.behind,
+                    ctx.head_on);
+    }
+    if (ImGui::CollapsingHeader("Tir")) {
+        ImGui::Text("Rafale restante %d, derniere arme %d, dernier tir a %d s", brain->burst_remaining, brain->last_fired_weapon, brain->last_fire_second);
+        ImGui::Text("Objet suivi par le point d'emport %s", actorLabel(brain->station_tracked).c_str());
+        ImGui::Text("Missile signale %p", (void *) brain->complained_missile);
+    }
+    if (ImGui::CollapsingHeader("Navigation")) {
+        ImGui::Text("Reference %s", actorLabel(brain->nav.reference).c_str());
+        vectorText("Centre", brain->nav.center);
+        ImGui::Text("Rayon %.0f, altitude %.0f, vitesse %.0f", brain->nav.radius, brain->nav.altitude, brain->nav.speed);
+        vectorText("Point", brain->nav.point);
+        vectorText("Vitesse voulue", brain->nav.velocity);
+        ImGui::Text("Minuterie %.2f, atteint %d", brain->nav.timer, brain->nav.reached);
+    }
+    if (ImGui::CollapsingHeader("Attaque sol")) {
+        ImGui::Text("Cible %s, phase %d, arme %s", actorLabel(brain->ground.target).c_str(), brain->ground.phase,
+                    brain->ground.weapon != nullptr ? brain->ground.weapon->name.c_str() : "aucune");
+        ImGui::Text("Largue %p, attente %d, temps phase 3 %.2f", (void *) brain->ground.released, brain->ground.release_wait, brain->ground.phase3_time);
+        vectorText("Point d'autopilote", brain->ground.autopilot_target);
+    }
+    if (ImGui::CollapsingHeader("Decollage / atterrissage")) {
+        GroundOpsState &ops = brain->ground_ops;
+        ImGui::Text("Operation %s, phase %d, temps %.2f, manche %.1f", ops.kind < 3 ? ground_op_names[ops.kind] : "?", ops.phase, ops.time, ops.stick);
+        vectorText("Axe", ops.axis);
+        vectorText("Origine", ops.origin);
+        vectorText("Point de toucher", ops.landing_target);
+        vectorText("Direction d'approche", ops.landing_dir);
+        ImGui::Text("Vitesse %.0f, duree %.2f, assiette %.1f, compteur %d, palier %d, termine %d", ops.landing_speed, ops.landing_duration, ops.landing_pitch,
+                    ops.landing_counter, ops.landing_leveled, ops.landing_done);
+    }
+    if (ImGui::CollapsingHeader("Formation")) {
+        ImGui::Text("Leader %s (arg %d), etat %d, active %d, historique %d, index %d, horloge %.2f", actorLabel(brain->formation.leader).c_str(),
+                    brain->formation.leader_arg, brain->formation.leader_state, brain->formation.active, brain->formation.history_ready, brain->formation.index,
+                    brain->formation.clock);
+        vectorText("Poste", player->follow_slot);
+    }
+    if (ImGui::CollapsingHeader("Moral")) {
+        ImGui::Text("Discipline %d (minuterie %.2f), minuterie %.2f, mutinerie %d, fuite %d", brain->mood.disciplined, brain->mood.discipline_timer,
+                    brain->mood.timer, brain->mood.mutiny, brain->mood.fleeing);
+        vectorText("Destination", brain->mood.destination);
+        vectorText("Base", brain->mood.home);
+        ImGui::Text("Ennemis vivants %d, pertes %d, ennemis actifs %d", brain->mood.enemies_alive, brain->mood.own_losses, brain->mood.enemies_active);
+    }
+    if (ImGui::CollapsingHeader("Pilote")) {
+        ImGui::Text("Autopilote %d, atteint %d, operations au sol %d", pilot->autopilotActive(), pilot->autopilotReached(), pilot->GroundOpsActive());
+        ImGui::Text("Inclinaison %.1f, assiette %.1f, manche roulis %.1f", pilot->BankAngle(), pilot->NosePitch(), pilot->RollStickValue());
+        ImGui::Text("Mode attitude %d : erreur cap %.1f, tangage %.1f, zone morte %.1f", pilot->attitude_mode, pilot->attitude_heading_error,
+                    pilot->attitude_pitch_error, pilot->attitude_deadband);
+        ImGui::Text("Manche %d %d, gaz %d, cinematique %d", this->player_plane->control_stick_x, this->player_plane->control_stick_y,
+                    this->player_plane->GetThrottle(), this->player_plane->kinematicMode());
+    }
+}
+void DebugStrike::playerAIConfig() {
+    static RSProf *selected_profile = nullptr;
+    SCMissionActors *player = this->current_mission->player;
+    if (player->brain != nullptr) {
+        ImGui::Text("Profil %s", player->profile->radi.info.callsign.c_str());
+        ImGui::SameLine();
+        if (ImGui::Button("Desactiver l'IA")) {
+            this->disablePlayerAI();
+            return;
+        }
+        this->playerAIOrders();
+        this->playerAIControls();
+        this->playerAIState();
+        return;
+    }
+    std::vector<SCMissionActors *> candidates;
+    std::string selected_name = "";
+    for (auto actor : this->current_mission->actors) {
+        if (actor == player || actor->profile == nullptr || !actor->profile->ai.isAI || actor->profile->ai.goal.empty()) {
+            continue;
+        }
+        candidates.push_back(actor);
+        if (actor->profile == selected_profile) {
+            selected_name = actor->actor_name;
+        }
+    }
+    if (selected_name.empty()) {
+        selected_profile = nullptr;
+    }
+    if (ImGui::BeginCombo("Profil IA", selected_name.c_str(), 0)) {
+        for (auto actor : candidates) {
+            if (ImGui::Selectable(actor->actor_name.c_str(), actor->profile == selected_profile)) {
+                selected_profile = actor->profile;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Activer l'IA") && selected_profile != nullptr) {
+        this->enablePlayerAI(selected_profile);
+    }
+}
 void DebugStrike::showOffCamera() {
     ImVec2 avail_size = ImGui::GetContentRegionAvail();
     ImGui::Image((void *)(intptr_t)Renderer.texture, avail_size, {0, 1}, {1, 0});
@@ -336,6 +970,10 @@ void DebugStrike::simConfig() {
     ImGui::Text("target azimuth %.2f", this->pilot.target_azimut);
     ImGui::Text("target climb %d", this->pilot.target_climb);
     ImGui::Text("target roll %.2f", this->pilot.targetRoll);
+    if (this->current_mission->player->brain != nullptr) {
+        go_autopilot = false;
+        go_to_nav = false;
+    }
 }
 void DebugStrike::radar() {
     // Get the canvas parameters for converting world-coordinates to canvas coordinates.
@@ -920,6 +1558,7 @@ void DebugStrike::renderMenu() {
     static bool show_load_plane = false;
     static bool show_radar = false;
     static bool show_gunsight_hud_offset = false;
+    static bool show_player_ai = false;
     if (ImGui::BeginMenu("SCStrike")) {
         ImGui::MenuItem("Mission", NULL, &show_mission);
         ImGui::MenuItem("Mission part and Area", NULL, &show_mission_parts_and_areas);
@@ -934,6 +1573,7 @@ void DebugStrike::renderMenu() {
         ImGui::MenuItem("Cockpit", NULL, &show_cockpit);
         ImGui::MenuItem("Show BBox", NULL, &this->show_bbox);
         ImGui::MenuItem("Ai pilot", NULL, &show_ai);
+        ImGui::MenuItem("IA sur l'avion du joueur", NULL, &show_player_ai);
         ImGui::MenuItem("Off camera", NULL, &show_offcam);
         ImGui::MenuItem("Load plane", NULL, &show_load_plane);
         ImGui::MenuItem("Radar", NULL, &show_radar);
@@ -965,6 +1605,11 @@ void DebugStrike::renderMenu() {
     }
     if (show_textures) {
         this->showTextures();
+    }
+    if (show_player_ai) {
+        ImGui::Begin("IA sur l'avion du joueur", &show_player_ai);
+        this->playerAIConfig();
+        ImGui::End();
     }
     if (show_offcam) {
         ImGui::Begin("Offcam", &show_offcam);

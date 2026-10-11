@@ -168,6 +168,7 @@ struct MoodState {
 };
 
 class SCAIBrain {
+    friend class DebugStrike;
 public:
     static constexpr float TICK_DURATION = 1.0f / 25.0f;
     SCAIBrain(SCMissionActors *owner);
