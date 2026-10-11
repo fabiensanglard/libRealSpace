@@ -19,7 +19,6 @@
 #define RENDER_DISTANCE 40000.0f
 #define AUTOPILOTE_TIMEOUT 1000
 #define AUTOPILOTE_SPEED 4
-#define CHAFF_FLARE_TIMEOUT 5.0f
 
 static Matrix invertRigidBodyMatrix(const Matrix& m) {
     Matrix out;
@@ -1180,26 +1179,7 @@ void SCStrike::checkKeyboard(void) {
         this->mfd_timeout = 400;
     }
     if (m_keyboard->isActionJustPressed(CreateAction(InputAction::SIM_START, SimActionOfst::CHAFF))) {
-        if (this->player_plane->chaffs > 0) {
-            this->player_plane->chaffs--;
-            this->player_plane->chaff_timer = CHAFF_FLARE_TIMEOUT;
-        }
-        if (this->player_plane->flares > 0) {
-            this->player_plane->flares--;
-            this->player_plane->flare_timer = CHAFF_FLARE_TIMEOUT;
-            std::string path = "..\\..\\DATA\\OBJECTS\\CHAFF.IFF";
-            TreEntry *smk = Assets.GetEntryByName(path.c_str());
-            RSEntity *flare = new RSEntity();
-            flare->InitFromRAM(smk->data, smk->size, "CHAFF.IFF");
-            DumbSimulatedObject *flare_obj = new DumbSimulatedObject();
-            flare_obj->obj = flare;
-            flare_obj->x = this->player_plane->x;
-            flare_obj->y = this->player_plane->y;
-            flare_obj->z = this->player_plane->z;
-            flare_obj->weight = 0.2f;
-            flare_obj->distance = CHAFF_FLARE_TIMEOUT;
-            this->player_plane->weaps_object.push_back(flare_obj);
-        }
+        this->player_plane->DeployCountermeasure(true);
     }
     if (m_keyboard->isActionJustPressed(CreateAction(InputAction::SIM_START, SimActionOfst::EJECT))) {
         this->cockpit->frame = 0;
@@ -1207,22 +1187,7 @@ void SCStrike::checkKeyboard(void) {
         this->player_plane->ejected = true;
     }
     if (m_keyboard->isActionJustPressed(CreateAction(InputAction::SIM_START, SimActionOfst::FLARE))) {
-        if (this->player_plane->flares > 0) {
-            this->player_plane->flares--;
-            this->player_plane->flare_timer = CHAFF_FLARE_TIMEOUT;
-            std::string path = "..\\..\\DATA\\OBJECTS\\FLARE.IFF";
-            TreEntry *smk = Assets.GetEntryByName(path.c_str());
-            RSEntity *flare = new RSEntity();
-            flare->InitFromRAM(smk->data, smk->size, "FLARE.IFF");
-            DumbSimulatedObject *flare_obj = new DumbSimulatedObject();
-            flare_obj->obj = flare;
-            flare_obj->x = this->player_plane->x;
-            flare_obj->y = this->player_plane->y;
-            flare_obj->z = this->player_plane->z;
-            flare_obj->weight = 0.2f;
-            flare_obj->distance = CHAFF_FLARE_TIMEOUT;
-            this->player_plane->weaps_object.push_back(flare_obj);
-        }
+        this->player_plane->DeployCountermeasure(false);
     }
     
     
@@ -1736,7 +1701,7 @@ void SCStrike::setMission(char const *missionName) {
     this->cockpit->nav_point_id = &this->nav_point_id;
     Mixer.stopMusic();
     Mixer.switchBank(2);
-    Mixer.playMusic(this->current_mission->mission->mission_data.tune+1);
+    Mixer.playMusic(this->current_mission->mission->mission_data.tune);
 
     // Déclencheur : plan d'ouverture STARTCAM. camera_mode suit le directeur : on
     // le pose direct sur CAM_DIRECTOR et on synchronise last_director_view.
@@ -1914,17 +1879,17 @@ void SCStrike::runFrame(void) {
         this->player_plane->Simulate();
         this->current_mission->update();
         if (this->current_mission->mission_over && this->current_mission->mission_won) {
-            this->Mixer.playMusic(13); // play victory music
+            this->Mixer.playMusic(12); // play victory music
         } else if (this->current_mission->mission_over && !this->current_mission->mission_won) {
             this->Mixer.playMusic(12);
         } else if (this->current_mission->in_combat) {
-            this->Mixer.playMusic(5);
+            this->Mixer.playMusic(4);
         } else if (this->player_plane->crached) {
-            this->Mixer.playMusic(12);
+            this->Mixer.playMusic(11);
         } else if (this->player_plane->ejected) {
-            this->Mixer.playMusic(12);
+            this->Mixer.playMusic(11);
         } else {
-            this->Mixer.playMusic(this->current_mission->mission->mission_data.tune+1);
+            this->Mixer.playMusic(this->current_mission->mission->mission_data.tune);
         }
         if (this->current_mission->mission_ended) {
             GameState.missions_flags.clear();

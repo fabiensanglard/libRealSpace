@@ -81,15 +81,16 @@ struct ManeuverState {
     float timer{0.0f};
     int phase{0};
     int phase_hint{0};
-    int legs{0};
+    int segments{0};
     int side{0};
     uint8_t bits{0};
     Vector3D point{0.0f, 0.0f, 0.0f};
-    Vector3D leg{0.0f, 0.0f, 0.0f};
-    float leg_timer{0.0f};
+    Vector3D segment{0.0f, 0.0f, 0.0f};
+    float segment_timer{0.0f};
     float start_heading{0.0f};
     int uses[32]{};
     float pursuit_aspect{0.0f};     // word_72097, angle (D, vitesse de la cible) memorise par ID7
+    const char *end_reason{""};     // raison de la derniere fin de manoeuvre (banc de DebugStrike)
 };
 
 // entite+0x10F/+0x111/+0x139/+0x13D/+0x141 et bloc de commandes du noeud ID21
@@ -180,7 +181,6 @@ public:
     SCMissionActors *air_target{nullptr};
     SCMissionActors *ground_target{nullptr};
     SCSimulatedObject *missile_threat{nullptr};
-    uint8_t threat_state{0};
     uint16_t weapon_mask{0};
     bool ground_attack_active{false};
     uint8_t reaction_level{REACT_NONE};
@@ -192,6 +192,10 @@ public:
 
     bool acquireBestThreat(bool allow_new_target);
     void onObjectiveSet(bool assigned);
+    char decision[480]{};           // chemin de decision du dernier tick (trace de DebugStrike)
+    char tournament_scores[160]{};  // dernier tournoi : identifiant:note des candidats retenus
+    void decide(const char *format, ...);
+    std::string behaviorLabel();
 
 private:
     SCMissionActors *owner{nullptr};
@@ -212,7 +216,6 @@ private:
     int last_fire_second{0};                     // entite+0x109
     SCMissionActors *station_tracked{nullptr};   // point d'emport engage +0x0D : objet suivi
     bool selector_ran{false};                    // bit 2 de +0x28B
-    int evasion_hold{0};
     bool escort_leader_free{false};              // bit 1 de +0x28B : pose par l'ailier, leader non engage
     SCMissionActors *engage_target{nullptr};     // entite+0x285
     SCMissionActors *announced_target{nullptr};
@@ -246,7 +249,7 @@ private:
     void endManeuver(bool finished);
     void onBehaviorEnded(bool finished);
     bool tickManeuver();
-    bool tickLeg();
+    bool tickSegment();
     void maneuverSpeed(float wanted);
     void speedThrottle(float wanted);
     bool ejectDecision(int mode);
@@ -275,6 +278,7 @@ private:
     void computeAttitudeError(Vector3D direction, float &heading_error, float &pitch_error);
     int missileDistanceBand();
     bool reactToMissile();
+    void missileCountermeasures();
     ThreatScore scoreAirCandidate(SCMissionActors *candidate, Vector3D delta);
     ThreatScore scoreGroundCandidate(SCMissionActors *candidate, Vector3D delta);
     ThreatScore scoreMissile(SCSimulatedObject *missile);

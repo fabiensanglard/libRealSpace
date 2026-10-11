@@ -46,6 +46,7 @@ private:
 };
 
 class SCPilot {
+    friend class DebugStrike;
 private:
     bool alive{true};
     enum TurnState {
@@ -103,6 +104,8 @@ private:
     float guidance_log_h{0.0f};
     float guidance_log_v{0.0f};
     float guidance_log_r{0.0f};
+    float guidance_log_t{0.0f};     // consigne d'inclinaison de la branche petits ecarts (banc de DebugStrike)
+    float guidance_log_s{0.0f};     // manche de tangage de la meme branche
     void runGuidance(float dt);
     float bankAngle();
     float nosePitch();

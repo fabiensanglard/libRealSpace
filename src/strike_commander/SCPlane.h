@@ -188,6 +188,7 @@ public:
     float chaff_timer{0.0f};
     int chaffs{30};
     int flares{30};
+    void DeployCountermeasure(bool chaff);
     // WeaponSystem_FrameUpdate_3F8C0 : minuteurs +0x24 missiles, +0x28 bombes, +0x30 paniers, +0x2C canons
     float weapon_timers[4]{0.0f, 0.0f, 0.0f, 0.0f};
     int weaponTimerSlot(RSEntity *weapon);

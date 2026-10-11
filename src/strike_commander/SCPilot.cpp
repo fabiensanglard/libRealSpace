@@ -217,7 +217,10 @@ void SCPilot::FlyTo() {
         this->runAutopilot(dt);
         return;
     }
-    this->controlThrottle();
+    // en manoeuvre, le cran de gaz du bloc de commande (+0x1E) garde sa derniere valeur s'il n'est pas reecrit
+    if (this->guidance_mode != GUIDANCE_MANUAL) {
+        this->controlThrottle();
+    }
 
     float roll_signed = signedRoll(this->plane->roll);
 
@@ -583,7 +586,8 @@ bool SCPilot::combatDecision(float h, float v, float r, float dt) {
         v = (std::min)(v, 10.0f);
         h = (std::min)(h, 10.0f);
     }
-    if (h == 0.0f && v == 0.0f) {
+    // l'original teste h == v == 0 sur des angles issus de tables d'arc indexees au 1/256 : nul sous asin(1/256) = 0,224 deg
+    if (std::fabs(h) < 0.224f && std::fabs(v) < 0.224f) {
         this->rollToAngle(0.0f, 2.0f, dt);
         return true;
     }
@@ -614,6 +618,8 @@ bool SCPilot::combatDecision(float h, float v, float r, float dt) {
     if (std::fabs(t) > std::fabs(r)) {
         t = r;
     }
+    this->guidance_log_t = t;
+    this->guidance_log_s = s;
     if (this->bankError(t, 5.0f, dt)) {
         this->pitch_stick = this->clampPitch(s);
     }

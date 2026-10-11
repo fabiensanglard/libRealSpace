@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26.0)
-project(LibRealSpace VERSION 0.6.1 LANGUAGES C CXX)
+project(LibRealSpace VERSION 0.7.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)

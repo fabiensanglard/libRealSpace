@@ -2022,3 +2022,32 @@ void SCPlane::syncKinematicVelocity(float dt) {
     this->vy = displacement.x * this->ptw.v[1][0] + displacement.y * this->ptw.v[1][1] + displacement.z * this->ptw.v[1][2];
     this->vz = displacement.x * this->ptw.v[2][0] + displacement.y * this->ptw.v[2][1] + displacement.z * this->ptw.v[2][2];
 }
+
+// WeaponSystem_FrameUpdate_3F8C0 -> Countermeasure_DeployChaffFlare : bit 2 du bloc de commandes = paillettes (+0x3C),
+// bit 4 = fusees (+0x3A), commun au joueur et a l'IA
+void SCPlane::DeployCountermeasure(bool chaff) {
+    const float timeout = 5.0f;
+    int &count = chaff ? this->chaffs : this->flares;
+    if (count <= 0) {
+        return;
+    }
+    count--;
+    if (chaff) {
+        this->chaff_timer = timeout;
+    } else {
+        this->flare_timer = timeout;
+    }
+    std::string name = chaff ? "CHAFF.IFF" : "FLARE.IFF";
+    std::string path = "..\\..\\DATA\\OBJECTS\\" + name;
+    TreEntry *entry = AssetManager::getInstance().GetEntryByName(path.c_str());
+    RSEntity *decoy = new RSEntity();
+    decoy->InitFromRAM(entry->data, entry->size, name.c_str());
+    DumbSimulatedObject *decoy_obj = new DumbSimulatedObject();
+    decoy_obj->obj = decoy;
+    decoy_obj->x = this->x;
+    decoy_obj->y = this->y;
+    decoy_obj->z = this->z;
+    decoy_obj->weight = 0.2f;
+    decoy_obj->distance = timeout;
+    this->weaps_object.push_back(decoy_obj);
+}

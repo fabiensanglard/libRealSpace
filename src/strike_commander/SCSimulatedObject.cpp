@@ -254,13 +254,13 @@ void SCSimulatedObject::Simulate(int tps) {
     if (this->target != nullptr && this->target->plane != nullptr) {
         RSEntity *weapon_entity = this->obj;
         switch (weapon_entity->wdat->weapon_category) {
-        case 1:
+        case 2:
             if (this->target->plane->chaff_timer > 0) {
                 this->target->weapon_shooted_at_me = nullptr;
                 this->target = nullptr;
             }
             break;
-        case 2:
+        case 1:
             if (this->target->plane->flare_timer > 0) {
                 this->target->weapon_shooted_at_me = nullptr;
                 this->target = nullptr;
