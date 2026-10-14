@@ -7,40 +7,34 @@
 //
 
 #include "precomp.h"
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
-/*
- 3 eagle
- 9 letters
- */
 
-static std::string findLatestSave() {
-    namespace fs = std::filesystem;
+std::string SCMainMenu::findLatestSave() {
     std::string best;
-    fs::file_time_type bestTime;
-    std::error_code ec;
-    for (const auto &entry : fs::directory_iterator(".", ec)) {
-        if (!entry.is_regular_file(ec)) {
+    std::time_t bestTime = 0;
+    boost::system::error_code ec;
+    for (boost::filesystem::directory_iterator it(".", ec), end; !ec && it != end; it.increment(ec)) {
+        const boost::filesystem::path &p = it->path();
+        if (!boost::filesystem::is_regular_file(p, ec)) {
             continue;
         }
-        std::string name = entry.path().filename().string();
-        if (name.size() < 4) {
-            continue;
-        }
-        std::string ext = name.substr(name.size() - 4);
+        std::string ext = p.extension().string();
         if (ext != ".SAV" && ext != ".sav") {
             continue;
         }
-        fs::file_time_type t = entry.last_write_time(ec);
+        std::time_t t = boost::filesystem::last_write_time(p, ec);
+        if (ec) {
+            continue;
+        }
         if (best.empty() || t > bestTime) {
-            best = name;
+            best = p.filename().string();
             bestTime = t;
         }
     }
     return best;
 }
 
-// Continue: neuesten Spielstand laden
 void SCMainMenu::OnContinue(void) {
     std::string latest = findLatestSave();
     if (latest.empty()) {

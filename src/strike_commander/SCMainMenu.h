@@ -49,6 +49,7 @@ private:
     void OnStartNewGame();
     void OnLoadGame();
     void OnContinue(void);
+    std::string findLatestSave();
     SCState &GameState = SCState::getInstance();
 };
 

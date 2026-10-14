@@ -884,7 +884,11 @@ void RSEntity::parseREAL_OBJT_EXTE(uint8_t *data, size_t size) {
     
 }
 void RSEntity::parseREAL_OBJT_RNWY(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+    std::unordered_map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
     this->entity_type = EntityType::rnwy;
+    handlers["TRGT"] = std::bind(&RSEntity::parseREAL_OBJT_JETP_TRGT, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
 }
 void RSEntity::parseREAL_APPR(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
