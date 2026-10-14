@@ -2083,7 +2083,9 @@ void SCAIBrain::onObjectiveSet(bool assigned) {
     // cas par defaut (0xBE) : +0x10F vide, +0x111 = ma position, objectif 0xBF
     if (assigned && owner->current_command == OP_SET_OBJ_BE) {
         nav.reference = nullptr;
-        nav.center = owner->plane->position;
+        if (owner->plane != nullptr) {
+            nav.center = owner->plane->position;
+        }
     }
     if (owner->current_command != OP_SET_OBJ_FOLLOW_ALLY && formation.active) {
         this->followAllyExec(this->followLeader());
