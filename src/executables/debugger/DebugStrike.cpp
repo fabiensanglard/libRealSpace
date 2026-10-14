@@ -449,7 +449,6 @@ static const int test_maneuver_ids[] = {
     15,
     16,
     19,
-    20,
 };
 // geometrie vers la cible de manoeuvre, recalculee a chaque image (pas le contexte du cerveau, qui ne bouge qu'au tick)
 void DebugStrike::targetGeometry() {
