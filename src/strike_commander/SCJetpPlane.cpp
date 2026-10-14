@@ -549,6 +549,7 @@ void SCJetpPlane::processInput() {
     
     // clamp final +/- pitch_stick_gain (jdyn[0x65])
     pitchCommandDeg = (std::clamp)(pitchCommandDeg, -this->pitch_stick_gain * this->g_elevator, this->pitch_stick_gain * this->g_elevator);
+    this->alpha_command_deg = pitchCommandDeg;
 
     // --- Servo Aero_ComputeForcesMain (seg102) + Physics_IntegrateSecondaryPosition ---
     // Relu octet-pres (seg102 L2440-2652, seg112 L999-1045) :

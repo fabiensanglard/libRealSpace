@@ -70,6 +70,8 @@ protected:
     int bench_last_bits{-1};
     float bench_next_sample{0.0f};
     int bench_start_phase{0};
+    int bench_situation{0};
+    void benchSituation();
     float bench_time{0.0f};
     int bench_last_phase{-1};
     std::vector<std::string> bench_trace;

@@ -19,6 +19,7 @@
 #include "../realspace/RSAirdens.h"
 
 class SCJetpPlane : public SCPlane {
+    friend class DebugStrike;
 
 protected:
     // L'etat d'orientation est la matrice ptw, tournee chaque tick par omega*dt (comme
@@ -80,6 +81,7 @@ protected:
 
     // --- Valeurs de travail recalculees a chaque tick ---
     float alpha_deg{0.0f};               // incidence (flux vertical corps)
+    float alpha_command_deg{0.0f};
     float beta_deg{0.0f};                // derapage (flux lateral corps)
     float alpha_eff_deg{0.0f};           // incidence effective (calage aile + volets, bornee decrochage)
     float dynamic_pressure{0.0f};        // q = 1/2 . rho(altitude) . V^2

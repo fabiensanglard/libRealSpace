@@ -531,6 +531,7 @@ void DebugStrike::benchStart() {
     this->maneuver_test = false;
     this->current_mission->player->pilot->throttle = (float) this->player_plane->GetThrottle();
     this->current_mission->player->brain->abandonBehavior();
+    this->benchSituation();
     this->benchApply();
     SCAIBrain *brain = this->current_mission->player->brain;
     this->bench_active = true;
@@ -541,8 +542,41 @@ void DebugStrike::benchStart() {
     this->bench_last_bits = brain->maneuver.bits;
     this->bench_next_sample = 0.5f;
     this->bench_trace.clear();
-    std::string start_label = "depart, ordre " + prog_op_names[this->debug_order_command] + " " + std::to_string(this->debug_order_arg);
+    std::string start_label = "depart, situation " + std::to_string(this->bench_situation) + ", ordre " + prog_op_names[this->debug_order_command] + " " +
+                              std::to_string(this->debug_order_arg);
     this->benchRecord(start_label.c_str());
+}
+void DebugStrike::benchSituation() {
+    SCMissionActors *player = this->current_mission->player;
+    printf("BANC situation %d : player_plane %p, acteur %p, pilote %p\n", this->bench_situation, (void *) this->player_plane, (void *) player->plane,
+           (void *) player->pilot->plane);
+    if (this->bench_situation == 0) {
+        return;
+    }
+    SCPlane *plane = this->player_plane;
+    player->pilot->disengageAutopilot();
+    plane->kinematic_mode = false;
+    JDYN *jdyn = plane->object->entity->jdyn;
+    float pitch = 0.0f;
+    float speed = (float) jdyn->ai_speed_min;
+    if (this->bench_situation == 1) {
+        pitch = -10.0f;
+        speed = (float) jdyn->ai_speed_cruise;
+        plane->y = plane->groundlevel + 150.0f;
+    } else if (this->bench_situation == 2) {
+        pitch = 45.0f;
+    }
+    Vector3D level(plane->forward.x, 0.0f, plane->forward.z);
+    level.Normalize();
+    float cos_pitch = cosf(degreeToRad(pitch));
+    Vector3D nose(level.x * cos_pitch, sinf(degreeToRad(pitch)), level.z * cos_pitch);
+    plane->pitch = pitch * 10.0f;
+    plane->roll = 0.0f;
+    plane->forward = nose;
+    plane->velocity = nose * speed;
+    plane->pitch_speed = 0.0f;
+    plane->yaw_speed = 0.0f;
+    plane->roll_speed = 0.0f;
 }
 void DebugStrike::benchApply() {
     SCAIBrain *brain = this->current_mission->player->brain;
@@ -629,6 +663,14 @@ void DebugStrike::benchRecord(const char *label) {
     snprintf(guidance, sizeof(guidance), "  | h %6.2f v %6.2f r %7.1f t %6.2f s %5.2f  manche roulis %6.2f tangage %6.2f", pilot->guidance_log_h,
              pilot->guidance_log_v, pilot->guidance_log_r, pilot->guidance_log_t, pilot->guidance_log_s, pilot->roll_stick, pilot->pitch_stick);
     full += guidance;
+    SCJetpPlane *jetp = dynamic_cast<SCJetpPlane *>(this->player_plane);
+    if (jetp != nullptr) {
+        Vector3D velocity = jetp->worldVelocity();
+        char flight[160];
+        snprintf(flight, sizeof(flight), "  | pente %6.2f alpha %6.2f consigne %6.2f vtang %7.2f", velocity.Elevation(), jetp->alpha_deg, jetp->alpha_command_deg,
+                 jetp->pitch_speed);
+        full += flight;
+    }
     this->bench_trace.push_back(full);
     printf("BANC %s\n", full.c_str());
 }
@@ -644,6 +686,12 @@ void DebugStrike::benchConfig() {
         "7",
         "8",
     };
+    static const char *situation_names[] = {
+        "actuelle",
+        "pres du sol, en descente (ID 14)",
+        "nez haut, lent (ID 15)",
+        "lent, a plat (ID 16)",
+    };
     SCAIBrain *brain = this->current_mission->player->brain;
     if (!ImGui::CollapsingHeader("Banc de manoeuvre", ImGuiTreeNodeFlags_DefaultOpen)) {
         return;
@@ -652,6 +700,11 @@ void DebugStrike::benchConfig() {
     ImGui::PushItemWidth(160.0f);
     ImGui::Combo("Phase de depart", &this->bench_start_phase, phase_names, IM_ARRAYSIZE(phase_names));
     ImGui::PopItemWidth();
+    ImGui::Text("Situation de depart :");
+    for (int i = 0; i < IM_ARRAYSIZE(situation_names); i++) {
+        ImGui::SameLine();
+        ImGui::RadioButton(situation_names[i], &this->bench_situation, i);
+    }
     ImGui::SameLine();
     ImGui::Checkbox("Preparer avec le score", &this->bench_use_score);
     ImGui::SameLine();

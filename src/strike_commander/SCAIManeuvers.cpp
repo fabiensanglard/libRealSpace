@@ -80,7 +80,7 @@ float SCAIBrain::floorAltitude() {
 }
 
 bool SCAIBrain::tooSlow() {
-    return owner->plane->wing_stall > 0 || owner->plane->indicatedAirspeed() <= (float) owner->object->entity->jdyn->ai_speed_min;
+    return owner->plane->wing_stall > 0 || owner->plane->indicatedAirspeed() <= this->referenceSpeed();
 }
 
 bool SCAIBrain::tooLow() {
@@ -494,7 +494,9 @@ void SCAIBrain::applyManeuver(int id, SCMissionActors *target, uint8_t level) {
     switch (id) {
         case 1: {
             float side = ctx.side >= 0.0f ? 1.0f : -1.0f;
-            maneuver.segment = owner->plane->forward.RotateAzimuth(30.0f * side);
+            Vector3D level(owner->plane->forward.x, 0.0f, owner->plane->forward.z);
+            level.Normalize();
+            maneuver.segment = level.RotateAzimuth(30.0f * side);
             maneuver.segment_timer = 1.0f;
             maneuver.segments = 4;
             break;
@@ -634,19 +636,32 @@ bool SCAIBrain::tickManeuver() {
     float climb = 40.0f * flying * flying / 256.0f + 5.0f;
     bool running = true;
     switch (maneuver.id) {
-        case 1:
-            if (!has_target || ctx.nose_angle < 60.0f || maneuver.segments <= 0) {
-                maneuver.end_reason = !has_target ? "sans cible" : ctx.nose_angle < 60.0f ? "cible a moins de 60 deg du nez" : "4 segments faits";
+        case 1: {
+            if (!has_target && maneuver.segments == 4 && maneuver.segment_timer >= 1.0f) {
+                maneuver.end_reason = "sans cible";
                 running = false;
                 break;
             }
-            if (!this->tickSegment()) {
-                maneuver.segments--;
-                maneuver.segment = owner->plane->forward.RotateAzimuth(-60.0f);
-                maneuver.segment_timer = 1.0f;
+            if (this->tickSegment()) {
+                break;
             }
-            this->maneuverSpeed(cruise);
+            maneuver.segments--;
+            Vector3D level(owner->plane->forward.x, 0.0f, owner->plane->forward.z);
+            float heading_gap = 180.0f;
+            if (has_target) {
+                Vector3D to_target = target->plane->position - owner->plane->position;
+                heading_gap = std::fabs(signed180(level.Azimuth() - to_target.Azimuth()));
+            }
+            if (maneuver.segments <= 0 || !has_target || heading_gap < 60.0f) {
+                maneuver.end_reason = !has_target ? "sans cible" : heading_gap < 60.0f ? "cible a moins de 60 deg de cap" : "4 segments faits";
+                running = false;
+                break;
+            }
+            level.Normalize();
+            maneuver.segment = level.RotateAzimuth(-60.0f);
+            maneuver.segment_timer = 1.0f;
             break;
+        }
         case 2: {
             if (maneuver.timer < 0.0f) {
                 maneuver.end_reason = "minuteur";
@@ -765,22 +780,20 @@ bool SCAIBrain::tickManeuver() {
             break;
         case 4: {
             float turned = std::fabs(signed180(owner->plane->forward.Azimuth() - maneuver.start_heading));
-            if (maneuver.timer < -2.0f) {
-                maneuver.end_reason = "minuteur depasse de 2 s";
-                running = false;
-                break;
-            }
-            if (turned >= 90.0f || maneuver.timer <= 0.0f) {
-                if (pilot->CmdPitchTo(10.0f, 5.0f)) {
+            if (turned >= 90.0f || maneuver.timer < 0.0f) {
+                if (pilot->CmdPitchTo(10.0f, 10.0f)) {
                     maneuver.end_reason = turned >= 90.0f ? "cap tourne de 90 deg puis assiette +10" : "minuteur puis assiette +10";
+                    running = false;
+                } else if (maneuver.timer < -2.0f) {
+                    maneuver.end_reason = "minuteur depasse de 2 s";
                     running = false;
                 }
                 break;
             }
-            pilot->CmdThrottle(10);
             float bank = this->tooLow() ? 60.0f : 90.0f;
-            if (pilot->CmdRollTo(maneuver.side == 1 ? bank : -bank, maneuver.phase == 0 ? 30.0f : 5.0f)) {
-                maneuver.phase = 1;
+            float wanted = maneuver.side == 1 ? bank : -bank;
+            if (pilot->CmdRollTo(wanted, 30.0f)) {
+                pilot->CmdRollTo(wanted, 5.0f);
                 pilot->CmdPitchStick(16.0f);
             }
             break;
@@ -1004,7 +1017,7 @@ bool SCAIBrain::tickManeuver() {
                 break;
             }
             bool nose_down = pilot->NosePitch() < 0.0f;
-            pilot->CmdThrottle(nose_down && ctx.ias > ctx.min_speed ? 1 : 10);
+            pilot->CmdThrottle(nose_down && ctx.ias > this->referenceSpeed() ? 1 : 10);
             pilot->CmdPitchTo(30.0f, 10.0f);
             break;
         }
@@ -1020,7 +1033,7 @@ bool SCAIBrain::tickManeuver() {
                 break;
             }
             bool stalled = owner->plane->wing_stall > 0;
-            if (pilot->NosePitch() < 0.0f && !stalled) {
+            if ((!stalled || ctx.ias > this->referenceSpeed()) && pilot->NosePitch() <= 0.0f) {
                 maneuver.end_reason = "nez sous l'horizon";
                 running = false;
                 break;
@@ -1036,9 +1049,8 @@ bool SCAIBrain::tickManeuver() {
             break;
         }
         case 16: {
-            float min_speed = (float) owner->object->entity->jdyn->ai_speed_min;
-            if (maneuver.timer <= 0.0f || ctx.ias > (cruise + min_speed) / 2.0f) {
-                maneuver.end_reason = maneuver.timer <= 0.0f ? "minuteur" : "vitesse atteinte";
+            if (maneuver.timer < 0.0f || ctx.ias >= (cruise + this->referenceSpeed()) / 2.0f) {
+                maneuver.end_reason = maneuver.timer < 0.0f ? "minuteur" : "vitesse atteinte";
                 running = false;
                 break;
             }

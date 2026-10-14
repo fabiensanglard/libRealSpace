@@ -64,6 +64,7 @@ struct SCWeaponLoadoutHardPoint {
 };
 
 class SCPlane {
+    friend class DebugStrike;
 
 protected:
     int anim_ticks{0};

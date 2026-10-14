@@ -635,9 +635,12 @@ bool SCPilot::combatDecision(float h, float v, float r, float dt) {
 bool SCPilot::bankError(float error, float deadzone, float dt) {
     float g = (float) this->plane->object->entity->jdyn->max_g;
     float max_bank = g < 6.0f ? 90.0f * g / 6.0f : 90.0f;
-    float bank = this->bankAngle();
-    float wanted = (std::clamp)(bank + error, -max_bank, max_bank);
-    error = wanted - bank;
+    error = signed180(error);
+    if (max_bank < 90.0f) {
+        float bank = this->bankAngle();
+        float wanted = (std::clamp)(bank + error, -max_bank, max_bank);
+        error = wanted - bank;
+    }
     if (std::fabs(error) > deadzone) {
         this->roll_stick = this->rollStickFromError(error, dt);
         return false;
