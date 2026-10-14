@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include "../engine/EventManager.h"
 #include <boost/filesystem.hpp>
 
 
@@ -162,6 +163,10 @@ SCFileRequester::SCFileRequester(std::function<void(std::string)> callback, uint
 }
 
 SCFileRequester::~SCFileRequester() {
+    if (this->m_isEditingText) {
+        EventManager::getInstance().stopTextInput();
+        this->m_isEditingText = false;
+    }
     delete this->uiImageSet;
 }
 void SCFileRequester::draw(FrameBuffer *fb) {
@@ -234,81 +239,44 @@ void SCFileRequester::draw(FrameBuffer *fb) {
     }
 }
 void SCFileRequester::checkevents() {
-    SDL_Event keybEvents[1];
-    int numKeybEvents = SDL_PeepEvents(keybEvents, 1, SDL_PEEKEVENT, SDL_KEYDOWN, SDL_KEYDOWN);
-    for (int i = 0; i < numKeybEvents; i++) {
-        SDL_Event *event = &keybEvents[i];
-
-        switch (event->key.keysym.sym) {
-        case SDLK_ESCAPE: {
-            this->opened = false;
-            break;
+    // Texteingabe ueber den EventManager: Er leert die SDL-Ereigniswarteschlange, SDL_PeepEvents sieht keine Tasten mehr.
+    // Der InputActionSystem-Textmodus wird bewusst nicht benutzt (er friert die Maus ein).
+    EventManager &em = EventManager::getInstance();
+    if (!this->m_isEditingText) {
+        // Callbacks eines frueher zerstoerten TextEditors (z.B. aus SCRegister) entfernen, sonst Absturz beim ersten Zeichen
+        em.setTextInputCallback(nullptr);
+        em.setKeyPressCallback(nullptr);
+        em.startTextInput();
+        this->m_isEditingText = true;
+        return;
+    }
+    if (em.isKeyJustPressed(SDL_SCANCODE_ESCAPE)) {
+        this->opened = false;
+    }
+    if (em.isKeyJustPressed(SDL_SCANCODE_KP_PLUS)) {
+        this->color_offset = (this->color_offset + 1) % 256;
+    }
+    if (em.isKeyJustPressed(SDL_SCANCODE_KP_MINUS)) {
+        this->color_offset = (this->color_offset + 255) % 256;
+    }
+    if (em.isKeyJustPressed(SDL_SCANCODE_KP_MULTIPLY)) {
+        this->palette_index = (this->palette_index + 1) % 40;
+    }
+    if (em.isKeyJustPressed(SDL_SCANCODE_KP_DIVIDE)) {
+        this->palette_index = (this->palette_index + 39) % 40;
+    }
+    if (em.isKeyJustPressed(SDL_SCANCODE_BACKSPACE) || em.isKeyJustPressed(SDL_SCANCODE_DELETE)) {
+        if (!this->current_file.empty()) {
+            this->current_file.pop_back();
         }
-        case SDLK_KP_PLUS:
-            this->color_offset = (this->color_offset + 1) % 256;
-            break;
-        case SDLK_KP_MINUS:
-            this->color_offset = (this->color_offset + 255) % 256;
-            break;
-        case SDLK_KP_MULTIPLY:
-            this->palette_index = (this->palette_index + 1) % 40;
-            break;
-        case SDLK_KP_DIVIDE:
-            this->palette_index = (this->palette_index + 39) % 40;
-            break;
-        case SDLK_DELETE:
-            case SDLK_BACKSPACE:
-                if(this->current_file.size() > 0){
-                    this->current_file = this->current_file.substr(0,this->current_file.size()-1);
-                }
-            break;
-            case SDLK_a:
-            case SDLK_b:
-            case SDLK_c:
-            case SDLK_d:
-            case SDLK_e:
-            case SDLK_f:
-            case SDLK_g:
-            case SDLK_h:
-            case SDLK_i:
-            case SDLK_j:
-            case SDLK_k:
-            case SDLK_l:
-            case SDLK_m:
-            case SDLK_n:
-            case SDLK_o:
-            case SDLK_p:
-            case SDLK_q:
-            case SDLK_r:
-            case SDLK_s:
-            case SDLK_t:
-            case SDLK_u:
-            case SDLK_v:
-            case SDLK_w:
-            case SDLK_x:
-            case SDLK_y:
-            case SDLK_z:
-            {
-                this->current_file += char(event->key.keysym.sym - 'a' + 'A');
-                break;
+    }
+    for (const std::string &txt : em.getTextInput()) {
+        for (char c : txt) {
+            if (c >= 97 && c <= 122) {
+                this->current_file += (char)(c - 97 + 65);
+            } else if ((c >= 65 && c <= 90) || (c >= 48 && c <= 57) || c == 46) {
+                this->current_file += c;
             }
-            case SDLK_0:
-            case SDLK_1:
-            case SDLK_2:
-            case SDLK_3:
-            case SDLK_4:
-            case SDLK_5:
-            case SDLK_6:
-            case SDLK_7:
-            case SDLK_8:
-            case SDLK_9:
-            case SDLK_PERIOD:
-            {
-                this->current_file += char(event->key.keysym.sym);
-                break;
-            }
-        default:
-            break;
         }
     }
 }

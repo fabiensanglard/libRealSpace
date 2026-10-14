@@ -7,13 +7,47 @@
 //
 
 #include "precomp.h"
+#include <filesystem>
 
 /*
  3 eagle
  9 letters
  */
 
-void SCMainMenu::OnContinue(void) { printf("OnContinue\n"); }
+static std::string findLatestSave() {
+    namespace fs = std::filesystem;
+    std::string best;
+    fs::file_time_type bestTime;
+    std::error_code ec;
+    for (const auto &entry : fs::directory_iterator(".", ec)) {
+        if (!entry.is_regular_file(ec)) {
+            continue;
+        }
+        std::string name = entry.path().filename().string();
+        if (name.size() < 4) {
+            continue;
+        }
+        std::string ext = name.substr(name.size() - 4);
+        if (ext != ".SAV" && ext != ".sav") {
+            continue;
+        }
+        fs::file_time_type t = entry.last_write_time(ec);
+        if (best.empty() || t > bestTime) {
+            best = name;
+            bestTime = t;
+        }
+    }
+    return best;
+}
+
+// Continue: neuesten Spielstand laden
+void SCMainMenu::OnContinue(void) {
+    std::string latest = findLatestSave();
+    if (latest.empty()) {
+        return;
+    }
+    this->LoadGame(latest);
+}
 
 void SCMainMenu::OnLoadGame() { 
     if (this->frequest) {
@@ -90,7 +124,9 @@ void SCMainMenu::LoadGame(std::string filename) {
     SCGameFlow *gfl = new SCGameFlow();
     gfl->InitFromGameState();
     Game->addActivity(gfl);
-    this->frequest->requested_file = "";
+    if (this->frequest) {
+        this->frequest->requested_file = "";
+    }
 }
     
 void SCMainMenu::LoadButtons(void) {
@@ -113,7 +149,7 @@ void SCMainMenu::LoadButtons(void) {
                                                           &continuePosition);
     button->appearance[SCButton::APR_DOWN].InitWithPosition(subPak.GetEntry(5)->data, subPak.GetEntry(5)->size,
                                                             &continuePosition);
-    button->setEnable(false);
+    button->setEnable(!findLatestSave().empty());
     buttons.push_back(button);
 
     button = new SCButton();
