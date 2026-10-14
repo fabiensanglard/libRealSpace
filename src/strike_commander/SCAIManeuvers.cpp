@@ -1,15 +1,8 @@
 #include "precomp.h"
 #include "SCAIBrain.h"
 
-// dword_72039 (AIEntity_MasterTick_5ACC) : vitesse IA minimale, + sin(tangage) * (croisiere - minimale) / 2 nez haut
 float SCAIBrain::referenceSpeed() {
-    JDYN *jdyn = owner->object->entity->jdyn;
-    float speed = (float) jdyn->ai_speed_min;
-    float pitch = owner->pilot->NosePitch();
-    if (pitch > 0.0f) {
-        speed += sinf(degreeToRad(pitch)) * (float) (jdyn->ai_speed_cruise - jdyn->ai_speed_min) / 2.0f;
-    }
-    return speed;
+    return owner->pilot->ReferenceSpeed();
 }
 
 // AI_InterceptSpeedControlLaw_5F9B : vitesse de la cible le long de mon nez (au moins la minimale) ; au-dela du seuil,

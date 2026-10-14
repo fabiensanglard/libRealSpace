@@ -156,6 +156,7 @@ public:
     static float YawOf(Vector3D heading_dir);
     float BankAngle();
     float NosePitch();
+    float ReferenceSpeed();
     float BearingToRef(Vector3D direction);
     float RollStickValue() { return roll_stick; }
     void ClearGuidance();

@@ -585,8 +585,7 @@ bool SCPilot::guidanceSolution(Vector3D direction, float dt) {
 }
 
 bool SCPilot::combatDecision(float h, float v, float r, float dt) {
-    float speed = this->plane->worldVelocity().Length();
-    bool too_slow = this->plane->wing_stall > 0 || speed <= (float) this->plane->object->entity->jdyn->ai_speed_min;
+    bool too_slow = this->plane->wing_stall > 0 || this->plane->indicatedAirspeed() <= this->ReferenceSpeed();
     if (too_slow) {
         this->throttle = 100;
         v = (std::min)(v, 10.0f);
@@ -782,6 +781,17 @@ float SCPilot::BankAngle() {
 
 float SCPilot::NosePitch() {
     return this->nosePitch();
+}
+
+// vitesse minimale de manoeuvre : la minimale, plus sin(assiette) * (croisiere - minimale) / 2 quand le nez monte
+float SCPilot::ReferenceSpeed() {
+    JDYN *jdyn = this->plane->object->entity->jdyn;
+    float speed = (float) jdyn->ai_speed_min;
+    float pitch = this->nosePitch();
+    if (pitch > 0.0f) {
+        speed += sinf(degreeToRad(pitch)) * (float) (jdyn->ai_speed_cruise - jdyn->ai_speed_min) / 2.0f;
+    }
+    return speed;
 }
 
 float SCPilot::BearingToRef(Vector3D direction) {
