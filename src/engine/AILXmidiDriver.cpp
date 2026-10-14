@@ -32,23 +32,23 @@ const uint8_t PROTECTED = 0x40; // canal reserve par CHAN_PROTECT
 const uint8_t NONE = 0xFF;      // valeur de journal / note / canal : absente
 
 namespace {
-uint32_t be32(const uint8_t *p);
-int tag(const uint8_t *p, const char *t);
-uint32_t vln(const uint8_t *b, size_t len, size_t *pos);
-long findSeq(const uint8_t *b, size_t len, int num);
-void rewindSeq(XmidiSequence *s);
-size_t sysex(XmidiSequence *s);
-void grad(int *percent, int target, uint32_t *accum, uint32_t period);
+    uint32_t be32(const uint8_t *p);
+    int tag(const uint8_t *p, const char *t);
+    uint32_t vln(const uint8_t *b, size_t len, size_t *pos);
+    long findSeq(const uint8_t *b, size_t len, int num);
+    void rewindSeq(XmidiSequence *s);
+    size_t sysex(XmidiSequence *s);
+    void grad(int *percent, int target, uint32_t *accum, uint32_t period);
 } // namespace
 namespace {
-uint32_t be32(const uint8_t *p) {
-    return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) | ((uint32_t)p[2] << 8) | p[3];
-}
+    uint32_t be32(const uint8_t *p) {
+        return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) | ((uint32_t)p[2] << 8) | p[3];
+    }
 } // namespace
 namespace {
-int tag(const uint8_t *p, const char *t) {
-    return memcmp(p, t, 4) == 0;
-}
+    int tag(const uint8_t *p, const char *t) {
+        return memcmp(p, t, 4) == 0;
+    }
 } // namespace
 void AILXmidiDriver::send(int st, int d1, int d2) {
     adl->send(st, d1, d2);
@@ -56,57 +56,57 @@ void AILXmidiDriver::send(int st, int d1, int d2) {
 
 /* VLN XMIDI (7 bits par octet, bit 7 = suite) */
 namespace {
-uint32_t vln(const uint8_t *b, size_t len, size_t *pos) {
-    uint32_t v = 0;
-    while (*pos < len) {
-        uint8_t c = b[(*pos)++];
-        v = (v << 7) | (c & 0x7F);
-        if (!(c & 0x80)) {
-            break;
+    uint32_t vln(const uint8_t *b, size_t len, size_t *pos) {
+        uint32_t v = 0;
+        while (*pos < len) {
+            uint8_t c = b[(*pos)++];
+            v = (v << 7) | (c & 0x7F);
+            if (!(c & 0x80)) {
+                break;
+            }
         }
+        return v;
     }
-    return v;
-}
 } // namespace
 
 /* ---- findSeq : FORM XMID numero num dans un FORM XMID ou un CAT XMID ---- */
 namespace {
-long findSeq(const uint8_t *b, size_t len, int num) {
-    size_t p = 0;
-    for (;;) {
-        if (p + 12 > len) {
-            return -1;
-        }
-        int is_cat = tag(b + p, "CAT ");
-        int is_form = tag(b + p, "FORM");
-        if (!is_cat && !is_form) {
-            return -1;
-        }
-        if (tag(b + p + 8, "XMID")) {
-            break;
-        }
-        p += be32(b + p + 4) + 8;
-    }
-    if (tag(b + p, "FORM")) {
-        return num == 0 ? (long)p : -1;
-    }
-    size_t end = p + 8 + be32(b + p + 4);
-    if (end > len) {
-        end = len;
-    }
-    p += 12;
-    int n = 0;
-    while (p + 12 <= end) {
-        if (tag(b + p + 8, "XMID")) {
-            if (n == num) {
-                return (long)p;
+    long findSeq(const uint8_t *b, size_t len, int num) {
+        size_t p = 0;
+        for (;;) {
+            if (p + 12 > len) {
+                return -1;
             }
-            n++;
+            int is_cat = tag(b + p, "CAT ");
+            int is_form = tag(b + p, "FORM");
+            if (!is_cat && !is_form) {
+                return -1;
+            }
+            if (tag(b + p + 8, "XMID")) {
+                break;
+            }
+            p += be32(b + p + 4) + 8;
         }
-        p += be32(b + p + 4) + 8;
+        if (tag(b + p, "FORM")) {
+            return num == 0 ? (long)p : -1;
+        }
+        size_t end = p + 8 + be32(b + p + 4);
+        if (end > len) {
+            end = len;
+        }
+        p += 12;
+        int n = 0;
+        while (p + 12 <= end) {
+            if (tag(b + p + 8, "XMID")) {
+                if (n == num) {
+                    return (long)p;
+                }
+                n++;
+            }
+            p += be32(b + p + 4) + 8;
+        }
+        return -1;
     }
-    return -1;
-}
 } // namespace
 
 /* ---- rewindSeq, version ADLIB.ADV (sub_2DFA) ---- */

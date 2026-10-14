@@ -89,6 +89,7 @@ struct ManeuverState {
     float segment_timer{0.0f};
     float start_heading{0.0f};
     int uses[32]{};
+    bool jink_flip{false};
     float pursuit_aspect{0.0f};     // word_72097, angle (D, vitesse de la cible) memorise par ID7
     const char *end_reason{""};     // raison de la derniere fin de manoeuvre (banc de DebugStrike)
 };
@@ -112,8 +113,6 @@ struct GroundAttackState {
     int phase{0};
     RSEntity *weapon{nullptr};
     SCSimulatedObject *released{nullptr};
-    Vector3D last_position{0.0f, 0.0f, 0.0f};
-    int last_tick{-2};
     Vector3D autopilot_target{0.0f, 0.0f, 0.0f};
     std::vector<SCSimulatedObject *> known_objects;
     int release_wait{0};

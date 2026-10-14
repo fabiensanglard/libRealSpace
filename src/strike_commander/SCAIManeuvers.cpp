@@ -648,14 +648,17 @@ bool SCAIBrain::tickManeuver() {
             this->maneuverSpeed(cruise);
             break;
         case 2: {
-            if (maneuver.timer <= 0.0f) {
+            if (maneuver.timer < 0.0f) {
                 maneuver.end_reason = "minuteur";
                 running = false;
                 break;
             }
-            Vector3D reference = owner->mission->intel.unknown_vector;
-            reference.Normalize();
-            Vector3D delta = reference - owner->plane->forward;
+            if (!has_target) {
+                maneuver.end_reason = "sans cible";
+                running = false;
+                break;
+            }
+            Vector3D delta = -owner->plane->forward;
             Matrix &m = owner->plane->ptw;
             float up[3] = {m.v[1][0], m.v[1][1], m.v[1][2]};
             float d[3] = {delta.x, delta.y, delta.z};
@@ -668,11 +671,13 @@ bool SCAIBrain::tickManeuver() {
             bool same = (up[axis] >= 0.0f) == (d[axis] >= 0.0f);
             pilot->CmdPitchStick(same ? 16.0f : -8.0f);
             pilot->CmdRollStick(maneuver.side == 1 ? 16.0f : -16.0f);
-            this->maneuverSpeed(cruise);
+            this->maneuverSpeed(ctx.target_speed);
             break;
         }
         case 3:
-            if (maneuver.timer <= 0.0f && maneuver.phase != 6) {
+            if (maneuver.phase == 1 && maneuver.segment_timer > 0.0f) {
+                maneuver.timer += TICK_DURATION;
+            } else if (maneuver.timer < 0.0f && maneuver.phase != 6) {
                 maneuver.phase = 6;
             }
             switch (maneuver.phase) {
@@ -689,53 +694,65 @@ bool SCAIBrain::tickManeuver() {
                         int pick = std::rand() & 3;
                         maneuver.phase = pick == 1 ? 2 : pick == 2 ? 4 : 1;
                     }
-                    if (maneuver.phase == 1) {
-                        maneuver.segments++;
-                        float magnitude = (maneuver.segments & 1) ? 32.0f : 64.0f;
-                        maneuver.segment = owner->plane->forward.RotateAzimuth((maneuver.segments & 2) ? -magnitude : magnitude);
-                        maneuver.segment_timer = 1.0f;
-                    }
+                    maneuver.segment_timer = 0.0f;
                     break;
                 }
-                case 1:
+                case 1: {
+                    if (maneuver.segment_timer <= 0.0f) {
+                        float magnitude = (std::rand() & 0x20) != 0 ? 64.0f : 32.0f;
+                        if (maneuver.jink_flip) {
+                            magnitude = -magnitude;
+                        }
+                        maneuver.jink_flip = !maneuver.jink_flip;
+                        Vector3D level(owner->plane->forward.x, 0.0f, owner->plane->forward.z);
+                        level.Normalize();
+                        maneuver.segment = level.RotateAzimuth(magnitude);
+                        maneuver.segment_timer = 1.0f;
+                        maneuver.timer -= 1.0f;
+                    }
                     if (!this->tickSegment()) {
+                        maneuver.segment_timer = 0.0f;
                         maneuver.phase = 0;
                     }
                     break;
+                }
                 case 2:
                     this->speedThrottle(cruise);
-                    if (pilot->CmdRollTo(180.0f, 5.0f)) {
-                        pilot->CmdPitchStick(16.0f);
-                    }
                     if (pilot->NosePitch() >= -30.0f) {
                         maneuver.phase = 3;
                     }
+                    if (pilot->CmdRollTo(180.0f, 15.0f)) {
+                        pilot->CmdPitchStick(16.0f);
+                    }
                     break;
                 case 3:
-                    if (this->tooLow() || owner->plane->worldVelocity().Length() >= cruise) {
-                        if (pilot->CmdPitchTo(5.0f, 5.0f)) {
+                    if (this->tooLow() || ctx.ias >= cruise) {
+                        if (pilot->CmdPitchTo(5.0f, 10.0f)) {
                             maneuver.phase = 0;
                         }
                     } else {
-                        pilot->CmdPitchTo(-climb, 5.0f);
+                        pilot->CmdPitchTo(-climb, 10.0f);
                     }
+                    this->speedThrottle(cruise);
                     break;
                 case 4:
-                    if (pilot->CmdRollTo(0.0f, 5.0f)) {
-                        pilot->CmdPitchStick(16.0f);
-                    }
-                    if (pilot->NosePitch() >= 30.0f) {
+                    this->speedThrottle(cruise);
+                    if (pilot->NosePitch() <= 30.0f) {
                         maneuver.phase = 5;
+                    }
+                    if (pilot->CmdRollTo(0.0f, 15.0f)) {
+                        pilot->CmdPitchStick(16.0f);
                     }
                     break;
                 case 5:
                     if (owner->plane->y > this->floorAltitude() + 3.0f * 200.0f || this->tooSlow()) {
-                        if (pilot->CmdPitchTo(-5.0f, 5.0f)) {
+                        if (pilot->CmdPitchTo(-5.0f, 10.0f)) {
                             maneuver.phase = 0;
                         }
                     } else {
-                        pilot->CmdPitchTo(climb, 5.0f);
+                        pilot->CmdPitchTo(climb, 10.0f);
                     }
+                    this->speedThrottle(cruise);
                     break;
                 default:
                     this->speedThrottle(cruise);

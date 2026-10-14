@@ -10,73 +10,73 @@
 #include <cstring>
 
 namespace {
-enum {
-    P_FREQ,
-    P_LVL0,
-    P_LVL1,
-    P_PRIO,
-    P_FB,
-    P_MULT0,
-    P_MULT1,
-    P_WAVE
-};
-const int ADL_VOICES = AILAdlibDriver::VOICES;
-const int ADL_OPL = AILAdlibDriver::OPL_CHANNELS;
-const int ADL_CACHE = AILAdlibDriver::CACHE;
-const uint8_t NONE = 0xFF; // canal OPL / entree de cache / proprietaire : aucun
+    enum {
+        P_FREQ,
+        P_LVL0,
+        P_LVL1,
+        P_PRIO,
+        P_FB,
+        P_MULT0,
+        P_MULT1,
+        P_WAVE
+    };
+    const int ADL_VOICES = AILAdlibDriver::VOICES;
+    const int ADL_OPL = AILAdlibDriver::OPL_CHANNELS;
+    const int ADL_CACHE = AILAdlibDriver::CACHE;
+    const uint8_t NONE = 0xFF; // canal OPL / entree de cache / proprietaire : aucun
 
-// Registres OPL2 (+ offset d'operateur ou de canal)
-enum OplReg {
-    OPL_AVEKM = 0x20,   // tremolo, vibrato, maintien, KSR, multiplicateur
-    OPL_KSL_TL = 0x40,  // KSL, niveau de sortie
-    OPL_AR_DR = 0x60,   // attaque, declin
-    OPL_SL_RR = 0x80,   // maintien, relachement
-    OPL_FNUM_LO = 0xA0, // F-Number, 8 bits bas
-    OPL_KON_BLK = 0xB0, // Key On, bloc (octave), F-Number 2 bits hauts
-    OPL_FB_CONN = 0xC0, // feedback, connexion
-    OPL_WAVE = 0xE0,    // forme d'onde
-};
-const uint8_t OPL_KEY_ON = 0x20;  // bit Key On du registre 0xB0
-const uint8_t OPL_VIBRATO = 0x40; // bit vibrato du registre 0x20
+    // Registres OPL2 (+ offset d'operateur ou de canal)
+    enum OplReg {
+        OPL_AVEKM = 0x20,   // tremolo, vibrato, maintien, KSR, multiplicateur
+        OPL_KSL_TL = 0x40,  // KSL, niveau de sortie
+        OPL_AR_DR = 0x60,   // attaque, declin
+        OPL_SL_RR = 0x80,   // maintien, relachement
+        OPL_FNUM_LO = 0xA0, // F-Number, 8 bits bas
+        OPL_KON_BLK = 0xB0, // Key On, bloc (octave), F-Number 2 bits hauts
+        OPL_FB_CONN = 0xC0, // feedback, connexion
+        OPL_WAVE = 0xE0,    // forme d'onde
+    };
+    const uint8_t OPL_KEY_ON = 0x20;  // bit Key On du registre 0xB0
+    const uint8_t OPL_VIBRATO = 0x40; // bit vibrato du registre 0x20
 
-// v_dirty : registres a reecrire pour une voix (sub_20B2)
-enum Dirty : uint8_t {
-    DIRTY_FREQ = 0x01,     // 0xA0 / 0xB0
-    DIRTY_FB_CONN = 0x08,  // 0xC0
-    DIRTY_WAVE = 0x10,     // 0xE0
-    DIRTY_ENVELOPE = 0x20, // 0x60 / 0x80
-    DIRTY_LEVEL = 0x40,    // 0x40 (volume)
-    DIRTY_AVEKM = 0x80,    // 0x20
-    DIRTY_ALL = 0xF9,
-};
+    // v_dirty : registres a reecrire pour une voix (sub_20B2)
+    enum Dirty : uint8_t {
+        DIRTY_FREQ = 0x01,     // 0xA0 / 0xB0
+        DIRTY_FB_CONN = 0x08,  // 0xC0
+        DIRTY_WAVE = 0x10,     // 0xE0
+        DIRTY_ENVELOPE = 0x20, // 0x60 / 0x80
+        DIRTY_LEVEL = 0x40,    // 0x40 (volume)
+        DIRTY_AVEKM = 0x80,    // 0x20
+        DIRTY_ALL = 0xF9,
+    };
 
-// v_state
-enum VoiceState {
-    VOICE_FREE = 0,
-    VOICE_PLAYING = 1,
-    VOICE_RELEASE = 2
-};
+    // v_state
+    enum VoiceState {
+        VOICE_FREE = 0,
+        VOICE_PLAYING = 1,
+        VOICE_RELEASE = 2
+    };
 
-// c_flags
-const uint8_t CACHE_USED = 0x80;
-const uint8_t CACHE_PROTECTED = 0x40; // TIMBRE_PROTECT : jamais evince
+    // c_flags
+    const uint8_t CACHE_USED = 0x80;
+    const uint8_t CACHE_PROTECTED = 0x40; // TIMBRE_PROTECT : jamais evince
 
-// Longueurs de timbre (mot de tete)
-const uint16_t TIMBRE_LEN_OPL = 0x0E;     // timbre OPL simple (sub_2617)
-const uint16_t TIMBRE_LEN_IGNORED = 0x19; // le pilote ne charge rien
+    // Longueurs de timbre (mot de tete)
+    const uint16_t TIMBRE_LEN_OPL = 0x0E;     // timbre OPL simple (sub_2617)
+    const uint16_t TIMBRE_LEN_IGNORED = 0x19; // le pilote ne charge rien
 
-uint16_t rw(const uint8_t *t, int off) {
-    return (uint16_t)(t[off] | (t[off + 1] << 8));
-}
-int16_t s16(uint16_t v) {
-    return (int16_t)v;
-}
+    uint16_t rw(const uint8_t *t, int off) {
+        return (uint16_t)(t[off] | (t[off + 1] << 8));
+    }
+    int16_t s16(uint16_t v) {
+        return (int16_t)v;
+    }
 
-// 'mul / shl ax,1 / mov al,ah / cmp al,1 / sbb al,0FFh' : (a*b)/128, +1 si non nul
-uint8_t scale127(uint8_t a, uint8_t b) {
-    uint8_t r = (uint8_t)(((unsigned)a * b * 2u) >> 8);
-    return r ? (uint8_t)(r + 1) : 0;
-}
+    // 'mul / shl ax,1 / mov al,ah / cmp al,1 / sbb al,0FFh' : (a*b)/128, +1 si non nul
+    uint8_t scale127(uint8_t a, uint8_t b) {
+        uint8_t r = (uint8_t)(((unsigned)a * b * 2u) >> 8);
+        return r ? (uint8_t)(r + 1) : 0;
+    }
 } // namespace
 
 void AILAdlibDriver::wrOp(int op, int reg, uint8_t val) // sub_19B4 -> sub_19EB

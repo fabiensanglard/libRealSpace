@@ -1575,6 +1575,9 @@ Vector3D SCAIBrain::predictBombImpact(RSEntity *bomb) {
 void SCAIBrain::updateGroundAttack(SCMissionActors *target) {
     bool is_ground = target != nullptr && !target->is_destroyed && target->object != nullptr && target->object->entity != nullptr && target->object->entity->target_type == 2;
     if (!is_ground || reaction_level == REACT_MISSILE || owner->plane->on_ground) {
+        if (!is_ground) {
+            this->decide("attaque au sol impossible : cible non sol");
+        }
         this->resetGroundAttack(false);
         return;
     }
@@ -1582,6 +1585,7 @@ void SCAIBrain::updateGroundAttack(SCMissionActors *target) {
         this->resetGroundAttack(false);
         // GroundAttack_CanEngage_77000 : une arme sol chargee (id 3 a 8), sinon GOAL suivant
         if (this->selectGroundWeapon() == nullptr) {
+            this->decide("attaque au sol impossible : aucune arme sol");
             return;
         }
         ground.target = target;
@@ -1591,13 +1595,8 @@ void SCAIBrain::updateGroundAttack(SCMissionActors *target) {
         }
     }
     Vector3D own_position = owner->plane->position;
-    if (debug_ticks != ground.last_tick + 1) {
-        ground.last_position = own_position;
-    }
-    ground.last_tick = debug_ticks;
-    Vector3D own_velocity = (own_position - ground.last_position) * (1.0f / TICK_DURATION);
+    Vector3D own_velocity = owner->plane->worldVelocity();
     float own_speed = own_velocity.Length();
-    ground.last_position = own_position;
     Vector3D target_position = target->object->position;
     // la cible au sol (+0x283) ne remplace pas la cible de mission (+0x137)
     owner->current_target = target->actor_id;
@@ -1635,7 +1634,7 @@ void SCAIBrain::updateGroundAttack(SCMissionActors *target) {
             return;
         }
         owner->pilot->SetPitchCommand(5.0f, 5.0f);
-        owner->pilot->target_speed_ms = (float) owner->object->entity->jdyn->ai_speed_cruise;
+        this->speedThrottle((float) owner->object->entity->jdyn->ai_speed_cruise);
         ground_attack_active = true;
         return;
     }
@@ -1687,7 +1686,9 @@ void SCAIBrain::updateGroundAttack(SCMissionActors *target) {
             owner->pilot->SetGuidanceDirection(direction);
         }
     }
-    owner->pilot->target_speed_ms = (float) owner->object->entity->jdyn->ai_speed_cruise;
+    if (!wings_level) {
+        this->speedThrottle((float) owner->object->entity->jdyn->ai_speed_cruise);
+    }
     ground_attack_active = true;
 
     if (ground.phase == 3) {

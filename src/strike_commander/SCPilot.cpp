@@ -20,12 +20,14 @@ SCPilot::~SCPilot() {}
 
 void SCPilot::SetGuidanceDirection(Vector3D direction) {
     this->attitude_mode = false;
+    this->manual_throttle = -1;
     this->guidance_mode = GUIDANCE_DIRECTION;
     this->guidance_direction = direction;
 }
 
 void SCPilot::SetPitchCommand(float pitch_deg, float deadzone_deg) {
     this->attitude_mode = false;
+    this->manual_throttle = -1;
     this->guidance_mode = GUIDANCE_PITCH;
     this->guidance_pitch = pitch_deg;
     this->guidance_deadzone = deadzone_deg;
@@ -219,7 +221,11 @@ void SCPilot::FlyTo() {
     }
     // en manoeuvre, le cran de gaz du bloc de commande (+0x1E) garde sa derniere valeur s'il n'est pas reecrit
     if (this->guidance_mode != GUIDANCE_MANUAL) {
-        this->controlThrottle();
+        if (this->manual_throttle >= 0) {
+            this->throttle = (float) this->manual_throttle;
+        } else {
+            this->controlThrottle();
+        }
     }
 
     float roll_signed = signedRoll(this->plane->roll);
