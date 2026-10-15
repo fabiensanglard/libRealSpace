@@ -353,7 +353,8 @@ void SCRenderer::init(int width, int height) {
     this->lodLevel = config.getInt("Game", "object_detail", 0);
     this->show_textured = config.getBool("Game", "show_texture", true);
     this->show_fog = config.getBool("Game", "show_fog", true);
-    this->terrain_black_level = config.getInt("Game", "terrain_black_level", 15) / 100.0f;
+    this->terrain_shadow_lift = config.getInt("Game", "terrain_shadow_lift", 8) / 100.0f;
+    this->terrain_shadow_range = config.getInt("Game", "terrain_shadow_range", 35) / 100.0f;
     this->show_clouds = config.getBool("Game", "clouds_enabled", false);
     this->width = width;
     this->height = height;
@@ -1310,15 +1311,19 @@ void SCRenderer::terrainColor(uint8_t base, uint8_t light, float *color) {
         tone = 255;
     }
     Texel *texel = this->palette.GetRGBColor((uint8_t)tone);
-    for (int i = 0; i < 3; i++) {
-        uint8_t component = texel->r;
-        if (i == 1) {
-            component = texel->g;
+    color[0] = texel->r / 255.0f;
+    color[1] = texel->g / 255.0f;
+    color[2] = texel->b / 255.0f;
+    float luminance = 0.299f * color[0] + 0.587f * color[1] + 0.114f * color[2];
+    if (luminance > 0.0f && luminance < this->terrain_shadow_range) {
+        float depth = 1.0f - luminance / this->terrain_shadow_range;
+        float factor = (luminance + this->terrain_shadow_lift * depth * depth) / luminance;
+        for (int i = 0; i < 3; i++) {
+            color[i] = color[i] * factor;
+            if (color[i] > 1.0f) {
+                color[i] = 1.0f;
+            }
         }
-        if (i == 2) {
-            component = texel->b;
-        }
-        color[i] = this->terrain_black_level + component / 255.0f * (1.0f - this->terrain_black_level);
     }
     color[3] = 1.0f;
 }

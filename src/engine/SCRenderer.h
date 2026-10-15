@@ -98,7 +98,8 @@ public:
     float fov{45.0f};
     int max_view_distance{160000};
     bool show_fog{true};
-    float terrain_black_level{0.15f};
+    float terrain_shadow_lift{0.08f};
+    float terrain_shadow_range{0.35f};
     bool show_textured{true};
     bool show_clouds{false};
     int lodLevel{0};
