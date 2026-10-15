@@ -174,7 +174,18 @@ void RSPalette::parsePALT_SKYC(uint8_t *data, size_t size){
     
 }
 void RSPalette::parsePALT_RANG(uint8_t *data, size_t size){
-    
+    ByteStream stream(data, size);
+    uint16_t count = stream.ReadUShort();
+    for (int i = 0; i < count; i++) {
+        PaletteRange range;
+        range.first = stream.ReadUShort();
+        range.shades = stream.ReadUShort();
+        range.fog = stream.ReadUShort();
+        for (int k = 0; k < 7; k++) {
+            stream.ReadByte();
+        }
+        this->ranges.push_back(range);
+    }
 }
 void RSPalette::parsePALT_BILD(uint8_t *data, size_t size){
     IFFSaxLexer lexer;

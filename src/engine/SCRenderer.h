@@ -53,6 +53,7 @@ private:
     bool initialized;
     int scale;
     VGAPalette palette;
+    std::vector<PaletteRange> terrain_ranges;
     bool running;
     bool paused;
     uint32_t counter;
@@ -97,6 +98,7 @@ public:
     float fov{45.0f};
     int max_view_distance{160000};
     bool show_fog{true};
+    float terrain_black_level{0.15f};
     bool show_textured{true};
     bool show_clouds{false};
     int lodLevel{0};
@@ -143,6 +145,8 @@ public:
     void renderTexturedTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, RSArea *area, int triangleType,
                                 RSImage *image);
     void renderColoredTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
+    void terrainColor(uint8_t base, uint8_t light, float *color);
+    MapVertex *highestVertex(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
     bool isTextured(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
     void renderQuad(MapVertex *currentVertex, MapVertex *rightVertex, MapVertex *bottomRightVertex,
                     MapVertex *bottomVertex, RSArea *area);

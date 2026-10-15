@@ -31,6 +31,7 @@ public:
     void SetBWFlag(uint32_t flag);
     
     void copyFrom(VGAPalette* other);
+    std::vector<PaletteRange> ranges;
 private:
 
     

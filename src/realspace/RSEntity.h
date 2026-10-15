@@ -28,6 +28,7 @@ class RSImageSet;
 
 typedef struct MapVertex {
     Point3D v;
+    int16_t height;
 
     uint8_t flag;
     uint8_t type;

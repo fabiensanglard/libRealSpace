@@ -264,60 +264,10 @@ void RSArea::ParseBlocks(size_t lod, PakEntry *entry, size_t blockDim) {
             vertex->flag = vertStream.ReadByte();
             vertex->type = vertStream.ReadByte();
 
-            uint8_t paletteColor = 0;
-
-            // Hardcoding the values since I have no idea where those
-            // are coming from. Maybe it was hard-coded in STRIKE.EXE ?
-            switch (vertex->type) {
-            case LAND_TYPE_SEA:
-                paletteColor = 0xA;
-                break;
-            case LAND_TYPE_DESERT:
-                paletteColor = 0x3;
-                break;
-            case LAND_TYPE_GROUND:
-                paletteColor = 0x7;
-                break;
-            case LAND_TYPE_SAVANNAH:
-                paletteColor = 0x5;
-                break;
-            case LAND_TYPE_TAIGA:
-                paletteColor = 0x9;
-                break;
-            case LAND_TYPE_TUNDRA:
-                paletteColor = 0x1;
-                break;
-            case LAND_TYPE_SNOW:
-                paletteColor = 0xC;
-                break;
-            default:
-                printf("No color for type %d\n", vertex->type);
-            }
-
-            uint8_t shade = (vertex->flag & 0x0F);
-            shade = shade >> 1;
-
-            /*
-            if (shade & 1)
-                shade = 0;
-            */
-
-            int16_t unknown = (vertex->flag & 0xF0);
-            unknown = unknown >> 8;
-
             vertex->upperImageID = vertStream.ReadByte();
             vertex->lowerImageID = vertStream.ReadByte();
-
-            Texel *t = Renderer.getPalette()->GetRGBColor(paletteColor * 16 + shade);
-
-            // Texel* t = renderer.GetDefaultPalette()->GetRGBColor(vertex->text);
-            /*
-              TODO: Figure out what are:
-                    - flag high 4 bits.
-                    - flag low  1 bits.
-                    - textSet
-                    - text
-            */
+            vertex->height = height;
+            Renderer.terrainColor(vertex->type, vertex->flag, vertex->color);
 
             vertex->v.y = height * HEIGH_MAP_SCALE;
 
@@ -326,10 +276,6 @@ void RSArea::ParseBlocks(size_t lod, PakEntry *entry, size_t blockDim) {
             vertex->v.x += -BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
             vertex->v.z += -BLOCK_WIDTH * BLOCK_PER_MAP_SIDE_DIV_2;
 
-            vertex->color[0] = t->r / 255.0f;
-            vertex->color[1] = t->g / 255.0f;
-            vertex->color[2] = t->b / 255.0f;
-            vertex->color[3] = 255;
         }
     }
 }

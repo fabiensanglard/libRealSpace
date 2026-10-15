@@ -347,11 +347,13 @@ void SCRenderer::init(int width, int height) {
     if (entries) {
         palette.initFromFileRam(entries->data, entries->size);    
         this->palette = *palette.GetColorPalette();
+        this->terrain_ranges = palette.ranges;
     }
     
     this->lodLevel = config.getInt("Game", "object_detail", 0);
     this->show_textured = config.getBool("Game", "show_texture", true);
     this->show_fog = config.getBool("Game", "show_fog", true);
+    this->terrain_black_level = config.getInt("Game", "terrain_black_level", 15) / 100.0f;
     this->show_clouds = config.getBool("Game", "clouds_enabled", false);
     this->width = width;
     this->height = height;
@@ -1298,60 +1300,64 @@ float textTrianCoo[2][3][2] = {
 #define LOWER_TRIANGE 0
 #define UPPER_TRIANGE 1
 
+void SCRenderer::terrainColor(uint8_t base, uint8_t light, float *color) {
+    PaletteRange *range = &this->terrain_ranges[0];
+    if (base < this->terrain_ranges.size()) {
+        range = &this->terrain_ranges[base];
+    }
+    int tone = range->first + ((light * range->shades + 128) >> 8);
+    if (tone > 255) {
+        tone = 255;
+    }
+    Texel *texel = this->palette.GetRGBColor((uint8_t)tone);
+    for (int i = 0; i < 3; i++) {
+        uint8_t component = texel->r;
+        if (i == 1) {
+            component = texel->g;
+        }
+        if (i == 2) {
+            component = texel->b;
+        }
+        color[i] = this->terrain_black_level + component / 255.0f * (1.0f - this->terrain_black_level);
+    }
+    color[3] = 1.0f;
+}
+
+MapVertex *SCRenderer::highestVertex(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
+    MapVertex *highest = tri0;
+    if ((uint16_t)tri1->height >= (uint16_t)highest->height) {
+        highest = tri1;
+    }
+    if ((uint16_t)tri2->height >= (uint16_t)highest->height) {
+        highest = tri2;
+    }
+    return highest;
+}
+
 void SCRenderer::renderTexturedTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, RSArea *area,
                                         int triangleType, RSImage *image) {
 
-    int mainColor = 0;
-    if (tri0->type != tri1->type || tri0->type != tri2->type) {
-        mainColor = 1;
-        if (tri1->type > tri0->type)
-            if (tri1->type > tri2->type)
-                glColor4fv(tri1->color);
-            else
-                glColor4fv(tri2->color);
-        else if (tri0->type > tri2->type)
-            glColor4fv(tri0->color);
-        else
-            glColor4fv(tri2->color);
-    }
-
+    uint8_t base = this->highestVertex(tri0, tri1, tri2)->type;
+    float color[4];
+    float (*coords)[3][2] = textTrianCoo;
     if (image->width < 128) {
-        glTexCoord2fv(textTrianCoo64[triangleType][0]);
-        if (!mainColor) {
-            glColor4fv(tri0->color);
-        }
-        glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
-
-        if (!mainColor) {
-            glColor4fv(tri1->color);
-        }
-        glTexCoord2fv(textTrianCoo64[triangleType][1]);
-        glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
-
-        if (!mainColor) {
-            glColor4fv(tri2->color);
-        }
-        glTexCoord2fv(textTrianCoo64[triangleType][2]);
-        glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
-    } else {
-        glTexCoord2fv(textTrianCoo[triangleType][0]);
-        if (!mainColor) {
-            glColor4fv(tri0->color);
-        }
-        glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
-
-        glTexCoord2fv(textTrianCoo[triangleType][1]);
-        if (!mainColor) {
-            glColor4fv(tri1->color);
-        }
-        glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
-
-        glTexCoord2fv(textTrianCoo[triangleType][2]);
-        if (!mainColor) {
-            glColor4fv(tri2->color);
-        }
-        glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
+        coords = textTrianCoo64;
     }
+
+    this->terrainColor(base, tri0->flag, color);
+    glColor4fv(color);
+    glTexCoord2fv(coords[triangleType][0]);
+    glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
+
+    this->terrainColor(base, tri1->flag, color);
+    glColor4fv(color);
+    glTexCoord2fv(coords[triangleType][1]);
+    glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
+
+    this->terrainColor(base, tri2->flag, color);
+    glColor4fv(color);
+    glTexCoord2fv(coords[triangleType][2]);
+    glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
 }
 
 bool SCRenderer::isTextured(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
@@ -1362,35 +1368,20 @@ bool SCRenderer::isTextured(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
 }
 void SCRenderer::renderColoredTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
 
-    if (tri0->type != tri1->type || tri0->type != tri2->type
+    uint8_t base = this->highestVertex(tri0, tri1, tri2)->type;
+    float color[4];
 
-    ) {
+    this->terrainColor(base, tri0->flag, color);
+    glColor4fv(color);
+    glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
 
-        if (tri1->type > tri0->type)
-            if (tri1->type > tri2->type)
-                glColor4fv(tri1->color);
-            else
-                glColor4fv(tri2->color);
-        else if (tri0->type > tri2->type)
-            glColor4fv(tri0->color);
-        else
-            glColor4fv(tri2->color);
+    this->terrainColor(base, tri1->flag, color);
+    glColor4fv(color);
+    glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
 
-        glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
-
-        glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
-
-        glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
-    } else {
-        glColor4fv(tri0->color);
-        glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
-
-        glColor4fv(tri1->color);
-        glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
-
-        glColor4fv(tri2->color);
-        glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
-    }
+    this->terrainColor(base, tri2->flag, color);
+    glColor4fv(color);
+    glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
 }
 
 void SCRenderer::renderQuad(MapVertex *currentVertex, MapVertex *rightVertex, MapVertex *bottomRightVertex,

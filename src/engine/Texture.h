@@ -29,6 +29,12 @@ typedef struct Texel{
     uint8_t a{0};
 } Texel;
 
+struct PaletteRange {
+    uint16_t first{0};
+    uint16_t shades{0};
+    uint16_t fog{0};
+};
+
 typedef struct VGAPalette{
     
     Texel colors[256];
