@@ -311,7 +311,6 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
  * ne verrait jamais l'objectif comme termine).
  */
 bool SCMissionActors::setObjective(prog_op command, uint8_t arg) {
-    // Goal_SetObjective_A307 : bit 5 de +0x28B (ordre verrouille) -> rien n'est pose, renvoie 1 (en cours)
     if (this->brain != nullptr && this->brain->objective_locked) {
         this->brain->onObjectiveSet(false);
         return true;
@@ -324,7 +323,6 @@ bool SCMissionActors::setObjective(prog_op command, uint8_t arg) {
     }
     this->current_command = command;
     this->current_command_arg = arg;
-    // Goal_SetObjective_A307 0xA7/0xA8 : la cible de mission +0x137 est posee des que l'ordre est donne
     if ((command == OP_SET_OBJ_DESTROY_TARGET || command == OP_SET_OBJ_DEFEND_TARGET) && (this->target == nullptr || this->target->actor_id != arg)) {
         for (auto actor : this->mission->actors) {
             if (actor->actor_id == arg && !actor->is_destroyed) {
@@ -336,7 +334,6 @@ bool SCMissionActors::setObjective(prog_op command, uint8_t arg) {
     if (this->brain != nullptr) {
         this->brain->onObjectiveSet(true);
     }
-    // Goal_IsComplete_A6D3 du nouvel etat : 1 = en cours
     return !this->current_command_executed;
 }
 

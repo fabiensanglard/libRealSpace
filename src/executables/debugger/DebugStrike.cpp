@@ -205,7 +205,7 @@ void DebugStrike::enablePlayerAI(RSProf *profile) {
     this->debug_order_executed = player->current_command_executed;
     this->debug_order_target = player->target;
     // les PROG de mission sont ignores : le cerveau demarre en errance (0xBE) et ne suit que les ordres de test
-    this->giveDebugOrder(OP_SET_OBJ_BE, 0, 0xFF);
+    this->giveDebugOrder(OP_PACIFY_TARGET, 0, 0xFF);
     this->maneuver_test = false;
     this->bench_active = false;
     this->autopilot = true;
@@ -318,7 +318,7 @@ void DebugStrike::playerAIOrders() {
         OP_SET_OBJ_DEFEND_TARGET,
         OP_SET_OBJ_DEFEND_AREA,
         OP_SET_OBJ_FOLLOW_ALLY,
-        OP_SET_OBJ_BE,
+        OP_PACIFY_TARGET,
     };
     static const char *order_names[] = {
         "Decoller",

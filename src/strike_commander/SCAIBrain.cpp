@@ -627,7 +627,7 @@ void SCAIBrain::tickBehavior() {
     }
 }
 
-// AI_NavSolutionToPoint : vers +0x10F (objet) ou +0x111, a +0x13D au-dessus du terrain SOUS MOI
+
 bool SCAIBrain::navSolutionToPoint() {
     if (this->behaviorRunning()) {
         return false;
@@ -1101,8 +1101,7 @@ bool SCAIBrain::executeGoalAction() {
             return this->defendTargetOrder(owner->current_command_arg);
         case OP_SET_OBJ_DEFEND_AREA:
             return this->defendAreaOrder(owner->current_command_arg);
-        case OP_SET_OBJ_BE:
-            // Goal_ExecuteAction_A8AC 0xBF (loc_A9B7) : AI_NavSolutionToPoint, sinon Goal_WanderRandom ; toujours en cours
+        case OP_SET_OBJ_PATROL_POSITION:
             owner->current_command_executed = false;
             if (!this->navSolutionToPoint()) {
                 this->wander();
@@ -1573,7 +1572,7 @@ Vector3D SCAIBrain::predictBombImpact(RSEntity *bomb) {
 }
 
 void SCAIBrain::updateGroundAttack(SCMissionActors *target) {
-    bool is_ground = target != nullptr && !target->is_destroyed && target->object != nullptr && target->object->entity != nullptr && target->object->entity->target_type == 2;
+    bool is_ground = target != nullptr && target->is_active && !target->is_destroyed && target->object != nullptr && target->object->entity != nullptr && target->object->entity->target_type == 2;
     if (!is_ground || reaction_level == REACT_MISSILE || owner->plane->on_ground) {
         if (!is_ground) {
             this->decide("attaque au sol impossible : cible non sol");
@@ -2081,8 +2080,7 @@ void SCAIBrain::onObjectiveSet(bool assigned) {
     if (assigned && owner->current_command == OP_SET_OBJ_FOLLOW_ALLY) {
         formation.leader_state = 0;
     }
-    // cas par defaut (0xBE) : +0x10F vide, +0x111 = ma position, objectif 0xBF
-    if (assigned && owner->current_command == OP_SET_OBJ_BE) {
+    if (assigned && owner->current_command == OP_SET_OBJ_PATROL_POSITION) {
         nav.reference = nullptr;
         if (owner->plane != nullptr) {
             nav.center = owner->plane->position;

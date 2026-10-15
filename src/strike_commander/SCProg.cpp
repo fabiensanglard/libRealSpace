@@ -277,9 +277,28 @@ void SCProg::execute() {
                     }
                 }
                 break;
-                case OP_SET_OBJ_BE:
-                    // MissionScript_CallNativeHandler_52513 -> Goal_SetObjective_A307, cas par defaut (objectif 0xBF)
-                    this->task_state = this->actor->setObjective(OP_SET_OBJ_BE, prog.arg) ? 1 : 0;
+                case OP_PACIFY_TARGET:
+                    {
+                        for (auto actr: this->actor->mission->actors) {
+                            if (actr->actor_id == prog.arg && actr->is_active == true && actr->is_destroyed == false) {
+                                if (actr->plane != nullptr) {
+                                    bool task_result = actr->setObjective(OP_SET_OBJ_PATROL_POSITION, prog.arg);
+                                    if (task_result) {
+                                        this->task_state = 1;
+                                    } else {
+                                        this->task_state = 0;
+                                    }
+                                } else {
+                                    if (actr->object->entity->entity_type == EntityType::swpn && actr->object->entity->swpn_data != nullptr) {
+                                        actr->object->entity->swpn_data->weapons_round = 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case OP_SET_OBJ_PATROL_POSITION:
+                    this->actor->setObjective(OP_SET_OBJ_PATROL_POSITION, prog.arg);
                 break;
                 case OP_ACTIVATE_OBJ:
                     this->actor->activateTarget(prog.arg);
