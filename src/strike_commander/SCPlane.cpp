@@ -1173,8 +1173,8 @@ int SCPlane::isOnRunWay() {
 
     for (int i = 0; i < area->objectOverlay.size(); i++) {
 
-        if (IN_BOX(area->objectOverlay[i].lx, area->objectOverlay[i].hx, -area->objectOverlay[i].ly,
-                   -area->objectOverlay[i].hy)) {
+        if (IN_BOX(area->objectOverlay[i].lx, area->objectOverlay[i].hx, area->objectOverlay[i].hy,
+                   area->objectOverlay[i].ly)) {
 
             return 1;
         }

@@ -2040,11 +2040,11 @@ void SCRenderer::renderMapOverlay(RSArea *area) {
 
                 glBegin(GL_TRIANGLES);
                 glTexCoord2f(tri.uv[0].u / TRI_UV_SCALE, tri.uv[0].v / TRI_UV_SCALE);
-                glVertex3f((GLfloat)v1.x, (GLfloat)v1.y, (GLfloat)-v1.z);
+                glVertex3f((GLfloat)v1.x, (GLfloat)v1.y, (GLfloat)v1.z);
                 glTexCoord2f(tri.uv[1].u / TRI_UV_SCALE, tri.uv[1].v / TRI_UV_SCALE);
-                glVertex3f((GLfloat)v2.x, (GLfloat)v2.y, (GLfloat)-v2.z);
+                glVertex3f((GLfloat)v2.x, (GLfloat)v2.y, (GLfloat)v2.z);
                 glTexCoord2f(tri.uv[2].u / TRI_UV_SCALE, tri.uv[2].v / TRI_UV_SCALE);
-                glVertex3f((GLfloat)v3.x, (GLfloat)v3.y, (GLfloat)-v3.z);
+                glVertex3f((GLfloat)v3.x, (GLfloat)v3.y, (GLfloat)v3.z);
                 glEnd();
             } else {
                 glDisable(GL_TEXTURE_2D);
@@ -2052,9 +2052,9 @@ void SCRenderer::renderMapOverlay(RSArea *area) {
                 glColor4f(texel->r / 255.0f, texel->g / 255.0f, texel->b / 255.0f, 1.0f);
 
                 glBegin(GL_TRIANGLES);
-                glVertex3f((GLfloat)v1.x, (GLfloat)v1.y, (GLfloat)-v1.z);
-                glVertex3f((GLfloat)v2.x, (GLfloat)v2.y, (GLfloat)-v2.z);
-                glVertex3f((GLfloat)v3.x, (GLfloat)v3.y, (GLfloat)-v3.z);
+                glVertex3f((GLfloat)v1.x, (GLfloat)v1.y, (GLfloat)v1.z);
+                glVertex3f((GLfloat)v2.x, (GLfloat)v2.y, (GLfloat)v2.z);
+                glVertex3f((GLfloat)v3.x, (GLfloat)v3.y, (GLfloat)v3.z);
                 glEnd();
             }
         }

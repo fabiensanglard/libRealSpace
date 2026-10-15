@@ -114,7 +114,7 @@ void SCMissionScene::onSceneActivated(const MissionEventSceneActivated &event) {
                                 
                                 // Vérifier si la position de l'objet est à l'intérieur de la piste
                                 if (pos.x >= runway.lx && pos.x <= runway.hx && 
-                                    pos.z <= -runway.ly && pos.z >= -runway.hy) {
+                                    pos.z >= runway.ly && pos.z <= runway.hy) {
                                     
                                     // Calculer les dimensions de la piste
                                     float width = (float)std::abs(runway.lx - runway.hx); 

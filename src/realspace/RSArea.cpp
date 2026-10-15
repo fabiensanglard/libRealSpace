@@ -87,10 +87,6 @@ void RSArea::ParseObjects() {
 
             //mapObject.unknowns.push_back(reader.ReadByte());
             mapObject.unknowns.push_back(reader.ReadByte());
-            /*mapObject.position.x = reader.ReadInt24LE() * BLOCK_COORD_SCALE;
-            mapObject.position.z = -reader.ReadInt24LE() * BLOCK_COORD_SCALE;
-            mapObject.position.y = reader.ReadInt24LE() * HEIGH_MAP_SCALE;*/
-
             mapObject.position.x = reader.ReadFixedFloatLE() * BLOCK_COORD_SCALE;
             mapObject.position.z = -reader.ReadFixedFloatLE() * BLOCK_COORD_SCALE;
             mapObject.position.y = reader.ReadFixedFloatLE() * HEIGH_MAP_SCALE;
@@ -131,7 +127,7 @@ void RSArea::ParseTriFile(PakEntry *entry) {
     for (int i = 0; i < numvertice; i++) {
         AoVPoints *v = &vertices[i];
         v->x   = stream.ReadFixedFloatLE() * BLOCK_COORD_SCALE; read += 4;
-        v->z   = stream.ReadFixedFloatLE() * BLOCK_COORD_SCALE; read += 4;
+        v->z   = -stream.ReadFixedFloatLE() * BLOCK_COORD_SCALE; read += 4;
         v->y   = stream.ReadFixedFloatLE() * HEIGH_MAP_SCALE;   read += 4;
         v->pad = stream.ReadByte();                             read += 1;
 

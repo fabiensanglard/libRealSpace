@@ -82,10 +82,12 @@ bool SCMissionActors::ifTargetInSameArea(uint8_t arg) {
             if (actor->is_destroyed) {
                 return false;
             }
+            if (actor->is_active == false) {
+                return false;
+            }
             if (actor->is_active == true && !actor->is_destroyed) {
                 return true;
             }
-
             if (actor->plane == nullptr) {
                 return (area_id == actor->object->area_id);
             }
@@ -269,7 +271,7 @@ bool SCMissionActors::activateTarget(uint8_t arg) {
                     
                     // Vérifier si la position de l'objet est à l'intérieur de la piste
                     if (pos.x >= runway.lx && pos.x <= runway.hx && 
-                        pos.z <= -runway.ly && pos.z >= -runway.hy) {
+                        pos.z >= runway.ly && pos.z <= runway.hy) {
                         
                         // Calculer les dimensions de la piste
                         float width = (float)std::abs(runway.lx - runway.hx); 
