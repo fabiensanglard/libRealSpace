@@ -90,13 +90,11 @@ void RSArea::ParseObjects() {
             mapObject.position.x = reader.ReadFixedFloatLE() * BLOCK_COORD_SCALE;
             mapObject.position.z = -reader.ReadFixedFloatLE() * BLOCK_COORD_SCALE;
             mapObject.position.y = reader.ReadFixedFloatLE() * HEIGH_MAP_SCALE;
-            for (int k = 0; k < 2; k++)
-                mapObject.unknowns.push_back(reader.ReadByte());
-
-            mapObject.progs_id.push_back(reader.ReadUShort());
-            mapObject.progs_id.push_back(reader.ReadUShort());
-            mapObject.progs_id.push_back(reader.ReadUShort());
-            mapObject.progs_id.push_back(reader.ReadUShort());
+            for (int row = 0; row < 3; row++) {
+                for (int column = 0; column < 3; column++) {
+                    mapObject.orientation[row][column] = reader.ReadFixedFloatLE();
+                }
+            }
             mapObject.entity = nullptr;
             objects.push_back(mapObject);
         }

@@ -19,7 +19,7 @@ typedef struct MapObject{
     Vector3D position{0,0,0};
     
     RSEntity* entity{nullptr};
-    std::vector<uint16_t> progs_id;
+    float orientation[3][3];
     std::vector<uint8_t> unknowns;
     
 } MapObject;

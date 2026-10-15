@@ -227,13 +227,6 @@ void PSMission::loadMission() {
             continue;
         }
         actor->mission = this;
-        for (auto prg_id: area_actor.progs_id) {
-            if (prg_id != 255 && prg_id != 0 && prg_id < this->mission->mission_data.prog.size()) {
-                for (auto prg: *this->mission->mission_data.prog[prg_id]) {
-                    actor->prog.push_back(prg);
-                }
-            }
-        }
         this->actors.push_back(actor);
     }
     for (auto member: this->mission->mission_data.team) {

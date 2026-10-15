@@ -1812,6 +1812,25 @@ void SCRenderer::renderObjects(RSArea *area, size_t blockID) {
         glPushMatrix();
 
         glTranslatef(object.position.x, object.position.y, object.position.z);
+        float rotation[16] = {
+            object.orientation[1][0],
+            object.orientation[1][2],
+            -object.orientation[1][1],
+            0.0f,
+            object.orientation[2][0],
+            object.orientation[2][2],
+            -object.orientation[2][1],
+            0.0f,
+            object.orientation[0][0],
+            object.orientation[0][2],
+            -object.orientation[0][1],
+            0.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            1.0f,
+        };
+        glMultMatrixf(rotation);
         if (object.entity != nullptr) {
             drawModel(object.entity, this->lodLevel);
         } else {
