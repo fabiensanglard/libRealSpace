@@ -355,6 +355,7 @@ void SCRenderer::init(int width, int height) {
     this->show_fog = config.getBool("Game", "show_fog", true);
     this->terrain_shadow_lift = config.getInt("Game", "terrain_shadow_lift", 8) / 100.0f;
     this->terrain_shadow_range = config.getInt("Game", "terrain_shadow_range", 35) / 100.0f;
+    this->terrain_flat = config.getBool("Game", "terrain_flat", false);
     this->show_clouds = config.getBool("Game", "clouds_enabled", false);
     this->width = width;
     this->height = height;
@@ -1302,6 +1303,10 @@ float textTrianCoo[2][3][2] = {
 #define UPPER_TRIANGE 1
 
 void SCRenderer::terrainColor(uint8_t base, uint8_t light, float *color) {
+    this->toneColor(this->terrainTone(base, light), color);
+}
+
+int SCRenderer::terrainTone(uint8_t base, uint8_t light) {
     PaletteRange *range = &this->terrain_ranges[0];
     if (base < this->terrain_ranges.size()) {
         range = &this->terrain_ranges[base];
@@ -1310,6 +1315,27 @@ void SCRenderer::terrainColor(uint8_t base, uint8_t light, float *color) {
     if (tone > 255) {
         tone = 255;
     }
+    return tone;
+}
+
+void SCRenderer::triangleColors(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, float colors[3][4]) {
+    uint8_t base = this->highestVertex(tri0, tri1, tri2)->type;
+    int tones[3];
+    tones[0] = this->terrainTone(base, tri0->flag);
+    tones[1] = this->terrainTone(base, tri1->flag);
+    tones[2] = this->terrainTone(base, tri2->flag);
+    if (this->terrain_flat) {
+        int average = (tones[0] + tones[1] + tones[2]) / 3;
+        tones[0] = average;
+        tones[1] = average;
+        tones[2] = average;
+    }
+    for (int i = 0; i < 3; i++) {
+        this->toneColor(tones[i], colors[i]);
+    }
+}
+
+void SCRenderer::toneColor(int tone, float *color) {
     Texel *texel = this->palette.GetRGBColor((uint8_t)tone);
     color[0] = texel->r / 255.0f;
     color[1] = texel->g / 255.0f;
@@ -1342,25 +1368,22 @@ MapVertex *SCRenderer::highestVertex(MapVertex *tri0, MapVertex *tri1, MapVertex
 void SCRenderer::renderTexturedTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, RSArea *area,
                                         int triangleType, RSImage *image) {
 
-    uint8_t base = this->highestVertex(tri0, tri1, tri2)->type;
-    float color[4];
+    float colors[3][4];
+    this->triangleColors(tri0, tri1, tri2, colors);
     float (*coords)[3][2] = textTrianCoo;
     if (image->width < 128) {
         coords = textTrianCoo64;
     }
 
-    this->terrainColor(base, tri0->flag, color);
-    glColor4fv(color);
+    glColor4fv(colors[0]);
     glTexCoord2fv(coords[triangleType][0]);
     glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
 
-    this->terrainColor(base, tri1->flag, color);
-    glColor4fv(color);
+    glColor4fv(colors[1]);
     glTexCoord2fv(coords[triangleType][1]);
     glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
 
-    this->terrainColor(base, tri2->flag, color);
-    glColor4fv(color);
+    glColor4fv(colors[2]);
     glTexCoord2fv(coords[triangleType][2]);
     glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
 }
@@ -1373,19 +1396,16 @@ bool SCRenderer::isTextured(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
 }
 void SCRenderer::renderColoredTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
 
-    uint8_t base = this->highestVertex(tri0, tri1, tri2)->type;
-    float color[4];
+    float colors[3][4];
+    this->triangleColors(tri0, tri1, tri2, colors);
 
-    this->terrainColor(base, tri0->flag, color);
-    glColor4fv(color);
+    glColor4fv(colors[0]);
     glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
 
-    this->terrainColor(base, tri1->flag, color);
-    glColor4fv(color);
+    glColor4fv(colors[1]);
     glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
 
-    this->terrainColor(base, tri2->flag, color);
-    glColor4fv(color);
+    glColor4fv(colors[2]);
     glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
 }
 

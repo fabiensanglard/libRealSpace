@@ -100,6 +100,7 @@ public:
     bool show_fog{true};
     float terrain_shadow_lift{0.08f};
     float terrain_shadow_range{0.35f};
+    bool terrain_flat{false};
     bool show_textured{true};
     bool show_clouds{false};
     int lodLevel{0};
@@ -147,6 +148,9 @@ public:
                                 RSImage *image);
     void renderColoredTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
     void terrainColor(uint8_t base, uint8_t light, float *color);
+    int terrainTone(uint8_t base, uint8_t light);
+    void toneColor(int tone, float *color);
+    void triangleColors(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, float colors[3][4]);
     MapVertex *highestVertex(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
     bool isTextured(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
     void renderQuad(MapVertex *currentVertex, MapVertex *rightVertex, MapVertex *bottomRightVertex,
