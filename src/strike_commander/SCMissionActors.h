@@ -28,6 +28,7 @@ public:
     SCMission *mission{nullptr};
     SCMissionActors *target{nullptr};
     SCMissionActors *attacker{nullptr};
+    SCMissionActors *last_hit_by{nullptr};
     SCSimulatedObject *weapon_shooted_at_me{nullptr};
     prog_op current_objective;
     bool is_active{false};

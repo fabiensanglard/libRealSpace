@@ -369,6 +369,7 @@ int SCMissionActors::getDistanceToSpot(uint8_t arg) {
     return (int) diff.Length()/1000;
 }
 void SCMissionActors::hasBeenHit(SCSimulatedObject *weapon, SCMissionActors *attacker) {
+    this->last_hit_by = attacker;
     if (this->brain != nullptr) {
         this->brain->just_hit = true;
         this->brain->last_attacker = attacker;
@@ -487,6 +488,10 @@ void SCMissionActors::onMissionUpdate(const MissionUpdateEvent &event) {
 
     if (ai_actor->object->alive == false && ai_actor->is_destroyed == false) {
         ai_actor->is_destroyed = true;
+        MissionEventActorDestroyed destroyed_event;
+        destroyed_event.actor = ai_actor;
+        destroyed_event.mission = mission;
+        this->messageBus.publish(std::make_unique<MissionEventActorDestroyed>(destroyed_event));
         if (ai_actor->on_is_destroyed.size() > 0 && ai_actor->plane == nullptr) {
             ai_actor->is_active = false;
             SCProg *p = new SCProg(ai_actor, ai_actor->on_is_destroyed, mission, ai_actor->object->on_is_destroyed);
@@ -902,7 +907,7 @@ void SCMissionActorsSwpn::fireGun() {
     float flight_time = dist / tracer->muzzle_speed;
     Vector3D lead = this->target->plane->worldVelocity() * (dt * flight_time);
 
-    int spread = (int)data->dispersion * (std::rand() & 0x7FFF) / 0x8000 + (int)delta.y / 100;
+    int spread = (int)data->dispersion * (std::rand() % 32768) / 32768 + (int)delta.y / 100;
     float offset = dist * (float)spread / 200.0f;
     if (spread & 1) {
         offset = -offset;
@@ -914,7 +919,7 @@ void SCMissionActorsSwpn::fireGun() {
 
     float speed = tracer->muzzle_speed;
     int jitter = (int)(tracer->speed_jitter * 256.0f);
-    speed += (float)(2 * jitter * (std::rand() & 0x7FFF) / 0x8000 - jitter) / 256.0f;
+    speed += (float)(2 * jitter * (std::rand() % 32768) / 32768 - jitter) / 256.0f;
     Vector3D velocity = direction * speed;
     Vector3D position = this->object->position + direction * (float)data->launch_offset;
     position = position + velocity * (tracer->shooter_speed_part * dt);

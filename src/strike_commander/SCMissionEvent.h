@@ -21,6 +21,15 @@ class AIRefreshEvent: public EventMessage {
 public:
     SCMission *mission{nullptr};
 };
+class MusicUpdateEvent: public EventMessage {
+public:
+    SCMission *mission{nullptr};
+};
+class MissionEventActorDestroyed: public EventMessage {
+public:
+    SCMissionActors *actor{nullptr};
+    SCMission *mission{nullptr};
+};
 class MissionEventActorHit: public EventMessage {
 public:
     SCMissionActors *attacker{nullptr};

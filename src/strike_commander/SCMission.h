@@ -42,6 +42,23 @@ protected:
     // forte/reactive sur un framerate superieur a l'origine.
     float ai_refresh_accumulator{0.0f};
     static constexpr float AI_REFRESH_INTERVAL = 1.0f / 25.0f;
+    float music_accumulator{0.0f};
+    static constexpr float MUSIC_UPDATE_INTERVAL = 16.0f / 25.0f;
+    bool music_combat_happened{false};
+    uint8_t music_enemy_flags{0};
+    int music_resume_tune{-1};
+    bool music_end_played{false};
+    bool music_eject_requested{false};
+    bool music_shot_down_requested{false};
+    bool music_landing_requested{false};
+    void onMusicUpdate();
+    void onActorDestroyed(SCMissionActors *actor);
+    void musicPollEvents();
+    void musicRequest(int tune, const char *reason);
+    uint8_t musicScanEnemies(SCMissionActors *excluded);
+    bool musicFallback();
+    float playerDamage();
+    bool enemyOnPlayerSix();
     
     SCState &GameState = SCState::getInstance();
     AssetManager &Assets = AssetManager::getInstance();

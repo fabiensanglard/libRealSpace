@@ -110,7 +110,8 @@ enum EntityType {
     debris = 11,
     destroyed_object = 12,
     rnwy = 13,
-    podr = 14
+    podr = 14,
+    xmit = 15
 };
 class RSImage;
 
@@ -334,6 +335,7 @@ private:
     void parseREAL_OBJT_SWPN(uint8_t *data, size_t size);
     void parseREAL_OBJT_RNWY(uint8_t *data, size_t size);
     void parseREAL_OBJT_ORNT(uint8_t *data, size_t size);
+    void parseREAL_OBJT_XMIT(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS(uint8_t *data, size_t size);
     void parseREAL_OBJT_BOMB(uint8_t *data, size_t size);
     void parseREAL_OBJT_BOMB_DATA(uint8_t *data, size_t size);

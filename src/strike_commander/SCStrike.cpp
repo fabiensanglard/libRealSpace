@@ -1699,9 +1699,6 @@ void SCStrike::setMission(char const *missionName) {
     this->cockpit->init();
     this->cockpit->current_mission = this->current_mission;
     this->cockpit->nav_point_id = &this->nav_point_id;
-    Mixer.stopMusic();
-    Mixer.switchBank(2);
-    Mixer.playMusic(this->current_mission->mission->mission_data.tune);
 
     // Déclencheur : plan d'ouverture STARTCAM. camera_mode suit le directeur : on
     // le pose direct sur CAM_DIRECTOR et on synchronise last_director_view.
@@ -1878,19 +1875,6 @@ void SCStrike::runFrame(void) {
         this->mfd_timeout--;
         this->player_plane->Simulate();
         this->current_mission->update();
-        if (this->current_mission->mission_over && this->current_mission->mission_won) {
-            this->Mixer.playMusic(12); // play victory music
-        } else if (this->current_mission->mission_over && !this->current_mission->mission_won) {
-            this->Mixer.playMusic(12);
-        } else if (this->current_mission->in_combat) {
-            this->Mixer.playMusic(4);
-        } else if (this->player_plane->crached) {
-            this->Mixer.playMusic(11);
-        } else if (this->player_plane->ejected) {
-            this->Mixer.playMusic(11);
-        } else {
-            this->Mixer.playMusic(this->current_mission->mission->mission_data.tune);
-        }
         if (this->current_mission->mission_ended) {
             GameState.missions_flags.clear();
             GameState.missions_flags.shrink_to_fit();

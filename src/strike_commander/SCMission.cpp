@@ -81,9 +81,13 @@ RSProf *SCMission::LoadProfile(std::string name) {
     return profile;
 }
 void SCMission::onEvent(const EventMessage &event) {
-    auto mission_update_event = dynamic_cast<const MissionUpdateEvent*>(&event);
-    if (mission_update_event == nullptr) {
-        return; // pas le type qui nous intéresse, on ignore le message
+    if (dynamic_cast<const MusicUpdateEvent *>(&event) != nullptr) {
+        this->onMusicUpdate();
+        return;
+    }
+    auto destroyed_event = dynamic_cast<const MissionEventActorDestroyed *>(&event);
+    if (destroyed_event != nullptr) {
+        this->onActorDestroyed(destroyed_event->actor);
     }
 }
 void SCMission::loadMission() {
@@ -392,6 +396,8 @@ void SCMission::loadMission() {
     if (this->player != nullptr && this->player->plane != nullptr) {
         this->camera_director->init(this->world, this->player);
     }
+    this->Mixer.switchBank(2);
+    this->musicRequest(this->mission->mission_data.tune, "TUNE de la mission");
 }
 // ajout a la liste des objets du monde (59C3h) : missile air-air (WDAT target_domain 1) -> byte_6E4C6
 void SCMission::onWeaponSpawned(SCSimulatedObject *weapon) {
@@ -466,6 +472,32 @@ void SCMission::update() {
         this->messageBus.publish(std::make_unique<AIRefreshEvent>(ai_refresh_event));
     }
 
+    this->music_accumulator += mission_update_event.delta_time;
+    if (this->music_accumulator > 1.0f) {
+        this->music_accumulator = 1.0f;
+    }
+    while (this->music_accumulator >= MUSIC_UPDATE_INTERVAL) {
+        this->music_accumulator -= MUSIC_UPDATE_INTERVAL;
+        MusicUpdateEvent music_update_event;
+        music_update_event.mission = this;
+        this->messageBus.publish(std::make_unique<MusicUpdateEvent>(music_update_event));
+    }
+    this->musicPollEvents();
+    SCPlane *player_plane = this->player->plane;
+    if (player_plane->ejected && !this->music_eject_requested) {
+        this->music_eject_requested = true;
+        this->musicRequest(10, "ejection du joueur");
+    }
+    if ((player_plane->crached || !this->player->object->alive) && !player_plane->ejected &&
+        !this->music_shot_down_requested) {
+        this->music_shot_down_requested = true;
+        this->musicRequest(11, "avion du joueur detruit");
+    }
+    if (player_plane->landed && !this->music_landing_requested) {
+        this->music_landing_requested = true;
+        this->musicRequest(20, "atterrissage");
+    }
+
     for (auto scene: this->mission->mission_data.scenes) {
         if (scene->area_id == area_id - 1 || scene->area_id == -1) {
             if (scene->is_active == 1) {
@@ -483,6 +515,201 @@ void SCMission::update() {
     }
 }
 
+
+void SCMission::musicRequest(int tune, const char *reason) {
+    printf("MUSIC request %d (%s) current=%u requested=%u\n", tune, reason, this->Mixer.getMusicID(),
+           this->Mixer.getRequestedMusicID());
+    this->Mixer.playMusic((uint32_t)tune);
+}
+
+void SCMission::musicPollEvents() {
+    SCMusicEvent music_event;
+    while (this->Mixer.pollMusicEvent(music_event)) {
+        printf("MUSIC event type=%d track=%d from=%d link=%d measure=%d\n", (int)music_event.type, music_event.track,
+               music_event.fromTrack, music_event.link, music_event.measure);
+        bool punctuation = music_event.track >= 16 && music_event.track <= 18;
+        if (music_event.type == SCMusicEvent::TRACK_STARTED && punctuation && this->music_resume_tune >= 0) {
+            this->musicRequest(this->music_resume_tune, "reprise apres la ponctuation");
+        }
+        if (music_event.type == SCMusicEvent::TRACK_FINISHED && this->music_resume_tune >= 0) {
+            this->musicRequest(this->music_resume_tune, "piste terminee, reprise");
+        }
+    }
+}
+
+uint8_t SCMission::musicScanEnemies(SCMissionActors *excluded) {
+    uint8_t flags = 0;
+    Vector3D player_position = this->player->plane->position;
+    for (auto actor : this->actors) {
+        if (actor == excluded || actor == this->player || !actor->is_active || actor->is_destroyed) {
+            continue;
+        }
+        if (actor->object == nullptr || actor->object->entity == nullptr || !actor->object->alive ||
+            actor->team_id != 255) {
+            continue;
+        }
+        Vector3D position = actor->plane != nullptr ? actor->plane->position : actor->object->position;
+        if ((position - player_position).Length() >= 18520.0f) {
+            continue;
+        }
+        EntityType type = actor->object->entity->entity_type;
+        if (actor->plane != nullptr && type == EntityType::jet && !actor->plane->ejected) {
+            flags |= 1;
+        }
+        if (type == EntityType::swpn || type == EntityType::ground || type == EntityType::xmit) {
+            flags |= 2;
+        }
+    }
+    return flags;
+}
+
+float SCMission::playerDamage() {
+    float current = 0.0f;
+    float initial = 0.0f;
+    for (auto &system : this->player->object->entity->sysm) {
+        auto health_system = this->player->plane->system_health.find(system.first);
+        for (auto &sub_system : system.second) {
+            initial += (float)sub_system.second;
+            if (health_system != this->player->plane->system_health.end() &&
+                health_system->second.find(sub_system.first) != health_system->second.end()) {
+                current += (float)health_system->second[sub_system.first];
+            } else {
+                current += (float)sub_system.second;
+            }
+        }
+    }
+    return initial > 0.0f ? 1.0f - current / initial : 0.0f;
+}
+
+bool SCMission::enemyOnPlayerSix() {
+    SCPlane *player_plane = this->player->plane;
+    for (auto actor : this->actors) {
+        if (actor == this->player || actor->plane == nullptr || !actor->is_active || actor->is_destroyed ||
+            actor->team_id != 255 || actor->plane->ejected) {
+            continue;
+        }
+        Vector3D to_player = player_plane->position - actor->plane->position;
+        if (to_player.Length() >= 3500.0f) {
+            continue;
+        }
+        Vector3D from_player = actor->plane->position - player_plane->position;
+        bool nose_on_player = actor->plane->forward.AngleBetween(to_player) < 45.0f;
+        bool behind_player = player_plane->forward.DotProduct(&from_player) < 0.0f;
+        if (nose_on_player && behind_player) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SCMission::musicFallback() {
+    if (this->mission_over && this->mission_won) {
+        this->musicRequest(12, "fin de combat, mission terminee et gagnee");
+        return true;
+    }
+    if (this->music_combat_happened && !this->music_end_played) {
+        this->music_end_played = true;
+        this->musicRequest(13, "fin de combat");
+        return true;
+    }
+    return false;
+}
+
+void SCMission::onMusicUpdate() {
+    SCPlane *player_plane = this->player->plane;
+    if (player_plane->ejected || player_plane->crached || !this->player->object->alive) {
+        return;
+    }
+    if (this->Mixer.getMusicID() == 20 || this->Mixer.getRequestedMusicID() != this->Mixer.getMusicID()) {
+        return;
+    }
+    uint8_t flags = this->musicScanEnemies(nullptr);
+    this->music_enemy_flags = flags;
+    if (flags == 0) {
+        this->musicFallback();
+        return;
+    }
+    this->music_combat_happened = true;
+    int tune = 19;
+    const char *reason = "menaces au sol seules";
+    float damage = this->playerDamage();
+    if (this->player->weapon_shooted_at_me != nullptr || this->player_tail_threat != nullptr) {
+        tune = 9;
+        reason = "missile ou avion sur le joueur";
+    } else if (this->enemyOnPlayerSix()) {
+        tune = 5;
+        reason = "ennemi dans les six heures";
+    } else if (damage >= 0.75f) {
+        tune = 7;
+        reason = "degats >= 75 %";
+    } else if (damage >= 0.35f) {
+        tune = 6;
+        reason = "degats >= 35 %";
+    } else if (flags & 1) {
+        tune = 4;
+        reason = "avion ennemi proche";
+    }
+    if ((uint32_t)tune != this->Mixer.getMusicID()) {
+        this->musicRequest(tune, reason);
+    }
+}
+
+void SCMission::onActorDestroyed(SCMissionActors *actor) {
+    SCPlane *player_plane = this->player->plane;
+    if (actor == this->player || player_plane->crached || !this->player->object->alive) {
+        return;
+    }
+    if (actor->plane != nullptr && actor->plane->ejected) {
+        return;
+    }
+    if (actor->object == nullptr || actor->object->entity == nullptr) {
+        return;
+    }
+    EntityType type = actor->object->entity->entity_type;
+    if (type != EntityType::jet && type != EntityType::swpn && type != EntityType::ground && type != EntityType::ornt &&
+        type != EntityType::xmit) {
+        return;
+    }
+    printf("MUSIC destroyed %s#%d team=%d by=%s\n", actor->actor_name.c_str(), actor->actor_id, actor->team_id,
+           actor->last_hit_by != nullptr ? actor->last_hit_by->actor_name.c_str() : "none");
+    if (actor->team_id == 255) {
+        uint8_t before = this->music_enemy_flags;
+        uint8_t after = this->musicScanEnemies(actor);
+        this->music_enemy_flags = after;
+        bool changed = false;
+        if ((before & 1) && !(after & 1)) {
+            this->musicRequest(19, "dernier avion ennemi abattu");
+            changed = true;
+        } else if (before != 0 && after == 0) {
+            changed = this->musicFallback();
+        }
+        if (changed || actor->last_hit_by != this->player) {
+            return;
+        }
+        int punctuation = 18;
+        if (type == EntityType::jet) {
+            punctuation = 16;
+        } else if (type == EntityType::swpn || type == EntityType::ground) {
+            punctuation = 17;
+        }
+        int current = (int)this->Mixer.getMusicID();
+        this->music_resume_tune = current;
+        if (current == 5) {
+            this->music_resume_tune = 4;
+        } else if (current == 8) {
+            this->music_resume_tune = (this->music_enemy_flags & 1) ? 4 : 19;
+        } else if (current == 21) {
+            this->music_resume_tune = 19;
+        }
+        this->musicRequest(punctuation, "victoire du joueur");
+        return;
+    }
+    if (actor->team_id == this->player->team_id) {
+        this->musicRequest(14, "objet de l'equipe du joueur detruit");
+    } else {
+        this->musicRequest(15, "objet allie detruit");
+    }
+}
 
 void SCMission::executeProg(std::vector<PROG> *prog) {
     

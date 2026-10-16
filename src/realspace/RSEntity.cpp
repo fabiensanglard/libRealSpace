@@ -260,6 +260,7 @@ void RSEntity::parseREAL_OBJT(uint8_t *data, size_t size) {
     handlers["DEBR"] = std::bind(&RSEntity::parseREAL_OBJT_DEBR, this, std::placeholders::_1, std::placeholders::_2);
     handlers["PODR"] = std::bind(&RSEntity::parseREAL_OBJT_PODR, this, std::placeholders::_1, std::placeholders::_2);
     handlers["DECY"] = std::bind(&RSEntity::parseREAL_OBJT_DECY, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["XMIT"] = std::bind(&RSEntity::parseREAL_OBJT_XMIT, this, std::placeholders::_1, std::placeholders::_2);
     
     lexer.InitFromRAM(data, size, handlers);
 }
@@ -504,6 +505,26 @@ void RSEntity::parseREAL_OBJT_JETP(uint8_t *data, size_t size) {
 void RSEntity::parseREAL_OBJT_ORNT(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
     this->entity_type = EntityType::ornt;
+    std::unordered_map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
+    handlers["EXPL"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_EXPL, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DEBR"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_DEBR, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DEST"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_DEST, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DAMG"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_DAMG, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["TRGT"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_TRGT, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DAMG"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_DAMG, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SIGN"] =
+        std::bind(&RSEntity::parseREAL_OBJT_JETP_SIGN, this, std::placeholders::_1, std::placeholders::_2);
+    lexer.InitFromRAM(data, size, handlers);
+}
+void RSEntity::parseREAL_OBJT_XMIT(uint8_t *data, size_t size) {
+    IFFSaxLexer lexer;
+    this->entity_type = EntityType::xmit;
     std::unordered_map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
     handlers["EXPL"] =
         std::bind(&RSEntity::parseREAL_OBJT_JETP_EXPL, this, std::placeholders::_1, std::placeholders::_2);
