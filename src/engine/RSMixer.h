@@ -51,6 +51,10 @@ class RSMixer {
         -1,
         -1
     };
+    MemMusic *sfxEffect[SFX_CHANNELS]{};
+    const void *sfxEmitter[SFX_CHANNELS]{};
+    int sfxIdleTicks[SFX_CHANNELS]{};
+    static const int SFX_EMITTER_TIMEOUT = 60;
     std::vector<int16_t> mixBuffer;
 
     static void musicHook(void *udata, Uint8 *stream, int len);
@@ -113,6 +117,9 @@ public:
     void setSoundFxVolume(int fxChannel, int volume);
     void stopSoundFx(int fxChannel); // SoundFX_StopEffect_59A8A : Note Off seulement
     bool isSoundFxPlaying(int fxChannel);
+    // SoundFX_PlayOrUpdate_5A906 : effet de SOUNDFX.ADL pour cet emetteur, volume selon la distance
+    // au point de vue (SoundFX_Play3D_59902) ; demarre s'il ne joue pas, sinon met a jour son volume.
+    void playOrUpdateSoundFx(int effect, const void *emitter, float distance);
 
     void stopSound();
     void stopSound(int chanl);

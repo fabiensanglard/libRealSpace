@@ -181,9 +181,22 @@ void RSMixer::serveDriver() {
         }
     }
     for (int c = 0; c < SFX_CHANNELS; c++) {
+        if (sfxHandle[c] >= 0 && sfxEmitter[c] != nullptr) {
+            sfxIdleTicks[c]++;
+            if (sfxIdleTicks[c] > SFX_EMITTER_TIMEOUT) {
+                xmi.stop(sfxHandle[c]);
+                xmi.release(sfxHandle[c]);
+                sfxHandle[c] = -1;
+                sfxEffect[c] = nullptr;
+                sfxEmitter[c] = nullptr;
+                continue;
+            }
+        }
         if (sfxHandle[c] >= 0 && xmi.status(sfxHandle[c]) == SEQ_DONE) {
             xmi.release(sfxHandle[c]);
             sfxHandle[c] = -1;
+            sfxEffect[c] = nullptr;
+            sfxEmitter[c] = nullptr;
         }
     }
 }
@@ -421,6 +434,8 @@ int RSMixer::playSoundFx(MemMusic *fx, int volume) {
     }
     xmi.setRelVolume(h, volume, 0);
     sfxHandle[c] = h;
+    sfxEffect[c] = fx;
+    sfxEmitter[c] = nullptr;
     return c;
 }
 
@@ -443,6 +458,8 @@ void RSMixer::stopSoundFx(int fxChannel) {
         xmi.stop(sfxHandle[fxChannel]);
         xmi.release(sfxHandle[fxChannel]);
         sfxHandle[fxChannel] = -1;
+        sfxEffect[fxChannel] = nullptr;
+        sfxEmitter[fxChannel] = nullptr;
     }
 }
 
@@ -452,6 +469,44 @@ bool RSMixer::isSoundFxPlaying(int fxChannel) {
     }
     std::lock_guard<std::recursive_mutex> lock(engineMutex);
     return sfxHandle[fxChannel] >= 0;
+}
+
+void RSMixer::playOrUpdateSoundFx(int effect, const void *emitter, float distance) {
+    if (shuttingDown || !this->music) {
+        return;
+    }
+    auto set = this->music->soundfx_musics.find(0);
+    if (set == this->music->soundfx_musics.end() || effect >= (int)set->second.size()) {
+        return;
+    }
+    MemMusic *fx = set->second[effect];
+    int volume = 0;
+    if (distance < 1000.0f) {
+        volume = 100 - (int)(distance / 10.0f);
+    } else if (distance < 5000.0f) {
+        volume = 5;
+    }
+    std::lock_guard<std::recursive_mutex> lock(engineMutex);
+    for (int c = 0; c < SFX_CHANNELS; c++) {
+        if (sfxHandle[c] >= 0 && sfxEffect[c] == fx && sfxEmitter[c] == emitter) {
+            sfxIdleTicks[c] = 0;
+            if (volume == 0) {
+                stopSoundFx(c);
+            } else {
+                setSoundFxVolume(c, volume);
+            }
+            return;
+        }
+    }
+    if (volume == 0) {
+        return;
+    }
+    int c = playSoundFx(fx, volume);
+    if (c >= 0) {
+        sfxEmitter[c] = emitter;
+        sfxIdleTicks[c] = 0;
+    }
+    printf("SFX effect=%d channel=%d volume=%d\n", effect, c, volume);
 }
 
 // ---------------------------------------------------------------------------------------
