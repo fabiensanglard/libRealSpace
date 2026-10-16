@@ -18,31 +18,25 @@ static bool isForm(const PakEntry *e) {
 
 // Configuration de Strike Commander. Pour donner des transitions a un fichier, il suffit de
 // passer son .dat a LoadMusicFile.
+RSMusic::RSMusic(const std::string &music_ext, const std::string &midgames_pak, const std::string &timbre_file,
+                 const std::string &sfx_ext, const std::string &sfx_timbre_file)
+    : music_ext(music_ext), midgames_pak(midgames_pak), timbre_file(timbre_file), sfx_ext(sfx_ext),
+      sfx_timbre_file(sfx_timbre_file) {}
+
 void RSMusic::init() {
-    LoadTimbres("..\\..\\DATA\\SOUND\\STRIKE.AD");
-
-
-
-    if (midiMusic == 2) {
-        if (TreEntry *mt = assetManager.GetEntryByName("..\\..\\DATA\\SOUND\\STRIKE.MT")) {
-            mt_data.assign(mt->data, mt->data + mt->size);
-            timbresMt.set(mt_data.data(), mt_data.size());
-        } else {
-            printf("RSMusic: Could not find STRIKE.MT\n");
-        }
-    }
-
-    static const char *const exts[] = { "ADL", "MID", "ROL" };
-    static const char *const midPaks[] = { "AMUSIC.PAK", "MMUSIC.PAK", "RMUSIC.PAK" };
-    static const char *const names[] = { "AdLib", "General MIDI", "Roland MT-32" };
-    const int src = (midiMusic >= 0 && midiMusic <= 2) ? midiMusic : 0;
-    const char *ext = exts[src];
     const std::string sound = "..\\..\\DATA\\SOUND\\";
     const std::string mid = "..\\..\\DATA\\MIDGAMES\\";
-    printf("RSMusic: music source %s (.%s / %s)\n", names[src], ext, midPaks[src]);
+    const char *ext = this->music_ext.c_str();
+    printf("RSMusic: music .%s / %s, timbres %s, effects SOUNDFX.%s / %s\n", ext, this->midgames_pak.c_str(),
+           this->timbre_file.empty() ? "none" : this->timbre_file.c_str(), this->sfx_ext.c_str(),
+           this->sfx_timbre_file.c_str());
+    if (!this->timbre_file.empty()) {
+        this->loadTimbres(sound + this->timbre_file, this->timbres, this->timbre_data);
+    }
+    this->loadTimbres(sound + this->sfx_timbre_file, this->sfx_timbres, this->sfx_timbre_data);
 
     // banque 0 : AMUSIC.PAK / MMUSIC.PAK / RMUSIC.PAK (pistes a plat, pas de .dat)
-    std::vector<RSMusicSet *> amusic = LoadMusicFile((mid + midPaks[src]).c_str());
+    std::vector<RSMusicSet *> amusic = LoadMusicFile((mid + this->midgames_pak).c_str());
 
     if (!amusic.empty()) {
         SetBank(0, amusic[0]);
@@ -70,22 +64,22 @@ void RSMusic::init() {
         SetBank(2, combat[0]);
     }
 
-    // Effekte: immer ADL (es gibt keine GM-Variante), laufen weiter ueber OPL
-    std::vector<RSMusicSet *> soundfx = LoadMusicFile("..\\..\\DATA\\SOUND\\SOUNDFX.ADL");
+    // effets : SOUNDFX.ADL ou SOUNDFX.ROL (pas de version General MIDI)
+    std::vector<RSMusicSet *> soundfx = LoadMusicFile((sound + "SOUNDFX." + this->sfx_ext).c_str());
     for (size_t i = 0; i < soundfx.size(); i++) {
         soundfx_musics[i] = soundfx[i]->tracks;
     }
 }
 
-bool RSMusic::LoadTimbres(const char *file) {
-    TreEntry *lib = assetManager.GetEntryByName(file);
+bool RSMusic::loadTimbres(const std::string &file, SCTimbreLibrary &library, std::vector<uint8_t> &storage) {
+    TreEntry *lib = assetManager.GetEntryByName(file.c_str());
     if (lib == NULL) {
         // Sans bibliotheque, les sequences s'enchainent mais aucune note ne sonne.
-        printf("RSMusic: Could not find %s (no timbre bank: music will be silent)\n", file);
+        printf("RSMusic: Could not find %s (no timbre bank: music will be silent)\n", file.c_str());
         return false;
     }
-    timbre_data.assign(lib->data, lib->data + lib->size);
-    timbres.set(timbre_data.data(), timbre_data.size());
+    storage.assign(lib->data, lib->data + lib->size);
+    library.set(storage.data(), storage.size());
     return true;
 }
 

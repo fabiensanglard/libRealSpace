@@ -64,62 +64,52 @@ void RSMixer::init() {
     if (this->audioFormat != AUDIO_S16SYS && this->audioFormat != AUDIO_F32SYS) {
         printf("RSMixer: format audio 0x%04X non gere, musique muette\n", this->audioFormat);
     }
-    this->music = new RSMusic();
     {
-        Config &mcfg = Config::getInstance();
-        int src = mcfg.getInt("Sound", "midi_music", 0);
-        const bool hasPort = !mcfg.getString("Sound", "midi_port", "").empty();
-        const std::string sf = mcfg.getString("Sound", "soundfont", "");
-        if (src < 0 || src > 2) {
-            src = 0;
-        }
-        if (src == 1 && !hasPort && !sf.empty()) {
-            auto softOut = std::make_unique<SoftSynthOutput>();
-            if (softOut->open(sf.c_str(), this->sampleRate)) {
-                output = std::move(softOut);
-            } else {
-                src = 0; // fall back to AdLib
-            }
-        } else if (!hasPort) {
-            src = 0;
-        }
-        this->music->midiMusic = src;
-    }
-    this->music->init();
-    this->isplaying = false;
-    {
-        std::lock_guard<std::recursive_mutex> lock(engineMutex);
-        OPL3_Reset(&chip, (uint32_t)this->sampleRate);
-        adl.init([this](uint16_t reg, uint8_t val) {
-            OPL3_WriteReg(&chip, reg, val);
-        });
-        xmi.init(&adl);
-        sequencer.init(&xmi, &this->music->timbres);
         Config &cfg = Config::getInstance();
-        std::string midiPort = cfg.getString("Sound", "midi_port", "");
-        if (!midiPort.empty()) {
-            const bool isMt32 = (this->music->midiMusic == 2);
-            const bool dbg = cfg.getInt("Sound", "midi_debug", 0) != 0;
-            auto hw = std::make_unique<MidiHardwareOutput>(isMt32, &this->music->timbresMt, dbg);
-            if (hw->open(midiPort.c_str())) {
-                output = std::move(hw);
+        int profile = cfg.getInt("Sound", "midi_music", 0);
+        const std::string port = cfg.getString("Sound", "midi_port", "");
+        const std::string soundfont = cfg.getString("Sound", "soundfont", "");
+        const bool debug = cfg.getInt("Sound", "midi_debug", 0) != 0;
+        std::lock_guard<std::recursive_mutex> lock(engineMutex);
+        switch (profile) {
+        case 1: {
+            auto gm = std::make_unique<GeneralMidiDevice>(debug);
+            bool opened = port.empty() ? (!soundfont.empty() && gm->openSoundFont(soundfont.c_str(), this->sampleRate))
+                                       : gm->openPort(port.c_str());
+            if (opened) {
+                this->device = std::move(gm);
+                this->music = new RSMusic("MID", "MMUSIC.PAK", "", "ADL", "STRIKE.AD");
+                this->sfxOpl = std::make_unique<OplDevice>();
+                this->sfxOpl->init(this->sampleRate);
+                this->sfxOwnXmi.init(this->sfxOpl.get());
+                this->sfxXmi = &this->sfxOwnXmi;
             }
+            break;
         }
-        if (!output) {
-            output = std::make_unique<OplOutput>();
-        }
-        sequencer.output = output.get();
-        if (output->forwardsSysex()) {
-            xmi.sysexTap = [this](const uint8_t *p, size_t n) { output->sysex(p, n); };
-        }
-        xmi.midiTap = [this](int st, int d1, int d2) -> bool {
-            for (int c = 0; c < SFX_CHANNELS; c++) {
-                if (sfxHandle[c] >= 0 && sfxHandle[c] == xmi.current) {
-                    return false; // FM effects (SOUNDFX.ADL) stay on OPL
-                }
+        case 2: {
+            auto mt32 = std::make_unique<Mt32Device>(debug);
+            if (!port.empty() && mt32->open(port.c_str())) {
+                this->device = std::move(mt32);
+                this->music = new RSMusic("ROL", "RMUSIC.PAK", "STRIKE.MT", "ROL", "STRIKE.MT");
             }
-            return output->send(st, d1, d2);
-        };
+            break;
+        }
+        default:
+            break;
+        }
+        if (!this->device) {
+            if (profile != 0) {
+                printf("RSMixer: music device %d unavailable, falling back to AdLib\n", profile);
+            }
+            auto opl = std::make_unique<OplDevice>();
+            opl->init(this->sampleRate);
+            this->device = std::move(opl);
+            this->music = new RSMusic("ADL", "AMUSIC.PAK", "STRIKE.AD", "ADL", "STRIKE.AD");
+        }
+        this->music->init();
+        this->isplaying = false;
+        xmi.init(this->device.get());
+        sequencer.init(&xmi, &this->music->timbres);
     }
     Mix_HookMusic(RSMixer::musicHook, this);
     Mix_ChannelFinished(ChannelFinishedCallback);
@@ -216,6 +206,9 @@ void RSMixer::musicHook(void *udata, Uint8 *stream, int len) {
 // Pas du pilote (120 Hz) : interpreteur XMIDI + voix, puis fin de piste isolee / bouclage.
 void RSMixer::serveDriver() {
     xmi.serve();
+    if (sfxXmi != &xmi) {
+        sfxXmi->serve();
+    }
     if (musicHandle >= 0 && xmi.status(musicHandle) == SEQ_DONE) {
         if (loopsLeft < 0 || loopsLeft > 1) {
             if (loopsLeft > 0) {
@@ -233,16 +226,16 @@ void RSMixer::serveDriver() {
         if (sfxHandle[c] >= 0 && sfxEmitter[c] != nullptr) {
             sfxIdleTicks[c]++;
             if (sfxIdleTicks[c] > SFX_EMITTER_TIMEOUT) {
-                xmi.stop(sfxHandle[c]);
-                xmi.release(sfxHandle[c]);
+                sfxXmi->stop(sfxHandle[c]);
+                sfxXmi->release(sfxHandle[c]);
                 sfxHandle[c] = -1;
                 sfxEffect[c] = nullptr;
                 sfxEmitter[c] = nullptr;
                 continue;
             }
         }
-        if (sfxHandle[c] >= 0 && xmi.status(sfxHandle[c]) == SEQ_DONE) {
-            xmi.release(sfxHandle[c]);
+        if (sfxHandle[c] >= 0 && sfxXmi->status(sfxHandle[c]) == SEQ_DONE) {
+            sfxXmi->release(sfxHandle[c]);
             sfxHandle[c] = -1;
             sfxEffect[c] = nullptr;
             sfxEmitter[c] = nullptr;
@@ -266,9 +259,10 @@ void RSMixer::render(int16_t *out, int frames) {
         if (chunk > frames - done) {
             chunk = frames - done;
         }
-        OPL3_GenerateStream(&chip, out + 2 * done, (uint32_t)chunk);
-        if (output) {
-            output->render(out + 2 * done, chunk);
+        memset(out + 2 * done, 0, (size_t)chunk * 2 * sizeof(int16_t));
+        device->render(out + 2 * done, chunk);
+        if (sfxOpl) {
+            sfxOpl->render(out + 2 * done, chunk);
         }
         done += chunk;
         accDriver += chunk * drvStep;
@@ -427,7 +421,7 @@ void RSMixer::playIsolated(MemMusic *mus, int loop, int index) {
     this->current_music = index < 0 ? UINT32_MAX : (uint32_t)index;
     this->isolatedTrack = index;
     int err = 0;
-    musicHandle = SCMusicSequencer::registerAndStart(&xmi, &this->music->timbres, mus->data, mus->size, &err, sequencer.output);
+    musicHandle = SCMusicSequencer::registerAndStart(&xmi, &this->music->timbres, mus->data, mus->size, &err);
     if (musicHandle < 0) {
         printf("Error loading music (error %d)\n", err);
         return;
@@ -480,11 +474,11 @@ int RSMixer::playSoundFx(MemMusic *fx, int volume) {
         return -1;
     }
     int err = 0;
-    int h = SCMusicSequencer::registerAndStart(&xmi, &this->music->timbres, fx->data, fx->size, &err);
+    int h = SCMusicSequencer::registerAndStart(sfxXmi, &this->music->sfx_timbres, fx->data, fx->size, &err);
     if (h < 0) {
         return -1;
     }
-    xmi.setRelVolume(h, volume, 0);
+    sfxXmi->setRelVolume(h, volume, 0);
     sfxHandle[c] = h;
     sfxEffect[c] = fx;
     sfxEmitter[c] = nullptr;
@@ -497,7 +491,7 @@ void RSMixer::setSoundFxVolume(int fxChannel, int volume) {
     }
     std::lock_guard<std::recursive_mutex> lock(engineMutex);
     if (sfxHandle[fxChannel] >= 0) {
-        xmi.setRelVolume(sfxHandle[fxChannel], volume, 0);
+        sfxXmi->setRelVolume(sfxHandle[fxChannel], volume, 0);
     }
 }
 
@@ -507,8 +501,8 @@ void RSMixer::stopSoundFx(int fxChannel) {
     }
     std::lock_guard<std::recursive_mutex> lock(engineMutex);
     if (sfxHandle[fxChannel] >= 0) {
-        xmi.stop(sfxHandle[fxChannel]);
-        xmi.release(sfxHandle[fxChannel]);
+        sfxXmi->stop(sfxHandle[fxChannel]);
+        sfxXmi->release(sfxHandle[fxChannel]);
         sfxHandle[fxChannel] = -1;
         sfxEffect[fxChannel] = nullptr;
         sfxEmitter[fxChannel] = nullptr;

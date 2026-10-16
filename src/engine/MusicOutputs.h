@@ -2,7 +2,7 @@
 //  MusicOutputs.h
 //  libRealSpace
 //
-//  Concrete music outputs, see MusicOutput.h.
+//  MIDI devices, see MusicOutput.h.
 //
 #pragma once
 #include <cstdio>
@@ -12,53 +12,63 @@
 #include "Mt32Timbres.h"
 #include "SoftSynth.h"
 
-// Raw MIDI device (Linux). mt32Mode: Roland MT-32 (reset sequence, timbres from STRIKE.MT are
-// uploaded via SysEx); otherwise General MIDI (GS reset).
-class MidiHardwareOutput : public MusicOutput {
+// Roland MT-32 on a MIDI port: .ROL tunes, timbres of STRIKE.MT sent as SysEx
+class Mt32Device : public MusicDevice {
 public:
-    MidiHardwareOutput(bool mt32Mode, const SCTimbreLibrary *mt32Library, bool debug)
-    : mt32(mt32Mode), library(mt32Library), debugLog(debug) {
-        midi.mt32 = mt32Mode;
+    explicit Mt32Device(bool debug) : debugLog(debug) {
+        midi.mt32 = true;
         uploader.out = &midi;
     }
     bool open(const char *path) { return midi.open(path); }
-
-    bool send(int status, int d1, int d2) override {
+    void send(int status, int d1, int d2) override {
         if (debugLog && (status & 0xF0) == 0xC0) {
             std::printf("MIDI ch%d program %d\n", (status & 0x0F) + 1, d1);
         }
         midi.send(status, d1, d2);
-        return true;
     }
-    bool forwardsSysex() const override { return mt32; }
     void sysex(const uint8_t *data, size_t size) override { midi.raw(data, size); }
-
-    bool ownsTimbres() const override { return mt32; }
-    const SCTimbreLibrary *timbreLibrary() const override { return library; }
-    bool hasTimbre(int bank, int patch) const override { return uploader.has(bank, patch); }
+    bool hasTimbre(int bank, int patch) override { return uploader.has(bank, patch); }
     void installTimbre(int bank, int patch, const uint8_t *rec) override { uploader.install(bank, patch, rec); }
 
 private:
-    bool mt32;
-    const SCTimbreLibrary *library;
     bool debugLog;
     MidiOut midi;
     Mt32Uploader uploader;
 };
 
-// General MIDI through a SoundFont (TinySoundFont), no hardware needed.
-class SoftSynthOutput : public MusicOutput {
+// General MIDI: .MID tunes, standard programs (no timbre library), on a MIDI port or a SoundFont
+class GeneralMidiDevice : public MusicDevice {
 public:
-    bool open(const char *soundFont, int sampleRate) { return soft.open(soundFont, sampleRate); }
-    bool send(int status, int d1, int d2) override {
-        if (!soft.active()) {
-            return false;
+    explicit GeneralMidiDevice(bool debug) : debugLog(debug) {}
+    bool openPort(const char *path) {
+        usePort = midi.open(path);
+        return usePort;
+    }
+    bool openSoundFont(const char *path, int sampleRate) { return soft.open(path, sampleRate); }
+    void send(int status, int d1, int d2) override {
+        if (debugLog && (status & 0xF0) == 0xC0) {
+            std::printf("MIDI ch%d program %d\n", (status & 0x0F) + 1, d1);
         }
-        soft.send(status, d1, d2);
+        if (usePort) {
+            midi.send(status, d1, d2);
+        } else {
+            soft.send(status, d1, d2);
+        }
+    }
+    bool hasTimbre(int bank, int patch) override {
+        (void)bank;
+        (void)patch;
         return true;
     }
-    void render(int16_t *out, int frames) override { soft.render(out, frames); }
+    void render(int16_t *out, int frames) override {
+        if (!usePort) {
+            soft.render(out, frames);
+        }
+    }
 
 private:
+    bool debugLog;
+    bool usePort{ false };
+    MidiOut midi;
     SoftSynth soft;
 };

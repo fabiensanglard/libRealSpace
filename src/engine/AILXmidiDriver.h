@@ -14,7 +14,7 @@
 #pragma once
 #include <cstdint>
 #include <cstddef>
-#include "AILAdlibDriver.h"
+#include "MusicOutput.h"
 #include <functional>
 
 enum {
@@ -68,7 +68,7 @@ struct XmidiSequence {
 class AILXmidiDriver {
 public:
     static const int NSEQS = 8;
-    void init(AILAdlibDriver *driver);                              // init_driver
+    void init(MusicDevice *driver);                                 // init_driver
     int registerSequence(const uint8_t *data, size_t len, int num); // register_seq, -1 si echec
     void release(int h);
     void start(int h);
@@ -79,12 +79,10 @@ public:
     int beatCount(int h);
     void setRelVolume(int h, int vol, int ms);
     int relVolume(int h);
-    int timbreRequest(int h, const std::function<bool(int, int)> *have = nullptr); // (banque << 8) | patch du premier timbre absent, ou 0xFFFF
-    // optional: bekommt SysEx-Events aus dem Stueck (F0 ... F7). Kein Warten im Callback!
-    std::function<void(const uint8_t *, size_t)> sysexTap;
-    void serve();             // a appeler a 120 Hz ; appelle aussi AILAdlibDriver::serve()
+    int timbreRequest(int h); // (banque << 8) | patch du premier timbre absent de l'appareil, ou 0xFFFF
+    void serve();             // a appeler a 120 Hz ; appelle aussi MusicDevice::serve()
 
-    AILAdlibDriver *adl = nullptr;
+    MusicDevice *device = nullptr;
     XmidiSequence seq[NSEQS];
     int current = 0;
     uint8_t ctrl_hash[256];
@@ -94,10 +92,6 @@ public:
     uint8_t global_pitch_h[16];
     uint8_t active_notes[16];
     uint8_t lock_status[16];
-
-    // optional: gibt true zurueck, wenn die Nachricht an ein externes MIDI-Geraet ging
-    // (dann wird sie nicht an den OPL-Treiber weitergegeben)
-    std::function<bool(int, int, int)> midiTap;
 
 private:
     void send(int st, int d1, int d2);

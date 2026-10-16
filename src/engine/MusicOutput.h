@@ -2,58 +2,77 @@
 //  MusicOutput.h
 //  libRealSpace
 //
-//  Destination for the music (not for the sound effects). The sequencer and the mixer only talk to
-//  this interface; a new output path is a new subclass, no signature has to change.
-//    OplOutput           built-in OPL3 emulation (default)
-//    MidiHardwareOutput  raw MIDI device (General MIDI or Roland MT-32), see MusicOutputs.h
-//    SoftSynthOutput     SoundFont software synth (General MIDI), see MusicOutputs.h
+//  Device side of the XMIDI driver: what AILXmidiDriver calls on the hardware, like the device
+//  part of an AIL 2.0 driver (ADLIB.ADV, MT32MPU.ADV...). One implementation per device, chosen
+//  with the files it plays (RSMixer::init):
+//    OplDevice           .ADL + STRIKE.AD, built-in OPL3 emulation
+//    Mt32Device          .ROL + STRIKE.MT, MIDI port (MusicOutputs.h)
+//    GeneralMidiDevice   .MID, MIDI port or SoundFont (MusicOutputs.h)
 //
 #pragma once
 #include <cstddef>
 #include <cstdint>
-#include "AILXmidiDriver.h"
-#include "../realspace/SCMusicSet.h"
+#include <vector>
+#include "AILAdlibDriver.h"
+#include "../commons/Nuked-OPL3/opl3.h"
 
-class MusicOutput {
+class MusicDevice {
 public:
-    virtual ~MusicOutput() = default;
-
-    // Channel message. true = consumed, the OPL driver does not get it.
-    virtual bool send(int status, int d1, int d2) {
-        (void)status;
-        (void)d1;
-        (void)d2;
-        return false;
-    }
-    // SysEx events inside a tune are only forwarded if this returns true.
-    virtual bool forwardsSysex() const { return false; }
+    virtual ~MusicDevice() = default;
+    virtual void send(int status, int d1, int d2) = 0;
     virtual void sysex(const uint8_t *data, size_t size) {
         (void)data;
         (void)size;
     }
-
-    // Timbre handling (AIL_timbre_request). An output that owns its timbres (MT-32 upload)
-    // brings its own library and installs the timbres itself instead of the OPL driver.
-    virtual bool ownsTimbres() const { return false; }
-    virtual const SCTimbreLibrary *timbreLibrary() const { return nullptr; }
-    virtual bool hasTimbre(int bank, int patch) const {
-        (void)bank;
-        (void)patch;
-        return false;
-    }
-    // rec == nullptr: timbre not in the library, mark it as done
+    // AIL_timbre_request / AIL_install_timbre. rec == nullptr: timbre absent from the library.
+    virtual bool hasTimbre(int bank, int patch) = 0;
     virtual void installTimbre(int bank, int patch, const uint8_t *rec) {
         (void)bank;
         (void)patch;
         (void)rec;
     }
-
-    // Software outputs mix into the audio stream (interleaved stereo int16, added to the OPL output).
+    // 120 Hz service, after the XMIDI events of the interval
+    virtual void serve() {}
+    // Software devices add their output to an interleaved stereo int16 buffer
     virtual void render(int16_t *out, int frames) {
         (void)out;
         (void)frames;
     }
 };
 
-// Default: nothing overridden, the music is played by the OPL3 emulation.
-class OplOutput : public MusicOutput {};
+class OplDevice : public MusicDevice {
+public:
+    void init(int sampleRate) {
+        OPL3_Reset(&chip, (uint32_t)sampleRate);
+        adl.init([this](uint16_t reg, uint8_t val) {
+            OPL3_WriteReg(&chip, reg, val);
+        });
+    }
+    void send(int status, int d1, int d2) override { adl.send(status, d1, d2); }
+    bool hasTimbre(int bank, int patch) override { return adl.timbreStatus(bank, patch); }
+    void installTimbre(int bank, int patch, const uint8_t *rec) override {
+        if (rec != nullptr) {
+            adl.installTimbre(bank, patch, rec);
+        }
+    }
+    void serve() override { adl.serve(); }
+    void render(int16_t *out, int frames) override {
+        buffer.resize((size_t)frames * 2);
+        OPL3_GenerateStream(&chip, buffer.data(), (uint32_t)frames);
+        for (size_t i = 0; i < buffer.size(); i++) {
+            int v = out[i] + buffer[i];
+            if (v > 32767) {
+                v = 32767;
+            }
+            if (v < -32768) {
+                v = -32768;
+            }
+            out[i] = (int16_t)v;
+        }
+    }
+    AILAdlibDriver adl;
+
+private:
+    opl3_chip chip;
+    std::vector<int16_t> buffer;
+};

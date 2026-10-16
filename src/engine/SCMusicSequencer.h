@@ -64,12 +64,11 @@ public:
     // (AIL_timbre_request -> Music_InstallTimbre_5A62A), puis AIL_start_sequence.
     // Renvoie le handle, ou -1. Utilisable aussi pour jouer une piste isolee.
     static int registerAndStart(AILXmidiDriver *xmi, const SCTimbreLibrary *lib,
-                                const uint8_t *data, size_t size, int *error, MusicOutput *out = nullptr);
+                                const uint8_t *data, size_t size, int *error);
 
     // etat (public pour l'affichage)
     Channel mainCh;
     Channel linkCh;
-    MusicOutput *output = nullptr; // music goes here (nullptr = OPL); effects always stay on OPL
     int requested = 0xFFFF; // word_70859 (0xFFFF = arret)
     int current = 0;        // byte_72C90
     int state = 0;          // byte_70858

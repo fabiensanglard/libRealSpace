@@ -36,8 +36,14 @@ class RSMusic {
 private:
     std::vector<MemMusic *> gameflow_music;
     AssetManager &assetManager = AssetManager::instance();
-    std::vector<uint8_t> timbre_data;               // copie de STRIKE.AD (timbres ne fait que pointer dessus)
-    std::vector<uint8_t> mt_data;
+    std::vector<uint8_t> timbre_data;               // copie de la bibliotheque (timbres ne fait que pointer dessus)
+    std::vector<uint8_t> sfx_timbre_data;
+    std::string music_ext;
+    std::string midgames_pak;
+    std::string timbre_file;
+    std::string sfx_ext;
+    std::string sfx_timbre_file;
+    bool loadTimbres(const std::string &file, SCTimbreLibrary &library, std::vector<uint8_t> &storage);
     std::vector<std::unique_ptr<RSMusicSet>> owned; // tous les jeux charges
     std::unordered_map<uint8_t, RSMusicSet *> bank_sets;
     RSMusicSet *newSet();
@@ -54,9 +60,10 @@ public:
 
     // Jeux charges, par nom de fichier (tel que passe a LoadMusicFile)
     std::unordered_map<std::string, std::vector<RSMusicSet *>> music_files;
-    // STRIKE.AD : "strike." + suffixe "AD" du pilote ADLIB.ADV (Music_LoadTimbreFromLibrary_5A577)
+    // "strike." + suffixe du pilote : STRIKE.AD (ADLIB.ADV), STRIKE.MT (MT-32) ; aucune en General MIDI
+    // (Music_LoadTimbreFromLibrary_5A577). sfx_timbres : celle des effets (SOUNDFX).
     SCTimbreLibrary timbres;
-    SCTimbreLibrary timbresMt; // STRIKE.MT (nur bei midiMusic == 2)
+    SCTimbreLibrary sfx_timbres;
 
     // Charge un fichier de musique et renvoie ses jeux (vide si le fichier est absent).
     // - Si les entrees de premier niveau sont des pistes (FORM), le fichier forme un seul jeu,
@@ -70,14 +77,11 @@ public:
     std::vector<RSMusicSet *> LoadMusicFile(const char *file, const char *datFile = nullptr);
     // La banque 'bank' sert les pistes du jeu 'set' (GetMusic) ; ses transitions si set->hasDat.
     void SetBank(uint8_t bank, RSMusicSet *set);
-    // Bibliotheque de timbres (STRIKE.AD). Sans elle, la musique joue mais ne sonne pas.
-    bool LoadTimbres(const char *file);
-
+    // Fichiers d'un appareil : extension des musiques (ADL, ROL, MID), pak des cinematiques,
+    // bibliotheque de timbres (vide : aucune), extension et bibliotheque des effets SOUNDFX.
+    RSMusic(const std::string &music_ext, const std::string &midgames_pak, const std::string &timbre_file,
+            const std::string &sfx_ext, const std::string &sfx_timbre_file);
     ~RSMusic();
-
-    // Musikquelle: 0 = AdLib (.ADL, AMUSIC.PAK), 1 = General MIDI (.MID, MMUSIC.PAK),
-    // 2 = Roland MT-32 (.ROL, RMUSIC.PAK). Muss vor init() gesetzt werden. Effekte bleiben ADL.
-    int midiMusic{ 0 };
 
     // Configuration de Strike Commander : fichiers, .dat et banques (voir RSMusic.cpp).
     void init();

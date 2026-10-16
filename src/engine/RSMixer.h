@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Fabien Sanglard. All rights reserved.
 //
 //  Musique et effets XMIDI : chaine du jeu original, sans ADLMIDI ni banque WOPL.
-//    SCMusicSequencer (20 Hz) -> AILXmidiDriver (120 Hz) -> AILAdlibDriver -> Nuked-OPL3,
+//    SCMusicSequencer (20 Hz) -> AILXmidiDriver (120 Hz) -> MusicDevice (OPL3, MT-32, General MIDI),
 //  rendue dans le flux de SDL_mixer par Mix_HookMusic. Les VOC restent sur les canaux SDL_mixer.
 //
 #pragma once
@@ -33,10 +33,11 @@ class RSMixer {
 
     // --- moteur musical (protege par engineMutex : le rendu tourne dans le fil audio) ---
     std::recursive_mutex engineMutex;
-    opl3_chip chip;
-    AILAdlibDriver adl;
+    std::unique_ptr<MusicDevice> device; // musique, et effets sauf en General MIDI
+    std::unique_ptr<OplDevice> sfxOpl;   // General MIDI : les effets (SOUNDFX.ADL) restent en FM
     AILXmidiDriver xmi;
-    std::unique_ptr<MusicOutput> output; // music destination: OPL, MIDI hardware or software synth
+    AILXmidiDriver sfxOwnXmi;
+    AILXmidiDriver *sfxXmi{ &xmi };
     SCMusicSequencer sequencer;
     int sampleRate{ 44100 };
     uint16_t audioFormat{ AUDIO_S16SYS };

@@ -238,10 +238,7 @@ void AILXmidiDriver::resetSequence(XmidiSequence *s) {
 }
 
 void AILXmidiDriver::send(int st, int d1, int d2) {
-    if (midiTap && midiTap(st, d1, d2)) {
-        return; // Musik laeuft ueber das externe MIDI-Geraet, OPL bleibt fuer die Effekte
-    }
-    adl->send(st, d1, d2);
+    device->send(st, d1, d2);
 }
 
 void AILXmidiDriver::xmidiVolume(XmidiSequence *s) /* sub_311D */
@@ -375,8 +372,8 @@ void AILXmidiDriver::restoreSequence(XmidiSequence *s) {
     }
 }
 
-void AILXmidiDriver::init(AILAdlibDriver *driver) {
-    adl = driver;
+void AILXmidiDriver::init(MusicDevice *driver) {
+    device = driver;
     for (auto &s : seq) {
         memset(&s, 0, sizeof s);
     }
@@ -541,7 +538,7 @@ void AILXmidiDriver::setRelVolume(int h, int vol, int ms) {
 }
 
 /* get_request (fonction 0x9B, 0x1CC7) : premier timbre du chunk TIMB absent du cache */
-int AILXmidiDriver::timbreRequest(int h, const std::function<bool(int, int)> *have) {
+int AILXmidiDriver::timbreRequest(int h) {
     if (h < 0 || !seq[h].used || !seq[h].timb) {
         return 0xFFFF;
     }
@@ -550,7 +547,7 @@ int AILXmidiDriver::timbreRequest(int h, const std::function<bool(int, int)> *ha
     for (int i = 0; i < n; i++) {
         int patch = t[10 + 2 * i];
         int bank = t[11 + 2 * i];
-        bool present = have ? (*have)(bank, patch) : (adl->timbreStatus(bank, patch) != 0);
+        bool present = device->hasTimbre(bank, patch);
         if (!present) {
             return (bank << 8) | patch;
         }
@@ -717,7 +714,7 @@ void AILXmidiDriver::serve() {
                             sz = meta(s, h);
                         } else {
                             sz = sysex(s);
-                            if (sysexTap && st == 0xF0 && sz > 2 && p + sz <= s->len) {
+                            if (st == 0xF0 && sz > 2 && p + sz <= s->len) {
                                 size_t q = p + 1;
                                 uint32_t n = vln(s->base, s->len, &q);
                                 std::vector<uint8_t> m;
@@ -726,7 +723,7 @@ void AILXmidiDriver::serve() {
                                 if (m.back() != 0xF7) {
                                     m.push_back(0xF7);
                                 }
-                                sysexTap(m.data(), m.size());
+                                device->sysex(m.data(), m.size());
                             }
                         }
                     } else if (op == PITCH_BEND) {
@@ -784,5 +781,5 @@ void AILXmidiDriver::serve() {
             xmidiVolume(s);
         }
     }
-    adl->serve();
+    device->serve();
 }
