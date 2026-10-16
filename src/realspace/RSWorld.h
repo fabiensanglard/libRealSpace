@@ -88,6 +88,11 @@ private:
 public:
     std::string tera;
     std::string cameraSetName;
+    bool has_light{false};
+    uint16_t light_ambient_weight{0};
+    uint16_t light_percent{0};
+    uint16_t light_weight{0};
+    int16_t light_direction[3]{0, 0, 0};
     std::vector<RSCameraDef> cameras;
     std::vector<RSCameraSequence> cameraSequences;
     RSWorld();

@@ -109,6 +109,11 @@ void SCMission::loadMission() {
     if (treEntry != NULL) {
         this->world->InitFromRAM(treEntry->data, treEntry->size);
     }
+    if (this->world->has_light) {
+        Renderer.setObjectLight(this->world->light_ambient_weight, this->world->light_weight,
+                                this->world->light_direction[0], this->world->light_direction[1],
+                                this->world->light_direction[2]);
+    }
     std::string area_fn = this->world->tera+".PAK";
     std::transform(area_fn.begin(), area_fn.end(), area_fn.begin(), ::toupper);
     this->area = new RSArea();

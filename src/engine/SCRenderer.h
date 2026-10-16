@@ -168,6 +168,7 @@ public:
     Camera *getCamera(void);
 
     void setLight(Point3D *position);
+    void setObjectLight(int ambient_weight, int light_weight, int c0, int c1, int c2);
 
     void setClearColor(uint8_t red, uint8_t green, uint8_t blue);
 
@@ -193,6 +194,15 @@ public:
     int32_t width;
     int32_t height;
     Point3D light;
+    Vector3D object_light_direction{0.0f, 1.0f, 0.0f};
+    float object_light_ambient{0.0f};
+    float object_light_share{0.0f};
+    Vector3D shading_light_local{0.0f, 1.0f, 0.0f};
+    Vector3D shading_eye_local{0.0f, 0.0f, 0.0f};
+    std::unordered_map<RSEntity *, std::vector<Vector3D>> object_normals;
+    std::vector<Vector3D> &objectNormals(RSEntity *object);
+    float objectIntensity(Vector3D normal);
+    Vector3D shadeAlongRamp(int colour, float intensity);
 
      
 };

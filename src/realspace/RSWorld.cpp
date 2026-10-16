@@ -53,7 +53,16 @@ void RSWorld::parseWRLD_GLNT(uint8_t *data, size_t size) {}
 
 void RSWorld::parseWRLD_SMOK(uint8_t *data, size_t size) {}
 
-void RSWorld::parseWRLD_LGHT(uint8_t *data, size_t size) {}
+void RSWorld::parseWRLD_LGHT(uint8_t *data, size_t size) {
+    ByteStream bs(data, size);
+    this->light_ambient_weight = bs.ReadUShort();
+    this->light_percent = bs.ReadUShort();
+    this->light_weight = bs.ReadUShort();
+    for (int i = 0; i < 3; i++) {
+        this->light_direction[i] = bs.ReadShort();
+    }
+    this->has_light = true;
+}
 
 static void readSimpleCamera(ByteStream &s, size_t size, bool lookAtGap,
                              RSCameraType typeCode, std::vector<RSCameraDef> &out) {

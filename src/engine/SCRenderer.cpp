@@ -25,38 +25,6 @@
 
 SCRenderer &Renderer = SCRenderer::getInstance();
 
-static inline void FixEntityWinding(RSEntity* obj) {
-    if (!obj) return;
-    Vector3D center{0,0,0};
-    if (!obj->vertices.empty()) {
-        for (const auto& v : obj->vertices) { center.x += v.x; center.y += v.y; center.z += v.z; }
-        float invN = 1.0f / (float)obj->vertices.size();
-        center.x *= invN; center.y *= invN; center.z *= invN;
-    }
-    auto ensureTriOutward = [&](uint16_t ids[3]) {
-        const Vector3D& a = obj->vertices[ids[0]];
-        const Vector3D& b = obj->vertices[ids[1]];
-        const Vector3D& c = obj->vertices[ids[2]];
-        Vector3D e1{ b.x-a.x, b.y-a.y, b.z-a.z };
-        Vector3D e2{ c.x-a.x, c.y-a.y, c.z-a.z };
-        Vector3D n{ e1.y*e2.z - e1.z*e2.y,
-                    e1.z*e2.x - e1.x*e2.z,
-                    e1.x*e2.y - e1.y*e2.x };
-        Vector3D faceC{ (a.x+b.x+c.x)/3.0f, (a.y+b.y+c.y)/3.0f, (a.z+b.z+c.z)/3.0f };
-        Vector3D outward{ faceC.x-center.x, faceC.y-center.y, faceC.z-center.z };
-        float d = n.x*outward.x + n.y*outward.y + n.z*outward.z;
-        if (d < 0.0f) std::swap(ids[1], ids[2]); // flip winding
-    };
-    for (auto& t : obj->triangles) ensureTriOutward(t.ids);
-    for (auto* q : obj->quads) { // flip tout le quad si nécessaire
-        if (!q) continue;
-        uint16_t tri[3] = { q->ids[0], q->ids[1], q->ids[2] };
-        uint16_t before[3] = { tri[0], tri[1], tri[2] };
-        ensureTriOutward(tri);
-        bool flipped = !(tri[0]==before[0] && tri[1]==before[1] && tri[2]==before[2]);
-        if (flipped) std::swap(q->ids[1], q->ids[3]);
-    }
-}
 static inline GLenum DetectTerrainFrontFace(AreaBlock* blk) {
     if (!blk || blk->sideSize < 2) return GL_CCW;
     MapVertex* a = &blk->vertice[0];
@@ -281,48 +249,57 @@ static void AccumulateFaceNormal(const RSEntity* obj, int i0, int i1, int i2, co
     acc[i2].x+=n.x; acc[i2].y+=n.y; acc[i2].z+=n.z;
 }
 
-static void ComputeVertexNormalsForLOD(RSEntity* obj, size_t lodLevel, const Point3D& camPos, std::vector<Vector3D>& outNormals) {
-    outNormals.assign(obj->vertices.size(), Vector3D{0,0,0});
-    if (lodLevel >= obj->NumLods()) return;
+static Vector3D objectFaceNormal(const RSEntity *obj, uint16_t i0, uint16_t i1, uint16_t i2) {
+    Vector3D e1 = obj->vertices[i0];
+    Vector3D pivot = obj->vertices[i1];
+    e1.Substract(&pivot);
+    Vector3D e2 = obj->vertices[i2];
+    e2.Substract(&pivot);
+    Vector3D n = e1.CrossProduct(&e2);
+    n.Normalize();
+    return n;
+}
 
-    const Lod* lod = &obj->lods[lodLevel];
+static bool objectFaceSeenFromFront(const RSEntity *obj, uint16_t i0, uint16_t i1, uint16_t i2, Vector3D normal,
+                                    Vector3D eye) {
+    const Vector3D &v0 = obj->vertices[i0];
+    const Vector3D &v1 = obj->vertices[i1];
+    const Vector3D &v2 = obj->vertices[i2];
+    Vector3D to_face = {(v0.x + v1.x + v2.x) / 3.0f - eye.x, (v0.y + v1.y + v2.y) / 3.0f - eye.y,
+                        (v0.z + v1.z + v2.z) / 3.0f - eye.z};
+    return to_face.DotProduct(&normal) < 0.0f;
+}
 
-    // Triangles utilisés par ce LOD
-    for (int i = 0; i < lod->numTriangles; ++i) {
-        uint16_t triID = lod->triangleIDs[i];
-        if (obj->attrs.size() > 0) {
-            if (obj->attrs[triID] == nullptr) continue;
-            // ignorer quads et lignes dans ce passage
-            if (obj->attrs[triID]->type == 'Q' || obj->attrs[triID]->type == 'L') continue;
-            triID = obj->attrs[triID]->id;
-        }
-        if (triID >= obj->triangles.size()) continue;
-        const Triangle& t = obj->triangles[triID];
-        AccumulateFaceNormal(obj, t.ids[0], t.ids[1], t.ids[2], camPos, outNormals);
-    }
+static Vector3D worldDirectionToObject(const float MV[16], const float V[16], Vector3D world) {
+    Vector3D eye = {V[0] * world.x + V[4] * world.y + V[8] * world.z, V[1] * world.x + V[5] * world.y + V[9] * world.z,
+                    V[2] * world.x + V[6] * world.y + V[10] * world.z};
+    Vector3D local = {MV[0] * eye.x + MV[1] * eye.y + MV[2] * eye.z, MV[4] * eye.x + MV[5] * eye.y + MV[6] * eye.z,
+                      MV[8] * eye.x + MV[9] * eye.y + MV[10] * eye.z};
+    local.Normalize();
+    return local;
+}
 
-    // Quads utilisés par ce LOD (comme faces, sans split pour l’accumulation)
-    if (obj->quads.size() > 0) {
-        for (int i = 0; i < lod->numTriangles; ++i) {
-            uint16_t qid = lod->triangleIDs[i];
-            if (obj->attrs.size() > 0) {
-                if (obj->attrs[qid] == nullptr) continue;
-                // ignorer triangles et lignes dans ce passage
-                if (obj->attrs[qid]->type == 'T' || obj->attrs[qid]->type == 'L') continue;
-                qid = obj->attrs[qid]->id;
+static Vector3D eyePositionInObject(const float MV[16]) {
+    return {-(MV[0] * MV[12] + MV[1] * MV[13] + MV[2] * MV[14]), -(MV[4] * MV[12] + MV[5] * MV[13] + MV[6] * MV[14]),
+            -(MV[8] * MV[12] + MV[9] * MV[13] + MV[10] * MV[14])};
+}
+
+static int objectFirstTexel(RSEntity *obj, int face_id, bool quad) {
+    if (quad) {
+        for (auto quv : obj->qmapuvs) {
+            if (quv->triangleID == face_id && quv->textureID < obj->images.size()) {
+                return obj->images[quv->textureID]->data[0];
             }
-            if (qid >= obj->quads.size()) continue;
-            const Quads* q = obj->quads[qid];
-            // Accumuler avec deux triangles (quad -> 2 tris) pour lisser
-            AccumulateFaceNormal(obj, q->ids[0], q->ids[1], q->ids[2], camPos, outNormals);
-            AccumulateFaceNormal(obj, q->ids[0], q->ids[2], q->ids[3], camPos, outNormals);
+        }
+        return obj->quads[face_id]->color - 1;
+    }
+    for (int i = 0; i < obj->NumUVs(); i++) {
+        uvxyEntry *uv = &obj->uvs[i];
+        if (uv->triangleID == face_id && uv->textureID < obj->images.size()) {
+            return obj->images[uv->textureID]->data[0];
         }
     }
-
-    // Normalisation finale
-    for (auto& n : outNormals) {
-        n.Normalize();
-    }
+    return obj->triangles[face_id].color;
 }
 
 SCRenderer::SCRenderer() : initialized(false) {}
@@ -349,6 +326,7 @@ void SCRenderer::init(int width, int height) {
         this->palette = *palette.GetColorPalette();
         this->terrain_ranges = palette.ranges;
     }
+    this->setObjectLight(3, 5, -10, -25, 100);
     
     this->lodLevel = config.getInt("Game", "object_detail", 0);
     this->show_textured = config.getBool("Game", "show_texture", true);
@@ -830,19 +808,22 @@ void SCRenderer::drawModelColorPass(RSEntity *object, size_t lodLevel, std::vect
         if (twoSided) {
             glDisable(GL_CULL_FACE);
         }
+        Vector3D face_normal = objectFaceNormal(object, triangle->ids[0], triangle->ids[1], triangle->ids[2]);
+        bool back = twoSided && !objectFaceSeenFromFront(object, triangle->ids[0], triangle->ids[1], triangle->ids[2],
+                                                         face_normal, this->shading_eye_local);
+        int colour = triangle->color;
+        if (triangle->property == 6) {
+            colour = objectFirstTexel(object, triangleID, false);
+        }
         glBegin(GL_TRIANGLES);
         for (int j = 0; j < 3; j++) {
             Vector3D vLocal = object->vertices[triangle->ids[j]];
-            Vector3D nLocal = vertexNormals[triangle->ids[j]];
-
-            float lambertianFactor = twoSided
-                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
-                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
-
-            const Texel *texel = palette.GetRGBColor(triangle->color);
-            glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
-                      texel->b / 255.0f * lambertianFactor, alpha);
-
+            Vector3D normal = vertexNormals[triangle->ids[j]];
+            if (back) {
+                normal = {-face_normal.x, -face_normal.y, -face_normal.z};
+            }
+            Vector3D rgb = this->shadeAlongRamp(colour, this->objectIntensity(normal));
+            glColor4f(rgb.x, rgb.y, rgb.z, alpha);
             glVertex3f(vLocal.x, vLocal.y, vLocal.z);
         }
         glEnd();
@@ -892,20 +873,22 @@ void SCRenderer::drawModelColorPass(RSEntity *object, size_t lodLevel, std::vect
             if (twoSided) {
                 glDisable(GL_CULL_FACE);
             }
+            Vector3D face_normal = objectFaceNormal(object, triangle->ids[0], triangle->ids[1], triangle->ids[2]);
+            bool back = twoSided && !objectFaceSeenFromFront(object, triangle->ids[0], triangle->ids[1],
+                                                             triangle->ids[2], face_normal, this->shading_eye_local);
+            int colour = triangle->color - 1;
+            if (triangle->property == 6) {
+                colour = objectFirstTexel(object, triangleID, true);
+            }
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
                 Vector3D vLocal = object->vertices[triangle->ids[j]];
-                Vector3D nLocal = vertexNormals[triangle->ids[j]];
-
-                float lambertianFactor = twoSided
-                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
-                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
-
-                const Texel *texel = palette.GetRGBColor(triangle->color-1);
-                glColor4f(texel->r / 255.0f * lambertianFactor, texel->g / 255.0f * lambertianFactor,
-                          texel->b / 255.0f * lambertianFactor, alpha);
-                
-                
+                Vector3D normal = vertexNormals[triangle->ids[j]];
+                if (back) {
+                    normal = {-face_normal.x, -face_normal.y, -face_normal.z};
+                }
+                Vector3D rgb = this->shadeAlongRamp(colour, this->objectIntensity(normal));
+                glColor4f(rgb.x, rgb.y, rgb.z, alpha);
                 glVertex3f(vLocal.x, vLocal.y, vLocal.z);
             }
             glEnd();
@@ -959,18 +942,18 @@ void SCRenderer::drawModelTexturePass(RSEntity *object, size_t lodLevel, std::ve
             if (twoSided) {
                 glDisable(GL_CULL_FACE);
             }
+            Vector3D face_normal = objectFaceNormal(object, triangle->ids[0], triangle->ids[1], triangle->ids[2]);
+            bool back = twoSided && !objectFaceSeenFromFront(object, triangle->ids[0], triangle->ids[1],
+                                                             triangle->ids[2], face_normal, this->shading_eye_local);
             glBegin(GL_TRIANGLES);
             for (int j = 0; j < 3; j++) {
                 Vector3D vLocal = object->vertices[triangle->ids[j]];
-                Vector3D nLocal = vertexNormals[triangle->ids[j]];
-
-                float lambertianFactor = twoSided
-                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
-                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
-
-                const Texel *texel = palette.GetRGBColor(triangle->color-1);
-                
-                glColor4f(lambertianFactor, lambertianFactor, lambertianFactor, 1.0f);
+                Vector3D normal = vertexNormals[triangle->ids[j]];
+                if (back) {
+                    normal = {-face_normal.x, -face_normal.y, -face_normal.z};
+                }
+                float intensity = this->objectIntensity(normal);
+                glColor4f(intensity, intensity, intensity, 1.0f);
                 
                 glTexCoord2f(textInfo->uvs[j].u / (float)texture->width, textInfo->uvs[j].v / (float)texture->height);
                 glVertex3f(vLocal.x, vLocal.y, vLocal.z);
@@ -1026,17 +1009,18 @@ void SCRenderer::drawModelTexturePass(RSEntity *object, size_t lodLevel, std::ve
             if (twoSided) {
                 glDisable(GL_CULL_FACE);
             }
+            Vector3D face_normal = objectFaceNormal(object, triangle->ids[0], triangle->ids[1], triangle->ids[2]);
+            bool back = twoSided && !objectFaceSeenFromFront(object, triangle->ids[0], triangle->ids[1],
+                                                             triangle->ids[2], face_normal, this->shading_eye_local);
             glBegin(GL_QUADS);
             for (int j = 0; j < 4; j++) {
                 Vector3D vLocal = object->vertices[triangle->ids[j]];
-                Vector3D nLocal = vertexNormals[triangle->ids[j]];
-
-                float lambertianFactor = twoSided
-                ? ComputeLambertAtTwoSided(vLocal, nLocal, MV, lightEye, ambientLamber)
-                : ComputeLambertAt(vLocal, nLocal, MV, lightEye, ambientLamber);
-
-                const Texel *texel = palette.GetRGBColor(triangle->color-1);
-                glColor4f(lambertianFactor, lambertianFactor, lambertianFactor, 1.0f);                glTexCoord2f(quv->uvs[j].u / (float)texture->width, quv->uvs[j].v / (float)texture->height);
+                Vector3D normal = vertexNormals[triangle->ids[j]];
+                if (back) {
+                    normal = {-face_normal.x, -face_normal.y, -face_normal.z};
+                }
+                float intensity = this->objectIntensity(normal);
+                glColor4f(intensity, intensity, intensity, 1.0f);                glTexCoord2f(quv->uvs[j].u / (float)texture->width, quv->uvs[j].v / (float)texture->height);
                 glVertex3f(vLocal.x, vLocal.y, vLocal.z);
             }
             glEnd();
@@ -1187,8 +1171,7 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     float ambientLamber = 0.4f;
 
     Lod *lod = &object->lods[currentLodLevel];
-    std::vector<Vector3D> vertexNormals;
-    ComputeVertexNormalsForLOD(object, currentLodLevel, camera.getPosition(), vertexNormals);
+    std::vector<Vector3D> &vertexNormals = this->objectNormals(object);
 
     // Prépare les matrices pour faire l’éclairage en espace œil
     float MV[16];
@@ -1196,6 +1179,8 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
     const float* V = camera.getViewMatrix()->ToGL();
     Vector3D lightWorld{light.x, light.y, light.z};
     Vector3D lightEye = TransformPointCM(V, lightWorld);
+    this->shading_light_local = worldDirectionToObject(MV, V, this->object_light_direction);
+    this->shading_eye_local = eyePositionInObject(MV);
 
     glPolygonMode(GL_FRONT, GL_FILL);
     glEnable(GL_CULL_FACE);
@@ -1222,12 +1207,98 @@ void SCRenderer::drawModel(RSEntity *object, size_t lodLevel) {
 
 void SCRenderer::setLight(Point3D *l) { this->light = *l; }
 
+void SCRenderer::setObjectLight(int ambient_weight, int light_weight, int c0, int c1, int c2) {
+    float total = (float)(ambient_weight + light_weight);
+    this->object_light_ambient = ambient_weight / total;
+    this->object_light_share = light_weight / total;
+    this->object_light_direction = {(float)c0, (float)c2, (float)-c1};
+    this->object_light_direction.Normalize();
+    printf("RENDER object light ambient=%.3f share=%.3f direction=(%.3f, %.3f, %.3f)\n", this->object_light_ambient,
+           this->object_light_share, this->object_light_direction.x, this->object_light_direction.y,
+           this->object_light_direction.z);
+}
+
+std::vector<Vector3D> &SCRenderer::objectNormals(RSEntity *object) {
+    auto found = this->object_normals.find(object);
+    if (found != this->object_normals.end() && found->second.size() == object->vertices.size()) {
+        return found->second;
+    }
+    std::vector<Vector3D> &normals = this->object_normals[object];
+    normals.assign(object->vertices.size(), Vector3D{0.0f, 0.0f, 0.0f});
+    for (const Triangle &t : object->triangles) {
+        Vector3D n = objectFaceNormal(object, t.ids[0], t.ids[1], t.ids[2]);
+        for (int j = 0; j < 3; j++) {
+            normals[t.ids[j]].x += n.x;
+            normals[t.ids[j]].y += n.y;
+            normals[t.ids[j]].z += n.z;
+        }
+    }
+    for (Quads *q : object->quads) {
+        Vector3D n1 = objectFaceNormal(object, q->ids[0], q->ids[1], q->ids[2]);
+        Vector3D n2 = objectFaceNormal(object, q->ids[0], q->ids[2], q->ids[3]);
+        uint16_t first[3] = {q->ids[0], q->ids[1], q->ids[2]};
+        uint16_t second[3] = {q->ids[0], q->ids[2], q->ids[3]};
+        for (int j = 0; j < 3; j++) {
+            normals[first[j]].x += n1.x;
+            normals[first[j]].y += n1.y;
+            normals[first[j]].z += n1.z;
+            normals[second[j]].x += n2.x;
+            normals[second[j]].y += n2.y;
+            normals[second[j]].z += n2.z;
+        }
+    }
+    for (auto &n : normals) {
+        n.Normalize();
+    }
+    printf("RENDER normals vertices=%zu triangles=%zu quads=%zu\n", object->vertices.size(), object->triangles.size(),
+           object->quads.size());
+    return normals;
+}
+
+float SCRenderer::objectIntensity(Vector3D normal) {
+    float d = this->shading_light_local.DotProduct(&normal);
+    if (d < 0.0f) {
+        d = 0.0f;
+    }
+    float intensity = this->object_light_ambient + d * this->object_light_share;
+    if (intensity > 1.0f) {
+        intensity = 1.0f;
+    }
+    return intensity;
+}
+
+Vector3D SCRenderer::shadeAlongRamp(int colour, float intensity) {
+    const PaletteRange *range = nullptr;
+    for (const PaletteRange &r : this->terrain_ranges) {
+        if (r.first <= colour && colour <= r.first + r.fog) {
+            range = &r;
+            break;
+        }
+    }
+    if (range == nullptr) {
+        const Texel *c = this->palette.GetRGBColor((uint8_t)colour);
+        return {c->r / 255.0f * intensity, c->g / 255.0f * intensity, c->b / 255.0f * intensity};
+    }
+    int n = colour - range->first;
+    if (n == 0) {
+        n = range->shades;
+    }
+    float t = intensity * n;
+    int k0 = (int)t;
+    if (k0 > n - 1) {
+        k0 = n - 1;
+    }
+    float f = t - k0;
+    const Texel *a = this->palette.GetRGBColor((uint8_t)(range->first + k0));
+    const Texel *b = this->palette.GetRGBColor((uint8_t)(range->first + k0 + 1));
+    return {(a->r + (b->r - a->r) * f) / 255.0f, (a->g + (b->g - a->g) * f) / 255.0f, (a->b + (b->b - a->b) * f) / 255.0f};
+}
+
 void SCRenderer::prepare(RSEntity *object) {
 
     for (size_t i = 0; i < object->NumImages(); i++) {
         object->images[i]->SyncTexture();
     }
-    FixEntityWinding(object);
     object->prepared = true;
 }
 
