@@ -2482,7 +2482,7 @@ void DebugStrike::renderMenu() {
                                                 weapon->objct->wdat->tracking_cone, weapon->objct->wdat->radius);
                                         }
                                         if (weapon->objct->dynn_miss != nullptr) {
-                                            ImGui::Text("Dynamics: %d, %d, %d, %d",
+                                            ImGui::Text("Dynamics: %.2f, %.2f, %d, %d",
                                                         weapon->objct->dynn_miss->velovity_m_per_sec,
                                                         weapon->objct->dynn_miss->turn_degre_per_sec,
                                                         weapon->objct->dynn_miss->proximity_cm,

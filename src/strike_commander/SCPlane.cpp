@@ -240,52 +240,127 @@ bool SCPlane::seekerSees(RSEntity *weapon, SCMissionActors *candidate) {
 }
 
 SCMissionActors *SCPlane::seekerSelect(RSEntity *weapon, SCMissionActors *desired, SCMission *mission) {
-    int aspec = weapon->wdat->weapon_aspec;
-    Vector3D reference_velocity = this->worldVelocity();
-    if (aspec == 5 || aspec == 6) {
-        return (desired != nullptr && this->seekerLocks(weapon, desired)) ? desired : nullptr;
+    if (desired != nullptr && !desired->is_active) {
+        desired = nullptr;
     }
+    SCSimulatedObject *decoy = nullptr;
+    SCMissionActors *chosen = SCPlane::SeekerChoose(weapon, desired, nullptr, mission, this->position, this->forward,
+                                                    this->worldVelocity(), &decoy);
+    if (decoy != nullptr) {
+        return nullptr;
+    }
+    return chosen;
+}
+
+SCMissionActors *SCPlane::SeekerChoose(RSEntity *weapon, SCMissionActors *current, SCSimulatedObject *current_decoy,
+                                       SCMission *mission, Vector3D reference_position, Vector3D reference_nose,
+                                       Vector3D reference_velocity, SCSimulatedObject **chosen_decoy) {
+    int aspec = weapon->wdat->weapon_aspec;
+    float range = (float)weapon->wdat->target_range;
+    float cone = (float)weapon->wdat->tracking_cone;
+    *chosen_decoy = nullptr;
+
+    Vector3D current_position;
+    Vector3D current_velocity;
+    bool has_current = false;
+    if (current != nullptr) {
+        current_position = current->plane != nullptr ? current->plane->position : current->object->position;
+        if (current->plane != nullptr) {
+            current_velocity = current->plane->worldVelocity();
+        }
+        has_current = true;
+    } else if (current_decoy != nullptr) {
+        current_position = {current_decoy->x, current_decoy->y, current_decoy->z};
+        current_velocity = Vector3D(current_decoy->vx, current_decoy->vy, current_decoy->vz) * (float)mission->tps;
+        has_current = true;
+    }
+
+    if (aspec == 5 || aspec == 6) {
+        if (!has_current) {
+            return nullptr;
+        }
+        Vector3D delta = current_position - reference_position;
+        float distance = delta.Length();
+        if (distance <= 0.0f || distance > range || reference_nose.AngleBetween(delta) > cone) {
+            return nullptr;
+        }
+        *chosen_decoy = current_decoy;
+        return current;
+    }
+
     SCMissionActors *best = nullptr;
+    AgravSimulatedObject *best_decoy = nullptr;
     int best_signature = 0;
     for (auto actor : mission->actors) {
-        if (actor->is_destroyed || actor->object == nullptr || actor->object->entity == nullptr) {
+        if (!actor->is_active || actor->is_destroyed || actor->object == nullptr || actor->object->entity == nullptr) {
             continue;
         }
         if (actor->plane != nullptr && !actor->plane->object->alive) {
             continue;
         }
         uint8_t type = actor->object->entity->target_type;
-        if (type != 1 && type != 4) {
+        if (type == 1 || type == 4) {
+            Vector3D position = actor->plane != nullptr ? actor->plane->position : actor->object->position;
+            Vector3D delta = position - reference_position;
+            float distance = delta.Length();
+            int signature = SCPlane::SeekerSignature(weapon, actor, reference_velocity);
+            if (signature > best_signature && distance > 0.0f && distance <= range &&
+                reference_nose.AngleBetween(delta) <= cone) {
+                best_signature = signature;
+                best = actor;
+                best_decoy = nullptr;
+            }
+        }
+        if (actor->plane == nullptr) {
             continue;
         }
-        int signature = SCPlane::SeekerSignature(weapon, actor, reference_velocity);
-        if (signature > best_signature && this->seekerSees(weapon, actor)) {
-            best_signature = signature;
-            best = actor;
+        for (auto weapon_object : actor->plane->weaps_object) {
+            AgravSimulatedObject *decoy = dynamic_cast<AgravSimulatedObject *>(weapon_object);
+            if (decoy == nullptr || !decoy->alive || decoy->obj->target_type != 4) {
+                continue;
+            }
+            Vector3D delta = Vector3D(decoy->x, decoy->y, decoy->z) - reference_position;
+            float distance = delta.Length();
+            int signature = decoy->seekerSignature(aspec);
+            if (signature > best_signature && distance > 0.0f && distance <= range &&
+                reference_nose.AngleBetween(delta) <= cone) {
+                best_signature = signature;
+                best = nullptr;
+                best_decoy = decoy;
+            }
         }
     }
-    if (best == nullptr) {
+    if (best == nullptr && best_decoy == nullptr) {
         return nullptr;
     }
-    SCMissionActors *result = desired;
-    if (best != desired) {
-        SCMissionActors *player = mission->player;
-        int weight = best == player ? 5 : 3;
-        int signature = SCPlane::SeekerSignature(weapon, best, reference_velocity);
+    bool best_is_current = (best != nullptr && best == current) || (best_decoy != nullptr && best_decoy == current_decoy);
+    if (!best_is_current) {
+        int weight = 3;
+        if (best != nullptr && best == mission->player) {
+            weight = 5;
+        }
+        if (best_decoy != nullptr && best_decoy->shooter == mission->player) {
+            weight = 5;
+        }
         bool steal = false;
         if (aspec == 1) {
-            steal = (signature > 210 && (std::rand() % 10) < weight) || signature == 210;
+            steal = (best_signature > 210 && (std::rand() % 10) < weight) || best_signature == 210;
         } else if (aspec == 2 || aspec == 4) {
-            steal = signature >= 245 && (std::rand() % 10) < weight;
+            steal = best_signature >= 245 && (std::rand() % 10) < weight;
         }
         if (steal) {
+            *chosen_decoy = best_decoy;
             return best;
         }
     }
-    if (result == nullptr || !this->seekerAspectAllows(weapon, result)) {
+    if (!has_current) {
         return nullptr;
     }
-    return result;
+    if (aspec == 1 && reference_velocity.DotProduct(&current_velocity) < 0.0f) {
+        return nullptr;
+    }
+    *chosen_decoy = current_decoy;
+    return current;
 }
 
 // aspec 1 (AIM-9J) : aspect arriere obligatoire, vitesses a moins de 90 deg (dot >= cos 90)
@@ -1574,7 +1649,7 @@ void SCPlane::launchDirect(int weapon_hard_point_id, SCMissionActors *target, SC
             wobj = wobj->weaps[0]->objct;
         break;
         case ID_GBU15:
-            weap = new SCSimulatedObject();
+            weap = new GuidedBombSimulatedObject();
             initial_trust = this->getWeaponIntialVector(1.0f);
             initial_trust.Scale(1.0f/(float)tps);
             if (this->pilot->mission->sound.sounds.size() > 0) {
@@ -2045,15 +2120,16 @@ void SCPlane::DeployCountermeasure(bool chaff) {
         position = position - this->forward * 12.0f;
     }
     Vector3D velocity = Vector3D(this->x - this->last_px, this->y - this->last_py, this->z - this->last_pz) * 0.8984375f;
-    DumbSimulatedObject *decoy_obj = new DumbSimulatedObject();
+    AgravSimulatedObject *decoy_obj = new AgravSimulatedObject();
     decoy_obj->obj = decoy;
+    decoy_obj->shooter = this->pilot;
+    decoy_obj->mission = this->pilot->mission;
     decoy_obj->x = position.x;
     decoy_obj->y = position.y;
     decoy_obj->z = position.z;
     decoy_obj->vx = velocity.x;
     decoy_obj->vy = velocity.y;
     decoy_obj->vz = velocity.z;
-    decoy_obj->weight = 0.2f;
-    decoy_obj->distance = decoy->decoy_lifetime;
+    decoy_obj->lifetime_left = decoy->decoy_lifetime;
     this->weaps_object.push_back(decoy_obj);
 }

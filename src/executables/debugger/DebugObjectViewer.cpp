@@ -388,8 +388,8 @@ void DebugObjectViewer::renderUI() {
             }
             if (entity->dynn_miss != nullptr) {
                 if (ImGui::TreeNode("Dynamic Missile Data")) {
-                    ImGui::Text("Turn Degree per Second: %d", entity->dynn_miss->turn_degre_per_sec);
-                    ImGui::Text("Velocity m/s: %d", entity->dynn_miss->velovity_m_per_sec);
+                    ImGui::Text("Turn Degree per Second: %.2f", entity->dynn_miss->turn_degre_per_sec);
+                    ImGui::Text("Velocity m/s: %.2f", entity->dynn_miss->velovity_m_per_sec);
                     ImGui::Text("Proximity cm: %d", entity->dynn_miss->proximity_cm);
                     ImGui::TreePop();
                 }

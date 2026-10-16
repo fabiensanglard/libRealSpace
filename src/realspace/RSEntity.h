@@ -202,9 +202,12 @@ class RSEntity {
         RSEntity *weapon_entity{nullptr};
     };
     struct DYNN_MISS {
-        uint32_t turn_degre_per_sec{0};
-        uint32_t velovity_m_per_sec{0};
+        float turn_degre_per_sec{0.0f};
+        float velovity_m_per_sec{0.0f};
         uint32_t proximity_cm{0};
+        float acceleration{0.0f};
+        float cruise_lateral{0.0f};
+        float cruise_normal{0.0f};
     };
     struct RADAR_SIGN {
         uint8_t unknown1{0};
@@ -260,6 +263,12 @@ public:
     uint8_t combat_class{2};           // chunk JINF, modele +0x52 (9 et plus : chasseur)
     uint8_t bomb_guided{0};            // chunk DATA des BOMB, modele +0x5E
     int16_t bomb_lock_cone_rate{0};    // modele +0x61, deg/s
+    uint8_t bomb_arming_delay{0};
+    float bomb_turn_rate{0.0f};
+    float drag_coefficient{0.0f};
+    int32_t missile_flight_time{0};
+    uint8_t missile_data_unknown{0};
+    uint16_t missile_fuse_radius{0};
     float decoy_lifetime{0.0f};        // secondes
     uint8_t health{0};
     WDAT *wdat{nullptr};
@@ -338,6 +347,7 @@ private:
     void parseREAL_OBJT_MISS_DYNM_MISS(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_DYNM_ATMO(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_DYNM_AGRV(uint8_t *data, size_t size);
+    void parseREAL_OBJT_MISS_DYNM_GBMB(uint8_t *data, size_t size);
     void parseREAL_OBJT_MISS_DYNM_GRAV(uint8_t *data, size_t size);
     void parseREAL_OBJT_SWPN_DYNM(uint8_t *data, size_t size);
     void parseREAL_OBJT_SWPN_DATA(uint8_t *data, size_t size);

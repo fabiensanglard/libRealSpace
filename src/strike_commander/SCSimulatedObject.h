@@ -1,5 +1,6 @@
 #pragma once
 #include "precomp.h"
+#include "../realspace/RSAirdens.h"
 
 class SCMissionActors;
 class SCMission;
@@ -11,14 +12,13 @@ protected:
     float last_py{0.0f};
     float last_pz{0.0f};
 
-    Vector3D calculate_drag(Vector3D velocity);
-    Vector3D calculate_lift(Vector3D velocity);
     int tps{30};
     std::vector<Vector3D> smoke_positions;
     int run_iterations{0};
     SCRenderer &Renderer = SCRenderer::getInstance();
     RSMixer &Mixer = RSMixer::getInstance();
     SCSmokeSet &SmokeSet = SCSmokeSet::getInstance();
+    float missile_roll{0.0f};
 public:
     bool is_simulated{false};
     bool guidance{true};
@@ -39,6 +39,7 @@ public:
     bool alive{true};
     RSEntity *obj;
     SCMissionActors *target{nullptr};
+    SCSimulatedObject *decoy_target{nullptr};
     SCMissionActors *shooter{nullptr};
     SCMission *mission{nullptr};
     SCSimulatedObject();
@@ -66,6 +67,27 @@ class DumbSimulatedObject : public SCSimulatedObject {
 public:
     void Simulate(int tps);
     void Render();
+};
+
+class AgravSimulatedObject : public DumbSimulatedObject {
+    RSAirdens airdens;
+
+public:
+    float lifetime_left{0.0f};
+    void Simulate(int tps);
+    int seekerSignature(int aspec);
+};
+
+class GuidedBombSimulatedObject : public SCSimulatedObject {
+    Vector3D nose{0.0f, 0.0f, -1.0f};
+    Vector3D up{0.0f, 1.0f, 0.0f};
+    bool launch_speed_set{false};
+    float guided_speed{0.0f};
+    RSAirdens airdens;
+
+public:
+    void Simulate(int tps);
+    std::tuple<Vector3D, Vector3D> ComputeTrajectory(int tps);
 };
 
 class EjectionSeatSimulatedObject : public SCSimulatedObject {

@@ -395,6 +395,18 @@ void SCMission::onWeaponRemoved(SCSimulatedObject *weapon) {
         if (actor->brain != nullptr && actor->brain->missile_threat == weapon) {
             actor->brain->missile_threat = nullptr;
         }
+        if (actor->plane != nullptr) {
+            for (auto missile : actor->plane->weaps_object) {
+                if (missile->decoy_target == weapon) {
+                    missile->decoy_target = nullptr;
+                }
+            }
+        }
+        for (auto missile : actor->weapons_shooted) {
+            if (missile->decoy_target == weapon) {
+                missile->decoy_target = nullptr;
+            }
+        }
     }
 }
 RSEntity * SCMission::LoadEntity(std::string name) {

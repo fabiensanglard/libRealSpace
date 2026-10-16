@@ -384,12 +384,17 @@ void RSEntity::parseREAL_OBJT_MISS_WDAT(uint8_t *data, size_t size){
     wdat->fire_interval = (float) bs.ReadInt32LE() / 256.0f;
     this->wdat = wdat;
 }
-void RSEntity::parseREAL_OBJT_MISS_DATA(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_DATA(uint8_t *data, size_t size){
+    ByteStream bs(data, size);
+    this->missile_flight_time = bs.ReadInt32LE();
+    this->missile_data_unknown = bs.ReadByte();
+    this->missile_fuse_radius = bs.ReadUShort();
+}
 void RSEntity::parseREAL_OBJT_BOMB_DATA(uint8_t *data, size_t size) {
     // PlayerComponent_LoadFieldsWithRetry_9FAD0 lit 5 octets sans borne de chunk : le DATA de la GBU-15 n'en a que 3
     ByteStream bs(data, 5);
     this->bomb_guided = bs.ReadByte();
-    bs.ReadByte();
+    this->bomb_arming_delay = bs.ReadByte();
     bs.ReadByte();
     this->bomb_lock_cone_rate = bs.ReadShort();
 }
@@ -397,6 +402,9 @@ void RSEntity::parseREAL_OBJT_DECY(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
     std::unordered_map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
     handlers["DATA"] = std::bind(&RSEntity::parseREAL_OBJT_DECY_DATA, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["SIGN"] = std::bind(&RSEntity::parseREAL_OBJT_JETP_SIGN, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["TRGT"] = std::bind(&RSEntity::parseREAL_OBJT_JETP_TRGT, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["DYNM"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_DYNM, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSEntity::parseREAL_OBJT_DECY_DATA(uint8_t *data, size_t size) {
@@ -412,17 +420,27 @@ void RSEntity::parseREAL_OBJT_MISS_DYNM(uint8_t *data, size_t size){
     handlers["ATMO"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_DYNM_ATMO, this, std::placeholders::_1, std::placeholders::_2);
     handlers["GRAV"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_DYNM_GRAV, this, std::placeholders::_1, std::placeholders::_2);
     handlers["AGRV"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_DYNM_AGRV, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["GBMB"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_DYNM_GBMB, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
 void RSEntity::parseREAL_OBJT_MISS_DYNM_AGRV(uint8_t *data, size_t size){}
 void RSEntity::parseREAL_OBJT_MISS_DYNM_GRAV(uint8_t *data, size_t size){}
-void RSEntity::parseREAL_OBJT_MISS_DYNM_ATMO(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_MISS_DYNM_ATMO(uint8_t *data, size_t size){
+    ByteStream bs(data, size);
+    this->drag_coefficient = bs.ReadFixedFloatLE();
+}
+void RSEntity::parseREAL_OBJT_MISS_DYNM_GBMB(uint8_t *data, size_t size){
+    ByteStream bs(data, size);
+    this->bomb_turn_rate = bs.ReadFixedFloatLE();
+}
 void RSEntity::parseREAL_OBJT_MISS_DYNM_MISS(uint8_t *data, size_t size){
     ByteStream bs(data, size);
     DYNN_MISS *dynn_miss = new DYNN_MISS();
-    bs.ReadByte();
-    dynn_miss->turn_degre_per_sec = bs.ReadInt24LE();
-    dynn_miss->velovity_m_per_sec = bs.ReadInt24LE();
+    dynn_miss->turn_degre_per_sec = bs.ReadFixedFloatLE();
+    dynn_miss->velovity_m_per_sec = bs.ReadFixedFloatLE();
+    dynn_miss->acceleration = bs.ReadFixedFloatLE();
+    dynn_miss->cruise_lateral = bs.ReadFixedFloatLE();
+    dynn_miss->cruise_normal = bs.ReadFixedFloatLE();
     this->dynn_miss = dynn_miss;
 }
 void RSEntity::parseREAL_OBJT_INFO(uint8_t *data, size_t size) {}
@@ -718,7 +736,7 @@ void RSEntity::parseREAL_OBJT_JETP_DYNM(uint8_t *data, size_t size) {
 }
 void RSEntity::parseREAL_OBJT_JETP_DYNM_DYNM(uint8_t *data, size_t size) {
     ByteStream bs(data, size);
-    if (size == 4) {
+    if (size >= 4) {
         bs.ReadByte();
         this->weight_in_kg = bs.ReadInt24LEByte3();
     }
