@@ -193,13 +193,23 @@ class RSEntity {
         int32_t weapons_round{0};
         int32_t detection_range{0};
         int32_t effective_range{0};
-        uint16_t unknown1{0};
-        uint16_t unknown2{0};
-        uint16_t unknown3{0};
-        uint8_t max_simultaneous_shots{0};
-        uint16_t weapons_round2{0};
-        int32_t unknown4{0};
+        uint16_t dispersion{0};
+        float fire_interval{0.0f};
+        uint8_t missile_launcher{0};
+        uint16_t weapon_quantity{0};
+        int32_t launch_offset{0};
         RSEntity *weapon_entity{nullptr};
+    };
+    struct TRCR_INFO {
+        float muzzle_speed{0.0f};
+        float unknown2{0.0f};
+        float start_jitter{0.0f};
+        float end_jitter{0.0f};
+        float lifetime{0.0f};
+        float speed_jitter{0.0f};
+        float shooter_speed_part{0.0f};
+        uint16_t unknown8{0};
+        uint16_t damage_factor{0};
     };
     struct DYNN_MISS {
         float turn_degre_per_sec{0.0f};
@@ -274,6 +284,7 @@ public:
     WDAT *wdat{nullptr};
     DYNN_MISS *dynn_miss{nullptr};
     SWPN_DATA *swpn_data{nullptr};
+    TRCR_INFO *tracer_info{nullptr};
     RSEntity *destroyed_object{nullptr};
     std::string destroyed_object_name;
     std::string cockpit_name;
@@ -329,6 +340,7 @@ private:
     void parseREAL_OBJT_DECY(uint8_t *data, size_t size);
     void parseREAL_OBJT_DECY_DATA(uint8_t *data, size_t size);
     void parseREAL_OBJT_TRCR(uint8_t *data, size_t size); 
+    void parseREAL_OBJT_TRCR_INFO(uint8_t *data, size_t size);
     void parseREAL_OBJT_AFTB(uint8_t *data, size_t size);
     void parseREAL_OBJT_EXPL(uint8_t *data, size_t size);
     void parseREAL_OBJT_SMKG(uint8_t *data, size_t size);

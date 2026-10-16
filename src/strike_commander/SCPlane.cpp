@@ -240,7 +240,7 @@ bool SCPlane::seekerSees(RSEntity *weapon, SCMissionActors *candidate) {
 }
 
 SCMissionActors *SCPlane::seekerSelect(RSEntity *weapon, SCMissionActors *desired, SCMission *mission) {
-    if (desired != nullptr && !desired->is_active) {
+    if (desired != nullptr && !desired->is_active && desired != mission->player) {
         desired = nullptr;
     }
     SCSimulatedObject *decoy = nullptr;
@@ -292,7 +292,8 @@ SCMissionActors *SCPlane::SeekerChoose(RSEntity *weapon, SCMissionActors *curren
     AgravSimulatedObject *best_decoy = nullptr;
     int best_signature = 0;
     for (auto actor : mission->actors) {
-        if (!actor->is_active || actor->is_destroyed || actor->object == nullptr || actor->object->entity == nullptr) {
+        bool active = actor->is_active || actor == mission->player;
+        if (!active || actor->is_destroyed || actor->object == nullptr || actor->object->entity == nullptr) {
             continue;
         }
         if (actor->plane != nullptr && !actor->plane->object->alive) {

@@ -142,6 +142,8 @@ void SCMission::loadMission() {
                     }
                 } else if (cast->actor == "STRIBASE") {
                     actor = new SCMissionActorsStrikeBase();
+                } else if (part->entity != nullptr && part->entity->entity_type == EntityType::swpn) {
+                    actor = new SCMissionActorsSwpn();
                 }
                 if (cast->actor == "TEAM0") {
                     cast->actor = GameState.wingman;
@@ -295,6 +297,9 @@ void SCMission::loadMission() {
     }
     for (auto area_actor: this->area->objects) {
         SCMissionActors *actor = new SCMissionActors();
+        if (area_actor.entity != nullptr && area_actor.entity->entity_type == EntityType::swpn) {
+            actor = new SCMissionActorsSwpn();
+        }
         MISN_PART *part = new MISN_PART();
         part->id = cpt_actor++;
         part->member_name = area_actor.name;

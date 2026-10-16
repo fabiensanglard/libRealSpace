@@ -1,6 +1,7 @@
 #include "precomp.h"
 #include "SCAIBrain.h"
 #include "SCMissionActors.h"
+#include "../engine/gametimer.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -367,97 +368,6 @@ int SCMissionActors::getDistanceToSpot(uint8_t arg) {
     Vector3D diff = plane_pos - position;
     return (int) diff.Length()/1000;
 }
-void SCMissionActors::shootWeapon(SCMissionActors *target) {
-    static int shoot_cooldown = 0;
-    if (this->is_destroyed || !this->is_active) {
-        return;
-    }
-    if (shoot_cooldown > 0) {
-        shoot_cooldown--;
-        return;
-    }
-    if (this->object->entity->entity_type != EntityType::swpn) {
-        return;
-    }
-    if (this->object->entity->swpn_data == nullptr) {
-        return;
-    }
-    if (this->object->entity->swpn_data->weapon_entity == nullptr) {
-        return;
-    }
-    
-    if (this->object->entity->swpn_data->max_simultaneous_shots > 0 && this->weapons_shooted.size() >= this->object->entity->swpn_data->max_simultaneous_shots) {
-        return;
-    }
-    if (this->object->entity->swpn_data->weapons_round <= 0) {
-        return; // No ammo left
-    }
-    RSEntity *weapon_entity = this->object->entity->swpn_data->weapon_entity;
-    Vector3D target_position = {0.0f, 0.0f, 0.0f};
-    if (target->plane != nullptr) {
-        target_position = {target->plane->x, target->plane->y, target->plane->z};
-    } else if (target->object != nullptr) {
-        target_position = target->object->position;
-    }
-    Vector3D direction = target_position - this->object->position;
-    float distance = direction.Length();
-    
-    if (distance> weapon_entity->wdat->target_range) {
-        return; // No direction to shoot
-    }
-    this->aiming_vector = direction;
-    direction.Normalize();
-    float p_y = this->object->position.y;
-    if (this->mission->area->getY(this->object->position.x, this->object->position.z) > this->object->position.y) {
-        this->object->position.y = this->mission->area->getY(this->object->position.x, this->object->position.z)+10.0f;
-    }
-    SCSimulatedObject *weapon = nullptr;
-
-    switch (weapon_entity->wdat->weapon_category) {
-        case 2: // Missiles
-            if (this->weapons_shooted.size()> 1) {
-                return; // Too many weapons already shot
-            }
-            if (weapon_entity->wdat->effective_range == 0) {
-                weapon_entity->wdat->effective_range = weapon_entity->wdat->target_range;
-            }
-            weapon = new SCSimulatedObject();
-            weapon->target = target;
-            weapon->obj = weapon_entity;
-            weapon->x = this->object->position.x;
-            weapon->y = p_y;
-            weapon->z = this->object->position.z;
-            shoot_cooldown = 160;
-            
-            weapon->vx = direction.x * weapon_entity->dynn_miss->velovity_m_per_sec / 80.0f;
-            weapon->vy = direction.y * weapon_entity->dynn_miss->velovity_m_per_sec / 80.0f;
-            weapon->vz = direction.z * weapon_entity->dynn_miss->velovity_m_per_sec / 80.0f;
-            break;
-        case 0: // Guns
-            if (this->weapons_shooted.size()> 30) {
-                return; // Too many weapons already shot
-            }
-            weapon = new GunSimulatedObject();
-            shoot_cooldown = 30;
-            weapon->obj = weapon_entity;
-            weapon->x = this->object->position.x;
-            weapon->y = p_y;
-            weapon->z = this->object->position.z;
-
-            
-            weapon->vx = direction.x *  1000.0f;
-            weapon->vy = direction.y *  1000.0f;
-            weapon->vz = direction.z *  1000.0f;
-            break;
-        default:
-            return;
-    }
-    weapon->mission = this->mission;
-    weapon->shooter = this;
-    this->object->entity->swpn_data->weapons_round--;
-    this->weapons_shooted.push_back(weapon);
-    this->mission->onWeaponSpawned(weapon);
-}
 void SCMissionActors::hasBeenHit(SCSimulatedObject *weapon, SCMissionActors *attacker) {
     if (this->brain != nullptr) {
         this->brain->just_hit = true;
@@ -598,34 +508,6 @@ void SCMissionActors::onMissionUpdate(const MissionUpdateEvent &event) {
             if (ai_actor->target->attacker == ai_actor) {
                 ai_actor->target->attacker = nullptr;
             }
-        }
-    }
-    if (ai_actor->object->entity != nullptr && ai_actor->object->entity->entity_type == EntityType::swpn && !ai_actor->is_destroyed && ai_actor->is_active) {
-        
-        if (ai_actor->target != nullptr && ai_actor->target->is_destroyed == false) {
-            if (ai_actor->retarget_cooldown > 0) {
-                ai_actor->shootWeapon(ai_actor->target);
-                ai_actor->retarget_cooldown--;
-            } else {
-                ai_actor->target = nullptr;
-            }
-        } else if (ai_actor->target != nullptr && ai_actor->target->is_destroyed == true) {
-            ai_actor->target = nullptr;
-        } else if (ai_actor->target == nullptr) {
-            for (auto targets: mission->actors) {
-                if (targets->plane == nullptr) {
-                    continue;
-                }
-                if (targets->team_id == ai_actor->team_id) {
-                    continue;
-                }
-                if ((targets->is_active && targets->is_destroyed == false && targets->object->alive) || (targets->actor_name == "PLAYER")) {
-                    ai_actor->shootWeapon(targets);
-                    ai_actor->target = targets;
-                    ai_actor->retarget_cooldown = 100 + (rand() % 200);
-                    break;
-                }
-            }   
         }
     }
     for (auto weapon: ai_actor->weapons_shooted) {
@@ -951,3 +833,159 @@ Fly to#Precise Way
 Defend#Point
 Follow#Leader
 */
+SCMissionActors *SCMissionActorsSwpn::findTarget() {
+    SCMissionActors *nearest = nullptr;
+    float nearest_distance = (float)this->object->entity->swpn_data->detection_range;
+    for (auto actor : this->mission->actors) {
+        bool active = actor->is_active || actor == this->mission->player;
+        if (actor->plane == nullptr || !active || actor->is_destroyed || !actor->object->alive) {
+            continue;
+        }
+        if (actor->object->entity == nullptr || actor->object->entity->target_type != 1) {
+            continue;
+        }
+        if (actor->team_id == this->team_id || actor->plane->ejected) {
+            continue;
+        }
+        float distance = (actor->plane->position - this->object->position).Length();
+        if (distance <= nearest_distance) {
+            nearest_distance = distance;
+            nearest = actor;
+        }
+    }
+    return nearest;
+}
+
+void SCMissionActorsSwpn::fireMissile() {
+    RSEntity *weapon_entity = this->object->entity->swpn_data->weapon_entity;
+    Vector3D target_position = this->target->plane->position;
+    float ground = this->mission->area->getY(target_position.x, target_position.z);
+    if (target_position.y - ground <= 305.0f) {
+        printf("SWPN %s#%d missile refused %s height=%.0f\n", this->actor_name.c_str(), this->actor_id,
+               this->target->actor_name.c_str(), target_position.y - ground);
+        return;
+    }
+    Vector3D start = this->object->position;
+    start.y += 2.0f * (float)this->object->entity->swpn_data->launch_offset;
+    Vector3D direction = target_position - start;
+    direction.Normalize();
+    SCSimulatedObject *missile = new SCSimulatedObject();
+    missile->obj = weapon_entity;
+    missile->target = this->target;
+    missile->shooter = this;
+    missile->mission = this->mission;
+    missile->guidance = true;
+    missile->x = start.x;
+    missile->y = start.y;
+    missile->z = start.z;
+    missile->vx = direction.x;
+    missile->vy = direction.y;
+    missile->vz = direction.z;
+    this->weapons_shooted.push_back(missile);
+    this->mission->onWeaponSpawned(missile);
+    printf("SWPN %s#%d fire missile at %s ammo=%d max_speed=%.1f accel=%.1f turn=%.1f flight_time=%d fuse=%d\n",
+           this->actor_name.c_str(), this->actor_id, this->target->actor_name.c_str(),
+           this->object->entity->swpn_data->weapons_round - 1, weapon_entity->dynn_miss->velovity_m_per_sec,
+           weapon_entity->dynn_miss->acceleration, weapon_entity->dynn_miss->turn_degre_per_sec,
+           weapon_entity->missile_flight_time, weapon_entity->missile_fuse_radius);
+    this->object->entity->swpn_data->weapons_round--;
+    this->fire_delay = this->object->entity->swpn_data->fire_interval;
+}
+
+void SCMissionActorsSwpn::fireGun() {
+    auto *data = this->object->entity->swpn_data;
+    RSEntity *weapon_entity = data->weapon_entity;
+    auto *tracer = weapon_entity->tracer_info;
+    float dt = GameTimer::getInstance().getDeltaTime();
+    Vector3D delta = this->target->plane->position - this->object->position;
+    float dist = delta.Length();
+    float flight_time = dist / tracer->muzzle_speed;
+    Vector3D lead = this->target->plane->worldVelocity() * (dt * flight_time);
+
+    int spread = (int)data->dispersion * (std::rand() & 0x7FFF) / 0x8000 + (int)delta.y / 100;
+    float offset = dist * (float)spread / 200.0f;
+    if (spread & 1) {
+        offset = -offset;
+    }
+    Vector3D wing = {this->target->plane->ptw.v[0][0], this->target->plane->ptw.v[0][1],
+                     this->target->plane->ptw.v[0][2]};
+    Vector3D direction = delta + lead + wing * offset;
+    direction.Normalize();
+
+    float speed = tracer->muzzle_speed;
+    int jitter = (int)(tracer->speed_jitter * 256.0f);
+    speed += (float)(2 * jitter * (std::rand() & 0x7FFF) / 0x8000 - jitter) / 256.0f;
+    Vector3D velocity = direction * speed;
+    Vector3D position = this->object->position + direction * (float)data->launch_offset;
+    position = position + velocity * (tracer->shooter_speed_part * dt);
+
+    GunSimulatedObject *shell = new GunSimulatedObject();
+    shell->obj = weapon_entity;
+    shell->shooter = this;
+    shell->mission = this->mission;
+    shell->x = position.x;
+    shell->y = position.y;
+    shell->z = position.z;
+    shell->vx = velocity.x;
+    shell->vy = velocity.y;
+    shell->vz = velocity.z;
+    this->weapons_shooted.push_back(shell);
+    this->mission->onWeaponSpawned(shell);
+    printf("SWPN %s#%d fire gun at %s speed=%.0f ammo=%d\n", this->actor_name.c_str(), this->actor_id,
+           this->target->actor_name.c_str(), speed, data->weapons_round - 1);
+    data->weapons_round--;
+    this->fire_delay = data->fire_interval;
+}
+
+void SCMissionActorsSwpn::onMissionUpdate(const MissionUpdateEvent &event) {
+    if (!this->is_destroyed && this->is_active) {
+        this->updateFire();
+    }
+    SCMissionActors::onMissionUpdate(event);
+}
+
+void SCMissionActorsSwpn::updateFire() {
+    auto *data = this->object->entity->swpn_data;
+    if (data->weapons_round <= 0 || data->weapon_entity == nullptr) {
+        this->target = nullptr;
+        return;
+    }
+    this->frames++;
+    if (this->fire_delay > 0.0f) {
+        this->fire_delay -= GameTimer::getInstance().getDeltaTime();
+        return;
+    }
+    if (this->frames % 10 == 0) {
+        SCMissionActors *previous = this->target;
+        this->target = this->findTarget();
+        if (this->target != previous) {
+            printf("SWPN %s#%d target=%s ammo=%d detection=%d range=%d interval=%.2f launcher=%d weapon=%s\n",
+                   this->actor_name.c_str(), this->actor_id,
+                   this->target != nullptr ? this->target->actor_name.c_str() : "none", data->weapons_round,
+                   data->detection_range, data->effective_range, data->fire_interval, data->missile_launcher,
+                   data->weapon_name.c_str());
+        }
+    }
+    if (this->target == nullptr) {
+        return;
+    }
+    Vector3D to_target = this->target->plane->position - this->object->position;
+    this->aiming_vector = to_target;
+    float distance = to_target.Length();
+    to_target.Normalize();
+    // cos²(élévation) <= cos 15° : cible à au moins 10,6° au-dessus de l'horizon
+    float horizontal_part = to_target.x * to_target.x + to_target.z * to_target.z;
+    const float max_horizontal_part = cosf(15.0f * (float)M_PI / 180.0f);
+    if (distance >= (float)data->effective_range || horizontal_part > max_horizontal_part) {
+        printf("SWPN %s#%d drop %s distance=%.0f range=%d elevation=%.1f\n", this->actor_name.c_str(),
+               this->actor_id, this->target->actor_name.c_str(), distance, data->effective_range,
+               asinf(to_target.y) * 180.0f / (float)M_PI);
+        this->target = nullptr;
+        return;
+    }
+    if (data->missile_launcher != 0) {
+        this->fireMissile();
+    } else {
+        this->fireGun();
+    }
+}

@@ -471,12 +471,11 @@ void DebugObjectViewer::renderUI() {
                     ImGui::Text("Weapons Round: %d", entity->swpn_data->weapons_round);
                     ImGui::Text("Detection Range: %d", entity->swpn_data->detection_range);
                     ImGui::Text("Effective Range: %d", entity->swpn_data->effective_range);
-                    ImGui::Text("Unknown1: %d", entity->swpn_data->unknown1);
-                    ImGui::Text("Unknown2: %d", entity->swpn_data->unknown2);
-                    ImGui::Text("Unknown3: %d", entity->swpn_data->unknown3);
-                    ImGui::Text("Max Simultaneous Shots: %d", entity->swpn_data->max_simultaneous_shots);
-                    ImGui::Text("Weapons Round2: %d", entity->swpn_data->weapons_round2);
-                    ImGui::Text("Unknown4: %d", entity->swpn_data->unknown4);
+                    ImGui::Text("Dispersion: %d", entity->swpn_data->dispersion);
+                    ImGui::Text("Fire Interval: %.2f s", entity->swpn_data->fire_interval);
+                    ImGui::Text("Missile Launcher: %d", entity->swpn_data->missile_launcher);
+                    ImGui::Text("Weapon Quantity: %d", entity->swpn_data->weapon_quantity);
+                    ImGui::Text("Launch Offset: %d", entity->swpn_data->launch_offset);
                     ImGui::TreePop();
                 }
             }

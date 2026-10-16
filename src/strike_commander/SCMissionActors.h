@@ -48,7 +48,6 @@ public:
     bool follow_slot_set{false};
     Vector3D aiming_vector{0.0f, 0.0f, 0.0f};
     std::vector<uint8_t> executed_opcodes;
-    int retarget_cooldown{0};
     float wait_timer{0.0f};   // objet de mission +0x3A (opcode WAIT)
     virtual bool deactivate(uint8_t arg);
     virtual bool setMessage(uint8_t arg);
@@ -71,7 +70,6 @@ public:
     virtual bool setObjective(prog_op command, uint8_t arg);
     virtual int getDistanceToTarget(uint8_t arg);
     virtual int getDistanceToSpot(uint8_t arg);
-    virtual void shootWeapon(SCMissionActors *target);
     virtual void hasBeenHit(SCSimulatedObject *weapon, SCMissionActors *attacker);
     SCMissionActors();
     ~SCMissionActors();
@@ -81,10 +79,12 @@ private:
     MessageBus &messageBus = MessageBus::getInstance();
     void onEvent(const EventMessage &event);
     void onGettingHit(const MissionEventActorHit &event);
-    void onMissionUpdate(const MissionUpdateEvent &event);
     // cadence IA fixe (AIRefreshEvent) : ordre radio accepte puis SCAIBrain::tick (AIEntity_MasterTick_5ACC)
     void onAIRefresh(const AIRefreshEvent &event);
     MessageBus::SubscriptionId subscription_id{-1};
+
+protected:
+    virtual void onMissionUpdate(const MissionUpdateEvent &event);
 };
 
 class SCMissionActorsPlayer : public SCMissionActors {
@@ -96,6 +96,18 @@ public:
     bool setMessage(uint8_t arg) override;
     void hasBeenHit(SCSimulatedObject *weapon, SCMissionActors *attacker) override;
     bool setObjective(prog_op command, uint8_t arg) override;
+};
+
+class SCMissionActorsSwpn : public SCMissionActors {
+    int frames{0};
+    float fire_delay{0.0f};
+    SCMissionActors *findTarget();
+    void fireMissile();
+    void fireGun();
+    void updateFire();
+
+public:
+    void onMissionUpdate(const MissionUpdateEvent &event) override;
 };
 
 class SCMissionActorsStrikeBase : public SCMissionActors {

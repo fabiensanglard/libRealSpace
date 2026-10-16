@@ -176,6 +176,11 @@ std::tuple<Vector3D, Vector3D> SCSimulatedObject::ComputeTrajectory(int tps) {
     level_up = level_right.CrossProduct(&nose);
     this->missile_roll = atan2f(up.DotProduct(&level_right), up.DotProduct(&level_up));
 
+    if (!this->is_simulated && this->run_iterations % tps == 0) {
+        printf("MISSILE %s t=%.1fs speed=%.1f %s target=%s\n", this->obj->name.c_str(),
+               (float)this->run_iterations / (float)tps, velocity.Length(), this->no_thrust ? "cruise" : "boost",
+               this->target != nullptr ? this->target->actor_name.c_str() : (this->decoy_target != nullptr ? "decoy" : "none"));
+    }
     this->run_iterations++;
     Vector3D step = velocity * deltaTime;
     position = position + step;
@@ -237,7 +242,8 @@ void SCSimulatedObject::Simulate(int tps) {
             }
             return;
         }
-        if (this->target != nullptr && (!this->target->is_active || !this->target->object->alive)) {
+        bool target_active = this->target != nullptr && (this->target->is_active || this->target == this->mission->player);
+        if (this->target != nullptr && (!target_active || !this->target->object->alive)) {
             this->target->weapon_shooted_at_me = nullptr;
             this->target = nullptr;
         }

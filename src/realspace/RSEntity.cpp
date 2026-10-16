@@ -316,7 +316,7 @@ void RSEntity::parseREAL_OBJT_TRCR(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
     this->entity_type = EntityType::tracer;
     std::unordered_map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
-    handlers["INFO"] = std::bind(&RSEntity::parseREAL_OBJT_JETP_INFO, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["INFO"] = std::bind(&RSEntity::parseREAL_OBJT_TRCR_INFO, this, std::placeholders::_1, std::placeholders::_2);
     handlers["EXPL"] = std::bind(&RSEntity::parseREAL_OBJT_JETP_EXPL, this, std::placeholders::_1, std::placeholders::_2);
     handlers["SIGN"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_SIGN, this, std::placeholders::_1, std::placeholders::_2);
     handlers["TRGT"] = std::bind(&RSEntity::parseREAL_OBJT_MISS_TRGT, this, std::placeholders::_1, std::placeholders::_2);
@@ -360,6 +360,20 @@ void RSEntity::parseREAL_OBJT_PODR_DATA(uint8_t *data, size_t size){
     this->weaps.push_back(podr_data);
 }
 void RSEntity::parseREAL_OBJT_JETP_INFO(uint8_t *data, size_t size){}
+void RSEntity::parseREAL_OBJT_TRCR_INFO(uint8_t *data, size_t size) {
+    ByteStream bs(data, size);
+    TRCR_INFO *info = new TRCR_INFO();
+    info->muzzle_speed = bs.ReadFixedFloatLE();
+    info->unknown2 = bs.ReadFixedFloatLE();
+    info->start_jitter = bs.ReadFixedFloatLE();
+    info->end_jitter = bs.ReadFixedFloatLE();
+    info->lifetime = bs.ReadFixedFloatLE();
+    info->speed_jitter = bs.ReadFixedFloatLE();
+    info->shooter_speed_part = bs.ReadFixedFloatLE();
+    info->unknown8 = bs.ReadUShort();
+    info->damage_factor = bs.ReadUShort();
+    this->tracer_info = info;
+}
 void RSEntity::parseREAL_OBJT_MISS_EXPL(uint8_t *data, size_t size){}
 void RSEntity::parseREAL_OBJT_MISS_SIGN(uint8_t *data, size_t size){}
 void RSEntity::parseREAL_OBJT_MISS_TRGT(uint8_t *data, size_t size){}
@@ -561,11 +575,10 @@ void RSEntity::parseREAL_OBJT_SWPN_DATA(uint8_t *data, size_t size) {
     swpn_data->weapons_round = bs.ReadInt32LE();
     swpn_data->detection_range = bs.ReadInt32LE();
     swpn_data->effective_range = bs.ReadInt32LE();
-    swpn_data->unknown1 = bs.ReadShort();
-    swpn_data->unknown2 = bs.ReadShort();
-    swpn_data->unknown3 = bs.ReadShort();
-    swpn_data->max_simultaneous_shots = bs.ReadByte();
-    swpn_data->weapons_round2 = bs.ReadShort();
+    swpn_data->dispersion = bs.ReadUShort();
+    swpn_data->fire_interval = bs.ReadFixedFloatLE();
+    swpn_data->missile_launcher = bs.ReadByte();
+    swpn_data->weapon_quantity = bs.ReadUShort();
     swpn_data->weapon_name = bs.ReadString(8);
     std::transform(swpn_data->weapon_name.begin(), swpn_data->weapon_name.end(), swpn_data->weapon_name.begin(), ::toupper);
     swpn_data->weapon_name = assetsManager.object_root_path + swpn_data->weapon_name + ".IFF";
@@ -577,7 +590,7 @@ void RSEntity::parseREAL_OBJT_SWPN_DATA(uint8_t *data, size_t size) {
     } else {
         swpn_data->weapon_entity = nullptr;
     }
-    swpn_data->unknown4 = bs.ReadInt32LE();
+    swpn_data->launch_offset = bs.ReadInt32LE();
     this->swpn_data = swpn_data;
 }
 void RSEntity::parseREAL_OBJT_SWPN_ALGN(uint8_t *data, size_t size) {}
