@@ -10,6 +10,10 @@ std::string Config::getString(const std::string& section, const std::string& key
     return _ini.GetValue(section.c_str(), key.c_str(), defaultValue.c_str());
 }
 
+void Config::setString(const std::string &section, const std::string &key, const std::string &value) {
+    _ini.SetValue(section.c_str(), key.c_str(), value.c_str());
+}
+
 int Config::getInt(const std::string& section, const std::string& key, int defaultValue) const {
     return static_cast<int>(_ini.GetLongValue(section.c_str(), key.c_str(), defaultValue));
 }

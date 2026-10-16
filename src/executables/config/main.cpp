@@ -67,7 +67,25 @@ int main(int argc, char* argv[]) {
     bool fx_fxaa         = config.getBool("Video", "fx_fxaa", true);
     bool widescreen_ambilight = config.getBool("Video", "widescreen_ambilight", true);
     int ambilight_sample_width = config.getInt("Video", "ambilight_sample_width", 1);
+    int terrain_shadow_lift = config.getInt("Game", "terrain_shadow_lift", 8);
+    int terrain_shadow_range = config.getInt("Game", "terrain_shadow_range", 35);
+    bool terrain_flat = config.getBool("Game", "terrain_flat", false);
     int difficulty = config.getInt("Gameplay", "difficulty", 0);
+    // [Input]
+    char bindings_file[256];
+    snprintf(bindings_file, sizeof(bindings_file), "%s", config.getString("Input", "bindings_file", "default_bindings.cfg").c_str());
+    // [Sound]
+    char midi_port[256];
+    snprintf(midi_port, sizeof(midi_port), "%s", config.getString("Sound", "midi_port", "").c_str());
+    int midi_music = config.getInt("Sound", "midi_music", 0);
+    bool midi_debug = config.getInt("Sound", "midi_debug", 0) != 0;
+    char soundfont[512];
+    snprintf(soundfont, sizeof(soundfont), "%s", config.getString("Sound", "soundfont", "").c_str());
+    const char *midi_music_labels[] = {
+        "AdLib",
+        "General MIDI (SC-155)",
+        "Roland MT-32",
+    };
     DebugControlMapping controlMapping;
     GameEngine::setInstance(std::make_unique<GameEngine>());
     GameEngine *game = &GameEngine::instance();
@@ -146,6 +164,9 @@ int main(int argc, char* argv[]) {
                     ImGui::Checkbox(_labelPrefix("Show Texture").c_str(), &show_texture);
                     ImGui::Checkbox(_labelPrefix("Show Fog").c_str(), &show_fog);
                     ImGui::Checkbox(_labelPrefix("Clouds Enabled").c_str(), &clouds_enabled);
+                    ImGui::SliderInt(_labelPrefix("Terrain Shadow Lift").c_str(), &terrain_shadow_lift, 0, 50);
+                    ImGui::SliderInt(_labelPrefix("Terrain Shadow Range").c_str(), &terrain_shadow_range, 1, 100);
+                    ImGui::Checkbox(_labelPrefix("Terrain Flat Shading").c_str(), &terrain_flat);
                 }
                 if (ImGui::CollapsingHeader("Gameplay", ImGuiTreeNodeFlags_DefaultOpen)) {
                     ImGui::SliderInt(_labelPrefix("Difficulty").c_str(), &difficulty, 0, 2);
@@ -159,6 +180,15 @@ int main(int argc, char* argv[]) {
                     ImGui::Checkbox(_labelPrefix("Widescreen Ambilight").c_str(), &widescreen_ambilight);
                     ImGui::SliderInt(_labelPrefix("Ambilight Sample Width").c_str(), &ambilight_sample_width, 1, 10);
 
+                }
+                if (ImGui::CollapsingHeader("Input", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    ImGui::InputText(_labelPrefix("Bindings File").c_str(), bindings_file, sizeof(bindings_file));
+                }
+                if (ImGui::CollapsingHeader("Sound", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    ImGui::Combo(_labelPrefix("Music Output").c_str(), &midi_music, midi_music_labels, 3);
+                    ImGui::InputText(_labelPrefix("MIDI Port").c_str(), midi_port, sizeof(midi_port));
+                    ImGui::InputText(_labelPrefix("SoundFont").c_str(), soundfont, sizeof(soundfont));
+                    ImGui::Checkbox(_labelPrefix("MIDI Debug").c_str(), &midi_debug);
                 }
 
                 ImGui::Separator();
@@ -179,6 +209,15 @@ int main(int argc, char* argv[]) {
                     config.setBool("Video",  "fx_fxaa",          fx_fxaa);
                     config.setBool("Video",  "widescreen_ambilight", widescreen_ambilight);
                     config.setInt ("Video",  "ambilight_sample_width", ambilight_sample_width);
+                    config.setInt ("Game",   "terrain_shadow_lift", terrain_shadow_lift);
+                    config.setInt ("Game",   "terrain_shadow_range", terrain_shadow_range);
+                    config.setBool("Game",   "terrain_flat", terrain_flat);
+                    config.setInt ("Gameplay", "difficulty", difficulty);
+                    config.setString("Input", "bindings_file", bindings_file);
+                    config.setInt ("Sound",  "midi_music", midi_music);
+                    config.setString("Sound", "midi_port", midi_port);
+                    config.setString("Sound", "soundfont", soundfont);
+                    config.setInt ("Sound",  "midi_debug", midi_debug ? 1 : 0);
                     config.save(configPath);
                 }
                 ImGui::SameLine();

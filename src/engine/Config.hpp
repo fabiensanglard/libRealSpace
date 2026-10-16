@@ -26,6 +26,7 @@ public:
     static bool hasInstance() { return (bool)s_instance; };
     bool load(const std::string& filePath);
     std::string getString(const std::string& section, const std::string& key, const std::string& defaultValue = "") const;
+    void setString(const std::string& section, const std::string& key, const std::string& value);
     int getInt(const std::string& section, const std::string& key, int defaultValue = 0) const;
     int setInt(const std::string& section, const std::string& key, int value);
     bool getBool(const std::string& section, const std::string& key, bool defaultValue = false) const;
