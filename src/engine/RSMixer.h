@@ -20,6 +20,8 @@
 #include "AILAdlibDriver.h"
 #include "AILXmidiDriver.h"
 #include "SCMusicSequencer.h"
+#include "MusicOutputs.h"
+#include <memory>
 
 class RSMixer {
     int initted;
@@ -34,6 +36,7 @@ class RSMixer {
     opl3_chip chip;
     AILAdlibDriver adl;
     AILXmidiDriver xmi;
+    std::unique_ptr<MusicOutput> output; // music destination: OPL, MIDI hardware or software synth
     SCMusicSequencer sequencer;
     int sampleRate{ 44100 };
     uint16_t audioFormat{ AUDIO_S16SYS };

@@ -37,6 +37,7 @@ private:
     std::vector<MemMusic *> gameflow_music;
     AssetManager &assetManager = AssetManager::instance();
     std::vector<uint8_t> timbre_data;               // copie de STRIKE.AD (timbres ne fait que pointer dessus)
+    std::vector<uint8_t> mt_data;
     std::vector<std::unique_ptr<RSMusicSet>> owned; // tous les jeux charges
     std::unordered_map<uint8_t, RSMusicSet *> bank_sets;
     RSMusicSet *newSet();
@@ -55,6 +56,7 @@ public:
     std::unordered_map<std::string, std::vector<RSMusicSet *>> music_files;
     // STRIKE.AD : "strike." + suffixe "AD" du pilote ADLIB.ADV (Music_LoadTimbreFromLibrary_5A577)
     SCTimbreLibrary timbres;
+    SCTimbreLibrary timbresMt; // STRIKE.MT (nur bei midiMusic == 2)
 
     // Charge un fichier de musique et renvoie ses jeux (vide si le fichier est absent).
     // - Si les entrees de premier niveau sont des pistes (FORM), le fichier forme un seul jeu,
@@ -72,6 +74,11 @@ public:
     bool LoadTimbres(const char *file);
 
     ~RSMusic();
+
+    // Musikquelle: 0 = AdLib (.ADL, AMUSIC.PAK), 1 = General MIDI (.MID, MMUSIC.PAK),
+    // 2 = Roland MT-32 (.ROL, RMUSIC.PAK). Muss vor init() gesetzt werden. Effekte bleiben ADL.
+    int midiMusic{ 0 };
+
     // Configuration de Strike Commander : fichiers, .dat et banques (voir RSMusic.cpp).
     void init();
     void SwitchBank(uint8_t bank);

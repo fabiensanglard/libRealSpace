@@ -1,7 +1,11 @@
+#define TSF_IMPLEMENTATION
+#include "third_party/tsf.h"
 #include "RSMixer.h"
 #include <unordered_map>
 #include <mutex>
 #include <atomic>
+#include <cstdlib>
+#include "Config.hpp"
 
 static RSMixer *g_rsmixer_instance = nullptr;
 
@@ -61,6 +65,26 @@ void RSMixer::init() {
         printf("RSMixer: format audio 0x%04X non gere, musique muette\n", this->audioFormat);
     }
     this->music = new RSMusic();
+    {
+        Config &mcfg = Config::getInstance();
+        int src = mcfg.getInt("Sound", "midi_music", 0);
+        const bool hasPort = !mcfg.getString("Sound", "midi_port", "").empty();
+        const std::string sf = mcfg.getString("Sound", "soundfont", "");
+        if (src < 0 || src > 2) {
+            src = 0;
+        }
+        if (src == 1 && !hasPort && !sf.empty()) {
+            auto softOut = std::make_unique<SoftSynthOutput>();
+            if (softOut->open(sf.c_str(), this->sampleRate)) {
+                output = std::move(softOut);
+            } else {
+                src = 0; // fall back to AdLib
+            }
+        } else if (!hasPort) {
+            src = 0;
+        }
+        this->music->midiMusic = src;
+    }
     this->music->init();
     this->isplaying = false;
     {
@@ -71,6 +95,31 @@ void RSMixer::init() {
         });
         xmi.init(&adl);
         sequencer.init(&xmi, &this->music->timbres);
+        Config &cfg = Config::getInstance();
+        std::string midiPort = cfg.getString("Sound", "midi_port", "");
+        if (!midiPort.empty()) {
+            const bool isMt32 = (this->music->midiMusic == 2);
+            const bool dbg = cfg.getInt("Sound", "midi_debug", 0) != 0;
+            auto hw = std::make_unique<MidiHardwareOutput>(isMt32, &this->music->timbresMt, dbg);
+            if (hw->open(midiPort.c_str())) {
+                output = std::move(hw);
+            }
+        }
+        if (!output) {
+            output = std::make_unique<OplOutput>();
+        }
+        sequencer.output = output.get();
+        if (output->forwardsSysex()) {
+            xmi.sysexTap = [this](const uint8_t *p, size_t n) { output->sysex(p, n); };
+        }
+        xmi.midiTap = [this](int st, int d1, int d2) -> bool {
+            for (int c = 0; c < SFX_CHANNELS; c++) {
+                if (sfxHandle[c] >= 0 && sfxHandle[c] == xmi.current) {
+                    return false; // FM effects (SOUNDFX.ADL) stay on OPL
+                }
+            }
+            return output->send(st, d1, d2);
+        };
     }
     Mix_HookMusic(RSMixer::musicHook, this);
     Mix_ChannelFinished(ChannelFinishedCallback);
@@ -218,6 +267,9 @@ void RSMixer::render(int16_t *out, int frames) {
             chunk = frames - done;
         }
         OPL3_GenerateStream(&chip, out + 2 * done, (uint32_t)chunk);
+        if (output) {
+            output->render(out + 2 * done, chunk);
+        }
         done += chunk;
         accDriver += chunk * drvStep;
         accGame += chunk * gameStep;
@@ -375,7 +427,7 @@ void RSMixer::playIsolated(MemMusic *mus, int loop, int index) {
     this->current_music = index < 0 ? UINT32_MAX : (uint32_t)index;
     this->isolatedTrack = index;
     int err = 0;
-    musicHandle = SCMusicSequencer::registerAndStart(&xmi, &this->music->timbres, mus->data, mus->size, &err);
+    musicHandle = SCMusicSequencer::registerAndStart(&xmi, &this->music->timbres, mus->data, mus->size, &err, sequencer.output);
     if (musicHandle < 0) {
         printf("Error loading music (error %d)\n", err);
         return;

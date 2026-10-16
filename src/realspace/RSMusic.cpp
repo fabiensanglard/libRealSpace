@@ -21,16 +21,36 @@ static bool isForm(const PakEntry *e) {
 void RSMusic::init() {
     LoadTimbres("..\\..\\DATA\\SOUND\\STRIKE.AD");
 
-    // banque 0 : AMUSIC.PAK (pistes a plat, pas de .dat)
-    std::vector<RSMusicSet *> amusic = LoadMusicFile("..\\..\\DATA\\MIDGAMES\\AMUSIC.PAK");
+
+
+    if (midiMusic == 2) {
+        if (TreEntry *mt = assetManager.GetEntryByName("..\\..\\DATA\\SOUND\\STRIKE.MT")) {
+            mt_data.assign(mt->data, mt->data + mt->size);
+            timbresMt.set(mt_data.data(), mt_data.size());
+        } else {
+            printf("RSMusic: Could not find STRIKE.MT\n");
+        }
+    }
+
+    static const char *const exts[] = { "ADL", "MID", "ROL" };
+    static const char *const midPaks[] = { "AMUSIC.PAK", "MMUSIC.PAK", "RMUSIC.PAK" };
+    static const char *const names[] = { "AdLib", "General MIDI", "Roland MT-32" };
+    const int src = (midiMusic >= 0 && midiMusic <= 2) ? midiMusic : 0;
+    const char *ext = exts[src];
+    const std::string sound = "..\\..\\DATA\\SOUND\\";
+    const std::string mid = "..\\..\\DATA\\MIDGAMES\\";
+    printf("RSMusic: music source %s (.%s / %s)\n", names[src], ext, midPaks[src]);
+
+    // banque 0 : AMUSIC.PAK / MMUSIC.PAK / RMUSIC.PAK (pistes a plat, pas de .dat)
+    std::vector<RSMusicSet *> amusic = LoadMusicFile((mid + midPaks[src]).c_str());
+
     if (!amusic.empty()) {
         SetBank(0, amusic[0]);
         midgames_musics[0] = amusic[0]->tracks;
     }
 
-    // banque 1 : toutes les pistes de GAMEFLOW.ADL ; gameflow_musics[i] = pistes du jeu i,
-    // precedees de celles du jeu 0
-    std::vector<RSMusicSet *> gameflow = LoadMusicFile("..\\..\\DATA\\SOUND\\GAMEFLOW.ADL");
+    // banque 1 : GAMEFLOW.ADL / GAMEFLOW.MID
+    std::vector<RSMusicSet *> gameflow = LoadMusicFile((sound + "GAMEFLOW." + ext).c_str());
     for (size_t i = 0; i < gameflow.size(); i++) {
         if (i > 0) {
             gameflow_musics[i] = gameflow_musics[0];
@@ -41,8 +61,8 @@ void RSMusic::init() {
         }
     }
 
-    // banque 2 : COMBAT.ADL, avec les transitions de COMBAT.DAT
-    std::vector<RSMusicSet *> combat = LoadMusicFile("..\\..\\DATA\\SOUND\\COMBAT.ADL", "..\\..\\DATA\\SOUND\\COMBAT.DAT");
+    // banque 2 : COMBAT.ADL / COMBAT.MID, Transitionen aus COMBAT.DAT (fuer alle Varianten gleich)
+    std::vector<RSMusicSet *> combat = LoadMusicFile((sound + "COMBAT." + ext).c_str(), (sound + "COMBAT.DAT").c_str());
     for (size_t i = 0; i < combat.size(); i++) {
         combat_musics[i] = combat[i]->tracks;
     }
@@ -50,7 +70,7 @@ void RSMusic::init() {
         SetBank(2, combat[0]);
     }
 
-    // effets XMIDI (pas de banque : RSMixer::playSoundFx)
+    // Effekte: immer ADL (es gibt keine GM-Variante), laufen weiter ueber OPL
     std::vector<RSMusicSet *> soundfx = LoadMusicFile("..\\..\\DATA\\SOUND\\SOUNDFX.ADL");
     for (size_t i = 0; i < soundfx.size(); i++) {
         soundfx_musics[i] = soundfx[i]->tracks;
