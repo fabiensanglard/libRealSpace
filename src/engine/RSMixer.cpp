@@ -74,8 +74,11 @@ void RSMixer::init() {
             src = 0;
         }
         if (src == 1 && !hasPort && !sf.empty()) {
-            if (!soft.open(sf.c_str(), this->sampleRate)) {
-                src = 0; // Rueckfall auf AdLib
+            auto softOut = std::make_unique<SoftSynthOutput>();
+            if (softOut->open(sf.c_str(), this->sampleRate)) {
+                output = std::move(softOut);
+            } else {
+                src = 0; // fall back to AdLib
             }
         } else if (!hasPort) {
             src = 0;
@@ -94,39 +97,29 @@ void RSMixer::init() {
         sequencer.init(&xmi, &this->music->timbres);
         Config &cfg = Config::getInstance();
         std::string midiPort = cfg.getString("Sound", "midi_port", "");
-        midi.mt32 = (this->music->midiMusic == 2);
-        if (!midiPort.empty() && midi.open(midiPort.c_str())) {
+        if (!midiPort.empty()) {
+            const bool isMt32 = (this->music->midiMusic == 2);
             const bool dbg = cfg.getInt("Sound", "midi_debug", 0) != 0;
-            if (this->music->midiMusic == 2) {
-                mt32.out = &midi;
-                sequencer.mt = &mt32;
-                sequencer.mtLib = &this->music->timbresMt;
-                xmi.sysexTap = [this](const uint8_t *p, size_t n) { midi.raw(p, n); };
+            auto hw = std::make_unique<MidiHardwareOutput>(isMt32, &this->music->timbresMt, dbg);
+            if (hw->open(midiPort.c_str())) {
+                output = std::move(hw);
             }
-            xmi.midiTap = [this, dbg](int st, int d1, int d2) -> bool {
-                for (int c = 0; c < SFX_CHANNELS; c++) {
-                    if (sfxHandle[c] >= 0 && sfxHandle[c] == xmi.current) {
-                        return false; // FM-Effekte (SOUNDFX.ADL) bleiben auf OPL
-                    }
-                }
-                if (dbg && (st & 0xF0) == 0xC0) {
-                    printf("MIDI ch%d program %d\n", (st & 0x0F) + 1, d1);
-                }
-                midi.send(st, d1, d2);
-                return true;
-            };
         }
-        if (soft.active()) {
-            xmi.midiTap = [this](int st, int d1, int d2) -> bool {
-                for (int c = 0; c < SFX_CHANNELS; c++) {
-                    if (sfxHandle[c] >= 0 && sfxHandle[c] == xmi.current) {
-                        return false; // FM-Effekte bleiben auf OPL
-                    }
-                }
-                soft.send(st, d1, d2);
-                return true;
-            };
+        if (!output) {
+            output = std::make_unique<OplOutput>();
         }
+        sequencer.output = output.get();
+        if (output->forwardsSysex()) {
+            xmi.sysexTap = [this](const uint8_t *p, size_t n) { output->sysex(p, n); };
+        }
+        xmi.midiTap = [this](int st, int d1, int d2) -> bool {
+            for (int c = 0; c < SFX_CHANNELS; c++) {
+                if (sfxHandle[c] >= 0 && sfxHandle[c] == xmi.current) {
+                    return false; // FM effects (SOUNDFX.ADL) stay on OPL
+                }
+            }
+            return output->send(st, d1, d2);
+        };
     }
     Mix_HookMusic(RSMixer::musicHook, this);
     Mix_ChannelFinished(ChannelFinishedCallback);
@@ -261,7 +254,9 @@ void RSMixer::render(int16_t *out, int frames) {
             chunk = frames - done;
         }
         OPL3_GenerateStream(&chip, out + 2 * done, (uint32_t)chunk);
-        soft.render(out + 2 * done, chunk);
+        if (output) {
+            output->render(out + 2 * done, chunk);
+        }
         done += chunk;
         accDriver += chunk * drvStep;
         accGame += chunk * gameStep;
@@ -419,7 +414,7 @@ void RSMixer::playIsolated(MemMusic *mus, int loop, int index) {
     this->current_music = index < 0 ? UINT32_MAX : (uint32_t)index;
     this->isolatedTrack = index;
     int err = 0;
-    musicHandle = SCMusicSequencer::registerAndStart(&xmi, sequencer.mt ? sequencer.mtLib : &this->music->timbres, mus->data, mus->size, &err, sequencer.mt);
+    musicHandle = SCMusicSequencer::registerAndStart(&xmi, &this->music->timbres, mus->data, mus->size, &err, sequencer.output);
     if (musicHandle < 0) {
         printf("Error loading music (error %d)\n", err);
         return;
