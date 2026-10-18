@@ -50,6 +50,8 @@ private:
     std::string buildSpriteLabel(MIDGAME_SHOT_SPRITE* sprite, size_t index);
     std::string buildForegroundLabel(MIDGAME_SHOT_BG* fg, size_t index);
     std::string buildTexteLineLabel(MIDGAME_TEXT_LINE* txt, size_t index);
+    void editLayerCommon(MIDGAME_LAYER_COMMON &common);
+    int nextFreeLayerId();
 
     void drawShotSection(
         const char* title,

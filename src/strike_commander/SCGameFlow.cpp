@@ -826,6 +826,9 @@ void SCGameFlow::playMidGame(uint8_t midGameId) {
         std::string filepath = midgame_file_map[midGameId];
         if (archive.LoadFromFile(filepath.c_str(), shots)) {
             midgame->midgames_shots[1] = shots;
+            for (auto shot : shots) {
+                midgame->resetShot(shot);
+            }
             this->mid_games.push(midgame);
             printf("Animation loaded from %s\n", filepath.c_str());
         } else {
