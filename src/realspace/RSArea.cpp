@@ -265,7 +265,7 @@ void RSArea::ParseBlocks(size_t lod, PakEntry *entry, size_t blockDim) {
             vertex->upperImageID = vertStream.ReadByte();
             vertex->lowerImageID = vertStream.ReadByte();
             vertex->height = height;
-            Renderer.terrainColor(vertex->type, vertex->flag, vertex->color);
+            this->terrainColor(vertex->type, vertex->flag, vertex->color);
 
             vertex->v.y = height * HEIGH_MAP_SCALE;
 
@@ -276,6 +276,67 @@ void RSArea::ParseBlocks(size_t lod, PakEntry *entry, size_t blockDim) {
 
         }
     }
+}
+void RSArea::terrainColor(uint8_t base, uint8_t light, float *color) {
+    this->toneColor(this->terrainTone(base, light), color);
+}
+
+int RSArea::terrainTone(uint8_t base, uint8_t light) {
+    PaletteRange *range = &this->palette.ranges[0];
+    if (base < this->palette.ranges.size()) {
+        range = &this->palette.ranges[base];
+    }
+    int tone = range->first + ((light * range->shades + 128) >> 8);
+    if (tone > 255) {
+        tone = 255;
+    }
+    return tone;
+}
+
+MapVertex *RSArea::highestVertex(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
+    MapVertex *highest = tri0;
+    if ((uint16_t)tri1->height >= (uint16_t)highest->height) {
+        highest = tri1;
+    }
+    if ((uint16_t)tri2->height >= (uint16_t)highest->height) {
+        highest = tri2;
+    }
+    return highest;
+}
+void RSArea::triangleColors(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, float colors[3][4]) {
+    uint8_t base = this->highestVertex(tri0, tri1, tri2)->type;
+    int tones[3];
+    tones[0] = this->terrainTone(base, tri0->flag);
+    tones[1] = this->terrainTone(base, tri1->flag);
+    tones[2] = this->terrainTone(base, tri2->flag);
+    if (this->terrain_flat) {
+        int average = (tones[0] + tones[1] + tones[2]) / 3;
+        tones[0] = average;
+        tones[1] = average;
+        tones[2] = average;
+    }
+    for (int i = 0; i < 3; i++) {
+        this->toneColor(tones[i], colors[i]);
+    }
+}
+
+void RSArea::toneColor(int tone, float *color) {
+    Texel *texel = this->palette.GetColorPalette()->GetRGBColor((uint8_t)tone);
+    color[0] = texel->r / 255.0f;
+    color[1] = texel->g / 255.0f;
+    color[2] = texel->b / 255.0f;
+    float luminance = 0.299f * color[0] + 0.587f * color[1] + 0.114f * color[2];
+    if (luminance > 0.0f && luminance < this->terrain_shadow_range) {
+        float depth = 1.0f - luminance / this->terrain_shadow_range;
+        float factor = (luminance + this->terrain_shadow_lift * depth * depth) / luminance;
+        for (int i = 0; i < 3; i++) {
+            color[i] = color[i] * factor;
+            if (color[i] > 1.0f) {
+                color[i] = 1.0f;
+            }
+        }
+    }
+    color[3] = 1.0f;
 }
 
 void RSArea::ParseElevations(void) {
@@ -309,7 +370,7 @@ void RSArea::ParseHeightMap(void) {
     PakArchive smallPak;
     smallPak.InitFromRAM("SMALSIZE", entry->data, entry->size);
     ParseBlocks(BLOCK_LOD_MIN, entry, 5);
-
+    ComputeTriangleColors();
     BuildSkirts();
     generateClouds(randInt(500), 15000, 15.0f);
     
@@ -345,6 +406,16 @@ void RSArea::InitFromZipFileName(std::string zipFilename) {
     this->InitFromRam(zipFilename.c_str(), data, uncompSize);
 }
 void RSArea::InitFromRam(const char *pakFilename, uint8_t *data, size_t size) {
+    AssetManager &assets = AssetManager::instance();
+    Config &config = Config::instance();
+    TreEntry *entries = (TreEntry *)assets.GetEntryByName("..\\..\\DATA\\PALETTE\\PALETTE.IFF");
+    if (entries) {
+        palette.initFromFileRam(entries->data, entries->size);    
+    }
+    this->terrain_shadow_lift = config.getInt("Game", "terrain_shadow_lift", 8) / 100.0f;
+    this->terrain_shadow_range = config.getInt("Game", "terrain_shadow_range", 35) / 100.0f;
+    this->terrain_flat = config.getBool("Game", "terrain_flat", false);
+    
     this->archive = new PakArchive();
     this->archive->InitFromRAM(pakFilename, data, size);
     this->objects.clear();
@@ -821,5 +892,42 @@ void RSArea::BuildSkirts() {
             {B.ox, B.oy, B.oz, avgR,  avgG,  avgB},
             {A.ox, A.oy, A.oz, avgR,  avgG,  avgB}
         }});
+    }
+}
+
+
+void RSArea::computeQuadColors(MapVertex *cur, MapVertex *right, MapVertex *bottomRight, MapVertex *bottom) {
+    float colors[3][4];
+    this->triangleColors(cur, bottomRight, bottom, cur->lowerColors);
+    this->triangleColors(cur, right, bottomRight, cur->upperColors);
+}
+
+void RSArea::ComputeTriangleColors() {
+    for (int lod = 0; lod < NUM_LODS; lod++) {
+        for (int i = 0; i < BLOCKS_PER_MAP; i++) {
+            AreaBlock *block = &blocks[lod][i];
+            int s = block->sideSize;
+            bool hasRight  = i % BLOCK_PER_MAP_SIDE != BLOCK_PER_MAP_SIDE - 1;
+            bool hasBottom = i / BLOCK_PER_MAP_SIDE != BLOCK_PER_MAP_SIDE - 1;
+            AreaBlock *rightBlk  = hasRight  ? &blocks[lod][i + 1] : nullptr;
+            AreaBlock *bottomBlk = hasBottom ? &blocks[lod][i + BLOCK_PER_MAP_SIDE] : nullptr;
+            AreaBlock *brBlk     = (hasRight && hasBottom) ? &blocks[lod][i + 1 + BLOCK_PER_MAP_SIDE] : nullptr;
+
+            for (int y = 0; y < s - 1; y++)
+                for (int x = 0; x < s - 1; x++)
+                    computeQuadColors(block->GetVertice(x, y), block->GetVertice(x + 1, y),
+                                      block->GetVertice(x + 1, y + 1), block->GetVertice(x, y + 1));
+            if (rightBlk)
+                for (int y = 0; y < s - 1; y++)
+                    computeQuadColors(block->GetVertice(s - 1, y), rightBlk->GetVertice(0, y),
+                                      rightBlk->GetVertice(0, y + 1), block->GetVertice(s - 1, y + 1));
+            if (bottomBlk)
+                for (int x = 0; x < s - 1; x++)
+                    computeQuadColors(block->GetVertice(x, s - 1), block->GetVertice(x + 1, s - 1),
+                                      bottomBlk->GetVertice(x + 1, 0), bottomBlk->GetVertice(x, 0));
+            if (brBlk)
+                computeQuadColors(block->GetVertice(s - 1, s - 1), rightBlk->GetVertice(0, s - 1),
+                                  brBlk->GetVertice(0, 0), bottomBlk->GetVertice(s - 1, 0));
+        }
     }
 }

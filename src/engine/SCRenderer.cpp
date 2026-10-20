@@ -331,9 +331,6 @@ void SCRenderer::init(int width, int height) {
     this->lodLevel = config.getInt("Game", "object_detail", 0);
     this->show_textured = config.getBool("Game", "show_texture", true);
     this->show_fog = config.getBool("Game", "show_fog", true);
-    this->terrain_shadow_lift = config.getInt("Game", "terrain_shadow_lift", 8) / 100.0f;
-    this->terrain_shadow_range = config.getInt("Game", "terrain_shadow_range", 35) / 100.0f;
-    this->terrain_flat = config.getBool("Game", "terrain_flat", false);
     this->show_clouds = config.getBool("Game", "clouds_enabled", false);
     this->width = width;
     this->height = height;
@@ -1373,88 +1370,27 @@ float textTrianCoo[2][3][2] = {
 #define LOWER_TRIANGE 0
 #define UPPER_TRIANGE 1
 
-void SCRenderer::terrainColor(uint8_t base, uint8_t light, float *color) {
-    this->toneColor(this->terrainTone(base, light), color);
-}
 
-int SCRenderer::terrainTone(uint8_t base, uint8_t light) {
-    PaletteRange *range = &this->terrain_ranges[0];
-    if (base < this->terrain_ranges.size()) {
-        range = &this->terrain_ranges[base];
-    }
-    int tone = range->first + ((light * range->shades + 128) >> 8);
-    if (tone > 255) {
-        tone = 255;
-    }
-    return tone;
-}
 
-void SCRenderer::triangleColors(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, float colors[3][4]) {
-    uint8_t base = this->highestVertex(tri0, tri1, tri2)->type;
-    int tones[3];
-    tones[0] = this->terrainTone(base, tri0->flag);
-    tones[1] = this->terrainTone(base, tri1->flag);
-    tones[2] = this->terrainTone(base, tri2->flag);
-    if (this->terrain_flat) {
-        int average = (tones[0] + tones[1] + tones[2]) / 3;
-        tones[0] = average;
-        tones[1] = average;
-        tones[2] = average;
-    }
-    for (int i = 0; i < 3; i++) {
-        this->toneColor(tones[i], colors[i]);
-    }
-}
-
-void SCRenderer::toneColor(int tone, float *color) {
-    Texel *texel = this->palette.GetRGBColor((uint8_t)tone);
-    color[0] = texel->r / 255.0f;
-    color[1] = texel->g / 255.0f;
-    color[2] = texel->b / 255.0f;
-    float luminance = 0.299f * color[0] + 0.587f * color[1] + 0.114f * color[2];
-    if (luminance > 0.0f && luminance < this->terrain_shadow_range) {
-        float depth = 1.0f - luminance / this->terrain_shadow_range;
-        float factor = (luminance + this->terrain_shadow_lift * depth * depth) / luminance;
-        for (int i = 0; i < 3; i++) {
-            color[i] = color[i] * factor;
-            if (color[i] > 1.0f) {
-                color[i] = 1.0f;
-            }
-        }
-    }
-    color[3] = 1.0f;
-}
-
-MapVertex *SCRenderer::highestVertex(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
-    MapVertex *highest = tri0;
-    if ((uint16_t)tri1->height >= (uint16_t)highest->height) {
-        highest = tri1;
-    }
-    if ((uint16_t)tri2->height >= (uint16_t)highest->height) {
-        highest = tri2;
-    }
-    return highest;
-}
 
 void SCRenderer::renderTexturedTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, RSArea *area,
-                                        int triangleType, RSImage *image) {
+                                        int triangleType, RSImage *image, float colors[3][4]) {
 
-    float colors[3][4];
-    this->triangleColors(tri0, tri1, tri2, colors);
+    
     float (*coords)[3][2] = textTrianCoo;
     if (image->width < 128) {
         coords = textTrianCoo64;
     }
 
-    glColor4fv(colors[0]);
+    glColor4fv(tri0->color);
     glTexCoord2fv(coords[triangleType][0]);
     glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
 
-    glColor4fv(colors[1]);
+    glColor4fv(tri0->color);
     glTexCoord2fv(coords[triangleType][1]);
     glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
 
-    glColor4fv(colors[2]);
+    glColor4fv(tri0->color);
     glTexCoord2fv(coords[triangleType][2]);
     glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
 }
@@ -1465,10 +1401,7 @@ bool SCRenderer::isTextured(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
         // tri0->type != tri2->type ||
         tri0->upperImageID == 0xFF || tri0->lowerImageID == 0xFF;
 }
-void SCRenderer::renderColoredTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2) {
-
-    float colors[3][4];
-    this->triangleColors(tri0, tri1, tri2, colors);
+void SCRenderer::renderColoredTriangle(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, float colors[3][4]) {
 
     glColor4fv(colors[0]);
     glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
@@ -1486,11 +1419,11 @@ void SCRenderer::renderQuad(MapVertex *currentVertex, MapVertex *rightVertex, Ma
     
     if (currentVertex->lowerImageID == 0xFF || !this->show_textured) {
         // Render lower triangle
-        renderColoredTriangle(currentVertex, bottomRightVertex, bottomVertex);
+        renderColoredTriangle(currentVertex, bottomRightVertex, bottomVertex, currentVertex->lowerColors);
     }
     if (currentVertex->upperImageID == 0xFF || !this->show_textured) {
         // Render Upper triangles
-        renderColoredTriangle(currentVertex, rightVertex, bottomRightVertex);
+        renderColoredTriangle(currentVertex, rightVertex, bottomRightVertex, currentVertex->upperColors);
     }
     if (this->show_textured){
         if (currentVertex->lowerImageID != 0xFF) {
@@ -1838,10 +1771,10 @@ void SCRenderer::renderWorldSolid(RSArea *area, int LOD, int verticesPerBlock) {
         for (int i = 0; i < (int)x.second.size(); i++) {
             VertexCache v = x.second.at(i);
             if (v.lv1 != NULL && v.lv1->lowerImageID == x.first) {
-                renderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image);
+                renderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image, v.lv1->lowerColors);
             }
             if (v.uv1 != NULL && v.uv1->upperImageID == x.first) {
-                renderTexturedTriangle(v.uv1, v.uv2, v.uv3, area, UPPER_TRIANGE, image);
+                renderTexturedTriangle(v.uv1, v.uv2, v.uv3, area, UPPER_TRIANGE, image, v.uv1->upperColors);
             }
         }
         glEnd();
@@ -1964,10 +1897,10 @@ void SCRenderer::renderWorldToTexture(RSArea *area) {
         for (int i = 0; i < x.second.size(); i++) {
             VertexCache v = x.second.at(i);
             if (v.lv1 != NULL && v.lv1->lowerImageID == x.first) {
-                renderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image);
+                renderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image, v.lv1->lowerColors);
             }
             if (v.uv1 != NULL && v.uv1->upperImageID == x.first) {
-                renderTexturedTriangle(v.uv1, v.uv2, v.uv3, area, UPPER_TRIANGE, image);
+                renderTexturedTriangle(v.uv1, v.uv2, v.uv3, area, UPPER_TRIANGE, image, v.uv1->upperColors);
             }
         }
         glEnd();
@@ -2203,10 +2136,10 @@ void SCRenderer::renderWorldByID(RSArea *area, int LOD, int verticesPerBlock, in
         for (int i = 0; i < x.second.size(); i++) {
             VertexCache v = x.second.at(i);
             if (v.lv1 != NULL && v.lv1->lowerImageID == x.first) {
-                renderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image);
+                renderTexturedTriangle(v.lv1, v.lv2, v.lv3, area, LOWER_TRIANGE, image, v.lv1->lowerColors);
             }
             if (v.uv1 != NULL && v.uv1->upperImageID == x.first) {
-                renderTexturedTriangle(v.uv1, v.uv2, v.uv3, area, UPPER_TRIANGE, image);
+                renderTexturedTriangle(v.uv1, v.uv2, v.uv3, area, UPPER_TRIANGE, image, v.uv1->upperColors);
             }
         }
         glEnd();

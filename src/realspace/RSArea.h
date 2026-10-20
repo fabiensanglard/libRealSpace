@@ -162,7 +162,17 @@ private:
     void parseTERA_TXML(uint8_t *data, size_t size);
     void parseTERA_TXML_INFO(uint8_t *data, size_t size);
     void parseTERA_TXMS_MAPS(uint8_t *data, size_t size);
-
+    void terrainColor(uint8_t base, uint8_t light, float *color);
+    int terrainTone(uint8_t base, uint8_t light);
+    void triangleColors(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2, float colors[3][4]);
+    void toneColor(int tone, float *color);
+    MapVertex *highestVertex(MapVertex *tri0, MapVertex *tri1, MapVertex *tri2);
+    void computeQuadColors(MapVertex *cur, MapVertex *right, MapVertex *bottomRight, MapVertex *bottom);
+    void ComputeTriangleColors();
     char name[16];
     PrecomputedSkirts skirts_;
+    float terrain_shadow_lift{0.08f};
+    float terrain_shadow_range{0.35f};
+    bool terrain_flat{false};
+    RSPalette palette;
 };

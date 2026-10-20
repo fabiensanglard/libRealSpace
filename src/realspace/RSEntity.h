@@ -36,6 +36,8 @@ typedef struct MapVertex {
     uint8_t upperImageID;
 
     float color[4];
+    float lowerColors[3][4];
+    float upperColors[3][4];
 
 } MapVertex;
 
