@@ -84,10 +84,10 @@ void RSPalette::loadPaletteFromStream(ByteStream& stream, VGAPalette& pal) {
     Texel texel;
     for (int i = 0; i < 256; i++) {
         texel.r = 0;
-        texel.g = 255;
+        texel.g = 0;
         texel.b = 0;
-        texel.a = 255;
-        pal.SetColor(i, &texel);
+        texel.a = 0;
+        pal.SetColor(i, texel);
     }
     for (int i = 0; i < count; i++) {
         texel.r = stream.ReadByte();
@@ -113,12 +113,31 @@ void RSPalette::loadPaletteFromStream(ByteStream& stream, VGAPalette& pal) {
         texel.g = g;
         texel.b = b;
         
-        pal.SetColor(i, &texel);
+        pal.SetColor(i, texel);
     }
 }
 void RSPalette::parsePAL_CMAP(uint8_t *data, size_t size){
     ByteStream stream(data, size);
-    this->loadPaletteFromStream(stream, this->colors);
+    
+    Texel texel;
+    if (size < 768) {
+        printf("Palette size is less than 768 bytes\n");
+    }
+    int count = size / 3;
+    for(int i = 0 ; i < count ; i++){
+        texel.r = stream.ReadByte();
+        texel.g = stream.ReadByte();
+        texel.b = stream.ReadByte();
+        texel.a = 255;
+        
+        colors.SetColor(i, texel);
+    }
+    if (count < 256) {
+        for (int i = count; i < 256; i++) {
+            Texel texel = {0, 255, 0, 0};
+            colors.SetColor(i, texel);
+        }
+    }
 }
 void RSPalette::parsePALT(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;

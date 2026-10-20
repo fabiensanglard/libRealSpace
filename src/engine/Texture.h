@@ -39,11 +39,11 @@ typedef struct VGAPalette{
     
     Texel colors[256];
 
-    void SetColor(uint8_t value,Texel* texel){
-        
-        Texel* paletteColor ;
-        paletteColor = &colors[value] ;
-        *paletteColor = *texel;
+    void SetColor(uint8_t value,Texel texel){
+        colors[value].a = texel.a;
+        colors[value].r = texel.r;
+        colors[value].g = texel.g;
+        colors[value].b = texel.b;
     }
     
     Texel* GetRGBColor(uint8_t value){

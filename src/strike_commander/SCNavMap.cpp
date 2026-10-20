@@ -142,7 +142,7 @@ void SCNavMap::init(){
     }
     this->palette = *palette.GetColorPalette();
     for (uint8_t i=0; i<255; i++) {
-        Texel *c = new Texel({i,0,0,255});
+        Texel c = {i,0,0,255};
         this->objpal.SetColor(i, c);
     }
     
