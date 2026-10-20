@@ -61,21 +61,64 @@ void RSPalette::parsePAL(uint8_t *data, size_t size) {
 
     lexer.InitFromRAM(data, size, handlers);
 }
-void RSPalette::parsePAL_CMAP(uint8_t *data, size_t size){
-    ByteStream stream(data, size);
-    
-    Texel texel;
-    if (size == 772) {
-        this->colorFlag = stream.ReadUInt32LE();
+void RSPalette::loadPaletteFromStream(ByteStream& stream, VGAPalette& pal) {
+    int first = 0;
+    int16_t count = 256;
+    size_t size = stream.GetSize();
+    if (size >= 4 && (size - 4) % 3 == 0) {
+        first = stream.ReadByte();
+        stream.ReadByte();
+        count = stream.ReadShort();
     }
-    for(int i = 0 ; i < 256 ; i++){
+    if (first > 0) {
+        printf("First palette index: %d\n", first);
+    }
+    this->colorFlag = first | (count << 16);
+    int available = (size >= 4 && (size - 4) % 3 == 0) ? (size - 4) / 3 : size / 3;
+    if (count > available) {
+        count = available;
+    }
+    if (first + count > 256) {
+        count = 256 - first;
+    }
+    Texel texel;
+    for (int i = 0; i < 256; i++) {
+        texel.r = 0;
+        texel.g = 255;
+        texel.b = 0;
+        texel.a = 255;
+        pal.SetColor(i, &texel);
+    }
+    for (int i = 0; i < count; i++) {
         texel.r = stream.ReadByte();
         texel.g = stream.ReadByte();
         texel.b = stream.ReadByte();
-        texel.a = 255;
         
-        colors.SetColor(i, &texel);
+        texel.a = 255;
+        if (i == 255) {
+            texel.a = 0;
+        } else {
+            texel.a = 255;
+        }
+            
+        uint8_t r = texel.r;
+        uint8_t g = texel.g;
+        uint8_t b = texel.b;
+
+        r = convertFrom6To8(r);
+        g = convertFrom6To8(g);
+        b = convertFrom6To8(b);
+
+        texel.r = r;
+        texel.g = g;
+        texel.b = b;
+        
+        pal.SetColor(i, &texel);
     }
+}
+void RSPalette::parsePAL_CMAP(uint8_t *data, size_t size){
+    ByteStream stream(data, size);
+    this->loadPaletteFromStream(stream, this->colors);
 }
 void RSPalette::parsePALT(uint8_t *data, size_t size) {
     IFFSaxLexer lexer;
@@ -100,75 +143,11 @@ void RSPalette::parsePALT_TABL(uint8_t *data, size_t size){
 
 void RSPalette::parsePALT_PALT(uint8_t *data, size_t size){
     ByteStream stream(data, size);
-    
-    //this->colorFlag = stream.ReadUInt32LE();
-    if (size == 772) {
-        this->colorFlag = stream.ReadUInt32LE();
-    }
-    Texel texel;
-    
-    
-    for(int i = 0 ; i < 256 ; i++){
-        texel.r = stream.ReadByte();
-        texel.g = stream.ReadByte();
-        texel.b = stream.ReadByte();
-        
-        texel.a = 255;
-        if (i == 255) {
-            texel.a = 0;
-        } else {
-            texel.a = 255;
-        }
-            
-        uint8_t r = texel.r;
-        uint8_t g = texel.g;
-        uint8_t b = texel.b;
-
-        r = convertFrom6To8(r);
-        g = convertFrom6To8(g);
-        b = convertFrom6To8(b);
-
-        texel.r = r;
-        texel.g = g;
-        texel.b = b;
-        
-        colors.SetColor(i, &texel);
-    }
+    this->loadPaletteFromStream(stream, this->colors);
 }
 void RSPalette::parsePALT_BLWH(uint8_t *data, size_t size){
     ByteStream stream(data, size);
-    
-    //this->bwFlag = stream.ReadUInt32LE();
-
-    
-    Texel texel;
-    
-    for(int i = 0 ; i < 256 ; i++){
-        texel.r = stream.ReadByte();
-        texel.g = stream.ReadByte();
-        texel.b = stream.ReadByte();
-        
-        if (i == 255) {
-            texel.a = 0;
-        } else {
-            texel.a = 255;
-        }
-        
-        uint8_t r = texel.r;
-        uint8_t g = texel.g;
-        uint8_t b = texel.b;
-
-        r = convertFrom6To8(r);
-        g = convertFrom6To8(g);
-        b = convertFrom6To8(b);
-        
-        texel.r = r;
-        texel.g = g;
-        texel.b = b;
-
-        
-        bwColors.SetColor(i, &texel);
-    }
+    this->loadPaletteFromStream(stream, this->bwColors);
 }
 void RSPalette::parsePALT_SKYC(uint8_t *data, size_t size){
     

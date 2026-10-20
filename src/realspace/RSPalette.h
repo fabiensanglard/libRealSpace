@@ -54,4 +54,5 @@ private:
     void parsePALT_BILD(uint8_t *data, size_t size);
     void parsePALT_BILD_INFO(uint8_t *data, size_t size);
     void parsePALT_BILD_TABL(uint8_t *data, size_t size);
+    void loadPaletteFromStream(ByteStream& stream, VGAPalette& palette);
 };
