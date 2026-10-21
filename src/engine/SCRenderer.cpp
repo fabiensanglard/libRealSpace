@@ -1382,15 +1382,15 @@ void SCRenderer::renderTexturedTriangle(MapVertex *tri0, MapVertex *tri1, MapVer
         coords = textTrianCoo64;
     }
 
-    glColor4fv(tri0->color);
+    glColor4fv(colors[0]);
     glTexCoord2fv(coords[triangleType][0]);
     glVertex3f(tri0->v.x, tri0->v.y, tri0->v.z);
 
-    glColor4fv(tri0->color);
+    glColor4fv(colors[1]);
     glTexCoord2fv(coords[triangleType][1]);
     glVertex3f(tri1->v.x, tri1->v.y, tri1->v.z);
 
-    glColor4fv(tri0->color);
+    glColor4fv(colors[2]);
     glTexCoord2fv(coords[triangleType][2]);
     glVertex3f(tri2->v.x, tri2->v.y, tri2->v.z);
 }
