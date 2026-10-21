@@ -19,6 +19,8 @@ constexpr uint32_t MIDGAME_ANIM_VERSION = 2;
 constexpr uint8_t MIDGAME_MUSIC_KEEP = 255;
 constexpr uint8_t MIDGAME_MUSIC_STOP = 254;
 constexpr uint8_t MIDGAME_NO_IMAGE = 255;
+constexpr int MIDGAME_BAND_TOP = 24;
+constexpr int MIDGAME_BAND_BOTTOM = 151;
 
 typedef struct MIDGAME_LAYER_COMMON {
     int16_t layer_id{-1};
@@ -165,6 +167,7 @@ typedef struct MIDGAME_SHOT {
     bool clear_palette{false};
     std::vector<MIDGAME_PALETTE_REF> palettes;
     std::vector<MIDGAME_SHOT_SOUND *> sounds;
+    uint32_t version{MIDGAME_ANIM_VERSION};
 } MIDGAME_SHOT;
 
 

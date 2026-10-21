@@ -562,7 +562,8 @@ void SCAnimationArchive::HandleLIPS(uint8_t* data, size_t size) {
 void SCAnimationArchive::HandleSHOT(uint8_t* data, size_t size) {
     // Créer un nouveau shot
     currentShot = new MIDGAME_SHOT();
-    
+    currentShot->version = this->version;
+
     IFFSaxLexer lexer;
     
     std::unordered_map<std::string, std::function<void(uint8_t*, size_t)>> events;

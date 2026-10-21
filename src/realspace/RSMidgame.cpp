@@ -101,7 +101,7 @@ void RSMidgame::parseMG_DATA(uint8_t *data, size_t size){
 void RSMidgame::parseMG_SPOK(uint8_t *data, size_t size){
     IFFSaxLexer lexer;
     std::unordered_map<std::string, std::function<void(uint8_t * data, size_t size)>> handlers;
-    handlers["TEXT"] = std::bind(&RSMidgame::parseMG_DATA_TEXT, this, std::placeholders::_1, std::placeholders::_2);
+    handlers["TEXT"] = std::bind(&RSMidgame::parseMG_SPOK_TEXT, this, std::placeholders::_1, std::placeholders::_2);
     lexer.InitFromRAM(data, size, handlers);
 }
 
@@ -114,5 +114,6 @@ void RSMidgame::parseMG_DATA_TEXT(uint8_t *data, size_t size){
 void RSMidgame::parseMG_SPOK_TEXT(uint8_t *data, size_t size){
     ByteStream stream(data, size);
     std::string text = stream.ReadStringNoSize(size);
+    this->midgame_texts[this->tmp_key].DATA.push_back(text);
     this->midgame_texts[this->tmp_key].SPOK.push_back(text);
 }

@@ -243,6 +243,17 @@ void SCAnimationPlayer::blitLayer(FrameBuffer *fb, FrameBuffer *texture, Point2D
     fb->blitWithMask(texture->framebuffer, position.x, position.y, 320, 200, mask);
 }
 
+void SCAnimationPlayer::blitAnchoredShape(FrameBuffer *fb, RLEShape *shape, Point2D position,
+                                          const MIDGAME_LAYER_COMMON &common) {
+    FrameBuffer *texture = new FrameBuffer(320, 200);
+    texture->fillWithColor(255);
+    texture->drawShape(shape);
+    position.x -= shape->position.x + shape->GetLeft();
+    position.y -= shape->position.y + shape->GetTop();
+    blitLayer(fb, texture, position, common, 255);
+    delete texture;
+}
+
 int SCAnimationPlayer::nextLipMouth(MIDGAME_SHOT_CHARACTER *chara, const std::string &text) {
     static const char *lip_table = "06891599098769362999252999";
     int mouth = -1;
@@ -406,6 +417,53 @@ int SCAnimationPlayer::textWidth(RSFont *font, const std::string &text) {
     return width;
 }
 
+void SCAnimationPlayer::drawText(RSFont *font, MIDGAME_TEXT_LINE *textLine, const std::string &text) {
+    static const int max_width = 300;
+    Point2D position = textLine->position_start;
+    if (textLine->align != 2) {
+        VGA.getFrameBuffer()->printText(font, position, text, textLine->color);
+        return;
+    }
+    RLEShape *letter = font->GetShapeForChar('A');
+    if (letter == nullptr) {
+        letter = font->GetShapeForChar('0');
+    }
+    int line_step = letter->GetHeight() + 2;
+    std::vector<std::string> lines;
+    size_t paragraph_start = 0;
+    while (paragraph_start <= text.size()) {
+        size_t paragraph_end = text.find('\n', paragraph_start);
+        if (paragraph_end == std::string::npos) {
+            paragraph_end = text.size();
+        }
+        std::string paragraph = text.substr(paragraph_start, paragraph_end - paragraph_start);
+        std::string line;
+        size_t start = 0;
+        while (start <= paragraph.size()) {
+            size_t end = paragraph.find(' ', start);
+            if (end == std::string::npos) {
+                end = paragraph.size();
+            }
+            std::string word = paragraph.substr(start, end - start);
+            std::string candidate = line.empty() ? word : line + " " + word;
+            if (!line.empty() && textWidth(font, candidate) > max_width) {
+                lines.push_back(line);
+                line = word;
+            } else {
+                line = candidate;
+            }
+            start = end + 1;
+        }
+        lines.push_back(line);
+        paragraph_start = paragraph_end + 1;
+    }
+    for (size_t i = 0; i < lines.size(); i++) {
+        position.x = (320 - textWidth(font, lines[i])) / 2;
+        position.y = textLine->position_start.y + (int)i * line_step;
+        VGA.getFrameBuffer()->printText(font, position, lines[i], textLine->color);
+    }
+}
+
 void SCAnimationPlayer::drawBackground(FrameBuffer *fb, MIDGAME_SHOT *shot, MIDGAME_SHOT_BG *bg, int frame, int fpsupdate) {
     if (bg->image == nullptr) {
         return;
@@ -423,7 +481,16 @@ void SCAnimationPlayer::drawBackground(FrameBuffer *fb, MIDGAME_SHOT *shot, MIDG
     } else if (bg->common.game_numbering) {
         shape = imageIndex(bg->common, bg->shapeid);
     }
-    if (shape >= 0) {
+    if (shape >= 0 && shot->version >= 2) {
+        if (fpsupdate && frame == bg->common.frame_start) {
+            RLEShape *s = bg->image->GetShape(shape);
+            printf("MIDGAME: calque %d, image %d en (%d, %d), ancrage (%d, %d)\n", bg->common.layer_id, shape,
+                   bg->current_position.x, bg->current_position.y, s->position.x + s->GetLeft(),
+                   s->position.y + s->GetTop());
+        }
+        blitAnchoredShape(fb, bg->image->GetShape(shape), screenPosition(shot, bg->common, bg->current_position),
+                          bg->common);
+    } else if (shape >= 0) {
         FrameBuffer *texture = new FrameBuffer(320, 200);
         texture->fillWithColor(255);
         texture->drawShape(bg->image->GetShape(shape));
@@ -488,13 +555,18 @@ void SCAnimationPlayer::drawCharacter(FrameBuffer *fb, MIDGAME_SHOT *shot, MIDGA
 
 int SCAnimationPlayer::spriteLast(MIDGAME_SHOT_SPRITE *sprt) {
     int last = (int)sprt->image->GetNumImages() - 1;
-    if (sprt->end_frame > 0) {
-        int end = imageIndex(sprt->common, sprt->end_frame);
-        if (end < last) {
-            last = end;
+    if (sprt->common.game_numbering) {
+        if (sprt->repeat_animation) {
+            return last;
         }
-    } else if (sprt->end_frame < 0 && sprt->common.game_numbering) {
-        last += sprt->end_frame;
+        if (sprt->end_frame > 0) {
+            return imageIndex(sprt->common, sprt->end_frame);
+        }
+        int count = (int)sprt->image->GetNumImages() - sprt->common.image_offset;
+        return imageIndex(sprt->common, count + sprt->end_frame);
+    }
+    if (sprt->end_frame > 0 && sprt->end_frame < last) {
+        last = sprt->end_frame;
     }
     return last;
 }
@@ -508,7 +580,12 @@ void SCAnimationPlayer::advanceSprite(MIDGAME_SHOT_SPRITE *sprt) {
     } else {
         sprt->current_frame = last;
     }
-    sprt->finished = !sprt->repeat_animation && sprt->current_frame >= last;
+    bool finished = !sprt->repeat_animation && sprt->current_frame >= last;
+    if (finished && !sprt->finished) {
+        printf("MIDGAME: calque %d, fin de l'animation sur l'image %d (%s)\n", sprt->common.layer_id,
+               sprt->current_frame, sprt->current_frame < (int)sprt->image->GetNumImages() ? "gardee" : "disparait");
+    }
+    sprt->finished = finished;
 }
 
 void SCAnimationPlayer::drawSprite(FrameBuffer *fb, MIDGAME_SHOT *shot, MIDGAME_SHOT_SPRITE *sprt, int frame, int fpsupdate) {
@@ -518,10 +595,11 @@ void SCAnimationPlayer::drawSprite(FrameBuffer *fb, MIDGAME_SHOT *shot, MIDGAME_
     if (!isInWindow(sprt->common.frame_start, sprt->common.nb_frames, frame)) {
         return;
     }
+    RLEShape *first_shape = sprt->image->GetShape(sprt->common.game_numbering ? sprt->common.image_offset : 1);
     FrameBuffer *texture = new FrameBuffer(320, 200);
     texture->fillWithColor(255);
-    if (sprt->keep_first_frame) {
-        texture->drawShape(sprt->image->GetShape(sprt->common.game_numbering ? sprt->common.image_offset : 1));
+    if (sprt->keep_first_frame && shot->version < 2) {
+        texture->drawShape(first_shape);
     }
     if (fpsupdate && sprt->common.path.empty()) {
         moveTowardsEnd(sprt->current_position, sprt->position_end, sprt->velocity);
@@ -535,11 +613,29 @@ void SCAnimationPlayer::drawSprite(FrameBuffer *fb, MIDGAME_SHOT *shot, MIDGAME_
             sprt->current_frame = imageIndex(sprt->common, value);
         }
     }
-    if (visible) {
-        texture->drawShape(sprt->image->GetShape(sprt->current_frame));
+    if (sprt->current_frame >= (int)sprt->image->GetNumImages()) {
+        visible = false;
     }
-    int color = texture->framebuffer[0];
-    blitLayer(fb, texture, screenPosition(shot, sprt->common, sprt->current_position), sprt->common, color);
+    Point2D position = screenPosition(shot, sprt->common, sprt->current_position);
+    if (shot->version >= 2) {
+        if (fpsupdate && frame == sprt->common.frame_start && visible) {
+            RLEShape *s = sprt->image->GetShape(sprt->current_frame);
+            printf("MIDGAME: calque %d, animation image %d en (%d, %d), ancrage (%d, %d)\n", sprt->common.layer_id,
+                   sprt->current_frame, sprt->current_position.x, sprt->current_position.y,
+                   s->position.x + s->GetLeft(), s->position.y + s->GetTop());
+        }
+        if (sprt->keep_first_frame) {
+            blitAnchoredShape(fb, first_shape, position, sprt->common);
+        }
+        if (visible) {
+            blitAnchoredShape(fb, sprt->image->GetShape(sprt->current_frame), position, sprt->common);
+        }
+    } else {
+        if (visible) {
+            texture->drawShape(sprt->image->GetShape(sprt->current_frame));
+        }
+        blitLayer(fb, texture, position, sprt->common, texture->framebuffer[0]);
+    }
     if (fpsupdate && sprt->common.sequence.empty()) {
         advanceSprite(sprt);
     }
@@ -552,9 +648,11 @@ void SCAnimationPlayer::drawSprite(FrameBuffer *fb, MIDGAME_SHOT *shot, MIDGAME_
 void SCAnimationPlayer::runFrame(void){
     checkKeyboard();
     VGA.activate();
-    VGA.getFrameBuffer()->clear();
     MIDGAME_SHOT *shot = this->midgames_shots[1][shot_counter];
-    if (shot->clear_palette) {
+    if (!shot->full_screen) {
+        VGA.getFrameBuffer()->clear();
+    }
+    if (shot->clear_palette || (shot->version >= 2 && !shot->keep_palette)) {
         for (int i = 0; i < 256; i++) {
             this->palette.colors[i].r = 0;
             this->palette.colors[i].g = 0;
@@ -571,18 +669,25 @@ void SCAnimationPlayer::runFrame(void){
     }
     VGA.setPalette(&this->palette);
     FrameBuffer *fb = VGA.getFrameBuffer();
-    fb->fillWithColor(0);
+    if (!shot->full_screen) {
+        fb->fillWithColor(0);
+    }
     int fpsupdate = 0;
     if (!pause) {
         if (shot->fps > 0) {
-            uint32_t ticks = 60 / shot->fps;
+            uint64_t ticks = 60 / shot->fps;
             if (ticks < 1) {
                 ticks = 1;
             }
-            uint32_t now = SDL_GetTicks();
-            if (now - this->frame_timer >= ticks * 1000 / 60) {
+            uint64_t now = (uint64_t)SDL_GetTicks() * 60 / 1000;
+            if (now - this->frame_tick >= ticks) {
                 fpsupdate = 1;
-                this->frame_timer = now;
+                this->frame_tick += ticks;
+                if (now - this->frame_tick >= ticks) {
+                    printf("MIDGAME: plan %d, retard de %llu tics, cadence recalee\n", shot_counter,
+                           (unsigned long long)(now - this->frame_tick));
+                    this->frame_tick = now;
+                }
             }
         } else {
             fpsupdate = (SDL_GetTicks() / 10) - fps_timer > 6;
@@ -757,11 +862,11 @@ void SCAnimationPlayer::runFrame(void){
         }
     }
     if (!shot->full_screen) {
-        for (size_t i = 0; i < CONV_TOP_BAR_HEIGHT; i++) {
+        for (int i = 0; i < MIDGAME_BAND_TOP; i++) {
             VGA.getFrameBuffer()->fillLineColor(i, 0x00);
         }
-        for (size_t i = 0; i < CONV_BOTTOM_BAR_HEIGHT; i++) {
-            VGA.getFrameBuffer()->fillLineColor(199 - i, 0x00);
+        for (int i = MIDGAME_BAND_BOTTOM + 1; i < 200; i++) {
+            VGA.getFrameBuffer()->fillLineColor(i, 0x00);
         }
     }
     for (auto textLine : shot->textes) {
@@ -778,11 +883,12 @@ void SCAnimationPlayer::runFrame(void){
             continue;
         }
         std::string text = this->midgame_text_db->midgame_texts[textLine->key].DATA[textLine->id];
-        Point2D position = textLine->position_start;
-        if (textLine->align == 2) {
-            position.x = (320 - textWidth(this->fonts[textLine->font_id], text)) / 2;
+        if (fpsupdate && frame == textLine->frame_start) {
+            printf("MIDGAME: plan %d, texte %s %d, police %d, couleur %d, alignement %d : \"%s\"\n", shot_counter,
+                   textLine->key.c_str(), textLine->id, textLine->font_id, textLine->color, textLine->align,
+                   text.c_str());
         }
-        VGA.getFrameBuffer()->printText(this->fonts[textLine->font_id], position, text, textLine->color);
+        drawText(this->fonts[textLine->font_id], textLine, text);
     }
     if (!pause) {
         fps_counter++;
@@ -840,6 +946,7 @@ void SCAnimationPlayer::loadShot(std::string filename) {
     archive.LoadFromFile(filename.c_str(), this->midgames_shots[1]);
     this->shot_counter = 0;
     this->fps = 1;
+    this->frame_tick = (uint64_t)SDL_GetTicks() * 60 / 1000;
     for (auto shot : this->midgames_shots[1]) {
         resetShot(shot);
     }
